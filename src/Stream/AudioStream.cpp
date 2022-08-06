@@ -26,19 +26,19 @@ void AudioStream::setup() {
 }
 
 void AudioStream::update() {
-  analysis->rms.value = gist.rootMeanSquare();
-  analysis->pitch.value = gist.pitch();
-  analysis->csd.value = gist.complexSpectralDifference();
-  analysis->energy.value = gist.energyDifference();
-  analysis->zcr.value = gist.zeroCrossingRate();
-  analysis->spectralDiff.value = gist.spectralDifference();
-  cout<<"============"<<endl;
-  cout<<"rms: \t" << gist.rootMeanSquare() << std::endl;
-  cout<<"pitch: \t" << gist.pitch() << std::endl;
-  cout<<"csd: \t" << gist.complexSpectralDifference() << std::endl;
-  cout<<"zcr: \t" << gist.zeroCrossingRate() << std::endl;
-  cout<<"specDiff: \t" << gist.spectralDifference() << std::endl;
-  cout<<"============"<<endl;
+  analysis->analyzeFrame(&gist);
+//  cout<<"============"<<endl;
+//  cout<<"rms: \t" << gist.rootMeanSquare() << std::endl;
+//  cout<<"pitch: \t" << gist.pitch() << std::endl;
+//  cout<<"csd: \t" << gist.complexSpectralDifference() << std::endl;
+//  cout<<"zcr: \t" << gist.zeroCrossingRate() << std::endl;
+//  cout<<"specDiff: \t" << gist.spectralDifference() << std::endl;
+//  cout<<"mod_rms: \t" << analysis->rms.value << std::endl;
+//  cout<<"mod_pitch: \t" << analysis->pitch.value << std::endl;
+//  cout<<"mod_csd: \t" << analysis->csd.value << std::endl;
+//  cout<<"mod_zcr: \t" << analysis->zcr.value << std::endl;
+//  cout<<"mod_specDiff: \t" << analysis->spectralDiff.value << std::endl;
+//  cout<<"============"<<endl;
 }
 
 void AudioStream::audioIn(ofSoundBuffer &soundBuffer) {

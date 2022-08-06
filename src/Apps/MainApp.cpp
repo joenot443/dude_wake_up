@@ -12,13 +12,15 @@
 #include "MidiService.hpp"
 #include <stdio.h>
 
+const static ofVec2f windowSize = ofVec2f(1200, 800);
+
 void MainApp::setup(){
   if (isSetup) return;
   
   ModulationService::getService();
   MidiService::getService();
   
-  gui.setup(nullptr, true, ImGuiConfigFlags_ViewportsEnable | ImGuiConfigFlags_DockingEnable);
+  gui.setup(nullptr, true, ImGuiConfigFlags_ViewportsEnable);
   FontService::getService()->addFontToGui(&gui);
   
   std::function<void(StreamConfig)> videoFn = [this](StreamConfig config) {
@@ -32,13 +34,14 @@ void MainApp::setup(){
   mainSettingsView = new MainSettingsView(new MainSettings(), videoFn, audioFn);
   mainSettingsView->setup();
   isSetup = true;
+  videoFn(StreamConfig(VideoSource_webcam, "", 1));
 //  videoFn(StreamConfig(VideoSource_file, "/Users/jcrozier/Library/Mobile Documents/com~apple~CloudDocs/dude_wake_up/videos/dvd_logo.mp4", 0));
   //  pushAudioStream(AudioStreamConfig(AudioSource_microphone, "", 4));
 }
 
 void MainApp::update(){
   OscillationService::getService()->tickOscillators();
-  
+  ModulationService::getService()->tickMappings();
   for (int i = 0; i < audioStreams.size(); i++) {
     if (audioStreams[i]->isSetup) {
       audioStreams[i]->update();
@@ -52,12 +55,7 @@ void MainApp::update(){
 
 void MainApp::draw(){ 
   gui.begin();
-  //  ImGui::NewFrame();
-  ImGui::PushFont(FontService::getService()->p);
-  ImGui::ShowDemoWindow();
-  //  ImPlot::ShowDemoWindow();
-  //  ImGui::SetNextItemOpen(true);
-  ModulationService::getService()->tickMappings();
+  ImGui::PushFont(FontService::getService()->p);  
   drawAudioSettings();
   drawMainSettings();
   drawVideoSettings();
@@ -83,12 +81,9 @@ void MainApp::completeFrame() {
 void MainApp::drawAudioSettings() {
   ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar;
   
-  ImGui::Begin("audio_settings_view", NULL, windowFlags);
   for (int i = 0; i < audioSettingsViews.size(); i++) {
     audioSettingsViews[i]->draw();
   }
-  
-  ImGui::End();
 }
 
 void MainApp::pushAudioStream(std::shared_ptr<AudioStreamConfig> config) {
@@ -144,7 +139,7 @@ void MainApp::pushVideoStream(std::shared_ptr<StreamConfig> config) {
   VideoStream* stream = new VideoStream(streamWindow, *config, videoSettings, closeStream);
   videoStreams.push_back(stream);
   
-  VideoSettingsView *settingsView = new VideoSettingsView(videoSettings, closeStream);
+  VideoSettingsView *settingsView = new VideoSettingsView(videoSettings, stream, closeStream);
   videoSettingsViews.push_back(settingsView);
   
   settingsView->setup();

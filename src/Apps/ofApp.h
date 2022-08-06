@@ -18,7 +18,7 @@ public:
   ofApp() : v(0) {}
   
   void setup() {
-    gui.setup(nullptr, false, ImGuiConfigFlags_ViewportsEnable | ImGuiConfigFlags_DockingEnable);
+    gui.setup(nullptr, false, ImGuiConfigFlags_ViewportsEnable);
   }
   void draw() {
     gui.begin();

@@ -21,6 +21,7 @@
 		021026EE289412220060F282 /* Yin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 021026E0289412220060F282 /* Yin.cpp */; };
 		021026EF289412220060F282 /* WindowFunctions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 021026E4289412220060F282 /* WindowFunctions.cpp */; };
 		021026F32894123F0060F282 /* kiss_fft.c in Sources */ = {isa = PBXBuildFile; fileRef = 021026F12894123F0060F282 /* kiss_fft.c */; };
+		024D1689289DFD8400DA807C /* FeedbackShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D1687289DFD8400DA807C /* FeedbackShader.cpp */; };
 		059638BE8C8A1D59958631C4 /* MidiPairing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D824BC957F369968DA9939C /* MidiPairing.cpp */; };
 		0AC42BFBAC1207FC78527E53 /* ParameterService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63D397FA3B8B71D8DFD1D3BA /* ParameterService.cpp */; };
 		0BFC9C20FD7E3C8D5873AA97 /* ofxMidiIn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DD359247F3ED1550D8BB5C9 /* ofxMidiIn.cpp */; };
@@ -103,6 +104,9 @@
 		021026F02894123F0060F282 /* kissfft.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = kissfft.hh; path = lib/gist/src/libs/kiss_fft130/kissfft.hh; sourceTree = "<group>"; };
 		021026F12894123F0060F282 /* kiss_fft.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = kiss_fft.c; path = lib/gist/src/libs/kiss_fft130/kiss_fft.c; sourceTree = "<group>"; };
 		021026F22894123F0060F282 /* kiss_fft.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = kiss_fft.h; path = lib/gist/src/libs/kiss_fft130/kiss_fft.h; sourceTree = "<group>"; };
+		024D1685289DB5DF00DA807C /* data */ = {isa = PBXFileReference; lastKnownFileType = folder; name = data; path = bin/data; sourceTree = "<group>"; };
+		024D1687289DFD8400DA807C /* FeedbackShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FeedbackShader.cpp; path = Shading/FeedbackShader.cpp; sourceTree = "<group>"; };
+		024D1688289DFD8400DA807C /* FeedbackShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = FeedbackShader.hpp; path = Shading/FeedbackShader.hpp; sourceTree = "<group>"; };
 		026A10CB0F40EC63FBB2FF06 /* VideoSettings.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = VideoSettings.h; path = src/Models/VideoSettings.h; sourceTree = SOURCE_ROOT; };
 		04F77E5C73A62E2E77C78EC6 /* ofxMidiOut.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ofxMidiOut.cpp; path = ../../../addons/ofxMidi/src/ofxMidiOut.cpp; sourceTree = SOURCE_ROOT; };
 		05F6CF127D4A621113D4A62F /* ofxMidi.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxMidi.h; path = ../../../addons/ofxMidi/src/ofxMidi.h; sourceTree = SOURCE_ROOT; };
@@ -428,6 +432,15 @@
 				021026E5289412220060F282 /* Yin.h */,
 			);
 			name = libs;
+			sourceTree = "<group>";
+		};
+		024D1686289DFD6200DA807C /* Shading */ = {
+			isa = PBXGroup;
+			children = (
+				024D1687289DFD8400DA807C /* FeedbackShader.cpp */,
+				024D1688289DFD8400DA807C /* FeedbackShader.hpp */,
+			);
+			name = Shading;
 			sourceTree = "<group>";
 		};
 		2413C01760B1811BED0F502D /* ofxMidi */ = {
@@ -981,6 +994,7 @@
 		E4B69B4A0A3A1720003C02F2 = {
 			isa = PBXGroup;
 			children = (
+				024D1685289DB5DF00DA807C /* data */,
 				021026F4289412660060F282 /* libs */,
 				021026D328940FDB0060F282 /* lib */,
 				E4B6FCAD0C3E899E008CF71C /* openFrameworks-Info.plist */,
@@ -996,6 +1010,7 @@
 		E4B69E1C0A3A1BDC003C02F2 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				024D1686289DFD6200DA807C /* Shading */,
 				47E4E7757DB0771B0C4C58E1 /* Services */,
 				9F29250EFB8B209E9192C8B8 /* main.cpp */,
 				9E4FC7FE1041D81B7931878E /* Util */,
@@ -1136,6 +1151,7 @@
 				5C2607C471F8D48C0036C56E /* imgui.cpp in Sources */,
 				E984796BE84AA4315636B6E7 /* imgui_demo.cpp in Sources */,
 				00413C35AAE31B483D7538AB /* imgui_draw.cpp in Sources */,
+				024D1689289DFD8400DA807C /* FeedbackShader.cpp in Sources */,
 				DAE67500A7BFCE7D22EEE423 /* imgui_tables.cpp in Sources */,
 				0090B479605B26E7C387B02D /* imgui_widgets.cpp in Sources */,
 				E5E99CE545F672AC5D265F43 /* implot.cpp in Sources */,

@@ -10,16 +10,16 @@
 #include "BasicSettingsView.hpp"
 #include "FontService.hpp"
 
-const static ofVec2f windowSize = ofVec2f(700, 500);
+const static ofVec2f windowSize = ofVec2f(800, 600);
 
 static int streamIdCounter = 0;
 
 void VideoSettingsView::setup() {
   basicSettingsView.setup();
   basicSettingsView.basicSettings = &videoSettings->basicSettings;
+  feedback0SettingsView.feedbackSettings = &videoSettings->feedback0Settings;
   feedback1SettingsView.feedbackSettings = &videoSettings->feedback1Settings;
   feedback2SettingsView.feedbackSettings = &videoSettings->feedback2Settings;
-  feedback3SettingsView.feedbackSettings = &videoSettings->feedback3Settings;
   videoSettings->streamId = streamIdCounter += 1;
   styleWindow();
 }
@@ -40,7 +40,7 @@ void VideoSettingsView::update() {
 }
 
 void VideoSettingsView::draw() {
-  ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar || ImGuiWindowFlags_AlwaysAutoResize;
+  ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar;
   ImGui::SetNextWindowSize(windowSize);
   auto name = std::string("##%d Video Feed Tabs", videoSettings->streamId);
   
@@ -59,17 +59,20 @@ void VideoSettingsView::draw() {
     }
     if (ImGui::BeginTabItem("Feedback 1"))
     {
-      feedback1SettingsView.draw();
+      feedback0SettingsView.draw();
+      if (ImGui::Button("Clear Feedback")) {
+        videoStream->shouldClearFrameBuffer = true;
+      }
       ImGui::EndTabItem();
     }
     if (ImGui::BeginTabItem("Feedback 2"))
     {
-      feedback2SettingsView.draw();
+      feedback1SettingsView.draw();
       ImGui::EndTabItem();
     }
     if (ImGui::BeginTabItem("Feedback 3"))
     {
-      feedback3SettingsView.draw();
+      feedback2SettingsView.draw();
       ImGui::EndTabItem();
     }
     ImGui::EndTabBar();

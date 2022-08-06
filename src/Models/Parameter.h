@@ -14,8 +14,10 @@
 struct Parameter
 {
   std::string name = "";
+  std::string shaderKey = "";
   std::string paramId;
   float value = 0.0;
+  bool boolValue = false;
   // Another Parameter which is driving this one's value
   Parameter* driver = NULL;
   
@@ -36,6 +38,8 @@ struct Parameter
     value = percent * range + min;
   }
   Parameter(std::string name, std::string settingsId, float value);
+  Parameter(std::string name, std::string settingsId, std::string shaderKey, float value);
+  Parameter(std::string name, std::string settingsId, std::string shaderKey, float value, float min, float max);
   Parameter(std::string name, std::string settingsId, float value, float min, float max);
 };
 

@@ -32,7 +32,7 @@ void FeedbackSettingsView::drawParameters() {
   ImGui::Spacing();
   ImGui::PopFont();
   
-  ImGui::Checkbox("Enabled##fb0_enabled", &feedbackSettings->enabled);
+  ImGui::Checkbox("Enabled##fb0_enabled", &feedbackSettings->enabled.boolValue);
   
   // Mix
   CommonViews::SliderWithOscillator("Mix", "##mix_amount", &feedbackSettings->mixSettings.mix, &feedbackSettings->mixSettings.mixOscillator);

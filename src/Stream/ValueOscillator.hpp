@@ -16,7 +16,7 @@
 struct ValueOscillator {
   
   Parameter* observed = NULL;
-  bool enabled = false;
+  bool enabled = true;
   float value = 0.0;
   float amplitude = 1.0;
   float shift = 0.0;

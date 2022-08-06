@@ -15,7 +15,7 @@ ParameterService *ParameterService::service = 0;
 //========================================================================
 int main( ){
   ofGLFWWindowSettings settings;
-  settings.setSize(1280, 720);
+  settings.setSize(1400, 900);
   settings.setGLVersion(2, 1);
 //  ofSetupOpenGL(1280,720, OF_WINDOW);
 //  settings.windowMode = OF_WINDOW;

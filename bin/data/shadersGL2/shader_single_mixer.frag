@@ -20,7 +20,7 @@ uniform float fb0blend;
 uniform vec3 fb0_hsb_x;
 uniform vec3 fb0_hue_x;
 uniform vec3 fb0_rescale;
-uniform vec3 fb0_modswitch;
+uniform vec3 fb0_invert;
 uniform float fb0_rotate;
 
 //fb0 tex mod
@@ -840,7 +840,7 @@ void main()
 
   fb0color_hsb=fb_hsbop(fb0color_hsb,
                         fb0_hsb_x+tex_fb0_hsb_x*fb0_tex_mod,
-                        fb0_hue_x+tex_fb0_hue_x*fb0_tex_mod,fb0_modswitch,0);
+                        fb0_hue_x+tex_fb0_hue_x*fb0_tex_mod,fb0_invert,0);
 
   fb1color_hsb=fb_hsbop(fb1color_hsb,
                         fb1_hsb_x+tex_fb1_hsb_x*fb1_tex_mod,

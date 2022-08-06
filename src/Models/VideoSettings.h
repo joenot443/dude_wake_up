@@ -124,7 +124,6 @@ struct BasicSettings {
 struct FeedbackMixSettings {
   std::string settingsId;
   
-  
   Parameter mix;
   Oscillator mixOscillator;
   Parameter keyValue;
@@ -134,11 +133,13 @@ struct FeedbackMixSettings {
   Parameter delayAmount;
   Oscillator delayAmountOscillator;
   
-  FeedbackMixSettings(std::string settingsId) :
-  mix(Parameter("feedback_mix", settingsId, 0.0, 0.0, 1.0)),
-  keyValue(Parameter("feedback_keyValue", settingsId, 0.0, 0.0, 1.0)),
-  keyThreshold(Parameter("feedback_keyThreshold", settingsId, 0.0, 0.0, 1.0)),
-  delayAmount(Parameter("feedback_delayAmount", settingsId, 10.0, 0.0, 30.0)),
+  FeedbackMixSettings(std::string settingsId, int idx) :
+  settingsId(settingsId),
+  mix(Parameter("feedback_mix", settingsId, formatString("fb%dmix", idx), 0.0, 0.0, 1.0)),
+  keyValue(Parameter("feedback_keyValue", settingsId, formatString("fb%dlumakeyvalue", idx), 0.0, 0.0, 1.0)),
+  keyThreshold(Parameter("feedback_keyThreshold", settingsId, formatString("fb%dlumakeythresh", idx), 0.0, 0.0, 1.0)),
+  delayAmount(Parameter("feedback_delayAmount",
+                        settingsId, 10.0, 0.0, 29.0)),
   mixOscillator(Oscillator(&mix)),
   keyValueOscillator(Oscillator(&keyValue)),
   keyThresholdOscillator(Oscillator(&keyThreshold)),
@@ -156,10 +157,10 @@ struct FeedbackMiscSettings {
   Oscillator xOffsetOscillator;
   Oscillator yOffsetOscillator;
   
-  FeedbackMiscSettings(std::string settingsId) :
+  FeedbackMiscSettings(std::string settingsId, int idx) :
   rotate(Parameter("feedback_rotate", settingsId, 0.0001, 0.0001, TWO_PI)),
-  xOffset(Parameter("feedback_xOffset", settingsId, 0.0, -300.0, 300.0)),
-  yOffset(Parameter("feedback_yOffset", settingsId, 0.0, -300.0, 300.0)),
+  xOffset(Parameter("feedback_xOffset", settingsId, 0.0, -30.0, 30.0)),
+  yOffset(Parameter("feedback_yOffset", settingsId, 0.0, -30.0, 30.0)),
   xOffsetOscillator(Oscillator(&xOffset)),
   yOffsetOscillator(Oscillator(&yOffset)),
   rotationOscillator(Oscillator(&rotate))
@@ -169,14 +170,16 @@ struct FeedbackMiscSettings {
 struct FeedbackScaleSettings {
   Parameter xScale;
   Parameter yScale;
-  FeedbackScaleSettings(std::string settingsId) :
+  
+  FeedbackScaleSettings(std::string settingsId, int idx) :
   xScale(Parameter("feedback_scaleX", settingsId, 0.0, 5.0, 1.0)),
   yScale(Parameter("feedback_scaleY", settingsId, 0.0, 5.0, 1.0)) {}
 };
 
 struct FeedbackSettings {
+  
   int index;
-  bool enabled = false;
+  Parameter enabled;
   std::string feedbackId;
   FeedbackMixSettings mixSettings;
   FeedbackMiscSettings miscSettings;
@@ -184,12 +187,13 @@ struct FeedbackSettings {
   FeedbackScaleSettings scaleSettings;
   
   FeedbackSettings(std::string settingsId, int index) :
+  index(index),
+  enabled(Parameter(formatString("%sfeedback_enabled_%d", settingsId.c_str(), index), settingsId, formatString("fb%denabled", index), 0.0, 0.0, 0.0)),
   feedbackId(formatString("%s_%d_", settingsId.c_str(), index)),
-  mixSettings(FeedbackMixSettings(feedbackId)),
-  miscSettings(FeedbackMiscSettings(feedbackId)),
+  mixSettings(FeedbackMixSettings(feedbackId, index)),
+  miscSettings(FeedbackMiscSettings(feedbackId, index)),
   hsbSettings(HSBSettings(feedbackId)),
-  scaleSettings(FeedbackScaleSettings(feedbackId)),
-  index(index)
+  scaleSettings(FeedbackScaleSettings(feedbackId, index))
   {}
 };
 
@@ -218,18 +222,22 @@ enum VideoSource { VideoSource_webcam, VideoSource_file };
 struct VideoSettings {
   BasicSettings basicSettings;
   MiscSettings miscSettings;
+  FeedbackSettings feedback0Settings;
   FeedbackSettings feedback1Settings;
   FeedbackSettings feedback2Settings;
-  FeedbackSettings feedback3Settings;
-  
+  std::vector<FeedbackSettings*> allFeedbacks;
   int streamId;
   
   VideoSettings(std::string settingsId) :
   basicSettings(BasicSettings(settingsId)),
   miscSettings(MiscSettings()),
-  feedback1Settings(FeedbackSettings(settingsId, 0)),
-  feedback2Settings(FeedbackSettings(settingsId, 1)),
-  feedback3Settings(FeedbackSettings(settingsId, 2))
+  feedback0Settings(FeedbackSettings(settingsId, 0)),
+  feedback1Settings(FeedbackSettings(settingsId, 1)),
+  feedback2Settings(FeedbackSettings(settingsId, 2)),
+  allFeedbacks({
+    &feedback0Settings,
+    &feedback1Settings,
+    &feedback2Settings})
   {
   }
 };

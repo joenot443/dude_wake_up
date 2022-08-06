@@ -14,8 +14,6 @@ uniform sampler2DRect fb3;
 //fb0
 
 uniform int fb0enabled;
-
-
 uniform float fb0lumakeyvalue;
 uniform float fb0lumakeythresh;
 uniform float fb0mix;
@@ -24,7 +22,7 @@ uniform float fb0blend;
 uniform vec3 fb0_hsb_x;
 uniform vec3 fb0_hue_x;
 uniform vec3 fb0_rescale;
-uniform vec3 fb0_modswitch;
+uniform vec3 fb0_invert;
 uniform float fb0_rotate;
 
 //fb0 tex mod
@@ -41,15 +39,16 @@ uniform vec2 fb0_texmod_logic;
 
 
 //fb1
+uniform int fb1enabled;
 uniform float fb1lumakeyvalue;
 uniform float fb1lumakeythresh;
-uniform int fb1mix;
+uniform float fb1mix;
 uniform float fb1blend;
 
 uniform vec3 fb1_hsb_x;
 uniform vec3 fb1_hue_x;
 uniform vec3 fb1_rescale;
-uniform vec3 fb1_modswitch;
+uniform vec3 fb1_invert;
 uniform float fb1_rotate;
 
 //fb1 tex mod
@@ -65,15 +64,16 @@ uniform float tex_fb1blend;
 uniform vec2 fb1_texmod_logic;
 
 //fb2
+uniform int fb2enabled;
 uniform float fb2lumakeyvalue;
 uniform float fb2lumakeythresh;
-uniform int fb2mix;
+uniform float fb2mix;
 uniform float fb2blend;
 
 uniform vec3 fb2_hsb_x;
 uniform vec3 fb2_hue_x;
 uniform vec3 fb2_rescale;
-uniform vec3 fb2_modswitch;
+uniform vec3 fb2_invert;
 uniform float fb2_rotate;
 
 //fb2 tex mod
@@ -695,23 +695,21 @@ void main()
   //1 variable each for x and y shift
   //can rotations work in here?  try and research this a second
   
+  // jcrozier
+  // MARK: - fb0
   
   vec2 fb0_coord=fb0_rescale.z*texCoordVarying;
-  vec2 center=vec2(width/2,height/2);
+  vec2 fb0_center=vec2(width/2,height/2);
   
-  fb0_coord=vec2(texCoordVarying.x-center.x,texCoordVarying.y-center.y);
+  fb0_coord=vec2(texCoordVarying.x-fb0_center.x,texCoordVarying.y-fb0_center.y);
   fb0_coord.xy=fb0_rescale.xy+fb0_coord.xy;
   
-  fb0_coord.x=fb0_coord.x+center.x;
+  fb0_coord.x=fb0_coord.x+fb0_center.x;
   
-  fb0_coord.y=fb0_coord.y+center.y;
+  fb0_coord.y=fb0_coord.y+fb0_center.y;
   
   
   fb0_coord=rotate(fb0_coord,fb0_rotate);
-  
-  
-  // jcrozier
-//  fb0_coord = vec2(texCoordVarying.x, texCoordVarying.y);
   
   if(fb0_toroid_switch==1){
     fb0_coord=wrapCoord(fb0_coord);
@@ -738,13 +736,7 @@ void main()
   }
   
   ///testing the pixelation function
-  //1 mix value is pure pixel
-  //0 mix value is bypass
-  //smaller values for pixel size make larger pixels
-  //the way to calculate the actual pixel size is width/index
   if(fb0_pixel_switch==1){
-    //fb0_color=pixelate(64,fb0_coord,fb0,.25,fb0_color,.5);
-    
     float fb0_pixel_tex_mod=fb0_pixel_texmod_logic.x*ch1_hsbstrip.z+fb0_pixel_texmod_logic.y*ch2_hsbstrip.z;
     
     fb0_color=pixelate(fb0_pixel_scale_x+texmod_fb0_pixel_scale_x*fb0_pixel_tex_mod,
@@ -754,41 +746,101 @@ void main()
                        fb0_color,
                        fb0_pixel_brightscale+texmod_fb0_pixel_brightscale*fb0_pixel_tex_mod);
   }
+
+  // MARK: - fb1
   
-  //just like  spare dummy variabl for a color vector
-  vec4 color = vec4(0.0, 0.0, 0.0, 0.0);
+  vec2 fb1_coord=fb1_rescale.z*texCoordVarying;
+  vec2 fb1_center=vec2(width/2,height/2);
+  
+  fb1_coord=vec2(texCoordVarying.x-fb1_center.x,texCoordVarying.y-fb1_center.y);
+  fb1_coord.xy=fb1_rescale.xy+fb1_coord.xy;
+  
+  fb1_coord.x=fb1_coord.x+fb1_center.x;
+  fb1_coord.y=fb1_coord.y+fb1_center.y;
+  
+  if(fb1_toroid_switch==1){
+    fb1_coord=wrapCoord(fb1_coord);
+  }
+  
+  if(fb1_toroid_switch==2){
+    fb1_coord=mirrorCoord(fb1_coord);
+  }
+  
+  
+  if(fb1_hflip_switch==1){
+    if(fb1_coord.x>width/2){fb1_coord.x=abs(width-fb1_coord.x);}
+  }//endifhflip1
+  if(fb1_vflip_switch==1){
+    if(fb1_coord.y>height/2){fb1_coord.y=abs(height-fb1_coord.y);}
+  }//endifvflip1
   
   
   
+  vec4 fb1_color = texture2DRect(fb1,fb1_coord);
   
+  if(abs(fb1_coord.x-width/2)>=width/2||abs(fb1_coord.y-height/2)>=height/2){
+    fb1_color=vec4(0,0,0,1.0);
+  }
+  
+  // MARK: - fb2
+  
+  vec2 fb2_coord=fb2_rescale.z*texCoordVarying;
+  vec2 fb2_center=vec2(width/2,height/2);
+  
+  fb2_coord=vec2(texCoordVarying.x-fb2_center.x,texCoordVarying.y-fb2_center.y);
+  fb2_coord.xy=fb2_rescale.xy+fb2_coord.xy;
+  
+  fb2_coord.x=fb2_coord.x+fb2_center.x;
+  
+  fb2_coord.y=fb2_coord.y+fb2_center.y;
+  
+  if(fb2_toroid_switch==1){
+    fb2_coord=wrapCoord(fb2_coord);
+  }
+  
+  if(fb2_toroid_switch==2){
+    fb2_coord=mirrorCoord(fb2_coord);
+  }
+  
+  if(fb2_hflip_switch==1){
+    if(fb2_coord.x>width/2){fb2_coord.x=abs(width-fb2_coord.x);}
+  }//endifhflip1
+  if(fb2_vflip_switch==1){
+    if(fb2_coord.y>height/2){fb2_coord.y=abs(height-fb2_coord.y);}
+  }//endifvflip1
+  
+  
+  vec4 fb2_color = texture2DRect(fb2,fb2_coord);
+  
+  if(abs(fb2_coord.x-width/2)>=width/2||abs(fb2_coord.y-height/2)>=height/2){
+    fb2_color=vec4(0,0,0,1.0);
+  }
   
   
   vec3 fb0color_hsb=rgb2hsv(vec3(fb0_color.r,fb0_color.g,fb0_color.b));
-//  vec3 fb1color_hsb=rgb2hsv(vec3(fb1_color.r,fb1_color.g,fb1_color.b));
-//  vec3 fb2color_hsb=rgb2hsv(vec3(fb2_color.r,fb2_color.g,fb2_color.b));
-//  vec3 fb3color_hsb=rgb2hsv(vec3(fb3_color.r,fb3_color.g,fb3_color.b));
-//
+  vec3 fb1color_hsb=rgb2hsv(vec3(fb1_color.r,fb1_color.g,fb1_color.b));
+  vec3 fb2color_hsb=rgb2hsv(vec3(fb2_color.r,fb2_color.g,fb2_color.b));
+  
+  // TODO - What does this represent
+  vec3 hue_x = vec3(10.0, 0.0, 0.0);
   
   fb0color_hsb=fb_hsbop(fb0color_hsb,
                         fb0_hsb_x,
-                        fb0_hue_x,
-                        fb0_modswitch,
+                        hue_x,
+                        fb0_invert,
                         0);
   
-//  fb1color_hsb=fb_hsbop(fb1color_hsb,
-//                        fb1_hsb_x+tex_fb1_hsb_x*fb1_tex_mod,
-//                        fb1_hue_x+tex_fb1_hue_x*fb1_tex_mod,fb1_modswitch,0);
-//
-//  fb2color_hsb=fb_hsbop(fb2color_hsb,
-//                        fb2_hsb_x+tex_fb2_hsb_x*fb2_tex_mod,
-//                        fb2_hue_x+tex_fb2_hue_x*fb2_tex_mod,fb2_modswitch,0);
-//
-//  fb3color_hsb=fb_hsbop(fb3color_hsb,
-//                        fb3_hsb_x+tex_fb3_hsb_x*fb3_tex_mod,
-//                        fb3_hue_x+tex_fb3_hue_x*fb3_tex_mod,fb3_modswitch,0);
-  
-  
-  
+  fb1color_hsb=fb_hsbop(fb1color_hsb,
+                        fb1_hsb_x,
+                        hue_x,
+                        fb1_invert,
+                        0);
+
+  fb2color_hsb=fb_hsbop(fb2color_hsb,
+                        fb2_hsb_x,
+                        hue_x,
+                        fb2_invert,
+                        0);
   
   
   //convert back to vec4 rgb
@@ -797,21 +849,40 @@ void main()
   
   channel1_color=vec4(channel1_rgb, 1.0);
   fb0_color=vec4(vec3(hsb2rgb(fb0color_hsb)),1.0);
-  
+  fb1_color=vec4(vec3(hsb2rgb(fb1color_hsb)),1.0);
+  fb2_color=vec4(vec3(hsb2rgb(fb2color_hsb)),1.0);
   
   vec4 mixout_color = channel1_color;
   
   //fb0
   if (fb0enabled == 1) {
-    mixout_color=mix_rgb(channel1_color,
+    mixout_color=mix_rgb(mixout_color,
                               fb0_color,
                               fb0mix,
                               fb0lumakeyvalue,
                               fb0lumakeythresh,
                               ch1_hsbstrip.z);
   }
+
+  //fb1
+  if (fb1enabled == 1) {
+    mixout_color=mix_rgb(mixout_color,
+                              fb1_color,
+                              fb1mix,
+                              fb1lumakeyvalue,
+                              fb1lumakeythresh,
+                              ch1_hsbstrip.z);
+  }
   
+//  //fb2
+  if (fb2enabled == 1) {
+    mixout_color=mix_rgb(mixout_color,
+                              fb2_color,
+                              fb2mix,
+                              fb2lumakeyvalue,
+                              fb2lumakeythresh,
+                              ch1_hsbstrip.z);
+  }
   
   gl_FragColor = mixout_color;
-  
 }

@@ -7,14 +7,18 @@
 
 #include "VideoStream.h"
 #include "FontService.hpp"
+#include "FeedbackShader.hpp"
+#include "Console.h"
 #include "MidiService.hpp"
 #include "CommonViews.hpp"
 #include "VideoSettings.h"
 #include "ofxImGui.h"
 #include "Video.h"
 
+// MARK: - Lifecycle
+
 void VideoStream::setup() {
-  gui.setup(nullptr, true, ImGuiConfigFlags_ViewportsEnable | ImGuiConfigFlags_DockingEnable);
+  gui.setup(nullptr, true, ImGuiConfigFlags_ViewportsEnable);
   switch (config.source) {
     case VideoSource_file:
       player.load(config.path);
@@ -39,8 +43,20 @@ void VideoStream::setup() {
   ofAddListener(window->events().exit, this, &VideoStream::willExit);
 }
 
+void VideoStream::firstDrawSetup() {
+  firstFrameDrawn = true;
+  MidiService::getService()->loadConfigFile();
+}
+
 void VideoStream::willExit(ofEventArgs &args) {
   closeStream(settings->streamId);
+}
+
+void VideoStream::teardown() {
+  cam.close();
+  player.stop();
+  player.close();
+  window->setWindowShouldClose();
 }
 
 void VideoStream::update() {
@@ -52,10 +68,20 @@ void VideoStream::update() {
   }
 }
 
+// MARK: - Drawing
+
 void VideoStream::draw() {
   gui.begin();
+  
+  // Need to hold a fresh frame for one when resetting frame buffer
+  
+  if (shouldClearFrameBuffer) {
+    clearFrameBuffer();
+  }
+  
   ImGui::PushFont(FontService::getService()->p);
   drawMainFbo();
+  shadeFeedback();
   shadeHSB();
   shadeBlur();
   shadeSharpen();
@@ -68,10 +94,15 @@ void VideoStream::draw() {
   ImGui::PopFont();
 }
 
-void VideoStream::firstDrawSetup() {
-  firstFrameDrawn = true;
-  MidiService::getService()->loadConfigFile();
+void VideoStream::drawVideo() {
+  switch (config.source) {
+    case VideoSource_file:
+      return drawVideoPlayer();
+    case VideoSource_webcam:
+      return cam.draw(0, 0);
+  }
 }
+
 
 void VideoStream::drawVideoPlayer() {
   player.draw(0, 0);
@@ -113,40 +144,32 @@ void VideoStream::drawMainFbo() {
   fbo.end();
 }
 
-void VideoStream::shadeHSB() {
+// MARK: - Shading
+
+void VideoStream::shadeFeedback() {
   fbo.begin();
   shaderMixer.begin();
   fbo.draw(0,0);
   
-  FeedbackSettings feedback = settings->feedback1Settings;
-  int index = settings->feedback1Settings.mixSettings.delayAmount.intValue();
-  shaderMixer.setUniformTexture("fb0",frameBuffer[index].getTexture(),4);
   shaderMixer.setUniform1f("mix1blend1", 1.0);
   shaderMixer.setUniform1f("mix1keybright", 1.0);
   
-  if (feedback.enabled) {
-    shaderMixer.setUniform1f("fb0lumakeyvalue", feedback.mixSettings.keyValue.value);
-    shaderMixer.setUniform1f("fb0lumakeythresh", feedback.mixSettings.keyThreshold.value);
-    shaderMixer.setUniform1f("fb0mix", feedback.mixSettings.mix.value);
-    shaderMixer.setUniform1i("fb0enabled", feedback.enabled);
-    shaderMixer.setUniform3f("fb0_hsb_x", feedback.hsbSettings.hue.value, feedback.hsbSettings.saturation.value, feedback.hsbSettings.brightness.value);
-    
-    shaderMixer.setUniform3f("fb0_hue_x", 10.0, 0.0, 0.0);
-    shaderMixer.setUniform3f("fb0_rescale",
-                             feedback.miscSettings.xOffset.value,
-                             feedback.miscSettings.yOffset.value,
-                             1.0);
-    
-    shaderMixer.setUniform1f("fb0_rotate", feedback.miscSettings.rotate.value);
-    
-    shaderMixer.setUniform3f("fb0_modswitch", feedback.hsbSettings.invertHue, feedback.hsbSettings.invertSaturation, feedback.hsbSettings.invertBrightness);
-  } else {
-    resetFeedbackValues();
-  }
   
+  for (auto & feedbackShader : feedbackShaders) {
+    if (feedbackShader.feedback->enabled.boolValue) {
+      int frameIndex = feedbackShader.feedback->mixSettings.delayAmount.intValue();
+      auto texture = frameBuffer[frameIndex].getTexture();
+      
+      shaderMixer.setUniformTexture(formatString("fb%d",feedbackShader.idx), texture, 4);
+  }
+    feedbackShader.shade();
+  }
+}
+
+void VideoStream::shadeHSB() {
   shaderMixer.setUniform1f("cam1_scale", 1);
   shaderMixer.setUniformTexture("cam", streamTexture(), 1);
-
+  
   shaderMixer.setUniform2f("cam1dimensions", ofVec2f(streamWidth(), streamHeight()));
   shaderMixer.setUniform1f("width", 640);
   shaderMixer.setUniform1f("height", 480);
@@ -171,18 +194,6 @@ void VideoStream::shadeHSB() {
   
   shaderMixer.end();
   fbo.end();
-}
-
-void VideoStream::resetFeedbackValues() {
-  shaderMixer.setUniform1i("fb0enabled", false);
-  shaderMixer.setUniform1f("fb0lumakeyvalue", 0.0);
-  shaderMixer.setUniform1f("fb0lumakeythresh", 0.0);
-  shaderMixer.setUniform1f("fb0mix", 0.0);
-  shaderMixer.setUniform3f("fb0_hsb_x", 1.0, 1.0, 1.0);
-  
-  shaderMixer.setUniform3f("fb0_hue_x", 10.0, 0.0, 0.0);
-  shaderMixer.setUniform3f("fb0_rescale", 0.0, 0.0, 1.0);
-  shaderMixer.setUniform1f("fb0_rotate", 0.0);
 }
 
 void VideoStream::shadeBlur() {
@@ -236,14 +247,6 @@ void VideoStream::prepareFbos() {
   fboBlur.end();
 }
 
-void VideoStream::teardown() {
-  cam.close();
-  player.stop();
-  player.close();
-  
-  window->setWindowShouldClose();
-}
-
 void VideoStream::saveFeedbackFrame() {
   ofFbo feedbackFrame = ofFbo();
   feedbackFrame.allocate(ofGetWidth(), ofGetHeight());
@@ -259,16 +262,28 @@ void VideoStream::saveFeedbackFrame() {
   }
 }
 
+void VideoStream::resetFeedbackValues(FeedbackSettings *feedback) {
+  shaderMixer.setUniform1i("fb0enabled", false);
+  shaderMixer.setUniform1f("fb0lumakeyvalue", 0.0);
+  shaderMixer.setUniform1f("fb0lumakeythresh", 0.0);
+  shaderMixer.setUniform1f("fb0mix", 0.0);
+  shaderMixer.setUniform3f("fb0_hsb_x", 1.0, 1.0, 1.0);
+
+  shaderMixer.setUniform3f("fb0_hue_x", 10.0, 0.0, 0.0);
+  shaderMixer.setUniform3f("fb0_rescale", 0.0, 0.0, 1.0);
+  shaderMixer.setUniform1f("fb0_rotate", 0.0);
+}
+
 
 void VideoStream::drawDebug() {
   //  frameBuffer[feedbackDrawIndex()].draw(ofGetWidth() - 200, ofGetHeight() - 100, 200, 100);
   
   //  cout<<"============"<<endl;
-  //  cout << "fb0_mix:\t" << settings->feedback1Settings.mixSettings.mix << std::endl;
-  //  cout << "fb0_hue:\t" << settings->feedback1Settings.hsbSettings.hue << std::endl;
-  //  cout << "fb0_saturation:\t" << settings->feedback1Settings.hsbSettings.saturation << std::endl;
-  //  cout << "fb0_bright:\t" << settings->feedback1Settings.hsbSettings.brightness << std::endl;
-  //  cout << "fb0_delay_amount:\t" << settings->feedback1Settings.mixSettings.delayAmount << std::endl;
+  //  cout << "fb0_mix:\t" << settings->feedback0Settings.mixSettings.mix << std::endl;
+  //  cout << "fb0_hue:\t" << settings->feedback0Settings.hsbSettings.hue << std::endl;
+  //  cout << "fb0_saturation:\t" << settings->feedback0Settings.hsbSettings.saturation << std::endl;
+  //  cout << "fb0_bright:\t" << settings->feedback0Settings.hsbSettings.brightness << std::endl;
+  //  cout << "fb0_delay_amount:\t" << settings->feedback0Settings.mixSettings.delayAmount << std::endl;
   //  cout<<"============"<<endl;
 }
 
@@ -280,6 +295,7 @@ void VideoStream::clearFrameBuffer() {
     frame.allocate(ofGetWidth(), ofGetHeight());
     frameBuffer.push_back(frame);
   }
+  shouldClearFrameBuffer = false;
 }
 
 
@@ -287,7 +303,7 @@ void VideoStream::completeFrame() {
   frameCount += 1;
 }
 
-// Helpers
+// MARK: - Helpers
 
 float VideoStream::streamHeight() {
   switch (config.source) {
@@ -315,13 +331,3 @@ ofTexture VideoStream::streamTexture() {
       return cam.getTexture();
   }
 }
-
-void VideoStream::drawVideo() {
-  switch (config.source) {
-    case VideoSource_file:
-      return drawVideoPlayer();
-    case VideoSource_webcam:
-      return cam.draw(0, 0);
-  }
-}
-

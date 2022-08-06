@@ -14,8 +14,8 @@ void AudioSettingsView::setup() {
 
 void AudioSettingsView::draw() {
   ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar;
-  
   if (ImGui::Begin("audio_settings_view", NULL, windowFlags)) {
+    ImGui::Text("Test");
     OscillatorView::draw("RMS", &analysis->rms, &analysis->rmsOscillator);
     OscillatorView::draw("Pitch", &analysis->pitch, &analysis->pitchOscillator);
     OscillatorView::draw("CSD", &analysis->csd, &analysis->csdOscillator);
