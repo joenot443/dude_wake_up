@@ -9,27 +9,28 @@
 #define ParameterService_h
 
 #include <stdio.h>
+#include "json.hpp"
 #include "ofxMidi.h"
 #include "ofMain.h"
 #include "MidiPairing.hpp"
 #include "Parameter.h"
 
+using json = nlohmann::json;
+
 class ParameterService {
   std::map<std::string, Parameter *> parameterMap;
-  
-  void setup();
-  
+    
 public:
   Parameter * parameterForId(std::string paramId);
   static ParameterService* service;
   
   void registerParameter(Parameter *);
+  void loadParameters(json *);
   
   ParameterService() {};
   static ParameterService* getService() {
     if (!service) {
       service = new ParameterService;
-      service->setup();
     }
     return service;
     

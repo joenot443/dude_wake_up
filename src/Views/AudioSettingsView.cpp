@@ -16,11 +16,13 @@ void AudioSettingsView::draw() {
   ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar;
   if (ImGui::Begin("audio_settings_view", NULL, windowFlags)) {
     ImGui::Text("Test");
-    OscillatorView::draw("RMS", &analysis->rms, &analysis->rmsOscillator);
-    OscillatorView::draw("Pitch", &analysis->pitch, &analysis->pitchOscillator);
-    OscillatorView::draw("CSD", &analysis->csd, &analysis->csdOscillator);
-    OscillatorView::draw("Energy", &analysis->energy, &analysis->energyOscillator);
-    OscillatorView::draw("ZCR", &analysis->zcr, &analysis->zcrOscillator);
+    ImGui::SliderFloat("Pulse", &analysis->beat.value, 0.0, 1.0);
+//    OscillatorView::draw("Pulse", &analysis->beat, &analysis->beatOscillator);
+//    OscillatorView::draw("RMS", &analysis->rms, &analysis->rmsOscillator);
+//    OscillatorView::draw("Pitch", &analysis->pitch, &analysis->pitchOscillator);
+//    OscillatorView::draw("CSD", &analysis->csd, &analysis->csdOscillator);
+//    OscillatorView::draw("Energy", &analysis->energy, &analysis->energyOscillator);
+//    OscillatorView::draw("ZCR", &analysis->zcr, &analysis->zcrOscillator);
   }
   ImGui::End();
 }

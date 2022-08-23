@@ -7,24 +7,20 @@
 
 #include "Oscillator.hpp"
 #include "OscillationService.hpp"
+#include "Video.hpp"
 
-Oscillator::Oscillator(Parameter *val) {
-  value = val;
+Oscillator::Oscillator(Parameter *v) : value(v),
+settingsId(value->paramId),
+amplitude(Parameter("amp", value->paramId, 1.0, -3.0, 3.0)),
+shift(Parameter("shift", value->paramId, 0.0, -3.0, 3.0)),
+frequency(Parameter("freq", value->paramId, 1.0, -3.0, 3.0))
+{
   data = ImVector<ImVec2>();
   data.reserve(100);
   xRange = {0.0, 10.0};
-  yRange = {val->min, val->max};
-  amplitude = 1.0;
-  shift = 0.0;
-  frequency = 1.0;
-  span = 10.0;
+  yRange = {value->min, value->max};
+  parameters = {&amplitude, &frequency, &shift};
   OscillationService::getService()->addOscillator(this);
-}
-
-float Oscillator::frameTime() {
-  static float t = 0.0;
-  t += ImGui::GetIO().DeltaTime;
-  return t;
 }
 
 void Oscillator::tick() {
@@ -35,6 +31,6 @@ void Oscillator::tick() {
   if (!data.empty() && xmod < data.back().x)
       data.shrink(0);
   
-  value->value = amplitude * sin(frequency * t) + shift;
+  value->value = amplitude.value * sin(frequency.value * t) + shift.value;
   data.push_back(ImVec2(xmod, value->value));
 }

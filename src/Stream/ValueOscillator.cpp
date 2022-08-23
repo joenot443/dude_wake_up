@@ -8,6 +8,7 @@
 #include "ValueOscillator.hpp"
 #include "imgui.h"
 #include "OscillationService.hpp"
+#include "Video.hpp"
 
 ValueOscillator::ValueOscillator(Parameter *val) {
   data.reserve(100);
@@ -15,12 +16,6 @@ ValueOscillator::ValueOscillator(Parameter *val) {
   yRange = {val->min, val->max};
   observed = val;
   OscillationService::getService()->addValueOscillator(this);
-}
-
-float ValueOscillator::frameTime() {
-  static float t = 0.0;
-  t += ImGui::GetIO().DeltaTime;
-  return t;
 }
 
 void ValueOscillator::tick() {

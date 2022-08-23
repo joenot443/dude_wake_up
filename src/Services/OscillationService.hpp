@@ -13,12 +13,14 @@
 #include <deque>
 #include "Oscillator.hpp"
 #include "ValueOscillator.hpp"
+#include "PulseOscillator.hpp"
 
 class OscillationService {
 private:
   std::deque<Oscillator *> oscillators;
   std::deque<ValueOscillator *> valueOscillators;
-
+  std::deque<PulseOscillator *> pulseOscillators;
+  
 public:
   static OscillationService* service;
   OscillationService() {};
@@ -31,6 +33,7 @@ public:
   }
   void addOscillator(Oscillator *);
   void addValueOscillator(ValueOscillator *);
+  void addPulseOscillator(PulseOscillator *);
   void tickOscillators();
 };
 

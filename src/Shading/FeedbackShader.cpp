@@ -11,12 +11,18 @@
 void FeedbackShader::shade() {
   if (feedback->enabled.boolValue) {
     shaderMixer->setUniform1i(feedback->enabled.shaderKey, feedback->enabled.boolValue);
+    
+    shaderMixer->setUniform1i(feedback->mixSettings.feedbackType.shaderKey, feedback->mixSettings.feedbackType.intValue);
+    
+    shaderMixer->setUniform1f(feedback->mixSettings.blend.shaderKey,  feedback->mixSettings.blend.value);
+    
     shaderMixer->setUniform1f(feedback->mixSettings.keyValue.shaderKey,  feedback->mixSettings.keyValue.value);
     shaderMixer->setUniform1f(feedback->mixSettings.keyThreshold.shaderKey,
                              feedback->mixSettings.keyThreshold.value);
     shaderMixer->setUniform1f(feedback->mixSettings.mix.shaderKey,
                              feedback->mixSettings.mix.value);
 
+    
     shaderMixer->setUniform3f(formatString("fb%d_hsb_x", idx), feedback->hsbSettings.hue.value, feedback->hsbSettings.saturation.value, feedback->hsbSettings.brightness.value);
     shaderMixer->setUniform3f(formatString("fb%d_hue_x", idx), 10.0, 0.0, 0.0);
     shaderMixer->setUniform3f(formatString("fb%d_rescale", idx),
@@ -29,6 +35,8 @@ void FeedbackShader::shade() {
     shaderMixer->setUniform3f(formatString("fb%d_invert", idx), feedback->hsbSettings.invertHue,
                              feedback->hsbSettings.invertSaturation,
                              feedback->hsbSettings.invertBrightness);
+    
+    shaderMixer->setUniform1i(formatString("fb%d_mirror_vertical", idx), feedback->miscSettings.verticalMirror);
 
   } else {
     disableFeedback();

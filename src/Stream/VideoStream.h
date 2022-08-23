@@ -55,7 +55,7 @@ private:
   void completeFrame();
   void drawMainFbo();
   void drawDebug();
-  void drawVideo();
+  void drawVideo(float scale);
   void drawVideoPlayer();
   
   // Shading
@@ -87,9 +87,9 @@ private:
   ofShader shaderBlur;
   ofShader shaderSharpen;
   ofFbo fbo;
+  ofFbo fboFeedback;
   ofFbo fboBlur;
   ofFbo fboSharpen;
-  ofFbo fboFeedback;
   Parameter position;
   Parameter speed;
   

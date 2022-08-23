@@ -9,6 +9,7 @@
 #define Oscillator_hpp
 
 #include <stdio.h>
+//#include "Vectors.hpp"
 #include "Parameter.h"
 #include "imgui.h"
 
@@ -17,10 +18,13 @@ struct Oscillator {
   bool enabled = false;
 
   Parameter *value;
-  float amplitude;
-  float shift;
-  float frequency;
+  Parameter amplitude;
+  Parameter shift;
+  Parameter frequency;
+  std::vector<Parameter *> parameters;
   float span;
+  
+  std::string settingsId;
   
   std::vector<float> xRange;
   std::vector<float> yRange;
@@ -28,11 +32,26 @@ struct Oscillator {
   ImVector<ImVec2> data;
   Oscillator(Parameter *);
   
+  
   void tick();
   void tick(float value);
+  
+  static std::vector<Parameter*> parametersFromOscillators(std::vector<Oscillator*> oscs) {
+    std::vector<Parameter*> ret = {};
+    
+    for (auto o: oscs) {
+      auto p = o->parameters;
+      ret.insert( ret.end(), p.begin(), p.end() );
+    }
+    
+    return ret;
+  }
+
 private:
   void pushValue(float value);
-  float frameTime();
 };
+
+
+
 
 #endif /* Oscillator_hpp */

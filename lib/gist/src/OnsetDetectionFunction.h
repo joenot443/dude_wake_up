@@ -32,12 +32,12 @@
  * Instantiations of the class should be of either 'float' or 
  * 'double' types and no others */
 template <class T>
-class OnsetDetectionFunction
+class GistOnsetDetectionFunction
 {
 public:
     //===========================================================
     /** constructor */
-    OnsetDetectionFunction (int frameSize);
+  GistOnsetDetectionFunction (int frameSize);
 
     //===========================================================
     /** Sets the frame size of internal buffers. Assumes all magnitude

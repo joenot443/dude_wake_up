@@ -15,10 +15,10 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			I6bAM7P8H12KCEwlJcM+9eMIWz0=
+			g/hgiqAgHwL7LzZ9RbpSqhKs8mY=
 			</data>
 			<key>requirement</key>
-			<string>cdhash H"e3276b4137929f92d669c16618ef892678c6347f" or cdhash H"23a6c033b3fc1f5d8a084c2525c33ef5e3085b3d" or cdhash H"f2f96194a8afb6c80b7bbcff6d772c85237f216d" or cdhash H"1ccd24a42ff045f56cca12302b49abc6b549eb40"</string>
+			<string>identifier libfmod and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: Joe Crozier (7HTR557REQ)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
 		</dict>
 		<key>Resources/icon-debug.icns</key>
 		<dict>

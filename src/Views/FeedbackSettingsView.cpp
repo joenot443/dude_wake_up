@@ -14,7 +14,7 @@
 void FeedbackSettingsView::draw() {
   auto name = std::string("##%dfeedbacksettings", feedbackSettings->index);
   
-  ImGui::Columns(2, name.c_str(), false);  // 3-ways, no border
+  ImGui::Columns(2, name.c_str(), false);
   drawHSB();
   ImGui::NextColumn();
   drawParameters();
@@ -25,41 +25,69 @@ void FeedbackSettingsView::draw() {
   ImGui::Columns(1);
 }
 
+std::string feedbackTypeName(FeedbackType type) {
+  switch (type) {
+    case FeedbackType_Classic:
+      return "Classic";
+    case FeedbackType_Luma:
+      return "Luminosity";
+    case FeedbackType_Diff:
+      return "Difference";
+  }
+}
+
 void FeedbackSettingsView::drawParameters() {
-  CommonViews::Spacing(8);
-  ImGui::PushFont(FontService::getService()->h3);
-  ImGui::Text("Feedback Parameters");
-  ImGui::Spacing();
-  ImGui::PopFont();
+  CommonViews::H3Title("Feedback Parameters");
   
   ImGui::Checkbox("Enabled##fb0_enabled", &feedbackSettings->enabled.boolValue);
   
+  if (!feedbackSettings->enabled.boolValue) {
+    return;
+  }
+  
+  std::string typeName;
+  auto types = {FeedbackType_Diff, FeedbackType_Luma, FeedbackType_Classic};
+  typeName = feedbackTypeName((FeedbackType) feedbackSettings->mixSettings.feedbackType.intValue);
+  
+  if (ImGui::BeginCombo(typeName.c_str(), "Select Feedback Type"))
+  {
+    for (auto const& fb : types) {
+      if (ImGui::Selectable(feedbackTypeName(fb).c_str(), feedbackSettings->mixSettings.feedbackType.intValue == fb)) {
+        feedbackSettings->mixSettings.feedbackType.intValue = fb;
+      }
+    }
+    ImGui::EndCombo();
+  }
   // Mix
   CommonViews::SliderWithOscillator("Mix", "##mix_amount", &feedbackSettings->mixSettings.mix, &feedbackSettings->mixSettings.mixOscillator);
+  CommonViews::ModulationSelector(&feedbackSettings->mixSettings.mix);
   CommonViews::MidiSelector(&feedbackSettings->mixSettings.mix);
   
+  if (feedbackSettings->mixSettings.feedbackType.intValue != FeedbackType_Classic) {
+    // Blend (Disabled for Classic)
+    CommonViews::SliderWithOscillator("Blend", "##blend_amount", &feedbackSettings->mixSettings.blend, &feedbackSettings->mixSettings.blendOscillator);
+    CommonViews::ModulationSelector(&feedbackSettings->mixSettings.blend);
+    CommonViews::MidiSelector(&feedbackSettings->mixSettings.blend);
+  }
+
   // Delay Amount
-  CommonViews::SliderWithOscillator("Delay", "##delay_amount", &feedbackSettings->mixSettings.delayAmount, &feedbackSettings->mixSettings.delayAmountOscillator);
+  CommonViews::IntSliderWithOscillator("Delay", "##delay_amount", &feedbackSettings->mixSettings.delayAmount, &feedbackSettings->mixSettings.delayAmountOscillator);
+  CommonViews::ModulationSelector(&feedbackSettings->mixSettings.delayAmount);
   CommonViews::MidiSelector(&feedbackSettings->mixSettings.delayAmount);
   
   // Key Value
   CommonViews::SliderWithOscillator("Key Value", "##key_value", &feedbackSettings->mixSettings.keyValue, &feedbackSettings->mixSettings.keyValueOscillator);
+  CommonViews::ModulationSelector(&feedbackSettings->mixSettings.keyValue);
   CommonViews::MidiSelector(&feedbackSettings->mixSettings.keyValue);
   
   // Threshold
   CommonViews::SliderWithOscillator("Key Threshold", "##key_threshold", &feedbackSettings->mixSettings.keyThreshold, &feedbackSettings->mixSettings.keyThresholdOscillator);
+  CommonViews::ModulationSelector(&feedbackSettings->mixSettings.keyThreshold);
   CommonViews::MidiSelector(&feedbackSettings->mixSettings.keyThreshold);
-  
-  CommonViews::Spacing(8);
 }
 
 void FeedbackSettingsView::drawHSB() {
-  CommonViews::Spacing(8);
-  
-  ImGui::PushFont(FontService::getService()->h3);
-  ImGui::Text("Basic (HSB)");
-  ImGui::Spacing();
-  ImGui::PopFont();
+  CommonViews::H3Title("Feedback HSB");
   
   // Hue
   CommonViews::SliderWithInvertOscillator("Hue", "##hue", &feedbackSettings->hsbSettings.hue, &feedbackSettings->hsbSettings.invertHue, &feedbackSettings->hsbSettings.hueOscillator);
@@ -75,9 +103,7 @@ void FeedbackSettingsView::drawHSB() {
   CommonViews::SliderWithInvertOscillator("Brightness", "##brightness", &feedbackSettings->hsbSettings.brightness, &feedbackSettings->hsbSettings.invertBrightness, &feedbackSettings->hsbSettings.brightnessOscillator);
   CommonViews::ModulationSelector(&feedbackSettings->hsbSettings.brightness);
   CommonViews::MidiSelector(&feedbackSettings->hsbSettings.brightness);
-  
-  CommonViews::Spacing(8);
-}
+  }
 
 void FeedbackSettingsView::drawRanges() {
   CommonViews::Spacing(8);
@@ -118,26 +144,18 @@ void FeedbackSettingsView::drawMisc() {
   ImGui::Spacing();
   ImGui::PopFont();
   
-  // Scale x
-  ImGui::Text("Scale x");
-  ImGui::PushItemWidth(-1);
-  ImGui::SliderFloat("##scalex", &feedbackSettings->scaleSettings.xScale.value, 0.0001, 10.0, "%.3f");
-  ImGui::PopItemWidth();
-  CommonViews::MidiSelector(&feedbackSettings->scaleSettings.xScale);
-  
-  
-  // Scale y
-  ImGui::Text("Scale y");
-  ImGui::PushItemWidth(-1);
-  ImGui::SliderFloat("##scaley", &feedbackSettings->scaleSettings.yScale.value, 0.0001, 10.0, "%.3f");
-  ImGui::PopItemWidth();
-  CommonViews::MidiSelector(&feedbackSettings->scaleSettings.yScale);
-  
+  // Scale
+  CommonViews::SliderWithOscillator("Scale",
+                                    "##fb_scale",
+                                    &feedbackSettings->miscSettings.scale,
+                                    &feedbackSettings->miscSettings.scaleOscillator);
+  CommonViews::MidiSelector(&feedbackSettings->miscSettings.scale);
+
   // Mirror Horizontal
   ImGui::Text("Mirror Horizontally");
-  ImGui::Checkbox("", &feedbackSettings->miscSettings.horizontalMirror);
+  ImGui::Checkbox("##mirror_horizontal", &feedbackSettings->miscSettings.horizontalMirror);
   
   // Mirror Vertical
   ImGui::Text("Mirror Vertically");
-  ImGui::Checkbox("", &feedbackSettings->miscSettings.verticalMirror);
+  ImGui::Checkbox("##mirror_vertical", &feedbackSettings->miscSettings.verticalMirror);
 }

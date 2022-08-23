@@ -25,7 +25,7 @@
 
 //===========================================================
 template <class T>
-OnsetDetectionFunction<T>::OnsetDetectionFunction (int frameSize)
+GistOnsetDetectionFunction<T>::GistOnsetDetectionFunction (int frameSize)
 {
     // initialise buffers with the frame size
     setFrameSize (frameSize);
@@ -33,7 +33,7 @@ OnsetDetectionFunction<T>::OnsetDetectionFunction (int frameSize)
 
 //===========================================================
 template <class T>
-void OnsetDetectionFunction<T>::setFrameSize (int frameSize)
+void GistOnsetDetectionFunction<T>::setFrameSize (int frameSize)
 {
     // resize the prev magnitude spectrum vector
     prevMagnitudeSpectrum_spectralDifference.resize (frameSize);
@@ -60,7 +60,7 @@ void OnsetDetectionFunction<T>::setFrameSize (int frameSize)
 
 //===========================================================
 template <class T>
-T OnsetDetectionFunction<T>::energyDifference (const std::vector<T>& buffer)
+T GistOnsetDetectionFunction<T>::energyDifference (const std::vector<T>& buffer)
 {
     T sum;
     T difference;
@@ -83,7 +83,7 @@ T OnsetDetectionFunction<T>::energyDifference (const std::vector<T>& buffer)
 
 //===========================================================
 template <class T>
-T OnsetDetectionFunction<T>::spectralDifference (const std::vector<T>& magnitudeSpectrum)
+T GistOnsetDetectionFunction<T>::spectralDifference (const std::vector<T>& magnitudeSpectrum)
 {
     T sum = 0; // initialise sum to zero
 
@@ -110,7 +110,7 @@ T OnsetDetectionFunction<T>::spectralDifference (const std::vector<T>& magnitude
 
 //===========================================================
 template <class T>
-T OnsetDetectionFunction<T>::spectralDifferenceHWR (const std::vector<T>& magnitudeSpectrum)
+T GistOnsetDetectionFunction<T>::spectralDifferenceHWR (const std::vector<T>& magnitudeSpectrum)
 {
     T sum = 0; // initialise sum to zero
 
@@ -135,7 +135,7 @@ T OnsetDetectionFunction<T>::spectralDifferenceHWR (const std::vector<T>& magnit
 
 //===========================================================
 template <class T>
-T OnsetDetectionFunction<T>::complexSpectralDifference (const std::vector<T>& fftReal, const std::vector<T>& fftImag)
+T GistOnsetDetectionFunction<T>::complexSpectralDifference (const std::vector<T>& fftReal, const std::vector<T>& fftImag)
 {
     T dev, pdev;
     T sum;
@@ -184,7 +184,7 @@ T OnsetDetectionFunction<T>::complexSpectralDifference (const std::vector<T>& ff
 
 //===========================================================
 template <class T>
-T OnsetDetectionFunction<T>::highFrequencyContent (const std::vector<T>& magnitudeSpectrum)
+T GistOnsetDetectionFunction<T>::highFrequencyContent (const std::vector<T>& magnitudeSpectrum)
 {
     T sum = 0;
 
@@ -196,7 +196,7 @@ T OnsetDetectionFunction<T>::highFrequencyContent (const std::vector<T>& magnitu
 
 //===========================================================
 template <class T>
-T OnsetDetectionFunction<T>::princarg (T phaseVal)
+T GistOnsetDetectionFunction<T>::princarg (T phaseVal)
 {
     // if phase value is less than or equal to -pi then add 2*pi
     while (phaseVal <= (-M_PI))
@@ -210,5 +210,5 @@ T OnsetDetectionFunction<T>::princarg (T phaseVal)
 }
 
 //===========================================================
-template class OnsetDetectionFunction<float>;
-template class OnsetDetectionFunction<double>;
+template class GistOnsetDetectionFunction<float>;
+template class GistOnsetDetectionFunction<double>;

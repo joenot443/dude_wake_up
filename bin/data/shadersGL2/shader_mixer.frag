@@ -1,6 +1,5 @@
 #version 120
 
-
 uniform sampler2DRect ndi;
 uniform sampler2DRect cam1;
 uniform sampler2DRect cam2;
@@ -10,14 +9,15 @@ uniform sampler2DRect fb1;
 uniform sampler2DRect fb2;
 uniform sampler2DRect fb3;
 
-
 //fb0
 
 uniform int fb0enabled;
-uniform float fb0lumakeyvalue;
-uniform float fb0lumakeythresh;
-uniform float fb0mix;
+uniform int fb0type;
 uniform float fb0blend;
+
+uniform float fb0mix;
+uniform float fb0thresh;
+uniform float fb0key;
 
 uniform vec3 fb0_hsb_x;
 uniform vec3 fb0_hue_x;
@@ -40,6 +40,8 @@ uniform vec2 fb0_texmod_logic;
 
 //fb1
 uniform int fb1enabled;
+uniform int fb1lumaenabled;
+uniform float fb1lumamix;
 uniform float fb1lumakeyvalue;
 uniform float fb1lumakeythresh;
 uniform float fb1mix;
@@ -65,6 +67,8 @@ uniform vec2 fb1_texmod_logic;
 
 //fb2
 uniform int fb2enabled;
+uniform int fb2lumaenabled;
+uniform float fb2lumamix;
 uniform float fb2lumakeyvalue;
 uniform float fb2lumakeythresh;
 uniform float fb2mix;
@@ -118,8 +122,6 @@ uniform float ch1_h_mirror;
 
 //vidmixervariables
 
-uniform float cam1_scale;
-uniform float cam2_scale;
 uniform float width;
 uniform float height;
 
@@ -277,9 +279,9 @@ uniform int ndi_pixel_scale_y;
 uniform float ndi_pixel_mix;
 uniform float ndi_pixel_brightscale;
 
-uniform int fb0_toroid_switch;
-uniform int fb1_toroid_switch;
-uniform int fb2_toroid_switch;
+uniform int fb0_mirror_vertical;
+uniform int fb1_mirror_vertical;
+uniform int fb2_mirror_vertical;
 uniform int fb3_toroid_switch;
 
 uniform float ps;
@@ -312,7 +314,6 @@ vec3 hsb2rgb(vec3 c)
   vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
   return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
-
 
 vec3 fb_hsbop(vec3 c,
               vec3 hsbx,
@@ -454,8 +455,6 @@ vec3 channel_hsboperations(vec3 c,float hue_x,float sat_x, float bright_x
     }
   }
   
-  
-  
   c.x=fract(c.x);
   
   //powmaps
@@ -463,42 +462,35 @@ vec3 channel_hsboperations(vec3 c,float hue_x,float sat_x, float bright_x
   c.y=pow((c.y),sat_powmap);
   c.z=pow((c.z),bright_powmap);
   
-  
-  
-  
-  
-  
   return c;
 }
 
 
 
-vec4 mix_rgb(vec4 ch1,
+vec4 mix_key_value(vec4 ch1,
              vec4 ch2,
              float blend,
-             float lumavalue,
-             float lumathresh,
-             float bright1) {
+             float key,
+             float thresh,
+             float val) {
+  float upper = key + thresh;
+  float lower = key - thresh;
   
-  vec4 mixout=mix(ch1,ch2,blend);
-  
-  if((bright1> lumavalue-lumathresh) && (bright1<lumavalue+lumathresh)){
-    mixout=ch2;
+  if(val > lower && val < upper) {
+    return vec4(ch2.x, ch2.y, ch2.z, blend);
   }
   
-  
-  
-  
-  
-  //mixout=vec3(mixhue,mixsat,mixbright);
-  return mixout;
-}//endmixfunction
+  return ch1;
+}
 
+vec4 mix_diff(vec3 ch1, vec3 ch2, float blend, float diffthresh, float diffmix) {
+  if (abs(ch1.z - ch2.z) > diffthresh) {
+    return vec4(mix(ch1, ch2, blend), diffmix);
+  }
+  return vec4(ch1, 1.0);
+}
 
 //pixelatefunction
-
-
-
 
 
 vec4 pixelate(float x_scale, float y_scale, vec2 coord,sampler2DRect pixelTex,float pixelMixxx,vec4 c,float brightscale){
@@ -574,103 +566,21 @@ void main()
   vec4 channel1_color=vec4(0.0, 0.0, 0.0, 0.0);
   
   vec4 channel2_color=vec4(0.0, 0.0, 0.0, 0.0);
+  vec2 cam1_coord = texCoordVarying;
+  vec4 cam1color = texture2DRect(cam1,texCoordVarying);
+
+//  if(cam1_hflip_switch==1){
+//    if(texCoordVarying.x>width/2){cam1_coord.x=cam1_scale*abs(width-texCoordVarying.x);}
+//  }//endifhflip1
+//  if(cam1_vflip_switch==1){
+//    if(texCoordVarying.y>height/2){cam1_coord.y=cam1_scale*abs(height-texCoordVarying.y);}
+//  }
   
-  vec4 ndi_color=texture2DRect(ndi,texCoordVarying);
-  
-  if(ndi_pixel_switch==1){
-    ndi_color=pixelate(ndi_pixel_scale_x,ndi_pixel_scale_y,texCoordVarying,ndi,ndi_pixel_mix,ndi_color,ndi_pixel_brightscale);
-  }
-  
-  vec2 cam1_coord=texCoordVarying*cam1_scale;
-  
-  if(cam1_hflip_switch==1){
-    if(texCoordVarying.x>width/2){cam1_coord.x=cam1_scale*abs(width-texCoordVarying.x);}
-  }//endifhflip1
-  if(cam1_vflip_switch==1){
-    if(texCoordVarying.y>height/2){cam1_coord.y=cam1_scale*abs(height-texCoordVarying.y);}
-    
-  }//endifvflip1
-  
-  vec4 cam1color=vec4(0.0,0.0,0.0,0.0);
-  bool hit = false;
-  
-  if(texCoordVarying.x*cam1_scale<cam1dimensions.x){
-    if(texCoordVarying.y*cam1_scale<cam1dimensions.y){
-      cam1color=texture2DRect(cam1,vec2(cam1_coord.x,cam1_coord.y));
-    }
-  }
   if(cam1_pixel_switch==1){
-    
     cam1color=pixelate(cam1_pixel_scale_x,cam1_pixel_scale_y,cam1_coord,cam1,cam1_pixel_mix,cam1color,cam1_pixel_brightscale);
   }
   
-  
-  
-  vec2 cam2_coord=texCoordVarying*cam2_scale;
-  
-  if(cam2_hflip_switch==1){
-    if(texCoordVarying.x>width/2){cam2_coord.x=cam2_scale*abs(width-texCoordVarying.x);}
-  }//endifhflip2
-  if(cam2_vflip_switch==1){
-    if(texCoordVarying.y>height/2){cam2_coord.y=cam1_scale*abs(height-texCoordVarying.y);}
-  }//endifvflip2
-  vec4 cam2color=vec4(0.0,0.0,0.0,0.0);
-  
-  if(texCoordVarying.x*cam2_scale<cam2dimensions.x){
-    if(texCoordVarying.y*cam2_scale<cam2dimensions.y){
-      cam2color=texture2DRect(cam2,vec2(cam2_coord.x,cam2_coord.y));
-    }
-  }
-  if(cam2_pixel_switch==1){
-    cam2color=pixelate(cam2_pixel_scale_x,cam2_pixel_scale_y,cam2_coord,cam2,cam2_pixel_mix,cam2color,cam2_pixel_brightscale);
-  }
-  
-  //select which input for channel1
-  
-  
-  if(channel1==1){
-      
-    channel1_color=cam1color;
-
-    
-  }//endifch1_1
-  
-  if(channel1==2){
-    
-    
-    
-    channel1_color=cam2color;
-    
-  }//endifch1_2
-  
-  
-  if(channel1==3){
-    channel1_color=ndi_color;
-  }//endifch1_3
-  
-  if(channel2==1){
-    
-    channel2_color=cam1color;
-    
-  }
-  
-  if(channel2==2){
-    
-    channel2_color=cam2color;
-    
-  }
-  
-  
-  if(channel2==3){
-    channel2_color=ndi_color;
-  }//endifch1_3
-  
-  
-  
-  
-  
-  
-  
+  channel1_color=cam1color;
   
   //convert to hsb and make some variables for easy readin
   
@@ -688,34 +598,26 @@ void main()
                                           ,channel2hue_powmap,channel2sat_powmap,channel2bright_powmap
                                           ,channel2satwrap,channel2brightwrap,
                                           ch2hue_inverttoggle,ch2sat_inverttoggle,ch2bright_inverttoggle);
-  
-  //so will want to do something similar here where there is a dif set of coordinates
-  //for each of the framebuffers then each one can be seperatly remapped
-  //1 variable for zoome in and out (multiplier plus modulo for wraparound
-  //1 variable each for x and y shift
-  //can rotations work in here?  try and research this a second
-  
+    
   // jcrozier
   // MARK: - fb0
   
-  vec2 fb0_coord=fb0_rescale.z*texCoordVarying;
+  vec2 fb0_coord=texCoordVarying;
   vec2 fb0_center=vec2(width/2,height/2);
   
   fb0_coord=vec2(texCoordVarying.x-fb0_center.x,texCoordVarying.y-fb0_center.y);
   fb0_coord.xy=fb0_rescale.xy+fb0_coord.xy;
-  
+
   fb0_coord.x=fb0_coord.x+fb0_center.x;
-  
   fb0_coord.y=fb0_coord.y+fb0_center.y;
-  
-  
+
   fb0_coord=rotate(fb0_coord,fb0_rotate);
   
-  if(fb0_toroid_switch==1){
+  if(fb0_mirror_vertical==1){
     fb0_coord=wrapCoord(fb0_coord);
   }
   
-  if(fb0_toroid_switch==2){
+  if(fb0_mirror_vertical==2){
     fb0_coord=mirrorCoord(fb0_coord);
   }
   
@@ -728,11 +630,10 @@ void main()
   }//endifvflip1
   
   
-  
   vec4 fb0_color = texture2DRect(fb0,fb0_coord);
   
   if(abs(fb0_coord.x-width/2)>=width/2||abs(fb0_coord.y-height/2)>=height/2){
-    fb0_color=vec4(0,0,0,1.0);
+    fb0_color=vec4(0,0,0,0);
   }
   
   ///testing the pixelation function
@@ -746,7 +647,7 @@ void main()
                        fb0_color,
                        fb0_pixel_brightscale+texmod_fb0_pixel_brightscale*fb0_pixel_tex_mod);
   }
-
+  
   // MARK: - fb1
   
   vec2 fb1_coord=fb1_rescale.z*texCoordVarying;
@@ -758,11 +659,11 @@ void main()
   fb1_coord.x=fb1_coord.x+fb1_center.x;
   fb1_coord.y=fb1_coord.y+fb1_center.y;
   
-  if(fb1_toroid_switch==1){
+  if(fb1_mirror_vertical==1){
     fb1_coord=wrapCoord(fb1_coord);
   }
   
-  if(fb1_toroid_switch==2){
+  if(fb1_mirror_vertical==2){
     fb1_coord=mirrorCoord(fb1_coord);
   }
   
@@ -794,11 +695,11 @@ void main()
   
   fb2_coord.y=fb2_coord.y+fb2_center.y;
   
-  if(fb2_toroid_switch==1){
+  if(fb2_mirror_vertical==1){
     fb2_coord=wrapCoord(fb2_coord);
   }
   
-  if(fb2_toroid_switch==2){
+  if(fb2_mirror_vertical==2){
     fb2_coord=mirrorCoord(fb2_coord);
   }
   
@@ -835,7 +736,7 @@ void main()
                         hue_x,
                         fb1_invert,
                         0);
-
+  
   fb2color_hsb=fb_hsbop(fb2color_hsb,
                         fb2_hsb_x,
                         hue_x,
@@ -856,33 +757,53 @@ void main()
   
   //fb0
   if (fb0enabled == 1) {
-    mixout_color=mix_rgb(mixout_color,
-                              fb0_color,
-                              fb0mix,
-                              fb0lumakeyvalue,
-                              fb0lumakeythresh,
-                              ch1_hsbstrip.z);
-  }
-
-  //fb1
-  if (fb1enabled == 1) {
-    mixout_color=mix_rgb(mixout_color,
-                              fb1_color,
-                              fb1mix,
-                              fb1lumakeyvalue,
-                              fb1lumakeythresh,
-                              ch1_hsbstrip.z);
+    // Classic
+    
+    if (fb0type == 0) {
+      mixout_color=mix(mixout_color, fb0_color, fb0mix);
+    }
+    
+    // Luma
+    if (fb0type == 1) {
+      mixout_color=mix_key_value(mixout_color,
+                           fb0_color,
+                           fb0mix,
+                           fb0key,
+                           fb0thresh,
+                           ch1_hsbstrip.z);
+      mixout_color = mix(channel1_color, mixout_color, fb0blend);
+    }
+    
+    // Diff
+    if (fb0type == 2) {
+      mixout_color = mix_diff(ch1_hsbstrip, fb0color_hsb, fb0blend, fb0thresh, fb0mix);
+      mixout_color = mix(channel1_color, mixout_color, fb0blend);
+    }
   }
   
-//  //fb2
-  if (fb2enabled == 1) {
-    mixout_color=mix_rgb(mixout_color,
-                              fb2_color,
-                              fb2mix,
-                              fb2lumakeyvalue,
-                              fb2lumakeythresh,
-                              ch1_hsbstrip.z);
-  }
+//  //fb1
+//  if (fb1enabled == 1) {
+//    mixout_color=mix_rgb(mixout_color,
+//                         fb1_color,
+//                         fb1mix,
+//                         fb1lumakeyvalue,
+//                         fb1lumakeythresh,
+//                         ch1_hsbstrip.z,
+//                         fb1lumamix,
+//                         fb1lumaenabled == 1);
+//  }
+//
+//  //  //fb2
+//  if (fb2enabled == 1) {
+//    mixout_color=mix_rgb(mixout_color,
+//                         fb2_color,
+//                         fb2mix,
+//                         fb2lumakeyvalue,
+//                         fb2lumakeythresh,
+//                         ch1_hsbstrip.z,
+//                         fb2lumamix,
+//                         fb2lumaenabled == 1);
+//  }
   
   gl_FragColor = mixout_color;
 }

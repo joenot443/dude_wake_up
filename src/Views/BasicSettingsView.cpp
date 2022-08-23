@@ -15,7 +15,6 @@ void BasicSettingsView::setup() {
 }
 
 void BasicSettingsView::update() {
-  basicSettings->pixelSettings.tick();
 }
 
 void BasicSettingsView::draw() {
@@ -33,8 +32,6 @@ void BasicSettingsView::draw() {
 }
 
 void BasicSettingsView::drawHSB() {
-  CommonViews::Spacing(8);
-  
   CommonViews::H3Title("Basic (HSB)");
   
   // Hue
@@ -51,6 +48,11 @@ void BasicSettingsView::drawHSB() {
   CommonViews::SliderWithInvertOscillator("Brightness", "##brightness", &basicSettings->hsbSettings.brightness, &basicSettings->hsbSettings.invertBrightness, &basicSettings->hsbSettings.brightnessOscillator);
   CommonViews::ModulationSelector(&basicSettings->hsbSettings.brightness);
   CommonViews::MidiSelector(&basicSettings->hsbSettings.brightness);
+  
+  // Amount
+  CommonViews::SliderWithOscillator("Scale", "##scale", &basicSettings->transformSettings.scale, &basicSettings->transformSettings.scaleOscillator);
+  CommonViews::ModulationSelector(&basicSettings->transformSettings.scale);
+  CommonViews::MidiSelector(&basicSettings->transformSettings.scale);
 }
 
 void BasicSettingsView::drawBlurSharpen() {
@@ -68,18 +70,20 @@ void BasicSettingsView::drawBlurSharpen() {
 
   // Sharpen
   
-  CommonViews::Spacing(8);
   CommonViews::H3Title("Sharpen");
   
   CommonViews::SliderWithOscillator("Amount", "##sharpen_amount", &basicSettings->sharpenSettings.amount, &basicSettings->sharpenSettings.amountOscillator);
+  CommonViews::ModulationSelector(&basicSettings->sharpenSettings.amount);
   CommonViews::MidiSelector(&basicSettings->sharpenSettings.amount);
 
   // Radius
   CommonViews::SliderWithOscillator("Radius", "##sharpen_radius", &basicSettings->sharpenSettings.radius, &basicSettings->sharpenSettings.radiusOscillator);
+  CommonViews::ModulationSelector(&basicSettings->sharpenSettings.radius);
   CommonViews::MidiSelector(&basicSettings->sharpenSettings.radius);
 
   // Boost
-  CommonViews::SliderWithOscillator("Boost", "##sharpen_boost", &basicSettings->blurSettings.radius, &basicSettings->blurSettings.radiusOscillator);
+  CommonViews::SliderWithOscillator("Boost", "##sharpen_boost", &basicSettings->sharpenSettings.boost, &basicSettings->sharpenSettings.boostOscillator);
+  CommonViews::ModulationSelector(&basicSettings->sharpenSettings.boost);
   CommonViews::MidiSelector(&basicSettings->sharpenSettings.boost);
 }
 
@@ -87,9 +91,7 @@ void BasicSettingsView::drawTransform() {
   
 }
 
-void BasicSettingsView::drawPixelation() {
-  CommonViews::Spacing(8);
-  
+void BasicSettingsView::drawPixelation() {  
   CommonViews::H3Title("Pixelation");
 
   ImGui::Text("Mix");
@@ -97,14 +99,11 @@ void BasicSettingsView::drawPixelation() {
   ImGui::SliderFloat("##pixelation_mix", &basicSettings->pixelSettings.mix.value, basicSettings->pixelSettings.mix.min, basicSettings->pixelSettings.mix.max, "%.3f");
   ImGui::SameLine(0, 20);
   ImGui::Checkbox("Enabled##pixelation_enabled", &basicSettings->pixelSettings.enabled);
+  CommonViews::ModulationSelector(&basicSettings->pixelSettings.mix);
   CommonViews::MidiSelector(&basicSettings->pixelSettings.mix);
 
-  
-  CommonViews::SliderWithOscillator("Scale X ##oscillate_pixel_x", "##pixelation_scale_x", &basicSettings->pixelSettings.scaleX, &basicSettings->pixelSettings.scaleXOscillator);
-  CommonViews::MidiSelector(&basicSettings->pixelSettings.scaleX);
-  
-  CommonViews::SliderWithOscillator("Scale Y ##oscillate_pixel_y", "##pixelation_scale_y", &basicSettings->pixelSettings.scaleY, &basicSettings->pixelSettings.scaleYOscillator);
-  CommonViews::MidiSelector(&basicSettings->pixelSettings.scaleY);
-  ImGui::Checkbox(" Lock X/Y ##oscillate_lock", &basicSettings->pixelSettings.locked);
+  CommonViews::SliderWithOscillator("Scale", "##pixelation_scale", &basicSettings->pixelSettings.scale, &basicSettings->pixelSettings.scaleOscillator);
+  CommonViews::ModulationSelector(&basicSettings->pixelSettings.scale);
+  CommonViews::MidiSelector(&basicSettings->pixelSettings.scale);
 }
 

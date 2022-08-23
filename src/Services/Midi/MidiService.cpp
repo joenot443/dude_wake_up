@@ -8,8 +8,8 @@
 #include "MidiService.hpp"
 #include "ParameterService.h"
 #include "json.hpp"
-#include "Console.h"
-#include "Strings.h"
+#include "Console.hpp"
+#include "Strings.hpp"
 #include <ostream>
 
 using json = nlohmann::json;

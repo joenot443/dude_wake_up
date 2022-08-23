@@ -29,8 +29,6 @@ struct ValueOscillator {
   ImVector<ImVec2> data;
   ValueOscillator(Parameter *observed);
   void tick();
-private:
-  float frameTime();
 };
 
 

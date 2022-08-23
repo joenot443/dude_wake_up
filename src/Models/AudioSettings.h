@@ -11,6 +11,7 @@
 #include "Oscillator.hpp"
 #include "Parameter.h"
 #include "ValueOscillator.hpp"
+#include "PulseOscillator.hpp"
 #include "Gist.h"
 
 enum AudioSource { AudioSource_none, AudioSource_microphone, AudioSource_file };
@@ -45,12 +46,14 @@ struct AudioAnalysis {
   Parameter energy;
   Parameter zcr;
   Parameter spectralDiff;
+  Parameter beat;
   ValueOscillator rmsOscillator;
   ValueOscillator csdOscillator;
   ValueOscillator pitchOscillator;
   ValueOscillator energyOscillator;
   ValueOscillator zcrOscillator;
   ValueOscillator spectralDiffOscillator;
+  PulseOscillator beatOscillator;
   AudioAnalysisParameter rmsAnalysisParam;
   AudioAnalysisParameter csdAnalysisParam;
   AudioAnalysisParameter pitchAnalysisParam;
@@ -69,15 +72,17 @@ struct AudioAnalysis {
   energy(Parameter("energy", name, 0.0, 0.0, 1.0)),
   zcr(Parameter("zcr", name, 0.0, 0.0, 1.0)),
   spectralDiff(Parameter("spectralDiff", name, 0.0, 0.0, 1.0)),
+  beat(Parameter("beat", name, 0.0, 0.0, 1.0)),
   rmsOscillator(ValueOscillator(&rms)),
   pitchOscillator(ValueOscillator(&pitch)),
   csdOscillator(ValueOscillator(&csd)),
   zcrOscillator(ValueOscillator(&zcr)),
   energyOscillator(ValueOscillator(&energy)),
   spectralDiffOscillator(ValueOscillator(&spectralDiff)),
-  parameters({&rms, &csd, &pitch, &energy, &zcr}),
+  beatOscillator(PulseOscillator(&beat)),
+  parameters({&rms, &csd, &pitch, &energy, &zcr, &beat}),
   rmsAnalysisParam(AudioAnalysisParameter(&rms)),
-  csdAnalysisParam(AudioAnalysisParameter(&csd)),
+  csdAnalysisParam(AudioAnalysisParameter(&csd)), 
   pitchAnalysisParam(AudioAnalysisParameter(&pitch)),
   energyAnalysisParam(AudioAnalysisParameter(&energy)),
   zcrAnalysisParam(AudioAnalysisParameter(&zcr)),

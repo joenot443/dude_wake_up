@@ -6,28 +6,27 @@
 //
 
 #include <stdio.h>
-
+#include "Strings.hpp"
 #include "Parameter.h"
 #include "ParameterService.h"
 
 
-Parameter::Parameter(std::string name, std::string settingsId, float value) : name(name), value(value) {
+Parameter::Parameter(std::string name, std::string settingsId, float value) : name(name), defaultValue(value), value(value)  {
   paramId = formatString("%s-%s", settingsId.c_str(), name.c_str());
   ParameterService::getService()->registerParameter(this);
 };
 
-
-Parameter::Parameter(std::string name, std::string settingsId, std::string shaderKey, float value): name(name), shaderKey(shaderKey), value(value) {
+Parameter::Parameter(std::string name, std::string settingsId, std::string shaderKey, float value): name(name), shaderKey(shaderKey), defaultValue(value), value(value) {
   paramId = formatString("%s-%s", settingsId.c_str(), name.c_str());
   ParameterService::getService()->registerParameter(this);
 };
 
-Parameter::Parameter(std::string name, std::string settingsId, std::string shaderKey, float value, float min, float max) : name(name), shaderKey(shaderKey), value(value), min(min), max(max) {
+Parameter::Parameter(std::string name, std::string settingsId, std::string shaderKey, float value, float min, float max) : name(name), shaderKey(shaderKey), defaultValue(value), value(value), min(min), max(max) {
   paramId = formatString("%s-%s", settingsId.c_str(), name.c_str());
   ParameterService::getService()->registerParameter(this);
 };
 
-Parameter::Parameter(std::string name, std::string settingsId, float value, float min, float max) : name(name), value(value), min(min), max(max) {
+Parameter::Parameter(std::string name, std::string settingsId, float value, float min, float max) : name(name), defaultValue(value), value(value), min(min), max(max) {
   paramId = formatString("%s-%s", settingsId.c_str(), name.c_str());
   ParameterService::getService()->registerParameter(this);
 };

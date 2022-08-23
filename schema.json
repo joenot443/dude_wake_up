@@ -1,0 +1,23 @@
+{
+  "streams": [
+      {
+        "streamId": 0,
+        "type": 0,
+        "filename": "/users/file.mp4",
+      }
+  ],
+  
+  "settings": [
+      {
+        "streamId": 0,
+        "hue": 0.5,
+      }
+  ],
+  
+  "midi": [
+    {
+        "LaunchControl-131": "hue"
+    }
+  ]
+  
+}

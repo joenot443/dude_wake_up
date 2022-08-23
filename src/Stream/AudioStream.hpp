@@ -14,13 +14,17 @@
 #include "AudioSettings.h"
 #include "MainSettings.h"
 #include "Gist.h"
+#include "BTrack.h"
+#include "PulseOscillator.hpp"
 
 const static int GFrameSize = 512;
 const static int GSampleRate = 44100;
 
 class AudioStream {
 public:
-  AudioStream(AudioStreamConfig config) : config(config) {};
+  AudioStream(AudioStreamConfig config) : config(config), beatPulse(Parameter("beat_pulse", "beat_pulse_0", 0.0, 0.0, 1.0)),
+  pulseOscillator(&beatPulse)
+  {};
   void setup();
   void update();
   bool isSetup;
@@ -29,7 +33,10 @@ private:
   AudioStreamConfig config;
   ofSoundStream stream;
   Gist<float> gist = Gist<float>(GFrameSize, GSampleRate);
-  
+  BTrack b;
+  PulseOscillator pulseOscillator;
+  Parameter beatPulse;
+
   std::vector<float> buffer;
   
   // ofSoundStream Callbacks

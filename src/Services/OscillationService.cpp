@@ -20,8 +20,15 @@ void OscillationService::tickOscillators() {
   for (auto & osc : valueOscillators) {
     osc->tick();
   }
+  for (auto & osc : pulseOscillators) {
+    osc->tick();
+  }
 }
 
 void OscillationService::addValueOscillator(ValueOscillator * obj) {
   valueOscillators.push_front(obj);
+}
+
+void OscillationService::addPulseOscillator(PulseOscillator * obj) {
+  pulseOscillators.push_front(obj);
 }

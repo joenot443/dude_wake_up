@@ -34,9 +34,11 @@ void MainApp::setup(){
   mainSettingsView = new MainSettingsView(new MainSettings(), videoFn, audioFn);
   mainSettingsView->setup();
   isSetup = true;
-  videoFn(StreamConfig(VideoSource_webcam, "", 1));
-//  videoFn(StreamConfig(VideoSource_file, "/Users/jcrozier/Library/Mobile Documents/com~apple~CloudDocs/dude_wake_up/videos/dvd_logo.mp4", 0));
-  //  pushAudioStream(AudioStreamConfig(AudioSource_microphone, "", 4));
+  videoFn(StreamConfig(VideoSource_webcam, "", 0));
+//  videoFn(StreamConfig(VideoSource_file, "/Users/jcrozier/Libra/ry/Mobile Documents/com~apple~CloudDocs/dude_wake_up/videos/dvd_logo.mp4", 0));
+  std::shared_ptr<AudioStreamConfig> config = make_shared<AudioStreamConfig>(AudioStreamConfig(AudioSource_microphone, "", 3));
+  
+//    pushAudioStream(config);
 }
 
 void MainApp::update(){
@@ -55,7 +57,8 @@ void MainApp::update(){
 
 void MainApp::draw(){ 
   gui.begin();
-  ImGui::PushFont(FontService::getService()->p);  
+  ImGui::PushFont(FontService::getService()->p);
+  ImGui::ShowDemoWindow();
   drawAudioSettings();
   drawMainSettings();
   drawVideoSettings();
@@ -132,9 +135,11 @@ void MainApp::pushVideoStream(std::shared_ptr<StreamConfig> config) {
     this->removeVideoStream(streamId);
   };
   
-  std::string settingsId = formatString("%d_", config->index);
-  VideoSettings *videoSettings = new VideoSettings(settingsId);
-  videoSettings->streamId = mainSettingsView->mainSettings->activeStreams;
+  // settingsId is based off the number of active streams we have.
+  static int streamIdCounter = 0;
+  auto streamId = streamIdCounter += 1;
+
+  VideoSettings *videoSettings = new VideoSettings(streamId, std::to_string(streamId));
   
   VideoStream* stream = new VideoStream(streamWindow, *config, videoSettings, closeStream);
   videoStreams.push_back(stream);

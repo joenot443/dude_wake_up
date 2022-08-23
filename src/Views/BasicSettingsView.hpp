@@ -19,7 +19,7 @@ public:
   void update();
   void draw();
   
-  BasicSettings *basicSettings;
+  VideoSettings *basicSettings;
   
   private:
   void drawHSB();

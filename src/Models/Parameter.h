@@ -16,7 +16,9 @@ struct Parameter
   std::string name = "";
   std::string shaderKey = "";
   std::string paramId;
+  float defaultValue = 0.0;
   float value = 0.0;
+  int intValue = 0;
   bool boolValue = false;
   // Another Parameter which is driving this one's value
   Parameter* driver = NULL;
@@ -24,14 +26,25 @@ struct Parameter
   float min = 0.0;
   float max = 1.0;
   
-  int intValue() {
-    return static_cast<int>(value);
+  std::string description() {
+    return std::to_string(value);
   }
   
   float percentValue() {
     return value/(max - min);
   }
   
+  /// Resets the value to its defaultValue
+  void resetValue() {
+    setValue(defaultValue); 
+  }
+  
+  /// Sets the int, bool, and float values of the Parameter to the passed argument
+  void setValue(float newValue) {
+    value = newValue;
+    intValue = static_cast<int>(newValue);
+    boolValue = static_cast<bool>(newValue);
+  }
   /// Drives the Parameter between its min and max by a float percent.
   void driveValue(float percent) {
     float range = max - min;

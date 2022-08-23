@@ -22,6 +22,10 @@
 		021026EF289412220060F282 /* WindowFunctions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 021026E4289412220060F282 /* WindowFunctions.cpp */; };
 		021026F32894123F0060F282 /* kiss_fft.c in Sources */ = {isa = PBXBuildFile; fileRef = 021026F12894123F0060F282 /* kiss_fft.c */; };
 		024D1689289DFD8400DA807C /* FeedbackShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D1687289DFD8400DA807C /* FeedbackShader.cpp */; };
+		024D168F289ED64700DA807C /* BTrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D168B289ED64700DA807C /* BTrack.cpp */; };
+		024D1690289ED64700DA807C /* OnsetDetectionFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D168D289ED64700DA807C /* OnsetDetectionFunction.cpp */; };
+		024D1698289EEACD00DA807C /* PulseOscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D1696289EEACD00DA807C /* PulseOscillator.cpp */; };
+		024D169C28A046DF00DA807C /* ConfigService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D169A28A046DF00DA807C /* ConfigService.cpp */; };
 		059638BE8C8A1D59958631C4 /* MidiPairing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D824BC957F369968DA9939C /* MidiPairing.cpp */; };
 		0AC42BFBAC1207FC78527E53 /* ParameterService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63D397FA3B8B71D8DFD1D3BA /* ParameterService.cpp */; };
 		0BFC9C20FD7E3C8D5873AA97 /* ofxMidiIn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DD359247F3ED1550D8BB5C9 /* ofxMidiIn.cpp */; };
@@ -104,9 +108,22 @@
 		021026F02894123F0060F282 /* kissfft.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = kissfft.hh; path = lib/gist/src/libs/kiss_fft130/kissfft.hh; sourceTree = "<group>"; };
 		021026F12894123F0060F282 /* kiss_fft.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = kiss_fft.c; path = lib/gist/src/libs/kiss_fft130/kiss_fft.c; sourceTree = "<group>"; };
 		021026F22894123F0060F282 /* kiss_fft.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = kiss_fft.h; path = lib/gist/src/libs/kiss_fft130/kiss_fft.h; sourceTree = "<group>"; };
+		0240887328B1BB1400908222 /* macro_scope.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = macro_scope.hpp; sourceTree = "<group>"; };
+		0240887428B1E29E00908222 /* Vectors.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Vectors.hpp; sourceTree = "<group>"; };
 		024D1685289DB5DF00DA807C /* data */ = {isa = PBXFileReference; lastKnownFileType = folder; name = data; path = bin/data; sourceTree = "<group>"; };
 		024D1687289DFD8400DA807C /* FeedbackShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FeedbackShader.cpp; path = Shading/FeedbackShader.cpp; sourceTree = "<group>"; };
 		024D1688289DFD8400DA807C /* FeedbackShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = FeedbackShader.hpp; path = Shading/FeedbackShader.hpp; sourceTree = "<group>"; };
+		024D168A289ED64700DA807C /* BTrack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BTrack.h; path = lib/btrack/BTrack.h; sourceTree = "<group>"; };
+		024D168B289ED64700DA807C /* BTrack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BTrack.cpp; path = lib/btrack/BTrack.cpp; sourceTree = "<group>"; };
+		024D168C289ED64700DA807C /* CircularBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CircularBuffer.h; path = lib/btrack/CircularBuffer.h; sourceTree = "<group>"; };
+		024D168D289ED64700DA807C /* OnsetDetectionFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OnsetDetectionFunction.cpp; path = lib/btrack/OnsetDetectionFunction.cpp; sourceTree = "<group>"; };
+		024D168E289ED64700DA807C /* OnsetDetectionFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OnsetDetectionFunction.h; path = lib/btrack/OnsetDetectionFunction.h; sourceTree = "<group>"; };
+		024D1694289ED65400DA807C /* _kiss_fft_guts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = _kiss_fft_guts.h; path = lib/kiss_fft130/_kiss_fft_guts.h; sourceTree = "<group>"; };
+		024D1696289EEACD00DA807C /* PulseOscillator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = PulseOscillator.cpp; path = Stream/PulseOscillator.cpp; sourceTree = "<group>"; };
+		024D1697289EEACD00DA807C /* PulseOscillator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = PulseOscillator.hpp; path = Stream/PulseOscillator.hpp; sourceTree = "<group>"; };
+		024D169928A0420B00DA807C /* schema.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = schema.json; sourceTree = "<group>"; };
+		024D169A28A046DF00DA807C /* ConfigService.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ConfigService.cpp; path = Services/ConfigService.cpp; sourceTree = "<group>"; };
+		024D169B28A046DF00DA807C /* ConfigService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = ConfigService.hpp; path = Services/ConfigService.hpp; sourceTree = "<group>"; };
 		026A10CB0F40EC63FBB2FF06 /* VideoSettings.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = VideoSettings.h; path = src/Models/VideoSettings.h; sourceTree = SOURCE_ROOT; };
 		04F77E5C73A62E2E77C78EC6 /* ofxMidiOut.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ofxMidiOut.cpp; path = ../../../addons/ofxMidi/src/ofxMidiOut.cpp; sourceTree = SOURCE_ROOT; };
 		05F6CF127D4A621113D4A62F /* ofxMidi.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxMidi.h; path = ../../../addons/ofxMidi/src/ofxMidi.h; sourceTree = SOURCE_ROOT; };
@@ -188,7 +205,7 @@
 		AA228C62A0D0E0A229410AE5 /* imstb_rectpack.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = imstb_rectpack.h; path = ../../../addons/ofxImGui/libs/imgui/src/imstb_rectpack.h; sourceTree = SOURCE_ROOT; };
 		ABDEF0ACF05BF28F5C74E008 /* RtMidi.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = RtMidi.cpp; path = ../../../addons/ofxMidi/libs/rtmidi/RtMidi.cpp; sourceTree = SOURCE_ROOT; };
 		AE806A26C99C3FB31F2ACF76 /* imstb_textedit.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = imstb_textedit.h; path = ../../../addons/ofxImGui/libs/imgui/src/imstb_textedit.h; sourceTree = SOURCE_ROOT; };
-		B05D2EE362F4BA9297661093 /* Video.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Video.h; path = src/Util/Video.h; sourceTree = SOURCE_ROOT; };
+		B05D2EE362F4BA9297661093 /* Video.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Video.hpp; path = src/Util/Video.hpp; sourceTree = SOURCE_ROOT; };
 		B21CEA7F3D7E274DE1310FE6 /* CommonViews.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = CommonViews.cpp; path = src/Views/CommonViews.cpp; sourceTree = SOURCE_ROOT; };
 		B462DABAC6A023A1D88702C7 /* BaseTheme.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = BaseTheme.h; path = ../../../addons/ofxImGui/src/BaseTheme.h; sourceTree = SOURCE_ROOT; };
 		B55D941FBE2558C9BEB7534B /* imstb_truetype.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = imstb_truetype.h; path = ../../../addons/ofxImGui/libs/imgui/src/imstb_truetype.h; sourceTree = SOURCE_ROOT; };
@@ -201,10 +218,10 @@
 		D641DD27E519E40CE8F259B0 /* AudioStream.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = AudioStream.cpp; path = src/Stream/AudioStream.cpp; sourceTree = SOURCE_ROOT; };
 		D6C40FFF6BEF0129D3A3237B /* Oscillator.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Oscillator.hpp; path = src/Stream/Oscillator.hpp; sourceTree = SOURCE_ROOT; };
 		D7C7BDAD29F580A47FF56B52 /* BaseEngine.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = BaseEngine.cpp; path = ../../../addons/ofxImGui/src/BaseEngine.cpp; sourceTree = SOURCE_ROOT; };
-		D85FF6DA846FFAB2A241ED93 /* Console.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Console.h; path = src/Util/Console.h; sourceTree = SOURCE_ROOT; };
+		D85FF6DA846FFAB2A241ED93 /* Console.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Console.hpp; path = src/Util/Console.hpp; sourceTree = SOURCE_ROOT; };
 		D91100C1FBA245AD6CB55BD3 /* ofxImGui.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxImGui.h; path = ../../../addons/ofxImGui/src/ofxImGui.h; sourceTree = SOURCE_ROOT; };
 		D994AF12295A8568554AAB57 /* FontService.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = FontService.cpp; path = src/Services/FontService.cpp; sourceTree = SOURCE_ROOT; };
-		E0A4D94E39EC0096C52A0FEB /* Strings.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Strings.h; path = src/Util/Strings.h; sourceTree = SOURCE_ROOT; };
+		E0A4D94E39EC0096C52A0FEB /* Strings.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Strings.hpp; path = src/Util/Strings.hpp; sourceTree = SOURCE_ROOT; };
 		E135C7F22D40FCFD9C5AB94B /* imgui.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = imgui.h; path = ../../../addons/ofxImGui/libs/imgui/src/imgui.h; sourceTree = SOURCE_ROOT; };
 		E16BB73D19DD0713FDCC7986 /* ofxMidiTypes.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxMidiTypes.h; path = ../../../addons/ofxMidi/src/ofxMidiTypes.h; sourceTree = SOURCE_ROOT; };
 		E238CCDE032640E0FEBFAD82 /* ofxMidi.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ofxMidi.cpp; path = ../../../addons/ofxMidi/src/ofxMidi.cpp; sourceTree = SOURCE_ROOT; };
@@ -408,6 +425,12 @@
 		021026F4289412660060F282 /* libs */ = {
 			isa = PBXGroup;
 			children = (
+				024D1694289ED65400DA807C /* _kiss_fft_guts.h */,
+				024D168B289ED64700DA807C /* BTrack.cpp */,
+				024D168A289ED64700DA807C /* BTrack.h */,
+				024D168C289ED64700DA807C /* CircularBuffer.h */,
+				024D168D289ED64700DA807C /* OnsetDetectionFunction.cpp */,
+				024D168E289ED64700DA807C /* OnsetDetectionFunction.h */,
 				021026F12894123F0060F282 /* kiss_fft.c */,
 				021026F22894123F0060F282 /* kiss_fft.h */,
 				021026F02894123F0060F282 /* kissfft.hh */,
@@ -464,6 +487,7 @@
 		47E4E7757DB0771B0C4C58E1 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				0240887328B1BB1400908222 /* macro_scope.hpp */,
 				D994AF12295A8568554AAB57 /* FontService.cpp */,
 				62A6B75A2D3DC6DD3C4DAF71 /* FontService.hpp */,
 				BD263990F9280AA951FB215A /* Midi */,
@@ -473,6 +497,8 @@
 				2A6E2B609D4C0D2F9A2B7BAA /* OscillationService.hpp */,
 				63D397FA3B8B71D8DFD1D3BA /* ParameterService.cpp */,
 				7838FE9B7FB655ED0ADEECB9 /* ParameterService.h */,
+				024D169A28A046DF00DA807C /* ConfigService.cpp */,
+				024D169B28A046DF00DA807C /* ConfigService.hpp */,
 			);
 			name = Services;
 			sourceTree = "<group>";
@@ -657,6 +683,8 @@
 				E320D3D42E18099A6E07B075 /* ValueOscillator.hpp */,
 				54E0535E02336B40A5873C99 /* VideoStream.cpp */,
 				6C825128EA08C736B277CD11 /* VideoStream.h */,
+				024D1696289EEACD00DA807C /* PulseOscillator.cpp */,
+				024D1697289EEACD00DA807C /* PulseOscillator.hpp */,
 			);
 			name = Stream;
 			sourceTree = "<group>";
@@ -664,9 +692,10 @@
 		9E4FC7FE1041D81B7931878E /* Util */ = {
 			isa = PBXGroup;
 			children = (
-				D85FF6DA846FFAB2A241ED93 /* Console.h */,
-				E0A4D94E39EC0096C52A0FEB /* Strings.h */,
-				B05D2EE362F4BA9297661093 /* Video.h */,
+				D85FF6DA846FFAB2A241ED93 /* Console.hpp */,
+				E0A4D94E39EC0096C52A0FEB /* Strings.hpp */,
+				B05D2EE362F4BA9297661093 /* Video.hpp */,
+				0240887428B1E29E00908222 /* Vectors.hpp */,
 			);
 			name = Util;
 			sourceTree = "<group>";
@@ -994,6 +1023,7 @@
 		E4B69B4A0A3A1720003C02F2 = {
 			isa = PBXGroup;
 			children = (
+				024D169928A0420B00DA807C /* schema.json */,
 				024D1685289DB5DF00DA807C /* data */,
 				021026F4289412660060F282 /* libs */,
 				021026D328940FDB0060F282 /* lib */,
@@ -1052,6 +1082,12 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0600;
+				TargetAttributes = {
+					E4B69B5A0A3A1756003C02F2 = {
+						DevelopmentTeam = 7VUCELU5PL;
+						ProvisioningStyle = Automatic;
+					};
+				};
 			};
 			buildConfigurationList = E4B69B4D0A3A1720003C02F2 /* Build configuration list for PBXProject "dude_wake_up" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -1172,9 +1208,13 @@
 				881AF887EC2124F4105DE9E1 /* ofxMidiClock.cpp in Sources */,
 				021026E9289412220060F282 /* MFCC.cpp in Sources */,
 				021026EA289412220060F282 /* OnsetDetectionFunction.cpp in Sources */,
+				024D1690289ED64700DA807C /* OnsetDetectionFunction.cpp in Sources */,
 				021026EC289412220060F282 /* AccelerateFFT.cpp in Sources */,
 				0BFC9C20FD7E3C8D5873AA97 /* ofxMidiIn.cpp in Sources */,
+				024D168F289ED64700DA807C /* BTrack.cpp in Sources */,
+				024D169C28A046DF00DA807C /* ConfigService.cpp in Sources */,
 				C6FE64F74F1EA1D98C8F9847 /* ofxMidiMessage.cpp in Sources */,
+				024D1698289EEACD00DA807C /* PulseOscillator.cpp in Sources */,
 				83D9F930112E0944444124EE /* ofxMidiOut.cpp in Sources */,
 				1030C647FD06E4D3E054F65D /* ofxMidiTimecode.cpp in Sources */,
 			);
@@ -1273,12 +1313,16 @@
 					../../../addons/ofxMidi/src/ios,
 					"lib/gist/src/**",
 					lib,
+					"/usr/local/include/**",
 				);
 				ICON = "$(ICON_NAME_RELEASE)";
 				ICON_FILE = "$(ICON_FILE_PATH)$(ICON)";
 				INFOPLIST_FILE = "openFrameworks-Info.plist";
 				INSTALL_PATH = /Applications;
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"/usr/local/lib/**",
+				);
 				OTHER_LDFLAGS = (
 					"$(OF_CORE_LIBS)",
 					"$(OF_CORE_FRAMEWORKS)",
@@ -1396,8 +1440,11 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E4EB6923138AFD0F00A09F29 /* Project.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
+				DEVELOPMENT_TEAM = 7VUCELU5PL;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					/System/Library/Frameworks,
@@ -1430,18 +1477,26 @@
 					../../../addons/ofxMidi/src/ios,
 					"lib/gist/src/**",
 					lib,
+					"/usr/local/include/**",
 				);
 				ICON = "$(ICON_NAME_DEBUG)";
 				ICON_FILE = "$(ICON_FILE_PATH)$(ICON)";
 				INFOPLIST_FILE = "openFrameworks-Info.plist";
 				INSTALL_PATH = /Applications;
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"/usr/local/lib/**",
+				);
 				OTHER_LDFLAGS = (
 					"$(OF_CORE_LIBS)",
 					"$(OF_CORE_FRAMEWORKS)",
 					"$(LIB_OF_DEBUG)",
+					"-L/usr/local/lib",
+					"-lfftw3",
+					"-lsamplerate",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)Debug";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -1483,12 +1538,16 @@
 					../../../addons/ofxMidi/src/ios,
 					"lib/gist/src/**",
 					lib,
+					"/usr/local/include/**",
 				);
 				ICON = "$(ICON_NAME_RELEASE)";
 				ICON_FILE = "$(ICON_FILE_PATH)$(ICON)";
 				INFOPLIST_FILE = "openFrameworks-Info.plist";
 				INSTALL_PATH = /Applications;
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"/usr/local/lib/**",
+				);
 				OTHER_LDFLAGS = (
 					"$(OF_CORE_LIBS)",
 					"$(OF_CORE_FRAMEWORKS)",

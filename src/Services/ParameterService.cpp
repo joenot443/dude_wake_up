@@ -6,7 +6,7 @@
 //
 
 #include "ParameterService.h"
-#include "Console.h"
+#include "Console.hpp"
 
 Parameter * ParameterService::parameterForId(std::string paramId) {
   if (parameterMap.count(paramId) == 0) {
@@ -20,8 +20,13 @@ void ParameterService::registerParameter(Parameter *parameter) {
     log("Reregistering Parameter %s", parameter->paramId.c_str());
   }
   parameterMap[parameter->paramId] = parameter;
-//  log("%s", parameterMap);
 }
 
-void ParameterService::setup() {
+void ParameterService::loadParameters(json * j) {
+  for (json::iterator it = j->begin(); it != j->end(); ++it) {
+    if (parameterForId(it.key())) {
+      parameterMap[it.key()]->value = it.value();
+    }
+    std::cout << it.key() << " : " << it.value() << "\n";
+  }
 }

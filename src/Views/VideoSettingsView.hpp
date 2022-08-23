@@ -23,7 +23,6 @@ public:
   void teardown();
   
   VideoSettings *videoSettings;
-  BasicSettingsView basicSettingsView;
   FeedbackSettingsView feedback0SettingsView;
   FeedbackSettingsView feedback1SettingsView;
   FeedbackSettingsView feedback2SettingsView;
@@ -36,6 +35,13 @@ public:
   
 private:
   void styleWindow();
+  void drawMenu();
+  void drawHSB();
+  void drawBlurSharpen();
+  void drawTransform();
+  void drawPixelation();
+  
+  bool hasDrawn = false;
 };
 
 #endif /* VideoFeedSettingsView_hpp */

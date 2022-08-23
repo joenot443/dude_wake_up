@@ -6,6 +6,8 @@
 //
 
 #include "AudioStream.hpp"
+#include "BTrack.h"
+#include "Console.hpp"
 
 void AudioStream::setup() {
   ofSoundDevice device = ofSoundStream().getDeviceList()[config.index];
@@ -23,10 +25,11 @@ void AudioStream::setup() {
   
   isSetup = true;
   stream.setup(settings);
+  analysis->beatOscillator.enabled = true;
 }
 
 void AudioStream::update() {
-  analysis->analyzeFrame(&gist);
+//  analysis->analyzeFrame(&gist);
 //  cout<<"============"<<endl;
 //  cout<<"rms: \t" << gist.rootMeanSquare() << std::endl;
 //  cout<<"pitch: \t" << gist.pitch() << std::endl;
@@ -54,5 +57,15 @@ void AudioStream::audioIn(ofSoundBuffer &soundBuffer) {
   if (avg < 0.01) {
     return;
   }
-  gist.processAudioFrame(soundBuffer.getBuffer());
+  
+  auto buffer = soundBuffer.getBuffer();
+  auto doubleBuffer = std::vector<double>(buffer.begin(), buffer.end());
+  double* firstDouble = doubleBuffer.data();
+//  gist.processAudioFrame(buffer);
+  b.processAudioFrame(firstDouble);
+  
+  if (b.beatDueInCurrentFrame()) {
+  
+    analysis->beatOscillator.pulse();
+  }
 }

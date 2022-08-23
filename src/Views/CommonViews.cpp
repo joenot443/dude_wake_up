@@ -11,7 +11,7 @@
 #include "ModulationService.hpp"
 #include "MidiService.hpp"
 #include "imgui.h"
-#include "Strings.h"
+#include "Strings.hpp"
 
 void CommonViews::sSpacing() {
   Spacing(8);
@@ -40,8 +40,18 @@ void CommonViews::ModulationSelector(Parameter *videoParam) {
   bool hasDriver = videoParam->driver != NULL;
   auto popupId = formatString("##%s_popup", videoParam->name.c_str());
   auto buttonId = formatString("##mod_button_%s", videoParam->name.c_str());
-  auto buttonTitle = hasDriver ? videoParam->driver->name : formatString("Select Audio Parameter%s", buttonId.c_str());
-  if (ImGui::Button(buttonTitle.c_str())) ImGui::OpenPopup(popupId.c_str());
+  
+  if (hasDriver) {
+    if (ImGui::Button(videoParam->driver->name.c_str())) {
+      ModulationService::getService()->removeMapping(videoParam);
+    }
+    return;
+  }
+  
+  if (ImGui::Button(formatString("Select Audio Parameter%s", buttonId.c_str()).c_str())) {
+    ImGui::OpenPopup(popupId.c_str());
+  }
+  
   
   if (ImGui::BeginPopup(popupId.c_str())) {
     for (auto const a : ModulationService::getService()->audioAnalysis) {
@@ -60,25 +70,45 @@ void CommonViews::ModulationSelector(Parameter *videoParam) {
 }
 
 void CommonViews::H3Title(std::string title) {
-  CommonViews::Spacing(8);
+  CommonViews::Spacing(2);
   ImGui::PushFont(FontService::getService()->h3);
   ImGui::Text("%s", title.c_str());
-  CommonViews::Spacing(8);
+  CommonViews::Spacing(2);
   ImGui::PopFont();
 }
 
 void CommonViews::SliderWithOscillator(std::string title, std::string id, Parameter *param, Oscillator *o) {
   ImGui::Text("%s", title.c_str());
+  ImGui::SameLine(0, 20);
   ImGui::SetNextItemWidth(200.0);
   ImGui::SliderFloat(id.c_str(), &param->value, param->min, param->max, "%.3f");
   ImGui::SameLine(0, 20);
   auto checkBox = formatString("Oscillate %s_checkbox", id.c_str());
   ImGui::Checkbox(checkBox.c_str(), &o->enabled);
+  if (ImGui::Button(formatString("X %s_reset", id.c_str()).c_str())) {
+    param->resetValue();
+  }
   OscillatorView::draw(title.c_str(), param, o);
 }
 
+void CommonViews::IntSliderWithOscillator(std::string title, std::string id, Parameter *param, Oscillator *o) {
+  ImGui::Text("%s", title.c_str());
+  ImGui::SameLine(0, 20);
+  ImGui::SetNextItemWidth(200.0);
+  ImGui::SliderInt(id.c_str(), &param->intValue, param->min, param->max, "%d");
+  ImGui::SameLine(0, 20);
+  auto checkBox = formatString("Oscillate %s_checkbox", id.c_str());
+  ImGui::Checkbox(checkBox.c_str(), &o->enabled);
+  if (ImGui::Button(formatString("X %s_reset", id.c_str()).c_str())) {
+    param->resetValue();
+  }
+  OscillatorView::draw(title.c_str(), param, o);
+}
+
+
 void CommonViews::SliderWithInvertOscillator(std::string title, std::string id, Parameter *param, bool *invert, Oscillator *o) {
   ImGui::Text("%s", title.c_str());
+  ImGui::SameLine(0, 20);
   ImGui::SetNextItemWidth(150.0);
   ImGui::SliderFloat(id.c_str(), &param->value, param->min, param->max, "%.3f");
   ImGui::SameLine(0, 20);
@@ -86,6 +116,9 @@ void CommonViews::SliderWithInvertOscillator(std::string title, std::string id, 
   ImGui::Checkbox(invertTitle.c_str(), invert);
   ImGui::SameLine(0, 20);
   auto checkBox = formatString("Oscillate %s_checkbox", id.c_str());
+  if (ImGui::Button(formatString("X %s_reset", id.c_str()).c_str())) {
+    param->resetValue();
+  }
   ImGui::Checkbox(checkBox.c_str(), &o->enabled);
   OscillatorView::draw(title.c_str(), param, o);
 }

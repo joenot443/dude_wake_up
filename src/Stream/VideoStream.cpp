@@ -8,12 +8,12 @@
 #include "VideoStream.h"
 #include "FontService.hpp"
 #include "FeedbackShader.hpp"
-#include "Console.h"
+#include "Console.hpp"
 #include "MidiService.hpp"
 #include "CommonViews.hpp"
 #include "VideoSettings.h"
 #include "ofxImGui.h"
-#include "Video.h"
+#include "Video.hpp"
 
 // MARK: - Lifecycle
 
@@ -45,7 +45,6 @@ void VideoStream::setup() {
 
 void VideoStream::firstDrawSetup() {
   firstFrameDrawn = true;
-  MidiService::getService()->loadConfigFile();
 }
 
 void VideoStream::willExit(ofEventArgs &args) {
@@ -94,12 +93,17 @@ void VideoStream::draw() {
   ImGui::PopFont();
 }
 
-void VideoStream::drawVideo() {
+void VideoStream::drawVideo(float scale) {
   switch (config.source) {
     case VideoSource_file:
       return drawVideoPlayer();
     case VideoSource_webcam:
-      return cam.draw(0, 0);
+      ofClear(0,0,0,255);
+      float centerX = streamWidth() / 2.0;
+      float centerY = streamHeight() / 2.0;
+      float originX = centerX - centerX * scale;
+      float originY = centerY - centerY * scale;
+      return cam.draw(originX, originY, scale * streamWidth(), scale * streamHeight());
   }
 }
 
@@ -140,7 +144,8 @@ void VideoStream::drawVideoPlayer() {
 
 void VideoStream::drawMainFbo() {
   fbo.begin();
-  drawVideo();
+  float scale = settings->transformSettings.scale.value;
+  drawVideo(scale);
   fbo.end();
 }
 
@@ -157,17 +162,37 @@ void VideoStream::shadeFeedback() {
   
   for (auto & feedbackShader : feedbackShaders) {
     if (feedbackShader.feedback->enabled.boolValue) {
-      int frameIndex = feedbackShader.feedback->mixSettings.delayAmount.intValue();
-      auto texture = frameBuffer[frameIndex].getTexture();
+      int frameIndex = feedbackShader.feedback->mixSettings.delayAmount.intValue;
+      float scale = feedbackShader.feedback->miscSettings.scale.value;
+      if (frameIndex < frameBuffer.size()) {
+        auto texture = frameBuffer[frameIndex].getTexture();
+        if (abs(scale - 1.0) > 0.1) {
+          fboFeedback.begin();
+          ofClear(0,0,0,255);
+          float centerX = streamWidth() / 2.0;
+          float centerY = streamHeight() / 2.0;
+          float originX = centerX - centerX * scale;
+          float originY = centerY - centerY * scale;
+          float w = scale * streamWidth();
+          float h = scale * streamHeight();
+          texture.draw(originX, originY, w, h);
+          fboFeedback.end();
+          texture = fboFeedback.getTexture();
+        }
+        
+        shaderMixer.setUniformTexture(formatString("fb%d",feedbackShader.idx), texture, 4);
+        
+      } else {
+        log("Missing feedback texture");
+      }
       
-      shaderMixer.setUniformTexture(formatString("fb%d",feedbackShader.idx), texture, 4);
   }
     feedbackShader.shade();
   }
 }
 
 void VideoStream::shadeHSB() {
-  shaderMixer.setUniform1f("cam1_scale", 1);
+  shaderMixer.setUniform1f(settings->transformSettings.scale.shaderKey, 1.0);
   shaderMixer.setUniformTexture("cam", streamTexture(), 1);
   
   shaderMixer.setUniform2f("cam1dimensions", ofVec2f(streamWidth(), streamHeight()));
@@ -181,16 +206,16 @@ void VideoStream::shadeHSB() {
   shaderMixer.setUniform1f("channel1sat_powmap", 1.0);
   
   
-  shaderMixer.setUniform1f("channel1hue_x", settings->basicSettings.hsbSettings.hue.value);
-  shaderMixer.setUniform1f("channel1saturation_x", settings->basicSettings.hsbSettings.saturation.value);
-  shaderMixer.setUniform1f("channel1bright_x", settings->basicSettings.hsbSettings.brightness.value);
+  shaderMixer.setUniform1f("channel1hue_x", settings->hsbSettings.hue.value);
+  shaderMixer.setUniform1f("channel1saturation_x", settings->hsbSettings.saturation.value);
+  shaderMixer.setUniform1f("channel1bright_x", settings->hsbSettings.brightness.value);
   
-  shaderMixer.setUniform1i("cam1_pixel_scale_x", settings->basicSettings.pixelSettings.scaleX.intValue());
-  shaderMixer.setUniform1i("cam1_pixel_scale_y", settings->basicSettings.pixelSettings.scaleY.intValue());
-  shaderMixer.setUniform1f("cam1_pixel_mix", settings->basicSettings.pixelSettings.mix.value);
+  shaderMixer.setUniform1i("cam1_pixel_scale_x", settings->pixelSettings.scale.intValue);
+  shaderMixer.setUniform1i("cam1_pixel_scale_y", settings->pixelSettings.scale.intValue);
+  shaderMixer.setUniform1f("cam1_pixel_mix", settings->pixelSettings.mix.value);
   shaderMixer.setUniform1f("cam1_pixel_brightscale", 0.0f);
   
-  shaderMixer.setUniform1i("cam1_pixel_switch", settings->basicSettings.pixelSettings.enabled);
+  shaderMixer.setUniform1i("cam1_pixel_switch", settings->pixelSettings.enabled);
   
   shaderMixer.end();
   fbo.end();
@@ -201,8 +226,8 @@ void VideoStream::shadeBlur() {
   shaderBlur.begin();
   fbo.draw(0,0);
   shaderBlur.setUniformTexture("texmod", fbo.getTexture(), 8);
-  shaderBlur.setUniform1f("blur_amount", settings->basicSettings.blurSettings.amount.value);
-  shaderBlur.setUniform1f("blur_radius", settings->basicSettings.blurSettings.radius.value);
+  shaderBlur.setUniform1f("blur_amount", settings->blurSettings.amount.value);
+  shaderBlur.setUniform1f("blur_radius", settings->blurSettings.radius.value);
   shaderBlur.end();
   fbo.end();
 }
@@ -211,12 +236,12 @@ void VideoStream::shadeSharpen() {
   shaderSharpen.begin();
   fbo.draw(0,0, ofGetWidth(), ofGetHeight());
   shaderSharpen.setUniformTexture("texmod", fbo.getTexture(), 9);
-  shaderSharpen.setUniform1f("sharpen_amount", settings->basicSettings.sharpenSettings.amount.value);
-  shaderSharpen.setUniform1f("sharpen_radius", settings->basicSettings.sharpenSettings.radius.value);
-  shaderSharpen.setUniform1f("sharpen_boost", settings->basicSettings.sharpenSettings.boost.value);
-  shaderSharpen.setUniform1f("texmod_sharpen_amount", settings->basicSettings.sharpenSettings.amount.value);
-  shaderSharpen.setUniform1f("texmod_sharpen_radius", settings->basicSettings.sharpenSettings.radius.value);
-  shaderSharpen.setUniform1f("texmod_sharpen_boost", settings->basicSettings.sharpenSettings.boost.value);
+  shaderSharpen.setUniform1f("sharpen_amount", settings->sharpenSettings.amount.value);
+  shaderSharpen.setUniform1f("sharpen_radius", settings->sharpenSettings.radius.value);
+  shaderSharpen.setUniform1f("sharpen_boost", settings->sharpenSettings.boost.value);
+  shaderSharpen.setUniform1f("texmod_sharpen_amount", settings->sharpenSettings.amount.value);
+  shaderSharpen.setUniform1f("texmod_sharpen_radius", settings->sharpenSettings.radius.value);
+  shaderSharpen.setUniform1f("texmod_sharpen_boost", settings->sharpenSettings.boost.value);
   shaderBlur.end();
 }
 
@@ -245,6 +270,11 @@ void VideoStream::prepareFbos() {
   fboBlur.begin();
   ofClear(0,0,0,255);
   fboBlur.end();
+  
+  fboFeedback.allocate(ofGetWidth(), ofGetHeight());
+  fboFeedback.begin();
+  ofClear(0,0,0,255);
+  fboFeedback.end();
 }
 
 void VideoStream::saveFeedbackFrame() {

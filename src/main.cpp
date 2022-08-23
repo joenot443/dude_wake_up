@@ -4,13 +4,17 @@
 #include "ModulationService.hpp"
 #include "OscillationService.hpp"
 #include "MidiService.hpp"
+#include "ConfigService.hpp"
 #include "ParameterService.h"
+
+using json = nlohmann::json;
 
 FontService *FontService::service = 0;
 ModulationService *ModulationService::service = 0;
 OscillationService *OscillationService::service = 0;
 MidiService *MidiService::service = 0;
 ParameterService *ParameterService::service = 0;
+ConfigService *ConfigService::service = 0;
 
 //========================================================================
 int main( ){

@@ -27,6 +27,8 @@ struct CommonViews {
   
   static void SliderWithOscillator(std::string title, std::string id, Parameter *param, Oscillator *o);
   
+  static void IntSliderWithOscillator(std::string title, std::string id, Parameter *param, Oscillator *o);
+  
   static void SliderWithInvertOscillator(std::string title, std::string id, Parameter *param, bool *invert, Oscillator *o);
 };
 

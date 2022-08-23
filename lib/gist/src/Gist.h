@@ -221,7 +221,7 @@ private:
     CoreFrequencyDomainFeatures<T> coreFrequencyDomainFeatures;
 
     /** object to compute onset detection functions */
-    OnsetDetectionFunction<T> onsetDetectionFunction;
+  GistOnsetDetectionFunction<T> onsetDetectionFunction;
 
     /** object to compute pitch estimates via the Yin algorithm */
     Yin<T> yin;
