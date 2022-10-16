@@ -25,7 +25,7 @@ void ParameterService::registerParameter(Parameter *parameter) {
 void ParameterService::loadParameters(json * j) {
   for (json::iterator it = j->begin(); it != j->end(); ++it) {
     if (parameterForId(it.key())) {
-      parameterMap[it.key()]->value = it.value();
+      parameterMap[it.key()]->setValue(it.value());
     }
     std::cout << it.key() << " : " << it.value() << "\n";
   }

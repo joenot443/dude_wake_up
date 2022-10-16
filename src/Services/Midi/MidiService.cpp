@@ -168,13 +168,13 @@ void MidiService::beginLearning(Parameter *parameter) {
 }
 
 void MidiService::stopLearning() {
-  log("Stopping learning");
+//  log("Stopping learning");
   learningParam = NULL;
 }
 
 void MidiService::saveAssignment(Parameter *param, ofxMidiMessage &msg) {
   std::string descriptor = descriptorFrom(msg);
-  log("Saving %s for %s", param->name.c_str(), descriptor.c_str());
+//  log("Saving %s for %s", param->name.c_str(), descriptor.c_str());
   auto pairing = MidiPairing(param->paramId, descriptor, msg.channel, msg.portNum, msg.status, msg.control);
   descriptorToPairing[descriptor] = pairing;
   parameterIdToPairing[param->paramId] = pairing;

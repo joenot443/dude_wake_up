@@ -11,13 +11,14 @@
 
 Oscillator::Oscillator(Parameter *v) : value(v),
 settingsId(value->paramId),
-amplitude(Parameter("amp", value->paramId, 1.0, -3.0, 3.0)),
+amplitude(Parameter("amp", value->paramId, 1.0, 0.0, value->max)),
 shift(Parameter("shift", value->paramId, 0.0, -3.0, 3.0)),
 frequency(Parameter("freq", value->paramId, 1.0, -3.0, 3.0))
 {
   data = ImVector<ImVec2>();
   data.reserve(100);
   xRange = {0.0, 10.0};
+  span = 10.0;
   yRange = {value->min, value->max};
   parameters = {&amplitude, &frequency, &shift};
   OscillationService::getService()->addOscillator(this);
@@ -26,11 +27,11 @@ frequency(Parameter("freq", value->paramId, 1.0, -3.0, 3.0))
 void Oscillator::tick() {
   if (!enabled) return;
   
-  float t = frameTime();
-  float xmod = fmodf(t, span);
+  float t = frameTime();  float xmod = fmodf(t, span);
   if (!data.empty() && xmod < data.back().x)
       data.shrink(0);
   
-  value->value = amplitude.value * sin(frequency.value * t) + shift.value;
+  float v = amplitude.value * sin(frequency.value * t) + shift.value;
+  value->setValue(fmin(fmax(v, value->min), value->max));
   data.push_back(ImVec2(xmod, value->value));
 }

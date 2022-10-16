@@ -27,11 +27,11 @@ public:
   std::vector<Oscillator*> oscillators;
   json serialize(json j) {
     for (auto p : parameters) {
-      j[p->paramId] = p->value;
+      j[p->paramId] = p->valueRespectingBool();
     }
     auto ops = Oscillator::parametersFromOscillators(oscillators);
     for (auto p : ops) {
-      j[p->paramId] = p->value;
+      j[p->paramId] = p->valueRespectingBool();
     }
     return j;
   }
@@ -51,9 +51,9 @@ struct HSBSettings: public JSONSerializable {
   
   HSBSettings(std::string settingsId) :
   settingsId(settingsId),
-  hue(Parameter("HSB_hue", settingsId, 1.0, 0.0, 2.0)),
-  saturation(Parameter("HSB_saturation", settingsId, 1.0, 0.0, 3.0)),
-  brightness(Parameter("HSB_brightness", settingsId, 1.0, 0.0, 3.0))
+  hue(Parameter("HSB_hue", settingsId, 1.0, -1.0, 2.0)),
+  saturation(Parameter("HSB_saturation", settingsId, 1.0, -1.0, 3.0)),
+  brightness(Parameter("HSB_brightness", settingsId, 1.0, -1.0, 3.0))
   
   {
     parameters = {&hue, &saturation, &brightness};
@@ -63,23 +63,34 @@ struct HSBSettings: public JSONSerializable {
 
 struct BlurSettings: public JSONSerializable  {
   std::string settingsId;
-  Parameter amount = Parameter("blur_amount", settingsId, 0.0, 0.0, 1.0);
-  Parameter radius = Parameter("blur_radius", settingsId, 1.0, 0.0, 50.0);
-  Oscillator amountOscillator = Oscillator(&amount);
-  Oscillator radiusOscillator = Oscillator(&radius);
+  Parameter mix;
+  Parameter radius;
+  Oscillator mixOscillator;
+  Oscillator radiusOscillator;
   BlurSettings(std::string settingsId) :
+  mix(Parameter("blur_mix", settingsId, 0.0, 0.0, 1.0)),
+  radius(Parameter("blur_radius", settingsId, 1.0, 0.0, 50.0)),
+  mixOscillator(&mix),
+  radiusOscillator(&radius),
   settingsId(settingsId)
   {
-    parameters = {&amount, &radius};
-    oscillators = {&amountOscillator, &radiusOscillator};
+    parameters = {&mix, &radius};
+    oscillators = {&mixOscillator, &radiusOscillator};
   }
 };
 
 struct TransformSettings: public JSONSerializable  {
   std::string settingsId;
-  Parameter scale = Parameter("scale", settingsId, "cam1_scale", 1.0, 0.001, 3.0);
-  Oscillator scaleOscillator = Oscillator(&scale);
-  TransformSettings(std::string settingsId) : settingsId(settingsId) {
+  Parameter scale;
+  Oscillator scaleOscillator;
+  Parameter feedbackBlend;
+  Oscillator feedbackBlendOscillator;
+  TransformSettings(std::string settingsId) : settingsId(settingsId),
+  scale(Parameter("scale", settingsId, "cam1_scale", 1.0, 0.001, 3.0)),
+  feedbackBlend(Parameter("feedback_blend", settingsId, "channel1blend", 1.0, 0.0, 1.0)),
+  scaleOscillator(Oscillator(&scale)),
+  feedbackBlendOscillator(Oscillator(&feedbackBlend))
+  {
     parameters = {&scale};
     oscillators = {&scaleOscillator};
   }
@@ -100,24 +111,20 @@ struct SharpenSettings: public JSONSerializable  {
 };
 
 struct PixelSettings: public JSONSerializable  {
-  bool enabled = false;
-  bool locked = true;
+  Parameter enabled;
   std::string settingsId;
   
-  Parameter scale;
-  Parameter mix;
-  Oscillator mixOscillator;
-  Oscillator scaleOscillator;
+  Parameter size;
+  Oscillator sizeOscillator;
   
   PixelSettings(std::string settingsId) :
   settingsId(settingsId),
-  mixOscillator(&mix),
-  scaleOscillator(&scale),
-  scale(Parameter("pixel_scale", settingsId, 64.0,  0.0, 128.0)),
-  mix(Parameter("pixel_mix", settingsId, 1.0, -2.0, 2.0))
+  size(Parameter("pixel_size", settingsId, 24.0,  0.01, 64.0)),
+  enabled(Parameter("enabled", settingsId, 0.0,  1.0, 0.0)),
+  sizeOscillator(&size)
   {
-    parameters = {&scale, &mix};
-    oscillators = {&scaleOscillator, &mixOscillator};
+    parameters = {&size};
+    oscillators = {&sizeOscillator};
   }
 };
 
@@ -150,14 +157,14 @@ struct FeedbackMixSettings: public JSONSerializable  {
   
   FeedbackMixSettings(std::string settingsId, int idx) :
   settingsId(settingsId),
-  feedbackType(Parameter("feedback_type", settingsId, formatString("fb%dtype", idx), 0.0, 0.0, 2.0)),
-  blend(Parameter("feedback_blend", settingsId, formatString("fb%dblend", idx), 0.0, 0.0, 1.0)),
+  feedbackType(Parameter("feedback_type", settingsId, "fbType", 0.0, 0.0, 2.0)),
+  blend(Parameter("feedback_blend", settingsId, "blend", 0.0, 0.0, 1.0)),
   blendOscillator(Oscillator(&blend)),
-  mix(Parameter("feedback_mix", settingsId, formatString("fb%dmix", idx), 0.0, 0.0, 1.0)),
+  mix(Parameter("feedback_mix", settingsId, "fb_mix", 0.0, 0.0, 1.0)),
   mixOscillator(Oscillator(&mix)),
-  keyValue(Parameter("feedback_keyValue", settingsId, formatString("fb%dkey", idx), 0.0, 0.0, 1.0)),
+  keyValue(Parameter("feedback_keyValue", settingsId, "lumaKey", 0.0, 0.0, 1.0)),
   keyValueOscillator(Oscillator(&keyValue)),
-  keyThreshold(Parameter("feedback_keyThreshold", settingsId, formatString("fb%dthresh", idx), 0.0, 0.0, 1.0)),
+  keyThreshold(Parameter("feedback_keyThreshold", settingsId, "lumaThresh", 0.0, 0.0, 1.0)),
   keyThresholdOscillator(Oscillator(&keyThreshold)),
   delayAmount(Parameter("feedback_delayAmount", settingsId, 10.0, 0.0, 28.0)),
   delayAmountOscillator(Oscillator(&delayAmount))
@@ -181,8 +188,8 @@ struct FeedbackMiscSettings: public JSONSerializable  {
   
   FeedbackMiscSettings(std::string settingsId, int idx) :
   rotate(Parameter("feedback_rotate", settingsId, 0.0001, 0.0001, TWO_PI)),
-  xOffset(Parameter("feedback_xOffset", settingsId, 0.0, -30.0, 30.0)),
-  yOffset(Parameter("feedback_yOffset", settingsId, 0.0, -30.0, 30.0)),
+  xOffset(Parameter("feedback_xOffset", settingsId, 0.0, -300.0, 300.0)),
+  yOffset(Parameter("feedback_yOffset", settingsId, 0.0, -300.0, 300.0)),
   scale(Parameter("feedback_scale", settingsId, 1.0, 0.001, 3.0)),
   xOffsetOscillator(Oscillator(&xOffset)),
   scaleOscillator(Oscillator(&scale)),
@@ -198,6 +205,7 @@ struct FeedbackSettings  {
   
   int index;
   Parameter enabled;
+  Parameter useProcessedFrame;
   std::string feedbackId;
   FeedbackMixSettings mixSettings;
   FeedbackMiscSettings miscSettings;
@@ -206,6 +214,7 @@ struct FeedbackSettings  {
   FeedbackSettings(std::string settingsId, int index) :
   index(index),
   enabled(Parameter(formatString("%sfeedback_enabled_%d", settingsId.c_str(), index), settingsId, formatString("fb%denabled", index), 0.0, 0.0, 0.0)),
+  useProcessedFrame(Parameter(formatString("%sfeedback_use_procssed_%d", settingsId.c_str(), index), settingsId, formatString("fb%duse_processed", index), 0.0, 0.0, 0.0)),
   feedbackId(formatString("%s_%d_", settingsId.c_str(), index)),
   mixSettings(FeedbackMixSettings(feedbackId, index)),
   miscSettings(FeedbackMiscSettings(feedbackId, index)),
@@ -213,6 +222,7 @@ struct FeedbackSettings  {
   {}
   
   json serialize(json j) {
+    j[enabled.paramId] = enabled.valueRespectingBool();
     j = hsbSettings.serialize(j);
     j = mixSettings.serialize(j);
     return j;
@@ -221,6 +231,11 @@ struct FeedbackSettings  {
 
 enum VideoSource { VideoSource_webcam, VideoSource_file };
 
+struct VideoFlags {
+  Parameter resetFeedback;
+  std::string settingsId;
+  VideoFlags(std::string settingsId) : resetFeedback(Parameter("reset_feedback", settingsId, 0.0, 0.0, 1.0)), settingsId(settingsId) {}
+};
 
 struct VideoSettings   {
   HSBSettings hsbSettings;
@@ -231,6 +246,7 @@ struct VideoSettings   {
   FeedbackSettings feedback0Settings;
   FeedbackSettings feedback1Settings;
   FeedbackSettings feedback2Settings;
+  VideoFlags videoFlags;
   std::vector<FeedbackSettings*> allFeedbacks;
   int streamId;
   std::string settingsIdStr;
@@ -241,6 +257,7 @@ struct VideoSettings   {
   hsbSettings(HSBSettings(strId)),
   pixelSettings(PixelSettings(strId)),
   blurSettings(BlurSettings(strId)),
+  videoFlags(VideoFlags(strId)),
   sharpenSettings(SharpenSettings(strId)),
   transformSettings(TransformSettings(strId)),
   feedback0Settings(FeedbackSettings(strId, 0)),

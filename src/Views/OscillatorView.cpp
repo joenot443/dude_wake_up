@@ -9,6 +9,7 @@
 #include "ofxImGui.h"
 #include "FontService.hpp"
 #include "ValueOscillator.hpp"
+#include "CommonViews.hpp"
 #include "implot.h"
 #include "Strings.hpp"
 #include "PulseOscillator.hpp"
@@ -61,6 +62,8 @@ void OscillatorView::draw(const char* name, Parameter* value, ValueOscillator *o
 }
 
 void OscillatorView::draw(const char* name, Parameter* value, Oscillator *oscillator) {
+  ImGui::SameLine(0, 20);
+  CommonViews::OscillateButton(value->paramId, oscillator);
   if (oscillator->enabled) {
     ImGui::PushFont(FontService::getService()->h4);
     ImGui::Text("%s Oscillator", name);
@@ -68,9 +71,9 @@ void OscillatorView::draw(const char* name, Parameter* value, Oscillator *oscill
     ImGui::PopFont();
     ImGui::VSliderFloat(formatString("##freq%s", name).c_str(), ImVec2(40,160), &oscillator->frequency.value, 0.0f, 100.0f, "Freq.\n%.2f", ImGuiSliderFlags_Logarithmic);
     ImGui::SameLine(0, 10);
-    ImGui::VSliderFloat(formatString("##amp%s", name).c_str(), ImVec2(40,160), &oscillator->amplitude.value, 0.0f, value->max, "Amp.\n%.2f", ImGuiSliderFlags_None);
+    ImGui::VSliderFloat(formatString("##amp%s", name).c_str(), ImVec2(40,160), &oscillator->amplitude.value, 0.0f, oscillator->amplitude.max, "Amp.\n%.2f", ImGuiSliderFlags_None);
     ImGui::SameLine(0, 20);
-    ImGui::VSliderFloat(formatString("##shift%s", name).c_str(), ImVec2(40,160), &oscillator->shift.value, -value->max, value->max, "Shift\n%.2f");
+    ImGui::VSliderFloat(formatString("##shift%s", name).c_str(), ImVec2(40,160), &oscillator->shift.value, -value->max * 2, value->max * 2, "Shift\n%.2f");
     ImGui::SameLine(0, 20);
     oscillator->tick();
     ImVector<ImVec2> data = oscillator->data;
@@ -80,9 +83,6 @@ void OscillatorView::draw(const char* name, Parameter* value, Oscillator *oscill
     if (ImPlot::BeginPlot(formatString("##plot%s", name).c_str(), NULL, NULL, ImVec2(-1,150), ImPlotFlags_Default, rt_axis, rt_axis)) {
         ImPlot::PlotLine(name, &data[0].x, &data[0].y, data.size(), 0, 2 * sizeof(float));
         ImPlot::EndPlot();
-    }
-    if (oscillator != NULL) {
-      value->setValue(oscillator->value->value);
     }
   }
 }

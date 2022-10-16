@@ -43,13 +43,22 @@ struct Parameter
   void setValue(float newValue) {
     value = newValue;
     intValue = static_cast<int>(newValue);
-    boolValue = static_cast<bool>(newValue);
+    boolValue = newValue > 0.0001;
   }
   /// Drives the Parameter between its min and max by a float percent.
   void driveValue(float percent) {
     float range = max - min;
-    value = percent * range + min;
+    setValue(percent * range + min);
   }
+  
+  /// Returns 1 if our boolValue is true, otherwise the normal float value
+  float valueRespectingBool() {
+    if (boolValue) {
+      return true;
+    }
+    return value;
+  }
+  
   Parameter(std::string name, std::string settingsId, float value);
   Parameter(std::string name, std::string settingsId, std::string shaderKey, float value);
   Parameter(std::string name, std::string settingsId, std::string shaderKey, float value, float min, float max);

@@ -6,9 +6,14 @@
 //
 
 #include "VideoStream.h"
+#include "ShaderChainer.hpp"
+#include "EmptyShader.hpp"
 #include "FontService.hpp"
 #include "FeedbackShader.hpp"
 #include "Console.hpp"
+#include "HSBShader.hpp"
+#include "PixelShader.hpp"
+#include "BlurShader.hpp"
 #include "MidiService.hpp"
 #include "CommonViews.hpp"
 #include "VideoSettings.h"
@@ -32,11 +37,20 @@ void VideoStream::setup() {
       break;
   }
   
-  shaderMixer.load("shadersGL2/shader_mixer");
-  shaderBlur.load("shadersGL2/shader_blur");
-  shaderSharpen.load("shadersGL2/shader_sharpen");
   isSetup = true;
   ofSetWindowShape(640, 480);
+  
+  HSBShader* hsb = new HSBShader(&settings->hsbSettings);
+  BlurShader* blur = new BlurShader(&settings->blurSettings);
+  PixelShader *pixel = new PixelShader(&settings->pixelSettings);
+  
+  shaders.push_back(hsb);
+  shaders.push_back(pixel);
+  shaders.push_back(blur);
+  shaders.push_back(&feedbackShaders[0]);
+  for (auto & sh : shaders) {
+    sh->setup();
+  }
   
   prepareFbos();
   clearFrameBuffer();
@@ -71,26 +85,39 @@ void VideoStream::update() {
 
 void VideoStream::draw() {
   gui.begin();
-  
-  // Need to hold a fresh frame for one when resetting frame buffer
-  
-  if (shouldClearFrameBuffer) {
-    clearFrameBuffer();
-  }
-  
+    
   ImGui::PushFont(FontService::getService()->p);
-  drawMainFbo();
-  shadeFeedback();
-  shadeHSB();
-  shadeBlur();
-  shadeSharpen();
-  saveFeedbackFrame();
-  completeFrame();
-  drawDebug();
+  prepareMainFbo();
+
+  fbo = ShaderChainer::fboChainingShaders(&shaders, fbo);
+  fbo.draw(0, 0, ofGetWidth(), ofGetHeight());
+  
+//  shadeFeedback();
+//  shadeHSB();
+//  shadeBlur();
+//  shadeSharpen();
+//  fbo = glitchShader.shade(&fbo);
+//  drawDebug();
+//  drawMainFbo();
+//  completeFrame();
+  
   if (!firstFrameDrawn) {
     firstDrawSetup();
   }
   ImGui::PopFont();
+  
+  if (settings->videoFlags.resetFeedback.boolValue) {
+    settings->videoFlags.resetFeedback.setValue(0.0);
+    clearFrameBuffer();
+  }
+  
+}
+
+void VideoStream::prepareMainFbo() {
+  fbo.begin();
+  float scale = settings->transformSettings.scale.value;
+  drawVideo(scale);
+  fbo.end();
 }
 
 void VideoStream::drawVideo(float scale) {
@@ -134,6 +161,7 @@ void VideoStream::drawVideoPlayer() {
     ImGui::SliderFloat("Playback", &position.value, 0.0, 1.0);
     ImGui::SliderFloat("Speed", &speed.value, 0.0, 4.0);
     if (ImGui::Button("Clear Feedback")) {
+      shouldClearFrameBuffer = true;
       clearFrameBuffer();
     }
     CommonViews::MidiSelector(&position);
@@ -143,116 +171,10 @@ void VideoStream::drawVideoPlayer() {
 
 
 void VideoStream::drawMainFbo() {
-  fbo.begin();
-  float scale = settings->transformSettings.scale.value;
-  drawVideo(scale);
-  fbo.end();
+  fbo.draw(0,0, ofGetWidth(), ofGetHeight());
 }
 
 // MARK: - Shading
-
-void VideoStream::shadeFeedback() {
-  fbo.begin();
-  shaderMixer.begin();
-  fbo.draw(0,0);
-  
-  shaderMixer.setUniform1f("mix1blend1", 1.0);
-  shaderMixer.setUniform1f("mix1keybright", 1.0);
-  
-  
-  for (auto & feedbackShader : feedbackShaders) {
-    if (feedbackShader.feedback->enabled.boolValue) {
-      int frameIndex = feedbackShader.feedback->mixSettings.delayAmount.intValue;
-      float scale = feedbackShader.feedback->miscSettings.scale.value;
-      if (frameIndex < frameBuffer.size()) {
-        auto texture = frameBuffer[frameIndex].getTexture();
-        if (abs(scale - 1.0) > 0.1) {
-          fboFeedback.begin();
-          ofClear(0,0,0,255);
-          float centerX = streamWidth() / 2.0;
-          float centerY = streamHeight() / 2.0;
-          float originX = centerX - centerX * scale;
-          float originY = centerY - centerY * scale;
-          float w = scale * streamWidth();
-          float h = scale * streamHeight();
-          texture.draw(originX, originY, w, h);
-          fboFeedback.end();
-          texture = fboFeedback.getTexture();
-        }
-        
-        shaderMixer.setUniformTexture(formatString("fb%d",feedbackShader.idx), texture, 4);
-        
-      } else {
-        log("Missing feedback texture");
-      }
-      
-  }
-    feedbackShader.shade();
-  }
-}
-
-void VideoStream::shadeHSB() {
-  shaderMixer.setUniform1f(settings->transformSettings.scale.shaderKey, 1.0);
-  shaderMixer.setUniformTexture("cam", streamTexture(), 1);
-  
-  shaderMixer.setUniform2f("cam1dimensions", ofVec2f(streamWidth(), streamHeight()));
-  shaderMixer.setUniform1f("width", 640);
-  shaderMixer.setUniform1f("height", 480);
-  shaderMixer.setUniform1i("channel1", 1);
-  shaderMixer.setUniform1i("mix1", 2);
-  
-  shaderMixer.setUniform1f("channel1bright_powmap", 1.0);
-  shaderMixer.setUniform1f("channel1hue_powmap", 1.0);
-  shaderMixer.setUniform1f("channel1sat_powmap", 1.0);
-  
-  
-  shaderMixer.setUniform1f("channel1hue_x", settings->hsbSettings.hue.value);
-  shaderMixer.setUniform1f("channel1saturation_x", settings->hsbSettings.saturation.value);
-  shaderMixer.setUniform1f("channel1bright_x", settings->hsbSettings.brightness.value);
-  
-  shaderMixer.setUniform1i("cam1_pixel_scale_x", settings->pixelSettings.scale.intValue);
-  shaderMixer.setUniform1i("cam1_pixel_scale_y", settings->pixelSettings.scale.intValue);
-  shaderMixer.setUniform1f("cam1_pixel_mix", settings->pixelSettings.mix.value);
-  shaderMixer.setUniform1f("cam1_pixel_brightscale", 0.0f);
-  
-  shaderMixer.setUniform1i("cam1_pixel_switch", settings->pixelSettings.enabled);
-  
-  shaderMixer.end();
-  fbo.end();
-}
-
-void VideoStream::shadeBlur() {
-  fbo.begin();
-  shaderBlur.begin();
-  fbo.draw(0,0);
-  shaderBlur.setUniformTexture("texmod", fbo.getTexture(), 8);
-  shaderBlur.setUniform1f("blur_amount", settings->blurSettings.amount.value);
-  shaderBlur.setUniform1f("blur_radius", settings->blurSettings.radius.value);
-  shaderBlur.end();
-  fbo.end();
-}
-
-void VideoStream::shadeSharpen() {
-  shaderSharpen.begin();
-  fbo.draw(0,0, ofGetWidth(), ofGetHeight());
-  shaderSharpen.setUniformTexture("texmod", fbo.getTexture(), 9);
-  shaderSharpen.setUniform1f("sharpen_amount", settings->sharpenSettings.amount.value);
-  shaderSharpen.setUniform1f("sharpen_radius", settings->sharpenSettings.radius.value);
-  shaderSharpen.setUniform1f("sharpen_boost", settings->sharpenSettings.boost.value);
-  shaderSharpen.setUniform1f("texmod_sharpen_amount", settings->sharpenSettings.amount.value);
-  shaderSharpen.setUniform1f("texmod_sharpen_radius", settings->sharpenSettings.radius.value);
-  shaderSharpen.setUniform1f("texmod_sharpen_boost", settings->sharpenSettings.boost.value);
-  shaderBlur.end();
-}
-
-void VideoStream::shadeGlitch() {
-  shaderGlitch.begin();
-  fbo.draw(0,0, ofGetWidth(), ofGetHeight());
-  shaderGlitch.setUniform2i("resolution", ofGetWidth(), ofGetHeight());
-  shaderGlitch.setUniform1f("time", float(ofGetFrameNum() / 60.0));
-  shaderGlitch.setUniform1i("glitch", 0.0);
-  
-}
 
 
 void VideoStream::prepareFbos() {
@@ -260,36 +182,6 @@ void VideoStream::prepareFbos() {
   fbo.begin();
   ofClear(0,0,0,255);
   fbo.end();
-  
-  fboSharpen.allocate(ofGetWidth(), ofGetHeight());
-  fboSharpen.begin();
-  ofClear(0,0,0,255);
-  fboSharpen.end();
-  
-  fboBlur.allocate(ofGetWidth(), ofGetHeight());
-  fboBlur.begin();
-  ofClear(0,0,0,255);
-  fboBlur.end();
-  
-  fboFeedback.allocate(ofGetWidth(), ofGetHeight());
-  fboFeedback.begin();
-  ofClear(0,0,0,255);
-  fboFeedback.end();
-}
-
-void VideoStream::saveFeedbackFrame() {
-  ofFbo feedbackFrame = ofFbo();
-  feedbackFrame.allocate(ofGetWidth(), ofGetHeight());
-  feedbackFrame.begin();
-  ofClear(0,0,0,255);
-  fbo.draw(0, 0);
-  
-  feedbackFrame.end();
-  frameBuffer.insert(frameBuffer.begin(), feedbackFrame);
-  
-  if (frameBuffer.size() >= FrameBufferCount) {
-    frameBuffer.pop_back();
-  }
 }
 
 void VideoStream::resetFeedbackValues(FeedbackSettings *feedback) {
@@ -319,11 +211,10 @@ void VideoStream::drawDebug() {
 
 
 void VideoStream::clearFrameBuffer() {
-  frameBuffer.clear();
-  for(int i=0;i<FrameBufferCount;i++){
-    ofFbo frame = ofFbo();
-    frame.allocate(ofGetWidth(), ofGetHeight());
-    frameBuffer.push_back(frame);
+  for (auto & fb : feedbackShaders) {
+    if (fb.feedback->enabled.boolValue) {
+      fb.clearFrameBuffer();
+    }
   }
   shouldClearFrameBuffer = false;
 }
@@ -331,6 +222,7 @@ void VideoStream::clearFrameBuffer() {
 
 void VideoStream::completeFrame() {
   frameCount += 1;
+  glitchShader.clear();
 }
 
 // MARK: - Helpers

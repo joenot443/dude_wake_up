@@ -25,27 +25,15 @@ uniform vec3 fb0_rescale;
 uniform vec3 fb0_invert;
 uniform float fb0_rotate;
 
-//fb0 tex mod
-uniform vec3 tex_fb0_rescale;
-uniform float tex_fb0_rotate;
-uniform vec3 tex_fb0_hsb_x;
-uniform vec3 tex_fb0_hue_x;
-
-uniform float tex_fb0lumakeyvalue;
-uniform float tex_fb0lumakeythresh;
-uniform float tex_fb0blend;
-
-uniform vec2 fb0_texmod_logic;
-
 
 //fb1
 uniform int fb1enabled;
-uniform int fb1lumaenabled;
-uniform float fb1lumamix;
-uniform float fb1lumakeyvalue;
-uniform float fb1lumakeythresh;
-uniform float fb1mix;
+uniform int fb1type;
 uniform float fb1blend;
+
+uniform float fb1mix;
+uniform float fb1thresh;
+uniform float fb1key;
 
 uniform vec3 fb1_hsb_x;
 uniform vec3 fb1_hue_x;
@@ -53,26 +41,14 @@ uniform vec3 fb1_rescale;
 uniform vec3 fb1_invert;
 uniform float fb1_rotate;
 
-//fb1 tex mod
-uniform vec3 tex_fb1_rescale;
-uniform float tex_fb1_rotate;
-uniform vec3 tex_fb1_hsb_x;
-uniform vec3 tex_fb1_hue_x;
-
-uniform float tex_fb1lumakeyvalue;
-uniform float tex_fb1lumakeythresh;
-uniform float tex_fb1blend;
-
-uniform vec2 fb1_texmod_logic;
-
 //fb2
 uniform int fb2enabled;
-uniform int fb2lumaenabled;
-uniform float fb2lumamix;
-uniform float fb2lumakeyvalue;
-uniform float fb2lumakeythresh;
-uniform float fb2mix;
+uniform int fb2type;
 uniform float fb2blend;
+
+uniform float fb2mix;
+uniform float fb2thresh;
+uniform float fb2key;
 
 uniform vec3 fb2_hsb_x;
 uniform vec3 fb2_hue_x;
@@ -80,51 +56,10 @@ uniform vec3 fb2_rescale;
 uniform vec3 fb2_invert;
 uniform float fb2_rotate;
 
-//fb2 tex mod
-uniform vec3 tex_fb2_rescale;
-uniform float tex_fb2_rotate;
-uniform vec3 tex_fb2_hsb_x;
-uniform vec3 tex_fb2_hue_x;
-
-uniform float tex_fb2lumakeyvalue;
-uniform float tex_fb2lumakeythresh;
-uniform float tex_fb2blend;
-
-uniform vec2 fb2_texmod_logic;
-
-
-
-//fb3
-uniform vec3 fb3_hsb_x;
-uniform vec3 fb3_hue_x;
-uniform vec3 fb3_rescale;
-uniform vec3 fb3_modswitch;
-uniform float fb3_rotate;
-
-
-//fb3 tex mod
-uniform vec3 tex_fb3_rescale;
-uniform float tex_fb3_rotate;
-uniform vec3 tex_fb3_hsb_x;
-uniform vec3 tex_fb3_hue_x;
-
-uniform float tex_fb3lumakeyvalue;
-uniform float tex_fb3lumakeythresh;
-uniform float tex_fb3blend;
-
-uniform vec2 fb3_texmod_logic;
-
-
-uniform float delaymix;
-
-
-uniform float ch1_h_mirror;
-
 //vidmixervariables
 
 uniform float width;
 uniform float height;
-
 
 varying vec2 texCoordVarying;
 
@@ -137,21 +72,13 @@ uniform int mix1;
 uniform int mix2;
 
 
-
 //mix1 variables
+uniform float channel1blend;
 uniform float mix1blend1;
 
 uniform float mix1keybright;
 uniform float mix1keythresh;
 
-
-
-
-
-uniform float fb3lumakeyvalue;
-uniform float fb3lumakeythresh;
-uniform int fb3mix;
-uniform float fb3blend;
 
 //channel1 variablesfrom gui
 uniform float channel1hue_x;
@@ -284,18 +211,6 @@ uniform int fb1_mirror_vertical;
 uniform int fb2_mirror_vertical;
 uniform int fb3_toroid_switch;
 
-uniform float ps;
-
-uniform vec2 cam1dimensions;
-uniform vec2 cam2dimensions;
-
-//uniform float pp=1.0;
-
-//just some generice testing varibles
-//uniform float qq;
-//uniform float ee;
-
-
 
 vec3 rgb2hsv(vec3 c)
 {
@@ -401,9 +316,18 @@ vec3 fb_hsbop(vec3 c,
 //a function for all hsb operations to be invoked by each channel
 
 //change every like hsb thing out there to a vec3 duh
-vec3 channel_hsboperations(vec3 c,float hue_x,float sat_x, float bright_x
-                           ,float hue_powmap, float sat_powmap, float bright_powmap
-                           ,int satwrap,int brightwrap,int hueinvert,int satinvert,int brightinvert)
+vec3 channel_hsboperations(vec3 c,
+                           float hue_x,
+                           float sat_x,
+                           float bright_x,
+                           float hue_powmap,
+                           float sat_powmap,
+                           float bright_powmap,
+                           int satwrap,
+                           int brightwrap,
+                           int hueinvert,
+                           int satinvert,
+                           int brightinvert)
 {
   
   //attenuators
@@ -480,7 +404,7 @@ vec4 mix_key_value(vec4 ch1,
     return vec4(ch2.x, ch2.y, ch2.z, blend);
   }
   
-  return ch1;
+  return vec4(0.0);
 }
 
 vec4 mix_diff(vec3 ch1, vec3 ch2, float blend, float diffthresh, float diffmix) {
@@ -547,6 +471,20 @@ vec2 wrapCoord(vec2 coord){
   
   return coord;
 }
+
+vec4 mix(vec4 c0, float w0, vec4 c1, float w1, vec4 c2, float w2, vec4 c3, float w3) {
+  float t = w0 + w1 + w2 + w3;
+  w0 = w0 / t;
+  w1 = w1 / t;
+  w2 = w2 / t;
+  w3 = w3 / t;
+  
+  return vec4(c0.w * w0 + c1.w * w1 + c2.w * w2 + c3.w * w3,
+              c0.x * w0 + c1.x * w1 + c2.x * w2 + c3.x * w3,
+              c0.y * w0 + c1.y * w1 + c2.y * w2 + c3.y * w3,
+              c0.z * w0 + c1.z * w1 + c2.z * w2 + c3.z * w3);
+}
+
 
 vec2 mirrorCoord(vec2 coord){
   
@@ -754,56 +692,98 @@ void main()
   fb2_color=vec4(vec3(hsb2rgb(fb2color_hsb)),1.0);
   
   vec4 mixout_color = channel1_color;
+  bool fbOn = false;
   
   //fb0
   if (fb0enabled == 1) {
+    fbOn = true;
     // Classic
     
     if (fb0type == 0) {
-      mixout_color=mix(mixout_color, fb0_color, fb0mix);
+//      fb0_color=mix(mixout_color, fb0_color, fb0mix);
     }
     
     // Luma
     if (fb0type == 1) {
-      mixout_color=mix_key_value(mixout_color,
+      fb0_color=mix_key_value(mixout_color,
                            fb0_color,
                            fb0mix,
                            fb0key,
                            fb0thresh,
                            ch1_hsbstrip.z);
-      mixout_color = mix(channel1_color, mixout_color, fb0blend);
     }
     
     // Diff
     if (fb0type == 2) {
-      mixout_color = mix_diff(ch1_hsbstrip, fb0color_hsb, fb0blend, fb0thresh, fb0mix);
-      mixout_color = mix(channel1_color, mixout_color, fb0blend);
+      fb0_color = mix_diff(ch1_hsbstrip, fb0color_hsb, fb0blend, fb0thresh, fb0mix);
     }
+  } else {
+    fb0_color = vec4(0.0);
+  }
+    
+  //fb1
+  if (fb1enabled == 1) {
+    fbOn = true;
+    // Classic
+    
+    if (fb1type == 0) {
+//      fb1_color=mix(mixout_color, fb1_color, fb1mix);
+    }
+    
+    // Luma
+    if (fb1type == 1) {
+      fb1_color=mix_key_value(mixout_color,
+                           fb1_color,
+                           fb1mix,
+                           fb1key,
+                           fb1thresh,
+                           ch1_hsbstrip.z);
+    }
+    
+    // Diff
+    if (fb1type == 2) {
+      fb1_color = mix_diff(ch1_hsbstrip, fb1color_hsb, fb1blend, fb1thresh, fb1mix);
+    }
+  } else {
+    fb1_color = vec4(0.0);
+  }
+    
+  //fb2
+  if (fb2enabled == 1) {
+    fbOn = true;
+    // Classic
+    
+    if (fb2type == 0) {
+//      fb2_color=mix(mixout_color, fb2_color, fb2mix);
+    }
+    
+    // Luma
+    if (fb2type == 1) {
+      fb2_color=mix_key_value(mixout_color,
+                           fb2_color,
+                           fb2mix,
+                           fb2key,
+                           fb2thresh,
+                           ch1_hsbstrip.z);
+    }
+    
+    // Diff
+    if (fb2type == 2) {
+      fb2_color = mix_diff(ch1_hsbstrip, fb2color_hsb, fb2blend, fb2thresh, fb2mix);
+    }
+  } else {
+    fb2_color = vec4(0.0);
   }
   
-//  //fb1
-//  if (fb1enabled == 1) {
-//    mixout_color=mix_rgb(mixout_color,
-//                         fb1_color,
-//                         fb1mix,
-//                         fb1lumakeyvalue,
-//                         fb1lumakeythresh,
-//                         ch1_hsbstrip.z,
-//                         fb1lumamix,
-//                         fb1lumaenabled == 1);
-//  }
-//
-//  //  //fb2
-//  if (fb2enabled == 1) {
-//    mixout_color=mix_rgb(mixout_color,
-//                         fb2_color,
-//                         fb2mix,
-//                         fb2lumakeyvalue,
-//                         fb2lumakeythresh,
-//                         ch1_hsbstrip.z,
-//                         fb2lumamix,
-//                         fb2lumaenabled == 1);
-//  }
+  if (fbOn) {
+    mixout_color = mix(channel1_color,fb0_color, fb0blend);
+
+//    mixout_color = mix(fb0_color, fb0blend,
+//                       fb1_color, fb1blend,
+//                       fb2_color, fb2blend,
+//                       channel1_color, channel1blend);
+//    mixout_color = mix(fb0_color, channel1_color, channel1blend);
+  }
   
   gl_FragColor = mixout_color;
 }

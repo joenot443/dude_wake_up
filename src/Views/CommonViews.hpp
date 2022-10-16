@@ -19,6 +19,8 @@ struct CommonViews {
   static void xlSpacing();
   static void Spacing(int n);
   
+  static void IconButton(char icon, std::string id, std::function<void> action);
+  
   static void MidiSelector(Parameter *videoParam);
   
   static void H3Title(std::string title);
@@ -30,6 +32,9 @@ struct CommonViews {
   static void IntSliderWithOscillator(std::string title, std::string id, Parameter *param, Oscillator *o);
   
   static void SliderWithInvertOscillator(std::string title, std::string id, Parameter *param, bool *invert, Oscillator *o);
+  
+  static void ResetButton(std::string id, Parameter *param);
+  static void OscillateButton(std::string id, Oscillator *o);
 };
 
 #endif /* CommonViews_hpp */

@@ -11,7 +11,6 @@
 #include <stdio.h>
 
 #include "VideoSettings.h"
-#include "BasicSettingsView.hpp"
 #include "FeedbackSettingsView.hpp"
 #include "AudioSettings.h"
 

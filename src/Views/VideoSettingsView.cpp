@@ -15,7 +15,7 @@
 #include "VideoSettingsView.hpp"
 #include "FontService.hpp"
 
-const static ofVec2f windowSize = ofVec2f(800, 600);
+const static ofVec2f windowSize = ofVec2f(1000, 600);
 
 void VideoSettingsView::setup() {
   feedback0SettingsView.feedbackSettings = &videoSettings->feedback0Settings;
@@ -101,7 +101,7 @@ void VideoSettingsView::draw() {
     {
       feedback0SettingsView.draw();
       if (ImGui::Button("Clear Feedback")) {
-        videoStream->shouldClearFrameBuffer = true;
+        videoSettings->videoFlags.resetFeedback.setValue(1.0);
       }
       ImGui::EndTabItem();
     }
@@ -134,17 +134,17 @@ void VideoSettingsView::drawHSB() {
   CommonViews::H3Title("Basic (HSB)");
   
   // Hue
-  CommonViews::SliderWithInvertOscillator("Hue", "##hue", &videoSettings->hsbSettings.hue, &videoSettings->hsbSettings.invertHue, &videoSettings->hsbSettings.hueOscillator);
+  CommonViews::SliderWithOscillator("Hue", "##hue", &videoSettings->hsbSettings.hue, &videoSettings->hsbSettings.hueOscillator);
   CommonViews::ModulationSelector(&videoSettings->hsbSettings.hue);
   CommonViews::MidiSelector(&videoSettings->hsbSettings.hue);
   
   // Saturation
-  CommonViews::SliderWithInvertOscillator("Saturation", "##saturation", &videoSettings->hsbSettings.saturation, &videoSettings->hsbSettings.invertSaturation, &videoSettings->hsbSettings.saturationOscillator);
+  CommonViews::SliderWithOscillator("Saturation", "##saturation", &videoSettings->hsbSettings.saturation, &videoSettings->hsbSettings.saturationOscillator);
   CommonViews::ModulationSelector(&videoSettings->hsbSettings.saturation);
   CommonViews::MidiSelector(&videoSettings->hsbSettings.saturation);
 
   // Brightness
-  CommonViews::SliderWithInvertOscillator("Brightness", "##brightness", &videoSettings->hsbSettings.brightness, &videoSettings->hsbSettings.invertBrightness, &videoSettings->hsbSettings.brightnessOscillator);
+  CommonViews::SliderWithOscillator("Brightness", "##brightness", &videoSettings->hsbSettings.brightness, &videoSettings->hsbSettings.brightnessOscillator);
   CommonViews::ModulationSelector(&videoSettings->hsbSettings.brightness);
   CommonViews::MidiSelector(&videoSettings->hsbSettings.brightness);
 }
@@ -153,9 +153,9 @@ void VideoSettingsView::drawBlurSharpen() {
   CommonViews::H3Title("Blur");
   
   // Amount
-  CommonViews::SliderWithOscillator("Amount", "##amount", &videoSettings->blurSettings.amount, &videoSettings->blurSettings.amountOscillator);
-  CommonViews::ModulationSelector(&videoSettings->blurSettings.amount);
-  CommonViews::MidiSelector(&videoSettings->blurSettings.amount);
+  CommonViews::SliderWithOscillator("Mix", "##mix", &videoSettings->blurSettings.mix, &videoSettings->blurSettings.mixOscillator);
+  CommonViews::ModulationSelector(&videoSettings->blurSettings.mix);
+  CommonViews::MidiSelector(&videoSettings->blurSettings.mix);
   
   // Radius
   CommonViews::SliderWithOscillator("Radius", "##radius", &videoSettings->blurSettings.radius, &videoSettings->blurSettings.radiusOscillator);
@@ -184,7 +184,13 @@ void VideoSettingsView::drawBlurSharpen() {
 void VideoSettingsView::drawTransform() {
   CommonViews::H3Title("Transform");
 
-  // Amount
+  // Feedback Blend
+  CommonViews::SliderWithOscillator("Feedback Blend", "##feedbackblend", &videoSettings->transformSettings.feedbackBlend, &videoSettings->transformSettings.feedbackBlendOscillator);
+  CommonViews::ModulationSelector(&videoSettings->transformSettings.feedbackBlend);
+  CommonViews::MidiSelector(&videoSettings->transformSettings.feedbackBlend);
+  
+  
+  // Scale
   CommonViews::SliderWithOscillator("Scale", "##scale", &videoSettings->transformSettings.scale, &videoSettings->transformSettings.scaleOscillator);
   CommonViews::ModulationSelector(&videoSettings->transformSettings.scale);
   CommonViews::MidiSelector(&videoSettings->transformSettings.scale);
@@ -195,14 +201,11 @@ void VideoSettingsView::drawPixelation() {
 
   ImGui::Text("Mix");
   ImGui::SetNextItemWidth(150.0);
-  ImGui::SliderFloat("##pixelation_mix", &videoSettings->pixelSettings.mix.value, videoSettings->pixelSettings.mix.min, videoSettings->pixelSettings.mix.max, "%.3f");
   ImGui::SameLine(0, 20);
-  ImGui::Checkbox("Enabled##pixelation_enabled", &videoSettings->pixelSettings.enabled);
-  CommonViews::ModulationSelector(&videoSettings->pixelSettings.mix);
-  CommonViews::MidiSelector(&videoSettings->pixelSettings.mix);
+  ImGui::Checkbox("Enabled##pixelation_enabled", &videoSettings->pixelSettings.enabled.boolValue);
 
-  CommonViews::SliderWithOscillator("Scale", "##pixelation_scale", &videoSettings->pixelSettings.scale, &videoSettings->pixelSettings.scaleOscillator);
-  CommonViews::ModulationSelector(&videoSettings->pixelSettings.scale);
-  CommonViews::MidiSelector(&videoSettings->pixelSettings.scale);
+  CommonViews::SliderWithOscillator("Size", "##pixelation_size", &videoSettings->pixelSettings.size, &videoSettings->pixelSettings.sizeOscillator);
+  CommonViews::ModulationSelector(&videoSettings->pixelSettings.size);
+  CommonViews::MidiSelector(&videoSettings->pixelSettings.size);
 }
 

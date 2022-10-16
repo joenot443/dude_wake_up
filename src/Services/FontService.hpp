@@ -27,6 +27,7 @@ public:
   ImFont * p;
   ImFont * b;
   ImFont * i;
+  ImFont * icon;
   
   void loadFonts();
   void addFontToGui(ofxImGui::Gui *gui);

@@ -10,6 +10,7 @@
 
 #include "ofMain.h"
 #include "VideoSettings.h"
+#include "GlitchShader.hpp"
 #include "ofBaseApp.h"
 #include "Oscillator.hpp"
 #include "FeedbackShader.hpp"
@@ -21,9 +22,10 @@ public:
   VideoStream(std::shared_ptr<ofAppBaseWindow> window, StreamConfig config, VideoSettings *settings,   std::function<void(int)> closeStream) :
   position(Parameter("playerPosition", config.streamId, 0.0)),
   speed(Parameter("playerSpeed", config.streamId, 1.0, 0.0, 4.0)),
-  feedbackShaders({FeedbackShader(&settings->feedback0Settings, &shaderMixer, 0),
-    FeedbackShader(&settings->feedback1Settings, &shaderMixer, 1),
-    FeedbackShader(&settings->feedback2Settings, &shaderMixer, 2)
+  feedbackShaders({
+    FeedbackShader(&settings->feedback0Settings, 0),
+    FeedbackShader(&settings->feedback1Settings, 1),
+    FeedbackShader(&settings->feedback2Settings, 2)
   }),
   window(window),
   config(config),
@@ -53,6 +55,7 @@ private:
   // Drawing
   void prepareFbos();
   void completeFrame();
+  void prepareMainFbo();
   void drawMainFbo();
   void drawDebug();
   void drawVideo(float scale);
@@ -63,7 +66,6 @@ private:
   void shadeHSB();
   void shadeFeedback();
   void shadeSharpen();
-  void shadeGlitch();
   void saveFeedbackFrame();
   void resetFeedbackValues(FeedbackSettings *feedback);
   void clearFrameBuffer();
@@ -93,9 +95,11 @@ private:
   Parameter position;
   Parameter speed;
   
+  GlitchShader glitchShader;
+  
   // Vector of vectors of feedback frames
-  std::vector<ofFbo> frameBuffer;
   std::vector<FeedbackShader> feedbackShaders;
+  std::vector<Shader *> shaders;
   long frameCount = 1;
   int frameDelayOffset;
 };

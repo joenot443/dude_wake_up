@@ -34,9 +34,9 @@ void MainApp::setup(){
   mainSettingsView = new MainSettingsView(new MainSettings(), videoFn, audioFn);
   mainSettingsView->setup();
   isSetup = true;
-  videoFn(StreamConfig(VideoSource_webcam, "", 0));
+//  videoFn(StreamConfig(VideoSource_webcam, "", 1));
 //  videoFn(StreamConfig(VideoSource_file, "/Users/jcrozier/Libra/ry/Mobile Documents/com~apple~CloudDocs/dude_wake_up/videos/dvd_logo.mp4", 0));
-  std::shared_ptr<AudioStreamConfig> config = make_shared<AudioStreamConfig>(AudioStreamConfig(AudioSource_microphone, "", 3));
+//  std::shared_ptr<AudioStreamConfig> config = make_shared<AudioStreamConfig>(AudioStreamConfig(AudioSource_microphone, "", 3));
   
 //    pushAudioStream(config);
 }

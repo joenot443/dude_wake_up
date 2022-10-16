@@ -1,3 +1,4 @@
+#include <errno.h>
 #include "ofMain.h"
 #include "MainApp.h"
 #include "FontService.hpp"

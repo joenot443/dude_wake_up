@@ -45,6 +45,8 @@ void FeedbackSettingsView::drawParameters() {
     return;
   }
   
+  ImGui::Checkbox("Use Processed##fb_use_processed", &feedbackSettings->useProcessedFrame.boolValue);
+  
   std::string typeName;
   auto types = {FeedbackType_Diff, FeedbackType_Luma, FeedbackType_Classic};
   typeName = feedbackTypeName((FeedbackType) feedbackSettings->mixSettings.feedbackType.intValue);
@@ -59,31 +61,31 @@ void FeedbackSettingsView::drawParameters() {
     ImGui::EndCombo();
   }
   // Mix
-  CommonViews::SliderWithOscillator("Mix", "##mix_amount", &feedbackSettings->mixSettings.mix, &feedbackSettings->mixSettings.mixOscillator);
-  CommonViews::ModulationSelector(&feedbackSettings->mixSettings.mix);
-  CommonViews::MidiSelector(&feedbackSettings->mixSettings.mix);
+  CommonViews::SliderWithOscillator("Blend", "##blend_amount", &feedbackSettings->mixSettings.blend, &feedbackSettings->mixSettings.blendOscillator);
+  CommonViews::ModulationSelector(&feedbackSettings->mixSettings.blend);
+  CommonViews::MidiSelector(&feedbackSettings->mixSettings.blend);
   
-  if (feedbackSettings->mixSettings.feedbackType.intValue != FeedbackType_Classic) {
-    // Blend (Disabled for Classic)
-    CommonViews::SliderWithOscillator("Blend", "##blend_amount", &feedbackSettings->mixSettings.blend, &feedbackSettings->mixSettings.blendOscillator);
-    CommonViews::ModulationSelector(&feedbackSettings->mixSettings.blend);
-    CommonViews::MidiSelector(&feedbackSettings->mixSettings.blend);
-  }
-
   // Delay Amount
   CommonViews::IntSliderWithOscillator("Delay", "##delay_amount", &feedbackSettings->mixSettings.delayAmount, &feedbackSettings->mixSettings.delayAmountOscillator);
   CommonViews::ModulationSelector(&feedbackSettings->mixSettings.delayAmount);
   CommonViews::MidiSelector(&feedbackSettings->mixSettings.delayAmount);
-  
-  // Key Value
-  CommonViews::SliderWithOscillator("Key Value", "##key_value", &feedbackSettings->mixSettings.keyValue, &feedbackSettings->mixSettings.keyValueOscillator);
-  CommonViews::ModulationSelector(&feedbackSettings->mixSettings.keyValue);
-  CommonViews::MidiSelector(&feedbackSettings->mixSettings.keyValue);
-  
-  // Threshold
-  CommonViews::SliderWithOscillator("Key Threshold", "##key_threshold", &feedbackSettings->mixSettings.keyThreshold, &feedbackSettings->mixSettings.keyThresholdOscillator);
-  CommonViews::ModulationSelector(&feedbackSettings->mixSettings.keyThreshold);
-  CommonViews::MidiSelector(&feedbackSettings->mixSettings.keyThreshold);
+
+  if (feedbackSettings->mixSettings.feedbackType.intValue != FeedbackType_Classic) {
+//    // Mix (Disabled for Classic)
+//    CommonViews::SliderWithOscillator("Mix", "##mix_amount", &feedbackSettings->mixSettings.mix, &feedbackSettings->mixSettings.mixOscillator);
+//    CommonViews::ModulationSelector(&feedbackSettings->mixSettings.mix);
+//    CommonViews::MidiSelector(&feedbackSettings->mixSettings.mix);
+    
+    // Key Value
+    CommonViews::SliderWithOscillator("Key Value", "##key_value", &feedbackSettings->mixSettings.keyValue, &feedbackSettings->mixSettings.keyValueOscillator);
+    CommonViews::ModulationSelector(&feedbackSettings->mixSettings.keyValue);
+    CommonViews::MidiSelector(&feedbackSettings->mixSettings.keyValue);
+    
+    // Threshold
+    CommonViews::SliderWithOscillator("Key Threshold", "##key_threshold", &feedbackSettings->mixSettings.keyThreshold, &feedbackSettings->mixSettings.keyThresholdOscillator);
+    CommonViews::ModulationSelector(&feedbackSettings->mixSettings.keyThreshold);
+    CommonViews::MidiSelector(&feedbackSettings->mixSettings.keyThreshold);
+  }
 }
 
 void FeedbackSettingsView::drawHSB() {
