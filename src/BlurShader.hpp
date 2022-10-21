@@ -43,6 +43,24 @@ public:
   bool enabled() override {
     return true;
   }
+  
+  std::string name() override {
+    return "Blur";
+  }
+  
+  void drawSettings() override {
+    CommonViews::H3Title("Blur");
+    
+    // Amount
+    CommonViews::SliderWithOscillator("Mix", "##mix", &settings->mix, &settings->mixOscillator);
+    CommonViews::ModulationSelector(&settings->mix);
+    CommonViews::MidiSelector(&settings->mix);
+    
+    // Radius
+    CommonViews::SliderWithOscillator("Radius", "##radius", &settings->radius, &settings->radiusOscillator);
+    CommonViews::ModulationSelector(&settings->radius);
+    CommonViews::MidiSelector(&settings->radius);
+  }
 };
 
 

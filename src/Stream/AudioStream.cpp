@@ -23,7 +23,6 @@ void AudioStream::setup() {
     this->audioIn(soundBuffer);
   };
   
-  isSetup = true;
   stream.setup(settings);
   analysis->beatOscillator.enabled = true;
 }

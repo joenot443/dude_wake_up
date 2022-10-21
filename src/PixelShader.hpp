@@ -41,6 +41,23 @@ struct PixelShader: Shader {
   bool enabled() override {
     return settings->enabled.boolValue;
   }
+  
+  std::string name() override {
+    return "Pixel";
+  }
+  
+  void drawSettings() override {
+    CommonViews::H3Title("Pixelation");
+    
+    ImGui::Text("Mix");
+    ImGui::SetNextItemWidth(150.0);
+    ImGui::SameLine(0, 20);
+    ImGui::Checkbox("Enabled##pixelation_enabled", &settings->enabled.boolValue);
+    
+    CommonViews::SliderWithOscillator("Size", "##pixelation_size", &settings->size, &settings->sizeOscillator);
+    CommonViews::ModulationSelector(&settings->size);
+    CommonViews::MidiSelector(&settings->size);
+  }
 };
 
 #endif /* PixelShader_hpp */

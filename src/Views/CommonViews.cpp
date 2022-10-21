@@ -80,6 +80,14 @@ void CommonViews::H3Title(std::string title) {
   ImGui::PopFont();
 }
 
+void CommonViews::H4Title(std::string title) {
+  CommonViews::Spacing(2);
+  ImGui::PushFont(FontService::getService()->h4);
+  ImGui::Text("%s", title.c_str());
+  CommonViews::Spacing(2);
+  ImGui::PopFont();
+}
+
 void CommonViews::SliderWithOscillator(std::string title, std::string id, Parameter *param, Oscillator *o) {
   ImGui::Text("%s", title.c_str());
   ImGui::SameLine(0, 20);
@@ -186,4 +194,17 @@ void CommonViews::MidiSelector(Parameter *videoParam) {
     buttonAction();
   }
   
+}
+
+void CommonViews::HorizontallyAligned(float width, float alignment) {
+  ImGuiStyle& style = ImGui::GetStyle();
+  float avail = ImGui::GetContentRegionAvail().x;
+  float off = (avail - width) * alignment;
+  if (off > 0.0f)
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
+}
+
+void CommonViews::CenteredVerticalLine() {
+  HorizontallyAligned(1);
+  ImGui::Text("|");
 }

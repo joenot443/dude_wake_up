@@ -9,7 +9,7 @@
 #include "ofMain.h"
 #include "Console.hpp"
 
-ofFbo ShaderChainer::fboChainingShaders(std::vector<Shader*> *shaders, ofFbo texture) {
+ofFbo ShaderChainer::fboChainingShaders(std::vector<Shader *> *shaders, ofFbo texture) {
   auto ping = ofFbo();
   if (!ping.isAllocated()) {
     ping.allocate(texture.getWidth(), texture.getHeight());

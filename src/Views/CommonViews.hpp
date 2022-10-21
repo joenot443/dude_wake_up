@@ -18,12 +18,18 @@ struct CommonViews {
   static void lSpacing();
   static void xlSpacing();
   static void Spacing(int n);
+
+  static void HorizontallyAligned(float width, float alignment = 0.5);
   
   static void IconButton(char icon, std::string id, std::function<void> action);
   
   static void MidiSelector(Parameter *videoParam);
   
   static void H3Title(std::string title);
+  
+  static void H4Title(std::string title);
+  
+  static void CenteredVerticalLine();
   
   static void ModulationSelector(Parameter* videoParam);
   

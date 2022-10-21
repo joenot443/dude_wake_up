@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include "VideoSettings.h"
 #include "VideoStream.h"
+#include "ShaderChainerView.hpp"
 #include "FeedbackSettingsView.hpp"
 
 struct VideoSettingsView {
@@ -22,6 +23,7 @@ public:
   void teardown();
   
   VideoSettings *videoSettings;
+  ShaderChainerView shaderChainerView;
   FeedbackSettingsView feedback0SettingsView;
   FeedbackSettingsView feedback1SettingsView;
   FeedbackSettingsView feedback2SettingsView;
@@ -30,10 +32,16 @@ public:
   std::vector<std::string> sourceNames;
   
   VideoSettingsView(VideoSettings *videoSettings, VideoStream *videoStream, std::function<void(int)> closeStream)
-  : videoSettings(videoSettings), closeStream(closeStream), videoStream(videoStream) {};
+  :
+  videoSettings(videoSettings),
+  closeStream(closeStream),
+  videoStream(videoStream),
+  shaderChainerView(ShaderChainerView(videoSettings, &videoStream->shaders, &videoStream->feedbackShaders))
+  {};
   
 private:
   void styleWindow();
+  void drawSelectedShader();
   void drawMenu();
   void drawHSB();
   void drawBlurSharpen();

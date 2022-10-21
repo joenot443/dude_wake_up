@@ -11,6 +11,7 @@
 #include "ofMain.h"
 #include "VideoSettings.h"
 #include "ofxImGui.h"
+#include "CommonViews.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
@@ -41,6 +42,30 @@ public:
   
   bool enabled() override {
     return true;
+  }
+  
+  std::string name() override {
+    return "HSB";
+  }
+  
+  void drawSettings() override {
+    CommonViews::H3Title("Basic (HSB)");
+    
+    // Hue
+    CommonViews::SliderWithOscillator("Hue", "##hue", &settings->hue, &settings->hueOscillator);
+    CommonViews::ModulationSelector(&settings->hue);
+    CommonViews::MidiSelector(&settings->hue);
+    
+    // Saturation
+    CommonViews::SliderWithOscillator("Saturation", "##saturation", &settings->saturation, &settings->saturationOscillator);
+    CommonViews::ModulationSelector(&settings->saturation);
+    CommonViews::MidiSelector(&settings->saturation);
+    
+    // Brightness
+    CommonViews::SliderWithOscillator("Brightness", "##brightness", &settings->brightness, &settings->brightnessOscillator);
+    CommonViews::ModulationSelector(&settings->brightness);
+    CommonViews::MidiSelector(&settings->brightness);
+
   }
 };
 

@@ -37,17 +37,8 @@ void VideoStream::setup() {
       break;
   }
   
-  isSetup = true;
   ofSetWindowShape(640, 480);
   
-  HSBShader* hsb = new HSBShader(&settings->hsbSettings);
-  BlurShader* blur = new BlurShader(&settings->blurSettings);
-  PixelShader *pixel = new PixelShader(&settings->pixelSettings);
-  
-  shaders.push_back(hsb);
-  shaders.push_back(pixel);
-  shaders.push_back(blur);
-  shaders.push_back(&feedbackShaders[0]);
   for (auto & sh : shaders) {
     sh->setup();
   }
@@ -86,25 +77,14 @@ void VideoStream::update() {
 void VideoStream::draw() {
   gui.begin();
     
-  ImGui::PushFont(FontService::getService()->p);
   prepareMainFbo();
 
   fbo = ShaderChainer::fboChainingShaders(&shaders, fbo);
   fbo.draw(0, 0, ofGetWidth(), ofGetHeight());
   
-//  shadeFeedback();
-//  shadeHSB();
-//  shadeBlur();
-//  shadeSharpen();
-//  fbo = glitchShader.shade(&fbo);
-//  drawDebug();
-//  drawMainFbo();
-//  completeFrame();
-  
   if (!firstFrameDrawn) {
     firstDrawSetup();
   }
-  ImGui::PopFont();
   
   if (settings->videoFlags.resetFeedback.boolValue) {
     settings->videoFlags.resetFeedback.setValue(0.0);
@@ -156,7 +136,10 @@ void VideoStream::drawVideoPlayer() {
     }
   }
   
-  
+  drawVideoPlayerMenu();
+}
+
+void VideoStream::drawVideoPlayerMenu() {
   if (ImGui::Begin(std::to_string(settings->streamId).c_str(), NULL, ImGuiWindowFlags_NoTitleBar || ImGuiWindowFlags_NoMove)) {
     ImGui::SliderFloat("Playback", &position.value, 0.0, 1.0);
     ImGui::SliderFloat("Speed", &speed.value, 0.0, 4.0);
@@ -184,19 +167,6 @@ void VideoStream::prepareFbos() {
   fbo.end();
 }
 
-void VideoStream::resetFeedbackValues(FeedbackSettings *feedback) {
-  shaderMixer.setUniform1i("fb0enabled", false);
-  shaderMixer.setUniform1f("fb0lumakeyvalue", 0.0);
-  shaderMixer.setUniform1f("fb0lumakeythresh", 0.0);
-  shaderMixer.setUniform1f("fb0mix", 0.0);
-  shaderMixer.setUniform3f("fb0_hsb_x", 1.0, 1.0, 1.0);
-
-  shaderMixer.setUniform3f("fb0_hue_x", 10.0, 0.0, 0.0);
-  shaderMixer.setUniform3f("fb0_rescale", 0.0, 0.0, 1.0);
-  shaderMixer.setUniform1f("fb0_rotate", 0.0);
-}
-
-
 void VideoStream::drawDebug() {
   //  frameBuffer[feedbackDrawIndex()].draw(ofGetWidth() - 200, ofGetHeight() - 100, 200, 100);
   
@@ -212,18 +182,11 @@ void VideoStream::drawDebug() {
 
 void VideoStream::clearFrameBuffer() {
   for (auto & fb : feedbackShaders) {
-    if (fb.feedback->enabled.boolValue) {
-      fb.clearFrameBuffer();
-    }
+    fb->clearFrameBuffer();
   }
   shouldClearFrameBuffer = false;
 }
 
-
-void VideoStream::completeFrame() {
-  frameCount += 1;
-  glitchShader.clear();
-}
 
 // MARK: - Helpers
 

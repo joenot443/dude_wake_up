@@ -9,6 +9,7 @@
 #define VideoSettings_h
 
 #include "Oscillator.hpp"
+#include "Shader.hpp"
 #include "Parameter.h"
 #include "Strings.hpp"
 #include <string>
@@ -27,11 +28,11 @@ public:
   std::vector<Oscillator*> oscillators;
   json serialize(json j) {
     for (auto p : parameters) {
-      j[p->paramId] = p->valueRespectingBool();
+      j[p->paramId] = p->paramValue();
     }
     auto ops = Oscillator::parametersFromOscillators(oscillators);
     for (auto p : ops) {
-      j[p->paramId] = p->valueRespectingBool();
+      j[p->paramId] = p->paramValue();
     }
     return j;
   }
@@ -169,7 +170,7 @@ struct FeedbackMixSettings: public JSONSerializable  {
   delayAmount(Parameter("feedback_delayAmount", settingsId, 10.0, 0.0, 28.0)),
   delayAmountOscillator(Oscillator(&delayAmount))
   {
-    parameters = {&blend, &mix, &keyValue, &keyThreshold, &delayAmount};
+    parameters = {&feedbackType, &blend, &mix, &keyValue, &keyThreshold, &delayAmount};
     oscillators = {&blendOscillator, &mixOscillator, &keyValueOscillator, &keyThresholdOscillator, &delayAmountOscillator};
   }
 };
@@ -204,7 +205,7 @@ struct FeedbackMiscSettings: public JSONSerializable  {
 struct FeedbackSettings  {
   
   int index;
-  Parameter enabled;
+  Parameter lumaKeyEnabled;
   Parameter useProcessedFrame;
   std::string feedbackId;
   FeedbackMixSettings mixSettings;
@@ -213,8 +214,8 @@ struct FeedbackSettings  {
   
   FeedbackSettings(std::string settingsId, int index) :
   index(index),
-  enabled(Parameter(formatString("%sfeedback_enabled_%d", settingsId.c_str(), index), settingsId, formatString("fb%denabled", index), 0.0, 0.0, 0.0)),
-  useProcessedFrame(Parameter(formatString("%sfeedback_use_procssed_%d", settingsId.c_str(), index), settingsId, formatString("fb%duse_processed", index), 0.0, 0.0, 0.0)),
+  lumaKeyEnabled(Parameter(formatString("%sfeedback_luma_key_enabled_%d", "lumaEnabled", settingsId.c_str(), index), settingsId, 0.0, 0.0, 0.0)),
+  useProcessedFrame(Parameter(formatString("%sfeedback_use_procssed_%d", settingsId.c_str(), index), settingsId, 0.0, 0.0, 0.0)),
   feedbackId(formatString("%s_%d_", settingsId.c_str(), index)),
   mixSettings(FeedbackMixSettings(feedbackId, index)),
   miscSettings(FeedbackMiscSettings(feedbackId, index)),
@@ -222,7 +223,8 @@ struct FeedbackSettings  {
   {}
   
   json serialize(json j) {
-    j[enabled.paramId] = enabled.valueRespectingBool();
+    j[lumaKeyEnabled.paramId] = lumaKeyEnabled.paramValue();
+    j[useProcessedFrame.paramId] = useProcessedFrame.paramValue();
     j = hsbSettings.serialize(j);
     j = mixSettings.serialize(j);
     return j;
@@ -247,7 +249,6 @@ struct VideoSettings   {
   FeedbackSettings feedback1Settings;
   FeedbackSettings feedback2Settings;
   VideoFlags videoFlags;
-  std::vector<FeedbackSettings*> allFeedbacks;
   int streamId;
   std::string settingsIdStr;
   
@@ -262,12 +263,7 @@ struct VideoSettings   {
   transformSettings(TransformSettings(strId)),
   feedback0Settings(FeedbackSettings(strId, 0)),
   feedback1Settings(FeedbackSettings(strId, 1)),
-  feedback2Settings(FeedbackSettings(strId, 2)),
-  
-  allFeedbacks({
-    &feedback0Settings,
-    &feedback1Settings,
-    &feedback2Settings})
+  feedback2Settings(FeedbackSettings(strId, 2))
   {
   }
   

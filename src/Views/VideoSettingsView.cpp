@@ -44,7 +44,7 @@ void VideoSettingsView::draw() {
     MidiService::getService()->loadConfigFile();
     hasDrawn = true;
   }
-
+  
   ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar;
   ImGui::SetNextWindowSize(windowSize);
   auto name = std::string("##%d Video Feed Tabs", videoSettings->streamId);
@@ -53,27 +53,27 @@ void VideoSettingsView::draw() {
   
   if (ImGui::BeginMenuBar())
   {
-      if (ImGui::BeginMenu("File"))
-      {
-        if (ImGui::MenuItem("Save Config", "CMD+S")) {
-          auto t = std::time(nullptr);
-          auto tm = *std::localtime(&t);
-          stringstream timeStream;
-          timeStream << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << std::endl;
-          timeStream << " Config.json";
-          ofFileDialogResult result = ofSystemSaveDialog(timeStream.str(), "Save config file");
-          if(result.bSuccess) {
-            ConfigService::getService()->saveConfigFile(videoSettings, result.getPath());
-          }
+    if (ImGui::BeginMenu("File"))
+    {
+      if (ImGui::MenuItem("Save Config", "CMD+S")) {
+        auto t = std::time(nullptr);
+        auto tm = *std::localtime(&t);
+        stringstream timeStream;
+        timeStream << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << std::endl;
+        timeStream << " Config.json";
+        ofFileDialogResult result = ofSystemSaveDialog(timeStream.str(), "Save config file");
+        if(result.bSuccess) {
+          ConfigService::getService()->saveConfigFile(videoSettings, result.getPath());
         }
-        if (ImGui::MenuItem("Load Config", "CMD+O")) {
-          ofFileDialogResult result = ofSystemLoadDialog("Open config file");
-          if (result.getPath().length()) {
-              ConfigService::getService()->loadConfigFile(result.getPath());
-          }
-        }
-          ImGui::EndMenu();
       }
+      if (ImGui::MenuItem("Load Config", "CMD+O")) {
+        ofFileDialogResult result = ofSystemLoadDialog("Open config file");
+        if (result.getPath().length()) {
+          ConfigService::getService()->loadConfigFile(result.getPath());
+        }
+      }
+      ImGui::EndMenu();
+    }
     ImGui::EndMenuBar();
   }
   
@@ -83,45 +83,19 @@ void VideoSettingsView::draw() {
   ImGui::Separator();
   
   
-  if (ImGui::BeginTabBar(name.c_str(), ImGuiTabBarFlags_None))
-  {
-    if (ImGui::BeginTabItem("Video Settings"))
-    {
-      ImGui::Columns(2, "videofeedsettings", false);
-      drawHSB();
-      drawPixelation();
-      ImGui::NextColumn();
-      drawBlurSharpen();
-      drawTransform();
-      ImGui::Columns(1);
-      CommonViews::Spacing(16);
-      ImGui::EndTabItem();
-    }
-    if (ImGui::BeginTabItem("Feedback 1"))
-    {
-      feedback0SettingsView.draw();
-      if (ImGui::Button("Clear Feedback")) {
-        videoSettings->videoFlags.resetFeedback.setValue(1.0);
-      }
-      ImGui::EndTabItem();
-    }
-    if (ImGui::BeginTabItem("Feedback 2"))
-    {
-      feedback1SettingsView.draw();
-      ImGui::EndTabItem();
-    }
-    if (ImGui::BeginTabItem("Feedback 3"))
-    {
-      feedback2SettingsView.draw();
-      ImGui::EndTabItem();
-    }
-    ImGui::EndTabBar();
-  }
+  ImGui::Columns(2, "videofeedsettings", false);
+  // Shader Chainer
+  shaderChainerView.draw();
+  ImGui::NextColumn();
+  // Selected Shader
+  drawSelectedShader();
+  ImGui::Columns(1);
   ImGui::Separator();
+  
+  // Close Stream button
   if (ImGui::Button("Close Stream")) {
     closeStream(videoSettings->streamId);
   }
-  
   ImGui::End();
 }
 
@@ -129,6 +103,9 @@ void VideoSettingsView::drawMenu() {
   
 }
 
+void VideoSettingsView::drawSelectedShader() {
+  shaderChainerView.selectedShader->drawSettings();
+}
 
 void VideoSettingsView::drawHSB() {
   CommonViews::H3Title("Basic (HSB)");
@@ -142,7 +119,7 @@ void VideoSettingsView::drawHSB() {
   CommonViews::SliderWithOscillator("Saturation", "##saturation", &videoSettings->hsbSettings.saturation, &videoSettings->hsbSettings.saturationOscillator);
   CommonViews::ModulationSelector(&videoSettings->hsbSettings.saturation);
   CommonViews::MidiSelector(&videoSettings->hsbSettings.saturation);
-
+  
   // Brightness
   CommonViews::SliderWithOscillator("Brightness", "##brightness", &videoSettings->hsbSettings.brightness, &videoSettings->hsbSettings.brightnessOscillator);
   CommonViews::ModulationSelector(&videoSettings->hsbSettings.brightness);
@@ -161,7 +138,7 @@ void VideoSettingsView::drawBlurSharpen() {
   CommonViews::SliderWithOscillator("Radius", "##radius", &videoSettings->blurSettings.radius, &videoSettings->blurSettings.radiusOscillator);
   CommonViews::ModulationSelector(&videoSettings->blurSettings.radius);
   CommonViews::MidiSelector(&videoSettings->blurSettings.radius);
-
+  
   // Sharpen
   
   CommonViews::H3Title("Sharpen");
@@ -169,12 +146,12 @@ void VideoSettingsView::drawBlurSharpen() {
   CommonViews::SliderWithOscillator("Amount", "##sharpen_amount", &videoSettings->sharpenSettings.amount, &videoSettings->sharpenSettings.amountOscillator);
   CommonViews::ModulationSelector(&videoSettings->sharpenSettings.amount);
   CommonViews::MidiSelector(&videoSettings->sharpenSettings.amount);
-
+  
   // Radius
   CommonViews::SliderWithOscillator("Radius", "##sharpen_radius", &videoSettings->sharpenSettings.radius, &videoSettings->sharpenSettings.radiusOscillator);
   CommonViews::ModulationSelector(&videoSettings->sharpenSettings.radius);
   CommonViews::MidiSelector(&videoSettings->sharpenSettings.radius);
-
+  
   // Boost
   CommonViews::SliderWithOscillator("Boost", "##sharpen_boost", &videoSettings->sharpenSettings.boost, &videoSettings->sharpenSettings.boostOscillator);
   CommonViews::ModulationSelector(&videoSettings->sharpenSettings.boost);
@@ -183,7 +160,7 @@ void VideoSettingsView::drawBlurSharpen() {
 
 void VideoSettingsView::drawTransform() {
   CommonViews::H3Title("Transform");
-
+  
   // Feedback Blend
   CommonViews::SliderWithOscillator("Feedback Blend", "##feedbackblend", &videoSettings->transformSettings.feedbackBlend, &videoSettings->transformSettings.feedbackBlendOscillator);
   CommonViews::ModulationSelector(&videoSettings->transformSettings.feedbackBlend);
@@ -198,12 +175,12 @@ void VideoSettingsView::drawTransform() {
 
 void VideoSettingsView::drawPixelation() {
   CommonViews::H3Title("Pixelation");
-
+  
   ImGui::Text("Mix");
   ImGui::SetNextItemWidth(150.0);
   ImGui::SameLine(0, 20);
   ImGui::Checkbox("Enabled##pixelation_enabled", &videoSettings->pixelSettings.enabled.boolValue);
-
+  
   CommonViews::SliderWithOscillator("Size", "##pixelation_size", &videoSettings->pixelSettings.size, &videoSettings->pixelSettings.sizeOscillator);
   CommonViews::ModulationSelector(&videoSettings->pixelSettings.size);
   CommonViews::MidiSelector(&videoSettings->pixelSettings.size);

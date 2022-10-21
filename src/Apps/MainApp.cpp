@@ -135,24 +135,24 @@ void MainApp::pushVideoStream(std::shared_ptr<StreamConfig> config) {
     this->removeVideoStream(streamId);
   };
   
-  // settingsId is based off the number of active streams we have.
+  // Each stream created within the lifecycle will increment streamId by 1
   static int streamIdCounter = 0;
   auto streamId = streamIdCounter += 1;
 
   VideoSettings *videoSettings = new VideoSettings(streamId, std::to_string(streamId));
   
-  VideoStream* stream = new VideoStream(streamWindow, *config, videoSettings, closeStream);
-  videoStreams.push_back(stream);
+  auto streamPointer = std::make_shared<VideoStream>(streamWindow, *config, videoSettings, closeStream);
   
-  VideoSettingsView *settingsView = new VideoSettingsView(videoSettings, stream, closeStream);
+  videoStreams.push_back(streamPointer.get());
+  
+  VideoSettingsView *settingsView = new VideoSettingsView(videoSettings, streamPointer.get(), closeStream);
   videoSettingsViews.push_back(settingsView);
   
   settingsView->setup();
   
   windows.push_back(streamWindow);
   mainSettingsView->mainSettings->activeStreams += 1;
-  
-  auto streamPointer = std::make_shared<VideoStream>(streamWindow, *config, videoSettings, closeStream);
+
   ofRunApp(streamWindow, streamPointer);
 }
 

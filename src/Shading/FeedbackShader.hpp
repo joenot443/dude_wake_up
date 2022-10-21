@@ -33,6 +33,8 @@ struct FeedbackShader: Shader  {
   virtual void shade(ofFbo *frame, ofFbo *canvas);
   virtual void clear();
   virtual bool enabled();
+  virtual std::string name();
+  virtual void drawSettings();
 };
 
 #endif /* FeedbackShader_hpp */

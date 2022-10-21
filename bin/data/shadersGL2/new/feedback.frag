@@ -7,6 +7,7 @@ varying vec2 coord;
 uniform float blend;
 uniform int fbType;
 
+uniform int lumaEnabled;
 uniform float lumaKey;
 uniform float lumaThresh;
 uniform vec3 hsb;
@@ -74,10 +75,10 @@ void main()
   vec4 fbColor = texture2DRect(fbTexture, coord);
   vec4 outColor = vec4(1.0, 0.0, 1.0, 1.0);
 
-  if (fbType == 0) {
-    outColor = mixStandard(mainColor, fbColor, blend);
-  } else if (fbType == 1) {
+  if (lumaEnabled == 1) {
     outColor = mixLumaKey(mainColor, fbColor, blend, lumaKey, lumaThresh);
+  } else {
+    outColor = mixStandard(mainColor, fbColor, blend);
   }
   
   gl_FragColor = outColor;

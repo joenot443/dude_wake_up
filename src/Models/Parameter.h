@@ -33,7 +33,7 @@ struct Parameter
   float percentValue() {
     return value/(max - min);
   }
-  
+
   /// Resets the value to its defaultValue
   void resetValue() {
     setValue(defaultValue); 
@@ -52,11 +52,28 @@ struct Parameter
   }
   
   /// Returns 1 if our boolValue is true, otherwise the normal float value
-  float valueRespectingBool() {
+  float paramValue() {
     if (boolValue) {
       return true;
     }
+    
+    if (intValue != 0) {
+      return static_cast<float>(intValue);
+    }
+    
     return value;
+  }
+  
+  int intParamValue() {
+    if (boolValue) {
+      return 1;
+    }
+    
+    if (intValue != 0) {
+      return intValue;
+    }
+    
+    return static_cast<int>(value);    
   }
   
   Parameter(std::string name, std::string settingsId, float value);

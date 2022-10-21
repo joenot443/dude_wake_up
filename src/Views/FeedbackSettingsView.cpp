@@ -25,41 +25,13 @@ void FeedbackSettingsView::draw() {
   ImGui::Columns(1);
 }
 
-std::string feedbackTypeName(FeedbackType type) {
-  switch (type) {
-    case FeedbackType_Classic:
-      return "Classic";
-    case FeedbackType_Luma:
-      return "Luminosity";
-    case FeedbackType_Diff:
-      return "Difference";
-  }
-}
-
 void FeedbackSettingsView::drawParameters() {
   CommonViews::H3Title("Feedback Parameters");
   
-  ImGui::Checkbox("Enabled##fb0_enabled", &feedbackSettings->enabled.boolValue);
-  
-  if (!feedbackSettings->enabled.boolValue) {
-    return;
-  }
-  
   ImGui::Checkbox("Use Processed##fb_use_processed", &feedbackSettings->useProcessedFrame.boolValue);
   
-  std::string typeName;
-  auto types = {FeedbackType_Diff, FeedbackType_Luma, FeedbackType_Classic};
-  typeName = feedbackTypeName((FeedbackType) feedbackSettings->mixSettings.feedbackType.intValue);
+  ImGui::Checkbox("Luma Key Enabled##fb_luma_key", &feedbackSettings->lumaKeyEnabled.boolValue);
   
-  if (ImGui::BeginCombo(typeName.c_str(), "Select Feedback Type"))
-  {
-    for (auto const& fb : types) {
-      if (ImGui::Selectable(feedbackTypeName(fb).c_str(), feedbackSettings->mixSettings.feedbackType.intValue == fb)) {
-        feedbackSettings->mixSettings.feedbackType.intValue = fb;
-      }
-    }
-    ImGui::EndCombo();
-  }
   // Mix
   CommonViews::SliderWithOscillator("Blend", "##blend_amount", &feedbackSettings->mixSettings.blend, &feedbackSettings->mixSettings.blendOscillator);
   CommonViews::ModulationSelector(&feedbackSettings->mixSettings.blend);
@@ -70,12 +42,7 @@ void FeedbackSettingsView::drawParameters() {
   CommonViews::ModulationSelector(&feedbackSettings->mixSettings.delayAmount);
   CommonViews::MidiSelector(&feedbackSettings->mixSettings.delayAmount);
 
-  if (feedbackSettings->mixSettings.feedbackType.intValue != FeedbackType_Classic) {
-//    // Mix (Disabled for Classic)
-//    CommonViews::SliderWithOscillator("Mix", "##mix_amount", &feedbackSettings->mixSettings.mix, &feedbackSettings->mixSettings.mixOscillator);
-//    CommonViews::ModulationSelector(&feedbackSettings->mixSettings.mix);
-//    CommonViews::MidiSelector(&feedbackSettings->mixSettings.mix);
-    
+  if (feedbackSettings->lumaKeyEnabled.boolValue) {
     // Key Value
     CommonViews::SliderWithOscillator("Key Value", "##key_value", &feedbackSettings->mixSettings.keyValue, &feedbackSettings->mixSettings.keyValueOscillator);
     CommonViews::ModulationSelector(&feedbackSettings->mixSettings.keyValue);
@@ -105,7 +72,7 @@ void FeedbackSettingsView::drawHSB() {
   CommonViews::SliderWithInvertOscillator("Brightness", "##brightness", &feedbackSettings->hsbSettings.brightness, &feedbackSettings->hsbSettings.invertBrightness, &feedbackSettings->hsbSettings.brightnessOscillator);
   CommonViews::ModulationSelector(&feedbackSettings->hsbSettings.brightness);
   CommonViews::MidiSelector(&feedbackSettings->hsbSettings.brightness);
-  }
+}
 
 void FeedbackSettingsView::drawRanges() {
   CommonViews::Spacing(8);

@@ -11,6 +11,9 @@
 #include "ofMain.h"
 #include "VideoSettings.h"
 #include "GlitchShader.hpp"
+#include "HSBShader.hpp"
+#include "PixelShader.hpp"
+#include "BlurShader.hpp"
 #include "ofBaseApp.h"
 #include "Oscillator.hpp"
 #include "FeedbackShader.hpp"
@@ -23,9 +26,17 @@ public:
   position(Parameter("playerPosition", config.streamId, 0.0)),
   speed(Parameter("playerSpeed", config.streamId, 1.0, 0.0, 4.0)),
   feedbackShaders({
-    FeedbackShader(&settings->feedback0Settings, 0),
-    FeedbackShader(&settings->feedback1Settings, 1),
-    FeedbackShader(&settings->feedback2Settings, 2)
+    new FeedbackShader(&settings->feedback0Settings, 0),
+    new FeedbackShader(&settings->feedback1Settings, 1),
+    new FeedbackShader(&settings->feedback2Settings, 2)
+  }),
+  shaders({
+    new HSBShader(&settings->hsbSettings),
+//    new BlurShader(&settings->blurSettings),
+//    new PixelShader(&settings->pixelSettings),
+//    feedbackShaders[0],
+//    feedbackShaders[1],
+//    feedbackShaders[2],
   }),
   window(window),
   config(config),
@@ -51,6 +62,9 @@ public:
   bool firstFrameDrawn;
   StreamConfig config;
   VideoSettings *settings;
+  
+  std::vector<FeedbackShader *> feedbackShaders;
+  std::vector<Shader *> shaders;
 private:
   // Drawing
   void prepareFbos();
@@ -60,6 +74,7 @@ private:
   void drawDebug();
   void drawVideo(float scale);
   void drawVideoPlayer();
+  void drawVideoPlayerMenu();
   
   // Shading
   void shadeBlur();
@@ -84,22 +99,10 @@ private:
   std::shared_ptr<ofAppBaseWindow> window;
   ofVideoPlayer player;
   ofVideoGrabber cam;
-  ofShader shaderGlitch;
-  ofShader shaderMixer;
-  ofShader shaderBlur;
-  ofShader shaderSharpen;
   ofFbo fbo;
-  ofFbo fboFeedback;
-  ofFbo fboBlur;
-  ofFbo fboSharpen;
   Parameter position;
   Parameter speed;
   
-  GlitchShader glitchShader;
-  
-  // Vector of vectors of feedback frames
-  std::vector<FeedbackShader> feedbackShaders;
-  std::vector<Shader *> shaders;
   long frameCount = 1;
   int frameDelayOffset;
 };

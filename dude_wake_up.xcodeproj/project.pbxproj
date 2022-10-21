@@ -26,6 +26,7 @@
 		024D1690289ED64700DA807C /* OnsetDetectionFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D168D289ED64700DA807C /* OnsetDetectionFunction.cpp */; };
 		024D1698289EEACD00DA807C /* PulseOscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D1696289EEACD00DA807C /* PulseOscillator.cpp */; };
 		024D169C28A046DF00DA807C /* ConfigService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D169A28A046DF00DA807C /* ConfigService.cpp */; };
+		02BB4A6C28FEED3000E2CFB7 /* ShaderChainerView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02BB4A6A28FEED3000E2CFB7 /* ShaderChainerView.cpp */; };
 		02F5B37428BE9856005F0EC6 /* ShaderChainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F5B37228BE97D5005F0EC6 /* ShaderChainer.cpp */; };
 		059638BE8C8A1D59958631C4 /* MidiPairing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D824BC957F369968DA9939C /* MidiPairing.cpp */; };
 		0AC42BFBAC1207FC78527E53 /* ParameterService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63D397FA3B8B71D8DFD1D3BA /* ParameterService.cpp */; };
@@ -127,6 +128,10 @@
 		024D169B28A046DF00DA807C /* ConfigService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = ConfigService.hpp; path = Services/ConfigService.hpp; sourceTree = "<group>"; };
 		026A10CB0F40EC63FBB2FF06 /* VideoSettings.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = VideoSettings.h; path = src/Models/VideoSettings.h; sourceTree = SOURCE_ROOT; };
 		02B6599D28BBD16700E31AE7 /* GlitchShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = GlitchShader.hpp; path = Shading/GlitchShader.hpp; sourceTree = "<group>"; };
+		02BB4A6A28FEED3000E2CFB7 /* ShaderChainerView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderChainerView.cpp; sourceTree = "<group>"; };
+		02BB4A6B28FEED3000E2CFB7 /* ShaderChainerView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ShaderChainerView.hpp; sourceTree = "<group>"; };
+		02BB4A6D290037F100E2CFB7 /* ShaderType.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderType.h; sourceTree = "<group>"; };
+		02BB4A6E290039C700E2CFB7 /* ShaderSettings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderSettings.h; sourceTree = "<group>"; };
 		02F5B37028BE918A005F0EC6 /* Shader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Shader.hpp; sourceTree = "<group>"; };
 		02F5B37228BE97D5005F0EC6 /* ShaderChainer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderChainer.cpp; sourceTree = "<group>"; };
 		02F5B37328BE97D5005F0EC6 /* ShaderChainer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ShaderChainer.hpp; sourceTree = "<group>"; };
@@ -478,6 +483,8 @@
 				02F5B37B28BED132005F0EC6 /* HSBShader.hpp */,
 				02F5B37928BEA28D005F0EC6 /* BlurShader.hpp */,
 				02F5B37628BE9C12005F0EC6 /* EmptyShader.hpp */,
+				02BB4A6D290037F100E2CFB7 /* ShaderType.h */,
+				02BB4A6E290039C700E2CFB7 /* ShaderSettings.h */,
 			);
 			name = Shading;
 			sourceTree = "<group>";
@@ -601,6 +608,8 @@
 				A8C1D034A3719E1BC744FC24 /* OscillatorView.hpp */,
 				9AB3549C3BA481A8729F7D06 /* VideoSettingsView.cpp */,
 				4093590D239F483861F57CCA /* VideoSettingsView.hpp */,
+				02BB4A6A28FEED3000E2CFB7 /* ShaderChainerView.cpp */,
+				02BB4A6B28FEED3000E2CFB7 /* ShaderChainerView.hpp */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -1212,6 +1221,7 @@
 				021026F32894123F0060F282 /* kiss_fft.c in Sources */,
 				462C212713EFFA5383B35DAB /* EngineGLFW.cpp in Sources */,
 				000315A9FA4E2F9A09533E05 /* EngineOpenGLES.cpp in Sources */,
+				02BB4A6C28FEED3000E2CFB7 /* ShaderChainerView.cpp in Sources */,
 				016BB55A143AD429330F07DB /* Gui.cpp in Sources */,
 				DC62E5817CB03447F2ADFB85 /* ImHelpers.cpp in Sources */,
 				021026ED289412220060F282 /* CoreTimeDomainFeatures.cpp in Sources */,

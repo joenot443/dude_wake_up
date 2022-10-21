@@ -14,7 +14,7 @@
 #include "Shader.hpp"
 
 struct ShaderChainer {
-  static ofFbo fboChainingShaders(std::vector<Shader*> *shaders, ofFbo texture);
+  static ofFbo fboChainingShaders(std::vector<Shader *> *shaders, ofFbo texture);
 };
 
 
