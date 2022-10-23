@@ -9,7 +9,7 @@
 #define HSBShader_hpp
 
 #include "ofMain.h"
-#include "VideoSettings.h"
+#include "VideoSettings.hpp"
 #include "ofxImGui.h"
 #include "CommonViews.hpp"
 #include "Shader.hpp"

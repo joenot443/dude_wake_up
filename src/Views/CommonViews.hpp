@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 #include "Oscillator.hpp"
-#include "Parameter.h"
+#include "Parameter.hpp"
 
 struct CommonViews {
   static void sSpacing();

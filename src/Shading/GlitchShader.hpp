@@ -8,7 +8,7 @@
 #ifndef GlitchShader_hpp
 #define GlitchShader_hpp
 #include "ofMain.h"
-#include "VideoSettings.h"
+#include "VideoSettings.hpp"
 #include "ofxImGui.h"
 #include "Shader.hpp"
 #include <stdio.h>

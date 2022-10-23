@@ -9,7 +9,7 @@
 #define ConfigService_hpp
 
 #include <stdio.h>
-#include "VideoSettings.h"
+#include "VideoSettings.hpp"
 
 using json = nlohmann::json;
 

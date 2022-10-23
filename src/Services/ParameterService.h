@@ -13,7 +13,7 @@
 #include "ofxMidi.h"
 #include "ofMain.h"
 #include "MidiPairing.hpp"
-#include "Parameter.h"
+#include "Parameter.hpp"
 
 using json = nlohmann::json;
 

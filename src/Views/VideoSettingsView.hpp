@@ -9,8 +9,8 @@
 #define VideoFeedSettingsView_hpp
 
 #include <stdio.h>
-#include "VideoSettings.h"
-#include "VideoStream.h"
+#include "VideoSettings.hpp"
+#include "VideoStream.hpp"
 #include "ShaderChainerView.hpp"
 #include "FeedbackSettingsView.hpp"
 
@@ -36,7 +36,7 @@ public:
   videoSettings(videoSettings),
   closeStream(closeStream),
   videoStream(videoStream),
-  shaderChainerView(ShaderChainerView(videoSettings, &videoStream->shaders, &videoStream->feedbackShaders))
+  shaderChainerView(ShaderChainerView(videoSettings, &videoStream->shaderChainer))
   {};
   
 private:

@@ -9,7 +9,7 @@
 #define FeedbackSettingsView_hpp
 
 #include <stdio.h>
-#include "VideoSettings.h"
+#include "VideoSettings.hpp"
 
 struct FeedbackSettingsView {
 public:

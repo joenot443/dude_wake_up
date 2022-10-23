@@ -9,7 +9,7 @@
 #define AudioSettings_h
 
 #include "Oscillator.hpp"
-#include "Parameter.h"
+#include "Parameter.hpp"
 #include "ValueOscillator.hpp"
 #include "PulseOscillator.hpp"
 #include "Gist.h"

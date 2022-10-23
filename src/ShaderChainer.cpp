@@ -8,8 +8,13 @@
 #include "ShaderChainer.hpp"
 #include "ofMain.h"
 #include "Console.hpp"
+#include "PixelShader.hpp"
+#include "GlitchShader.hpp"
+#include "HSBShader.hpp"
+#include "FeedbackShader.hpp"
+#include "BlurShader.hpp"
 
-ofFbo ShaderChainer::fboChainingShaders(std::vector<Shader *> *shaders, ofFbo texture) {
+ofFbo ShaderChainer::fboChainingShaders(ofFbo texture) {
   auto ping = ofFbo();
   if (!ping.isAllocated()) {
     ping.allocate(texture.getWidth(), texture.getHeight());
@@ -25,7 +30,7 @@ ofFbo ShaderChainer::fboChainingShaders(std::vector<Shader *> *shaders, ofFbo te
   ofFbo *tex = &pong;
   
   bool flip = false;
-  for (auto shader : *shaders) {
+  for (auto shader : shaders) {
     // Skip disabled shaders
     if (!shader->enabled()) {
       continue;
@@ -45,4 +50,49 @@ ofFbo ShaderChainer::fboChainingShaders(std::vector<Shader *> *shaders, ofFbo te
     flip = !flip;
   }
   return *canv;
+}
+
+void ShaderChainer::pushShader(ShaderType shaderType) {
+  switch (shaderType) {
+    case ShaderTypeNone:
+      return;
+    case ShaderTypeHSB: {
+      auto settings = new HSBSettings(settingsId);
+      auto shader = new HSBShader(settings);
+      shader->setup();
+      shaders.push_back(shader);
+      return;
+    }
+    case ShaderTypeBlur: {
+      auto settings = new BlurSettings(settingsId);
+      auto shader = new BlurShader(settings);
+      shader->setup();
+      shaders.push_back(shader);
+      return;
+    }
+    case ShaderTypePixelate: {
+      auto settings = new PixelSettings(settingsId);
+      auto shader = new PixelShader(settings);
+      shader->setup();
+      shaders.push_back(shader);
+      return;
+    }
+    case ShaderTypeGlitch:
+      return;
+    case ShaderTypeFeedback: {
+      auto settings = new FeedbackSettings(settingsId, 0);
+      auto shader = new FeedbackShader(settings, 0);
+      shader->setup();
+      feedbackShaders.push_back(shader);
+      shaders.push_back(shader);
+      return;
+    }
+  }
+}
+
+void ShaderChainer::deleteShader(Shader *shader) {
+  auto it = std::find(shaders.begin(), shaders.end(), shader);
+  if (it != shaders.end()) {
+    shaders.erase(it);
+  }
 }

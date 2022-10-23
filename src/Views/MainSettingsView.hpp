@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <functional>
 #include <string>
-#include "MainSettings.h"
+#include "MainSettings.hpp"
 #include "CommonViews.hpp"
 
 struct MainSettingsView {

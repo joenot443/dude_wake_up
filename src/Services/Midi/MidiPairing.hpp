@@ -9,7 +9,7 @@
 #define MidiPairing_hpp
 
 #include <stdio.h>
-#include "Parameter.h"
+#include "Parameter.hpp"
 
 struct MidiPairing {
   std::string paramId;

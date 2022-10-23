@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <vector>
 #include "imgui.h"
-#include "Parameter.h"
+#include "Parameter.hpp"
 
 struct ValueOscillator {
   

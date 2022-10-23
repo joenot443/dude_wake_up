@@ -9,8 +9,7 @@
 #define Oscillator_hpp
 
 #include <stdio.h>
-//#include "Vectors.hpp"
-#include "Parameter.h"
+#include "Parameter.hpp"
 #include "imgui.h"
 
 

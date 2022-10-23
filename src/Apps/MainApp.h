@@ -5,7 +5,7 @@
 #include "VideoSettingsView.hpp"
 #include "MainSettingsView.hpp"
 #include "AudioSettingsView.hpp"
-#include "VideoStream.h"
+#include "VideoStream.hpp"
 #include "AudioStream.hpp"
 
 class MainApp : public ofBaseApp {

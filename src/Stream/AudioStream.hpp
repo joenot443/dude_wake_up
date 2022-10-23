@@ -11,8 +11,8 @@
 #include <stdio.h>
 #include "ofSoundStream.h"
 #include "ofMain.h"
-#include "AudioSettings.h"
-#include "MainSettings.h"
+#include "AudioSettings.hpp"
+#include "MainSettings.hpp"
 #include "Gist.h"
 #include "BTrack.h"
 #include "PulseOscillator.hpp"

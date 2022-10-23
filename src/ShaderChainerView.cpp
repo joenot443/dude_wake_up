@@ -13,6 +13,8 @@
 #include "CommonViews.hpp"
 
 static const float ButtonWidth = 120.0;
+static const float ComboWidth = 160.0;
+
 static const ShaderType AvailableShaderTypes[] = {ShaderTypeHSB, ShaderTypeBlur, ShaderTypePixelate, ShaderTypeFeedback};
 
 void ShaderChainerView::setup() {
@@ -28,7 +30,7 @@ void ShaderChainerView::draw() {
   
   auto selectedShaderName = shaderTypeName(selectedShaderType);
   
-  CommonViews::HorizontallyAligned(ButtonWidth);
+  CommonViews::HorizontallyAligned(ButtonWidth + ComboWidth);
   ImGui::PushItemWidth(ButtonWidth);
   if (ImGui::BeginCombo("##shader_combo", selectedShaderName.c_str()))
   {
@@ -40,9 +42,10 @@ void ShaderChainerView::draw() {
     ImGui::EndCombo();
   }
   
-  CommonViews::HorizontallyAligned(ButtonWidth);
+  ImGui::SameLine();
+  
   if (ImGui::Button("Add New Shader") && selectedShaderType != ShaderTypeNone) {
-    addNewShader(selectedShaderType);
+    shaderChainer->pushShader(selectedShaderType);
   }
 }
 
@@ -61,6 +64,7 @@ void ShaderChainerView::drawShaderButton(Shader *shader, bool selected) {
     ImGui::PopStyleColor(3);
   }
 }
+
 
 
 void ShaderChainerView::drawChainer() {
@@ -91,6 +95,12 @@ void ShaderChainerView::drawChainer() {
       ImGui::EndDragDropTarget();
     }
     
+    ImGui::SameLine();
+
+    if (ImGui::Button("X", ImVec2(30, 30))) {
+      shaderChainer->deleteShader(shader);
+    }
+    
     CommonViews::CenteredVerticalLine();
 
     ImGui::PopID();
@@ -101,43 +111,5 @@ void ShaderChainerView::pushSelectedButtonStyle() {
   ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.7f, 0.6f, 0.6f));
   ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.7f, 0.7f, 0.7f));
   ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.7f, 0.8f, 0.8f));
-}
-
-void ShaderChainerView::addNewShader(ShaderType shaderType) {
-  switch (shaderType) {
-    case ShaderTypeNone:
-      return;
-    case ShaderTypeHSB: {
-      auto settings = new HSBSettings(videoSettings->settingsIdStr);
-      auto shader = new HSBShader(settings);
-      shader->setup();
-      shaders->push_back(shader);
-      return;
-    }
-    case ShaderTypeBlur: {
-      auto settings = new BlurSettings(videoSettings->settingsIdStr);
-      auto shader = new BlurShader(settings);
-      shader->setup();
-      shaders->push_back(shader);
-      return;
-    }
-    case ShaderTypePixelate: {
-      auto settings = new PixelSettings(videoSettings->settingsIdStr);
-      auto shader = new PixelShader(settings);
-      shader->setup();
-      shaders->push_back(shader);
-      return;
-    }
-    case ShaderTypeGlitch:
-      return;
-    case ShaderTypeFeedback: {
-      auto settings = new FeedbackSettings(videoSettings->settingsIdStr, 0);
-      auto shader = new FeedbackShader(settings, 0);
-      shader->setup();
-      feedbackShaders->push_back(shader);
-      shaders->push_back(shader);
-      return;
-    }
-  }
 }
   

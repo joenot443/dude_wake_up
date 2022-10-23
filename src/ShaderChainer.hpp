@@ -11,10 +11,22 @@
 #include <stdio.h>
 #include "ofMain.h"
 #include "ofxImGui.h"
+#include "FeedbackShader.hpp"
 #include "Shader.hpp"
 
 struct ShaderChainer {
-  static ofFbo fboChainingShaders(std::vector<Shader *> *shaders, ofFbo texture);
+  ofFbo fboChainingShaders(ofFbo texture);
+  std::string settingsId;
+  std::vector<FeedbackShader *> feedbackShaders;
+  std::vector<Shader *> shaders;
+
+  void pushShader(ShaderType shaderType);
+  void deleteShader(Shader *);
+  
+  ShaderChainer(std::string settingsId) :
+  settingsId(settingsId),
+  feedbackShaders({}),
+  shaders({}) {};
 };
 
 

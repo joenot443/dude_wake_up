@@ -104,7 +104,15 @@ void VideoSettingsView::drawMenu() {
 }
 
 void VideoSettingsView::drawSelectedShader() {
-  shaderChainerView.selectedShader->drawSettings();
+  if (shaderChainerView.selectedShader) {
+    shaderChainerView.selectedShader->drawSettings();
+  } else {
+    CommonViews::mSpacing();
+    CommonViews::HorizontallyAligned(120);
+    CommonViews::H4Title("Select a Shader");
+    CommonViews::mSpacing();
+  }
+  
 }
 
 void VideoSettingsView::drawHSB() {

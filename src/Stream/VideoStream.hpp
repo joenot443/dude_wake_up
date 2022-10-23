@@ -1,5 +1,5 @@
 //
-//  VideoStream.hpp
+//  VideoStream.hpppp
 //  dude_wake_up
 //
 //  Created by Joe Crozier on 2022-05-07.
@@ -9,7 +9,8 @@
 #define VideoStream_hpp
 
 #include "ofMain.h"
-#include "VideoSettings.h"
+#include "ShaderChainer.hpp"
+#include "VideoSettings.hpp"
 #include "GlitchShader.hpp"
 #include "HSBShader.hpp"
 #include "PixelShader.hpp"
@@ -17,7 +18,7 @@
 #include "ofBaseApp.h"
 #include "Oscillator.hpp"
 #include "FeedbackShader.hpp"
-#include "MainSettings.h"
+#include "MainSettings.hpp"
 #include "ofxImGui.h"
 
 class VideoStream : public ofBaseApp {
@@ -25,24 +26,11 @@ public:
   VideoStream(std::shared_ptr<ofAppBaseWindow> window, StreamConfig config, VideoSettings *settings,   std::function<void(int)> closeStream) :
   position(Parameter("playerPosition", config.streamId, 0.0)),
   speed(Parameter("playerSpeed", config.streamId, 1.0, 0.0, 4.0)),
-  feedbackShaders({
-    new FeedbackShader(&settings->feedback0Settings, 0),
-    new FeedbackShader(&settings->feedback1Settings, 1),
-    new FeedbackShader(&settings->feedback2Settings, 2)
-  }),
-  shaders({
-    new HSBShader(&settings->hsbSettings),
-//    new BlurShader(&settings->blurSettings),
-//    new PixelShader(&settings->pixelSettings),
-//    feedbackShaders[0],
-//    feedbackShaders[1],
-//    feedbackShaders[2],
-  }),
+  shaderChainer(ShaderChainer(config.streamId)),
   window(window),
   config(config),
   settings(settings),
   closeStream(closeStream) {};
-  
   
   void setup();
   void update();
@@ -63,8 +51,7 @@ public:
   StreamConfig config;
   VideoSettings *settings;
   
-  std::vector<FeedbackShader *> feedbackShaders;
-  std::vector<Shader *> shaders;
+  ShaderChainer shaderChainer;
 private:
   // Drawing
   void prepareFbos();

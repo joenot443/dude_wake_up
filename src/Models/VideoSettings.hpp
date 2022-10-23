@@ -10,7 +10,7 @@
 
 #include "Oscillator.hpp"
 #include "Shader.hpp"
-#include "Parameter.h"
+#include "Parameter.hpp"
 #include "Strings.hpp"
 #include <string>
 #include "json.hpp"

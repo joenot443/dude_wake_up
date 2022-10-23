@@ -22,7 +22,7 @@ enum ShaderType {
 static std::string shaderTypeName(ShaderType type) {
   switch (type) {
     case ShaderTypeNone:
-      return "Select Shader Type";
+      return "Select Shader";
     case ShaderTypeHSB:
       return "HSB";
     case ShaderTypeBlur:

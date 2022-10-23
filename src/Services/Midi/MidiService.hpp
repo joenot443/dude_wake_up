@@ -12,7 +12,7 @@
 #include "ofxMidi.h"
 #include "ofMain.h"
 #include "MidiPairing.hpp"
-#include "Parameter.h"
+#include "Parameter.hpp"
 
 class MidiService: public ofxMidiListener, public ofxMidiConnectionListener {
 private:

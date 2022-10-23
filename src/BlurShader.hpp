@@ -9,7 +9,7 @@
 #define BlurShader_hpp
 
 #include "ofMain.h"
-#include "VideoSettings.h"
+#include "VideoSettings.hpp"
 #include "ofxImGui.h"
 #include "Math.hpp"
 #include "Shader.hpp"

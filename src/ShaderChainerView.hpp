@@ -9,11 +9,12 @@
 #define ShaderChainerView_hpp
 
 #include <stdio.h>
-#include "VideoSettings.h"
+#include "VideoSettings.hpp"
 #include "Shader.hpp"
 #include "FeedbackSettingsView.hpp"
-#include "AudioSettings.h"
-#include "ShaderType.h"
+#include "AudioSettings.hpp"
+#include "ShaderType.hpp"
+#include "ShaderChainer.hpp"
 #include "FeedbackShader.hpp"
 
 struct ShaderChainerView {
@@ -25,26 +26,24 @@ public:
 
   
   VideoSettings *videoSettings;
+  ShaderChainer *shaderChainer;
+  Shader *selectedShader = NULL;
+  
+  // From ShaderChainer
   std::vector<Shader *> *shaders;
-  std::vector<FeedbackShader *> *feedbackShaders;
-  Shader *selectedShader;
     
   ShaderChainerView(VideoSettings *videoSettings,
-                    std::vector<Shader *> *shaders,
-                    std::vector<FeedbackShader *> *feedbackShaders)
+                    ShaderChainer *shaderChainer)
   : videoSettings(videoSettings),
-  shaders(shaders),
-  feedbackShaders(feedbackShaders)
-  {
-    selectedShader = (*shaders)[0];
-  };
+  shaders(&shaderChainer->shaders),
+  shaderChainer(shaderChainer)
+  {};
   
 private:
   void styleWindow();
   void pushSelectedButtonStyle();
   void drawShaderButton(Shader *shader, bool selected);
   void drawChainer();
-  void addNewShader(ShaderType shaderType);
   
   ShaderType selectedShaderType = ShaderTypeNone;
 };

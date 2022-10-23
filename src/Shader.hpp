@@ -8,10 +8,10 @@
 #ifndef Shader_h
 #define Shader_h
 #include "ofMain.h"
-#include "VideoSettings.h"
+#include "VideoSettings.hpp"
 #include "ofxImGui.h"
 #include "Console.hpp"
-#include "ShaderType.h"
+#include "ShaderType.hpp"
 #include "ShaderSettings.h"
 #include <stdio.h>
 

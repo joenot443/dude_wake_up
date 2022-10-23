@@ -12,8 +12,8 @@
 #include <vector>
 #include <map>
 #include <tuple>
-#include "Parameter.h"
-#include "AudioSettings.h"
+#include "Parameter.hpp"
+#include "AudioSettings.hpp"
 
 struct ModulationSetting {
   Parameter * videoParam;

@@ -7,9 +7,9 @@
 //
 //#ifndef ShaderSettings_h
 //#define ShaderSettings_h
-//#include "Parameter.h"
+//#include "Parameter.hpp"
 //#include "Oscillator.hpp"
-//#include "VideoSettings.h"
+//#include "VideoSettings.hpp"
 //#include <string>
 //
 //using json = nlohmann::json;

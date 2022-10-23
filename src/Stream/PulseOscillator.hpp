@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 #include <chrono>
-#include "Parameter.h"
+#include "Parameter.hpp"
 #include "imgui.h"
 
 struct PulseOscillator {

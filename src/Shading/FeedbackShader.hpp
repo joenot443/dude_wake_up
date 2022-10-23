@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include "ofMain.h"
 #include "Shader.hpp"
-#include "VideoSettings.h"
+#include "VideoSettings.hpp"
 #include "ofMain.h"
 #include "ofxImGui.h"
 

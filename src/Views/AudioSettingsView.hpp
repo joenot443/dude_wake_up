@@ -10,9 +10,9 @@
 
 #include <stdio.h>
 
-#include "VideoSettings.h"
+#include "VideoSettings.hpp"
 #include "FeedbackSettingsView.hpp"
-#include "AudioSettings.h"
+#include "AudioSettings.hpp"
 
 struct AudioSettingsView {
 public:

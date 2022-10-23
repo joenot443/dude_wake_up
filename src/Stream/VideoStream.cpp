@@ -5,7 +5,7 @@
 //  Created by Joe Crozier on 2022-05-07.
 //
 
-#include "VideoStream.h"
+#include "VideoStream.hpp"
 #include "ShaderChainer.hpp"
 #include "EmptyShader.hpp"
 #include "FontService.hpp"
@@ -16,7 +16,7 @@
 #include "BlurShader.hpp"
 #include "MidiService.hpp"
 #include "CommonViews.hpp"
-#include "VideoSettings.h"
+#include "VideoSettings.hpp"
 #include "ofxImGui.h"
 #include "Video.hpp"
 
@@ -39,7 +39,7 @@ void VideoStream::setup() {
   
   ofSetWindowShape(640, 480);
   
-  for (auto & sh : shaders) {
+  for (auto & sh : shaderChainer.shaders) {
     sh->setup();
   }
   
@@ -79,7 +79,7 @@ void VideoStream::draw() {
     
   prepareMainFbo();
 
-  fbo = ShaderChainer::fboChainingShaders(&shaders, fbo);
+  fbo = shaderChainer.fboChainingShaders(fbo);
   fbo.draw(0, 0, ofGetWidth(), ofGetHeight());
   
   if (!firstFrameDrawn) {
@@ -159,7 +159,6 @@ void VideoStream::drawMainFbo() {
 
 // MARK: - Shading
 
-
 void VideoStream::prepareFbos() {
   fbo.allocate(ofGetWidth(), ofGetHeight());
   fbo.begin();
@@ -181,7 +180,7 @@ void VideoStream::drawDebug() {
 
 
 void VideoStream::clearFrameBuffer() {
-  for (auto & fb : feedbackShaders) {
+  for (auto & fb : shaderChainer.feedbackShaders) {
     fb->clearFrameBuffer();
   }
   shouldClearFrameBuffer = false;

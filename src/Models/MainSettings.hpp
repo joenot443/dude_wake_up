@@ -1,5 +1,5 @@
 //
-//  MainSettings.h
+//  MainSettings.hpp
 //  dude_wake_up
 //
 //  Created by Joe Crozier on 2022-05-15.
@@ -7,8 +7,8 @@
 
 #ifndef MainSettings_h
 #define MainSettings_h
-#include "VideoSettings.h"
-#include "AudioSettings.h"
+#include "VideoSettings.hpp"
+#include "AudioSettings.hpp"
 #include <string>
 
 struct MainSettings {

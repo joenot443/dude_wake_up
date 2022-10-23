@@ -2,7 +2,7 @@
 #include "ofxImGui.h"
 #include "ofMain.h"
 #include "AudioStream.hpp"
-#include "MainSettings.h"
+#include "MainSettings.hpp"
 #include "implot.h"
 #include "FontService.hpp"
 #include "AudioSettingsView.hpp"
