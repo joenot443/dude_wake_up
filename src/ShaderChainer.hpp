@@ -13,12 +13,17 @@
 #include "ofxImGui.h"
 #include "FeedbackShader.hpp"
 #include "Shader.hpp"
+#include "HSBShader.hpp"
+#include "json.hpp"
+#include "macro_scope.hpp"
+
+using json = nlohmann::json;
 
 struct ShaderChainer {
   ofFbo fboChainingShaders(ofFbo texture);
-  std::string settingsId;
   std::vector<FeedbackShader *> feedbackShaders;
   std::vector<Shader *> shaders;
+  std::string settingsId;
 
   void pushShader(ShaderType shaderType);
   void deleteShader(Shader *);
@@ -27,6 +32,9 @@ struct ShaderChainer {
   settingsId(settingsId),
   feedbackShaders({}),
   shaders({}) {};
+  
+  json serialize();
+  void load(json j);
 };
 
 

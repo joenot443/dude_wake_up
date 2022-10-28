@@ -17,7 +17,7 @@
 
 struct PixelShader: Shader {
   PixelSettings *settings;
-  PixelShader(PixelSettings *settings) : settings(settings) {};
+  PixelShader(PixelSettings *settings) : settings(settings), Shader(settings) {};
   
   ofShader shader;
   void setup() override {
@@ -45,6 +45,10 @@ struct PixelShader: Shader {
   
   std::string name() override {
     return "Pixel";
+  }
+  
+  ShaderType type() override {
+    return ShaderTypePixelate;
   }
   
   void drawSettings() override {

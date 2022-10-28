@@ -16,10 +16,13 @@
 #include <stdio.h>
 
 struct HSBShader: Shader {
-  HSBSettings *settings;
+  
   ofShader shader;
 public:
-  HSBShader(HSBSettings *settings) : settings(settings) {}
+  HSBShader(HSBSettings *settings) : Shader(settings), settings(settings) {};
+  
+  HSBSettings *settings;
+  
   void setup() override {
     shader.load("shadersGL2/new/hsb");
   }
@@ -46,6 +49,10 @@ public:
   
   std::string name() override {
     return "HSB";
+  }
+  
+  ShaderType type() override {
+    return ShaderTypeHSB;
   }
   
   void drawSettings() override {

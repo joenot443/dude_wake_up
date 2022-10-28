@@ -39,7 +39,7 @@ void VideoStream::setup() {
   
   ofSetWindowShape(640, 480);
   
-  for (auto & sh : shaderChainer.shaders) {
+  for (auto & sh : shaderChainer->shaders) {
     sh->setup();
   }
   
@@ -79,7 +79,7 @@ void VideoStream::draw() {
     
   prepareMainFbo();
 
-  fbo = shaderChainer.fboChainingShaders(fbo);
+  fbo = shaderChainer->fboChainingShaders(fbo);
   fbo.draw(0, 0, ofGetWidth(), ofGetHeight());
   
   if (!firstFrameDrawn) {
@@ -95,8 +95,8 @@ void VideoStream::draw() {
 
 void VideoStream::prepareMainFbo() {
   fbo.begin();
-  float scale = settings->transformSettings.scale.value;
-  drawVideo(scale);
+//  float scale = settings->transformSettings.scale.value;
+  drawVideo(1.0);
   fbo.end();
 }
 
@@ -180,7 +180,7 @@ void VideoStream::drawDebug() {
 
 
 void VideoStream::clearFrameBuffer() {
-  for (auto & fb : shaderChainer.feedbackShaders) {
+  for (auto & fb : shaderChainer->feedbackShaders) {
     fb->clearFrameBuffer();
   }
   shouldClearFrameBuffer = false;

@@ -19,11 +19,11 @@ json jsonFromParameters(std::vector<Parameter*> parameters) {
   }
 }
 
-void ConfigService::saveConfigFile(VideoSettings* settings, std::string path) {
+void ConfigService::saveShaderChainerConfigFile(ShaderChainer* chainer, std::string path) {
   std::ofstream fileStream;
   fileStream.open(path.c_str(), std::ios::trunc);
   json container;
-  container = settings->serialize(container);
+  container = chainer->serialize();
   
   if (fileStream.is_open()) {
     std::cout << container.dump(4) << std::endl;
@@ -35,7 +35,7 @@ void ConfigService::saveConfigFile(VideoSettings* settings, std::string path) {
 }
 
 
-VideoSettings* ConfigService::loadConfigFile(std::string name) {
+ShaderChainer* ConfigService::loadShaderChainerConfigFile(std::string name) {
   std::fstream fileStream;
   fileStream.open(name, std::ios::in);
   if (fileStream.is_open()) {
@@ -47,8 +47,46 @@ VideoSettings* ConfigService::loadConfigFile(std::string name) {
       log("Failed to load JSON file.");
       return;
     }
+    std::string settingsId = data["settingsId"];
+    auto shaderChainer = new ShaderChainer(settingsId);
+    shaderChainer->load(data);
     ParameterService::getService()->loadParameters(&data);
     log("Loaded config file.");
+    return shaderChainer;
   }
+  return nullptr;
 }
 
+ShaderSettings* ConfigService::settingsFromJson(json j) {
+  ShaderType shaderType = j["shaderType"];
+  std::string settingsId = j["settingsId"];
+  switch (shaderType) {
+    case ShaderTypeNone:
+      return new ShaderSettings(settingsId);
+    case ShaderTypeHSB: {
+      auto settings = new HSBSettings(settingsId);
+      settings->load(j);
+      return settings;
+    }
+    case ShaderTypePixelate: {
+      auto settings = new PixelSettings(settingsId);
+      settings->load(j);
+      return settings;
+    }
+    case ShaderTypeGlitch: {
+      auto settings = new HSBSettings(settingsId);
+      settings->load(j);
+      return settings;
+    }
+    case ShaderTypeFeedback: {
+      auto settings = new FeedbackSettings(settingsId, 0);
+      settings->load(j);
+      return settings;
+    }
+    case ShaderTypeBlur: {
+      auto settings = new BlurSettings(settingsId);
+      settings->load(j);
+      return settings;
+    }
+  }
+}

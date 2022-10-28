@@ -96,3 +96,29 @@ void ShaderChainer::deleteShader(Shader *shader) {
     shaders.erase(it);
   }
 }
+
+
+json ShaderChainer::serialize() {
+  json j;
+  j["shaders"] = json::array();
+  j["settingsId"] = settingsId;
+  
+  for (auto shader : shaders) {
+    j["shaders"].push_back(shader->serialize());
+  }
+  return j; 
+}
+
+void ShaderChainer::load(json j) {
+  settingsId = j["settingsId"];
+  for (auto shader : shaders) {
+    delete shader;
+  }
+  shaders.clear();
+  for (auto shaderJson : j["shaders"]) {
+    ShaderType shaderType = shaderJson["shaderType"];
+    pushShader(shaderType);
+    shaders.back()->settings->load(shaderJson);
+    shaders.back()->setup();
+  }
+}

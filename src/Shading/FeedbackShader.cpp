@@ -15,13 +15,13 @@ void FeedbackShader::setup() {
 
 void FeedbackShader::shade(ofFbo *frame, ofFbo *canvas) {
   // If using preprocessed frames for feedback, save it now.
-  if (!feedback->useProcessedFrame.boolValue) {
+  if (!settings->useProcessedFrame.boolValue) {
     saveFrame(frame);
   }
   
   canvas->begin();
   // Set the textures
-  int frameIndex = feedback->mixSettings.delayAmount.intValue;
+  int frameIndex = settings->delayAmount.intValue;
   if (frameIndex < frameBuffer.size()) {
     auto texture = frameBuffer[frameIndex];
     shader.begin();
@@ -31,19 +31,19 @@ void FeedbackShader::shade(ofFbo *frame, ofFbo *canvas) {
     canvas->end();
     return;
   }
-  shader.setUniform1i(feedback->lumaKeyEnabled.shaderKey, feedback->lumaKeyEnabled.intParamValue());
+  shader.setUniform1i(settings->lumaKeyEnabled.shaderKey, settings->lumaKeyEnabled.intParamValue());
   shader.setUniformTexture("mainTexture", frame->getTexture(), 4);
-  shader.setUniform1i(feedback->mixSettings.feedbackType.shaderKey, feedback->mixSettings.feedbackType.intValue);
-  shader.setUniform1f(feedback->mixSettings.blend.shaderKey, feedback->mixSettings.blend.value);
-  shader.setUniform1f(feedback->mixSettings.keyValue.shaderKey, feedback->mixSettings.keyValue.value);
-  shader.setUniform1f(feedback->mixSettings.keyThreshold.shaderKey, feedback->mixSettings.keyThreshold.value);
+  shader.setUniform1i(settings->feedbackType.shaderKey, settings->feedbackType.intValue);
+  shader.setUniform1f(settings->blend.shaderKey, settings->blend.value);
+  shader.setUniform1f(settings->keyValue.shaderKey, settings->keyValue.value);
+  shader.setUniform1f(settings->keyThreshold.shaderKey, settings->keyThreshold.value);
   
   frame->draw(0, 0);
   shader.end();
   canvas->end();
   
   // If using processed frames for feedback, save it now.
-  if (feedback->useProcessedFrame.boolValue) {
+  if (settings->useProcessedFrame.boolValue) {
     saveFrame(canvas);
   }
   
@@ -51,7 +51,7 @@ void FeedbackShader::shade(ofFbo *frame, ofFbo *canvas) {
 }
 
 void FeedbackShader::saveFrame(ofFbo *frame) {
-  float scale = feedback->miscSettings.scale.value;
+  float scale = settings->scale.value;
   auto texture = frame->getTexture();
   float width = frame->getWidth();
   float height = frame->getHeight();
@@ -75,25 +75,13 @@ void FeedbackShader::saveFrame(ofFbo *frame) {
 }
 
 void FeedbackShader::disableFeedback() {
-  shader.setUniform1f(feedback->mixSettings.keyValue.shaderKey,  0.0);
-  shader.setUniform1f(feedback->mixSettings.keyThreshold.shaderKey,
+  shader.setUniform1f(settings->keyValue.shaderKey,  0.0);
+  shader.setUniform1f(settings->keyThreshold.shaderKey,
                       0.0);
-  shader.setUniform1f(feedback->mixSettings.mix.shaderKey,
+  shader.setUniform1f(settings->mix.shaderKey,
                       0.0);
-  shader.setUniform1f(feedback->mixSettings.blend.shaderKey,
+  shader.setUniform1f(settings->blend.shaderKey,
                       0.0);
-  shader.setUniform3f(formatString("fb%d_hsb_x", idx), 0.0, 0.0, 1.0);
-  shader.setUniform3f(formatString("fb%c_hue_x", idx), 10.0, 0.0, 0.0);
-  shader.setUniform3f(formatString("fb%c_rescale", idx),
-                      0.0,
-                      0.0,
-                      1.0);
-  
-  shader.setUniform1f(formatString("fb%c_rotate", idx), 0.0);
-  
-  shader.setUniform3f(formatString("fb%c_invert", idx), feedback->hsbSettings.invertHue,
-                      feedback->hsbSettings.invertSaturation,
-                      feedback->hsbSettings.invertBrightness);
 }
 
 void FeedbackShader::clearFrameBuffer() {
@@ -113,47 +101,31 @@ void FeedbackShader::drawSettings() {
   
   CommonViews::H4Title("Feedback Parameters");
   
-  ImGui::Checkbox("Use Processed##fb_use_processed", &feedback->useProcessedFrame.boolValue);
+  ImGui::Checkbox("Use Processed##fb_use_processed", &settings->useProcessedFrame.boolValue);
   
-  ImGui::Checkbox("Luma Key Enabled##fb_luma_key", &feedback->lumaKeyEnabled.boolValue);
+  ImGui::Checkbox("Luma Key Enabled##fb_luma_key", &settings->lumaKeyEnabled.boolValue);
   
   // Mix
-  CommonViews::SliderWithOscillator("Blend", "##blend_amount", &feedback->mixSettings.blend, &feedback->mixSettings.blendOscillator);
-  CommonViews::ModulationSelector(&feedback->mixSettings.blend);
-  CommonViews::MidiSelector(&feedback->mixSettings.blend);
+  CommonViews::SliderWithOscillator("Blend", "##blend_amount", &settings->blend, &settings->blendOscillator);
+  CommonViews::ModulationSelector(&settings->blend);
+  CommonViews::MidiSelector(&settings->blend);
   
   // Delay Amount
-  CommonViews::IntSliderWithOscillator("Delay", "##delay_amount", &feedback->mixSettings.delayAmount, &feedback->mixSettings.delayAmountOscillator);
-  CommonViews::ModulationSelector(&feedback->mixSettings.delayAmount);
-  CommonViews::MidiSelector(&feedback->mixSettings.delayAmount);
+  CommonViews::IntSliderWithOscillator("Delay", "##delay_amount", &settings->delayAmount, &settings->delayAmountOscillator);
+  CommonViews::ModulationSelector(&settings->delayAmount);
+  CommonViews::MidiSelector(&settings->delayAmount);
 
-  if (feedback->lumaKeyEnabled.boolValue) {
+  if (settings->lumaKeyEnabled.boolValue) {
     // Key Value
-    CommonViews::SliderWithOscillator("Key Value", "##key_value", &feedback->mixSettings.keyValue, &feedback->mixSettings.keyValueOscillator);
-    CommonViews::ModulationSelector(&feedback->mixSettings.keyValue);
-    CommonViews::MidiSelector(&feedback->mixSettings.keyValue);
+    CommonViews::SliderWithOscillator("Key Value", "##key_value", &settings->keyValue, &settings->keyValueOscillator);
+    CommonViews::ModulationSelector(&settings->keyValue);
+    CommonViews::MidiSelector(&settings->keyValue);
     
     // Threshold
-    CommonViews::SliderWithOscillator("Key Threshold", "##key_threshold", &feedback->mixSettings.keyThreshold, &feedback->mixSettings.keyThresholdOscillator);
-    CommonViews::ModulationSelector(&feedback->mixSettings.keyThreshold);
-    CommonViews::MidiSelector(&feedback->mixSettings.keyThreshold);
+    CommonViews::SliderWithOscillator("Key Threshold", "##key_threshold", &settings->keyThreshold, &settings->keyThresholdOscillator);
+    CommonViews::ModulationSelector(&settings->keyThreshold);
+    CommonViews::MidiSelector(&settings->keyThreshold);
   }
-  
-  CommonViews::H4Title("HSB");
-  // Hue
-  CommonViews::SliderWithInvertOscillator("Hue", "##hue", &feedback->hsbSettings.hue, &feedback->hsbSettings.invertHue, &feedback->hsbSettings.hueOscillator);
-  CommonViews::ModulationSelector(&feedback->hsbSettings.hue);
-  CommonViews::MidiSelector(&feedback->hsbSettings.hue);
-  
-  // Saturation
-  CommonViews::SliderWithInvertOscillator("Saturation", "##saturation", &feedback->hsbSettings.saturation, &feedback->hsbSettings.invertSaturation, &feedback->hsbSettings.saturationOscillator);
-  CommonViews::ModulationSelector(&feedback->hsbSettings.saturation);
-  CommonViews::MidiSelector(&feedback->hsbSettings.saturation);
-  
-  // Brightness
-  CommonViews::SliderWithInvertOscillator("Brightness", "##brightness", &feedback->hsbSettings.brightness, &feedback->hsbSettings.invertBrightness, &feedback->hsbSettings.brightnessOscillator);
-  CommonViews::ModulationSelector(&feedback->hsbSettings.brightness);
-  CommonViews::MidiSelector(&feedback->hsbSettings.brightness);
 }
 
 void FeedbackShader::clear() {
@@ -166,4 +138,8 @@ bool FeedbackShader::enabled() {
 
 std::string FeedbackShader::name() {
   return "Feedback";
+}
+
+ShaderType FeedbackShader::type() {
+  return ShaderTypeBlur;
 }

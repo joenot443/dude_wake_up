@@ -113,3 +113,9 @@ void ShaderChainerView::pushSelectedButtonStyle() {
   ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.7f, 0.8f, 0.8f));
 }
   
+
+void ShaderChainerView::setShaderChainer(ShaderChainer *chainer) {
+  shaderChainer = chainer;
+  shaders = &shaderChainer->shaders;
+  selectedShader = nullptr;  
+}

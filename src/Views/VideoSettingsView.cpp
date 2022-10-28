@@ -18,9 +18,6 @@
 const static ofVec2f windowSize = ofVec2f(1000, 600);
 
 void VideoSettingsView::setup() {
-  feedback0SettingsView.feedbackSettings = &videoSettings->feedback0Settings;
-  feedback1SettingsView.feedbackSettings = &videoSettings->feedback1Settings;
-  feedback2SettingsView.feedbackSettings = &videoSettings->feedback2Settings;
   styleWindow();
 }
 
@@ -63,13 +60,17 @@ void VideoSettingsView::draw() {
         timeStream << " Config.json";
         ofFileDialogResult result = ofSystemSaveDialog(timeStream.str(), "Save config file");
         if(result.bSuccess) {
-          ConfigService::getService()->saveConfigFile(videoSettings, result.getPath());
+          ConfigService::getService()->saveShaderChainerConfigFile(videoStream->shaderChainer, result.getPath());
         }
       }
       if (ImGui::MenuItem("Load Config", "CMD+O")) {
         ofFileDialogResult result = ofSystemLoadDialog("Open config file");
         if (result.getPath().length()) {
-          ConfigService::getService()->loadConfigFile(result.getPath());
+          auto shaderChainer = ConfigService::getService()->loadShaderChainerConfigFile(result.getPath());
+          if (shaderChainer != nullptr) {
+            shaderChainerView.setShaderChainer(shaderChainer);
+            videoStream->shaderChainer = shaderChainer;
+          }
         }
       }
       ImGui::EndMenu();
@@ -84,11 +85,14 @@ void VideoSettingsView::draw() {
   
   
   ImGui::Columns(2, "videofeedsettings", false);
+  
   // Shader Chainer
   shaderChainerView.draw();
   ImGui::NextColumn();
+  
   // Selected Shader
   drawSelectedShader();
+  
   ImGui::Columns(1);
   ImGui::Separator();
   
@@ -114,83 +118,18 @@ void VideoSettingsView::drawSelectedShader() {
   }
   
 }
-
-void VideoSettingsView::drawHSB() {
-  CommonViews::H3Title("Basic (HSB)");
-  
-  // Hue
-  CommonViews::SliderWithOscillator("Hue", "##hue", &videoSettings->hsbSettings.hue, &videoSettings->hsbSettings.hueOscillator);
-  CommonViews::ModulationSelector(&videoSettings->hsbSettings.hue);
-  CommonViews::MidiSelector(&videoSettings->hsbSettings.hue);
-  
-  // Saturation
-  CommonViews::SliderWithOscillator("Saturation", "##saturation", &videoSettings->hsbSettings.saturation, &videoSettings->hsbSettings.saturationOscillator);
-  CommonViews::ModulationSelector(&videoSettings->hsbSettings.saturation);
-  CommonViews::MidiSelector(&videoSettings->hsbSettings.saturation);
-  
-  // Brightness
-  CommonViews::SliderWithOscillator("Brightness", "##brightness", &videoSettings->hsbSettings.brightness, &videoSettings->hsbSettings.brightnessOscillator);
-  CommonViews::ModulationSelector(&videoSettings->hsbSettings.brightness);
-  CommonViews::MidiSelector(&videoSettings->hsbSettings.brightness);
-}
-
-void VideoSettingsView::drawBlurSharpen() {
-  CommonViews::H3Title("Blur");
-  
-  // Amount
-  CommonViews::SliderWithOscillator("Mix", "##mix", &videoSettings->blurSettings.mix, &videoSettings->blurSettings.mixOscillator);
-  CommonViews::ModulationSelector(&videoSettings->blurSettings.mix);
-  CommonViews::MidiSelector(&videoSettings->blurSettings.mix);
-  
-  // Radius
-  CommonViews::SliderWithOscillator("Radius", "##radius", &videoSettings->blurSettings.radius, &videoSettings->blurSettings.radiusOscillator);
-  CommonViews::ModulationSelector(&videoSettings->blurSettings.radius);
-  CommonViews::MidiSelector(&videoSettings->blurSettings.radius);
-  
-  // Sharpen
-  
-  CommonViews::H3Title("Sharpen");
-  
-  CommonViews::SliderWithOscillator("Amount", "##sharpen_amount", &videoSettings->sharpenSettings.amount, &videoSettings->sharpenSettings.amountOscillator);
-  CommonViews::ModulationSelector(&videoSettings->sharpenSettings.amount);
-  CommonViews::MidiSelector(&videoSettings->sharpenSettings.amount);
-  
-  // Radius
-  CommonViews::SliderWithOscillator("Radius", "##sharpen_radius", &videoSettings->sharpenSettings.radius, &videoSettings->sharpenSettings.radiusOscillator);
-  CommonViews::ModulationSelector(&videoSettings->sharpenSettings.radius);
-  CommonViews::MidiSelector(&videoSettings->sharpenSettings.radius);
-  
-  // Boost
-  CommonViews::SliderWithOscillator("Boost", "##sharpen_boost", &videoSettings->sharpenSettings.boost, &videoSettings->sharpenSettings.boostOscillator);
-  CommonViews::ModulationSelector(&videoSettings->sharpenSettings.boost);
-  CommonViews::MidiSelector(&videoSettings->sharpenSettings.boost);
-}
-
-void VideoSettingsView::drawTransform() {
-  CommonViews::H3Title("Transform");
-  
-  // Feedback Blend
-  CommonViews::SliderWithOscillator("Feedback Blend", "##feedbackblend", &videoSettings->transformSettings.feedbackBlend, &videoSettings->transformSettings.feedbackBlendOscillator);
-  CommonViews::ModulationSelector(&videoSettings->transformSettings.feedbackBlend);
-  CommonViews::MidiSelector(&videoSettings->transformSettings.feedbackBlend);
-  
-  
-  // Scale
-  CommonViews::SliderWithOscillator("Scale", "##scale", &videoSettings->transformSettings.scale, &videoSettings->transformSettings.scaleOscillator);
-  CommonViews::ModulationSelector(&videoSettings->transformSettings.scale);
-  CommonViews::MidiSelector(&videoSettings->transformSettings.scale);
-}
-
-void VideoSettingsView::drawPixelation() {
-  CommonViews::H3Title("Pixelation");
-  
-  ImGui::Text("Mix");
-  ImGui::SetNextItemWidth(150.0);
-  ImGui::SameLine(0, 20);
-  ImGui::Checkbox("Enabled##pixelation_enabled", &videoSettings->pixelSettings.enabled.boolValue);
-  
-  CommonViews::SliderWithOscillator("Size", "##pixelation_size", &videoSettings->pixelSettings.size, &videoSettings->pixelSettings.sizeOscillator);
-  CommonViews::ModulationSelector(&videoSettings->pixelSettings.size);
-  CommonViews::MidiSelector(&videoSettings->pixelSettings.size);
-}
-
+//
+//void VideoSettingsView::drawTransform() {
+//  CommonViews::H3Title("Transform");
+//
+//  // Feedback Blend
+//  CommonViews::SliderWithOscillator("Feedback Blend", "##feedbackblend", &videoSettings->transformSettings.feedbackBlend, &videoSettings->transformSettings.feedbackBlendOscillator);
+//  CommonViews::ModulationSelector(&videoSettings->transformSettings.feedbackBlend);
+//  CommonViews::MidiSelector(&videoSettings->transformSettings.feedbackBlend);
+//
+//
+//  // Scale
+//  CommonViews::SliderWithOscillator("Scale", "##scale", &videoSettings->transformSettings.scale, &videoSettings->transformSettings.scaleOscillator);
+//  CommonViews::ModulationSelector(&videoSettings->transformSettings.scale);
+//  CommonViews::MidiSelector(&videoSettings->transformSettings.scale);
+//}

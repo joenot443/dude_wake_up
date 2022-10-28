@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include "VideoSettings.hpp"
 #include "Shader.hpp"
-#include "FeedbackSettingsView.hpp"
 #include "AudioSettings.hpp"
 #include "ShaderType.hpp"
 #include "ShaderChainer.hpp"
@@ -31,6 +30,8 @@ public:
   
   // From ShaderChainer
   std::vector<Shader *> *shaders;
+  
+  void setShaderChainer(ShaderChainer *chainer);
     
   ShaderChainerView(VideoSettings *videoSettings,
                     ShaderChainer *shaderChainer)

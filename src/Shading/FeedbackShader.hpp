@@ -16,14 +16,15 @@
 #include "ofxImGui.h"
 
 struct FeedbackShader: Shader  {
-  FeedbackShader(FeedbackSettings *feedback, int idx) : feedback(feedback), idx(idx) {};
-  FeedbackSettings *feedback;
+
+  FeedbackSettings *settings;
   ofShader shader;
   std::vector<ofTexture> frameBuffer;
   int idx = 0;
   ofFbo fboFeedback;
-  
 
+  FeedbackShader(FeedbackSettings *settings, int idx) : Shader(settings), settings(settings), idx(idx) {};
+  
   void saveFrame(ofFbo *frame);
   void shade();
   void clearFrameBuffer();
@@ -35,6 +36,7 @@ struct FeedbackShader: Shader  {
   virtual bool enabled();
   virtual std::string name();
   virtual void drawSettings();
+  virtual ShaderType type();
 };
 
 #endif /* FeedbackShader_hpp */

@@ -19,7 +19,8 @@ struct BlurShader: Shader {
   BlurSettings *settings;
   ofShader shader;
 public:
-  BlurShader(BlurSettings *settings) : settings(settings) {}
+  BlurShader(BlurSettings *settings) : Shader(settings),
+  settings(settings) {}
   void setup() override {
     shader.load("shadersGL2/new/blur");
   }
@@ -46,6 +47,10 @@ public:
   
   std::string name() override {
     return "Blur";
+  }
+  
+  ShaderType type() override {
+    return ShaderTypeBlur;
   }
   
   void drawSettings() override {

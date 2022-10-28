@@ -26,7 +26,7 @@ public:
   VideoStream(std::shared_ptr<ofAppBaseWindow> window, StreamConfig config, VideoSettings *settings,   std::function<void(int)> closeStream) :
   position(Parameter("playerPosition", config.streamId, 0.0)),
   speed(Parameter("playerSpeed", config.streamId, 1.0, 0.0, 4.0)),
-  shaderChainer(ShaderChainer(config.streamId)),
+  shaderChainer(new ShaderChainer(config.streamId)),
   window(window),
   config(config),
   settings(settings),
@@ -51,7 +51,7 @@ public:
   StreamConfig config;
   VideoSettings *settings;
   
-  ShaderChainer shaderChainer;
+  ShaderChainer *shaderChainer;
 private:
   // Drawing
   void prepareFbos();

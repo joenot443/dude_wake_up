@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include "VideoSettings.hpp"
+#include "ShaderChainer.hpp"
 
 using json = nlohmann::json;
 
@@ -17,9 +18,14 @@ class ConfigService {
 private:
   
 public:
-  void saveConfigFile(VideoSettings* settings, std::string path);
-  VideoSettings* loadConfigFile(std::string name);
+  
+  // Shaders
+  ShaderSettings* settingsFromJson(json j);
+  void saveShaderChainerConfigFile(ShaderChainer* chainer, std::string path);
+  ShaderChainer* loadShaderChainerConfigFile(std::string name);
+  
   json jsonFromParameters(std::vector<Parameter*> parameters);
+  
   
   
   static ConfigService* service;

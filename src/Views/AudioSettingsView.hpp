@@ -11,7 +11,6 @@
 #include <stdio.h>
 
 #include "VideoSettings.hpp"
-#include "FeedbackSettingsView.hpp"
 #include "AudioSettings.hpp"
 
 struct AudioSettingsView {
