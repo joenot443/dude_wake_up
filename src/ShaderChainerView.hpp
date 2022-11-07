@@ -28,15 +28,11 @@ public:
   ShaderChainer *shaderChainer;
   Shader *selectedShader = NULL;
   
-  // From ShaderChainer
-  std::vector<Shader *> *shaders;
-  
   void setShaderChainer(ShaderChainer *chainer);
     
   ShaderChainerView(VideoSettings *videoSettings,
                     ShaderChainer *shaderChainer)
   : videoSettings(videoSettings),
-  shaders(&shaderChainer->shaders),
   shaderChainer(shaderChainer)
   {};
   

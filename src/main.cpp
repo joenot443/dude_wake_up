@@ -6,6 +6,9 @@
 #include "OscillationService.hpp"
 #include "MidiService.hpp"
 #include "ConfigService.hpp"
+#include "FeedbackSourceService.hpp"
+#include "VideoSourceService.hpp"
+#include "ShaderChainerService.hpp"
 #include "ParameterService.h"
 
 using json = nlohmann::json;
@@ -16,6 +19,9 @@ OscillationService *OscillationService::service = 0;
 MidiService *MidiService::service = 0;
 ParameterService *ParameterService::service = 0;
 ConfigService *ConfigService::service = 0;
+FeedbackSourceService *FeedbackSourceService::service = 0;
+VideoSourceService *VideoSourceService::service = 0;
+ShaderChainerService *ShaderChainerService::service = 0;
 
 //========================================================================
 int main( ){
@@ -26,6 +32,7 @@ int main( ){
 //  settings.windowMode = OF_WINDOW;
   auto window = ofCreateWindow(settings);
   auto app = shared_ptr<MainApp>(new MainApp(window));
+  ofSetFrameRate(60);
   ofRunApp(window, app);
   ofRunMainLoop();
 }

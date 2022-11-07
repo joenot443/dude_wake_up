@@ -20,7 +20,9 @@ private:
 public:
   
   // Shaders
-  ShaderSettings* settingsFromJson(json j);
+  
+//  Shader shaderFromJson(json j);
+  ShaderChainer shaderChainerFromJson(json j);
   void saveShaderChainerConfigFile(ShaderChainer* chainer, std::string path);
   ShaderChainer* loadShaderChainerConfigFile(std::string name);
   

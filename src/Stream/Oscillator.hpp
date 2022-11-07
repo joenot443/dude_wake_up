@@ -14,8 +14,8 @@
 
 
 struct Oscillator {
-  bool enabled = false;
-
+  
+  Parameter enabled;
   Parameter *value;
   Parameter amplitude;
   Parameter shift;

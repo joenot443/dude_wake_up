@@ -64,7 +64,7 @@ void OscillatorView::draw(const char* name, Parameter* value, ValueOscillator *o
 void OscillatorView::draw(const char* name, Parameter* value, Oscillator *oscillator) {
   ImGui::SameLine(0, 20);
   CommonViews::OscillateButton(value->paramId, oscillator);
-  if (oscillator->enabled) {
+  if (oscillator->enabled.boolValue) {
     ImGui::PushFont(FontService::getService()->h4);
     ImGui::Text("%s Oscillator", name);
     ImGui::Spacing();

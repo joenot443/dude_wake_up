@@ -22,21 +22,39 @@ public:
   void teardown();
   
   VideoSettings *videoSettings;
-  ShaderChainerView shaderChainerView;
+  std::vector<std::shared_ptr<ShaderChainerView>> shaderChainerViews;
+  std::vector<std::shared_ptr<ShaderChainer>> shaderChainers;
+  std::vector<std::shared_ptr<FeedbackSource>> feedbackSources;
   
   std::function<void(int)> closeStream;
   std::vector<std::string> sourceNames;
   
-  VideoSettingsView(VideoSettings *videoSettings, VideoStream *videoStream, std::function<void(int)> closeStream)
+  ShaderChainer *selectedChainer;
+  ShaderChainerView *selectedChainerView;
+  
+  VideoSettingsView(
+                    VideoSettings *videoSettings,
+                    std::shared_ptr<ShaderChainer> selectedShaderChain,
+                    VideoStream *videoStream,
+                    std::function<void(int)> closeStream)
   :
   videoSettings(videoSettings),
   closeStream(closeStream),
   videoStream(videoStream),
-  shaderChainerView(ShaderChainerView(videoSettings, videoStream->shaderChainer))
+  shaderChainerViews({
+    std::make_shared<ShaderChainerView>(videoSettings, selectedShaderChain.get())}),
+  shaderChainers({selectedShaderChain}),
+  selectedChainer(shaderChainers[0].get()),
+  selectedChainerView(shaderChainerViews[0].get())
   {};
   
 private:
   void styleWindow();
+  void pushShaderChainer(std::shared_ptr<ShaderChainer> chainer);
+  void selectShaderChainerAtIndex(int i);
+  void drawMenuBar();
+  void drawShaderChainerSelector();
+  void drawShaderChainerTabs();
   void drawSelectedShader();
   void drawMenu();
   void drawHSB();

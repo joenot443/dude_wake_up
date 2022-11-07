@@ -38,18 +38,6 @@ public:
     shader.end();
     canvas->end();
   }
-
-  void clear() override {
-    
-  }
-  
-  bool enabled() override {
-    return true;
-  }
-  
-  std::string name() override {
-    return "HSB";
-  }
   
   ShaderType type() override {
     return ShaderTypeHSB;

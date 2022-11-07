@@ -13,6 +13,7 @@
 #include "Console.hpp"
 #include "ShaderType.hpp"
 #include "ShaderSettings.hpp"
+#include "FeedbackSource.hpp"
 #include <stdio.h>
 #include "json.hpp"
 
@@ -25,8 +26,8 @@ struct Shader {
   virtual void setup() {};
   virtual void shade(ofFbo *frame, ofFbo *canvas) {};
   virtual void clear() {};
-  virtual std::string name() { return ""; };
-  virtual bool enabled() { return false; };
+  virtual std::string name() { return shaderTypeName(type()); };
+  virtual bool enabled() { return true; };
   virtual bool hasFrameBuffer() { return false; };
   void saveFrame(ofFbo *frame) {};
   
@@ -37,9 +38,9 @@ struct Shader {
   json serialize() {
     json j = settings->serialize();
     j["shaderType"] = type();
+    j["shaderId"] = settings->shaderId;
     return j;
   };
-//  ShaderSettings settings {};
 };
 
 #endif /* Shader_h */

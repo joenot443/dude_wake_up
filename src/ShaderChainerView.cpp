@@ -15,7 +15,6 @@
 static const float ButtonWidth = 120.0;
 static const float ComboWidth = 160.0;
 
-static const ShaderType AvailableShaderTypes[] = {ShaderTypeHSB, ShaderTypeBlur, ShaderTypePixelate, ShaderTypeFeedback};
 
 void ShaderChainerView::setup() {
   
@@ -68,8 +67,9 @@ void ShaderChainerView::drawShaderButton(Shader *shader, bool selected) {
 
 
 void ShaderChainerView::drawChainer() {
-  for (int n = 0; n < shaders->size(); n++) {
-    auto shader = (*shaders)[n];
+  for (int n = 0; n < shaderChainer->shaders.size(); n++) {
+    auto shared = shaderChainer->shaders[n];
+    auto shader = shared.get();
     bool selected = shader == selectedShader;
     ImGui::PushID(n);
     
@@ -88,9 +88,9 @@ void ShaderChainerView::drawChainer() {
       if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ShaderChainerDrop"))
       {
         int payload_n = *(const int*)payload->Data;
-        auto tmp = (*shaders)[n];
-        (*shaders)[n] = (*shaders)[payload_n];
-        (*shaders)[payload_n] = tmp;
+        auto tmp = shaderChainer->shaders[n];
+        shaderChainer->shaders[n] = shaderChainer->shaders[payload_n];
+        shaderChainer->shaders[payload_n] = tmp;
       }
       ImGui::EndDragDropTarget();
     }
@@ -98,7 +98,8 @@ void ShaderChainerView::drawChainer() {
     ImGui::SameLine();
 
     if (ImGui::Button("X", ImVec2(30, 30))) {
-      shaderChainer->deleteShader(shader);
+      shaderChainer->deleteShader(shared);
+      selectedShader = nullptr;
     }
     
     CommonViews::CenteredVerticalLine();
@@ -116,6 +117,5 @@ void ShaderChainerView::pushSelectedButtonStyle() {
 
 void ShaderChainerView::setShaderChainer(ShaderChainer *chainer) {
   shaderChainer = chainer;
-  shaders = &shaderChainer->shaders;
   selectedShader = nullptr;  
 }

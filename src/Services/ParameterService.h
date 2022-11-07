@@ -18,14 +18,14 @@
 using json = nlohmann::json;
 
 class ParameterService {
-  std::map<std::string, Parameter *> parameterMap;
+  
     
 public:
   Parameter * parameterForId(std::string paramId);
   static ParameterService* service;
   
-  void registerParameter(Parameter *);
-  void loadParameters(json *);
+  void registerParameter(Parameter *param);
+  std::map<std::string, Parameter *> parameterMap;
   
   ParameterService() {};
   static ParameterService* getService() {

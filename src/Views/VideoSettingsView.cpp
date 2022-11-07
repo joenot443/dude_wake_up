@@ -14,6 +14,8 @@
 #include "MidiService.hpp"
 #include "VideoSettingsView.hpp"
 #include "FontService.hpp"
+#include "VideoSourceService.hpp"
+#include "ShaderChainerService.hpp"
 
 const static ofVec2f windowSize = ofVec2f(1000, 600);
 
@@ -36,18 +38,7 @@ void VideoSettingsView::update() {
   
 }
 
-void VideoSettingsView::draw() {
-  if (!hasDrawn) {
-    MidiService::getService()->loadConfigFile();
-    hasDrawn = true;
-  }
-  
-  ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar;
-  ImGui::SetNextWindowSize(windowSize);
-  auto name = std::string("##%d Video Feed Tabs", videoSettings->streamId);
-  
-  ImGui::Begin(name.c_str(), NULL, windowFlags);
-  
+void VideoSettingsView::drawMenuBar() {
   if (ImGui::BeginMenuBar())
   {
     if (ImGui::BeginMenu("File"))
@@ -60,16 +51,15 @@ void VideoSettingsView::draw() {
         timeStream << " Config.json";
         ofFileDialogResult result = ofSystemSaveDialog(timeStream.str(), "Save config file");
         if(result.bSuccess) {
-          ConfigService::getService()->saveShaderChainerConfigFile(videoStream->shaderChainer, result.getPath());
+          ConfigService::getService()->saveShaderChainerConfigFile(selectedChainer, result.getPath());
         }
       }
       if (ImGui::MenuItem("Load Config", "CMD+O")) {
         ofFileDialogResult result = ofSystemLoadDialog("Open config file");
         if (result.getPath().length()) {
-          auto shaderChainer = ConfigService::getService()->loadShaderChainerConfigFile(result.getPath());
-          if (shaderChainer != nullptr) {
-            shaderChainerView.setShaderChainer(shaderChainer);
-            videoStream->shaderChainer = shaderChainer;
+          auto shaderChainer = std::shared_ptr<ShaderChainer>( ConfigService::getService()->loadShaderChainerConfigFile(result.getPath()));
+          if (shaderChainer.get() != nullptr) {
+            pushShaderChainer(shaderChainer);
           }
         }
       }
@@ -78,16 +68,32 @@ void VideoSettingsView::draw() {
     ImGui::EndMenuBar();
   }
   
+}
+
+void VideoSettingsView::draw() {
+  if (!hasDrawn) {
+    MidiService::getService()->loadConfigFile();
+    hasDrawn = true;
+  }
+  
+  ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar;
+  ImGui::SetNextWindowSize(windowSize);
+  auto name = std::string("##%d Video Feed Tabs", videoSettings->streamId);
+  
+  ImGui::Begin(name.c_str(), NULL, windowFlags);
+  
+  drawMenuBar();
+  
   ImGui::PushFont(FontService::getService()->h2);
   ImGui::Text("Video Feed Settings - %d", videoSettings->streamId);
   ImGui::PopFont();
   ImGui::Separator();
   
-  
   ImGui::Columns(2, "videofeedsettings", false);
   
-  // Shader Chainer
-  shaderChainerView.draw();
+  // Draw the shader chainers in different tabs
+  drawShaderChainerTabs();
+  
   ImGui::NextColumn();
   
   // Selected Shader
@@ -96,6 +102,9 @@ void VideoSettingsView::draw() {
   ImGui::Columns(1);
   ImGui::Separator();
   
+  // Shader Chainer
+  drawShaderChainerSelector();
+  
   // Close Stream button
   if (ImGui::Button("Close Stream")) {
     closeStream(videoSettings->streamId);
@@ -103,21 +112,77 @@ void VideoSettingsView::draw() {
   ImGui::End();
 }
 
-void VideoSettingsView::drawMenu() {
+void VideoSettingsView::selectShaderChainerAtIndex(int i) {
+  selectedChainer = shaderChainers[i].get();
+  selectedChainerView = shaderChainerViews[i].get();
+  videoStream->outputChainer = selectedChainer;
+}
+
+void VideoSettingsView::drawShaderChainerTabs() {
   
+  ImGui::PushFont(FontService::getService()->h3);
+  ImGui::Text("Shader Chainers");
+  ImGui::PopFont();
+  
+  if (ImGui::BeginTabBar("Shader Chainers")) {
+    for (int i = 0; i < shaderChainers.size(); i++) {
+      auto chainer = shaderChainers[i];
+      auto chainerView = shaderChainerViews[i];
+      if (ImGui::BeginTabItem(chainer->name.c_str())) {
+        selectShaderChainerAtIndex(i);
+        chainerView->draw();
+        ImGui::EndTabItem();
+      }
+    }
+    ImGui::EndTabBar();
+  }
+}
+
+void VideoSettingsView::drawShaderChainerSelector() {
+  ImGui::PushFont(FontService::getService()->h4);
+  ImGui::Text("New Shader Chain");
+  ImGui::PopFont();
+  
+  ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5f);
+  static char buf[128] = "";
+  ImGui::InputText("##ShaderChainerName", buf, IM_ARRAYSIZE(buf));
+  ImGui::PopItemWidth();
+  ImGui::SameLine();
+  
+  if (ImGui::Button("Create")) {
+    auto name = std::string(buf);
+    if (name.empty()) {
+      name = formatString("Chainer - %d", shaderChainers.size());
+    }
+    auto videoSources = VideoSourceService::getService()->videoSources();
+    
+    auto shaderChainer = std::make_shared<ShaderChainer>(buf, videoSources.at(0));
+    shaderChainer->name = name;
+    shaderChainer->setup();
+    pushShaderChainer(shaderChainer);
+  }
 }
 
 void VideoSettingsView::drawSelectedShader() {
-  if (shaderChainerView.selectedShader) {
-    shaderChainerView.selectedShader->drawSettings();
+  if (selectedChainerView->selectedShader != nullptr) {
+    selectedChainerView->selectedShader->drawSettings();
   } else {
     CommonViews::mSpacing();
     CommonViews::HorizontallyAligned(120);
     CommonViews::H4Title("Select a Shader");
     CommonViews::mSpacing();
   }
-  
 }
+
+void VideoSettingsView::pushShaderChainer(std::shared_ptr<ShaderChainer> shaderChainer) {
+  ShaderChainerService::getService()->addShaderChainer(shaderChainer);
+  shaderChainer->setup();
+  shaderChainers.push_back(shaderChainer);
+  auto shaderChainerView = std::make_shared<ShaderChainerView>(videoSettings, shaderChainer.get());
+  shaderChainerViews.push_back(shaderChainerView);
+  selectShaderChainerAtIndex(shaderChainers.size() - 1);
+}
+
 //
 //void VideoSettingsView::drawTransform() {
 //  CommonViews::H3Title("Transform");

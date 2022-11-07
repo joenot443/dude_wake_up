@@ -7,6 +7,14 @@
 
 #include "ConfigService.hpp"
 #include "ParameterService.h"
+#include "VideoSourceService.hpp"
+#include "HSBShader.hpp"
+#include "PixelShader.hpp"
+#include "GlitchShader.hpp"
+#include "BlurShader.hpp"
+#include "TransformShader.hpp"
+#include "MirrorShader.hpp"
+#include "EmptyShader.hpp"
 #include "json.hpp"
 #include "Console.hpp"
 #include <ostream>
@@ -47,46 +55,67 @@ ShaderChainer* ConfigService::loadShaderChainerConfigFile(std::string name) {
       log("Failed to load JSON file.");
       return;
     }
-    std::string settingsId = data["settingsId"];
-    auto shaderChainer = new ShaderChainer(settingsId);
+    std::string chainerId = data["chainerId"];
+    auto videoSources = VideoSourceService::getService()->videoSources();
+    auto shaderChainer = new ShaderChainer(chainerId, videoSources.at(0));
     shaderChainer->load(data);
-    ParameterService::getService()->loadParameters(&data);
     log("Loaded config file.");
     return shaderChainer;
   }
   return nullptr;
 }
 
-ShaderSettings* ConfigService::settingsFromJson(json j) {
-  ShaderType shaderType = j["shaderType"];
-  std::string settingsId = j["settingsId"];
-  switch (shaderType) {
-    case ShaderTypeNone:
-      return new ShaderSettings(settingsId);
-    case ShaderTypeHSB: {
-      auto settings = new HSBSettings(settingsId);
-      settings->load(j);
-      return settings;
-    }
-    case ShaderTypePixelate: {
-      auto settings = new PixelSettings(settingsId);
-      settings->load(j);
-      return settings;
-    }
-    case ShaderTypeGlitch: {
-      auto settings = new HSBSettings(settingsId);
-      settings->load(j);
-      return settings;
-    }
-    case ShaderTypeFeedback: {
-      auto settings = new FeedbackSettings(settingsId, 0);
-      settings->load(j);
-      return settings;
-    }
-    case ShaderTypeBlur: {
-      auto settings = new BlurSettings(settingsId);
-      settings->load(j);
-      return settings;
-    }
-  }
+ShaderChainer ConfigService::shaderChainerFromJson(json j) {
+  std::string chainerId = j["chainerId"];
+  auto videoSources = VideoSourceService::getService()->videoSources();
+  
+  auto shaderChainer = ShaderChainer(chainerId, videoSources.at(0));
+  shaderChainer.load(j);
+  return shaderChainer;
 }
+
+//Shader ConfigService::shaderFromJson(json j) {
+//  ShaderType shaderType = j["shaderType"];
+//  std::string shaderId = std::to_string((int) j["shaderId"]);
+//  switch (shaderType) {
+//    case ShaderTypeNone: {
+//      auto settings = new ShaderSettings(shaderId);
+//      return Shader(settings);
+//    }
+//    case ShaderTypeHSB: {
+//      auto settings = new HSBSettings(shaderId, j);
+//      settings->load(j);
+//      return HSBShader(settings);
+//    }
+//    case ShaderTypePixelate: {
+//      auto settings = new PixelSettings(shaderId, j);
+//      settings->load(j);
+//      return PixelShader(settings);
+//    }
+//    case ShaderTypeGlitch: {
+//      auto settings = new HSBSettings(shaderId, j);
+//      settings->load(j);
+//      return HSBShader(settings);
+//    }
+//    case ShaderTypeFeedback: {
+//      auto settings = new FeedbackSettings(shaderId, j);
+//      settings->load(j);
+//      return FeedbackShader(settings);
+//    }
+//    case ShaderTypeBlur: {
+//      auto settings = new BlurSettings(shaderId, j);
+//      settings->load(j);
+//      return BlurShader(settings);
+//    }
+//    case ShaderTypeMirror: {
+//      auto settings = new MirrorSettings(shaderId, j);
+//      settings->load(j);
+//      return MirrorShader(settings);
+//    }
+//    case ShaderTypeTransform: {
+//      auto settings = new TransformSettings(shaderId, j);
+//      settings->load(j);
+//      return TransformShader(settings);
+//    }
+//  }
+//}

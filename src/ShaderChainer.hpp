@@ -15,26 +15,46 @@
 #include "Shader.hpp"
 #include "HSBShader.hpp"
 #include "json.hpp"
+#include "FeedbackSource.hpp"
 #include "macro_scope.hpp"
+#include "VideoSource.hpp"
 
 using json = nlohmann::json;
 
 struct ShaderChainer {
-  ofFbo fboChainingShaders(ofFbo texture);
-  std::vector<FeedbackShader *> feedbackShaders;
-  std::vector<Shader *> shaders;
-  std::string settingsId;
-
-  void pushShader(ShaderType shaderType);
-  void deleteShader(Shader *);
+  void setup();
+  void update();
   
-  ShaderChainer(std::string settingsId) :
-  settingsId(settingsId),
+  std::string name;
+  
+  ofFbo fbo;
+  ofFbo processFrame(std::shared_ptr<ofTexture> frameTexture);
+  
+  std::vector<std::shared_ptr<FeedbackShader>> feedbackShaders;
+  std::vector<std::shared_ptr<Shader>> shaders;
+  std::shared_ptr<VideoSource> source;
+  
+  std::shared_ptr<FeedbackSource> feedbackDestination;
+  
+  std::string chainerId;
+
+  
+  void pushShader(ShaderType shaderType);
+  void deleteShader(std::shared_ptr<Shader> shader);
+  
+  void saveFeedbackFrame(ofTexture frame);
+  
+  ShaderChainer(std::string chainerId,
+                std::shared_ptr<VideoSource> source) :
+  chainerId(chainerId),
   feedbackShaders({}),
+  name(chainerId),
+  source(source),
   shaders({}) {};
   
   json serialize();
   void load(json j);
+  void registerFeedbackDestination();
 };
 
 

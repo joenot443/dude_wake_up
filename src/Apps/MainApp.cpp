@@ -1,8 +1,12 @@
 #include "MainApp.h"
+#include "ShaderChainer.hpp"
+#include "TransformShader.hpp"
 #include "ofxImGui.h"
 #include "ofMain.h"
 #include "AudioStream.hpp"
 #include "MainSettings.hpp"
+#include "UUID.hpp"
+#include "FileSource.hpp"
 #include "implot.h"
 #include "FontService.hpp"
 #include "AudioSettingsView.hpp"
@@ -10,6 +14,9 @@
 #include "ModulationService.hpp"
 #include "OscillationService.hpp"
 #include "MidiService.hpp"
+#include "ShaderChainerService.hpp"
+#include "WebcamSource.hpp"
+#include "VideoSourceService.hpp"
 #include <stdio.h>
 
 const static ofVec2f windowSize = ofVec2f(1200, 800);
@@ -44,6 +51,9 @@ void MainApp::setup(){
 void MainApp::update(){
   OscillationService::getService()->tickOscillators();
   ModulationService::getService()->tickMappings();
+  VideoSourceService::getService()->updateVideoSources();
+  ShaderChainerService::getService()->updateShaderChainers();
+  
   for (int i = 0; i < audioStreams.size(); i++) {
     if (audioStreams[i]->isSetup) {
       audioStreams[i]->update();
@@ -134,6 +144,27 @@ void MainApp::pushVideoStream(std::shared_ptr<StreamConfig> config) {
   std::function<void(int)> closeStream = [this](int streamId) {
     this->removeVideoStream(streamId);
   };
+  std::shared_ptr<VideoSource> videoSource = std::shared_ptr<VideoSource>(nullptr);
+  
+  switch (config->type) {
+    case VideoSource_webcam: {
+      videoSource =
+      std::make_shared<WebcamSource>(UUID::generateUUID(),
+                                     config->name,
+                                     config->index);
+      break;
+    }
+    case VideoSource_file: {
+      videoSource = std::make_shared<FileSource>(UUID::generateUUID(),
+                                                     config->name,
+                                                     config->path);
+      break;
+    }
+    default:
+      break;
+  }
+  
+  VideoSourceService::getService()->addVideoSource(videoSource);
   
   // Each stream created within the lifecycle will increment streamId by 1
   static int streamIdCounter = 0;
@@ -141,11 +172,17 @@ void MainApp::pushVideoStream(std::shared_ptr<StreamConfig> config) {
 
   VideoSettings *videoSettings = new VideoSettings(streamId, std::to_string(streamId));
   
-  auto streamPointer = std::make_shared<VideoStream>(streamWindow, *config, videoSettings, closeStream);
+  auto shaderChainer = std::make_shared<ShaderChainer>(std::to_string(streamId), videoSource);
+  shaderChainer->name = "Main Chainer";
+  shaderChainer->setup();
+  
+  ShaderChainerService::getService()->addShaderChainer(shaderChainer);
+    
+  auto streamPointer = std::make_shared<VideoStream>(streamWindow, *config, videoSettings, shaderChainer.get(), closeStream);
   
   videoStreams.push_back(streamPointer.get());
   
-  VideoSettingsView *settingsView = new VideoSettingsView(videoSettings, streamPointer.get(), closeStream);
+  VideoSettingsView *settingsView = new VideoSettingsView(videoSettings, shaderChainer, streamPointer.get(), closeStream);
   videoSettingsViews.push_back(settingsView);
   
   settingsView->setup();

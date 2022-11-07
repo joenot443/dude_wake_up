@@ -24,7 +24,7 @@
 
 void VideoStream::setup() {
   gui.setup(nullptr, true, ImGuiConfigFlags_ViewportsEnable);
-  switch (config.source) {
+  switch (config.type) {
     case VideoSource_file:
       player.load(config.path);
       player.play();
@@ -37,12 +37,9 @@ void VideoStream::setup() {
       break;
   }
   
+  frameTexture.allocate(640, 480, GL_RGBA);
   ofSetWindowShape(640, 480);
-  
-  for (auto & sh : shaderChainer->shaders) {
-    sh->setup();
-  }
-  
+    
   prepareFbos();
   clearFrameBuffer();
   ofAddListener(window->events().exit, this, &VideoStream::willExit);
@@ -64,7 +61,7 @@ void VideoStream::teardown() {
 }
 
 void VideoStream::update() {
-  switch (config.source) {
+  switch (config.type) {
     case VideoSource_file:
       return player.update();
     case VideoSource_webcam:
@@ -79,8 +76,7 @@ void VideoStream::draw() {
     
   prepareMainFbo();
 
-  fbo = shaderChainer->fboChainingShaders(fbo);
-  fbo.draw(0, 0, ofGetWidth(), ofGetHeight());
+  outputChainer->fbo.draw(0, 0, ofGetWidth(), ofGetHeight());
   
   if (!firstFrameDrawn) {
     firstDrawSetup();
@@ -89,28 +85,23 @@ void VideoStream::draw() {
   if (settings->videoFlags.resetFeedback.boolValue) {
     settings->videoFlags.resetFeedback.setValue(0.0);
     clearFrameBuffer();
-  }
-  
+  }  
 }
 
 void VideoStream::prepareMainFbo() {
   fbo.begin();
-//  float scale = settings->transformSettings.scale.value;
-  drawVideo(1.0);
+  ofClear(0,0,0,255);
+  drawVideo();
   fbo.end();
 }
 
-void VideoStream::drawVideo(float scale) {
-  switch (config.source) {
+void VideoStream::drawVideo() {
+  switch (config.type) {
     case VideoSource_file:
       return drawVideoPlayer();
     case VideoSource_webcam:
-      ofClear(0,0,0,255);
-      float centerX = streamWidth() / 2.0;
-      float centerY = streamHeight() / 2.0;
-      float originX = centerX - centerX * scale;
-      float originY = centerY - centerY * scale;
-      return cam.draw(originX, originY, scale * streamWidth(), scale * streamHeight());
+      return;
+//      frameTexture.loadData(videoSource->frame, GL_RGBA, GL_UNSIGNED_BYTE);
   }
 }
 
@@ -152,7 +143,6 @@ void VideoStream::drawVideoPlayerMenu() {
   ImGui::End();
 }
 
-
 void VideoStream::drawMainFbo() {
   fbo.draw(0,0, ofGetWidth(), ofGetHeight());
 }
@@ -180,7 +170,7 @@ void VideoStream::drawDebug() {
 
 
 void VideoStream::clearFrameBuffer() {
-  for (auto & fb : shaderChainer->feedbackShaders) {
+  for (auto & fb : outputChainer->feedbackShaders) {
     fb->clearFrameBuffer();
   }
   shouldClearFrameBuffer = false;
@@ -190,7 +180,7 @@ void VideoStream::clearFrameBuffer() {
 // MARK: - Helpers
 
 float VideoStream::streamHeight() {
-  switch (config.source) {
+  switch (config.type) {
     case VideoSource_file:
       return player.getHeight();
     case VideoSource_webcam:
@@ -199,7 +189,7 @@ float VideoStream::streamHeight() {
 }
 
 float VideoStream::streamWidth() {
-  switch (config.source) {
+  switch (config.type) {
     case VideoSource_file:
       return player.getWidth();
     case VideoSource_webcam:
@@ -208,7 +198,7 @@ float VideoStream::streamWidth() {
 }
 
 ofTexture VideoStream::streamTexture() {
-  switch (config.source) {
+  switch (config.type) {
     case VideoSource_file:
       return player.getTexture();
     case VideoSource_webcam:

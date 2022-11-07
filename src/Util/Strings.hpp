@@ -64,4 +64,3 @@ static std::vector<std::string> split_string (std::string s, std::string delimit
 
 
 #endif Strings_h
-

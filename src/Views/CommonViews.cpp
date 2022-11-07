@@ -137,7 +137,7 @@ void CommonViews::OscillateButton(std::string id, Oscillator *o) {
   ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
   
   std::string buttonTitle;
-  if (o->enabled) {
+  if (o->enabled.boolValue) {
     std::string rawTitle = "" "##%s_osc_button";
     buttonTitle = formatString(rawTitle, id.c_str()).c_str();
   } else {
@@ -146,7 +146,7 @@ void CommonViews::OscillateButton(std::string id, Oscillator *o) {
   }
   
   if (ImGui::Button(buttonTitle.c_str(), ImVec2(16.0, 16.0))) {
-    o->enabled = !o->enabled;
+    o->enabled.boolValue = !o->enabled.boolValue;
   }
   ImGui::PopStyleVar();
   ImGui::PopFont();

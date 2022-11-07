@@ -11,13 +11,17 @@
 #include <string>
 
 enum ShaderType {
-  ShaderTypeNone,
-  ShaderTypeHSB,
-  ShaderTypeBlur,
-  ShaderTypePixelate,
-  ShaderTypeGlitch,
-  ShaderTypeFeedback,
+  ShaderTypeNone,         // 0
+  ShaderTypeHSB,          // 1
+  ShaderTypeBlur,         // 2
+  ShaderTypePixelate,     // 3
+  ShaderTypeGlitch,       // 4
+  ShaderTypeMirror,       // 5
+  ShaderTypeTransform,    // 6
+  ShaderTypeFeedback,     // 7
 };
+
+static const ShaderType AvailableShaderTypes[] = {ShaderTypeHSB, ShaderTypeBlur, ShaderTypePixelate, ShaderTypeMirror, ShaderTypeTransform, ShaderTypeFeedback};
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) {
@@ -31,6 +35,10 @@ static std::string shaderTypeName(ShaderType type) {
       return "Pixelate";
     case ShaderTypeGlitch:
       return "Glitch";
+    case ShaderTypeTransform:
+      return "Transform";
+    case ShaderTypeMirror:
+      return "Mirror";
     case ShaderTypeFeedback:
       return "Feedback";
   }

@@ -43,6 +43,7 @@ void MainSettingsView::draw() {
   ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar;
   ImGui::SetNextWindowSize(windowSize);
   bool addTapped = false;
+  std::string name = "New Stream";
   if (ImGui::Begin("main_settings_view", NULL, windowFlags)) {
     ImGui::PushFont(FontService::getService()->h2);
     ImGui::Text("Main Settings");
@@ -71,7 +72,10 @@ void MainSettingsView::draw() {
     ImGui::PopFont();
   }
   if (addTapped) {
-    addVideoStream(StreamConfig(mainSettings->selectedVideoSource, mainSettings->selectedVideoPath, mainSettings->selectedVideoDeviceIndex));
+    addVideoStream(StreamConfig(mainSettings->selectedVideoSource,
+                                mainSettings->selectedVideoPath,
+                                name,
+                                mainSettings->selectedVideoDeviceIndex));
   }
   ImGui::End();
 }
@@ -107,8 +111,11 @@ void MainSettingsView::drawVideoSettings() {
       for (int i = 0; i < videoDeviceNames.size(); i++) {
         auto name = videoDeviceNames[i];
         // Option for every device
-        if (ImGui::Selectable(name.c_str(), mainSettings->selectedVideoDeviceIndex == i))
-          mainSettings->selectedVideoDeviceIndex = i;
+        if (ImGui::Selectable(name.c_str(), mainSettings->selectedVideoDeviceIndex == i)) {
+            mainSettings->selectedVideoDeviceIndex = i;
+            mainSettings->selectedVideoDevice = name;
+        }
+          
       }
       ImGui::EndCombo();
     }

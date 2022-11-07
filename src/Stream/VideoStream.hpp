@@ -18,15 +18,21 @@
 #include "ofBaseApp.h"
 #include "Oscillator.hpp"
 #include "FeedbackShader.hpp"
+#include "VideoSource.hpp"
 #include "MainSettings.hpp"
 #include "ofxImGui.h"
 
 class VideoStream : public ofBaseApp {
 public:
-  VideoStream(std::shared_ptr<ofAppBaseWindow> window, StreamConfig config, VideoSettings *settings,   std::function<void(int)> closeStream) :
+  VideoStream(
+              std::shared_ptr<ofAppBaseWindow> window,
+              StreamConfig config,
+              VideoSettings *settings,
+              ShaderChainer *chainer,
+              std::function<void(int)> closeStream) :
   position(Parameter("playerPosition", config.streamId, 0.0)),
   speed(Parameter("playerSpeed", config.streamId, 1.0, 0.0, 4.0)),
-  shaderChainer(new ShaderChainer(config.streamId)),
+  outputChainer(chainer),
   window(window),
   config(config),
   settings(settings),
@@ -39,10 +45,10 @@ public:
   
   // Shading
   
-  
   std::function<void(int)> closeStream;
   bool isSetup;
   bool shouldClearFrameBuffer;
+  ShaderChainer *outputChainer;
   
   // Whether we've drawn the current frame for this stream.
   // Used in draw() event for ensuring all are drawn.
@@ -50,8 +56,6 @@ public:
   bool firstFrameDrawn;
   StreamConfig config;
   VideoSettings *settings;
-  
-  ShaderChainer *shaderChainer;
 private:
   // Drawing
   void prepareFbos();
@@ -59,17 +63,11 @@ private:
   void prepareMainFbo();
   void drawMainFbo();
   void drawDebug();
-  void drawVideo(float scale);
+  void drawVideo();
   void drawVideoPlayer();
   void drawVideoPlayerMenu();
   
   // Shading
-  void shadeBlur();
-  void shadeHSB();
-  void shadeFeedback();
-  void shadeSharpen();
-  void saveFeedbackFrame();
-  void resetFeedbackValues(FeedbackSettings *feedback);
   void clearFrameBuffer();
   
   // Events
@@ -84,9 +82,11 @@ private:
   
   ofxImGui::Gui gui;
   std::shared_ptr<ofAppBaseWindow> window;
+  std::shared_ptr<VideoSource> videoSource;
   ofVideoPlayer player;
   ofVideoGrabber cam;
   ofFbo fbo;
+  ofTexture frameTexture;
   Parameter position;
   Parameter speed;
   

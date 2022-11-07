@@ -9,14 +9,16 @@
 #define MainSettings_h
 #include "VideoSettings.hpp"
 #include "AudioSettings.hpp"
+#include "VideoSource.hpp"
 #include <string>
 
 struct MainSettings {
   int activeStreams = 0;
-  VideoSource selectedVideoSource = VideoSource_webcam;
+  VideoSourceType selectedVideoSource = VideoSource_webcam;
   std::string selectedVideoPath = "";
   AudioSource selectedAudioSource = AudioSource_none;
   std::string selectedAudioPath = "";
+  std::string selectedVideoDevice = "";
   int selectedVideoDeviceIndex = 0;
   int selectedAudioDeviceIndex = 0;
   
@@ -65,14 +67,13 @@ struct AudioStreamConfig {
 };
 
 struct StreamConfig {
-  VideoSource source;
+  VideoSourceType type;
   std::string path;
+  std::string name;
   int index;
   std::string streamId;
   
-  StreamConfig(VideoSource source, std::string path, int index) : source(source), path(path), index(index),
-  streamId(formatString("%d-stream", index))
-  {}
+  StreamConfig(VideoSourceType type, std::string path, std::string name, int index) : type(type), path(path), index(index), name(name), streamId(formatString("%d-stream", index)) {}
 };
 
 #endif /* MainSettings_h */

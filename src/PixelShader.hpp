@@ -20,6 +20,7 @@ struct PixelShader: Shader {
   PixelShader(PixelSettings *settings) : settings(settings), Shader(settings) {};
   
   ofShader shader;
+  
   void setup() override {
     shader.load("shadersGL2/new/pixel");
   }
@@ -34,19 +35,11 @@ struct PixelShader: Shader {
     shader.end();
     canvas->end();
   }
-
-  void clear() override {
-    
-  }
   
   bool enabled() override {
     return settings->enabled.boolValue;
   }
-  
-  std::string name() override {
-    return "Pixel";
-  }
-  
+
   ShaderType type() override {
     return ShaderTypePixelate;
   }

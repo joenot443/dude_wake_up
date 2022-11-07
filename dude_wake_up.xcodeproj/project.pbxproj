@@ -26,6 +26,11 @@
 		024D1690289ED64700DA807C /* OnsetDetectionFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D168D289ED64700DA807C /* OnsetDetectionFunction.cpp */; };
 		024D1698289EEACD00DA807C /* PulseOscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D1696289EEACD00DA807C /* PulseOscillator.cpp */; };
 		024D169C28A046DF00DA807C /* ConfigService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D169A28A046DF00DA807C /* ConfigService.cpp */; };
+		02B280E02913FE8200B793D5 /* FeedbackSourceService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B280DE2913FE7D00B793D5 /* FeedbackSourceService.cpp */; };
+		02B280EA2915480600B793D5 /* WebcamSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B280E929148A7500B793D5 /* WebcamSource.cpp */; };
+		02B280EB2915480E00B793D5 /* FileSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B280E529148A7500B793D5 /* FileSource.cpp */; };
+		02B280EC2915487200B793D5 /* VideoSourceService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B280E12914761E00B793D5 /* VideoSourceService.cpp */; };
+		02B280EF291564A100B793D5 /* ShaderChainerService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B280ED291564A100B793D5 /* ShaderChainerService.cpp */; };
 		02BB4A6C28FEED3000E2CFB7 /* ShaderChainerView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02BB4A6A28FEED3000E2CFB7 /* ShaderChainerView.cpp */; };
 		02F5B37428BE9856005F0EC6 /* ShaderChainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F5B37228BE97D5005F0EC6 /* ShaderChainer.cpp */; };
 		059638BE8C8A1D59958631C4 /* MidiPairing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D824BC957F369968DA9939C /* MidiPairing.cpp */; };
@@ -112,6 +117,8 @@
 		0240887328B1BB1400908222 /* macro_scope.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = macro_scope.hpp; sourceTree = "<group>"; };
 		0240887428B1E29E00908222 /* Vectors.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Vectors.hpp; sourceTree = "<group>"; };
 		0240887528B5A70400908222 /* Fonts.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Fonts.hpp; sourceTree = "<group>"; };
+		0248C07E290EB52100477B65 /* MirrorShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MirrorShader.hpp; sourceTree = "<group>"; };
+		0248C07F291071D500477B65 /* TransformShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TransformShader.hpp; sourceTree = "<group>"; };
 		024D1685289DB5DF00DA807C /* data */ = {isa = PBXFileReference; lastKnownFileType = folder; name = data; path = bin/data; sourceTree = "<group>"; };
 		024D1687289DFD8400DA807C /* FeedbackShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FeedbackShader.cpp; path = Shading/FeedbackShader.cpp; sourceTree = "<group>"; };
 		024D1688289DFD8400DA807C /* FeedbackShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = FeedbackShader.hpp; path = Shading/FeedbackShader.hpp; sourceTree = "<group>"; };
@@ -127,6 +134,19 @@
 		024D169A28A046DF00DA807C /* ConfigService.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ConfigService.cpp; path = Services/ConfigService.cpp; sourceTree = "<group>"; };
 		024D169B28A046DF00DA807C /* ConfigService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = ConfigService.hpp; path = Services/ConfigService.hpp; sourceTree = "<group>"; };
 		026A10CB0F40EC63FBB2FF06 /* VideoSettings.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = VideoSettings.hpp; path = src/Models/VideoSettings.hpp; sourceTree = SOURCE_ROOT; };
+		02B280D92913FA5400B793D5 /* UUID.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UUID.hpp; sourceTree = "<group>"; };
+		02B280DD2913FE5A00B793D5 /* FeedbackSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = FeedbackSource.hpp; path = src/FeedbackSource.hpp; sourceTree = SOURCE_ROOT; };
+		02B280DE2913FE7D00B793D5 /* FeedbackSourceService.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FeedbackSourceService.cpp; sourceTree = "<group>"; };
+		02B280DF2913FE7D00B793D5 /* FeedbackSourceService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FeedbackSourceService.hpp; sourceTree = "<group>"; };
+		02B280E12914761E00B793D5 /* VideoSourceService.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VideoSourceService.cpp; path = Services/VideoSourceService.cpp; sourceTree = "<group>"; };
+		02B280E22914761E00B793D5 /* VideoSourceService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = VideoSourceService.hpp; path = Services/VideoSourceService.hpp; sourceTree = "<group>"; };
+		02B280E529148A7500B793D5 /* FileSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FileSource.cpp; sourceTree = "<group>"; };
+		02B280E629148A7500B793D5 /* WebcamSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = WebcamSource.hpp; sourceTree = "<group>"; };
+		02B280E729148A7500B793D5 /* VideoSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = VideoSource.hpp; sourceTree = "<group>"; };
+		02B280E829148A7500B793D5 /* FileSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FileSource.hpp; sourceTree = "<group>"; };
+		02B280E929148A7500B793D5 /* WebcamSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = WebcamSource.cpp; sourceTree = "<group>"; };
+		02B280ED291564A100B793D5 /* ShaderChainerService.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ShaderChainerService.cpp; path = Services/ShaderChainerService.cpp; sourceTree = "<group>"; };
+		02B280EE291564A100B793D5 /* ShaderChainerService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = ShaderChainerService.hpp; path = Services/ShaderChainerService.hpp; sourceTree = "<group>"; };
 		02B6599D28BBD16700E31AE7 /* GlitchShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = GlitchShader.hpp; path = Shading/GlitchShader.hpp; sourceTree = "<group>"; };
 		02BB4A6A28FEED3000E2CFB7 /* ShaderChainerView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderChainerView.cpp; sourceTree = "<group>"; };
 		02BB4A6B28FEED3000E2CFB7 /* ShaderChainerView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ShaderChainerView.hpp; sourceTree = "<group>"; };
@@ -478,12 +498,36 @@
 				024D1688289DFD8400DA807C /* FeedbackShader.hpp */,
 				02F5B38028BFCDD4005F0EC6 /* PixelShader.hpp */,
 				02B6599D28BBD16700E31AE7 /* GlitchShader.hpp */,
+				0248C07F291071D500477B65 /* TransformShader.hpp */,
 				02F5B37B28BED132005F0EC6 /* HSBShader.hpp */,
+				0248C07E290EB52100477B65 /* MirrorShader.hpp */,
 				02F5B37928BEA28D005F0EC6 /* BlurShader.hpp */,
 				02F5B37628BE9C12005F0EC6 /* EmptyShader.hpp */,
 				02BB4A6D290037F100E2CFB7 /* ShaderType.hpp */,
 			);
 			name = Shading;
+			sourceTree = "<group>";
+		};
+		02B280DB2913FE1000B793D5 /* Feedback */ = {
+			isa = PBXGroup;
+			children = (
+				02B280DD2913FE5A00B793D5 /* FeedbackSource.hpp */,
+				02B280DE2913FE7D00B793D5 /* FeedbackSourceService.cpp */,
+				02B280DF2913FE7D00B793D5 /* FeedbackSourceService.hpp */,
+			);
+			path = Feedback;
+			sourceTree = "<group>";
+		};
+		02B280E429148A7500B793D5 /* Video */ = {
+			isa = PBXGroup;
+			children = (
+				02B280E529148A7500B793D5 /* FileSource.cpp */,
+				02B280E629148A7500B793D5 /* WebcamSource.hpp */,
+				02B280E829148A7500B793D5 /* FileSource.hpp */,
+				02B280E929148A7500B793D5 /* WebcamSource.cpp */,
+				02B280E729148A7500B793D5 /* VideoSource.hpp */,
+			);
+			path = Video;
 			sourceTree = "<group>";
 		};
 		2413C01760B1811BED0F502D /* ofxMidi */ = {
@@ -519,6 +563,10 @@
 				7838FE9B7FB655ED0ADEECB9 /* ParameterService.h */,
 				024D169A28A046DF00DA807C /* ConfigService.cpp */,
 				024D169B28A046DF00DA807C /* ConfigService.hpp */,
+				02B280E12914761E00B793D5 /* VideoSourceService.cpp */,
+				02B280E22914761E00B793D5 /* VideoSourceService.hpp */,
+				02B280ED291564A100B793D5 /* ShaderChainerService.cpp */,
+				02B280EE291564A100B793D5 /* ShaderChainerService.hpp */,
 			);
 			name = Services;
 			sourceTree = "<group>";
@@ -713,6 +761,7 @@
 			isa = PBXGroup;
 			children = (
 				D85FF6DA846FFAB2A241ED93 /* Console.hpp */,
+				02B280D92913FA5400B793D5 /* UUID.hpp */,
 				E0A4D94E39EC0096C52A0FEB /* Strings.hpp */,
 				B05D2EE362F4BA9297661093 /* Video.hpp */,
 				0240887428B1E29E00908222 /* Vectors.hpp */,
@@ -1062,10 +1111,12 @@
 		E4B69E1C0A3A1BDC003C02F2 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				02B280DB2913FE1000B793D5 /* Feedback */,
 				024D1686289DFD6200DA807C /* Shading */,
 				47E4E7757DB0771B0C4C58E1 /* Services */,
 				9F29250EFB8B209E9192C8B8 /* main.cpp */,
 				9E4FC7FE1041D81B7931878E /* Util */,
+				02B280E429148A7500B793D5 /* Video */,
 				9D4EB7020129479136E47D0F /* Stream */,
 				53993C2CF5EE6C972F3A0308 /* Models */,
 				721B30BA8F4AAE6EB850CE13 /* Views */,
@@ -1181,6 +1232,7 @@
 				1D1A2453BB2D3770DF64BC69 /* AudioStream.cpp in Sources */,
 				A31728853BA0741D77701E2A /* ValueOscillator.cpp in Sources */,
 				021026E8289412220060F282 /* CoreFrequencyDomainFeatures.cpp in Sources */,
+				02B280E02913FE8200B793D5 /* FeedbackSourceService.cpp in Sources */,
 				60DF0EAEB64F40DD22AC1542 /* VideoStream.cpp in Sources */,
 				AF7ECB5BB5EF05E70B890405 /* Oscillator.cpp in Sources */,
 				9021CA48E18FB8B26215F64C /* Parameter.cpp in Sources */,
@@ -1190,6 +1242,7 @@
 				25E5D0BD57DFDA880B674DF6 /* MainSettingsView.cpp in Sources */,
 				175464DB3A85014D9DF5BD3C /* AudioSettingsView.cpp in Sources */,
 				6764CEA4D206EE90B9BEE3D4 /* MainApp.cpp in Sources */,
+				02B280EF291564A100B793D5 /* ShaderChainerService.cpp in Sources */,
 				5D5F66B1ACC05361D4592A52 /* main.cpp in Sources */,
 				021026D5289412140060F282 /* AccelerateFFT.cpp in Sources */,
 				12C04C963F830B6A09F5FC7D /* ModulationService.cpp in Sources */,
@@ -1212,6 +1265,7 @@
 				0090B479605B26E7C387B02D /* imgui_widgets.cpp in Sources */,
 				E5E99CE545F672AC5D265F43 /* implot.cpp in Sources */,
 				02F5B37428BE9856005F0EC6 /* ShaderChainer.cpp in Sources */,
+				02B280EC2915487200B793D5 /* VideoSourceService.cpp in Sources */,
 				DBBE189ECD171A97DCF46C6A /* BaseEngine.cpp in Sources */,
 				C2114978C2A333BA9867109F /* DefaultTheme.cpp in Sources */,
 				021026F32894123F0060F282 /* kiss_fft.c in Sources */,
@@ -1222,8 +1276,10 @@
 				DC62E5817CB03447F2ADFB85 /* ImHelpers.cpp in Sources */,
 				021026ED289412220060F282 /* CoreTimeDomainFeatures.cpp in Sources */,
 				A6F396BE5D1E24326E1F796A /* ofxImGuiLoggerChannel.cpp in Sources */,
+				02B280EA2915480600B793D5 /* WebcamSource.cpp in Sources */,
 				63D0FD8734D5760B8080C901 /* RtMidi.cpp in Sources */,
 				BCC8D420CBA9217E437D2D76 /* ofxRtMidiIn.cpp in Sources */,
+				02B280EB2915480E00B793D5 /* FileSource.cpp in Sources */,
 				3AEFE4FA8AD5C72671AD07F8 /* ofxRtMidiOut.cpp in Sources */,
 				1A86B7721CAEBC6F1C572C45 /* ofxBaseMidi.cpp in Sources */,
 				63F9FE1D90234FA6DE6F509E /* ofxMidi.cpp in Sources */,
@@ -1321,6 +1377,7 @@
 					src/Stream,
 					src/Util,
 					src/Views,
+					src/Video,
 					../../../addons/ofxImGui/libs,
 					../../../addons/ofxImGui/libs/imgui,
 					../../../addons/ofxImGui/libs/imgui/backends,
@@ -1485,6 +1542,7 @@
 					src/Stream,
 					src/Util,
 					src/Views,
+					src/Video,
 					../../../addons/ofxImGui/libs,
 					../../../addons/ofxImGui/libs/imgui,
 					../../../addons/ofxImGui/libs/imgui/backends,
@@ -1546,6 +1604,7 @@
 					src/Stream,
 					src/Util,
 					src/Views,
+					src/Video,
 					../../../addons/ofxImGui/libs,
 					../../../addons/ofxImGui/libs/imgui,
 					../../../addons/ofxImGui/libs/imgui/backends,

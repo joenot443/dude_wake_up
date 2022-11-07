@@ -75,6 +75,7 @@ void main()
   vec4 fbColor = texture2DRect(fbTexture, coord);
   vec4 outColor = vec4(1.0, 0.0, 1.0, 1.0);
 
+  
   if (lumaEnabled == 1) {
     outColor = mixLumaKey(mainColor, fbColor, blend, lumaKey, lumaThresh);
   } else {
