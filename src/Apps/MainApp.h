@@ -5,6 +5,7 @@
 #include "VideoSettingsView.hpp"
 #include "MainSettingsView.hpp"
 #include "AudioSettingsView.hpp"
+#include "MainStageView.hpp"
 #include "VideoStream.hpp"
 #include "AudioStream.hpp"
 
@@ -22,7 +23,10 @@ public:
 private:
   void drawStream(ofEventArgs & args);
   void exitStream(ofEventArgs & args);
+  void dragEvent(ofDragInfo dragInfo);
   
+  void drawMainStage();
+
   void drawAudioSettings();
   void drawVideoSettings();
   void drawMainSettings();
@@ -36,6 +40,7 @@ private:
   
   ofxImGui::Gui gui;
   MainSettingsView *mainSettingsView;
+  MainStageView *mainStageView = new MainStageView();
   // Config which will be pushed at the end of the frame.
   std::shared_ptr<StreamConfig> configToPush = NULL;
   std::shared_ptr<AudioStreamConfig> audioConfigToPush = NULL;
@@ -45,6 +50,7 @@ private:
   std::vector<VideoSettingsView*> videoSettingsViews;
   std::vector<AudioStream*> audioStreams;
   std::vector<AudioSettingsView*> audioSettingsViews;
+  
   int streamDrawIndex;
   bool isSetup = false;
 };

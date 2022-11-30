@@ -1,45 +1,46 @@
-#version 120
+#version 150
 
 uniform sampler2DRect tex;
-varying vec2 coord;
+in vec2 coord;
+out vec4 outputColor;
+
+uniform vec2 dimensions;
 uniform vec3 hsbScalar;
-uniform vec3 hsbCeil;
-uniform vec3 hsbFloor;
 
-vec3 rgb2hsb( in vec3 c ){
-    vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
-    vec4 p = mix(vec4(c.bg, K.wz),
-                 vec4(c.gb, K.xy),
-                 step(c.b, c.g));
-    vec4 q = mix(vec4(p.xyw, c.r),
-                 vec4(c.r, p.yzx),
-                 step(p.x, c.r));
-    float d = q.x - min(q.w, q.y);
-    float e = 1.0e-10;
-    return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)),
-                d / (q.x + e),
-                q.x);
-}
+#define M_PI 3.14159265
 
-//  Function from Iñigo Quiles
-//  https://www.shadertoy.com/view/MsS3Wc
-vec3 hsb2rgb( in vec3 c ){
-    vec3 rgb = clamp(abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),
-                             6.0)-3.0)-1.0,
-                     0.0,
-                     1.0 );
-    rgb = rgb*rgb*(3.0-2.0*rgb);
-    return c.z * mix(vec3(1.0), rgb, c.y);
-}
-
+vec3 TransformHSV(
+                  vec3 inputCol,  // color to transform
+                  float h,          // hue shift (in degrees)
+                  float s,          // saturation multiplier (scalar)
+                  float v           // value multiplier (scalar)
+                  ) {
+                    float vsu = v * s * cos(h * M_PI/180.0);
+                    float vsw = v * s * sin(h * M_PI/180.0);
+                    
+                    vec3 ret = vec3(0.0);
+                    ret.r = (.299*v + .701*vsu + .168*vsw)*inputCol.r
+                    +   (.587*v - .587*vsu + .330*vsw)*inputCol.g
+                    +   (.114*v - .114*vsu - .497*vsw)*inputCol.b;
+                    ret.g = (.299*v - .299*vsu - .328*vsw)*inputCol.r
+                    +   (.587*v + .413*vsu + .035*vsw)*inputCol.g
+                    +   (.114*v - .114*vsu + .292*vsw)*inputCol.b;
+                    ret.b = (.299*v - .300*vsu + 1.25*vsw)*inputCol.r
+                    +   (.587*v - .588*vsu - 1.05*vsw)*inputCol.g
+                    +   (.114*v + .886*vsu - .203*vsw)*inputCol.b;
+                    
+                    return ret;
+                  }
 
 void main()
 {
-  vec4 color = texture2DRect(tex, coord);
-  vec3 hsb = rgb2hsb(color.xyz);
-  hsb *= hsbScalar;
-//  hsb = max(hsb, hsbFloor);
-  hsb = min(hsb, hsbCeil);
   
-  gl_FragColor = vec4(hsb2rgb(hsb), color.w);
+  // Normalized pixel coordinates (from 0 to 1)
+  vec2 uv = coord/dimensions.xy;
+  vec3 col = texture(tex, coord).xyz;
+  
+  vec3 newCol = clamp(TransformHSV(col, hsbScalar.x * 360.0, hsbScalar.y, hsbScalar.z), 0.0, 1.0);
+  outputColor = vec4(newCol,1.0);
 }
+
+

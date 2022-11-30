@@ -11,6 +11,7 @@ void FeedbackSourceService::registerFeedbackSource(std::shared_ptr<FeedbackSourc
   if (feedbackSourceMap.count(feedbackSource->id) != 0) {
     log("Reregistering FeedbackSource %s", feedbackSource->id.c_str());
   }
+  feedbackSource->setup();
   feedbackSourceMap[feedbackSource->id] = feedbackSource;
 }
 

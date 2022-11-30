@@ -43,6 +43,8 @@ void MainSettingsView::draw() {
   ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar;
   ImGui::SetNextWindowSize(windowSize);
   bool addTapped = false;
+  static int camCount = 0;
+  static int fileCount = 0;
   std::string name = "New Stream";
   if (ImGui::Begin("main_settings_view", NULL, windowFlags)) {
     ImGui::PushFont(FontService::getService()->h2);
@@ -72,6 +74,15 @@ void MainSettingsView::draw() {
     ImGui::PopFont();
   }
   if (addTapped) {
+    // Set the name of the stream to be Webcam 1, File 2, etc.
+    if (mainSettings->selectedVideoSource == VideoSource_webcam) {
+      camCount++;
+      name = "Webcam " + std::to_string(camCount);
+    } else if (mainSettings->selectedVideoSource == VideoSource_file) {
+      fileCount++;
+      name = "File " + std::to_string(fileCount);
+    }
+    
     addVideoStream(StreamConfig(mainSettings->selectedVideoSource,
                                 mainSettings->selectedVideoPath,
                                 name,

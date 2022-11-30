@@ -20,35 +20,30 @@ void FeedbackShader::shade(ofFbo *frame, ofFbo *canvas) {
   canvas->begin();
   shader.begin();
   // Set the textures
-  int frameIndex = settings->delayAmount.intValue;
+  int frameIndex = settings->delayAmount->intValue;
   ofTexture feedbackTexture = feedbackSource->getFrame(frameIndex);
 
-  shader.setUniform1i(settings->lumaKeyEnabled.shaderKey, settings->lumaKeyEnabled.boolValue);
+  shader.setUniform1i(settings->lumaKeyEnabled->shaderKey, settings->lumaKeyEnabled->boolValue);
   shader.setUniformTexture("mainTexture", frame->getTexture(), 4);
   shader.setUniformTexture("fbTexture", feedbackTexture, 3);
-  shader.setUniform1f(settings->blend.shaderKey, settings->blend.value);
-  shader.setUniform1f(settings->keyValue.shaderKey, settings->keyValue.value);
-  shader.setUniform1f(settings->keyThreshold.shaderKey, settings->keyThreshold.value);
+  shader.setUniform1f(settings->blend->shaderKey, settings->blend->value);
+  shader.setUniform1f(settings->keyValue->shaderKey, settings->keyValue->value);
+  shader.setUniform1f(settings->keyThreshold->shaderKey, settings->keyThreshold->value);
   
   frame->draw(0, 0);
   shader.end();
   canvas->end();
   
-  // If using processed frames for feedback, save it now.
-  if (settings->useProcessedFrame.boolValue) {
-    saveFrame(canvas);
-  }
-  
   clear();
 }
 
 void FeedbackShader::disableFeedback() {
-  shader.setUniform1f(settings->keyValue.shaderKey,  0.0);
-  shader.setUniform1f(settings->keyThreshold.shaderKey,
+  shader.setUniform1f(settings->keyValue->shaderKey,  0.0);
+  shader.setUniform1f(settings->keyThreshold->shaderKey,
                       0.0);
-  shader.setUniform1f(settings->mix.shaderKey,
+  shader.setUniform1f(settings->mix->shaderKey,
                       0.0);
-  shader.setUniform1f(settings->blend.shaderKey,
+  shader.setUniform1f(settings->blend->shaderKey,
                       0.0);
 }
 
@@ -89,32 +84,31 @@ void FeedbackShader::drawSettings() {
   
   CommonViews::H4Title("Feedback Parameters");
   
-  ImGui::Checkbox("Use Processed##fb_use_processed", &settings->useProcessedFrame.boolValue);
   
-  ImGui::Checkbox("Luma Key Enabled##fb_luma_key", &settings->lumaKeyEnabled.boolValue);
+  ImGui::Checkbox("Luma Key Enabled##fb_luma_key", &settings->lumaKeyEnabled->boolValue);
   
   drawFeedbackSourceSelector();
   
   // Mix
-  CommonViews::SliderWithOscillator("Blend", "##blend_amount", &settings->blend, &settings->blendOscillator);
-  CommonViews::ModulationSelector(&settings->blend);
-  CommonViews::MidiSelector(&settings->blend);
+  CommonViews::Slider("Blend", "##blend_amount", settings->blend);
+  CommonViews::ModulationSelector(settings->blend);
+  CommonViews::MidiSelector(settings->blend);
   
   // Delay Amount
-  CommonViews::IntSliderWithOscillator("Delay", "##delay_amount", &settings->delayAmount, &settings->delayAmountOscillator);
-  CommonViews::ModulationSelector(&settings->delayAmount);
-  CommonViews::MidiSelector(&settings->delayAmount);
+  CommonViews::Slider("Delay", "##delay_amount", settings->delayAmount);
+  CommonViews::ModulationSelector(settings->delayAmount);
+  CommonViews::MidiSelector(settings->delayAmount);
 
-  if (settings->lumaKeyEnabled.boolValue) {
+  if (settings->lumaKeyEnabled->boolValue) {
     // Key Value
-    CommonViews::SliderWithOscillator("Key Value", "##key_value", &settings->keyValue, &settings->keyValueOscillator);
-    CommonViews::ModulationSelector(&settings->keyValue);
-    CommonViews::MidiSelector(&settings->keyValue);
+    CommonViews::Slider("Key Value", "##key_value", settings->keyValue);
+    CommonViews::ModulationSelector(settings->keyValue);
+    CommonViews::MidiSelector(settings->keyValue);
     
     // Threshold
-    CommonViews::SliderWithOscillator("Key Threshold", "##key_threshold", &settings->keyThreshold, &settings->keyThresholdOscillator);
-    CommonViews::ModulationSelector(&settings->keyThreshold);
-    CommonViews::MidiSelector(&settings->keyThreshold);
+    CommonViews::Slider("Key Threshold", "##key_threshold", settings->keyThreshold);
+    CommonViews::ModulationSelector(settings->keyThreshold);
+    CommonViews::MidiSelector(settings->keyThreshold);
   }
 }
 

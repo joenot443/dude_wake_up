@@ -20,9 +20,9 @@ struct AudioAnalysisParameter {
   float minSeen = 0.0;
   float maxSeen = 0.0;
   float value = 0.0;
-  Parameter *param;
+  std::shared_ptr<Parameter> param;
   
-  AudioAnalysisParameter(Parameter * param) : param(param) {}
+  AudioAnalysisParameter(std::shared_ptr<Parameter> param) : param(param) {}
   
   void tick(float val) {
     value = val;
@@ -40,20 +40,21 @@ struct AudioAnalysisParameter {
 struct AudioAnalysis {
   std::string name;
   bool toggled = false;
-  Parameter rms;
-  Parameter csd;
-  Parameter pitch;
-  Parameter energy;
-  Parameter zcr;
-  Parameter spectralDiff;
-  Parameter beat;
-  ValueOscillator rmsOscillator;
-  ValueOscillator csdOscillator;
-  ValueOscillator pitchOscillator;
-  ValueOscillator energyOscillator;
-  ValueOscillator zcrOscillator;
-  ValueOscillator spectralDiffOscillator;
-  PulseOscillator beatOscillator;
+  std::shared_ptr<Parameter> rms;
+  std::shared_ptr<Parameter> csd;
+  std::shared_ptr<Parameter> pitch;
+  std::shared_ptr<Parameter> energy;
+  std::shared_ptr<Parameter> zcr;
+  std::shared_ptr<Parameter> spectralDiff;
+  std::shared_ptr<Parameter> beat;
+  
+  std::shared_ptr<ValueOscillator> rmsOscillator;
+  std::shared_ptr<ValueOscillator> csdOscillator;
+  std::shared_ptr<ValueOscillator> pitchOscillator;
+  std::shared_ptr<ValueOscillator> energyOscillator;
+  std::shared_ptr<ValueOscillator> zcrOscillator;
+  std::shared_ptr<ValueOscillator> spectralDiffOscillator;
+  std::shared_ptr<PulseOscillator> beatOscillator;
   AudioAnalysisParameter rmsAnalysisParam;
   AudioAnalysisParameter csdAnalysisParam;
   AudioAnalysisParameter pitchAnalysisParam;
@@ -61,32 +62,32 @@ struct AudioAnalysis {
   AudioAnalysisParameter zcrAnalysisParam;
   AudioAnalysisParameter spectralDiffAnalysisParam;
   
-  std::vector<Parameter *> parameters;
+  std::vector<std::shared_ptr<Parameter>> parameters;
   std::vector<AudioAnalysisParameter *> analysisParameters;
   
   AudioAnalysis(std::string name) :
   name(name),
-  rms(Parameter("rms", name, 0.0, 0.0, 1.0)),
-  csd(Parameter("csd", name, 0.0, 0.0, 1.0)),
-  pitch(Parameter("pitch", name, 0.0, 0.0, 1.0)),
-  energy(Parameter("energy", name, 0.0, 0.0, 1.0)),
-  zcr(Parameter("zcr", name, 0.0, 0.0, 1.0)),
-  spectralDiff(Parameter("spectralDiff", name, 0.0, 0.0, 1.0)),
-  beat(Parameter("beat", name, 0.0, 0.0, 1.0)),
-  rmsOscillator(ValueOscillator(&rms)),
-  pitchOscillator(ValueOscillator(&pitch)),
-  csdOscillator(ValueOscillator(&csd)),
-  zcrOscillator(ValueOscillator(&zcr)),
-  energyOscillator(ValueOscillator(&energy)),
-  spectralDiffOscillator(ValueOscillator(&spectralDiff)),
-  beatOscillator(PulseOscillator(&beat)),
-  parameters({&rms, &csd, &pitch, &energy, &zcr, &beat}),
-  rmsAnalysisParam(AudioAnalysisParameter(&rms)),
-  csdAnalysisParam(AudioAnalysisParameter(&csd)), 
-  pitchAnalysisParam(AudioAnalysisParameter(&pitch)),
-  energyAnalysisParam(AudioAnalysisParameter(&energy)),
-  zcrAnalysisParam(AudioAnalysisParameter(&zcr)),
-  spectralDiffAnalysisParam(AudioAnalysisParameter(&spectralDiff)),
+  rms(std::make_shared<Parameter>("rms", name, 0.0, 0.0, 1.0)),
+  csd(std::make_shared<Parameter>("csd", name, 0.0, 0.0, 1.0)),
+  pitch(std::make_shared<Parameter>("pitch", name, 0.0, 0.0, 1.0)),
+  energy(std::make_shared<Parameter>("energy", name, 0.0, 0.0, 1.0)),
+  zcr(std::make_shared<Parameter>("zcr", name, 0.0, 0.0, 1.0)),
+  spectralDiff(std::make_shared<Parameter>("spectralDiff", name, 0.0, 0.0, 1.0)),
+  beat(std::make_shared<Parameter>("beat", name, 0.0, 0.0, 1.0)),
+  rmsOscillator(std::make_shared<ValueOscillator>(rms)),
+  pitchOscillator(std::make_shared<ValueOscillator>(pitch)),
+  csdOscillator(std::make_shared<ValueOscillator>(csd)),
+  zcrOscillator(std::make_shared<ValueOscillator>(zcr)),
+  energyOscillator(std::make_shared<ValueOscillator>(energy)),
+  spectralDiffOscillator(std::make_shared<ValueOscillator>(spectralDiff)),
+  beatOscillator(std::make_shared<PulseOscillator>(beat)),
+  parameters({rms, csd, pitch, energy, zcr, beat}),
+  rmsAnalysisParam(AudioAnalysisParameter(rms)),
+  csdAnalysisParam(AudioAnalysisParameter(csd)), 
+  pitchAnalysisParam(AudioAnalysisParameter(pitch)),
+  energyAnalysisParam(AudioAnalysisParameter(energy)),
+  zcrAnalysisParam(AudioAnalysisParameter(zcr)),
+  spectralDiffAnalysisParam(AudioAnalysisParameter(spectralDiff)),
   analysisParameters({&rmsAnalysisParam, &csdAnalysisParam, &pitchAnalysisParam, &energyAnalysisParam, &zcrAnalysisParam, &spectralDiffAnalysisParam})
   {
   };

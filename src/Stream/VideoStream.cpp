@@ -37,7 +37,6 @@ void VideoStream::setup() {
       break;
   }
   
-  frameTexture.allocate(640, 480, GL_RGBA);
   ofSetWindowShape(640, 480);
     
   prepareFbos();
@@ -73,8 +72,6 @@ void VideoStream::update() {
 
 void VideoStream::draw() {
   gui.begin();
-    
-  prepareMainFbo();
 
   outputChainer->fbo.draw(0, 0, ofGetWidth(), ofGetHeight());
   
@@ -86,23 +83,6 @@ void VideoStream::draw() {
     settings->videoFlags.resetFeedback.setValue(0.0);
     clearFrameBuffer();
   }  
-}
-
-void VideoStream::prepareMainFbo() {
-  fbo.begin();
-  ofClear(0,0,0,255);
-  drawVideo();
-  fbo.end();
-}
-
-void VideoStream::drawVideo() {
-  switch (config.type) {
-    case VideoSource_file:
-      return drawVideoPlayer();
-    case VideoSource_webcam:
-      return;
-//      frameTexture.loadData(videoSource->frame, GL_RGBA, GL_UNSIGNED_BYTE);
-  }
 }
 
 
@@ -131,20 +111,16 @@ void VideoStream::drawVideoPlayer() {
 }
 
 void VideoStream::drawVideoPlayerMenu() {
-  if (ImGui::Begin(std::to_string(settings->streamId).c_str(), NULL, ImGuiWindowFlags_NoTitleBar || ImGuiWindowFlags_NoMove)) {
-    ImGui::SliderFloat("Playback", &position.value, 0.0, 1.0);
-    ImGui::SliderFloat("Speed", &speed.value, 0.0, 4.0);
-    if (ImGui::Button("Clear Feedback")) {
-      shouldClearFrameBuffer = true;
-      clearFrameBuffer();
-    }
-    CommonViews::MidiSelector(&position);
-  }
-  ImGui::End();
-}
-
-void VideoStream::drawMainFbo() {
-  fbo.draw(0,0, ofGetWidth(), ofGetHeight());
+//  if (ImGui::Begin(std::to_string(settings->streamId).c_str(), NULL, ImGuiWindowFlags_NoTitleBar || ImGuiWindowFlags_NoMove)) {
+//    ImGui::SliderFloat("Playback", &position.value, 0.0, 1.0);
+//    ImGui::SliderFloat("Speed", &speed.value, 0.0, 4.0);
+//    if (ImGui::Button("Clear Feedback")) {
+//      shouldClearFrameBuffer = true;
+//      clearFrameBuffer();
+//    }
+//    CommonViews::MidiSelector(position);
+//  }
+//  ImGui::End();
 }
 
 // MARK: - Shading

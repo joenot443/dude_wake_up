@@ -10,12 +10,11 @@
 #include "OscillationService.hpp"
 #include "Video.hpp"
 
-ValueOscillator::ValueOscillator(Parameter *val) {
+ValueOscillator::ValueOscillator(std::shared_ptr<Parameter> o) {
   data.reserve(100);
   xRange = {0.0, 10.0};
-  yRange = {val->min, val->max};
-  observed = val;
-  OscillationService::getService()->addValueOscillator(this);
+  yRange = {o->min, o->max};
+  observed = o;
 }
 
 void ValueOscillator::tick() {

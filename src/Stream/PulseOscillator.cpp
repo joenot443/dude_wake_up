@@ -11,11 +11,10 @@
 #include "Console.hpp"
 #include "Video.hpp"
 
-PulseOscillator::PulseOscillator(Parameter *param) : value(param) {
+PulseOscillator::PulseOscillator(std::shared_ptr<Parameter> o) : value(o) {
   time = 0.0;
   xRange = {0.0, 10.0};
-  yRange = {param->min, param->max};
-  OscillationService::getService()->addPulseOscillator(this);
+  yRange = {o->min, o->max};
   lastBeatTimestamp = std::chrono::system_clock::now();
 }
 

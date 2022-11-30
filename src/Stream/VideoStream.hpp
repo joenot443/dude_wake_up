@@ -60,8 +60,6 @@ private:
   // Drawing
   void prepareFbos();
   void completeFrame();
-  void prepareMainFbo();
-  void drawMainFbo();
   void drawDebug();
   void drawVideo();
   void drawVideoPlayer();
@@ -86,7 +84,6 @@ private:
   ofVideoPlayer player;
   ofVideoGrabber cam;
   ofFbo fbo;
-  ofTexture frameTexture;
   Parameter position;
   Parameter speed;
   

@@ -1,7 +1,8 @@
-#version 120
+#version 150
 
 uniform sampler2DRect tex;
-varying vec2 coord;
+in vec2 coord;
+out vec4 outputColor;
 uniform vec2 dimensions;
 uniform vec2 offset;
 
@@ -10,7 +11,7 @@ uniform int mirrorYEnabled;
 
 void main()
 {
-  vec4 tex_color=texture2DRect(tex, coord);
+  vec4 tex_color=texture(tex, coord);
   
   
   // Normalized pixel coordinates (from 0 to 1)
@@ -32,6 +33,6 @@ void main()
   }
   
   // Output to screen
-  gl_FragColor = texture2DRect(tex, col);
+  outputColor = texture(tex, col);
   
 }

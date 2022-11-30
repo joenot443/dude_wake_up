@@ -12,7 +12,8 @@ using json = nlohmann::json;
 
 class JSONSerializable {
 public:
-  
+  void load(json j);
+  json serialize();
 
 };
 

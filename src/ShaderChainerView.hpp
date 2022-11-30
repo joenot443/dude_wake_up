@@ -9,7 +9,6 @@
 #define ShaderChainerView_hpp
 
 #include <stdio.h>
-#include "VideoSettings.hpp"
 #include "Shader.hpp"
 #include "AudioSettings.hpp"
 #include "ShaderType.hpp"
@@ -24,23 +23,20 @@ public:
   void teardown();
 
   
-  VideoSettings *videoSettings;
-  ShaderChainer *shaderChainer;
-  Shader *selectedShader = NULL;
+  std::shared_ptr<ShaderChainer> shaderChainer;
   
-  void setShaderChainer(ShaderChainer *chainer);
+  void setShaderChainer(std::shared_ptr<ShaderChainer> chainer);
     
-  ShaderChainerView(VideoSettings *videoSettings,
-                    ShaderChainer *shaderChainer)
-  : videoSettings(videoSettings),
-  shaderChainer(shaderChainer)
+  ShaderChainerView(std::shared_ptr<ShaderChainer> shaderChainer)
+  : shaderChainer(shaderChainer)
   {};
   
 private:
   void styleWindow();
   void pushSelectedButtonStyle();
-  void drawShaderButton(Shader *shader, bool selected);
+  void drawShaderButton(std::shared_ptr<Shader> shader, bool selected);
   void drawChainer();
+  void drawShaderDropZone();
   
   ShaderType selectedShaderType = ShaderTypeNone;
 };

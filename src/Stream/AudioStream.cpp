@@ -6,7 +6,7 @@
 //
 
 #include "AudioStream.hpp"
-#include "BTrack.h"
+//#include "BTrack.h"
 #include "Console.hpp"
 
 void AudioStream::setup() {
@@ -15,7 +15,7 @@ void AudioStream::setup() {
   
   ofSoundStreamSettings settings = ofSoundStreamSettings();
   settings.setInDevice(device);
-  settings.bufferSize = 512;
+//  settings.bufferSize = 512;
   settings.sampleRate = 44100;
   settings.numInputChannels = 1;
   settings.numOutputChannels = 0;
@@ -24,7 +24,7 @@ void AudioStream::setup() {
   };
   
   stream.setup(settings);
-  analysis->beatOscillator.enabled = true;
+  analysis->beatOscillator->enabled = true;
 }
 
 void AudioStream::update() {
@@ -61,10 +61,9 @@ void AudioStream::audioIn(ofSoundBuffer &soundBuffer) {
   auto doubleBuffer = std::vector<double>(buffer.begin(), buffer.end());
   double* firstDouble = doubleBuffer.data();
 //  gist.processAudioFrame(buffer);
-  b.processAudioFrame(firstDouble);
+//  b.processAudioFrame(firstDouble);
   
-  if (b.beatDueInCurrentFrame()) {
-  
-    analysis->beatOscillator.pulse();
-  }
+//  if (b.beatDueInCurrentFrame()) {
+//    analysis->beatOscillator->pulse();
+//  }
 }

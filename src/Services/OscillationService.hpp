@@ -17,12 +17,25 @@
 
 class OscillationService {
 private:
-  std::deque<Oscillator *> oscillators;
-  std::deque<ValueOscillator *> valueOscillators;
-  std::deque<PulseOscillator *> pulseOscillators;
+  std::deque<std::shared_ptr<Oscillator>> oscillators;
+  
+  // map of form:
+  /*
+   "HSB_hue": {
+       "amp": {
+           "midiDescriptor": "",
+           "name": "amp",
+           "paramId": "amp-ec9032e6",
+           "value": 1.0
+       },
+   }
+   */
+  std::map<std::string, std::map<std::string, float>> oscillatorSettings;
   
 public:
   static OscillationService* service;
+  std::shared_ptr<Oscillator> selectedOscillator;
+
   OscillationService() {};
   static OscillationService* getService() {
     if (!service) {
@@ -31,10 +44,14 @@ public:
     return service;
     
   }
-  void addOscillator(Oscillator *);
-  void addValueOscillator(ValueOscillator *);
-  void addPulseOscillator(PulseOscillator *);
+  void selectOscillator(std::shared_ptr<Oscillator>, std::shared_ptr<Parameter>);
+  void addOscillator(std::shared_ptr<Oscillator> o);
+  void loadOscillatorSettings(std::shared_ptr<Oscillator> o);
+  
   void tickOscillators();
+  
+  void saveConfigFile();
+  void loadConfigFile();
 };
 
 #endif /* OscillationService_hpp */

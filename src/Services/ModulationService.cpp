@@ -11,12 +11,12 @@ void ModulationService::addAudioAnalysis(AudioAnalysis *analysis) {
   audioAnalysis.push_back(analysis);
 }
 
-void ModulationService::addMapping(Parameter *videoParam, Parameter *audioParam) {
+void ModulationService::addMapping(std::shared_ptr<Parameter> videoParam, std::shared_ptr<Parameter> audioParam) {
   mappings[videoParam->name] = ModulationSetting(videoParam, audioParam);
   videoParam->driver = audioParam;
 }
 
-void ModulationService::removeMapping(Parameter *videoParam) {
+void ModulationService::removeMapping(std::shared_ptr<Parameter> videoParam) {
   mappings.erase(videoParam->name);
   videoParam->driver = NULL;
 }
@@ -29,11 +29,11 @@ void ModulationService::tickMappings() {
   }
 }
 
-bool ModulationService::videoParameterIsBeingDriven(Parameter *videoParam) {
+bool ModulationService::videoParameterIsBeingDriven(std::shared_ptr<Parameter> videoParam) {
   return mappings.count(videoParam->name);
 }
 
-Parameter* ModulationService::audioParameterDriving(Parameter *videoParam) {
+std::shared_ptr<Parameter> ModulationService::audioParameterDriving(std::shared_ptr<Parameter> videoParam) {
   if (mappings.count(videoParam->name)) {
     return mappings[videoParam->name].audioParam;
   }

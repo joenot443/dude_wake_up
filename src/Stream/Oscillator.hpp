@@ -11,46 +11,40 @@
 #include <stdio.h>
 #include "Parameter.hpp"
 #include "imgui.h"
+#include "json.hpp"
 
+using json = nlohmann::json;
 
 struct Oscillator {
+  std::shared_ptr<Parameter> enabled;
+  std::shared_ptr<Parameter> amplitude;
+  std::shared_ptr<Parameter> shift;
+  std::shared_ptr<Parameter> frequency;
   
-  Parameter enabled;
-  Parameter *value;
-  Parameter amplitude;
-  Parameter shift;
-  Parameter frequency;
-  std::vector<Parameter *> parameters;
+  std::shared_ptr<Parameter> value;
+
+  std::vector<std::shared_ptr<Parameter>> parameters;
   float span;
   
   std::string settingsId;
+  std::string name;
   
   std::vector<float> xRange;
   std::vector<float> yRange;
   
   ImVector<ImVec2> data;
-  Oscillator(Parameter *);
+  Oscillator(std::shared_ptr<Parameter> v);
   
+  void load(json j);
   
   void tick();
   void tick(float value);
   
-  static std::vector<Parameter*> parametersFromOscillators(std::vector<Oscillator*> oscs) {
-    std::vector<Parameter*> ret = {};
-    
-    for (auto o: oscs) {
-      auto p = o->parameters;
-      ret.insert( ret.end(), p.begin(), p.end() );
-    }
-    
-    return ret;
-  }
-
+  json serialize();
+  std::map<std::string, float> parameterValueMap();
+  
 private:
   void pushValue(float value);
 };
-
-
-
 
 #endif /* Oscillator_hpp */

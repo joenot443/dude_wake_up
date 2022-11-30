@@ -10,26 +10,35 @@
 
 #include <stdio.h>
 #include "VideoSettings.hpp"
+#include "FeedbackSource.hpp"
 
-enum VideoSourceType { VideoSource_webcam, VideoSource_file };
+enum VideoSourceType { VideoSource_webcam, VideoSource_file, VideoSource_chainer };
 
 class VideoSource {
   
 public:
   std::string id;
-  std::string name;
+  std::string sourceName;
 
   VideoSourceType type;
   std::shared_ptr<ofTexture> frameTexture;
+  std::shared_ptr<ofTexture> previewTexture;
   ofBufferObject frameBuffer;
+  ofBufferObject previewBuffer;
+  std::shared_ptr<FeedbackSource> feedbackDestination;
 
   VideoSource(std::string id, std::string name, VideoSourceType type) :
-  id(id), name(name), type(type) {};
+  id(id), sourceName(name), type(type) {};
 
   virtual void setup() {};
-  virtual void update() {};
+  virtual void saveFrame() {};
+  virtual void drawSettings() {}; 
   
-private:
+  void saveFeedbackFrame() {
+    if (frameTexture != nullptr) {
+      feedbackDestination->pushFrame(frameTexture);
+    }
+  };
 };
 
 #endif /* VideoSourceSource_hpp */

@@ -1,13 +1,13 @@
-#version 120
+#version 150
 
 #define MAX_SIZE 99
 
 uniform sampler2DRect tex;
-varying vec2 coord;
+in vec2 coord;
 uniform vec2 dimensions;
 uniform int size;
 uniform float blur_mix;
-
+out vec4 outputColor;
 
 // 16x acceleration of https://www.shadertoy.com/view/4tSyzy
 // by applying gaussian at intermediate MIPmap level.
@@ -19,7 +19,7 @@ float normpdf(in float x, in float sigma)
 
 
 void main() {
-  vec4 orig = texture2DRect(tex, coord);
+  vec4 orig = texture(tex, coord);
   vec3 c = orig.rgb;
   
   //declare stuff
@@ -47,10 +47,10 @@ void main() {
   {
     for (int j=-kSize; j <= kSize; ++j)
     {
-      final_colour += kernel[kSize+j]*kernel[kSize+i]*texture2DRect(tex, (coord+vec2(float(i), float(j)))).rgb;
+      final_colour += kernel[kSize+j]*kernel[kSize+i]*texture(tex, (coord+vec2(float(i), float(j)))).rgb;
     }
   }
   
   
-  gl_FragColor = mix(orig, vec4(final_colour/(Z*Z), 1.0), blur_mix);
+  outputColor = mix(orig, vec4(final_colour/(Z*Z), 1.0), blur_mix);
 }

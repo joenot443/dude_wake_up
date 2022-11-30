@@ -18,12 +18,14 @@ struct CommonViews {
   static void lSpacing();
   static void xlSpacing();
   static void Spacing(int n);
+  
+  static void ShaderParameter(std::shared_ptr<Parameter> param);
 
   static void HorizontallyAligned(float width, float alignment = 0.5);
   
   static void IconButton(char icon, std::string id, std::function<void> action);
   
-  static void MidiSelector(Parameter *videoParam);
+  static void MidiSelector(std::shared_ptr<Parameter> videoParam);
   
   static void H3Title(std::string title);
   
@@ -31,16 +33,13 @@ struct CommonViews {
   
   static void CenteredVerticalLine();
   
-  static void ModulationSelector(Parameter* videoParam);
+  static void ModulationSelector(std::shared_ptr<Parameter> videoParam);
   
-  static void SliderWithOscillator(std::string title, std::string id, Parameter *param, Oscillator *o);
-  
-  static void IntSliderWithOscillator(std::string title, std::string id, Parameter *param, Oscillator *o);
-  
-  static void SliderWithInvertOscillator(std::string title, std::string id, Parameter *param, bool *invert, Oscillator *o);
-  
-  static void ResetButton(std::string id, Parameter *param);
-  static void OscillateButton(std::string id, Oscillator *o);
+  static void Slider(std::string title, std::string id, std::shared_ptr<Parameter> param);
+  static void IntSlider(std::string title, std::string id, std::shared_ptr<Parameter> param);
+    
+  static void ResetButton(std::string id, std::shared_ptr<Parameter> param);
+  static void OscillateButton(std::string id, std::shared_ptr<Oscillator> o, std::shared_ptr<Parameter> param);
 };
 
 #endif /* CommonViews_hpp */

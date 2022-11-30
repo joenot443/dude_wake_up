@@ -20,9 +20,9 @@
 using json = nlohmann::json;
 
 struct Shader {
-  Shader(ShaderSettings *settings) : settings(settings) {};
+  Shader(ShaderSettings *settings) : settings(std::unique_ptr<ShaderSettings>(settings)) {};
   
-  ShaderSettings *settings;
+  std::unique_ptr<ShaderSettings> settings;
   virtual void setup() {};
   virtual void shade(ofFbo *frame, ofFbo *canvas) {};
   virtual void clear() {};

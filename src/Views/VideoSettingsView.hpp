@@ -11,6 +11,9 @@
 #include <stdio.h>
 #include "VideoSettings.hpp"
 #include "VideoStream.hpp"
+#include "FileBrowserView.hpp"
+#include "VideoSourceBrowserView.hpp"
+#include "NewVideoSourceView.hpp"
 #include "ShaderChainerView.hpp"
 
 struct VideoSettingsView {
@@ -29,8 +32,12 @@ public:
   std::function<void(int)> closeStream;
   std::vector<std::string> sourceNames;
   
+  int selectedIndex = 0;
   ShaderChainer *selectedChainer;
   ShaderChainerView *selectedChainerView;
+  VideoSourceBrowserView videoSourceBrowserView;
+  NewVideoSourceView newVideoSourceView;
+  
   
   VideoSettingsView(
                     VideoSettings *videoSettings,
@@ -42,7 +49,7 @@ public:
   closeStream(closeStream),
   videoStream(videoStream),
   shaderChainerViews({
-    std::make_shared<ShaderChainerView>(videoSettings, selectedShaderChain.get())}),
+    std::make_shared<ShaderChainerView>( selectedShaderChain )}),
   shaderChainers({selectedShaderChain}),
   selectedChainer(shaderChainers[0].get()),
   selectedChainerView(shaderChainerViews[0].get())
@@ -53,15 +60,12 @@ private:
   void pushShaderChainer(std::shared_ptr<ShaderChainer> chainer);
   void selectShaderChainerAtIndex(int i);
   void drawMenuBar();
-  void drawShaderChainerSelector();
+  void drawFileBrowserView();
   void drawShaderChainerTabs();
   void drawSelectedShader();
   void drawMenu();
-  void drawHSB();
-  void drawBlurSharpen();
-  void drawTransform();
-  void drawPixelation();
-  
+  void drawVideoSourceBrowserView();
+
   bool hasDrawn = false;
 };
 

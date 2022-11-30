@@ -19,7 +19,6 @@ private:
   std::map<std::string, MidiPairing> descriptorToPairing;
   std::map<std::string, MidiPairing> parameterIdToPairing;
   
-  void saveAssignment(Parameter *param, ofxMidiMessage& msg);
   void driveParameter(std::string paramId, ofxMidiMessage &msg);
   std::string descriptorFrom(ofxMidiMessage& msg);
   ofxMidiMessage messageFrom(std::string descriptor);
@@ -39,22 +38,24 @@ private:
   void midiInputRemoved(std::string name, bool isNetwork);
   void midiOutputAdded(std::string nam, bool isNetwork);
   void midiOutputRemoved(std::string name, bool isNetwork);
-  void removePairing(Parameter *param);
+  void removePairing(std::shared_ptr<Parameter> param);
   
 public:
   void setup();
   void stopLearning();
-  void beginLearning(Parameter * parameter);
+  void beginLearning(std::shared_ptr<Parameter> parameter);
+  void saveAssignment(std::shared_ptr<Parameter> param, std::string descriptor);
   bool isLearning();
   
   bool hasPairingForDescriptor(std::string descriptor);
   bool hasPairingForParameterId(std::string paramId);
   
+  
   MidiPairing* pairingForParameterId(std::string paramId);
   MidiPairing* pairingForDescriptor(std::string descriptor);
   
   /// Parameter currently being learned.
-  Parameter *learningParam;
+  std::shared_ptr<Parameter> learningParam;
   
   void saveConfigFile();
   void loadConfigFile();

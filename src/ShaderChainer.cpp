@@ -9,7 +9,9 @@
 #include "ofMain.h"
 #include "MirrorShader.hpp"
 #include "FeedbackSourceService.hpp"
+#include "AsciiShader.hpp"
 #include "ConfigService.hpp"
+#include "KaleidoscopeShader.hpp"
 #include "TransformShader.hpp"
 #include "ShaderChainerService.hpp"
 #include "Console.hpp"
@@ -21,15 +23,35 @@
 
 void ShaderChainer::setup() {
   registerFeedbackDestination();
+  ofFbo::Settings fboSettings;
+  fboSettings.width = 640;
+  fboSettings.height = 480;
+  fboSettings.internalformat = GL_RGB;
+  fboSettings.textureTarget = GL_TEXTURE_2D;
   fbo = ofFbo();
   fbo.allocate(640, 480);
   fbo.begin();
   ofClear(0, 0, 0, 255);
   fbo.end();
   
+  frameTexture = std::make_shared<ofTexture>();
+  frameTexture->allocate(640, 480, GL_RGB);
+  frameBuffer.bind(GL_SAMPLER_2D_RECT);
+  frameBuffer.allocate(640*480*4, GL_STATIC_COPY);
+  
+  previewTexture = std::make_shared<ofTexture>();
+  previewTexture->allocate(320, 240, GL_RGB);
+  previewBuffer.bind(GL_SAMPLER_2D_RECT);
+  previewBuffer.allocate(320*240*4, GL_STATIC_COPY);
+    
   for (auto & sh : shaders) {
     sh->setup();
   }
+  
+
+  
+  ping.allocate(640, 480);
+  pong.allocate(640, 480);
 }
 
 void ShaderChainer::update() {
@@ -37,19 +59,15 @@ void ShaderChainer::update() {
 }
 
 
-ofFbo ShaderChainer::processFrame(std::shared_ptr<ofTexture>  texture) {
-  auto ping = ofFbo();
-  if (!ping.isAllocated()) {
-    ping.allocate(texture->getWidth(), texture->getHeight());
-  } else {
-    ping.begin();
-    ofClear(255, 255, 255);
-    ping.end();
-  }
-  
-  
-  ofFbo pong = ofFbo();
-  pong.allocate(texture->getWidth(), texture->getHeight());
+ofFbo ShaderChainer::processFrame(std::shared_ptr<ofTexture> texture) {
+  ping.begin();
+  ofClear(255, 255, 255);
+  ping.end();
+
+  pong.begin();
+  ofClear(255, 255, 255);
+  pong.end();
+
   pong.begin();
   texture->draw(0, 0, 640, 480);
   pong.end();
@@ -61,7 +79,8 @@ ofFbo ShaderChainer::processFrame(std::shared_ptr<ofTexture>  texture) {
   
   // Return raw texture if no shaders
   if (shaders.empty()) {
-    saveFeedbackFrame(*texture);
+    frameTexture = std::make_shared<ofTexture>(pong.getTexture());
+    saveFeedbackFrame(texture);
     return pong;
   }
   
@@ -85,9 +104,18 @@ ofFbo ShaderChainer::processFrame(std::shared_ptr<ofTexture>  texture) {
     tex->end();
     flip = !flip;
   }
+
+//  canv->getTexture().copyTo(frameBuffer);
+//  frameTexture->loadData(frameBuffer, GL_RGB, GL_UNSIGNED_BYTE);
   
-  saveFeedbackFrame(canv->getTexture());
+  frameTexture = std::make_shared<ofTexture>(canv->getTexture());
+  saveFeedbackFrame(frameTexture);
+  
   return *canv;
+}
+
+void ShaderChainer::saveFrame() {
+  // no-op
 }
 
 void ShaderChainer::pushShader(ShaderType shaderType) {
@@ -144,11 +172,27 @@ void ShaderChainer::pushShader(ShaderType shaderType) {
       shaders.push_back(shader);
       return;
     }
+    case ShaderTypeAscii: {
+      auto settings = new AsciiSettings(shaderIdStr, 0);
+      auto shader = std::make_shared<AsciiShader>(settings);
+      shader.get()->setup();
+      shaders.push_back(shader);
+      return;
+    }
+    case ShaderTypeKaleidoscope: {
+      auto settings = new KaleidoscopeSettings(shaderIdStr, 0);
+      auto shader = std::make_shared<KaleidoscopeShader>(settings);
+      shader.get()->setup();
+      shaders.push_back(shader);
+      return;
+    }
   }
 }
 
-void ShaderChainer::saveFeedbackFrame(ofTexture frame) {
-  feedbackDestination->pushFrame(frame);
+void ShaderChainer::saveFeedbackFrame(std::shared_ptr<ofTexture> frame) {
+  if (feedbackDestination) {
+    feedbackDestination->pushFrame(frame);
+  }
 }
  
 void ShaderChainer::deleteShader(shared_ptr<Shader> shader) {
@@ -227,12 +271,19 @@ void ShaderChainer::load(json j) {
         shaders.push_back(shader);
         continue;
       }
+      case ShaderTypeAscii: {
+        auto settings = new AsciiSettings(shaderId, shaderJson);
+        auto shader = std::make_shared<AsciiShader>(settings);
+        shader.get()->setup();
+        shaders.push_back(shader);
+        return;
+      }
     }
   }
 }
 
 void ShaderChainer::registerFeedbackDestination() {
-  std::shared_ptr<FeedbackSource> source = std::make_shared<FeedbackSource>(name, chainerId);
+  std::shared_ptr<FeedbackSource> source = std::make_shared<FeedbackSource>(chainerId, sourceName);
   FeedbackSourceService::getService()->registerFeedbackSource(source);
   feedbackDestination = source;
 }

@@ -6,7 +6,7 @@
 //
 
 #include "ConfigService.hpp"
-#include "ParameterService.h"
+#include "ParameterService.hpp"
 #include "VideoSourceService.hpp"
 #include "HSBShader.hpp"
 #include "PixelShader.hpp"
@@ -42,7 +42,6 @@ void ConfigService::saveShaderChainerConfigFile(ShaderChainer* chainer, std::str
   }
 }
 
-
 ShaderChainer* ConfigService::loadShaderChainerConfigFile(std::string name) {
   std::fstream fileStream;
   fileStream.open(name, std::ios::in);
@@ -56,66 +55,12 @@ ShaderChainer* ConfigService::loadShaderChainerConfigFile(std::string name) {
       return;
     }
     std::string chainerId = data["chainerId"];
+    std::string chainerName = data["name"];
     auto videoSources = VideoSourceService::getService()->videoSources();
-    auto shaderChainer = new ShaderChainer(chainerId, videoSources.at(0));
+    auto shaderChainer = new ShaderChainer(chainerId, name, videoSources.at(0));
     shaderChainer->load(data);
     log("Loaded config file.");
     return shaderChainer;
   }
   return nullptr;
 }
-
-ShaderChainer ConfigService::shaderChainerFromJson(json j) {
-  std::string chainerId = j["chainerId"];
-  auto videoSources = VideoSourceService::getService()->videoSources();
-  
-  auto shaderChainer = ShaderChainer(chainerId, videoSources.at(0));
-  shaderChainer.load(j);
-  return shaderChainer;
-}
-
-//Shader ConfigService::shaderFromJson(json j) {
-//  ShaderType shaderType = j["shaderType"];
-//  std::string shaderId = std::to_string((int) j["shaderId"]);
-//  switch (shaderType) {
-//    case ShaderTypeNone: {
-//      auto settings = new ShaderSettings(shaderId);
-//      return Shader(settings);
-//    }
-//    case ShaderTypeHSB: {
-//      auto settings = new HSBSettings(shaderId, j);
-//      settings->load(j);
-//      return HSBShader(settings);
-//    }
-//    case ShaderTypePixelate: {
-//      auto settings = new PixelSettings(shaderId, j);
-//      settings->load(j);
-//      return PixelShader(settings);
-//    }
-//    case ShaderTypeGlitch: {
-//      auto settings = new HSBSettings(shaderId, j);
-//      settings->load(j);
-//      return HSBShader(settings);
-//    }
-//    case ShaderTypeFeedback: {
-//      auto settings = new FeedbackSettings(shaderId, j);
-//      settings->load(j);
-//      return FeedbackShader(settings);
-//    }
-//    case ShaderTypeBlur: {
-//      auto settings = new BlurSettings(shaderId, j);
-//      settings->load(j);
-//      return BlurShader(settings);
-//    }
-//    case ShaderTypeMirror: {
-//      auto settings = new MirrorSettings(shaderId, j);
-//      settings->load(j);
-//      return MirrorShader(settings);
-//    }
-//    case ShaderTypeTransform: {
-//      auto settings = new TransformSettings(shaderId, j);
-//      settings->load(j);
-//      return TransformShader(settings);
-//    }
-//  }
-//}

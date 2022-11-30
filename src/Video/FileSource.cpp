@@ -8,17 +8,21 @@
 #include "FileSource.hpp"
 
 void FileSource::setup() {
+  player.setPixelFormat(OF_PIXELS_RGB);
+  player.setVolume(0.0);
   player.load(path);
+  auto wd = player.getWidth();
   player.play();
+  frameTexture = std::make_shared<ofTexture>();
+  frameTexture->allocate(1280, 720, GL_RGB);
+  frameBuffer.bind(GL_SAMPLER_2D_RECT);
+  frameBuffer.allocate(1280*720*4, GL_STATIC_COPY);
 }
 
-void FileSource::update() {
+void FileSource::saveFrame() {
   player.update();
   if (player.isFrameNew()) {
-//    frame.begin();
-    ofClear(0, 0, 0, 0);
-    player.draw(0, 0);
-//    frame.end();
+    frameTexture->loadData(player.getPixels());
   }
 }
 

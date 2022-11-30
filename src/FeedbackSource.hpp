@@ -15,48 +15,54 @@ const int FrameBufferCount=30;
 struct FeedbackSource {
   std::string name;
   std::string id;
-  std::vector<ofTexture> frameBuffer = {};
+  std::vector<ofFbo> frameBuffer = {};
+  int startIndex = 0;
+  
+  void setup() {
+    // Add FrameBufferCount ofFbo to frameBuffer
 
-  FeedbackSource(std::string name, std::string id) : name(name), id(id) {};
+    for (int i = 0; i < FrameBufferCount; i++) {
+      ofFbo fbo;
+      fbo.allocate(640, 480, GL_RGBA);
+      fbo.begin();
+      ofClear(0,0,0,255);
+      fbo.end();
+      frameBuffer.push_back(fbo);
+    }    
+  }
+
+  FeedbackSource(std::string id, std::string name) : name(name), id(id) {};
   
   ofTexture getFrame(int index) {
-    if (index < frameBuffer.size()) {
-      return frameBuffer[index];
-    } else {
-      log("Missing feedback texture");
-      ofTexture texture;
-      texture.allocate(0, 0, GL_LUMINANCE_ALPHA);
-      return texture;
-    }
+    int destIndex = (startIndex + index) % FrameBufferCount;
+    auto fbo = frameBuffer.at(destIndex);
+    return fbo.getTexture();
   }
   
   void clearFrameBuffer() {
     frameBuffer.clear();
-    
+
     for (int i = 0; i < FrameBufferCount; i++) {
-      ofFbo frame = ofFbo();
-      frame.allocate(ofGetWidth(), ofGetHeight());
-      frame.begin();
+      auto canvas = ofFbo();
+      canvas.begin();
       ofClear(0,0,0,255);
-      frame.end();
-      frameBuffer.push_back(frame.getTexture());
+      canvas.end();
+      frameBuffer.push_back(canvas);
     }
   }
   
-  void pushFrame(ofTexture frame) {
-    static ofFbo canvas;
-    float width = frame.getWidth();
-    float height = frame.getHeight();
-    canvas.allocate(width, height);
+  void pushFrame(std::shared_ptr<ofTexture> frame) {
+    
+    auto canvas = frameBuffer[startIndex];
     canvas.begin();
     ofClear(0,0,0,255);
-    frame.draw(0, 0, width, height);
+    frame->draw(0, 0, frame->getWidth(), frame->getHeight());
     canvas.end();
-    auto ret = canvas.getTexture();
-    frameBuffer.insert(frameBuffer.begin(), ret);
     
-    if (frameBuffer.size() >= FrameBufferCount) {
-      frameBuffer.pop_back();
+    startIndex++;
+    
+    if (startIndex == FrameBufferCount) {
+      startIndex = 0;
     }
   }
   

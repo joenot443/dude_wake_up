@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include "ShaderChainer.hpp"
+#include "Shader.hpp"
 
 // Singleton service for managing ShaderChainer objects
 
@@ -34,7 +35,12 @@ public:
   void updateShaderChainers();
   void removeShaderChainer(std::string id);
   void addShaderChainer(std::shared_ptr<ShaderChainer> shaderChainer);
+  void selectShaderChainer(std::shared_ptr<ShaderChainer> shaderChainer);
+  void selectShader(std::shared_ptr<Shader> shader);
+  int count();
   std::shared_ptr<ShaderChainer> shaderChainerForId(std::string id);
+  std::shared_ptr<Shader> selectedShader;
+  std::shared_ptr<ShaderChainer> selectedShaderChainer;
 };
 
 

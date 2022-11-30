@@ -11,6 +11,14 @@
 
 class UUID {
 public:
+  
+  
+  static std::string generateParamId(std::string name) {
+    std::stringstream stream;
+    stream << name << "-" << UUID::generate_hex(4);
+    return stream.str();
+  }
+  
   /**
    * @brief Generates a uuid string in the form
    * b9317db-02a2-4882-9b94-d1e1defe8c56

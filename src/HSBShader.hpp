@@ -15,6 +15,33 @@
 #include "Shader.hpp"
 #include <stdio.h>
 
+// Basic
+struct HSBSettings: public ShaderSettings {
+  std::string shaderId;
+  std::shared_ptr<Parameter> hue;
+  std::shared_ptr<Parameter> saturation;
+  std::shared_ptr<Parameter> brightness;
+  
+  std::shared_ptr<Oscillator> hueOscillator;
+  std::shared_ptr<Oscillator> saturationOscillator;
+  std::shared_ptr<Oscillator> brightnessOscillator;
+  
+  HSBSettings(std::string shaderId, json j) :
+  shaderId(shaderId),
+  hue(std::make_shared<Parameter>("HSB_hue", shaderId, 0.0, -1.0, 2.0)),
+  saturation(std::make_shared<Parameter>("HSB_saturation", shaderId, 1.0, -1.0, 3.0)),
+  brightness(std::make_shared<Parameter>("HSB_brightness", shaderId, 1.0, -1.0, 3.0)),
+  hueOscillator(std::make_shared<Oscillator>(hue)),
+  saturationOscillator(std::make_shared<Oscillator>(saturation)),
+  brightnessOscillator(std::make_shared<Oscillator>(brightness)),
+  ShaderSettings(shaderId)
+  {
+    parameters = {hue, saturation, brightness};
+    oscillators = {hueOscillator, saturationOscillator, brightnessOscillator};
+    load(j);
+  }
+};
+
 struct HSBShader: Shader {
   
   ofShader shader;
@@ -31,9 +58,9 @@ public:
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform3f("hsbScalar", settings->hue.value, settings->saturation.value, settings->brightness.value);
-    shader.setUniform3f("hsbFloor", 0.3, 0.3, 0.3);
-    shader.setUniform3f("hsbCeil", 1.0, 1.0, 1.0);
+    shader.setUniform3f("hsbScalar", settings->hue->value, settings->saturation->value, settings->brightness->value);
+    shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
+
     frame->draw(0, 0);
     shader.end();
     canvas->end();
@@ -47,20 +74,22 @@ public:
     CommonViews::H3Title("Basic (HSB)");
     
     // Hue
-    CommonViews::SliderWithOscillator("Hue", "##hue", &settings->hue, &settings->hueOscillator);
-    CommonViews::ModulationSelector(&settings->hue);
-    CommonViews::MidiSelector(&settings->hue);
+    CommonViews::Slider("Hue", "##hue", settings->hue);
+    CommonViews::MidiSelector(settings->hue);
+    ImGui::SameLine(0, 20);
+    CommonViews::OscillateButton("##hue", settings->hueOscillator, settings->hue);
     
     // Saturation
-    CommonViews::SliderWithOscillator("Saturation", "##saturation", &settings->saturation, &settings->saturationOscillator);
-    CommonViews::ModulationSelector(&settings->saturation);
-    CommonViews::MidiSelector(&settings->saturation);
-    
-    // Brightness
-    CommonViews::SliderWithOscillator("Brightness", "##brightness", &settings->brightness, &settings->brightnessOscillator);
-    CommonViews::ModulationSelector(&settings->brightness);
-    CommonViews::MidiSelector(&settings->brightness);
+    CommonViews::Slider("Saturation", "##saturation", settings->saturation);
+    CommonViews::MidiSelector(settings->saturation);
+    ImGui::SameLine(0, 20);
+    CommonViews::OscillateButton("##saturation", settings->saturationOscillator, settings->saturation);
 
+    // Brightness
+    CommonViews::Slider("Brightness", "##brightness", settings->brightness);
+    CommonViews::MidiSelector(settings->brightness);
+    ImGui::SameLine(0, 20);
+    CommonViews::OscillateButton("##brightness", settings->brightnessOscillator, settings->brightness);
   }
 };
 

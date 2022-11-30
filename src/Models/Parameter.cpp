@@ -8,18 +8,20 @@
 #include <stdio.h>
 #include "Strings.hpp"
 #include "Parameter.hpp"
-#include "ParameterService.h"
+#include "ParameterService.hpp"
 #include "UUID.hpp"
 
 Parameter::Parameter(std::string name,
                      std::string settingsId,
                      float value) :
 name(name),
+shaderKey(name),
 defaultValue(value),
 value(value)
 {
-  paramId = UUID::generateUUID();
-  ParameterService::getService()->registerParameter(this);
+  paramId = UUID::generateParamId(name);
+  std::shared_ptr<Parameter> sharedSelf = std::shared_ptr<Parameter>(this);
+  ParameterService::getService()->registerParameter(sharedSelf);
 };
 
 Parameter::Parameter(std::string name,
@@ -31,8 +33,9 @@ shaderKey(shaderKey),
 defaultValue(value),
 value(value)
 {
-  paramId = UUID::generateUUID();
-  ParameterService::getService()->registerParameter(this);
+  paramId = UUID::generateParamId(name);
+  std::shared_ptr<Parameter> sharedSelf = std::shared_ptr<Parameter>(this);
+  ParameterService::getService()->registerParameter(sharedSelf);
 };
 
 Parameter::Parameter(std::string name,
@@ -48,8 +51,9 @@ value(value),
 min(min),
 max(max)
 {
-  paramId = UUID::generateUUID();
-  ParameterService::getService()->registerParameter(this);
+  paramId = UUID::generateParamId(name);
+  std::shared_ptr<Parameter> sharedSelf = std::shared_ptr<Parameter>(this);
+  ParameterService::getService()->registerParameter(sharedSelf);
 };
 
 Parameter::Parameter(std::string name,
@@ -63,7 +67,8 @@ value(value),
 min(min),
 max(max)
 {
-  paramId = UUID::generateUUID();
-  ParameterService::getService()->registerParameter(this);
+  paramId = UUID::generateParamId(name);
+  std::shared_ptr<Parameter> sharedSelf = std::shared_ptr<Parameter>(this);
+  ParameterService::getService()->registerParameter(sharedSelf);
 };
 

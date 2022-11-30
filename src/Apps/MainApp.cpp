@@ -13,10 +13,12 @@
 #include "functional"
 #include "ModulationService.hpp"
 #include "OscillationService.hpp"
+#include "ShaderChainer.hpp"
 #include "MidiService.hpp"
 #include "ShaderChainerService.hpp"
 #include "WebcamSource.hpp"
 #include "VideoSourceService.hpp"
+#include "OscillationService.hpp"
 #include <stdio.h>
 
 const static ofVec2f windowSize = ofVec2f(1200, 800);
@@ -26,21 +28,12 @@ void MainApp::setup(){
   
   ModulationService::getService();
   MidiService::getService();
-  
-  gui.setup(nullptr, true, ImGuiConfigFlags_ViewportsEnable);
+  gui.setup();
+  ImGui::CreateContext();
   FontService::getService()->addFontToGui(&gui);
-  
-  std::function<void(StreamConfig)> videoFn = [this](StreamConfig config) {
-    this->configToPush = std::make_shared<StreamConfig>(config);
-  };
-  
-  std::function<void(AudioStreamConfig)> audioFn = [this](AudioStreamConfig config) {
-    this->audioConfigToPush = std::make_shared<AudioStreamConfig>(config);
-  };
-  
-  mainSettingsView = new MainSettingsView(new MainSettings(), videoFn, audioFn);
-  mainSettingsView->setup();
-  isSetup = true;
+
+  mainStageView->setup();
+
 //  videoFn(StreamConfig(VideoSource_webcam, "", 1));
 //  videoFn(StreamConfig(VideoSource_file, "/Users/jcrozier/Libra/ry/Mobile Documents/com~apple~CloudDocs/dude_wake_up/videos/dvd_logo.mp4", 0));
 //  std::shared_ptr<AudioStreamConfig> config = make_shared<AudioStreamConfig>(AudioStreamConfig(AudioSource_microphone, "", 3));
@@ -53,6 +46,8 @@ void MainApp::update(){
   ModulationService::getService()->tickMappings();
   VideoSourceService::getService()->updateVideoSources();
   ShaderChainerService::getService()->updateShaderChainers();
+  
+  mainStageView->update();
   
   for (int i = 0; i < audioStreams.size(); i++) {
     if (audioStreams[i]->isSetup) {
@@ -68,15 +63,29 @@ void MainApp::update(){
 void MainApp::draw(){ 
   gui.begin();
   ImGui::PushFont(FontService::getService()->p);
-  ImGui::ShowDemoWindow();
-  drawAudioSettings();
-  drawMainSettings();
-  drawVideoSettings();
+  drawMainStage();
+//  ImGui::ShowDemoWindow();
+
+  // drawAudioSettings();
+  // drawMainSettings();
+  // drawVideoSettings();
   ImGui::PopFont();
   //  ImGui::EndFrame();
   gui.end();
   completeFrame();
   //  gui.draw();
+}
+
+void MainApp::drawMainStage() {
+  // Get the current screen size
+  ImGui::SetNextWindowSize(ImVec2(ofGetWindowWidth(), ofGetWindowHeight()));
+  ImGui::SetNextWindowPos(ImVec2(0,0));
+  ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar;
+  ImGui::Begin("Main Stage", NULL, windowFlags);
+  ImGui::PushFont(FontService::getService()->p);
+  mainStageView->draw();
+  ImGui::PopFont();
+  ImGui::End();
 }
 
 void MainApp::completeFrame() {
@@ -137,7 +146,7 @@ void MainApp::removeAudioStream(int streamId) {
 void MainApp::pushVideoStream(std::shared_ptr<StreamConfig> config) {
   ofGLFWWindowSettings settings;
   settings.shareContextWith = window;
-  settings.setGLVersion(2,1);
+  settings.setGLVersion(3, 2);
   auto streamWindow = ofCreateWindow(settings);
   
   // Callback for closing stream, passed to VideoStream / VideoSettingsView
@@ -172,8 +181,7 @@ void MainApp::pushVideoStream(std::shared_ptr<StreamConfig> config) {
 
   VideoSettings *videoSettings = new VideoSettings(streamId, std::to_string(streamId));
   
-  auto shaderChainer = std::make_shared<ShaderChainer>(std::to_string(streamId), videoSource);
-  shaderChainer->name = "Main Chainer";
+  auto shaderChainer = std::make_shared<ShaderChainer>(std::to_string(streamId), "Main Chainer", videoSource);
   shaderChainer->setup();
   
   ShaderChainerService::getService()->addShaderChainer(shaderChainer);
@@ -245,6 +253,25 @@ void MainApp::drawStream(ofEventArgs & args) {
 
 void MainApp::exitStream(ofEventArgs &args) {
   
+}
+
+void MainApp::dragEvent(ofDragInfo dragInfo) {
+  // Check if the file is a video file
+  if (ofIsStringInString(dragInfo.files[0], ".mp4") ||
+      ofIsStringInString(dragInfo.files[0], ".mov") ||
+      ofIsStringInString(dragInfo.files[0], ".avi") ||
+      ofIsStringInString(dragInfo.files[0], ".mkv") ||
+      ofIsStringInString(dragInfo.files[0], ".flv") ||
+      ofIsStringInString(dragInfo.files[0], ".wmv") ||
+      ofIsStringInString(dragInfo.files[0], ".webm") ||
+      ofIsStringInString(dragInfo.files[0], ".gif")) {
+    // Create a new VideoSource for the file
+    auto fileName = ofFilePath::getFileName(dragInfo.files[0]);
+    auto videoSource = std::make_shared<FileSource>(UUID::generateUUID(),
+                                                    fileName,
+                                                    dragInfo.files[0]);
+    VideoSourceService::getService()->addVideoSource(videoSource);
+  }
 }
 
 

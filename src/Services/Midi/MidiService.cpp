@@ -6,7 +6,7 @@
 //
 
 #include "MidiService.hpp"
-#include "ParameterService.h"
+#include "ParameterService.hpp"
 #include "json.hpp"
 #include "Console.hpp"
 #include "Strings.hpp"
@@ -20,7 +20,7 @@ void MidiService::setup() {
   ofxMidiOut output;
   input.listInPorts();
   output.listOutPorts();
-  learningParam = NULL;
+  learningParam = nullptr;
   
   // create and open input ports
   for(int i = 0; i < input.getNumInPorts(); ++i) {
@@ -113,7 +113,8 @@ void MidiService::midiOutputRemoved(std::string name, bool isNetwork) {
 //--------------------------------------------------------------
 void MidiService::newMidiMessage(ofxMidiMessage& msg) {
   if (learningParam != NULL) {
-    saveAssignment(learningParam, msg);
+    std::string descriptor = descriptorFrom(msg);
+    saveAssignment(learningParam, descriptor);
     saveConfigFile();
     return;
   }
@@ -161,7 +162,7 @@ void MidiService::addMessage(std::string msg) {
   messageMutex.unlock();
 }
 
-void MidiService::beginLearning(Parameter *parameter) {
+void MidiService::beginLearning(std::shared_ptr<Parameter> parameter) {
   log("Starting to learn for %s", parameter->name.c_str());
   removePairing(parameter);
   learningParam = parameter;
@@ -172,17 +173,17 @@ void MidiService::stopLearning() {
   learningParam = NULL;
 }
 
-void MidiService::saveAssignment(Parameter *param, ofxMidiMessage &msg) {
-  std::string descriptor = descriptorFrom(msg);
-//  log("Saving %s for %s", param->name.c_str(), descriptor.c_str());
-  auto pairing = MidiPairing(param->paramId, descriptor, msg.channel, msg.portNum, msg.status, msg.control);
+void MidiService::saveAssignment(std::shared_ptr<Parameter> param, std::string descriptor) {
+  log("Saving %s for %s", param->name.c_str(), descriptor.c_str());
+  auto pairing = MidiPairing(param->paramId, descriptor);
+  param->midiDescriptor = descriptor;
   descriptorToPairing[descriptor] = pairing;
   parameterIdToPairing[param->paramId] = pairing;
   
   stopLearning();
 }
 
-void MidiService::removePairing(Parameter *param) {
+void MidiService::removePairing(std::shared_ptr<Parameter> param) {
   if (!hasPairingForParameterId(param->paramId)) {
     log("No need to remove %s", param->name.c_str());
     return;
@@ -248,10 +249,11 @@ void MidiService::loadConfigFile() {
 
     for (auto const& x : paramIdToDescriptor) {
       auto paramId = x.first;
-      Parameter *param = ParameterService::getService()->parameterForId(paramId);
-      if (param) {
+      auto param = ParameterService::getService()->parameterForId(paramId);
+      if (param != nullptr) {
         ofxMidiMessage msg = messageFrom(x.second);
-        saveAssignment(param, msg);
+        std::string descriptor = descriptorFrom(msg);
+        saveAssignment(param, descriptor);
       }
     }
 

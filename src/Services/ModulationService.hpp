@@ -16,9 +16,9 @@
 #include "AudioSettings.hpp"
 
 struct ModulationSetting {
-  Parameter * videoParam;
-  Parameter * audioParam;
-  ModulationSetting(Parameter *v = NULL, Parameter *a = NULL) : videoParam(v), audioParam(a) {};
+  std::shared_ptr<Parameter> videoParam;
+  std::shared_ptr<Parameter> audioParam;
+  ModulationSetting(std::shared_ptr<Parameter> p = NULL, std::shared_ptr<Parameter> a = NULL) : videoParam(p), audioParam(a) {};
 };
 
 class ModulationService {
@@ -38,11 +38,11 @@ public:
   }
   std::vector<AudioAnalysis*> audioAnalysis;
   
-  Parameter* audioParameterDriving(Parameter *videoParam);
-  bool videoParameterIsBeingDriven(Parameter *videoParam);
+  std::shared_ptr<Parameter> audioParameterDriving(std::shared_ptr<Parameter> videoParam);
+  bool videoParameterIsBeingDriven(std::shared_ptr<Parameter> videoParam);
   void addAudioAnalysis(AudioAnalysis *analysis);
-  void addMapping(Parameter *audioParam, Parameter *videoParam);
-  void removeMapping(Parameter *videoParam);
+  void addMapping(std::shared_ptr<Parameter> audioParam, std::shared_ptr<Parameter> videoParam);
+  void removeMapping(std::shared_ptr<Parameter> videoParam);
   void tickMappings();
 };
 

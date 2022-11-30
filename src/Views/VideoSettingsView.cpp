@@ -12,6 +12,7 @@
 #include "Console.hpp"
 #include "ConfigService.hpp"
 #include "MidiService.hpp"
+#include "FileBrowserView.hpp"
 #include "VideoSettingsView.hpp"
 #include "FontService.hpp"
 #include "VideoSourceService.hpp"
@@ -21,6 +22,7 @@ const static ofVec2f windowSize = ofVec2f(1000, 600);
 
 void VideoSettingsView::setup() {
   styleWindow();
+  videoSourceBrowserView.setup();
 }
 
 void VideoSettingsView::styleWindow() {
@@ -35,7 +37,7 @@ void VideoSettingsView::styleWindow() {
 }
 
 void VideoSettingsView::update() {
-  
+
 }
 
 void VideoSettingsView::drawMenuBar() {
@@ -89,21 +91,26 @@ void VideoSettingsView::draw() {
   ImGui::PopFont();
   ImGui::Separator();
   
-  ImGui::Columns(2, "videofeedsettings", false);
   
+  
+  ImGui::Columns(2, "shaderchainer", false);
   // Draw the shader chainers in different tabs
   drawShaderChainerTabs();
+  // Shader Chainer creation
   
   ImGui::NextColumn();
-  
   // Selected Shader
   drawSelectedShader();
-  
   ImGui::Columns(1);
+  
   ImGui::Separator();
   
-  // Shader Chainer
-  drawShaderChainerSelector();
+  ImGui::Columns(2, "sourcesettings", false);
+//  drawFileBrowserView();
+  newVideoSourceView.draw();
+  ImGui::NextColumn();
+  drawVideoSourceBrowserView();
+  ImGui::Columns(1);
   
   // Close Stream button
   if (ImGui::Button("Close Stream")) {
@@ -116,6 +123,7 @@ void VideoSettingsView::selectShaderChainerAtIndex(int i) {
   selectedChainer = shaderChainers[i].get();
   selectedChainerView = shaderChainerViews[i].get();
   videoStream->outputChainer = selectedChainer;
+  selectedIndex = i;
 }
 
 void VideoSettingsView::drawShaderChainerTabs() {
@@ -138,63 +146,33 @@ void VideoSettingsView::drawShaderChainerTabs() {
   }
 }
 
-void VideoSettingsView::drawShaderChainerSelector() {
-  ImGui::PushFont(FontService::getService()->h4);
-  ImGui::Text("New Shader Chain");
+void VideoSettingsView::drawFileBrowserView() {
+  ImGui::PushFont(FontService::getService()->h3);
+  ImGui::Text("File Browser");
   ImGui::PopFont();
-  
-  ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5f);
-  static char buf[128] = "";
-  ImGui::InputText("##ShaderChainerName", buf, IM_ARRAYSIZE(buf));
-  ImGui::PopItemWidth();
-  ImGui::SameLine();
-  
-  if (ImGui::Button("Create")) {
-    auto name = std::string(buf);
-    if (name.empty()) {
-      name = formatString("Chainer - %d", shaderChainers.size());
-    }
-    auto videoSources = VideoSourceService::getService()->videoSources();
-    
-    auto shaderChainer = std::make_shared<ShaderChainer>(buf, videoSources.at(0));
-    shaderChainer->name = name;
-    shaderChainer->setup();
-    pushShaderChainer(shaderChainer);
-  }
+  ImGui::Separator();
+}
+
+void VideoSettingsView::drawVideoSourceBrowserView() {
+  videoSourceBrowserView.draw();
 }
 
 void VideoSettingsView::drawSelectedShader() {
-  if (selectedChainerView->selectedShader != nullptr) {
-    selectedChainerView->selectedShader->drawSettings();
-  } else {
-    CommonViews::mSpacing();
-    CommonViews::HorizontallyAligned(120);
-    CommonViews::H4Title("Select a Shader");
-    CommonViews::mSpacing();
-  }
+//  if (selectedChainerView->selectedShader != nullptr) {
+//    selectedChainerView->selectedShader->drawSettings();
+//  } else {
+//    CommonViews::mSpacing();
+//    CommonViews::HorizontallyAligned(120);
+//    CommonViews::H4Title("Select a Shader");
+//    CommonViews::mSpacing();
+//  }
 }
 
 void VideoSettingsView::pushShaderChainer(std::shared_ptr<ShaderChainer> shaderChainer) {
   ShaderChainerService::getService()->addShaderChainer(shaderChainer);
   shaderChainer->setup();
   shaderChainers.push_back(shaderChainer);
-  auto shaderChainerView = std::make_shared<ShaderChainerView>(videoSettings, shaderChainer.get());
+  auto shaderChainerView = std::make_shared<ShaderChainerView>(shaderChainer);
   shaderChainerViews.push_back(shaderChainerView);
   selectShaderChainerAtIndex(shaderChainers.size() - 1);
 }
-
-//
-//void VideoSettingsView::drawTransform() {
-//  CommonViews::H3Title("Transform");
-//
-//  // Feedback Blend
-//  CommonViews::SliderWithOscillator("Feedback Blend", "##feedbackblend", &videoSettings->transformSettings.feedbackBlend, &videoSettings->transformSettings.feedbackBlendOscillator);
-//  CommonViews::ModulationSelector(&videoSettings->transformSettings.feedbackBlend);
-//  CommonViews::MidiSelector(&videoSettings->transformSettings.feedbackBlend);
-//
-//
-//  // Scale
-//  CommonViews::SliderWithOscillator("Scale", "##scale", &videoSettings->transformSettings.scale, &videoSettings->transformSettings.scaleOscillator);
-//  CommonViews::ModulationSelector(&videoSettings->transformSettings.scale);
-//  CommonViews::MidiSelector(&videoSettings->transformSettings.scale);
-//}

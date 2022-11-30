@@ -1,8 +1,9 @@
-#version 120
+#version 150
 
 uniform sampler2DRect mainTexture;
 uniform sampler2DRect fbTexture;
-varying vec2 coord;
+in vec2 coord;
+out vec4 outputColor;
 
 uniform float blend;
 uniform int fbType;
@@ -71,8 +72,8 @@ vec4 mixLumaKey(in vec4 mainColor,
 
 void main()
 {
-  vec4 mainColor = texture2DRect(mainTexture, coord);
-  vec4 fbColor = texture2DRect(fbTexture, coord);
+  vec4 mainColor = texture(mainTexture, coord);
+  vec4 fbColor = texture(fbTexture, coord);
   vec4 outColor = vec4(1.0, 0.0, 1.0, 1.0);
 
   
@@ -82,5 +83,5 @@ void main()
     outColor = mixStandard(mainColor, fbColor, blend);
   }
   
-  gl_FragColor = outColor;
+  outputColor = outColor;
 }

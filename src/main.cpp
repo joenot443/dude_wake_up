@@ -9,7 +9,7 @@
 #include "FeedbackSourceService.hpp"
 #include "VideoSourceService.hpp"
 #include "ShaderChainerService.hpp"
-#include "ParameterService.h"
+#include "ParameterService.hpp"
 
 using json = nlohmann::json;
 
@@ -26,8 +26,9 @@ ShaderChainerService *ShaderChainerService::service = 0;
 //========================================================================
 int main( ){
   ofGLFWWindowSettings settings;
-  settings.setSize(1400, 900);
-  settings.setGLVersion(2, 1);
+  // Set the window size to be the same as the monitor size
+  settings.setSize(1440, 900);
+  settings.setGLVersion(3, 2);
 //  ofSetupOpenGL(1280,720, OF_WINDOW);
 //  settings.windowMode = OF_WINDOW;
   auto window = ofCreateWindow(settings);

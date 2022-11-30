@@ -15,7 +15,7 @@
 
 struct ValueOscillator {
   
-  Parameter* observed = NULL;
+  std::shared_ptr<Parameter> observed = nullptr;
   bool enabled = true;
   float value = 0.0;
   float amplitude = 1.0;
@@ -27,7 +27,7 @@ struct ValueOscillator {
   std::vector<float> yRange;
   
   ImVector<ImVec2> data;
-  ValueOscillator(Parameter *observed);
+  ValueOscillator(std::shared_ptr<Parameter> observed);
   void tick();
 };
 

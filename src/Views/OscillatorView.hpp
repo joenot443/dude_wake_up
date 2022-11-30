@@ -15,9 +15,10 @@
 #include "ValueOscillator.hpp"
 
 struct OscillatorView {
-  static void draw(const char* name, Parameter* value, PulseOscillator *oscillator);
-  static void draw(const char* name, Parameter* value, ValueOscillator *oscillator);
-  static void draw(const char* name, Parameter* value, Oscillator *oscillator);
+public:
+  void setup();
+  void update();
+  void draw();
 };
 
 #endif /* Waveform_hpp */

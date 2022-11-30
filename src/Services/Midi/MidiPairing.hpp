@@ -14,12 +14,8 @@
 struct MidiPairing {
   std::string paramId;
   std::string descriptor;
-  int channel;
-  int portNum;
-  int status;
-  int control;
   MidiPairing() {};
-  MidiPairing(std::string paramId, std::string descriptor, int channel, int portNum, int status, int control) : paramId(paramId), descriptor(descriptor), channel(channel), portNum(portNum), status(status), control(control) {}
+  MidiPairing(std::string paramId, std::string descriptor) : paramId(paramId), descriptor(descriptor) {}
 };
 
 #endif /* MidiPairing_hpp */

@@ -17,11 +17,11 @@ class WebcamSource : public VideoSource {
 public:
   WebcamSource(std::string id, std::string name, int deviceID) : VideoSource(id, name, VideoSource_webcam), deviceID(deviceID) {};
   void setup();
-  void update();
+  void saveFrame();
 
 private:
   int deviceID;
-  ofVideoGrabber grabber;;
+  ofVideoGrabber grabber;
 };
 
 #endif

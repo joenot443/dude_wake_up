@@ -7,24 +7,54 @@
 
 #include <stdio.h>
 #include <string>
+#include "json.hpp"
 
 #ifndef BaseField_h
 #define BaseField_h
+
+using json = nlohmann::json;
 
 struct Parameter
 {
   std::string name = "";
   std::string shaderKey = "";
   std::string paramId;
+  std::string midiDescriptor = "";
   float defaultValue = 0.0;
   float value = 0.0;
   int intValue = 0;
   bool boolValue = false;
   // Another Parameter which is driving this one's value
-  Parameter* driver = NULL;
+  std::shared_ptr<Parameter> driver = nullptr;
   
   float min = 0.0;
   float max = 1.0;
+
+  json serialize() {
+    json j;
+    j["name"] = name;
+    j["paramId"] = paramId;
+    j["midiDescriptor"] = midiDescriptor;
+    j["value"] = value;
+    return j;
+  }
+
+  void load(json j) {
+    if (j.is_object()) {
+      if (j.contains("value")) {
+        value = j["value"];
+      }
+      if (j.contains("intValue")) {
+        intValue = j["intValue"];
+      }
+      if (j.contains("boolValue")) {
+        boolValue = j["boolValue"];
+      }
+      if (j.contains("midiDescriptor")) {
+        midiDescriptor = j["midiDescriptor"];
+      }
+    }
+  }
   
   std::string description() {
     return std::to_string(value);

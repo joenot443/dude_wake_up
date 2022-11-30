@@ -12,6 +12,11 @@ std::vector<std::shared_ptr<ShaderChainer>> ShaderChainerService::shaderChainers
   for (auto const& [key, val] : shaderChainerMap) {
     shaderChainers.push_back(val);
   }
+  // Sort the ShaderChainers by their names
+  std::sort(shaderChainers.begin(), shaderChainers.end(), [](const std::shared_ptr<ShaderChainer> &a, const std::shared_ptr<ShaderChainer> &b) {
+    return a->name < b->name;
+  });
+  
   return shaderChainers;
 }
 
@@ -37,9 +42,29 @@ void ShaderChainerService::removeShaderChainer(std::string id) {
   shaderChainerMap.erase(id);
 }
 
+int ShaderChainerService::count() {
+  return shaderChainerMap.size();
+}
+
+void ShaderChainerService::selectShaderChainer(::shared_ptr<ShaderChainer> shaderChainer) {
+  selectedShaderChainer = shaderChainer;
+  // When we select a ShaderChainer, we deselect the Shader
+  selectedShader = nullptr;
+}
+
+void ShaderChainerService::selectShader(std::shared_ptr<Shader> shader) {
+  selectedShader = shader;
+}
+
 void ShaderChainerService::addShaderChainer(std::shared_ptr<ShaderChainer> shaderChainer) {
   if (shaderChainerMap.count(shaderChainer->chainerId) != 0) {
     log("Reregistering ShaderChainer %s", shaderChainer->chainerId.c_str());
   }
+  
+  // Select the first ShaderChainer to be created
+  if (shaderChainerMap.empty()) {
+    selectShaderChainer(shaderChainer);
+  }
+  
   shaderChainerMap[shaderChainer->chainerId] = shaderChainer;
 }

@@ -17,7 +17,7 @@ struct PulseOscillator {
   bool enabled = false;
   bool pulsing = false;
 
-  Parameter *value;
+  std::shared_ptr<Parameter> value = nullptr;
   float amplitude = 1.0;
   float time = 0.0;
   std::chrono::time_point<std::chrono::system_clock> lastBeatTimestamp;
@@ -27,7 +27,7 @@ struct PulseOscillator {
   std::vector<float> yRange;
   
   ImVector<ImVec2> data;
-  PulseOscillator(Parameter *param);
+  PulseOscillator(std::shared_ptr<Parameter> o);
   
   void tick();
   void pulse();
