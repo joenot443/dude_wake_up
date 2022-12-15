@@ -34,11 +34,14 @@ public:
 private:
   void styleWindow();
   void pushSelectedButtonStyle();
-  void drawShaderButton(std::shared_ptr<Shader> shader, bool selected);
+  void drawShaderButton(std::shared_ptr<Shader> shader, bool selected, int idx);
+  void drawShaderCloseButton(std::shared_ptr<Shader> shader);
+  void drawSourceButton();
   void drawChainer();
   void drawShaderDropZone();
   
   ShaderType selectedShaderType = ShaderTypeNone;
+  ImDrawListSplitter splitter = ImDrawListSplitter();
 };
 
 

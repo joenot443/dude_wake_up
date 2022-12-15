@@ -28,9 +28,9 @@ struct HSBSettings: public ShaderSettings {
   
   HSBSettings(std::string shaderId, json j) :
   shaderId(shaderId),
-  hue(std::make_shared<Parameter>("HSB_hue", shaderId, 0.0, -1.0, 2.0)),
-  saturation(std::make_shared<Parameter>("HSB_saturation", shaderId, 1.0, -1.0, 3.0)),
-  brightness(std::make_shared<Parameter>("HSB_brightness", shaderId, 1.0, -1.0, 3.0)),
+  hue(std::make_shared<Parameter>("Hue", shaderId, 0.0, -1.0, 2.0)),
+  saturation(std::make_shared<Parameter>("Saturation", shaderId, 1.0, -1.0, 3.0)),
+  brightness(std::make_shared<Parameter>("Brightness", shaderId, 1.0, -1.0, 3.0)),
   hueOscillator(std::make_shared<Oscillator>(hue)),
   saturationOscillator(std::make_shared<Oscillator>(saturation)),
   brightnessOscillator(std::make_shared<Oscillator>(brightness)),
@@ -51,7 +51,7 @@ public:
   HSBSettings *settings;
   
   void setup() override {
-    shader.load("shadersGL2/new/hsb");
+    shader.load("shaders/hsb");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -73,23 +73,9 @@ public:
   void drawSettings() override {
     CommonViews::H3Title("Basic (HSB)");
     
-    // Hue
-    CommonViews::Slider("Hue", "##hue", settings->hue);
-    CommonViews::MidiSelector(settings->hue);
-    ImGui::SameLine(0, 20);
-    CommonViews::OscillateButton("##hue", settings->hueOscillator, settings->hue);
-    
-    // Saturation
-    CommonViews::Slider("Saturation", "##saturation", settings->saturation);
-    CommonViews::MidiSelector(settings->saturation);
-    ImGui::SameLine(0, 20);
-    CommonViews::OscillateButton("##saturation", settings->saturationOscillator, settings->saturation);
-
-    // Brightness
-    CommonViews::Slider("Brightness", "##brightness", settings->brightness);
-    CommonViews::MidiSelector(settings->brightness);
-    ImGui::SameLine(0, 20);
-    CommonViews::OscillateButton("##brightness", settings->brightnessOscillator, settings->brightness);
+    CommonViews::ShaderParameter(settings->hue, settings->hueOscillator);
+    CommonViews::ShaderParameter(settings->saturation, settings->saturationOscillator);
+    CommonViews::ShaderParameter(settings->brightness, settings->brightnessOscillator);
   }
 };
 

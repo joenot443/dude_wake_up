@@ -9,6 +9,7 @@
 #include "VideoSourceService.hpp"
 #include "UUID.hpp"
 #include "ShaderChainerService.hpp"
+#include "ConfigService.hpp"
 #include "OscillationService.hpp"
 #include "FontService.hpp"
 #include "ShaderChainerView.hpp"
@@ -16,24 +17,26 @@
 #include "HSBShader.hpp"
 
 void MainStageView::setup() {
-  OscillationService::getService()->loadConfigFile();
-
   VideoSourceService::getService()->addWebcamVideoSource("Webcam 0", 1);
   VideoSourceService::getService()->addShaderVideoSource(ShaderSource_plasma);
   VideoSourceService::getService()->addShaderVideoSource(ShaderSource_fractal);
   VideoSourceService::getService()->addShaderVideoSource(ShaderSource_fuji);
+  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_clouds);
+  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_melter);
   
+//  ConfigService::getService()->loadDefaultConfigFile();
+  populateShaderChainerViews();
   
-  // Create a ShaderChainer with first video source
+//  // Create a ShaderChainer with first video source
   auto shaderChainer = std::make_shared<ShaderChainer>(UUID::generateUUID(), "Main Chainer", VideoSourceService::getService()->videoSources().at(0));
-  
+
   shaderChainer->setup();
   // Add an HSB shader to the ShaderChainer
   shaderChainer->pushShader(ShaderTypeHSB);
-  
+
   // Add the ShaderChainer to the ShaderChainerService
   ShaderChainerService::getService()->addShaderChainer(shaderChainer);
-  
+
   // Create a ShaderChainerView for the ShaderChainer
   auto shaderChainerView = std::make_shared<ShaderChainerView>(shaderChainer);
   shaderChainerViews.push_back(shaderChainerView);
@@ -72,6 +75,8 @@ void MainStageView::draw() {
   // Sources
   drawVideoSourceBrowser();
   
+  drawMenu();
+  
   ImGui::NextColumn();
   
   // Chainers
@@ -85,6 +90,18 @@ void MainStageView::draw() {
   
   // Outputs
   drawOutputBrowser();
+}
+
+void MainStageView::drawMenu() {
+  if (ImGui::BeginMenuBar()) {
+    if (ImGui::MenuItem("Save Config")) {
+      ConfigService::getService()->saveDefaultConfigFile();
+    }
+    if (ImGui::MenuItem("Load Config")) {
+      ConfigService::getService()->loadDefaultConfigFile();
+    }
+    ImGui::EndMenuBar();
+  }
 }
 
 void MainStageView::drawSelectedShader() {
@@ -109,7 +126,9 @@ void MainStageView::drawSelectedShader() {
 
 void MainStageView::drawShaderChainerSettings() {
   ImGui::Text("Shader Chainer Settings");
-  shaderChainerSettingsView.draw();
+  if (shaderChainerSettingsView.shaderChainer != nullptr) {
+    shaderChainerSettingsView.draw();
+  }
 }
 
 void MainStageView::drawNewShaderButton() {
@@ -155,6 +174,21 @@ void MainStageView::drawNewShaderChainerButton() {
     shaderChainer->setup();
     pushShaderChainer(shaderChainer);
   }
+}
+
+void MainStageView::populateShaderChainerViews() {
+  shaderChainerViews.clear();
+  
+  auto chainers = ShaderChainerService::getService()->shaderChainers();
+  
+  for (auto c : chainers) {
+    auto shaderChainerView = std::make_shared<ShaderChainerView>(c);
+    shaderChainerViews.push_back(shaderChainerView);
+  }
+  
+  std::sort(shaderChainerViews.begin(), shaderChainerViews.end(), [](const std::shared_ptr<ShaderChainerView> &a, const std::shared_ptr<ShaderChainerView> &b) {
+    return a->shaderChainer->name < b->shaderChainer->name;
+  });
 }
 
 void MainStageView::pushShaderChainer(std::shared_ptr<ShaderChainer> shaderChainer)

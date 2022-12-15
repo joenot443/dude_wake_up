@@ -35,7 +35,6 @@ public:
   ofFbo pong;
   ofFbo processFrame(std::shared_ptr<ofTexture> frameTexture);
   
-  std::vector<std::shared_ptr<FeedbackShader>> feedbackShaders;
   std::vector<std::shared_ptr<Shader>> shaders;
   std::shared_ptr<VideoSource> source;
   
@@ -54,7 +53,6 @@ public:
                 std::string name,
                 std::shared_ptr<VideoSource> source) :
   chainerId(chainerId),
-  feedbackShaders({}),
   fileBrowserSettings(std::make_shared<FileBrowserSettings>()),
   name(name),
   source(source),

@@ -6,6 +6,7 @@
 //
 
 #include "OscillationService.hpp"
+#include "ConfigService.hpp"
 #include "ParameterService.hpp"
 #include "Console.hpp"
 #include "Strings.hpp"
@@ -47,44 +48,26 @@ void OscillationService::selectOscillator(std::shared_ptr<Oscillator> osc, std::
   
   selectedOscillator = osc;
   loadOscillatorSettings(osc);
-  saveConfigFile();
   ParameterService::getService()->selectedParameter = param;
   osc->enabled->boolValue = true;
+  ConfigService::getService()->saveDefaultConfigFile();
 }
 
-void OscillationService::saveConfigFile() {
-  json j = json::object();
 
-  // Save each oscillator using its name as the key and the serialized data as the value
+// ConfigurableService
+
+json OscillationService::config() {
+  json j = json::object();
+  
   for (auto & osc : oscillators) {
-    auto paramValueMap = osc->parameterValueMap();
-    if (paramValueMap.empty()) continue;
-    
-    j[osc->name] = paramValueMap;
-    oscillatorSettings[osc->name] = paramValueMap;
+    j[osc->name] = osc->parameterValueMap();
   }
   
-  // Save the json to the config file at ~/oscillator_config.json
-  std::ofstream fileStream;
-  const char* homeDir = getenv("HOME");
-  fileStream.open(formatString("%s/oscillator_config.json", homeDir), ios::trunc);
-  if (fileStream.is_open()) {
-    fileStream << j.dump(4);
-    fileStream.close();
-  } else {
-    log("Problem saving oscillator_config.");
-  }
+  return j;
 }
 
-void OscillationService::loadConfigFile() {
-  // Load the oscillator config file into a json object
-  std::fstream fileStream;
-  const char* homeDir = getenv("HOME");
-  fileStream.open(formatString("%s/oscillator_config.json", homeDir), ios::in);
-  if (fileStream.is_open() && fileStream) {
-    json data;
-    fileStream >> data;
-    
+void OscillationService::loadConfig(json data) {
+  if (data.is_object()) {  
     std::map<std::string, std::map<std::string, float>> itemsMap = data;
     
     
@@ -93,12 +76,5 @@ void OscillationService::loadConfigFile() {
         oscillatorSettings[osc.first][param.first] = param.second;
       }
     }
-    
-//    for (const auto& item : j.items()) {
-//      std::cout << item.key() << "\n";
-//      for (const auto& val : item.value().items()) {
-//          oscillatorSettings[item.key()][val.key()] = val.value();
-//      }
-//    }
   }
 }

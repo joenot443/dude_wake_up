@@ -35,6 +35,10 @@ void VideoSourcePreviewView::draw() {
     
     auto id = previewFbo.getTexture().getTextureData().textureID;
     ImGui::Image((void*) id, ImVec2(320, 240));
+    ImGui::SameLine();
+    if (ImGui::Button(formatString("View##%s", videoSource->sourceName.c_str()).c_str())) {
+      VideoSourceService::getService()->addOutputWindowForVideoSource(videoSource);
+    }
   }
   ImGui::PopStyleVar();
   ImGui::PopStyleColor();

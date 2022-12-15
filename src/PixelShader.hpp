@@ -24,7 +24,7 @@ struct PixelSettings: public ShaderSettings  {
   std::shared_ptr<Oscillator> sizeOscillator;
   
   PixelSettings(std::string shaderId, json j) :
-  size(std::make_shared<Parameter>("pixel_size", shaderId, 24.0,  0.01, 64.0)),
+  size(std::make_shared<Parameter>("pixel_size", shaderId, 24.1,  1.0, 64.0)),
   enabled(std::make_shared<Parameter>("enabled", shaderId, 0.0,  1.0, 0.0)),
   sizeOscillator(std::make_shared<Oscillator>(size)),
   ShaderSettings(shaderId)
@@ -43,7 +43,7 @@ struct PixelShader: Shader {
   ofShader shader;
   
   void setup() override {
-    shader.load("shadersGL2/new/pixel");
+    shader.load("shaders/pixel");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -58,7 +58,7 @@ struct PixelShader: Shader {
   }
   
   bool enabled() override {
-    return settings->enabled->boolValue;
+    return true;
   }
 
   ShaderType type() override {
@@ -71,8 +71,6 @@ struct PixelShader: Shader {
     ImGui::Text("Mix");
     ImGui::SetNextItemWidth(150.0);
     ImGui::SameLine(0, 20);
-    ImGui::Checkbox("Enabled##pixelation_enabled", &settings->enabled->boolValue);
-    
     CommonViews::Slider("Size", "##pixelation_size", settings->size);
     CommonViews::ModulationSelector(settings->size);
     CommonViews::MidiSelector(settings->size);

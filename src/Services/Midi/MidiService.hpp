@@ -13,11 +13,13 @@
 #include "ofMain.h"
 #include "MidiPairing.hpp"
 #include "Parameter.hpp"
+#include "ConfigurableService.hpp"
 
-class MidiService: public ofxMidiListener, public ofxMidiConnectionListener {
+class MidiService: public ofxMidiListener, public ofxMidiConnectionListener, public ConfigurableService {
 private:
   std::map<std::string, MidiPairing> descriptorToPairing;
   std::map<std::string, MidiPairing> parameterIdToPairing;
+  std::map<std::string, std::string> descriptorToParamId;
   
   void driveParameter(std::string paramId, ofxMidiMessage &msg);
   std::string descriptorFrom(ofxMidiMessage& msg);
@@ -57,9 +59,6 @@ public:
   /// Parameter currently being learned.
   std::shared_ptr<Parameter> learningParam;
   
-  void saveConfigFile();
-  void loadConfigFile();
-  
   static MidiService* service;
   MidiService() {};
   static MidiService* getService() {
@@ -68,8 +67,10 @@ public:
       service->setup();
     }
     return service;
-    
   }
+  
+  json config() override;
+  void loadConfig(json j) override;
 };
 
 

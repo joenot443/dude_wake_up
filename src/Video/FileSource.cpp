@@ -26,4 +26,22 @@ void FileSource::saveFrame() {
   }
 }
 
+void FileSource::load(json j) {
+  if (!j.is_object()) {
+    log("Error hydrating WebcamSource from json");
+    return;
+  }
+  
+  path = j["path"];
+  id = j["id"];
+  sourceName = j["sourceName"];
+}
 
+json FileSource::serialize() {
+  json j;
+  j["path"] = path;
+  j["id"] = id;
+  j["sourceName"] = sourceName;
+  j["videoSourceType"] = VideoSource_file;
+  return j;
+}

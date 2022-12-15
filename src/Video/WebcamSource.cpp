@@ -35,3 +35,23 @@ void WebcamSource::saveFrame() {
     previewTexture->loadData(frameBuffer, GL_RGB, GL_UNSIGNED_BYTE);
   }
 }
+
+void WebcamSource::load(json j) {
+  if (!j.is_object()) {
+    log("Error hydrating WebcamSource from json");
+    return;
+  }
+  
+  deviceID = j["deviceId"];
+  id = j["id"];
+  sourceName = j["sourceName"];
+}
+
+json WebcamSource::serialize() {
+  json j;
+  j["deviceId"] = deviceID;
+  j["id"] = id;
+  j["sourceName"] = sourceName;
+  j["videoSourceType"] = VideoSource_webcam;
+  return j;
+}

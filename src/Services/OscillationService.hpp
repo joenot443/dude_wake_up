@@ -14,8 +14,9 @@
 #include "Oscillator.hpp"
 #include "ValueOscillator.hpp"
 #include "PulseOscillator.hpp"
+#include "ConfigurableService.hpp"
 
-class OscillationService {
+class OscillationService: public ConfigurableService {
 private:
   std::deque<std::shared_ptr<Oscillator>> oscillators;
   
@@ -50,8 +51,8 @@ public:
   
   void tickOscillators();
   
-  void saveConfigFile();
-  void loadConfigFile();
+  json config() override;
+  void loadConfig(json j) override;
 };
 
 #endif /* OscillationService_hpp */

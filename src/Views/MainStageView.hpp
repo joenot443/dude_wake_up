@@ -31,6 +31,8 @@ private:
   ShaderChainerSettingsView shaderChainerSettingsView = ShaderChainerSettingsView();
   OscillatorView oscillatorView = OscillatorView();
   
+  void styleWindow();
+  void drawMenu();
   void drawNewShaderChainerButton();
   void drawNewShaderButton();
   void drawVideoSourceBrowser();
@@ -41,6 +43,7 @@ private:
   void drawShaderSelection();
   
   void pushShaderChainer(std::shared_ptr<ShaderChainer> shaderChainer);
+  void populateShaderChainerViews();
   
 public:
   void setup();

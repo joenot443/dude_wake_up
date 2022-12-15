@@ -18,6 +18,8 @@
 #include <tuple>
 #include <string>
 
+
+
 template<typename ... Args>
 std::string formatString( const std::string& format, Args ... args )
 {
@@ -29,6 +31,9 @@ std::string formatString( const std::string& format, Args ... args )
     return std::string( buf.get(), buf.get() + size - 1 ); // We don't want the '\0' inside
 }
 
+static std::string idString(std::string idStr) {
+  return formatString("##%s", idStr.c_str());
+}
 
 static std::vector<std::string> split_string (std::string s, std::string delimiter) {
     size_t pos_start = 0, pos_end, delim_len = delimiter.length();

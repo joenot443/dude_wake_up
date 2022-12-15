@@ -12,7 +12,7 @@
 #include "Console.hpp"
 
 void FeedbackShader::setup() {
-  shader.load("shadersGL2/new/feedback");
+  shader.load("shaders/feedback");
   feedbackSource = FeedbackSourceService::getService()->feedbackSourceForId(settings->feedbackSourceId);
 };
 
@@ -20,7 +20,7 @@ void FeedbackShader::shade(ofFbo *frame, ofFbo *canvas) {
   canvas->begin();
   shader.begin();
   // Set the textures
-  int frameIndex = settings->delayAmount->intValue;
+  int frameIndex = static_cast<int>(settings->delayAmount->value);
   ofTexture feedbackTexture = feedbackSource->getFrame(frameIndex);
 
   shader.setUniform1i(settings->lumaKeyEnabled->shaderKey, settings->lumaKeyEnabled->boolValue);

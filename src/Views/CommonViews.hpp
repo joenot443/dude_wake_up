@@ -19,7 +19,9 @@ struct CommonViews {
   static void xlSpacing();
   static void Spacing(int n);
   
-  static void ShaderParameter(std::shared_ptr<Parameter> param);
+  static void ShaderParameter(std::shared_ptr<Parameter> param, std::shared_ptr<Oscillator> osc);
+
+  static void ShaderCheckbox(std::shared_ptr<Parameter> param);
 
   static void HorizontallyAligned(float width, float alignment = 0.5);
   

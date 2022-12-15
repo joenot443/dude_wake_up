@@ -14,11 +14,19 @@
 #include "Shader.hpp"
 #include <stdio.h>
 
+struct EmptySettings: public ShaderSettings {
+  EmptySettings(std::string shaderId, json j) :
+  ShaderSettings(shaderId) {
+    
+  };
+};
+
 struct EmptyShader: Shader {
+  EmptySettings *settings;
+  EmptyShader(EmptySettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("shadersGL2/new/empty");
-
+    shader.load("shaders/empty");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

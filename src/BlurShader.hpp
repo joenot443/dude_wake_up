@@ -42,7 +42,7 @@ public:
   BlurShader(BlurSettings *settings) : Shader(settings),
   settings(settings) {}
   void setup() override {
-    shader.load("shadersGL2/new/blur");
+    shader.load("shaders/blur");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

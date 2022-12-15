@@ -11,10 +11,12 @@
 #include <stdio.h>
 #include "ShaderChainer.hpp"
 #include "Shader.hpp"
+#include "ConfigurableService.hpp"
+
+using json = nlohmann::json;
 
 // Singleton service for managing ShaderChainer objects
-
-class ShaderChainerService {
+class ShaderChainerService: public ConfigurableService {
 
 private:
   std::map<std::string, std::shared_ptr<ShaderChainer>> shaderChainerMap;
@@ -41,6 +43,9 @@ public:
   std::shared_ptr<ShaderChainer> shaderChainerForId(std::string id);
   std::shared_ptr<Shader> selectedShader;
   std::shared_ptr<ShaderChainer> selectedShaderChainer;
+  
+  json config() override;
+  void loadConfig(json j) override;
 };
 
 

@@ -38,8 +38,21 @@ void CommonViews::Spacing(int n) {
   }
 }
 
-void CommonViews::ShaderParameter(std::shared_ptr<Parameter> param) {
-  
+void CommonViews::ShaderParameter(std::shared_ptr<Parameter> param, std::shared_ptr<Oscillator> osc) {
+  sSpacing();
+  H4Title(param->name);
+  Slider(param->name, param->paramId, param);
+  MidiSelector(param);
+  ImGui::SameLine();
+  OscillateButton(param->paramId, osc, param);
+  sSpacing();
+}
+
+void CommonViews::ShaderCheckbox(std::shared_ptr<Parameter> param) {
+  sSpacing();
+  H4Title(param->name);
+  ImGui::Checkbox(param->name.c_str(), &param->boolValue);
+  sSpacing();
 }
 
 void CommonViews::ModulationSelector(std::shared_ptr<Parameter> videoParam) { 
@@ -94,11 +107,8 @@ void CommonViews::H4Title(std::string title) {
 }
 
 void CommonViews::Slider(std::string title, std::string id, std::shared_ptr<Parameter> param) {
-  ImGui::SetNextItemWidth(80);
-  ImGui::Text("%s", title.c_str());
-  ImGui::SameLine(0, 20);
   ImGui::SetNextItemWidth(200.0);
-  ImGui::SliderFloat(id.c_str(), &param->value, param->min, param->max, "%.3f");
+  ImGui::SliderFloat(idString(id).c_str(), &param->value, param->min, param->max, "%.3f");
   ImGui::SameLine(0, 20);
   ResetButton(id, param);
 }

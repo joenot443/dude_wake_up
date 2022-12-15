@@ -146,10 +146,7 @@ void VideoStream::drawDebug() {
 
 
 void VideoStream::clearFrameBuffer() {
-  for (auto & fb : outputChainer->feedbackShaders) {
-    fb->clearFrameBuffer();
-  }
-  shouldClearFrameBuffer = false;
+
 }
 
 

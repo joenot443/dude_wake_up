@@ -21,9 +21,11 @@ enum ShaderType {
   ShaderTypeFeedback,     // 7
   ShaderTypeAscii,        // 8
   ShaderTypeKaleidoscope, // 9
+  ShaderTypeTile,         // 10
+  ShaderTypeMix,          // 11
 };
 
-static const ShaderType AvailableShaderTypes[] = {ShaderTypeHSB, ShaderTypeBlur, ShaderTypePixelate, ShaderTypeMirror, ShaderTypeTransform, ShaderTypeFeedback, ShaderTypeAscii, ShaderTypeKaleidoscope};
+static const ShaderType AvailableShaderTypes[] = {ShaderTypeHSB, ShaderTypeBlur, ShaderTypePixelate, ShaderTypeMirror, ShaderTypeTransform, ShaderTypeFeedback, ShaderTypeAscii, ShaderTypeKaleidoscope, ShaderTypeTile, ShaderTypeMix};
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) {
@@ -47,6 +49,10 @@ static std::string shaderTypeName(ShaderType type) {
       return "ASCII";
     case ShaderTypeKaleidoscope:
       return "Kaleidoscope";
+    case ShaderTypeTile:
+      return "Tile";
+    case ShaderTypeMix:
+      return "Mix";
   }
 }
 

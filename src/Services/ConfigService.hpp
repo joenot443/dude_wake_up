@@ -25,8 +25,12 @@ public:
   ShaderChainer* loadShaderChainerConfigFile(std::string name);
   
   json jsonFromParameters(std::vector<Parameter*> parameters);
+
+  void saveDefaultConfigFile();
+  void loadDefaultConfigFile();
   
-  
+  void saveConfigFile(std::string path);
+  void loadConfigFile(std::string path);
   
   static ConfigService* service;
   ConfigService() {};

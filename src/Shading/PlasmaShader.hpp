@@ -61,7 +61,7 @@ public:
   };
 
   void setup() override {
-    shader.load("shadersGL2/new/plasma");
+    shader.load("shaders/plasma");
   };
 
   void drawSettings() override {

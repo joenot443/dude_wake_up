@@ -74,7 +74,6 @@ void VideoSettingsView::drawMenuBar() {
 
 void VideoSettingsView::draw() {
   if (!hasDrawn) {
-    MidiService::getService()->loadConfigFile();
     hasDrawn = true;
   }
   

@@ -15,16 +15,16 @@
 #include "ofxImGui.h"
 
 struct FractalSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> speed;
+  std::shared_ptr<Parameter> zoom;
 
-  std::shared_ptr<Oscillator> speedOscillator;
+  std::shared_ptr<Oscillator> zoomOscillator;
 
   FractalSettings(std::string shaderId, json j) :
-  speed(std::make_shared<Parameter>("speed", shaderId, 0.0,  0.0, 1.0)),
-  speedOscillator(std::make_shared<Oscillator>(speed)),
+  zoom(std::make_shared<Parameter>("zoom", shaderId, 1.0,  1.0, 5.0)),
+  zoomOscillator(std::make_shared<Oscillator>(zoom)),
   ShaderSettings(shaderId) {
-    parameters = {speed};
-    oscillators = {speedOscillator};
+    parameters = {zoom};
+    oscillators = {zoomOscillator};
     load(j);
   };
 };
@@ -46,22 +46,19 @@ public:
     shader.begin();
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("time", ofGetElapsedTimef());
-    shader.setUniform1f("speed", settings->speed->value);
+    shader.setUniform1f("zoom", settings->zoom->value);
     frame->draw(0, 0);
     shader.end();
     canvas->end();
   };
 
   void setup() override {
-    shader.load("shadersGL2/new/fractal");
+    shader.load("shaders/fractal");
   };
 
   void drawSettings() override {
     CommonViews::H3Title("Fractal");
-    ImGui::Text("Fractal Enabled");
-    ImGui::SetNextItemWidth(150.0);
-    ImGui::SameLine(0, 20);
-//    ImGui::Checkbox("Enabled##fractal_enabled", &settings->enabled.boolValue);
+    CommonViews::ShaderParameter(settings->zoom, settings->zoomOscillator);
   };
 };
 

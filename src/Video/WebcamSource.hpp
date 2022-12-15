@@ -12,12 +12,17 @@
 #include "ofMain.h"
 #include "VideoSource.hpp"
 
+using json = nlohmann::json;
+
 class WebcamSource : public VideoSource {
   
 public:
   WebcamSource(std::string id, std::string name, int deviceID) : VideoSource(id, name, VideoSource_webcam), deviceID(deviceID) {};
-  void setup();
-  void saveFrame();
+  void setup() override;
+  void saveFrame() override;
+  json serialize() override;
+  void load(json j) override;
+  
 
 private:
   int deviceID;

@@ -5,8 +5,8 @@
 //  Created by Joe Crozier on 8/30/22.
 //
 
-#ifndef EmptyShader_hpp
-#define EmptyShader_hpp
+#ifndef MirrorShader_hpp
+#define MirrorShader_hpp
 
 #include "ofMain.h"
 #include "VideoSettings.hpp"
@@ -53,7 +53,7 @@ struct MirrorShader: Shader {
   MirrorShader(MirrorSettings *settings) : settings(settings), Shader(settings) {};
   
   void setup() override {
-    shader.load("shadersGL2/new/mirror");
+    shader.load("shaders/mirror");
   }
   
   ShaderType type() override {

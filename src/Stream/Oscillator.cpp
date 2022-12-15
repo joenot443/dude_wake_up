@@ -16,7 +16,7 @@ value(v),
 name(v->name),
 settingsId(value->paramId),
 amplitude(std::make_shared<Parameter>("amp", v->paramId, 1.0, 0.0, v->max)),
-shift(std::make_shared<Parameter>("shift", v->paramId, 0.0, -3.0, 3.0)),
+shift(std::make_shared<Parameter>("shift", v->paramId, (v->max - v->min) / 2., -3.0, 3.0)),
 frequency(std::make_shared<Parameter>("freq", v->paramId, 0.5, 0.0, 3.0)),
 enabled(std::make_shared<Parameter>("enabled", v->paramId, 0.0, 0.0, 1.0))
 {

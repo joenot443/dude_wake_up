@@ -25,7 +25,7 @@ const static ofVec2f windowSize = ofVec2f(1200, 800);
 
 void MainApp::setup(){
   if (isSetup) return;
-  
+  ofDisableArbTex();
   ModulationService::getService();
   MidiService::getService();
   gui.setup();
@@ -80,7 +80,7 @@ void MainApp::drawMainStage() {
   // Get the current screen size
   ImGui::SetNextWindowSize(ImVec2(ofGetWindowWidth(), ofGetWindowHeight()));
   ImGui::SetNextWindowPos(ImVec2(0,0));
-  ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar;
+  ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar;
   ImGui::Begin("Main Stage", NULL, windowFlags);
   ImGui::PushFont(FontService::getService()->p);
   mainStageView->draw();

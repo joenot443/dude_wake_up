@@ -16,6 +16,8 @@
 
 struct FujiSettings: public ShaderSettings {
   std::shared_ptr<Parameter> enabled;
+  
+  std::shared_ptr<Parameter> speed;
 
   std::shared_ptr<Parameter> cloud1Y;
   std::shared_ptr<Parameter> cloud1X;
@@ -28,6 +30,8 @@ struct FujiSettings: public ShaderSettings {
 
   std::shared_ptr<Oscillator> cloud2XOscillator;
   std::shared_ptr<Oscillator> cloud2YOscillator;
+  
+  std::shared_ptr<Oscillator> speedOscillator;
 
   FujiSettings(std::string shaderId, json j) :
   enabled(std::make_shared<Parameter>("enabled", shaderId, 0.0,  1.0, 0.0)),
@@ -35,10 +39,12 @@ struct FujiSettings: public ShaderSettings {
   cloud1X(std::make_shared<Parameter>("cloud1X", shaderId, 0.0,  0.0, 1.0)),
   cloud2Y(std::make_shared<Parameter>("cloud2Y", shaderId, 0.0,  -0.5, 0.5)),
   cloud2X(std::make_shared<Parameter>("cloud2X", shaderId, 0.0,  0.0, 1.0)),
+  speed(std::make_shared<Parameter>("speed", shaderId, 1.0, 0.0, 2.0)),
   cloud1XOscillator(std::make_shared<Oscillator>(cloud1X)),
   cloud1YOscillator(std::make_shared<Oscillator>(cloud1Y)),
   cloud2XOscillator(std::make_shared<Oscillator>(cloud2X)),
   cloud2YOscillator(std::make_shared<Oscillator>(cloud2Y)),
+  speedOscillator(std::make_shared<Oscillator>(speed)),
   ShaderSettings(shaderId) {
     parameters = {enabled, cloud1Y, cloud1X, cloud2Y, cloud2X};
     oscillators = {cloud1XOscillator, cloud1YOscillator, cloud2XOscillator, cloud2YOscillator};
@@ -62,7 +68,7 @@ public:
     canvas->begin();
     shader.begin();
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", ofGetElapsedTimef() * settings->speed->value);
     shader.setUniform2f("cloud1", settings->cloud1X->value, settings->cloud1Y->value);
     shader.setUniform2f("cloud2", settings->cloud2X->value, settings->cloud2Y->value);
     frame->draw(0, 0);
@@ -71,7 +77,7 @@ public:
   };
 
   void setup() override {
-    shader.load("shadersGL2/new/fuji");
+    shader.load("shaders/fuji");
   };
 
   void drawSettings() override {
@@ -106,6 +112,7 @@ public:
     CommonViews::MidiSelector(settings->cloud2Y);
     CommonViews::OscillateButton("##y2", settings->cloud2YOscillator, settings->cloud2Y);
 
+    CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
   }
 };
 

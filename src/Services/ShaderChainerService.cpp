@@ -6,6 +6,7 @@
 //
 
 #include "ShaderChainerService.hpp"
+#include "VideoSourceService.hpp"
 
 std::vector<std::shared_ptr<ShaderChainer>> ShaderChainerService::shaderChainers() {
   std::vector<std::shared_ptr<ShaderChainer>> shaderChainers;
@@ -67,4 +68,38 @@ void ShaderChainerService::addShaderChainer(std::shared_ptr<ShaderChainer> shade
   }
   
   shaderChainerMap[shaderChainer->chainerId] = shaderChainer;
+  
+  VideoSourceService::getService()->addVideoSource(shaderChainer);
+}
+
+// ConfigurableService
+
+json ShaderChainerService::config() {
+  json container;
+  
+  for (auto & pair : shaderChainerMap) {
+    container[pair.first] = pair.second->serialize();
+  }
+  
+  return container;
+}
+
+void ShaderChainerService::loadConfig(json data) {
+  shaderChainerMap.clear();
+  
+  if (data.is_object()) {
+    std::map<std::string, json> items = data;
+
+    for (auto const & pair : items) {
+      std::string chainerName = pair.second["name"];
+      
+      auto videoSources = VideoSourceService::getService()->videoSources();
+      
+      
+      auto shaderChainer = new ShaderChainer(pair.first, chainerName, videoSources.at(0));
+      shaderChainer->load(pair.second);
+      shaderChainer->setup();
+      addShaderChainer(std::shared_ptr<ShaderChainer>(shaderChainer));
+    }
+  }
 }

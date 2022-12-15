@@ -23,7 +23,7 @@ void VideoSourceBrowserView::draw() {
 
 // Draw a list of video sources as items in a ListBox
 void VideoSourceBrowserView::drawVideoSourceSelector() {
-  auto sources = VideoSourceService::getService()->videoSources();
+  auto sources = VideoSourceService::getService()->inputSources();
   ImGui::PushFont(FontService::getService()->h3);
   ImGui::Text("Video Source");
   ImGui::PopFont();

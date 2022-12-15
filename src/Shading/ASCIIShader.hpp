@@ -36,7 +36,7 @@ struct AsciiShader: Shader {
   AsciiShader(AsciiSettings *settings) : settings(settings), Shader(settings) {};
   
   void setup() override {
-    shader.load("shadersGL2/new/ascii");
+    shader.load("shaders/ascii");
   }
   
   ShaderType type() override {

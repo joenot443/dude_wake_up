@@ -6,11 +6,14 @@
 //
 
 #include "ShaderChainer.hpp"
+#include "VideoSourceService.hpp"
 #include "ofMain.h"
 #include "MirrorShader.hpp"
 #include "FeedbackSourceService.hpp"
 #include "AsciiShader.hpp"
 #include "ConfigService.hpp"
+#include "TileShader.hpp"
+#include "MixShader.hpp"
 #include "KaleidoscopeShader.hpp"
 #include "TransformShader.hpp"
 #include "ShaderChainerService.hpp"
@@ -38,6 +41,7 @@ void ShaderChainer::setup() {
   frameTexture->allocate(640, 480, GL_RGB);
   frameBuffer.bind(GL_SAMPLER_2D_RECT);
   frameBuffer.allocate(640*480*4, GL_STATIC_COPY);
+  frameTexture->setTextureWrap(GL_REPEAT, GL_REPEAT);
   
   previewTexture = std::make_shared<ofTexture>();
   previewTexture->allocate(320, 240, GL_RGB);
@@ -52,6 +56,9 @@ void ShaderChainer::setup() {
   
   ping.allocate(640, 480);
   pong.allocate(640, 480);
+  
+  ping.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
+  pong.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
 }
 
 void ShaderChainer::update() {
@@ -168,7 +175,6 @@ void ShaderChainer::pushShader(ShaderType shaderType) {
       auto settings = new FeedbackSettings(shaderIdStr, chainerId, 0);
       auto shader = std::make_shared<FeedbackShader>(settings);
       shader.get()->setup();
-      feedbackShaders.push_back(shader);
       shaders.push_back(shader);
       return;
     }
@@ -182,6 +188,20 @@ void ShaderChainer::pushShader(ShaderType shaderType) {
     case ShaderTypeKaleidoscope: {
       auto settings = new KaleidoscopeSettings(shaderIdStr, 0);
       auto shader = std::make_shared<KaleidoscopeShader>(settings);
+      shader.get()->setup();
+      shaders.push_back(shader);
+      return;
+    }
+    case ShaderTypeTile: {
+      auto settings = new TileSettings(shaderIdStr, 0);
+      auto shader = std::make_shared<TileShader>(settings);
+      shader.get()->setup();
+      shaders.push_back(shader);
+      return;
+    }
+    case ShaderTypeMix: {
+      auto settings = new MixSettings(shaderIdStr, chainerId, 0);
+      auto shader = std::make_shared<MixShader>(settings);
       shader.get()->setup();
       shaders.push_back(shader);
       return;
@@ -206,6 +226,8 @@ json ShaderChainer::serialize() {
   json j;
   j["shaders"] = json::array();
   j["chainerId"] = chainerId;
+  j["name"] = name;
+  j["sourceId"] = source->id;
   
   for (auto shader : shaders) {
     j["shaders"].push_back(shader->serialize());
@@ -214,6 +236,12 @@ json ShaderChainer::serialize() {
 }
 
 void ShaderChainer::load(json j) {
+  std::cout << j.dump(4) << std::endl;
+  
+  if (VideoSourceService::getService()->videoSourceForId(j["sourceId"]) != nullptr) {
+    source = VideoSourceService::getService()->videoSourceForId(j["sourceId"]);
+  }
+  
   chainerId = j["chainerId"];
   for (auto shader : shaders) {
     shader.reset();
@@ -267,13 +295,26 @@ void ShaderChainer::load(json j) {
         auto settings = new FeedbackSettings(shaderId, chainerId, shaderJson);
         auto shader = std::make_shared<FeedbackShader>(settings);
         shader.get()->setup();
-        feedbackShaders.push_back(shader);
         shaders.push_back(shader);
         continue;
       }
       case ShaderTypeAscii: {
         auto settings = new AsciiSettings(shaderId, shaderJson);
         auto shader = std::make_shared<AsciiShader>(settings);
+        shader.get()->setup();
+        shaders.push_back(shader);
+        return;
+      }
+      case ShaderTypeKaleidoscope: {
+        auto settings = new KaleidoscopeSettings(shaderId, shaderJson);
+        auto shader = std::make_shared<KaleidoscopeShader>(settings);
+        shader.get()->setup();
+        shaders.push_back(shader);
+        return;
+      }
+      case ShaderTypeTile: {
+        auto settings = new TileSettings(shaderId, shaderJson);
+        auto shader = std::make_shared<TileShader>(settings);
         shader.get()->setup();
         shaders.push_back(shader);
         return;

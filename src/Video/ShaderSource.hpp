@@ -9,24 +9,35 @@
 #define ShaderSource_hpp
 
 #include <stdio.h>
+#include "EmptyShader.hpp"
 #include "VideoSource.hpp"
 #include "UUID.hpp"
+#include "CloudShader.hpp"
 #include "VideoSettings.hpp"
 #include "FujiShader.hpp"
+#include "MelterShader.hpp"
 #include "FractalShader.hpp"
 #include "PlasmaShader.hpp"
 #include "Shader.hpp"
 
-enum ShaderSourceType { ShaderSource_plasma, ShaderSource_fractal, ShaderSource_fuji };
+using json = nlohmann::json;
+
+enum ShaderSourceType { ShaderSource_empty, ShaderSource_plasma, ShaderSource_fractal, ShaderSource_fuji, ShaderSource_clouds, ShaderSource_melter };
 
 static std::string shaderSourceTypeName(ShaderSourceType type) {
   switch (type) {
+    case ShaderSource_empty:
+      return "Empty";
     case ShaderSource_plasma:
       return "Plasma";
     case ShaderSource_fractal:
       return "Fractal";
     case ShaderSource_fuji:
       return "Fuji";
+    case ShaderSource_clouds:
+      return "Clouds";
+    case ShaderSource_melter:
+      return "Melter";
     default:
       return "Unknown";
   }
@@ -35,19 +46,26 @@ static std::string shaderSourceTypeName(ShaderSourceType type) {
 struct ShaderSource : public VideoSource {
 public:
   std::shared_ptr<Shader> shader;
-  ShaderSourceType shaderType;
+  ShaderSourceType shaderSourceType;
   ofFbo fbo;
   ofFbo canvas;
   
   ShaderSource(std::string id, ShaderSourceType type) :
   shader(nullptr),
-  VideoSource(id, shaderSourceTypeName(type), VideoSource_chainer)
+  shaderSourceType(type),
+  VideoSource(id, shaderSourceTypeName(type), VideoSource_shader)
   {
     addShader(type);
   };
   
   void addShader(ShaderSourceType type) {
     switch (type) {
+      case ShaderSource_empty: {
+        auto plasmaSettings = new EmptySettings(UUID::generateUUID(), 0);
+        shader = std::make_shared<EmptyShader>(plasmaSettings);
+        shader->setup();
+        return;
+      }
       case ShaderSource_plasma: {
         auto plasmaSettings = new PlasmaSettings(UUID::generateUUID(), 0);
         shader = std::make_shared<PlasmaShader>(plasmaSettings);
@@ -63,6 +81,18 @@ public:
       case ShaderSource_fuji: {
         auto fujiSettings = new FujiSettings(UUID::generateUUID(), 0);
         shader = std::make_shared<FujiShader>(fujiSettings);
+        shader->setup();
+        return;
+      }
+      case ShaderSource_clouds: {
+        auto cloudsSettings = new CloudSettings(UUID::generateUUID(), 0);
+        shader = std::make_shared<CloudShader>(cloudsSettings);
+        shader->setup();
+        return;
+      }
+      case ShaderSource_melter: {
+        auto melterSettings = new MeltSettings(UUID::generateUUID(), 0);
+        shader = std::make_shared<MeltShader>(melterSettings);
         shader->setup();
         return;
       }
@@ -90,9 +120,6 @@ public:
   void saveFrame() override {
     shader->shade(&fbo, &canvas);
     frameTexture = std::make_shared<ofTexture>(canvas.getTexture());
-//    canvas.getTexture().copyTo(frameBuffer);
-//
-//    frameTexture->loadData(frameBuffer, GL_RGB, GL_UNSIGNED_BYTE);
   }
   
   void drawSettings() override {
@@ -104,6 +131,13 @@ public:
   void update();
   void draw();
   
+  json serialize() override {
+    json j;
+    j["videoSourceType"] = VideoSource_shader;
+    j["shaderSourceType"] = shaderSourceType;
+    j["id"] = id;
+    return j;
+  }
 };
 
 #endif /* ShaderSource_hpp */

@@ -7,6 +7,7 @@
 
 #include "MidiService.hpp"
 #include "ParameterService.hpp"
+#include "ConfigService.hpp"
 #include "json.hpp"
 #include "Console.hpp"
 #include "Strings.hpp"
@@ -115,7 +116,6 @@ void MidiService::newMidiMessage(ofxMidiMessage& msg) {
   if (learningParam != NULL) {
     std::string descriptor = descriptorFrom(msg);
     saveAssignment(learningParam, descriptor);
-    saveConfigFile();
     return;
   }
   auto descriptor = descriptorFrom(msg);
@@ -180,6 +180,7 @@ void MidiService::saveAssignment(std::shared_ptr<Parameter> param, std::string d
   descriptorToPairing[descriptor] = pairing;
   parameterIdToPairing[param->paramId] = pairing;
   
+  ConfigService::getService()->saveDefaultConfigFile();
   stopLearning();
 }
 
@@ -215,7 +216,9 @@ MidiPairing* MidiService::pairingForDescriptor(std::string descriptor) {
   return &descriptorToPairing[descriptor];
 }
 
-void MidiService::saveConfigFile() {
+// ConfigurableService
+
+json MidiService::config() {
   std::map<std::string, std::string> descriptorToParamId;
   
   for (auto const& x : descriptorToPairing)
@@ -223,29 +226,15 @@ void MidiService::saveConfigFile() {
     const std::string paramId = x.second.paramId;
     descriptorToParamId[paramId] = x.second.descriptor;
   }
-  
-  std::ofstream fileStream;
-  const char* homeDir = getenv("HOME");
-  fileStream.open(formatString("%s/midi_config.json", homeDir), ios::trunc);
-  if (fileStream.is_open()) {
-    auto jsonContents = json(descriptorToParamId);
-    cout << jsonContents << endl;
-    fileStream << jsonContents;
-    fileStream.close();
-  } else {
-    log("Problem saving midi_config.");
-  }
+
+  return descriptorToParamId;
 }
 
-void MidiService::loadConfigFile() {
-  std::fstream fileStream;
-  const char* homeDir = getenv("HOME");
-  fileStream.open(formatString("%s/midi_config.json", homeDir), ios::in);
-  if (fileStream.is_open()) {
-    
-    json data;
-    fileStream >> data;
-    std::map<std::string,std::string> paramIdToDescriptor = data;
+void MidiService::loadConfig(json config) {
+    if (config.is_null()) {
+      return;
+    }
+    std::map<std::string,std::string> paramIdToDescriptor = config;
 
     for (auto const& x : paramIdToDescriptor) {
       auto paramId = x.first;
@@ -258,8 +247,4 @@ void MidiService::loadConfigFile() {
     }
 
     log("Loaded MIDI config.");
-  }
 }
-  
-
-

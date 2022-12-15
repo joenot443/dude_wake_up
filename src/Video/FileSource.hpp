@@ -19,6 +19,8 @@ public:
   FileSource(std::string id, std::string name, std::string path) : VideoSource(id, name, VideoSource_file), path(path) {};
   void setup();
   void saveFrame();
+  json serialize() override;
+  void load(json j) override;
 };
 
 #endif

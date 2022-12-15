@@ -12,7 +12,7 @@
 #include "VideoSettings.hpp"
 #include "FeedbackSource.hpp"
 
-enum VideoSourceType { VideoSource_webcam, VideoSource_file, VideoSource_chainer };
+enum VideoSourceType { VideoSource_webcam, VideoSource_file, VideoSource_chainer, VideoSource_shader };
 
 class VideoSource {
   
@@ -32,7 +32,9 @@ public:
 
   virtual void setup() {};
   virtual void saveFrame() {};
-  virtual void drawSettings() {}; 
+  virtual void drawSettings() {};
+  virtual json serialize() {};
+  virtual void load(json j) {};
   
   void saveFeedbackFrame() {
     if (frameTexture != nullptr) {
