@@ -8,6 +8,8 @@
 #include "WebcamSource.hpp"
 
 void WebcamSource::setup() {
+  auto devices = grabber.listDevices();
+  
   grabber.setDeviceID(deviceID);
   grabber.setDesiredFrameRate(30);
   grabber.setPixelFormat(OF_PIXELS_RGB);

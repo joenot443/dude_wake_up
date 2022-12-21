@@ -21,9 +21,8 @@ struct FeedbackSettings: public ShaderSettings {
   int index;
   std::shared_ptr<Parameter> lumaKeyEnabled;
   std::string shaderId;
-  std::string feedbackSourceId;
-  std::string chainerId;
-  
+  std::string feedbackSourceId = "";
+
   std::shared_ptr<Parameter> blend;
   std::shared_ptr<Oscillator> blendOscillator;
   
@@ -52,10 +51,8 @@ struct FeedbackSettings: public ShaderSettings {
   std::shared_ptr<Oscillator> scaleOscillator;
 
   
-  FeedbackSettings(std::string shaderId, std::string chainerId, json j) :
+  FeedbackSettings(std::string shaderId, json j) :
   index(index),
-  feedbackSourceId(chainerId),
-  chainerId(chainerId),
   blend(std::make_shared<Parameter>("feedback_blend", shaderId, "blend", 0.0, 0.0, 1.0)),
   blendOscillator(std::make_shared<Oscillator>(blend)),
   mix(std::make_shared<Parameter>("feedback_mix", shaderId, "fb_mix", 0.0, 0.0, 1.0)),

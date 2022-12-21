@@ -18,6 +18,7 @@
 
 void MainStageView::setup() {
   VideoSourceService::getService()->addWebcamVideoSource("Webcam 0", 1);
+//  VideoSourceService::getService()->addWebcamVideoSource("Webcam 1", 2);
   VideoSourceService::getService()->addShaderVideoSource(ShaderSource_plasma);
   VideoSourceService::getService()->addShaderVideoSource(ShaderSource_fractal);
   VideoSourceService::getService()->addShaderVideoSource(ShaderSource_fuji);

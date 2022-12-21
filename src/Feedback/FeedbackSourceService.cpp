@@ -45,3 +45,7 @@ std::vector<std::shared_ptr<FeedbackSource>> FeedbackSourceService::feedbackSour
   }
   return feedbackSources;
 }
+
+std::shared_ptr<FeedbackSource> FeedbackSourceService::defaultFeedbackSource() {
+  return feedbackSources().front();
+}

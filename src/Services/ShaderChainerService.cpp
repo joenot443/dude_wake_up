@@ -7,6 +7,24 @@
 
 #include "ShaderChainerService.hpp"
 #include "VideoSourceService.hpp"
+#include "AsciiShader.hpp"
+#include "NikoShader.hpp"
+#include "WobbleShader.hpp"
+#include "RGBShiftShader.hpp"
+#include "CorbinShader.hpp"
+#include "MirrorShader.hpp"
+#include "ConfigService.hpp"
+#include "TileShader.hpp"
+#include "MixShader.hpp"
+#include "KaleidoscopeShader.hpp"
+#include "TransformShader.hpp"
+#include "ShaderChainerService.hpp"
+#include "Console.hpp"
+#include "PixelShader.hpp"
+#include "GlitchShader.hpp"
+#include "HSBShader.hpp"
+#include "FeedbackShader.hpp"
+#include "BlurShader.hpp"
 
 std::vector<std::shared_ptr<ShaderChainer>> ShaderChainerService::shaderChainers() {
   std::vector<std::shared_ptr<ShaderChainer>> shaderChainers;
@@ -100,6 +118,94 @@ void ShaderChainerService::loadConfig(json data) {
       shaderChainer->load(pair.second);
       shaderChainer->setup();
       addShaderChainer(std::shared_ptr<ShaderChainer>(shaderChainer));
+    }
+  }
+}
+
+std::shared_ptr<Shader> ShaderChainerService::shaderForType(ShaderType type, std::string shaderId, json shaderJson) {
+  
+  switch (type) {
+    case ShaderTypeNiko: {
+      auto settings = new NikoSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<NikoShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeWobble: {
+      auto settings = new WobbleSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<WobbleShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeRGBShift: {
+      auto settings = new RGBShiftSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<RGBShiftShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeNone:
+      return 0;
+    case ShaderTypeHSB: {
+      auto settings = new HSBSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<HSBShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeBlur: {
+      auto settings = new BlurSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<BlurShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypePixelate: {
+      auto settings = new PixelSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<PixelShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeGlitch:
+      return 0;
+    case ShaderTypeMirror: {
+      auto settings = new MirrorSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<MirrorShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeTransform: {
+      auto settings = new TransformSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<TransformShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeFeedback: {
+      auto settings = new FeedbackSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<FeedbackShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeAscii: {
+      auto settings = new AsciiSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AsciiShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeKaleidoscope: {
+      auto settings = new KaleidoscopeSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<KaleidoscopeShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeTile: {
+      auto settings = new TileSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<TileShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeMix: {
+      auto settings = new MixSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<MixShader>(settings);
+      shader.get()->setup();
+      return shader;
     }
   }
 }

@@ -20,7 +20,7 @@ struct FractalSettings: public ShaderSettings {
   std::shared_ptr<Oscillator> zoomOscillator;
 
   FractalSettings(std::string shaderId, json j) :
-  zoom(std::make_shared<Parameter>("zoom", shaderId, 1.0,  1.0, 5.0)),
+  zoom(std::make_shared<Parameter>("zoom", shaderId, 1.0, 1.0, 5.0)),
   zoomOscillator(std::make_shared<Oscillator>(zoom)),
   ShaderSettings(shaderId) {
     parameters = {zoom};

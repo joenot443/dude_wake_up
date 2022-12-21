@@ -551,22 +551,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "5A001392-5122-4A3B-99E3-D2837EB53F27"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "src/Apps/MainApp.cpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "176"
-            endingLineNumber = "176"
-            landmarkName = "MainApp::pushVideoStream(config)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "69FBCAB8-A49D-475F-8FD4-6A265973DA5F"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -574,8 +558,8 @@
             filePath = "src/Shading/FeedbackShader.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "86"
-            endingLineNumber = "86"
+            startingLineNumber = "91"
+            endingLineNumber = "91"
             landmarkName = "FeedbackShader::drawSettings()"
             landmarkType = "7">
          </BreakpointContent>
@@ -584,22 +568,6 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "F1F0E1D6-1736-49AD-A5AD-3FCCBA7EE5EB"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "src/ShaderChainer.cpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "106"
-            endingLineNumber = "106"
-            landmarkName = "ShaderChainer::processFrame(texture)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "0B5EBC8D-4D10-4A52-BEAB-DE2370754788"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -615,6 +583,22 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "0B5EBC8D-4D10-4A52-BEAB-DE2370754788"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/ShaderChainer.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "108"
+            endingLineNumber = "108"
+            landmarkName = "ShaderChainer::processFrame(texture)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
             uuid = "2B8707F0-4907-451C-9C38-46CD6C5F0833"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -622,8 +606,8 @@
             filePath = "src/ShaderChainer.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "112"
-            endingLineNumber = "112"
+            startingLineNumber = "113"
+            endingLineNumber = "113"
             landmarkName = "ShaderChainer::processFrame(texture)"
             landmarkType = "7">
          </BreakpointContent>
@@ -654,8 +638,8 @@
             filePath = "src/ShaderChainer.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "92"
-            endingLineNumber = "92"
+            startingLineNumber = "93"
+            endingLineNumber = "93"
             landmarkName = "ShaderChainer::processFrame(texture)"
             landmarkType = "7">
          </BreakpointContent>
@@ -686,8 +670,8 @@
             filePath = "src/Shading/FeedbackShader.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "33"
-            endingLineNumber = "33"
+            startingLineNumber = "38"
+            endingLineNumber = "38"
             landmarkName = "FeedbackShader::shade(frame, canvas)"
             landmarkType = "7">
          </BreakpointContent>
@@ -702,8 +686,8 @@
             filePath = "src/Shading/FeedbackShader.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "64"
-            endingLineNumber = "64"
+            startingLineNumber = "69"
+            endingLineNumber = "69"
             landmarkName = "FeedbackShader::drawFeedbackSourceSelector()"
             landmarkType = "7">
          </BreakpointContent>
@@ -718,8 +702,8 @@
             filePath = "src/Shading/FeedbackShader.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "46"
-            endingLineNumber = "46"
+            startingLineNumber = "51"
+            endingLineNumber = "51"
             landmarkName = "FeedbackShader::disableFeedback()"
             landmarkType = "7">
          </BreakpointContent>
@@ -750,10 +734,10 @@
             filePath = "src/ShaderChainer.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "68"
-            endingLineNumber = "68"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            startingLineNumber = "69"
+            endingLineNumber = "69"
+            landmarkName = "ShaderChainer::processFrame(texture)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -846,10 +830,10 @@
             filePath = "src/ShaderChainer.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "127"
-            endingLineNumber = "127"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            startingLineNumber = "128"
+            endingLineNumber = "128"
+            landmarkName = "ShaderChainer::pushShader(shaderType)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -926,8 +910,8 @@
             filePath = "src/Shading/FeedbackShader.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "32"
-            endingLineNumber = "32"
+            startingLineNumber = "37"
+            endingLineNumber = "37"
             landmarkName = "FeedbackShader::shade(frame, canvas)"
             landmarkType = "7">
          </BreakpointContent>
@@ -951,38 +935,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "2BA70D66-5748-417A-A0B3-BEDA03C60D5B"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "src/ShaderChainer.cpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "221"
-            endingLineNumber = "221"
-            landmarkName = "ShaderChainer::deleteShader(shader)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "791008B1-6BD4-4DFD-A303-24F7D714C4ED"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "src/ShaderChainer.cpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "240"
-            endingLineNumber = "240"
-            landmarkName = "ShaderChainer::load(j)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "0EA71CE6-D16E-4B70-A9D4-3332C70C091A"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -993,22 +945,6 @@
             startingLineNumber = "41"
             endingLineNumber = "41"
             landmarkName = "serialize()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "703BB92A-76AA-4B19-B0CD-DA479A97C4DA"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "src/Shading/FeedbackShader.cpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "16"
-            endingLineNumber = "16"
-            landmarkName = "FeedbackShader::setup()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1038,8 +974,8 @@
             filePath = "src/ShaderChainer.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "96"
-            endingLineNumber = "96"
+            startingLineNumber = "97"
+            endingLineNumber = "97"
             landmarkName = "ShaderChainer::processFrame(texture)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1054,8 +990,8 @@
             filePath = "src/Shading/FeedbackShader.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "20"
-            endingLineNumber = "20"
+            startingLineNumber = "25"
+            endingLineNumber = "25"
             landmarkName = "FeedbackShader::shade(frame, canvas)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1086,8 +1022,8 @@
             filePath = "src/Shading/FeedbackShader.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "29"
-            endingLineNumber = "29"
+            startingLineNumber = "34"
+            endingLineNumber = "34"
             landmarkName = "FeedbackShader::shade(frame, canvas)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1134,8 +1070,8 @@
             filePath = "src/ShaderChainer.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "27"
-            endingLineNumber = "27"
+            startingLineNumber = "28"
+            endingLineNumber = "28"
             landmarkName = "ShaderChainer::setup()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1150,8 +1086,8 @@
             filePath = "src/Services/ShaderChainerService.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "30"
-            endingLineNumber = "30"
+            startingLineNumber = "45"
+            endingLineNumber = "45"
             landmarkName = "ShaderChainerService::shaderChainerNames()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1198,8 +1134,8 @@
             filePath = "src/Video/WebcamSource.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "19"
-            endingLineNumber = "19"
+            startingLineNumber = "21"
+            endingLineNumber = "21"
             landmarkName = "WebcamSource::setup()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1214,8 +1150,8 @@
             filePath = "src/Video/WebcamSource.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "28"
-            endingLineNumber = "28"
+            startingLineNumber = "30"
+            endingLineNumber = "30"
             landmarkName = "WebcamSource::saveFrame()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1326,8 +1262,8 @@
             filePath = "src/Video/WebcamSource.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "27"
-            endingLineNumber = "27"
+            startingLineNumber = "29"
+            endingLineNumber = "29"
             landmarkName = "WebcamSource::saveFrame()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1406,8 +1342,8 @@
             filePath = "src/Video/WebcamSource.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "29"
-            endingLineNumber = "29"
+            startingLineNumber = "31"
+            endingLineNumber = "31"
             landmarkName = "WebcamSource::saveFrame()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1422,8 +1358,8 @@
             filePath = "src/Video/WebcamSource.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "35"
-            endingLineNumber = "35"
+            startingLineNumber = "37"
+            endingLineNumber = "37"
             landmarkName = "WebcamSource::saveFrame()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1518,8 +1454,8 @@
             filePath = "src/ShaderChainer.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "48"
-            endingLineNumber = "48"
+            startingLineNumber = "49"
+            endingLineNumber = "49"
             landmarkName = "ShaderChainer::setup()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1550,8 +1486,8 @@
             filePath = "src/ShaderChainer.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "114"
-            endingLineNumber = "114"
+            startingLineNumber = "115"
+            endingLineNumber = "115"
             landmarkName = "ShaderChainer::processFrame(texture)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1566,8 +1502,8 @@
             filePath = "src/ShaderChainer.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "64"
-            endingLineNumber = "64"
+            startingLineNumber = "65"
+            endingLineNumber = "65"
             landmarkName = "ShaderChainer::update()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1582,8 +1518,8 @@
             filePath = "src/ShaderChainer.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "57"
-            endingLineNumber = "57"
+            startingLineNumber = "58"
+            endingLineNumber = "58"
             landmarkName = "ShaderChainer::setup()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1598,8 +1534,8 @@
             filePath = "src/ShaderChainer.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "118"
-            endingLineNumber = "118"
+            startingLineNumber = "119"
+            endingLineNumber = "119"
             landmarkName = "ShaderChainer::processFrame(texture)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1630,8 +1566,8 @@
             filePath = "src/Views/MainStageView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "215"
-            endingLineNumber = "215"
+            startingLineNumber = "216"
+            endingLineNumber = "216"
             landmarkName = "MainStageView::drawOutputBrowser()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1678,8 +1614,8 @@
             filePath = "src/Services/ShaderChainerService.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "44"
-            endingLineNumber = "44"
+            startingLineNumber = "59"
+            endingLineNumber = "59"
             landmarkName = "ShaderChainerService::removeShaderChainer(id)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1768,14 +1704,14 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "5781A9B4-E06F-4799-81BE-BDFCB8E703D8"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "src/Shading/FeedbackShader.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "26"
-            endingLineNumber = "26"
+            startingLineNumber = "31"
+            endingLineNumber = "31"
             landmarkName = "FeedbackShader::shade(frame, canvas)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1790,8 +1726,8 @@
             filePath = "src/ShaderChainer.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "87"
-            endingLineNumber = "87"
+            startingLineNumber = "88"
+            endingLineNumber = "88"
             landmarkName = "ShaderChainer::processFrame(texture)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1806,8 +1742,8 @@
             filePath = "src/ShaderChainer.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "69"
-            endingLineNumber = "69"
+            startingLineNumber = "70"
+            endingLineNumber = "70"
             landmarkName = "ShaderChainer::processFrame(texture)"
             landmarkType = "7">
          </BreakpointContent>
@@ -1902,8 +1838,8 @@
             filePath = "src/Shading/FeedbackShader.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "68"
-            endingLineNumber = "68"
+            startingLineNumber = "73"
+            endingLineNumber = "73"
             landmarkName = "FeedbackShader::drawFeedbackSourceSelector()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1934,10 +1870,10 @@
             filePath = "src/Services/ShaderChainerService.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "51"
-            endingLineNumber = "51"
-            landmarkName = "ShaderChainerService::selectShaderChainer(shaderChainer)"
-            landmarkType = "7">
+            startingLineNumber = "66"
+            endingLineNumber = "66"
+            landmarkName = "unknown"
+            landmarkType = "0">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -2366,26 +2302,10 @@
             filePath = "src/Services/ShaderChainerService.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "90"
-            endingLineNumber = "90"
+            startingLineNumber = "105"
+            endingLineNumber = "105"
             landmarkName = "ShaderChainerService::loadConfig(data)"
             landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "05696CE6-227C-4F37-80E2-F274DBBD7ED6"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "src/ShaderChainer.cpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "237"
-            endingLineNumber = "237"
-            landmarkName = "unknown"
-            landmarkType = "0">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -2414,8 +2334,8 @@
             filePath = "src/Shading/MixShader.hpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "49"
-            endingLineNumber = "49"
+            startingLineNumber = "50"
+            endingLineNumber = "50"
             landmarkName = "shade(frame, canvas)"
             landmarkType = "7">
          </BreakpointContent>
@@ -2494,8 +2414,8 @@
             filePath = "src/Shading/MixShader.hpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "82"
-            endingLineNumber = "82"
+            startingLineNumber = "83"
+            endingLineNumber = "83"
             landmarkName = "drawSettings()"
             landmarkType = "7">
          </BreakpointContent>
@@ -2520,14 +2440,14 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "DB748D1E-AB3A-4543-95BA-B9442837ABC3"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "src/Shading/MixShader.hpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "54"
-            endingLineNumber = "54"
+            startingLineNumber = "55"
+            endingLineNumber = "55"
             landmarkName = "shade(frame, canvas)"
             landmarkType = "7">
          </BreakpointContent>

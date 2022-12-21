@@ -14,8 +14,6 @@
 #include "PulseOscillator.hpp"
 #include "Gist.h"
 
-enum AudioSource { AudioSource_none, AudioSource_microphone, AudioSource_file };
-
 struct AudioAnalysisParameter {
   float minSeen = 0.0;
   float maxSeen = 0.0;

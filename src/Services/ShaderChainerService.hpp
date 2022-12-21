@@ -44,6 +44,9 @@ public:
   std::shared_ptr<Shader> selectedShader;
   std::shared_ptr<ShaderChainer> selectedShaderChainer;
   
+  std::shared_ptr<Shader> shaderForType(ShaderType type, std::string shaderId, json j);
+  
+  
   json config() override;
   void loadConfig(json j) override;
 };

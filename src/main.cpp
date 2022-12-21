@@ -4,6 +4,7 @@
 #include "FontService.hpp"
 #include "ModulationService.hpp"
 #include "OscillationService.hpp"
+#include "AudioSourceService.hpp"
 #include "MidiService.hpp"
 #include "ConfigService.hpp"
 #include "FeedbackSourceService.hpp"
@@ -22,6 +23,7 @@ ConfigService *ConfigService::service = 0;
 FeedbackSourceService *FeedbackSourceService::service = 0;
 VideoSourceService *VideoSourceService::service = 0;
 ShaderChainerService *ShaderChainerService::service = 0;
+AudioSourceService *AudioSourceService::service = 0;
 
 //========================================================================
 int main( ){

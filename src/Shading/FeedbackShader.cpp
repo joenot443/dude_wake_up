@@ -13,7 +13,12 @@
 
 void FeedbackShader::setup() {
   shader.load("shaders/feedback");
-  feedbackSource = FeedbackSourceService::getService()->feedbackSourceForId(settings->feedbackSourceId);
+  if (settings->feedbackSourceId.empty()) {
+    feedbackSource = FeedbackSourceService::getService()->defaultFeedbackSource();
+    settings->feedbackSourceId = feedbackSource->id;
+  } else {
+    feedbackSource = FeedbackSourceService::getService()->feedbackSourceForId(settings->feedbackSourceId);
+  }
 };
 
 void FeedbackShader::shade(ofFbo *frame, ofFbo *canvas) {  

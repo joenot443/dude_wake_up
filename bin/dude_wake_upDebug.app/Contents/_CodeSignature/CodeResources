@@ -4,10 +4,6 @@
 <dict>
 	<key>files</key>
 	<dict>
-		<key>Resources/config.json</key>
-		<data>
-		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
-		</data>
 		<key>Resources/icon-debug.icns</key>
 		<data>
 		PK/FgaLxSEW4pVQhtgMTghsTUq4=
@@ -23,13 +19,6 @@
 			</data>
 			<key>requirement</key>
 			<string>identifier libfmod and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: Joe Crozier (7HTR557REQ)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
-		</dict>
-		<key>Resources/config.json</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=
-			</data>
 		</dict>
 		<key>Resources/icon-debug.icns</key>
 		<dict>
