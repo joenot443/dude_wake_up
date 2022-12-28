@@ -4,6 +4,7 @@
 //
 //  Created by Joe Crozier on 10/19/22.
 //
+// clang-format off
 
 #ifndef ShaderType_h
 #define ShaderType_h
@@ -25,12 +26,19 @@ enum ShaderType {
   ShaderTypeMix,
   ShaderTypeRGBShift,
   ShaderTypeWobble,
-  ShaderTypeNiko,
+  ShaderTypeSlider,
+  ShaderTypeRings,
+  ShaderTypeAudioWaveform,
+  ShaderTypeAudioBumper,
+  ShaderTypeAudioMountains,
 };
 
 static const ShaderType AvailableShaderTypes[] = {
   // Available shaders
-  ShaderTypeNiko, // Generated
+  ShaderTypeAudioMountains, // Generated
+  ShaderTypeAudioBumper, // Generated
+  ShaderTypeAudioWaveform, // Generated
+  ShaderTypeSlider, // Generated
   ShaderTypeWobble, // Generated
   ShaderTypeRGBShift, // Generated
   ShaderTypeHSB, 
@@ -48,8 +56,16 @@ static const ShaderType AvailableShaderTypes[] = {
 static std::string shaderTypeName(ShaderType type) {
   switch (type) {
     // Shader names
-    case ShaderTypeNiko:
-      return "Niko";
+    case ShaderTypeAudioMountains:
+      return "AudioMountains";
+    case ShaderTypeAudioBumper:
+      return "AudioBumper";
+    case ShaderTypeAudioWaveform:
+      return "AudioWaveform";
+    case ShaderTypeRings:
+      return "Rings";
+    case ShaderTypeSlider:
+      return "Slider";
     case ShaderTypeWobble:
       return "Wobble";
     case ShaderTypeRGBShift:
@@ -84,3 +100,4 @@ static std::string shaderTypeName(ShaderType type) {
 }
 
 #endif /* ShaderType_h */
+// clang-format on

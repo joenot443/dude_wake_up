@@ -96,6 +96,7 @@
       "functional": "cpp",
       "utility": "cpp",
       "__functional_base_03": "cpp"
-    }
+    },
+    "editor.defaultFormatter": "xaver.clang-format"
   }
 }

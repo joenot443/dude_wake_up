@@ -9,7 +9,7 @@
 #define MelterShader_h
 
 #include "ofMain.h"
-#include "VideoSettings.hpp"
+
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
 #include "Oscillator.hpp"
@@ -34,7 +34,7 @@ struct MeltShader : public Shader {
 
   MeltShader(MeltSettings *settings) : settings(settings),
   Shader(settings) {
-    shader.load("shaders/melt");
+    shader.load("../../shaders/Melt");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

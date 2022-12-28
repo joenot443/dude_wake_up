@@ -9,7 +9,7 @@
 #define AsciiShader_hpp
 
 #include "ofMain.h"
-#include "VideoSettings.hpp"
+
 #include "ofxImGui.h"
 #include "Shader.hpp"
 #include <stdio.h>
@@ -36,7 +36,7 @@ struct AsciiShader: Shader {
   AsciiShader(AsciiSettings *settings) : settings(settings), Shader(settings) {};
   
   void setup() override {
-    shader.load("shaders/ascii");
+    shader.load("../../shaders/ascii");
   }
   
   ShaderType type() override {
@@ -44,7 +44,7 @@ struct AsciiShader: Shader {
   }
   
   bool enabled() override {
-    return settings->enabled->boolValue;
+    return true;
   }
   
   void shade(ofFbo *frame, ofFbo *canvas) override {

@@ -9,7 +9,7 @@
 #define ConfigService_hpp
 
 #include <stdio.h>
-#include "VideoSettings.hpp"
+
 #include "ShaderChainer.hpp"
 
 using json = nlohmann::json;

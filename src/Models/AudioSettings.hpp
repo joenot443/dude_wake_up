@@ -8,27 +8,28 @@
 #ifndef AudioSettings_h
 #define AudioSettings_h
 
+#include "Gist.h"
 #include "Oscillator.hpp"
 #include "Parameter.hpp"
-#include "ValueOscillator.hpp"
 #include "PulseOscillator.hpp"
-#include "Gist.h"
+#include "ValueOscillator.hpp"
+#include "Vectors.hpp"
 
 struct AudioAnalysisParameter {
   float minSeen = 0.0;
   float maxSeen = 0.0;
   float value = 0.0;
   std::shared_ptr<Parameter> param;
-  
+
   AudioAnalysisParameter(std::shared_ptr<Parameter> param) : param(param) {}
-  
+
   void tick(float val) {
     value = val;
     minSeen = fmin(minSeen, val);
     maxSeen = fmax(maxSeen, val);
     param->value = relationToRange();
   }
-  
+
   float relationToRange() {
     float range = maxSeen - minSeen;
     return value / range;
@@ -45,7 +46,7 @@ struct AudioAnalysis {
   std::shared_ptr<Parameter> zcr;
   std::shared_ptr<Parameter> spectralDiff;
   std::shared_ptr<Parameter> beat;
-  
+
   std::shared_ptr<ValueOscillator> rmsOscillator;
   std::shared_ptr<ValueOscillator> csdOscillator;
   std::shared_ptr<ValueOscillator> pitchOscillator;
@@ -53,44 +54,51 @@ struct AudioAnalysis {
   std::shared_ptr<ValueOscillator> zcrOscillator;
   std::shared_ptr<ValueOscillator> spectralDiffOscillator;
   std::shared_ptr<PulseOscillator> beatOscillator;
+
+  std::vector<float> melFrequencySpectrum;
+  std::vector<float> magnitudeSpectrum;
+
   AudioAnalysisParameter rmsAnalysisParam;
   AudioAnalysisParameter csdAnalysisParam;
   AudioAnalysisParameter pitchAnalysisParam;
   AudioAnalysisParameter energyAnalysisParam;
   AudioAnalysisParameter zcrAnalysisParam;
   AudioAnalysisParameter spectralDiffAnalysisParam;
-  
+
   std::vector<std::shared_ptr<Parameter>> parameters;
   std::vector<AudioAnalysisParameter *> analysisParameters;
-  
-  AudioAnalysis(std::string name) :
-  name(name),
-  rms(std::make_shared<Parameter>("rms", name, 0.0, 0.0, 1.0)),
-  csd(std::make_shared<Parameter>("csd", name, 0.0, 0.0, 1.0)),
-  pitch(std::make_shared<Parameter>("pitch", name, 0.0, 0.0, 1.0)),
-  energy(std::make_shared<Parameter>("energy", name, 0.0, 0.0, 1.0)),
-  zcr(std::make_shared<Parameter>("zcr", name, 0.0, 0.0, 1.0)),
-  spectralDiff(std::make_shared<Parameter>("spectralDiff", name, 0.0, 0.0, 1.0)),
-  beat(std::make_shared<Parameter>("beat", name, 0.0, 0.0, 1.0)),
-  rmsOscillator(std::make_shared<ValueOscillator>(rms)),
-  pitchOscillator(std::make_shared<ValueOscillator>(pitch)),
-  csdOscillator(std::make_shared<ValueOscillator>(csd)),
-  zcrOscillator(std::make_shared<ValueOscillator>(zcr)),
-  energyOscillator(std::make_shared<ValueOscillator>(energy)),
-  spectralDiffOscillator(std::make_shared<ValueOscillator>(spectralDiff)),
-  beatOscillator(std::make_shared<PulseOscillator>(beat)),
-  parameters({rms, csd, pitch, energy, zcr, beat}),
-  rmsAnalysisParam(AudioAnalysisParameter(rms)),
-  csdAnalysisParam(AudioAnalysisParameter(csd)), 
-  pitchAnalysisParam(AudioAnalysisParameter(pitch)),
-  energyAnalysisParam(AudioAnalysisParameter(energy)),
-  zcrAnalysisParam(AudioAnalysisParameter(zcr)),
-  spectralDiffAnalysisParam(AudioAnalysisParameter(spectralDiff)),
-  analysisParameters({&rmsAnalysisParam, &csdAnalysisParam, &pitchAnalysisParam, &energyAnalysisParam, &zcrAnalysisParam, &spectralDiffAnalysisParam})
-  {
-  };
-  
-  void analyzeFrame(Gist<float> * gist) {
+
+  AudioAnalysis()
+      : rms(std::make_shared<Parameter>("rms", name, 0.0, 0.0, 1.0)),
+        csd(std::make_shared<Parameter>("csd", name, 0.0, 0.0, 1.0)),
+        pitch(std::make_shared<Parameter>("pitch", name, 0.0, 0.0, 1.0)),
+        energy(std::make_shared<Parameter>("energy", name, 0.0, 0.0, 1.0)),
+        zcr(std::make_shared<Parameter>("zcr", name, 0.0, 0.0, 1.0)),
+        spectralDiff(
+            std::make_shared<Parameter>("spectralDiff", name, 0.0, 0.0, 1.0)),
+        beat(std::make_shared<Parameter>("beat", name, 0.0, 0.0, 1.0)),
+        rmsOscillator(std::make_shared<ValueOscillator>(rms)),
+        pitchOscillator(std::make_shared<ValueOscillator>(pitch)),
+        csdOscillator(std::make_shared<ValueOscillator>(csd)),
+        zcrOscillator(std::make_shared<ValueOscillator>(zcr)),
+        energyOscillator(std::make_shared<ValueOscillator>(energy)),
+        spectralDiffOscillator(std::make_shared<ValueOscillator>(spectralDiff)),
+        beatOscillator(std::make_shared<PulseOscillator>(beat)),
+        parameters({rms, csd, pitch, energy, zcr, beat}),
+        rmsAnalysisParam(AudioAnalysisParameter(rms)),
+        csdAnalysisParam(AudioAnalysisParameter(csd)),
+        pitchAnalysisParam(AudioAnalysisParameter(pitch)),
+        energyAnalysisParam(AudioAnalysisParameter(energy)),
+        zcrAnalysisParam(AudioAnalysisParameter(zcr)),
+        spectralDiffAnalysisParam(AudioAnalysisParameter(spectralDiff)),
+        analysisParameters({&rmsAnalysisParam, &csdAnalysisParam,
+                            &pitchAnalysisParam, &energyAnalysisParam,
+                            &zcrAnalysisParam, &spectralDiffAnalysisParam}){};
+
+  void analyzeFrame(Gist<float> *gist) {
+    magnitudeSpectrum = Vectors::normalize(Vectors::sqrt(gist->getMagnitudeSpectrum()));
+    melFrequencySpectrum = Vectors::normalize(Vectors::sqrt(gist->getMelFrequencySpectrum()));
+    
     rmsAnalysisParam.tick(gist->rootMeanSquare());
     pitchAnalysisParam.tick(gist->pitch());
     csdAnalysisParam.tick(gist->complexSpectralDifference());
@@ -98,7 +106,6 @@ struct AudioAnalysis {
     zcrAnalysisParam.tick(gist->zeroCrossingRate());
     spectralDiffAnalysisParam.tick(gist->spectralDifference());
   }
-  
 };
 
 #endif /* AudioSettings_h */

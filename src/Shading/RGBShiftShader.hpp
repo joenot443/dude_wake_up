@@ -10,16 +10,31 @@
 
 #include "ofMain.h"
 #include "ShaderSettings.hpp"
+#include "WaveformOscillator.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct RGBShiftSettings: public ShaderSettings {
-  RGBShiftSettings(std::string shaderId, json j) :  
-  ShaderSettings(shaderId) {
-    
+  std::shared_ptr<Parameter> speed;
+  std::shared_ptr<Parameter> amount;
+
+  std::shared_ptr<Oscillator> speedOscillator;
+  std::shared_ptr<Oscillator> amountOscillator;
+  
+  RGBShiftSettings(std::string shaderId, json j) : 
+  speed(std::make_shared<Parameter>("speed", shaderId, 1.0, 0.0, 5.0)),
+  amount(std::make_shared<Parameter>("amount", shaderId, 1.0, 0.0, 2.0)),
+  speedOscillator(std::make_shared<WaveformOscillator>(speed)),
+  amountOscillator(std::make_shared<WaveformOscillator>(amount)),
+  ShaderSettings(shaderId)
+  {
+    parameters = {speed, amount};
+    oscillators = {speedOscillator, amountOscillator};
+    load(j);
   };
+  
 };
 
 struct RGBShiftShader: Shader {
@@ -27,7 +42,7 @@ struct RGBShiftShader: Shader {
   RGBShiftShader(RGBShiftSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("shaders/RGBShift");
+    shader.load("../../shaders/RGBShift");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -36,6 +51,8 @@ struct RGBShiftShader: Shader {
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("speed", settings->speed->value);
+    shader.setUniform1f("amount", settings->amount->value);
     frame->draw(0, 0);
     shader.end();
     canvas->end();
@@ -52,6 +69,8 @@ struct RGBShiftShader: Shader {
   void drawSettings() override {
     CommonViews::H3Title("RGBShift");
 
+    CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
+    CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
   }
 };
 

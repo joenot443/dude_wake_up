@@ -18,7 +18,10 @@ class AudioSourceService: public ConfigurableService {
   std::map<std::string, std::shared_ptr<AudioSource>> audioSourceMap;
   std::map<std::string, std::string> audioSourceIdToParamId;
 
+  public:
   static AudioSourceService* service;
+  std::shared_ptr<AudioSource> selectedAudioSource;
+  
   AudioSourceService() {};
   static AudioSourceService* getService() {
     if (!service) {
@@ -27,13 +30,15 @@ class AudioSourceService: public ConfigurableService {
     }
     return service;
   }
-
-  public:
   void setup();
-  void updateAudioSources();
+  void processAudioSource();
+  void selectAudioSource(std::shared_ptr<AudioSource> source);
+  
   std::vector<std::shared_ptr<AudioSource>> audioSources();
   std::shared_ptr<AudioSource> audioSourceForId(std::string id);
   std::shared_ptr<AudioSource> audioSourceForParamId(std::string paramId);
+  
+  
   void removeParamMapping(std::string paramId);
 
   json config() override;

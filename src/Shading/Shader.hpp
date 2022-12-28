@@ -7,9 +7,10 @@
 
 #ifndef Shader_h
 #define Shader_h
+
 #include "ofMain.h"
-#include "VideoSettings.hpp"
 #include "ofxImGui.h"
+#include "WaveformOscillator.hpp"
 #include "Console.hpp"
 #include "ShaderType.hpp"
 #include "ShaderSettings.hpp"

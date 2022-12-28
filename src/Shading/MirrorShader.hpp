@@ -9,8 +9,9 @@
 #define MirrorShader_hpp
 
 #include "ofMain.h"
-#include "VideoSettings.hpp"
+
 #include "ofxImGui.h"
+#include "WaveformOscillator.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
@@ -35,10 +36,10 @@ struct MirrorSettings: public ShaderSettings  {
   lockXY(std::make_shared<Parameter>("lockXY", shaderId, 0.0, 1.0, 1.0)),
   xOffset(std::make_shared<Parameter>("xOffset", shaderId, 0.15,  0.01, 1.0)),
   yOffset(std::make_shared<Parameter>("yOffset", shaderId, 0.15,  0.01, 1.0)),
-  mirrorXEnabled(std::make_shared<Parameter>("mirrorXEnabled", shaderId, 0.0,  1.0, 0.0)),
-  mirrorYEnabled(std::make_shared<Parameter>("mirrorXEnabled", shaderId, 0.0,  1.0, 0.0)),
-  xOffsetOscillator(std::make_shared<Oscillator>(xOffset)),
-  yOffsetOscillator(std::make_shared<Oscillator>(yOffset)),
+  mirrorXEnabled(std::make_shared<Parameter>("mirrorXEnabled", shaderId, 1.0,  1.0, 0.0)),
+  mirrorYEnabled(std::make_shared<Parameter>("mirrorYEnabled", shaderId, 1.0,  1.0, 0.0)),
+  xOffsetOscillator(std::make_shared<WaveformOscillator>(xOffset)),
+  yOffsetOscillator(std::make_shared<WaveformOscillator>(yOffset)),
   ShaderSettings(shaderId)
   {
     parameters = {lockXY, xOffset, yOffset, mirrorXEnabled, mirrorYEnabled};
@@ -53,7 +54,7 @@ struct MirrorShader: Shader {
   MirrorShader(MirrorSettings *settings) : settings(settings), Shader(settings) {};
   
   void setup() override {
-    shader.load("shaders/mirror");
+    shader.load("../../shaders/mirror");
   }
   
   ShaderType type() override {

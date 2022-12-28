@@ -1,5 +1,5 @@
 ---
-to: bin/data/shaders/<%= name %>.frag
+to: shaders/<%= name %>.frag
 ---
 
 #version 150

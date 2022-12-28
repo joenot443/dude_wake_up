@@ -12,15 +12,13 @@
 #include <vector>
 #include "imgui.h"
 #include "Parameter.hpp"
+#include "Oscillator.hpp"
 
-struct ValueOscillator {
+struct ValueOscillator: public Oscillator {
   
   std::shared_ptr<Parameter> observed = nullptr;
   bool enabled = true;
   float value = 0.0;
-  float amplitude = 1.0;
-  float shift = 0.0;
-  float frequency = 1.0;
   float span = 10.0;
   
   std::vector<float> xRange;

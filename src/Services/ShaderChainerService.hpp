@@ -8,24 +8,26 @@
 #ifndef ShaderChainerService_hpp
 #define ShaderChainerService_hpp
 
-#include <stdio.h>
-#include "ShaderChainer.hpp"
-#include "Shader.hpp"
 #include "ConfigurableService.hpp"
+#include "Shader.hpp"
+#include "ShaderChainer.hpp"
+#include "observable.hpp"
+#include <stdio.h>
 
 using json = nlohmann::json;
 
 // Singleton service for managing ShaderChainer objects
-class ShaderChainerService: public ConfigurableService {
+class ShaderChainerService : public ConfigurableService {
 
 private:
   std::map<std::string, std::shared_ptr<ShaderChainer>> shaderChainerMap;
+  observable::subject<void()> shaderChainerUpdateSubject;
 
 public:
-  static ShaderChainerService* service;
-  ShaderChainerService() {};
+  static ShaderChainerService *service;
+  ShaderChainerService(){};
 
-  static ShaderChainerService* getService() {
+  static ShaderChainerService *getService() {
     if (!service) {
       service = new ShaderChainerService;
     }
@@ -39,17 +41,18 @@ public:
   void addShaderChainer(std::shared_ptr<ShaderChainer> shaderChainer);
   void selectShaderChainer(std::shared_ptr<ShaderChainer> shaderChainer);
   void selectShader(std::shared_ptr<Shader> shader);
+  void subscribeToShaderChainerUpdates(std::function<void()> callback);
+
   int count();
   std::shared_ptr<ShaderChainer> shaderChainerForId(std::string id);
   std::shared_ptr<Shader> selectedShader;
   std::shared_ptr<ShaderChainer> selectedShaderChainer;
-  
-  std::shared_ptr<Shader> shaderForType(ShaderType type, std::string shaderId, json j);
-  
-  
+
+  std::shared_ptr<Shader> shaderForType(ShaderType type, std::string shaderId,
+                                        json j);
+
   json config() override;
   void loadConfig(json j) override;
 };
-
 
 #endif /* ShaderChainerService_hpp */

@@ -10,7 +10,7 @@
 
 #include "Shader.hpp"
 #include "CommonViews.hpp"
-#include "VideoSettings.hpp" 
+ 
 #include "ShaderSettings.hpp"
 #include "ofxImGui.h"
 
@@ -21,7 +21,7 @@ struct FractalSettings: public ShaderSettings {
 
   FractalSettings(std::string shaderId, json j) :
   zoom(std::make_shared<Parameter>("zoom", shaderId, 1.0, 1.0, 5.0)),
-  zoomOscillator(std::make_shared<Oscillator>(zoom)),
+  zoomOscillator(std::make_shared<WaveformOscillator>(zoom)),
   ShaderSettings(shaderId) {
     parameters = {zoom};
     oscillators = {zoomOscillator};
@@ -53,7 +53,7 @@ public:
   };
 
   void setup() override {
-    shader.load("shaders/fractal");
+    shader.load("../../shaders/fractal");
   };
 
   void drawSettings() override {

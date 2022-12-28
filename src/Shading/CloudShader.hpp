@@ -9,7 +9,7 @@
 #define CloudShader_h
 
 #include "ofMain.h"
-#include "VideoSettings.hpp"
+#include "WaveformOscillator.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
 #include "Oscillator.hpp"
@@ -24,7 +24,7 @@ struct CloudSettings : public ShaderSettings {
 
   CloudSettings(std::string shaderId, json j) :
   speed(std::make_shared<Parameter>("speed", shaderId, 1.0, 0.0, 2.0)),
-  speedOscillator(std::make_shared<Oscillator>(speed)),
+  speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   ShaderSettings(shaderId) {
     parameters = {speed};
     oscillators = {speedOscillator};
@@ -44,7 +44,7 @@ struct CloudShader: Shader {
   Shader(settings) {};
 
   void setup() override {
-    shader.load("shaders/clouds");
+    shader.load("../../shaders/clouds");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

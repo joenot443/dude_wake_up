@@ -6,46 +6,75 @@
 //
 
 #include "OscillatorView.hpp"
-#include "ofxImGui.h"
-#include "FontService.hpp"
-#include "ValueOscillator.hpp"
 #include "CommonViews.hpp"
-#include "implot.h"
-#include "Strings.hpp"
+#include "FontService.hpp"
 #include "OscillationService.hpp"
 #include "ParameterService.hpp"
 #include "PulseOscillator.hpp"
+#include "WaveformOscillator.hpp"
+#include "Strings.hpp"
+#include "ValueOscillator.hpp"
+#include "implot.h"
+#include "ofxImGui.h"
 
-
-void OscillatorView::setup() {
-}
-
-void OscillatorView::update() {
-}
-
-void OscillatorView::draw() {
-  auto oscillator = OscillationService::getService()->selectedOscillator;
-  auto value = ParameterService::getService()->selectedParameter;
+void OscillatorView::draw(std::shared_ptr<Oscillator> oscillator,
+                          std::shared_ptr<Parameter> value) {
+  if (oscillator == nullptr) {
+    return;
+  }
   
-  if (oscillator != nullptr) {
+  OscillatorType type = oscillator->type;
+  
+  if (oscillator.get()->type == Oscillator_waveform) {
+    WaveformOscillator* waveformOscillator = (WaveformOscillator *) oscillator.get();
+    
     ImGui::PushFont(FontService::getService()->h4);
     ImGui::Text("%s Oscillator", value->name.c_str());
     ImGui::Spacing();
     ImGui::PopFont();
-    ImGui::VSliderFloat(formatString("##freq%s", value->name.c_str()).c_str(), ImVec2(40,160), &oscillator->frequency->value, 0.0f, 100.0f, "Freq.\n%.2f", ImGuiSliderFlags_Logarithmic);
+    ImGui::VSliderFloat(formatString("##freq%s", value->name.c_str()).c_str(),
+                        ImVec2(40, 160), &waveformOscillator->frequency->value, 0.0f,
+                        100.0f, "Freq.\n%.2f", ImGuiSliderFlags_Logarithmic);
     ImGui::SameLine(0, 10);
-    ImGui::VSliderFloat(formatString("##amp%s", value->name.c_str()).c_str(), ImVec2(40,160), &oscillator->amplitude->value, 0.0f, oscillator->amplitude->max, "Amp.\n%.2f", ImGuiSliderFlags_None);
+    ImGui::VSliderFloat(formatString("##amp%s", value->name.c_str()).c_str(),
+                        ImVec2(40, 160), &waveformOscillator->amplitude->value, 0.0f,
+                        waveformOscillator->amplitude->max, "Amp.\n%.2f",
+                        ImGuiSliderFlags_None);
     ImGui::SameLine(0, 20);
-    ImGui::VSliderFloat(formatString("##shift%s", value->name.c_str()).c_str(), ImVec2(40,160), &oscillator->shift->value, -value->max * 2, value->max * 2, "Shift\n%.2f");
+    ImGui::VSliderFloat(formatString("##shift%s", value->name.c_str()).c_str(),
+                        ImVec2(40, 160), &waveformOscillator->shift->value,
+                        -value->max * 2, value->max * 2, "Shift\n%.2f");
     ImGui::SameLine(0, 20);
     oscillator->tick();
-    ImVector<ImVec2> data = oscillator->data;
-    static int rt_axis = ImPlotAxisFlags_Default & ~ImPlotAxisFlags_TickLabels;
-    ImPlot::SetNextPlotLimitsX(oscillator->xRange[0], oscillator->xRange[1], ImGuiCond_Always);
-    ImPlot::SetNextPlotLimitsY(oscillator->yRange[0], oscillator->yRange[1], ImGuiCond_Always);
-    if (data.size() > 0 && ImPlot::BeginPlot(formatString("##plot%s", value->name.c_str()).c_str(), NULL, NULL, ImVec2(-1,150), ImPlotFlags_Default, rt_axis, rt_axis)) {
-      ImPlot::PlotLine(value->name.c_str(), &data[0].x, &data[0].y, data.size(), 0, 2 * sizeof(float));
+    ImVector<ImVec2> data = waveformOscillator->data;
+    static int rt_axis = ImPlotAxisFlags_AuxDefault & ~ImPlotAxisFlags_NoTickLabels;
+    
+    ImPlot::SetNextAxisLimits(ImAxis_X1, waveformOscillator->xRange[0], oscillator->xRange[1]);
+    ImPlot::SetNextAxisLimits(ImAxis_Y1, waveformOscillator->yRange[0], waveformOscillator->yRange[1]);
+    
+    if (data.size() > 0 && ImPlot::BeginPlot(formatString("##plot%s", value->name.c_str()).c_str())) {
+      ImPlot::PlotLine("Mouse Y", &data[0].x, &data[0].y, data.size(), 0, 5.0, 2*sizeof(float));
+
+//      ImPlot::PlotLine(value->name.c_str(), &data[0].x, &data[0].y, data.size());
       ImPlot::EndPlot();
     }
   }
+  
+//  else if (type == Oscillator_value) {
+//    oscillator->tick();
+//    ValueOscillator* valueOscillator = (ValueOscillator *) oscillator.get();
+//    ImVector<ImVec2> data = valueOscillator->data;
+//
+//    static int rt_axis = ImPlotAxisFlags_AuxDefault & ~ImPlotAxisFlags_NoTickLabels;
+//    ImPlot::SetNextAxisLimits(ImAxis_X1, valueOscillator->xRange[0], oscillator->xRange[1]);
+//    ImPlot::SetNextAxisLimits(ImAxis_Y1, valueOscillator->yRange[0], valueOscillator->yRange[1]);
+//    if (data.size() > 0 &&
+//        ImPlot::BeginPlot(formatString("##plot%s", value->name.c_str()).c_str(),
+//                          NULL, NULL, ImVec2(-1, 150), ImPlotFlags_Equal,
+//                          rt_axis, rt_axis)) {
+////      ImPlot::PlotLine(value->name.c_str(), &data[0].x, &data[0].y, data.size(),
+////                       0, 2 * sizeof(float));
+//      ImPlot::EndPlot();
+//    }
+//  }
 }

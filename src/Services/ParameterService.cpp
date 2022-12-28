@@ -8,7 +8,8 @@
 #include "ParameterService.hpp"
 #include "Console.hpp"
 
-std::shared_ptr<Parameter> ParameterService::parameterForId(std::string paramId) {
+std::shared_ptr<Parameter>
+ParameterService::parameterForId(std::string paramId) {
   if (parameterMap.count(paramId) == 0) {
     return NULL;
   }
@@ -20,4 +21,10 @@ void ParameterService::registerParameter(std::shared_ptr<Parameter> parameter) {
     log("Reregistering Parameter %s", parameter->paramId.c_str());
   }
   parameterMap[parameter->paramId] = parameter;
+}
+
+void ParameterService::tickParameters() {
+  for (auto const &[key, val] : parameterMap) {
+    val->tick();
+  }
 }

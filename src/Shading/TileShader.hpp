@@ -10,7 +10,7 @@
 #define TileShader_h
 
 #include "ofMain.h"
-#include "VideoSettings.hpp"
+
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
 #include "Oscillator.hpp"
@@ -24,9 +24,9 @@ struct TileSettings : public ShaderSettings {
   std::shared_ptr<Oscillator> repeatOscillator;
 
   TileSettings(std::string shaderId, json j) :
-  repeat(std::make_shared<Parameter>("repeat", shaderId, 1.0, 1.0, 10.0)),
+  repeat(std::make_shared<Parameter>("repeat", shaderId, 4.0, 1.0, 10.0)),
   mirror(std::make_shared<Parameter>("mirror", shaderId, 0.0, 0.0, 1.0)),
-  repeatOscillator(std::make_shared<Oscillator>(repeat)),
+  repeatOscillator(std::make_shared<WaveformOscillator>(repeat)),
   ShaderSettings(shaderId) {
     parameters = {repeat, mirror};
     oscillators = {repeatOscillator};
@@ -40,7 +40,7 @@ struct TileShader : public Shader {
   TileShader(TileSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    shader.load("shaders/Tile");
+    shader.load("../../shaders/Tile");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -48,7 +48,7 @@ struct TileShader : public Shader {
     shader.begin();
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("repeat", settings->repeat->value);
-    shader.setUniform1f("mirror", settings->mirror->boolValue);
+    shader.setUniform1i("mirror", settings->mirror->boolValue);
     shader.setUniformTexture("tex", *frame, 0);
     frame->draw(0, 0);
     shader.end();

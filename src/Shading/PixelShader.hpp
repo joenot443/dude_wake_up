@@ -9,7 +9,7 @@
 #define PixelShader_hpp
 
 #include "ofMain.h"
-#include "VideoSettings.hpp"
+
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
 #include "Shader.hpp"
@@ -26,7 +26,7 @@ struct PixelSettings: public ShaderSettings  {
   PixelSettings(std::string shaderId, json j) :
   size(std::make_shared<Parameter>("pixel_size", shaderId, 24.1,  1.0, 64.0)),
   enabled(std::make_shared<Parameter>("enabled", shaderId, 0.0,  1.0, 0.0)),
-  sizeOscillator(std::make_shared<Oscillator>(size)),
+  sizeOscillator(std::make_shared<WaveformOscillator>(size)),
   ShaderSettings(shaderId)
   {
     parameters = {size, enabled};
@@ -43,7 +43,7 @@ struct PixelShader: Shader {
   ofShader shader;
   
   void setup() override {
-    shader.load("shaders/pixel");
+    shader.load("../../shaders/pixel");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

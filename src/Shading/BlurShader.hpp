@@ -9,7 +9,8 @@
 #define BlurShader_hpp
 
 #include "ofMain.h"
-#include "VideoSettings.hpp"
+#include "WaveformOscillator.hpp"
+
 #include "ofxImGui.h"
 #include "Math.hpp"
 #include "Shader.hpp"
@@ -25,8 +26,8 @@ struct BlurSettings: public ShaderSettings  {
   BlurSettings(std::string shaderId, json j) :
   mix(std::make_shared<Parameter>("blur_mix", shaderId, 0.0, 0.0, 1.0)),
   radius(std::make_shared<Parameter>("blur_radius", shaderId, 1.0, 0.0, 50.0)),
-  mixOscillator(std::make_shared<Oscillator>(mix)),
-  radiusOscillator(std::make_shared<Oscillator>(radius)),
+  mixOscillator(std::make_shared<WaveformOscillator>(mix)),
+  radiusOscillator(std::make_shared<WaveformOscillator>(radius)),
   shaderId(shaderId),
   ShaderSettings(shaderId)  {
     parameters = {mix, radius};
@@ -42,7 +43,7 @@ public:
   BlurShader(BlurSettings *settings) : Shader(settings),
   settings(settings) {}
   void setup() override {
-    shader.load("shaders/blur");
+    shader.load("../../shaders/blur");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

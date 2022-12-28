@@ -8,7 +8,7 @@
 #ifndef Console_h
 #define Console_h
 #include <stdio.h>
-#include <Strings.hpp>
+#include "Strings.hpp"
 
 template<typename ... Args>
 void log(std::string string, Args ... args) {

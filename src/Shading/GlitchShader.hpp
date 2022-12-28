@@ -8,7 +8,7 @@
 #ifndef GlitchShader_hpp
 #define GlitchShader_hpp
 #include "ofMain.h"
-#include "VideoSettings.hpp"
+
 #include "ofxImGui.h"
 #include "Shader.hpp"
 #include <stdio.h>
@@ -17,7 +17,7 @@ struct GlitchShader: Shader {
   ofShader shader;
 public:
   void setup() override {
-    shader.load("shaders/shader_glitch");
+    shader.load("../../shaders/shader_glitch");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

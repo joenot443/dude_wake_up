@@ -11,6 +11,7 @@
 #include "ofMain.h"
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
+#include "WaveformOscillator.hpp"
 #include "ofxImGui.h"
 #include "Shader.hpp"
 #include <string>
@@ -26,8 +27,8 @@ struct WobbleSettings: public ShaderSettings {
   WobbleSettings(std::string shaderId, json j) :
   speed(std::make_shared<Parameter>("speed", shaderId, 1.0, 0.0, 2.0)),
   amount(std::make_shared<Parameter>("amount", shaderId, 1.0, 0.0, 2.0)),
-  speedOscillator(std::make_shared<Oscillator>(speed)),
-  amountOscillator(std::make_shared<Oscillator>(amount)),
+  speedOscillator(std::make_shared<WaveformOscillator>(speed)),
+  amountOscillator(std::make_shared<WaveformOscillator>(amount)),
   ShaderSettings(shaderId) {
     
   };
@@ -38,7 +39,7 @@ struct WobbleShader: Shader {
   WobbleShader(WobbleSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("shaders/Wobble");
+    shader.load("../../shaders/Wobble");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

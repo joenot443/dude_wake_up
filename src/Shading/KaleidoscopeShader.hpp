@@ -29,9 +29,9 @@ struct KaleidoscopeSettings : public ShaderSettings {
   sides(std::make_shared<Parameter>("sides", shaderId, 2.0,  1.0, 6.0)),
   shift(std::make_shared<Parameter>("shift", shaderId, 0.5,  0.0, 1.0)),
   rotation(std::make_shared<Parameter>("rotation", shaderId, 1.0,  1.0, TWO_PI)),
-  sidesOscillator(std::make_shared<Oscillator>(sides)),
-  shiftOscillator(std::make_shared<Oscillator>(shift)),
-  rotationOscillator(std::make_shared<Oscillator>(rotation)),
+  sidesOscillator(std::make_shared<WaveformOscillator>(sides)),
+  shiftOscillator(std::make_shared<WaveformOscillator>(shift)),
+  rotationOscillator(std::make_shared<WaveformOscillator>(rotation)),
   ShaderSettings(shaderId) {
     parameters = {sides, shift, rotation};
     oscillators = {sidesOscillator, shiftOscillator, rotationOscillator};
@@ -45,7 +45,7 @@ struct KaleidoscopeShader : public Shader {
   KaleidoscopeShader(KaleidoscopeSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    shader.load("shaders/kaleidoscope");
+    shader.load("../../shaders/kaleidoscope");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

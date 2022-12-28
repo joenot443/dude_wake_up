@@ -44,31 +44,6 @@ void ShaderChainerView::drawChainer() {
     ImGui::PushID(n);
     
     drawShaderButton(shader, selected, n);
-    
-    // Our buttons are both drag sources and drag targets here!
-    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
-    {
-      // Set payload to carry the index of our item (could be anything)
-      ImGui::SetDragDropPayload("SwapShader", &n, sizeof(int));
-      
-      ImGui::Text("%s", shader->name().c_str());
-      ImGui::EndDragDropSource();
-    }
-    
-    
-
-    if (ImGui::BeginDragDropTarget())
-    {
-      if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SwapShader"))
-      {
-        int payload_n = *(const int*)payload->Data;
-        auto tmp = shaderChainer->shaders[n];
-        shaderChainer->shaders[n] = shaderChainer->shaders[payload_n];
-        shaderChainer->shaders[payload_n] = tmp;
-      }
-      ImGui::EndDragDropTarget();
-    }
-
 
     ImGui::PopID();
     // Only draw on the same line if we're not the last item
@@ -103,10 +78,32 @@ void ShaderChainerView::drawShaderButton(std::shared_ptr<Shader> shader, bool se
     ShaderChainerService::getService()->selectedShader = shader;
   }
   
+  // Our buttons are both drag sources and drag targets here!
+  if (ImGui::BeginDragDropSource())
+  {
+    // Set payload to carry the index of our item (could be anything)
+    ImGui::SetDragDropPayload("SwapShader", &idx, sizeof(int));
+    
+    ImGui::Text("%s", shader->name().c_str());
+    ImGui::EndDragDropSource();
+  }
+  
+  if (ImGui::BeginDragDropTarget())
+  {
+    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SwapShader"))
+    {
+      int payload_n = *(const int*)payload->Data;
+      auto tmp = shaderChainer->shaders[idx];
+      shaderChainer->shaders[idx] = shaderChainer->shaders[payload_n];
+      shaderChainer->shaders[payload_n] = tmp;
+    }
+    ImGui::EndDragDropTarget();
+  }
+
+
   if (selected) {
     ImGui::PopStyleColor(3);
   }
-  
   
   splitter.SetCurrentChannel(ImGui::GetWindowDrawList(), 2);
   
@@ -119,7 +116,7 @@ void ShaderChainerView::drawShaderCloseButton(std::shared_ptr<Shader> shader) {
   auto cursorX = ImGui::GetCursorPosX();
   ImGui::SameLine();
   ImGui::SetItemAllowOverlap();
-  if (ImGui::Button("X")) {
+  if (ImGui::Button(formatString("X##%s", shader->settings->shaderId.c_str()).c_str())) {
     shaderChainer->deleteShader(shader);
     if (ShaderChainerService::getService()->selectedShader == shader) {
       ShaderChainerService::getService()->selectedShader = nullptr;

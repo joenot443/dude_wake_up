@@ -17,7 +17,8 @@ Parameter::Parameter(std::string name,
 name(name),
 shaderKey(name),
 defaultValue(value),
-value(value)
+value(value),
+boolValue(value > 0.0001)
 {
   paramId = UUID::generateParamId(name);
   std::shared_ptr<Parameter> sharedSelf = std::shared_ptr<Parameter>(this);
@@ -31,7 +32,8 @@ Parameter::Parameter(std::string name,
 name(name),
 shaderKey(shaderKey),
 defaultValue(value),
-value(value)
+value(value),
+boolValue(value > 0.0001)
 {
   paramId = UUID::generateParamId(name);
   std::shared_ptr<Parameter> sharedSelf = std::shared_ptr<Parameter>(this);
@@ -49,7 +51,8 @@ shaderKey(shaderKey),
 defaultValue(value),
 value(value),
 min(min),
-max(max)
+max(max),
+boolValue(value > 0.0001)
 {
   paramId = UUID::generateParamId(name);
   std::shared_ptr<Parameter> sharedSelf = std::shared_ptr<Parameter>(this);
@@ -65,7 +68,8 @@ name(name),
 defaultValue(value),
 value(value),
 min(min),
-max(max)
+max(max),
+boolValue(value > 0.0001)
 {
   paramId = UUID::generateParamId(name);
   std::shared_ptr<Parameter> sharedSelf = std::shared_ptr<Parameter>(this);

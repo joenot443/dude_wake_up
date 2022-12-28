@@ -12,7 +12,7 @@
 #include "Console.hpp"
 
 void FeedbackShader::setup() {
-  shader.load("shaders/feedback");
+  shader.load("../../shaders/feedback");
   if (settings->feedbackSourceId.empty()) {
     feedbackSource = FeedbackSourceService::getService()->defaultFeedbackSource();
     settings->feedbackSourceId = feedbackSource->id;

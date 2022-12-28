@@ -7,10 +7,10 @@
 
 #ifndef ShaderSettings_h
 #define ShaderSettings_h
+
 #include "Parameter.hpp"
 #include "MidiService.hpp"
 #include "Oscillator.hpp"
-#include "VideoSettings.hpp"
 #include "JSONSerializable.hpp"
 #include "json.hpp"
 #include <string>

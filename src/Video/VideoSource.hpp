@@ -8,14 +8,21 @@
 #ifndef VideoSource_hpp
 #define VideoSource_hpp
 
-#include <stdio.h>
-#include "VideoSettings.hpp"
 #include "FeedbackSource.hpp"
+#include "json.hpp"
+#include <stdio.h>
 
-enum VideoSourceType { VideoSource_webcam, VideoSource_file, VideoSource_chainer, VideoSource_shader };
+using json = nlohmann::json;
+
+enum VideoSourceType {
+  VideoSource_webcam,
+  VideoSource_file,
+  VideoSource_chainer,
+  VideoSource_shader
+};
 
 class VideoSource {
-  
+
 public:
   std::string id;
   std::string sourceName;
@@ -27,15 +34,15 @@ public:
   ofBufferObject previewBuffer;
   std::shared_ptr<FeedbackSource> feedbackDestination;
 
-  VideoSource(std::string id, std::string name, VideoSourceType type) :
-  id(id), sourceName(name), type(type) {};
+  VideoSource(std::string id, std::string name, VideoSourceType type)
+      : id(id), sourceName(name), type(type){};
 
-  virtual void setup() {};
-  virtual void saveFrame() {};
-  virtual void drawSettings() {};
-  virtual json serialize() {};
-  virtual void load(json j) {};
-  
+  virtual void setup(){};
+  virtual void saveFrame(){};
+  virtual void drawSettings(){};
+  virtual json serialize(){};
+  virtual void load(json j){};
+
   void saveFeedbackFrame() {
     if (frameTexture != nullptr) {
       feedbackDestination->pushFrame(frameTexture);

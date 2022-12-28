@@ -12,7 +12,7 @@
 #include "Shader.hpp"
 #include "CommonViews.hpp"
 #include "ShaderSettings.hpp"
-#include "VideoSettings.hpp"
+
 #include "CommonViews.hpp"
 
 // Plasma
@@ -29,8 +29,8 @@ struct PlasmaSettings: public ShaderSettings {
   enabled(std::make_shared<Parameter>("enabled", shaderId, 0.0,  1.0, 0.0)),
   plasmaX(std::make_shared<Parameter>("plasmaX", shaderId, 0.0,  0.0, 1.0)),
   plasmaY(std::make_shared<Parameter>("plasmaY", shaderId, 0.0,  0.0, 1.0)),
-  plasmaXOscillator(std::make_shared<Oscillator>(plasmaX)),
-  plasmaYOscillator(std::make_shared<Oscillator>(plasmaY)),
+  plasmaXOscillator(std::make_shared<WaveformOscillator>(plasmaX)),
+  plasmaYOscillator(std::make_shared<WaveformOscillator>(plasmaY)),
   ShaderSettings(shaderId) {
     parameters = {enabled, plasmaX, plasmaY};
     oscillators = {plasmaXOscillator, plasmaYOscillator};
@@ -61,7 +61,7 @@ public:
   };
 
   void setup() override {
-    shader.load("shaders/plasma");
+    shader.load("../../shaders/plasma");
   };
 
   void drawSettings() override {

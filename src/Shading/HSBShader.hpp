@@ -9,7 +9,6 @@
 #define HSBShader_hpp
 
 #include "ofMain.h"
-#include "VideoSettings.hpp"
 #include "ofxImGui.h"
 #include "CommonViews.hpp"
 #include "Shader.hpp"
@@ -28,12 +27,12 @@ struct HSBSettings: public ShaderSettings {
   
   HSBSettings(std::string shaderId, json j) :
   shaderId(shaderId),
-  hue(std::make_shared<Parameter>("Hue", shaderId, 0.0, -1.0, 2.0)),
-  saturation(std::make_shared<Parameter>("Saturation", shaderId, 1.0, -1.0, 3.0)),
-  brightness(std::make_shared<Parameter>("Brightness", shaderId, 1.0, -1.0, 3.0)),
-  hueOscillator(std::make_shared<Oscillator>(hue)),
-  saturationOscillator(std::make_shared<Oscillator>(saturation)),
-  brightnessOscillator(std::make_shared<Oscillator>(brightness)),
+  hue(std::make_shared<Parameter>("Hue", shaderId, 0.0, 0.0, 1.0)),
+  saturation(std::make_shared<Parameter>("Saturation", shaderId, 1.0, 0.0, 2.0)),
+  brightness(std::make_shared<Parameter>("Brightness", shaderId, 1.0, 0.0, 2.0)),
+  hueOscillator(std::make_shared<WaveformOscillator>(hue)),
+  saturationOscillator(std::make_shared<WaveformOscillator>(saturation)),
+  brightnessOscillator(std::make_shared<WaveformOscillator>(brightness)),
   ShaderSettings(shaderId)
   {
     parameters = {hue, saturation, brightness};
@@ -51,7 +50,7 @@ public:
   HSBSettings *settings;
   
   void setup() override {
-    shader.load("shaders/hsb");
+    shader.load("../../shaders/hsb");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

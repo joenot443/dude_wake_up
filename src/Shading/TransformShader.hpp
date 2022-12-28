@@ -9,7 +9,7 @@
 #define TransformShader_hpp
 
 #include "ofMain.h"
-#include "VideoSettings.hpp"
+
 #include "ofxImGui.h"
 #include "Shader.hpp"
 #include <stdio.h>
@@ -23,11 +23,14 @@ struct TransformSettings: public ShaderSettings {
   std::shared_ptr<Parameter> yScale;
   std::shared_ptr<Parameter> rotate;
   
+  std::shared_ptr<Parameter> autoRotate;
+  
   std::shared_ptr<Oscillator> xTranslateOscillator;
   std::shared_ptr<Oscillator> yTranslateOscillator;
   std::shared_ptr<Oscillator> xScaleOscillator;
   std::shared_ptr<Oscillator> yScaleOscillator;
   std::shared_ptr<Oscillator> rotateOscillator;
+  std::shared_ptr<Oscillator> autoRotateOscillator;
 
   TransformSettings(std::string shaderId, json j) :
   xTranslate(std::make_shared<Parameter>("xTranslate", shaderId, 0.0,  -1.0, 1.0)),
@@ -35,15 +38,17 @@ struct TransformSettings: public ShaderSettings {
   xScale(std::make_shared<Parameter>("xScale", shaderId, 1.0,  0.0, 2.0)),
   yScale(std::make_shared<Parameter>("yScale", shaderId, 1.0,  0.0, 2.0)),
   rotate(std::make_shared<Parameter>("rotate", shaderId, 0.0,  0.0, 360.0)),
-  xTranslateOscillator(std::make_shared<Oscillator>(xTranslate)),
-  yTranslateOscillator(std::make_shared<Oscillator>(yTranslate)),
-  xScaleOscillator(std::make_shared<Oscillator>(xScale)),
-  yScaleOscillator(std::make_shared<Oscillator>(yScale)),
-  rotateOscillator(std::make_shared<Oscillator>(rotate)),
+  autoRotate(std::make_shared<Parameter>("autoRotate", shaderId, 0.0,  0.0, 30.0)),
+  xTranslateOscillator(std::make_shared<WaveformOscillator>(xTranslate)),
+  yTranslateOscillator(std::make_shared<WaveformOscillator>(yTranslate)),
+  xScaleOscillator(std::make_shared<WaveformOscillator>(xScale)),
+  yScaleOscillator(std::make_shared<WaveformOscillator>(yScale)),
+  rotateOscillator(std::make_shared<WaveformOscillator>(rotate)),
+  autoRotateOscillator(std::make_shared<WaveformOscillator>(autoRotate)),
   ShaderSettings(shaderId)
   {
-    parameters = {xTranslate, yTranslate, xScale, yScale, rotate};
-    oscillators = {xTranslateOscillator, yTranslateOscillator, xScaleOscillator, yScaleOscillator, rotateOscillator};
+    parameters = {xTranslate, yTranslate, xScale, yScale, rotate, autoRotate};
+    oscillators = {xTranslateOscillator, yTranslateOscillator, xScaleOscillator, yScaleOscillator, rotateOscillator, autoRotateOscillator};
     load(j);
   }
 };
@@ -52,6 +57,7 @@ struct TransformShader: public Shader {
 public:
   ofShader shader;
   TransformSettings *settings;
+  float autoRotateAmount;
   
   TransformShader(TransformSettings *settings) : settings(settings), Shader(settings) {};
 
@@ -66,6 +72,16 @@ public:
     auto texture = frame->getTexture();
     float width = frame->getWidth();
     float height = frame->getHeight();
+    bool autoRotating = false;
+    
+    
+    // Increment autoRotate
+    if (settings->autoRotate->value > 0.01) {
+      autoRotateAmount += settings->autoRotate->value;
+      autoRotating = true;
+    }
+    
+    
     ofClear(0,0,0,255);
     
     ofSetRectMode(OF_RECTMODE_CENTER);
@@ -74,7 +90,13 @@ public:
     float x = (settings->xTranslate->value + 0.5) * width;
     float y = (settings->yTranslate->value + 0.5) * height;
     ofTranslate(x, y);
-    ofRotateDeg(settings->rotate->value);
+    if (autoRotating) {
+      ofRotateDeg(autoRotateAmount);
+    } else {
+      ofRotateDeg(settings->rotate->value);
+    }
+    
+    
     ofScale(settings->xScale->value, settings->yScale->value);
     texture.draw(0, 0);
     ofPopMatrix();
@@ -115,6 +137,9 @@ public:
     CommonViews::Slider("Scale Y", "##yscale", settings->yScale);
     CommonViews::MidiSelector(settings->yScale);
 
+    // Auto Rotate
+    CommonViews::ShaderParameter(settings->autoRotate, settings->autoRotateOscillator);
+    
     // Rotate
     ImGui::Text("Rotate");
     ImGui::SetNextItemWidth(150.0);

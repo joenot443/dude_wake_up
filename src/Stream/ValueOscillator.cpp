@@ -10,7 +10,7 @@
 #include "OscillationService.hpp"
 #include "Video.hpp"
 
-ValueOscillator::ValueOscillator(std::shared_ptr<Parameter> o) {
+ValueOscillator::ValueOscillator(std::shared_ptr<Parameter> o): Oscillator(o) {
   data.reserve(100);
   xRange = {0.0, 10.0};
   yRange = {o->min, o->max};
@@ -25,7 +25,7 @@ void ValueOscillator::tick() {
   if (!data.empty() && xmod < data.back().x)
       data.shrink(0);
   
-  this->value = observed->value * amplitude + shift;
+  this->value = observed->value;
   observed->value = this->value;
   data.push_back(ImVec2(xmod, value));
 }

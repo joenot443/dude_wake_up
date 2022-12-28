@@ -9,9 +9,10 @@
 #define MixShader_h
 
 #include "ofMain.h"
-#include "VideoSettings.hpp"
+
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
+#include "VideoSourceService.hpp"
 #include "Oscillator.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
@@ -24,7 +25,7 @@ struct MixSettings : public ShaderSettings {
   MixSettings(std::string shaderId, json j) :
   mixSourceId(mixSourceId),
   mix(std::make_shared<Parameter>("mix", shaderId, 0.5, 0.0, 1.0)),
-  mixOscillator(std::make_shared<Oscillator>(mix)),
+  mixOscillator(std::make_shared<WaveformOscillator>(mix)),
   ShaderSettings(shaderId) {
     parameters = {mix};
     oscillators = {mixOscillator};
@@ -40,7 +41,7 @@ struct MixShader : public Shader {
   MixShader(MixSettings *settings) : settings(settings), Shader(settings) {};
   
   void setup() override {
-    shader.load("shaders/Mix");
+    shader.load("../../shaders/Mix");
     mixSource = VideoSourceService::getService()->defaultVideoSource();
     settings->mixSourceId = mixSource->id;
   }

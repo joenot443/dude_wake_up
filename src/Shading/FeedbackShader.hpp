@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include "ofMain.h"
 #include "Shader.hpp"
-#include "VideoSettings.hpp"
 #include "ofMain.h"
 #include "ofxImGui.h"
 
@@ -54,25 +53,25 @@ struct FeedbackSettings: public ShaderSettings {
   FeedbackSettings(std::string shaderId, json j) :
   index(index),
   blend(std::make_shared<Parameter>("feedback_blend", shaderId, "blend", 0.0, 0.0, 1.0)),
-  blendOscillator(std::make_shared<Oscillator>(blend)),
+  blendOscillator(std::make_shared<WaveformOscillator>(blend)),
   mix(std::make_shared<Parameter>("feedback_mix", shaderId, "fb_mix", 0.0, 0.0, 1.0)),
-  mixOscillator(std::make_shared<Oscillator>(mix)),
+  mixOscillator(std::make_shared<WaveformOscillator>(mix)),
   keyValue(std::make_shared<Parameter>("feedback_keyValue", shaderId, "lumaKey", 0.0, 0.0, 1.0)),
-  keyValueOscillator(std::make_shared<Oscillator>(keyValue)),
+  keyValueOscillator(std::make_shared<WaveformOscillator>(keyValue)),
   keyThreshold(std::make_shared<Parameter>("feedback_keyThreshold", shaderId, "lumaThresh", 0.0, 0.0, 1.0)),
-  keyThresholdOscillator(std::make_shared<Oscillator>(keyThreshold)),
+  keyThresholdOscillator(std::make_shared<WaveformOscillator>(keyThreshold)),
   delayAmount(std::make_shared<Parameter>("feedback_delayAmount", shaderId, 10.0, 0.0, 28.0)),
-  delayAmountOscillator(std::make_shared<Oscillator>(delayAmount)),
+  delayAmountOscillator(std::make_shared<WaveformOscillator>(delayAmount)),
   lumaKeyEnabled(std::make_shared<Parameter>("feedback_luma_key_enabled", shaderId, "lumaEnabled", 0.0, 0.0, 0.0)),
   shaderId(shaderId),
   rotate(std::make_shared<Parameter>("feedback_rotate", shaderId, 0.0001, 0.0001, TWO_PI)),
   xOffset(std::make_shared<Parameter>("feedback_xOffset", shaderId, 0.0, -300.0, 300.0)),
   yOffset(std::make_shared<Parameter>("feedback_yOffset", shaderId, 0.0, -300.0, 300.0)),
   scale(std::make_shared<Parameter>("feedback_scale", shaderId, 1.0, 0.0001, 3.0)),
-  rotationOscillator(std::make_shared<Oscillator>(rotate)),
-  xOffsetOscillator(std::make_shared<Oscillator>(xOffset)),
-  yOffsetOscillator(std::make_shared<Oscillator>(yOffset)),
-  scaleOscillator(std::make_shared<Oscillator>(scale)),
+  rotationOscillator(std::make_shared<WaveformOscillator>(rotate)),
+  xOffsetOscillator(std::make_shared<WaveformOscillator>(xOffset)),
+  yOffsetOscillator(std::make_shared<WaveformOscillator>(yOffset)),
+  scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
   ShaderSettings(shaderId) {
     parameters = {blend, mix, keyValue, keyThreshold, delayAmount, lumaKeyEnabled, rotate, xOffset, yOffset, scale};
     oscillators = {blendOscillator, mixOscillator, keyValueOscillator, keyThresholdOscillator, delayAmountOscillator, rotationOscillator, xOffsetOscillator, yOffsetOscillator, scaleOscillator};

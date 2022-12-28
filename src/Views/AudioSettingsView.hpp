@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 
-#include "VideoSettings.hpp"
+
 #include "AudioSettings.hpp"
 
 struct AudioSettingsView {

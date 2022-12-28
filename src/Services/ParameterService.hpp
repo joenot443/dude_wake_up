@@ -25,9 +25,13 @@ public:
   static ParameterService* service;
   
   void registerParameter(std::shared_ptr<Parameter> parameter);
+  
+  void tickParameters();
+  
   std::map<std::string, std::shared_ptr<Parameter>> parameterMap;
   
   std::shared_ptr<Parameter> selectedParameter;
+  
   
   ParameterService() {};
   static ParameterService* getService() {

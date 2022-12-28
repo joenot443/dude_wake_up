@@ -1,5 +1,5 @@
 ---
-to: bin/data/shaders/<%= name %>.vert
+to: shaders/<%= name %>.vert
 ---
 
 #version 150

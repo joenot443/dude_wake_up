@@ -1,5 +1,5 @@
 ---
-to: src/ShaderType.hpp
+to: src/Shading/ShaderType.hpp
 inject: true
 skip_if: "case ShaderType<%= name %>"
 after: "// Shader names"

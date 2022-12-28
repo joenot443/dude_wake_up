@@ -37,6 +37,8 @@ struct CommonViews {
   
   static void ModulationSelector(std::shared_ptr<Parameter> videoParam);
   
+  static void AudioParameterSelector(std::shared_ptr<Parameter> videoParam);
+  
   static void Slider(std::string title, std::string id, std::shared_ptr<Parameter> param);
   static void IntSlider(std::string title, std::string id, std::shared_ptr<Parameter> param);
     
