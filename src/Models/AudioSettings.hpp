@@ -8,26 +8,47 @@
 #ifndef AudioSettings_h
 #define AudioSettings_h
 
+#include <iostream>
 #include "Gist.h"
+#include "Math.hpp"
 #include "Oscillator.hpp"
 #include "Parameter.hpp"
 #include "PulseOscillator.hpp"
 #include "ValueOscillator.hpp"
 #include "Vectors.hpp"
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/framework/accumulator_set.hpp>
+#include <boost/accumulators/framework/extractor.hpp>
+#include <boost/accumulators/statistics/rolling_count.hpp>
+#include <boost/accumulators/statistics/rolling_mean.hpp>
+#include <boost/accumulators/statistics/rolling_sum.hpp>
+#include <boost/accumulators/statistics/rolling_window.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+
+using namespace boost::accumulators;
 
 struct AudioAnalysisParameter {
   float minSeen = 0.0;
   float maxSeen = 0.0;
-  float value = 0.0;
-  std::shared_ptr<Parameter> param;
 
-  AudioAnalysisParameter(std::shared_ptr<Parameter> param) : param(param) {}
+  float value = 0.0;
+  float rollingMean = 0.0;
+
+  std::shared_ptr<Parameter> param;
+  accumulator_set<double, stats<tag::rolling_mean > > acc;
+
+  AudioAnalysisParameter(std::shared_ptr<Parameter> param) :
+  acc(tag::rolling_window::window_size = 10),
+  param(param) {}
 
   void tick(float val) {
     value = val;
-    minSeen = fmin(minSeen, val);
-    maxSeen = fmax(maxSeen, val);
-    param->value = relationToRange();
+    minSeen = fmin(minSeen, abs(val));
+    maxSeen = fmax(maxSeen, abs(val));
+    acc(relationToRange());
+    rollingMean = rolling_mean(acc);
+    
+    param->value = rollingMean;
   }
 
   float relationToRange() {
@@ -57,6 +78,8 @@ struct AudioAnalysis {
 
   std::vector<float> melFrequencySpectrum;
   std::vector<float> magnitudeSpectrum;
+  std::vector<float> smoothSpectrum;
+  std::vector<float> smoothMelSpectrum;
 
   AudioAnalysisParameter rmsAnalysisParam;
   AudioAnalysisParameter csdAnalysisParam;
@@ -96,9 +119,15 @@ struct AudioAnalysis {
                             &zcrAnalysisParam, &spectralDiffAnalysisParam}){};
 
   void analyzeFrame(Gist<float> *gist) {
-    magnitudeSpectrum = Vectors::normalize(Vectors::sqrt(gist->getMagnitudeSpectrum()));
-    melFrequencySpectrum = Vectors::normalize(Vectors::sqrt(gist->getMelFrequencySpectrum()));
-    
+    magnitudeSpectrum =
+        Vectors::normalize(Vectors::sqrt(gist->getMagnitudeSpectrum()));
+    melFrequencySpectrum =
+        Vectors::normalize(Vectors::sqrt(gist->getMelFrequencySpectrum()));
+
+    smoothSpectrum = Vectors::release(magnitudeSpectrum, smoothSpectrum);
+    smoothMelSpectrum =
+        Vectors::release(melFrequencySpectrum, smoothMelSpectrum);
+
     rmsAnalysisParam.tick(gist->rootMeanSquare());
     pitchAnalysisParam.tick(gist->pitch());
     csdAnalysisParam.tick(gist->complexSpectralDifference());

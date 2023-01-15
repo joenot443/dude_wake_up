@@ -69,7 +69,6 @@ struct KaleidoscopeShader : public Shader {
     CommonViews::H3Title("Kaleidoscope");
     CommonViews::ShaderParameter(settings->shift, settings->shiftOscillator);
     CommonViews::ShaderParameter(settings->sides, settings->sidesOscillator);
-    CommonViews::ShaderParameter(settings->rotation, settings->rotationOscillator);
   }
 };
 

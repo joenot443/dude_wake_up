@@ -11,40 +11,38 @@
 #include "ofMain.h"
 
 #include "CommonViews.hpp"
-#include "ofxImGui.h"
 #include "Shader.hpp"
+#include "ofxImGui.h"
 #include <stdio.h>
 
 // Pixelate
 
-struct PixelSettings: public ShaderSettings  {
+struct PixelSettings : public ShaderSettings {
   std::shared_ptr<Parameter> enabled;
   std::shared_ptr<Parameter> size;
-  
+
   std::shared_ptr<Oscillator> sizeOscillator;
-  
-  PixelSettings(std::string shaderId, json j) :
-  size(std::make_shared<Parameter>("pixel_size", shaderId, 24.1,  1.0, 64.0)),
-  enabled(std::make_shared<Parameter>("enabled", shaderId, 0.0,  1.0, 0.0)),
-  sizeOscillator(std::make_shared<WaveformOscillator>(size)),
-  ShaderSettings(shaderId)
-  {
+
+  PixelSettings(std::string shaderId, json j)
+      : size(std::make_shared<Parameter>("pixel_size", shaderId, 24.1, 1.0,
+                                         64.0)),
+        enabled(
+            std::make_shared<Parameter>("enabled", shaderId, 0.0, 1.0, 0.0)),
+        sizeOscillator(std::make_shared<WaveformOscillator>(size)),
+        ShaderSettings(shaderId) {
     parameters = {size, enabled};
     oscillators = {sizeOscillator};
     load(j);
   }
 };
 
-
-struct PixelShader: Shader {
+struct PixelShader : Shader {
   PixelSettings *settings;
-  PixelShader(PixelSettings *settings) : settings(settings), Shader(settings) {};
-  
+  PixelShader(PixelSettings *settings) : settings(settings), Shader(settings){};
+
   ofShader shader;
-  
-  void setup() override {
-    shader.load("../../shaders/pixel");
-  }
+
+  void setup() override { shader.load("../../shaders/pixel"); }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
     canvas->begin();
@@ -56,24 +54,15 @@ struct PixelShader: Shader {
     shader.end();
     canvas->end();
   }
-  
-  bool enabled() override {
-    return true;
-  }
 
-  ShaderType type() override {
-    return ShaderTypePixelate;
-  }
-  
+  bool enabled() override { return true; }
+
+  ShaderType type() override { return ShaderTypePixelate; }
+
   void drawSettings() override {
     CommonViews::H3Title("Pixelation");
-    
-    ImGui::Text("Mix");
-    ImGui::SetNextItemWidth(150.0);
-    ImGui::SameLine(0, 20);
-    CommonViews::Slider("Size", "##pixelation_size", settings->size);
-    CommonViews::ModulationSelector(settings->size);
-    CommonViews::MidiSelector(settings->size);
+
+    CommonViews::ShaderParameter(settings->size, settings->sizeOscillator);
   }
 };
 

@@ -37,9 +37,10 @@ void ShaderChainerView::drawChainer() {
   drawSourceButton();
   
   ImGui::SameLine();
+  auto chainerShaders = shaderChainer->shaders();
   
-  for (int n = 0; n < shaderChainer->shaders.size(); n++) {
-    auto shader = shaderChainer->shaders[n];
+  for (int n = 0; n < chainerShaders.size(); n++) {
+    auto shader = chainerShaders[n];
     bool selected = shader == ShaderChainerService::getService()->selectedShader;
     ImGui::PushID(n);
     
@@ -92,10 +93,10 @@ void ShaderChainerView::drawShaderButton(std::shared_ptr<Shader> shader, bool se
   {
     if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SwapShader"))
     {
-      int payload_n = *(const int*)payload->Data;
-      auto tmp = shaderChainer->shaders[idx];
-      shaderChainer->shaders[idx] = shaderChainer->shaders[payload_n];
-      shaderChainer->shaders[payload_n] = tmp;
+//      int payload_n = *(const int*)payload->Data;
+//      auto tmp = shaderChainer->shaders[idx];
+//      shaderChainer->shaders[idx] = shaderChainer->shaders[payload_n];
+//      shaderChainer->shaders[payload_n] = tmp;
     }
     ImGui::EndDragDropTarget();
   }
@@ -117,7 +118,8 @@ void ShaderChainerView::drawShaderCloseButton(std::shared_ptr<Shader> shader) {
   ImGui::SameLine();
   ImGui::SetItemAllowOverlap();
   if (ImGui::Button(formatString("X##%s", shader->settings->shaderId.c_str()).c_str())) {
-    shaderChainer->deleteShader(shader);
+    ShaderChainerService::getService()->removeShader(shader);
+    
     if (ShaderChainerService::getService()->selectedShader == shader) {
       ShaderChainerService::getService()->selectedShader = nullptr;
     }

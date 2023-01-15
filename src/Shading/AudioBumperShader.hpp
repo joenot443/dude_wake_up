@@ -35,10 +35,9 @@ struct AudioBumperShader : Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    if (source != nullptr &&
-        source->audioAnalysis.melFrequencySpectrum.size() > 0)
-      shader.setUniform1fv("audio",
-                           &source->audioAnalysis.melFrequencySpectrum[0], 256);
+    if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() > 0)
+      shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0],
+                           256);
     // Flip the frame vertically
     ofPushMatrix();
     ofTranslate(0, frame->getHeight());

@@ -61,7 +61,7 @@ void CommonViews::AudioParameterSelector(std::shared_ptr<Parameter> param) {
   }
 
   // Otherwise, present a button to select an audio parameter
-  if (ImGui::Button(formatString("Select Param").c_str())) {
+  if (ImGui::Button(formatString("Select Param%s", param->name.c_str()).c_str())) {
     ImGui::OpenPopup(popupId.c_str());
   }
     

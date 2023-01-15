@@ -8,6 +8,7 @@
 #include "VideoSourceBrowserView.hpp"
 #include "FontService.hpp"
 #include "VideoSourceService.hpp"
+#include "AvailableVideoSource.hpp"
 
 
 void VideoSourceBrowserView::setup() {}
@@ -23,7 +24,7 @@ void VideoSourceBrowserView::draw() {
 
 // Draw a list of video sources as items in a ListBox
 void VideoSourceBrowserView::drawVideoSourceSelector() {
-  auto sources = VideoSourceService::getService()->inputSources();
+  auto sources = VideoSourceService::getService()->availableVideoSources();
   ImGui::PushFont(FontService::getService()->h3);
   ImGui::Text("Video Source");
   ImGui::PopFont();
@@ -32,7 +33,13 @@ void VideoSourceBrowserView::drawVideoSourceSelector() {
   if (ImGui::BeginListBox("##videosources")) {
     for (int i = 0; i < sources.size(); i++) {
       if (ImGui::Selectable(sources[i]->sourceName.c_str())) {
-        selectedVideoSource = sources[i];
+      }
+      if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+        // Set payload to carry the index of our item (could be anything)
+        auto source = sources[i];
+        ImGui::SetDragDropPayload("VideoSource", source.get(), sizeof(AvailableVideoSource));
+        ImGui::Text("%s", source->sourceName.c_str());
+        ImGui::EndDragDropSource();
       }
     }
     ImGui::EndListBox();

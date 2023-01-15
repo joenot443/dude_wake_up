@@ -12,6 +12,7 @@
 #include "VideoSource.hpp"
 #include "ShaderSource.hpp"
 #include "FeedbackSourceService.hpp"
+#include "AvailableVideoSource.hpp"
 #include "OutputWindow.hpp"
 #include "ConfigurableService.hpp"
 
@@ -31,16 +32,24 @@ public:
   static VideoSourceService* getService() {
     if (!service) {
       service = new VideoSourceService;
+      service->setup();
     }
     return service;
-    
   }
+  
+  void setup();
+  
   std::vector<std::shared_ptr<VideoSource>> videoSources();
   
   // VideoSources which should be used as inputs (non empty, non ShaderChainer)
   std::vector<std::shared_ptr<VideoSource>> inputSources();
   
+  // VideoSources which are available to be added to the Service
+  std::vector<std::shared_ptr<AvailableVideoSource>> availableVideoSources();
+  
   std::shared_ptr<VideoSource> defaultVideoSource();
+  
+  std::map<std::string, std::shared_ptr<AvailableVideoSource>> availableSourceMap;
   
   std::vector<std::string> videoSourceNames();
   std::vector<std::string> getWebcamNames();
@@ -49,9 +58,9 @@ public:
   void addVideoSource(std::shared_ptr<VideoSource> videoSource);
   std::shared_ptr<VideoSource> videoSourceForId(std::string id);
 
-  void addWebcamVideoSource(std::string name, int index, std::string id = UUID::generateUUID());
-  void addShaderVideoSource(ShaderSourceType type, std::string id = UUID::generateUUID());
-  void addFileVideoSource(std::string name, std::string path, std::string id = UUID::generateUUID());
+  std::shared_ptr<VideoSource> addWebcamVideoSource(std::string name, int index, std::string id = UUID::generateUUID());
+  std::shared_ptr<VideoSource> addShaderVideoSource(ShaderSourceType type, std::string id = UUID::generateUUID());
+  std::shared_ptr<VideoSource> addFileVideoSource(std::string name, std::string path, std::string id = UUID::generateUUID());
 
   // Output Windows
 

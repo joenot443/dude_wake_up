@@ -89,3 +89,5 @@ void MainApp::dragEvent(ofDragInfo dragInfo) {
 }
 
 void MainApp::resetState() {}
+
+void MainApp::keyReleased(int key) { mainStageView->keyReleased(key); }

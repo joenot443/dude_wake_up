@@ -2,7 +2,7 @@
 
 uniform sampler2D tex;
 in vec2 coord;
-uniform float audio[13];
+uniform float audio[256];
 out vec4 outputColor;
 
 /*
@@ -14,14 +14,14 @@ https://www.shadertoy.com/view/Msl3zr 2D LED Spectrum by: uNiversal - 27th May,
 
 void main() {
   // quantize coordinates
-  const float bands = 13.0;
+  const float bands = 30.0;
   const float segs = 40.0;
   vec2 p;
   p.x = floor(coord.x * bands) / bands;
   p.y = floor(coord.y * segs) / segs;
 
   // read frequency data from first row of texture
-  float fft = audio[int(p.x * 13)];
+  float fft = audio[int(p.x * 256.)];
 
   // led color
   vec3 color = mix(vec3(0.0, 2.0, 0.0), vec3(2.0, 0.0, 0.0), sqrt(coord.y));

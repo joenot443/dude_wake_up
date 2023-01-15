@@ -43,6 +43,6 @@ void main()
   outputColor = vec4(pow(col,vec3(1.0/2.2)), 1.0);
   
   if (col.r < 0.1 && col.g < 0.1 && col.b < 0.1) {
-    outputColor = vec4(1., 1., 1., 1.);
+    outputColor = vec4(1., 1., 1., 0.);
   }
 }

@@ -21,6 +21,11 @@ class ShaderChainerService : public ConfigurableService {
 
 private:
   std::map<std::string, std::shared_ptr<ShaderChainer>> shaderChainerMap;
+  std::map<std::string, std::shared_ptr<Shader>> shadersMap;
+  // Maps a Shader to its parent ShaderChainer
+  std::map<std::string, std::shared_ptr<ShaderChainer>> shaderIdShaderChainerMap;
+  
+
   observable::subject<void()> shaderChainerUpdateSubject;
 
 public:
@@ -34,20 +39,45 @@ public:
     return service;
   }
 
+  // ShaderChainer Ops
+  std::shared_ptr<ShaderChainer> selectedShaderChainer;
+  void addNewShaderChainer(std::shared_ptr<VideoSource> videoSource);
+  void addShaderChainer(std::shared_ptr<ShaderChainer> shaderChainer);
+  void removeShaderChainer(std::string id);
+  void selectShaderChainer(std::shared_ptr<ShaderChainer> shaderChainer);
+  void subscribeToShaderChainerUpdates(std::function<void()> callback);
+  void associateShaderWithChainer(std::string shaderId, std::shared_ptr<ShaderChainer> chainer);
+  std::shared_ptr<ShaderChainer> shaderChainerForId(std::string id);
+  std::shared_ptr<ShaderChainer> shaderChainerForShaderId(std::string id);
   std::vector<std::shared_ptr<ShaderChainer>> shaderChainers();
   std::vector<std::string> shaderChainerNames();
   void updateShaderChainers();
-  void removeShaderChainer(std::string id);
-  void addShaderChainer(std::shared_ptr<ShaderChainer> shaderChainer);
-  void selectShaderChainer(std::shared_ptr<ShaderChainer> shaderChainer);
-  void selectShader(std::shared_ptr<Shader> shader);
-  void subscribeToShaderChainerUpdates(std::function<void()> callback);
 
-  int count();
-  std::shared_ptr<ShaderChainer> shaderChainerForId(std::string id);
+  // Shader Ops
   std::shared_ptr<Shader> selectedShader;
-  std::shared_ptr<ShaderChainer> selectedShaderChainer;
+  void selectShader(std::shared_ptr<Shader> shader);
+  void addShader(std::shared_ptr<Shader> shader);
+  std::shared_ptr<Shader> makeShader(ShaderType type);
+  void removeShader(std::shared_ptr<Shader> shader);
+  // Breaks the Shader's link to its next Shader
+  void breakShaderNextLink(std::shared_ptr<Shader> shader);
+  // Breaks the ShaderChainer's link to its front Shader
+  void breakShaderChainerFront(std::shared_ptr<ShaderChainer> shaderChainer);
+  
+  // Links the Shader to the next Shader
+  void linkShaderToNext(std::shared_ptr<Shader> sourceShader,
+                        std::shared_ptr<Shader> destShader);
+  // Sets an Aux Shader for a Shader
+  void setAuxShader(std::shared_ptr<Shader> auxShader,
+                    std::shared_ptr<Shader> destShader);
+  // Sets a Shader to be the front of a ShaderChainer
+  void addShaderToFront(std::shared_ptr<Shader> destShader,
+                        std::shared_ptr<ShaderChainer> chainer);
 
+  std::shared_ptr<Shader> shaderForId(std::string id);
+  std::vector<std::shared_ptr<Shader>> shaders();
+
+  // Constructor Ops
   std::shared_ptr<Shader> shaderForType(ShaderType type, std::string shaderId,
                                         json j);
 

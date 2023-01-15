@@ -9,6 +9,7 @@
 #define MainStageView_hpp
 
 #include "AudioSourceBrowserView.hpp"
+#include "NodeLayoutView.hpp"
 #include "OscillatorView.hpp"
 #include "OutputBrowserView.hpp"
 #include "ShaderChainerSettingsView.hpp"
@@ -26,6 +27,8 @@ private:
   ShaderType selectedShaderType;
 
   std::vector<std::shared_ptr<ShaderChainerView>> shaderChainerViews;
+
+  NodeLayoutView nodeLayoutView;
 
   VideoSourceBrowserView videoSourceBrowserView = VideoSourceBrowserView();
   VideoSourcePreviewView videoSourcePreviewView = VideoSourcePreviewView();
@@ -53,6 +56,8 @@ public:
   void setup();
   void update();
   void draw();
+  void keyReleased(int key);
+
 };
 
 #endif /* MainStageView_hpp */

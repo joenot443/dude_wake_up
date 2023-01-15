@@ -10,6 +10,21 @@
 #include "WebcamSource.hpp"
 #include "FileSource.hpp"
 
+void VideoSourceService::setup() {
+  // Add an AvailableVideoSource for each Webcam and each ShaderType
+  for (auto const& x : ofVideoGrabber().listDevices()) {
+    auto webcamSource = std::make_shared<AvailableVideoSource>(x.deviceName, VideoSource_webcam);
+    webcamSource->webcamId = x.id;
+    availableSourceMap[webcamSource->availableVideoSourceId] = webcamSource;
+  }
+  
+  for (auto const& x : AvailableShaderSourceTypes) {
+    auto shaderSource = std::make_shared<AvailableVideoSource>(shaderSourceTypeName(x), VideoSource_shader);
+    shaderSource->shaderType = x;
+    availableSourceMap[shaderSource->availableVideoSourceId] = shaderSource;
+  }
+}
+
 // Create a FeedbackSource for the passed in VideoSource and register it in the FeedbackSourceService
 void VideoSourceService::createFeedbackSource(std::shared_ptr<VideoSource> videoSource) {
   std::shared_ptr<FeedbackSource> feedbackSource = std::make_shared<FeedbackSource>(videoSource->id, videoSource->sourceName);
@@ -52,6 +67,17 @@ std::vector<std::shared_ptr<VideoSource>> VideoSourceService::videoSources() {
   return videoSources;
 }
 
+// Return a vector of all AvailableVideoSource
+std::vector<std::shared_ptr<AvailableVideoSource>> VideoSourceService::availableVideoSources() {
+  std::vector<std::shared_ptr<AvailableVideoSource>> videoSources;
+  for (auto const& x : availableSourceMap) {
+    if (x.second != nullptr) {
+      videoSources.push_back(x.second);
+    }
+  }
+  return videoSources;
+}
+
 // Return a vector of all video sources which should be used as inputs (non empty, non ShaderChainer)
 
 std::vector<std::shared_ptr<VideoSource>> VideoSourceService::inputSources() {
@@ -74,21 +100,24 @@ std::vector<std::string> VideoSourceService::getWebcamNames() {
 }
 
 // Adds a webcam video source to the map
-void VideoSourceService::addWebcamVideoSource(std::string name, int deviceId, std::string id) {
+std::shared_ptr<VideoSource> VideoSourceService::addWebcamVideoSource(std::string name, int deviceId, std::string id) {
   std::shared_ptr<VideoSource> videoSource = std::make_shared<WebcamSource>(id, name, deviceId);
   addVideoSource(videoSource);
+  return videoSource;
 }
 
 // Adds a file video source to the map
-void VideoSourceService::addFileVideoSource(std::string name, std::string path, std::string id) {
+std::shared_ptr<VideoSource> VideoSourceService::addFileVideoSource(std::string name, std::string path, std::string id) {
   std::shared_ptr<VideoSource> videoSource = std::make_shared<FileSource>(id, name, path);
   addVideoSource(videoSource);
+  return videoSource;
 }
 
 // Adds a Shader video source to the map
-void VideoSourceService::addShaderVideoSource(ShaderSourceType type, std::string id) {
+std::shared_ptr<VideoSource> VideoSourceService::addShaderVideoSource(ShaderSourceType type, std::string id) {
   std::shared_ptr<VideoSource> videoSource = std::make_shared<ShaderSource>(id, type);
   addVideoSource(videoSource);
+  return videoSource;
 }
 
 // Adds an OutputWindow for the passed in VideoSource

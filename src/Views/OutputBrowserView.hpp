@@ -18,7 +18,8 @@ public:
   void draw();
   
 private:
-  void drawOutputs();
+  void drawPreviewViews();
+  void generatePreviewViews();
   
   std::vector<VideoSourcePreviewView> previewViews;
 };

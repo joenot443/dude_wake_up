@@ -37,12 +37,13 @@ void AudioSource::audioIn(ofSoundBuffer &soundBuffer) {
   for (int i = 0; i < soundBuffer.size(); i++) {
     float leftSample = soundBuffer[i * 2] * 0.5;
     float rightSample = soundBuffer[i * 2 + 1] * 0.5;
-    avg += leftSample + rightSample;
+    avg += abs(leftSample) + abs(rightSample);
   }
   avg = avg / static_cast<float>(soundBuffer.size());
   
   // If we have mostly silence, return
-  if (abs(avg) < 0.01) {
+  if (abs(avg) < 0.001) {
+    log("Mostly silence: %.4f", abs(avg));
     return;
   }
 

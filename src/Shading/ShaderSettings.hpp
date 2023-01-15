@@ -46,7 +46,7 @@ public:
   }
   
   
-  json serialize() {
+  virtual json serialize() {
     json j;
     
     for (auto p : allParameters()) {
@@ -64,7 +64,7 @@ public:
     return NULL;
   }
   
-  void load(json j) {
+  virtual void load(json j) {
     if (!j.is_object()) {
       return;
     }

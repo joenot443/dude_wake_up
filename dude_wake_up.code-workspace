@@ -95,7 +95,13 @@
       "algorithm": "cpp",
       "functional": "cpp",
       "utility": "cpp",
-      "__functional_base_03": "cpp"
+      "__functional_base_03": "cpp",
+      "*.ipp": "cpp",
+      "cfenv": "cpp",
+      "csignal": "cpp",
+      "ranges": "cpp",
+      "span": "cpp",
+      "strstream": "cpp"
     },
     "editor.defaultFormatter": "xaver.clang-format"
   }

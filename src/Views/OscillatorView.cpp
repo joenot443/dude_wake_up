@@ -53,28 +53,24 @@ void OscillatorView::draw(std::shared_ptr<Oscillator> oscillator,
     ImPlot::SetNextAxisLimits(ImAxis_Y1, waveformOscillator->yRange[0], waveformOscillator->yRange[1]);
     
     if (data.size() > 0 && ImPlot::BeginPlot(formatString("##plot%s", value->name.c_str()).c_str())) {
-      ImPlot::PlotLine("Mouse Y", &data[0].x, &data[0].y, data.size(), 0, 5.0, 2*sizeof(float));
+      ImPlot::PlotLine("", &data[0].x, &data[0].y, data.size(), 0, 5.0, 2*sizeof(float));
 
 //      ImPlot::PlotLine(value->name.c_str(), &data[0].x, &data[0].y, data.size());
       ImPlot::EndPlot();
     }
   }
   
-//  else if (type == Oscillator_value) {
-//    oscillator->tick();
-//    ValueOscillator* valueOscillator = (ValueOscillator *) oscillator.get();
-//    ImVector<ImVec2> data = valueOscillator->data;
-//
-//    static int rt_axis = ImPlotAxisFlags_AuxDefault & ~ImPlotAxisFlags_NoTickLabels;
-//    ImPlot::SetNextAxisLimits(ImAxis_X1, valueOscillator->xRange[0], oscillator->xRange[1]);
-//    ImPlot::SetNextAxisLimits(ImAxis_Y1, valueOscillator->yRange[0], valueOscillator->yRange[1]);
-//    if (data.size() > 0 &&
-//        ImPlot::BeginPlot(formatString("##plot%s", value->name.c_str()).c_str(),
-//                          NULL, NULL, ImVec2(-1, 150), ImPlotFlags_Equal,
-//                          rt_axis, rt_axis)) {
-////      ImPlot::PlotLine(value->name.c_str(), &data[0].x, &data[0].y, data.size(),
-////                       0, 2 * sizeof(float));
-//      ImPlot::EndPlot();
-//    }
-//  }
+  else if (type == Oscillator_value) {
+    oscillator->tick();
+    ValueOscillator* valueOscillator = (ValueOscillator *) oscillator.get();
+    std::vector<float> data = valueOscillator->values;
+
+    static int rt_axis = ImPlotAxisFlags_AuxDefault & ~ImPlotAxisFlags_NoTickLabels;
+    ImPlot::SetNextAxisLimits(ImAxis_X1, valueOscillator->xRange[0], valueOscillator->xRange[1]);
+    ImPlot::SetNextAxisLimits(ImAxis_Y1, valueOscillator->yRange[0], valueOscillator->yRange[1]);
+    if (data.size() > 0 && ImPlot::BeginPlot(formatString("##plot%s", value->name.c_str()).c_str())) {
+      ImPlot::PlotLine(value->name.c_str(), &data[0], data.size());
+      ImPlot::EndPlot();
+    }
+  }
 }

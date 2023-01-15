@@ -12,7 +12,7 @@
 #include <string>
 
 enum ShaderType {
-  ShaderTypeNone,        
+  ShaderTypeNone,         
   ShaderTypeHSB,         
   ShaderTypeBlur,        
   ShaderTypePixelate,    
@@ -31,13 +31,17 @@ enum ShaderType {
   ShaderTypeAudioWaveform,
   ShaderTypeAudioBumper,
   ShaderTypeAudioMountains,
+  ShaderTypeGalaxy,
+  ShaderTypeMountains,
+  ShaderTypeDither,
+  ShaderTypeRainbowRotator,
+  ShaderTypeRubiks,
 };
 
 static const ShaderType AvailableShaderTypes[] = {
   // Available shaders
-  ShaderTypeAudioMountains, // Generated
-  ShaderTypeAudioBumper, // Generated
-  ShaderTypeAudioWaveform, // Generated
+  ShaderTypeRainbowRotator, // Generated
+  ShaderTypeDither, // Generated
   ShaderTypeSlider, // Generated
   ShaderTypeWobble, // Generated
   ShaderTypeRGBShift, // Generated
@@ -56,6 +60,16 @@ static const ShaderType AvailableShaderTypes[] = {
 static std::string shaderTypeName(ShaderType type) {
   switch (type) {
     // Shader names
+    case ShaderTypeRubiks:
+      return "Rubiks";
+    case ShaderTypeRainbowRotator:
+      return "RainbowRotator";
+    case ShaderTypeDither:
+      return "Dither";
+    case ShaderTypeMountains:
+      return "Mountains";
+    case ShaderTypeGalaxy:
+      return "Galaxy";
     case ShaderTypeAudioMountains:
       return "AudioMountains";
     case ShaderTypeAudioBumper:
@@ -97,6 +111,13 @@ static std::string shaderTypeName(ShaderType type) {
   }
 
   return "";
+}
+
+static bool shaderTypeSupportsAux(ShaderType type) {
+  if (type == ShaderTypeMix ||
+    type == ShaderTypeFeedback)
+  {return true;}
+  return false;
 }
 
 #endif /* ShaderType_h */

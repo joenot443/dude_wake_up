@@ -17,7 +17,6 @@ public:
   void setup();
   void update();
   void draw();
-  std::shared_ptr<VideoSource> selectedVideoSource;
   
 private:
   void drawVideoSourceSelector();

@@ -13,6 +13,9 @@
 #include "Shader.hpp"
 #include "ofMain.h"
 #include "ofxImGui.h"
+#include "json.hpp"
+
+using json = nlohmann::json;
 
 // Feedback
 
@@ -36,46 +39,43 @@ struct FeedbackSettings: public ShaderSettings {
   
   std::shared_ptr<Parameter> keyThreshold;
   std::shared_ptr<Oscillator> keyThresholdOscillator;
-  
-  std::shared_ptr<Parameter> rotate;
-  std::shared_ptr<Oscillator> rotationOscillator;
-
-  std::shared_ptr<Parameter> xOffset;
-  std::shared_ptr<Oscillator> xOffsetOscillator;
-
-  std::shared_ptr<Parameter> yOffset;
-  std::shared_ptr<Oscillator> yOffsetOscillator;
-
-  std::shared_ptr<Parameter> scale;
-  std::shared_ptr<Oscillator> scaleOscillator;
 
   
   FeedbackSettings(std::string shaderId, json j) :
   index(index),
-  blend(std::make_shared<Parameter>("feedback_blend", shaderId, "blend", 0.0, 0.0, 1.0)),
+  blend(std::make_shared<Parameter>("Blend", shaderId, "blend", 0.0, 0.0, 1.0)),
   blendOscillator(std::make_shared<WaveformOscillator>(blend)),
-  mix(std::make_shared<Parameter>("feedback_mix", shaderId, "fb_mix", 0.0, 0.0, 1.0)),
+  mix(std::make_shared<Parameter>("Mix", shaderId, "fb_mix", 0.0, 0.0, 1.0)),
   mixOscillator(std::make_shared<WaveformOscillator>(mix)),
-  keyValue(std::make_shared<Parameter>("feedback_keyValue", shaderId, "lumaKey", 0.0, 0.0, 1.0)),
+  keyValue(std::make_shared<Parameter>("Key Value", shaderId, "lumaKey", 0.0, 0.0, 1.0)),
   keyValueOscillator(std::make_shared<WaveformOscillator>(keyValue)),
-  keyThreshold(std::make_shared<Parameter>("feedback_keyThreshold", shaderId, "lumaThresh", 0.0, 0.0, 1.0)),
+  keyThreshold(std::make_shared<Parameter>("Key Threshold", shaderId, "lumaThresh", 0.0, 0.0, 1.0)),
   keyThresholdOscillator(std::make_shared<WaveformOscillator>(keyThreshold)),
-  delayAmount(std::make_shared<Parameter>("feedback_delayAmount", shaderId, 10.0, 0.0, 28.0)),
+  delayAmount(std::make_shared<Parameter>("Delay Amount", shaderId, 10.0, 0.0, 28.0)),
   delayAmountOscillator(std::make_shared<WaveformOscillator>(delayAmount)),
-  lumaKeyEnabled(std::make_shared<Parameter>("feedback_luma_key_enabled", shaderId, "lumaEnabled", 0.0, 0.0, 0.0)),
+  lumaKeyEnabled(std::make_shared<Parameter>("Luma Key Enabled", shaderId, "lumaEnabled", 0.0, 0.0, 0.0)),
   shaderId(shaderId),
-  rotate(std::make_shared<Parameter>("feedback_rotate", shaderId, 0.0001, 0.0001, TWO_PI)),
-  xOffset(std::make_shared<Parameter>("feedback_xOffset", shaderId, 0.0, -300.0, 300.0)),
-  yOffset(std::make_shared<Parameter>("feedback_yOffset", shaderId, 0.0, -300.0, 300.0)),
-  scale(std::make_shared<Parameter>("feedback_scale", shaderId, 1.0, 0.0001, 3.0)),
-  rotationOscillator(std::make_shared<WaveformOscillator>(rotate)),
-  xOffsetOscillator(std::make_shared<WaveformOscillator>(xOffset)),
-  yOffsetOscillator(std::make_shared<WaveformOscillator>(yOffset)),
-  scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
   ShaderSettings(shaderId) {
-    parameters = {blend, mix, keyValue, keyThreshold, delayAmount, lumaKeyEnabled, rotate, xOffset, yOffset, scale};
-    oscillators = {blendOscillator, mixOscillator, keyValueOscillator, keyThresholdOscillator, delayAmountOscillator, rotationOscillator, xOffsetOscillator, yOffsetOscillator, scaleOscillator};
+    parameters = {blend, mix, keyValue, keyThreshold, delayAmount, lumaKeyEnabled};
+    oscillators = {blendOscillator, mixOscillator, keyValueOscillator, keyThresholdOscillator, delayAmountOscillator};
+
     load(j);
+  }
+  
+  void load(json j) override {
+    ShaderSettings::load(j);
+    if (!j.is_object()) {
+      return;
+    }
+    
+    feedbackSourceId = j["feedbackSourceId"];
+  }
+  
+  json serialize() override {
+    json j = ShaderSettings::serialize();
+    j["feedbackSourceId"] = feedbackSourceId.c_str();
+    
+    return j;
   }
 };
 

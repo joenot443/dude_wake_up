@@ -10,6 +10,7 @@
 
 #include "ofMain.h"
 #include "ShaderSettings.hpp"
+#include "AudioSourceService.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
 #include "Shader.hpp"
@@ -31,9 +32,11 @@ struct AudioMountainsShader: Shader {
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
+    auto source = AudioSourceService::getService()->selectedAudioSource;
     canvas->begin();
     shader.begin();
-    shader.setUniformTexture("tex", frame->getTexture(), 4);
+    if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() > 0)
+      shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0], 256);
     frame->draw(0, 0);
     shader.end();
     canvas->end();

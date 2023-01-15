@@ -1,21 +1,17 @@
-//
-//  ShaderSource.hpp
-//  dude_wake_up
-//
-//  Created by Joe Crozier on 11/21/22.
-//
-
 #ifndef ShaderSource_hpp
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "RubiksShader.hpp"
 #include "AudioMountainsShader.hpp"
 #include "AudioWaveformShader.hpp"
 #include "CloudShader.hpp"
 #include "EmptyShader.hpp"
 #include "FractalShader.hpp"
 #include "FujiShader.hpp"
+#include "GalaxyShader.hpp"
 #include "MelterShader.hpp"
+#include "MountainsShader.hpp"
 #include "PlasmaShader.hpp"
 #include "RingsShader.hpp"
 #include "Shader.hpp"
@@ -27,6 +23,8 @@
 using json = nlohmann::json;
 
 enum ShaderSourceType {
+  ShaderSource_Rubiks,
+  ShaderSource_Mountains,
   ShaderSource_empty,
   ShaderSource_plasma,
   ShaderSource_fractal,
@@ -37,10 +35,32 @@ enum ShaderSourceType {
   ShaderSource_audioWaveform,
   ShaderSource_audioBumper,
   ShaderSource_audioMountains,
+  ShaderSource_galaxy
 };
 
-static std::string shaderSourceTypeName(ShaderSourceType type) {
-  switch (type) {
+static const ShaderSourceType AvailableShaderSourceTypes[] = {
+  // Available ShaderSourceTypes
+  ShaderSource_Rubiks,
+  ShaderSource_Mountains,
+  ShaderSource_plasma,
+  ShaderSource_fractal,
+  ShaderSource_fuji,
+  ShaderSource_clouds,
+  ShaderSource_melter,
+  ShaderSource_rings,
+  ShaderSource_audioWaveform,
+  ShaderSource_audioBumper,
+  ShaderSource_audioMountains,
+  ShaderSource_galaxy
+};
+
+static std::string shaderSourceTypeName(ShaderSourceType nameType) {
+  switch (nameType) {
+  // Shader Names
+  case ShaderSource_Rubiks: // Name  
+    return "Rubiks"; // Rubiks
+  case ShaderSource_Mountains: // Name
+    return "Mountains";        // Mountain
   case ShaderSource_empty:
     return "Empty";
   case ShaderSource_plasma:
@@ -61,6 +81,8 @@ static std::string shaderSourceTypeName(ShaderSourceType type) {
     return "Audio Bumper";
   case ShaderSource_audioMountains:
     return "Audio Mountains";
+  case ShaderSource_galaxy:
+    return "Galaxy";
   default:
     return "Unknown";
   }
@@ -79,8 +101,21 @@ public:
     addShader(type);
   };
 
-  void addShader(ShaderSourceType type) {
-    switch (type) {
+  void addShader(ShaderSourceType addType) {
+    switch (addType) {
+    // Shader Settings
+    case ShaderSource_Rubiks: { // Settings
+      auto settings = new RubiksSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<RubiksShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Mountains: { // Settings
+      auto settings = new MountainsSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<MountainsShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_empty: {
       auto plasmaSettings = new EmptySettings(UUID::generateUUID(), 0);
       shader = std::make_shared<EmptyShader>(plasmaSettings);
@@ -93,12 +128,19 @@ public:
       shader->setup();
       return;
     }
+    case ShaderSource_galaxy: {
+      auto plasmaSettings = new GalaxySettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<GalaxyShader>(plasmaSettings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_audioBumper: {
       auto plasmaSettings = new AudioBumperSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<AudioBumperShader>(plasmaSettings);
       shader->setup();
       return;
     }
+
     case ShaderSource_audioWaveform: {
       auto plasmaSettings = new AudioWaveformSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<AudioWaveformShader>(plasmaSettings);

@@ -19,12 +19,12 @@ struct ValueOscillator: public Oscillator {
   std::shared_ptr<Parameter> observed = nullptr;
   bool enabled = true;
   float value = 0.0;
-  float span = 10.0;
+  float span = 400.0;
   
   std::vector<float> xRange;
   std::vector<float> yRange;
   
-  ImVector<ImVec2> data;
+  std::vector<float> values;
   ValueOscillator(std::shared_ptr<Parameter> observed);
   void tick();
 };

@@ -23,6 +23,8 @@
 //
 
 struct Vectors {
+  constexpr static const float RELEASE = 0.95;
+
   static std::vector<float> normalize(std::vector<float> vec) {
     std::vector<float> out = {};
     // Get the max value
@@ -46,6 +48,29 @@ struct Vectors {
     for (int i = 0; i < vec.size(); i++) {
       out.push_back(std::sqrt(vec[i]));
     }
+    return out;
+  }
+
+  static std::vector<float> release(std::vector<float> vec,
+                                    std::vector<float> smooth) {
+    if (vec.size() != smooth.size()) {
+      // Return a vector of 0s
+      std::vector<float> out = {};
+      for (int i = 0; i < vec.size(); i++) {
+        out.push_back(0);
+      }
+      return out;
+    }
+
+    std::vector<float> out = std::vector<float>(smooth);
+
+    for (int i = 0; i < vec.size(); i++) {
+      out[i] *= RELEASE;
+      if (vec[i] > smooth[i]) {
+        out[i] = vec[i];
+      }
+    }
+
     return out;
   }
 };

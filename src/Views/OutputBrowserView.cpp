@@ -10,26 +10,32 @@
 #include "VideoSourcePreviewView.hpp"
 
 void OutputBrowserView::setup() {
+  generatePreviewViews();
+  ShaderChainerService::getService()->subscribeToShaderChainerUpdates([this](){
+    generatePreviewViews();
+  });
+}
+
+void OutputBrowserView::generatePreviewViews() {
+  previewViews.clear();
+ 
+ for (auto shaderChainer : ShaderChainerService::getService()->shaderChainers()) {
+   VideoSourcePreviewView videoSourcePreviewView = VideoSourcePreviewView();
+   videoSourcePreviewView.videoSource = shaderChainer;
+   videoSourcePreviewView.setup();
+   previewViews.push_back(videoSourcePreviewView);
+ }
 }
 
 void OutputBrowserView::update() {
-  if (previewViews.size() != ShaderChainerService::getService()->count()) {
-     previewViews.clear();
-    
-    for (auto shaderChainer : ShaderChainerService::getService()->shaderChainers()) {
-      VideoSourcePreviewView videoSourcePreviewView = VideoSourcePreviewView();
-      videoSourcePreviewView.videoSource = shaderChainer;
-      videoSourcePreviewView.setup();
-      previewViews.push_back(videoSourcePreviewView);
-    }
-  }
+
 }
 
 void OutputBrowserView::draw() {
-  drawOutputs();
+  drawPreviewViews();
 }
 
-void OutputBrowserView::drawOutputs() {
+void OutputBrowserView::drawPreviewViews() {
  // Draw a VideoSourcePreviewView for every shaderChainer in the ShaderChainerService
   for (auto previewView : previewViews) {
     previewView.draw();

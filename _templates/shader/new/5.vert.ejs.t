@@ -6,7 +6,9 @@ to: shaders/<%= name %>.vert
 
 uniform mat4 modelViewProjectionMatrix;
 
+// Standard vertex coordinates
 in vec4 position;
+// Uv coordinates
 in vec2 texcoord;
 
 out vec2 coord;

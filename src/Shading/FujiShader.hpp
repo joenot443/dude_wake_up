@@ -83,34 +83,13 @@ public:
   void drawSettings() override {
     CommonViews::H3Title("Fuji");
 
-    ImGui::Text("Cloud 1 X");;
-    ImGui::SetNextItemWidth(150.0);
-    ImGui::SameLine(0, 20);
-    CommonViews::Slider("X", "##cloud1x", settings->cloud1X);
-    CommonViews::MidiSelector(settings->cloud1X);
-    CommonViews::OscillateButton("##x1", settings->cloud1XOscillator, settings->cloud1X);
-  
-    ImGui::Text("Cloud 1 Y");
-    ImGui::SetNextItemWidth(150.0);
-    ImGui::SameLine(0, 20);
-    CommonViews::Slider("Y", "##cloud1y", settings->cloud1Y);
-    CommonViews::MidiSelector(settings->cloud1Y);
-    CommonViews::OscillateButton("##y1", settings->cloud1YOscillator, settings->cloud1Y);
+    CommonViews::ShaderParameter(settings->cloud1X, settings->cloud1XOscillator);
+    
+    CommonViews::ShaderParameter(settings->cloud1Y, settings->cloud1YOscillator);
 
+    CommonViews::ShaderParameter(settings->cloud2X, settings->cloud2XOscillator);
 
-    ImGui::Text("Cloud 2 X");
-    ImGui::SetNextItemWidth(150.0);
-    ImGui::SameLine(0, 20);
-    CommonViews::Slider("X", "##cloud2x", settings->cloud2X);
-    CommonViews::MidiSelector(settings->cloud2X);
-    CommonViews::OscillateButton("##x2", settings->cloud2XOscillator, settings->cloud2X);
-
-    ImGui::Text("Cloud 2 Y");
-    ImGui::SetNextItemWidth(150.0);
-    ImGui::SameLine(0, 20);
-    CommonViews::Slider("Y", "##cloud2y", settings->cloud2Y);
-    CommonViews::MidiSelector(settings->cloud2Y);
-    CommonViews::OscillateButton("##y2", settings->cloud2YOscillator, settings->cloud2Y);
+    CommonViews::ShaderParameter(settings->cloud2Y, settings->cloud2YOscillator);
 
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
   }

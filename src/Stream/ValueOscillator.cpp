@@ -11,8 +11,8 @@
 #include "Video.hpp"
 
 ValueOscillator::ValueOscillator(std::shared_ptr<Parameter> o): Oscillator(o) {
-  data.reserve(100);
-  xRange = {0.0, 10.0};
+  values.reserve(span);
+  xRange = {0.0, span};
   yRange = {o->min, o->max};
   observed = o;
 }
@@ -21,11 +21,10 @@ void ValueOscillator::tick() {
   if (!enabled) return;
   
   float t = frameTime();
-  float xmod = fmodf(t, span);
-  if (!data.empty() && xmod < data.back().x)
-      data.shrink(0);
+  if (values.size() >= span)
+    values.clear();
   
   this->value = observed->value;
   observed->value = this->value;
-  data.push_back(ImVec2(xmod, value));
+  values.push_back(value);
 }

@@ -9,6 +9,7 @@
 #include "ConfigService.hpp"
 #include "FontService.hpp"
 #include "HSBShader.hpp"
+#include "NodeLayoutView.hpp"
 #include "OscillationService.hpp"
 #include "ParameterService.hpp"
 #include "ShaderChainerService.hpp"
@@ -22,19 +23,28 @@
 static const ImVec2 ShaderButtonSize = ImVec2(90, 30);
 
 void MainStageView::setup() {
-  VideoSourceService::getService()->addWebcamVideoSource("Webcam 0", 0);
+    VideoSourceService::getService()->addWebcamVideoSource("Webcam 0", 0);
   VideoSourceService::getService()->addWebcamVideoSource("Webcam 1", 1);
-  VideoSourceService::getService()->addWebcamVideoSource("Webcam 2", 2);
+    VideoSourceService::getService()->addWebcamVideoSource("Webcam 2", 2);
   VideoSourceService::getService()->addShaderVideoSource(ShaderSource_plasma);
   VideoSourceService::getService()->addShaderVideoSource(ShaderSource_fractal);
   VideoSourceService::getService()->addShaderVideoSource(ShaderSource_fuji);
   VideoSourceService::getService()->addShaderVideoSource(ShaderSource_clouds);
+  VideoSourceService::getService()->addShaderVideoSource(
+      ShaderSource_Mountains);
+  VideoSourceService::getService()->addShaderVideoSource(
+      ShaderSource_audioMountains);
+
+  nodeLayoutView.setup();
+
   VideoSourceService::getService()->addShaderVideoSource(ShaderSource_melter);
   VideoSourceService::getService()->addShaderVideoSource(ShaderSource_rings);
+//  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_Rubiks);
   VideoSourceService::getService()->addShaderVideoSource(
       ShaderSource_audioBumper);
   VideoSourceService::getService()->addShaderVideoSource(
       ShaderSource_audioWaveform);
+  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_galaxy);
 
   //  ConfigService::getService()->loadDefaultConfigFile();
   populateShaderChainerViews();
@@ -70,11 +80,12 @@ void MainStageView::update() {
   shaderChainerSettingsView.update();
   shaderChainerStageView.update();
   audioSourceBrowserView.update();
+  nodeLayoutView.update();
 
-  if (videoSourceBrowserView.selectedVideoSource) {
-    videoSourcePreviewView.videoSource =
-        videoSourceBrowserView.selectedVideoSource;
-  }
+//  if (videoSourceBrowserView.selectedVideoSource) {
+//    videoSourcePreviewView.videoSource =
+//        videoSourceBrowserView.selectedVideoSource;
+//  }
 }
 
 void MainStageView::draw() {
@@ -97,6 +108,7 @@ void MainStageView::draw() {
 
   // Chainers
   shaderChainerStageView.draw();
+  nodeLayoutView.draw();
   drawNewShaderChainerButton();
   drawShaderSelection();
 
@@ -110,10 +122,33 @@ void MainStageView::draw() {
 
 void MainStageView::drawMenu() {
   if (ImGui::BeginMenuBar()) {
-    if (ImGui::MenuItem("Save Config")) {
+    // Save Config
+    if (ImGui::BeginMenu("File")) {
+      if (ImGui::MenuItem("Save Config")) {
+        // Present a file dialog to save the config file
+        // Use a default name of "CURRENT_DATE_TIME.json"
+        std::string defaultName =
+            ofGetTimestampString("%Y-%m-%d_%H-%M-%S.json");
+        ofFileDialogResult result =
+            ofSystemSaveDialog(defaultName, "Save File");
+        if (result.bSuccess) {
+          ConfigService::getService()->saveConfigFile(result.getPath());
+        }
+      }
+      if (ImGui::MenuItem("Load Config")) {
+        // Present a file dialog to load the config file
+        ofFileDialogResult result = ofSystemLoadDialog("Open File", false);
+        if (result.bSuccess) {
+          ConfigService::getService()->loadConfigFile(result.getPath());
+        }
+      }
+      ImGui::EndMenu();
+    }
+
+    if (ImGui::MenuItem("Save Default Config")) {
       ConfigService::getService()->saveDefaultConfigFile();
     }
-    if (ImGui::MenuItem("Load Config")) {
+    if (ImGui::MenuItem("Load Default Config")) {
       ConfigService::getService()->loadDefaultConfigFile();
     }
     ImGui::EndMenuBar();
@@ -245,7 +280,6 @@ void MainStageView::drawShaderSelection() {
     float nextX = ImGui::GetItemRectMax().x + ImGui::GetStyle().ItemSpacing.x +
                   ShaderButtonSize.x;
 
-    // Our buttons are both drag sources and drag targets here!
     if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
       // Set payload to carry the index of our item (could be anything)
       ImGui::SetDragDropPayload("NewShader", &shaderType, sizeof(ShaderType));
@@ -257,8 +291,10 @@ void MainStageView::drawShaderSelection() {
     if (n + 1 < sizeof(AvailableShaderTypes) && nextX < maxX) {
       ImGui::SameLine();
     }
-
     n += 1;
   }
+
   ImGui::Text("Drag a Shader to the Chainer");
 }
+
+void MainStageView::keyReleased(int key) { nodeLayoutView.keyReleased(key); }
