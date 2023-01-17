@@ -42,6 +42,10 @@
 		028FA5DD295B1ACE00FE6FE3 /* implot_items.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA5D8295B1ACE00FE6FE3 /* implot_items.cpp */; };
 		028FA5DE295B1ACE00FE6FE3 /* implot_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA5D9295B1ACE00FE6FE3 /* implot_demo.cpp */; };
 		029F419D29742E2000B6DB77 /* Shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 029F419C29742D5000B6DB77 /* Shader.cpp */; };
+		029F41A42975A86400B6DB77 /* TileBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 029F41A22975A86400B6DB77 /* TileBrowserView.cpp */; };
+		029F41A62975F08B00B6DB77 /* AvailableVideoSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 029F41A52975F08B00B6DB77 /* AvailableVideoSource.cpp */; };
+		029F41A92976EF0F00B6DB77 /* ShaderBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 029F41A72976EF0F00B6DB77 /* ShaderBrowserView.cpp */; };
+		029F41AE29770D9800B6DB77 /* AvailableShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 029F41AC29770D9800B6DB77 /* AvailableShader.cpp */; };
 		02B16FC829674AF30043CA74 /* imgui_node_editor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B16F3A29674AF30043CA74 /* imgui_node_editor.cpp */; };
 		02B16FC929674AF30043CA74 /* imgui_node_editor_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B16F4D29674AF30043CA74 /* imgui_node_editor_api.cpp */; };
 		02B16FCA29674AF30043CA74 /* imgui_canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B16F4E29674AF30043CA74 /* imgui_canvas.cpp */; };
@@ -223,6 +227,19 @@
 		028FA5EA295D0FBD00FE6FE3 /* AudioMountains.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = AudioMountains.vert; sourceTree = "<group>"; };
 		028FA5EB295D0FBD00FE6FE3 /* AudioMountains.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = AudioMountains.frag; sourceTree = "<group>"; };
 		029F419C29742D5000B6DB77 /* Shader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Shader.cpp; path = Shading/Shader.cpp; sourceTree = "<group>"; };
+		029F419E29743DCD00B6DB77 /* Rubiks.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Rubiks.vert; sourceTree = "<group>"; };
+		029F419F29743DCD00B6DB77 /* Rubiks.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Rubiks.frag; sourceTree = "<group>"; };
+		029F41A029743DCD00B6DB77 /* VanGogh.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = VanGogh.vert; sourceTree = "<group>"; };
+		029F41A129743DCD00B6DB77 /* VanGogh.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = VanGogh.frag; sourceTree = "<group>"; };
+		029F41A22975A86400B6DB77 /* TileBrowserView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TileBrowserView.cpp; path = Views/TileBrowserView.cpp; sourceTree = "<group>"; };
+		029F41A32975A86400B6DB77 /* TileBrowserView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = TileBrowserView.hpp; path = Views/TileBrowserView.hpp; sourceTree = "<group>"; };
+		029F41A52975F08B00B6DB77 /* AvailableVideoSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AvailableVideoSource.cpp; sourceTree = "<group>"; };
+		029F41A72976EF0F00B6DB77 /* ShaderBrowserView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ShaderBrowserView.cpp; path = Views/ShaderBrowserView.cpp; sourceTree = "<group>"; };
+		029F41A82976EF0F00B6DB77 /* ShaderBrowserView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = ShaderBrowserView.hpp; path = Views/ShaderBrowserView.hpp; sourceTree = "<group>"; };
+		029F41AA29770A0500B6DB77 /* Octahedron.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Octahedron.vert; sourceTree = "<group>"; };
+		029F41AB29770A0500B6DB77 /* Octahedron.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Octahedron.frag; sourceTree = "<group>"; };
+		029F41AC29770D9800B6DB77 /* AvailableShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AvailableShader.cpp; path = Views/AvailableShader.cpp; sourceTree = "<group>"; };
+		029F41AD29770D9800B6DB77 /* AvailableShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = AvailableShader.hpp; path = Views/AvailableShader.hpp; sourceTree = "<group>"; };
 		02A19F3C294B904800D3ECC0 /* BlurShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = BlurShader.hpp; path = Shading/BlurShader.hpp; sourceTree = "<group>"; };
 		02A19F3D294B904800D3ECC0 /* EmptyShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = EmptyShader.hpp; path = Shading/EmptyShader.hpp; sourceTree = "<group>"; };
 		02A19F3E294B904800D3ECC0 /* HSBShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = HSBShader.hpp; path = Shading/HSBShader.hpp; sourceTree = "<group>"; };
@@ -673,6 +690,8 @@
 				02B22C31293AC2420095AC89 /* MelterShader.hpp */,
 				02B22C37294944E10095AC89 /* TileShader.hpp */,
 				029F419C29742D5000B6DB77 /* Shader.cpp */,
+				029F41AC29770D9800B6DB77 /* AvailableShader.cpp */,
+				029F41AD29770D9800B6DB77 /* AvailableShader.hpp */,
 			);
 			name = Shading;
 			path = /Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up/src;
@@ -917,6 +936,7 @@
 				02B280E729148A7500B793D5 /* VideoSource.hpp */,
 				023C634B292BC55A00A8BC9E /* ShaderSource.hpp */,
 				02B049C6296DCD8000F68451 /* AvailableVideoSource.hpp */,
+				029F41A52975F08B00B6DB77 /* AvailableVideoSource.cpp */,
 			);
 			path = Video;
 			sourceTree = "<group>";
@@ -924,6 +944,12 @@
 		02ED90D62954967F002252CC /* shaders */ = {
 			isa = PBXGroup;
 			children = (
+				029F41AB29770A0500B6DB77 /* Octahedron.frag */,
+				029F41AA29770A0500B6DB77 /* Octahedron.vert */,
+				029F419F29743DCD00B6DB77 /* Rubiks.frag */,
+				029F419E29743DCD00B6DB77 /* Rubiks.vert */,
+				029F41A129743DCD00B6DB77 /* VanGogh.frag */,
+				029F41A029743DCD00B6DB77 /* VanGogh.vert */,
 				0284EBE72960988900A572E7 /* RainbowRotator.frag */,
 				0284EBE82960988900A572E7 /* RainbowRotator.vert */,
 				0284EBE429608E5100A572E7 /* Dither.frag */,
@@ -1121,6 +1147,10 @@
 				02ED91032955EDFD002252CC /* AudioSourceBrowserView.hpp */,
 				028FA5C1295B117E00FE6FE3 /* BarPlotView.cpp */,
 				028FA5C2295B117E00FE6FE3 /* BarPlotView.hpp */,
+				029F41A22975A86400B6DB77 /* TileBrowserView.cpp */,
+				029F41A32975A86400B6DB77 /* TileBrowserView.hpp */,
+				029F41A72976EF0F00B6DB77 /* ShaderBrowserView.cpp */,
+				029F41A82976EF0F00B6DB77 /* ShaderBrowserView.hpp */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -1709,6 +1739,7 @@
 				028FA5C3295B117E00FE6FE3 /* BarPlotView.cpp in Sources */,
 				6764CEA4D206EE90B9BEE3D4 /* MainApp.cpp in Sources */,
 				02B22C2F293812800095AC89 /* OutputWindow.cpp in Sources */,
+				029F41AE29770D9800B6DB77 /* AvailableShader.cpp in Sources */,
 				02B280EF291564A100B793D5 /* ShaderChainerService.cpp in Sources */,
 				5D5F66B1ACC05361D4592A52 /* main.cpp in Sources */,
 				02B16FC829674AF30043CA74 /* imgui_node_editor.cpp in Sources */,
@@ -1725,6 +1756,7 @@
 				C41EA6E8F44334B01183F80A /* imgui_impl_opengl2.cpp in Sources */,
 				028FA5B12956062B00FE6FE3 /* Yin.cpp in Sources */,
 				60CBAD6DA6E255EB14CB4FF9 /* imgui_impl_opengl3.cpp in Sources */,
+				029F41A62975F08B00B6DB77 /* AvailableVideoSource.cpp in Sources */,
 				028FA5B72956062B00FE6FE3 /* AccelerateFFT.cpp in Sources */,
 				5C2607C471F8D48C0036C56E /* imgui.cpp in Sources */,
 				E984796BE84AA4315636B6E7 /* imgui_demo.cpp in Sources */,
@@ -1760,6 +1792,7 @@
 				02B280EB2915480E00B793D5 /* FileSource.cpp in Sources */,
 				3AEFE4FA8AD5C72671AD07F8 /* ofxRtMidiOut.cpp in Sources */,
 				1A86B7721CAEBC6F1C572C45 /* ofxBaseMidi.cpp in Sources */,
+				029F41A92976EF0F00B6DB77 /* ShaderBrowserView.cpp in Sources */,
 				028FA5DD295B1ACE00FE6FE3 /* implot_items.cpp in Sources */,
 				63F9FE1D90234FA6DE6F509E /* ofxMidi.cpp in Sources */,
 				881AF887EC2124F4105DE9E1 /* ofxMidiClock.cpp in Sources */,
@@ -1778,6 +1811,7 @@
 				028FA5B62956062B00FE6FE3 /* WindowFunctions.cpp in Sources */,
 				0230658729534E7400489A9F /* AudioSourceService.cpp in Sources */,
 				028FA5B52956062B00FE6FE3 /* CoreTimeDomainFeatures.cpp in Sources */,
+				029F41A42975A86400B6DB77 /* TileBrowserView.cpp in Sources */,
 				83D9F930112E0944444124EE /* ofxMidiOut.cpp in Sources */,
 				1030C647FD06E4D3E054F65D /* ofxMidiTimecode.cpp in Sources */,
 				02ED91042955EDFD002252CC /* AudioSourceBrowserView.cpp in Sources */,

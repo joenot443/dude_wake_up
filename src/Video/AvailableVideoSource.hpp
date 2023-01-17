@@ -17,13 +17,10 @@ struct AvailableVideoSource {
   VideoSourceType type;
   ShaderSourceType shaderType;
   int webcamId;
+  std::shared_ptr<ofTexture> preview;
   
+  void generatePreview();
   
-  AvailableVideoSource(std::string sourceName, VideoSourceType type) :
-  sourceName(sourceName),
-  type(type),
-  availableVideoSourceId(UUID::generateUUID()),
-  shaderType(shaderType),
-  webcamId(webcamId) {}
+  AvailableVideoSource(std::string sourceName, VideoSourceType type, ShaderSourceType shaderType, int webcamId);
 };
 #endif /* AvailableVideoSource_h */

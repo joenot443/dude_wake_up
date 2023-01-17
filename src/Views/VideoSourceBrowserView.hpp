@@ -8,6 +8,7 @@
 #ifndef VideoSourceBrowserView_hpp
 #define VideoSourceBrowserView_hpp
 
+#include "TileBrowserView.hpp"
 #include "VideoSource.hpp"
 #include "ofMain.h"
 #include <stdio.h>
@@ -17,12 +18,13 @@ public:
   void setup();
   void update();
   void draw();
-  
+
 private:
   void drawVideoSourceSelector();
   void drawVideoSourceFrame();
 
   ofFbo videoSourceFbo;
+  TileBrowserView tileBrowserView = TileBrowserView({});
 };
 
 #endif /* VideoSourceBrowserView_hpp */

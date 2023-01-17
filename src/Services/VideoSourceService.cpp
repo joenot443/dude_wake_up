@@ -8,21 +8,34 @@
 #include "VideoSourceService.hpp"
 #include "UUID.hpp"
 #include "WebcamSource.hpp"
+#include "ShaderChainerService.hpp"
 #include "FileSource.hpp"
 
 void VideoSourceService::setup() {
   // Add an AvailableVideoSource for each Webcam and each ShaderType
   for (auto const& x : ofVideoGrabber().listDevices()) {
-    auto webcamSource = std::make_shared<AvailableVideoSource>(x.deviceName, VideoSource_webcam);
-    webcamSource->webcamId = x.id;
+    auto webcamSource = std::make_shared<AvailableVideoSource>(x.deviceName, VideoSource_webcam, ShaderSource_empty, x.id);
     availableSourceMap[webcamSource->availableVideoSourceId] = webcamSource;
   }
   
   for (auto const& x : AvailableShaderSourceTypes) {
-    auto shaderSource = std::make_shared<AvailableVideoSource>(shaderSourceTypeName(x), VideoSource_shader);
+    auto shaderSource = std::make_shared<AvailableVideoSource>(shaderSourceTypeName(x), VideoSource_shader, x, 0);
     shaderSource->shaderType = x;
     availableSourceMap[shaderSource->availableVideoSourceId] = shaderSource;
   }
+}
+
+ofFbo VideoSourceService::previewFbo() {
+  auto fbo = ofFbo();
+  auto blankFbo = ofFbo();
+  fbo.allocate(320, 240);
+  blankFbo.allocate(320, 240);
+
+  auto shader = ShaderChainerService::getService()->shaderForType(
+      ShaderTypeOctahedron, UUID::generateUUID(), 0);
+  shader->setup();
+  shader->shade(&blankFbo, &fbo);
+  return fbo;
 }
 
 // Create a FeedbackSource for the passed in VideoSource and register it in the FeedbackSourceService

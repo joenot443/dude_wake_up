@@ -31,7 +31,8 @@ void MainApp::setup() {
   ImGui::CreateContext();
   ImPlot::CreateContext();
   FontService::getService()->addFontToGui(&gui);
-
+  VideoSourceService::getService();
+  
   mainStageView->setup();
 }
 

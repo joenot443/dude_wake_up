@@ -36,6 +36,13 @@ enum ShaderType {
   ShaderTypeDither,
   ShaderTypeRainbowRotator,
   ShaderTypeRubiks,
+  ShaderTypePlasma,
+  ShaderTypeVanGogh,
+  ShaderTypeFuji,
+  ShaderTypeFractal,
+  ShaderTypeClouds,
+  ShaderTypeMelter,
+  ShaderTypeOctahedron,
 };
 
 static const ShaderType AvailableShaderTypes[] = {
@@ -60,6 +67,10 @@ static const ShaderType AvailableShaderTypes[] = {
 static std::string shaderTypeName(ShaderType type) {
   switch (type) {
     // Shader names
+    case ShaderTypeOctahedron:
+      return "Octahedron";
+    case ShaderTypeVanGogh:
+      return "VanGogh";
     case ShaderTypeRubiks:
       return "Rubiks";
     case ShaderTypeRainbowRotator:

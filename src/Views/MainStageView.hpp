@@ -13,6 +13,7 @@
 #include "OscillatorView.hpp"
 #include "OutputBrowserView.hpp"
 #include "ShaderChainerSettingsView.hpp"
+#include "ShaderBrowserView.hpp"
 #include "ShaderChainerView.hpp"
 #include "ShaderChainersStageView.hpp"
 #include "VideoSource.hpp"
@@ -32,6 +33,7 @@ private:
 
   VideoSourceBrowserView videoSourceBrowserView = VideoSourceBrowserView();
   VideoSourcePreviewView videoSourcePreviewView = VideoSourcePreviewView();
+  ShaderBrowserView shaderBrowserView = ShaderBrowserView();
   OutputBrowserView outputBrowserView = OutputBrowserView();
   ShaderChainerSettingsView shaderChainerSettingsView =
       ShaderChainerSettingsView();
@@ -47,7 +49,7 @@ private:
   void drawShaderChainerSettings();
   void drawSelectedShader();
   void drawOutputBrowser();
-  void drawShaderSelection();
+  void drawShaderBrowser();
 
   void pushShaderChainer(std::shared_ptr<ShaderChainer> shaderChainer);
   void populateShaderChainerViews();

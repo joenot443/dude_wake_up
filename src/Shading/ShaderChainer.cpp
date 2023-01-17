@@ -26,11 +26,6 @@
 
 void ShaderChainer::setup() {
   registerFeedbackDestination();
-  ofFbo::Settings fboSettings;
-  fboSettings.width = 640;
-  fboSettings.height = 480;
-  fboSettings.internalformat = GL_RGB;
-  fboSettings.textureTarget = GL_TEXTURE_2D;
   fbo = ofFbo();
   fbo.allocate(640, 480);
   fbo.begin();
@@ -99,9 +94,9 @@ ofFbo ShaderChainer::processFrame(std::shared_ptr<ofTexture> texture) {
 
   for (auto sharedShader : currentShaders) {
     auto shader = sharedShader.get();
-    
-    ShaderChainerService::getService()->associateShaderWithChainer(shader->id()
-                                                                   , shared_from_this());
+
+    ShaderChainerService::getService()->associateShaderWithChainer(
+        shader->id(), shared_from_this());
     // Skip disabled shaders
     if (!shader->enabled()) {
       continue;
@@ -162,10 +157,10 @@ void ShaderChainer::saveFeedbackFrame(std::shared_ptr<ofTexture> frame) {
 }
 
 void ShaderChainer::deleteShader(shared_ptr<Shader> shader) {
-//  auto it = std::find(shaders.begin(), shaders.end(), shader);
-//  if (it != shaders.end()) {
-//    shaders.erase(it);
-//  }
+  //  auto it = std::find(shaders.begin(), shaders.end(), shader);
+  //  if (it != shaders.end()) {
+  //    shaders.erase(it);
+  //  }
 }
 
 json ShaderChainer::serialize() {

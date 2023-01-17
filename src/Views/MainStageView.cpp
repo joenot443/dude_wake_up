@@ -23,47 +23,44 @@
 static const ImVec2 ShaderButtonSize = ImVec2(90, 30);
 
 void MainStageView::setup() {
-    VideoSourceService::getService()->addWebcamVideoSource("Webcam 0", 0);
-  VideoSourceService::getService()->addWebcamVideoSource("Webcam 1", 1);
-    VideoSourceService::getService()->addWebcamVideoSource("Webcam 2", 2);
-  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_plasma);
-  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_fractal);
-  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_fuji);
-  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_clouds);
-  VideoSourceService::getService()->addShaderVideoSource(
-      ShaderSource_Mountains);
-  VideoSourceService::getService()->addShaderVideoSource(
-      ShaderSource_audioMountains);
-
-  nodeLayoutView.setup();
-
-  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_melter);
-  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_rings);
+//    VideoSourceService::getService()->addWebcamVideoSource("Webcam 0", 0);
+//  VideoSourceService::getService()->addWebcamVideoSource("Webcam 1", 1);
+//    VideoSourceService::getService()->addWebcamVideoSource("Webcam 2", 2);
+//  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_plasma);
+//  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_fractal);
+//  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_fuji);
+//  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_clouds);
+//  VideoSourceService::getService()->addShaderVideoSource(
+//      ShaderSource_Mountains);
+//  VideoSourceService::getService()->addShaderVideoSource(
+//      ShaderSource_audioMountains);
+//  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_melter);
+//  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_rings);
 //  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_Rubiks);
-  VideoSourceService::getService()->addShaderVideoSource(
-      ShaderSource_audioBumper);
-  VideoSourceService::getService()->addShaderVideoSource(
-      ShaderSource_audioWaveform);
-  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_galaxy);
+//  VideoSourceService::getService()->addShaderVideoSource(
+//      ShaderSource_audioBumper);
+//  VideoSourceService::getService()->addShaderVideoSource(
+//      ShaderSource_audioWaveform);
+//  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_galaxy);
+  
+  
+  nodeLayoutView.setup();
+  shaderBrowserView.setup();
 
   //  ConfigService::getService()->loadDefaultConfigFile();
   populateShaderChainerViews();
 
   //  // Create a ShaderChainer with first video source
-  auto shaderChainer = std::make_shared<ShaderChainer>(
-      UUID::generateUUID(), "Main Chainer",
-      VideoSourceService::getService()->videoSources().at(0));
-
-  shaderChainer->setup();
-  // Add an HSB shader to the ShaderChainer
-  shaderChainer->pushShader(ShaderTypeHSB);
-
-  // Add the ShaderChainer to the ShaderChainerService
-  ShaderChainerService::getService()->addShaderChainer(shaderChainer);
-
-  // Create a ShaderChainerView for the ShaderChainer
-  auto shaderChainerView = std::make_shared<ShaderChainerView>(shaderChainer);
-  shaderChainerViews.push_back(shaderChainerView);
+//  auto shaderChainer = std::make_shared<ShaderChainer>(
+//      UUID::generateUUID(), "Main Chainer",
+//      VideoSourceService::getService()->videoSources().at(0));
+//
+//  shaderChainer->setup();
+//  // Add an HSB shader to the ShaderChainer
+//  shaderChainer->pushShader(ShaderTypeHSB);
+//
+//  // Add the ShaderChainer to the ShaderChainerService
+//  ShaderChainerService::getService()->addShaderChainer(shaderChainer);
 
   videoSourceBrowserView.setup();
   videoSourcePreviewView.setup();
@@ -81,19 +78,14 @@ void MainStageView::update() {
   shaderChainerStageView.update();
   audioSourceBrowserView.update();
   nodeLayoutView.update();
-
-//  if (videoSourceBrowserView.selectedVideoSource) {
-//    videoSourcePreviewView.videoSource =
-//        videoSourceBrowserView.selectedVideoSource;
-//  }
 }
 
 void MainStageView::draw() {
-  // Draw a table with 3 columns, sized 1/6, 1/2, 1/3
+  // Draw a table with 3 columns, sized 1/5, 3/5, 1/5
   ImGui::Columns(3, "main_stage_view", false);
-  ImGui::SetColumnWidth(0, ImGui::GetWindowWidth() / 6);
-  ImGui::SetColumnWidth(1, ImGui::GetWindowWidth() / 2);
-  ImGui::SetColumnWidth(2, ImGui::GetWindowWidth() / 3);
+  ImGui::SetColumnWidth(0, ImGui::GetWindowWidth() / 5.);
+  ImGui::SetColumnWidth(1, 3. * (ImGui::GetWindowWidth() / 5.));
+  ImGui::SetColumnWidth(2, ImGui::GetWindowWidth() / 5.);
 
   // | Sources |   ShaderChainers   | Outputs
   // |               New Chainer
@@ -101,16 +93,16 @@ void MainStageView::draw() {
 
   // Sources
   drawVideoSourceBrowser();
+  drawShaderBrowser();
+  
   audioSourceBrowserView.draw();
   drawMenu();
 
   ImGui::NextColumn();
 
   // Chainers
-  shaderChainerStageView.draw();
   nodeLayoutView.draw();
   drawNewShaderChainerButton();
-  drawShaderSelection();
 
   drawSelectedShader();
 
@@ -269,32 +261,8 @@ void MainStageView::drawVideoSourceBrowser() {
 
 void MainStageView::drawOutputBrowser() { outputBrowserView.draw(); }
 
-void MainStageView::drawShaderSelection() {
-  float maxX = ImGui::GetWindowWidth() * (4. / 6.);
-  auto n = 0;
-
-  for (auto shaderType : AvailableShaderTypes) {
-    ImGui::Button(
-        formatString("%s", shaderTypeName(shaderType).c_str()).c_str(),
-        ShaderButtonSize);
-    float nextX = ImGui::GetItemRectMax().x + ImGui::GetStyle().ItemSpacing.x +
-                  ShaderButtonSize.x;
-
-    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
-      // Set payload to carry the index of our item (could be anything)
-      ImGui::SetDragDropPayload("NewShader", &shaderType, sizeof(ShaderType));
-
-      ImGui::Text("%s", shaderTypeName(shaderType).c_str());
-      ImGui::EndDragDropSource();
-    }
-
-    if (n + 1 < sizeof(AvailableShaderTypes) && nextX < maxX) {
-      ImGui::SameLine();
-    }
-    n += 1;
-  }
-
-  ImGui::Text("Drag a Shader to the Chainer");
+void MainStageView::drawShaderBrowser() {
+  shaderBrowserView.draw();
 }
 
 void MainStageView::keyReleased(int key) { nodeLayoutView.keyReleased(key); }

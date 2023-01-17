@@ -7,10 +7,13 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "OctahedronShader.hpp"
 #include "AudioBumperShader.hpp"
+#include "AvailableShader.hpp"
 #include "AudioMountainsShader.hpp"
 #include "AudioWaveformShader.hpp"
 #include "BlurShader.hpp"
+#include "CloudShader.hpp"
 #include "ConfigService.hpp"
 #include "Console.hpp"
 #include "DitherShader.hpp"
@@ -19,6 +22,7 @@
 #include "GlitchShader.hpp"
 #include "HSBShader.hpp"
 #include "KaleidoscopeShader.hpp"
+#include "MelterShader.hpp"
 #include "MirrorShader.hpp"
 #include "MixShader.hpp"
 #include "MountainsShader.hpp"
@@ -31,8 +35,18 @@
 #include "SliderShader.hpp"
 #include "TileShader.hpp"
 #include "TransformShader.hpp"
+#include "VanGoghShader.hpp"
 #include "VideoSourceService.hpp"
 #include "WobbleShader.hpp"
+
+void ShaderChainerService::setup() {
+  // Create an AvailableShader for each type
+  for (auto const shaderType : AvailableShaderTypes) {
+    auto shader = std::make_shared<AvailableShader>(shaderType,
+                                                    shaderTypeName(shaderType));
+    availableShaders.push_back(shader);
+  }
+}
 
 std::vector<std::shared_ptr<ShaderChainer>>
 ShaderChainerService::shaderChainers() {
@@ -87,6 +101,12 @@ void ShaderChainerService::selectShaderChainer(
 
 void ShaderChainerService::selectShader(std::shared_ptr<Shader> shader) {
   selectedShader = shader;
+}
+
+void ShaderChainerService::breakShaderAuxLink(
+    std::shared_ptr<Shader> startShader, std::shared_ptr<Shader> endShader) {
+  startShader->next = nullptr;
+  endShader->aux = nullptr;
 }
 
 void ShaderChainerService::addNewShaderChainer(
@@ -187,7 +207,7 @@ void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader) {
         shader->shaderId.c_str());
     return;
   }
-  
+
   // If the Shader is at the front of out chainer, remove that connection
   if (shaderChainerForShaderId(shader->shaderId) != nullptr) {
     auto chainer = shaderChainerForShaderId(shader->shaderId);
@@ -195,18 +215,18 @@ void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader) {
       chainer->front = nullptr;
     }
   }
-  
+
   shadersMap.erase(shader->shaderId);
   if (shader->parent != nullptr)
     shader->parent->next = nullptr;
 
   shader->next = nullptr;
-  
 
   shader.reset();
 }
 
-void ShaderChainerService::associateShaderWithChainer(std::string shaderId, std::shared_ptr<ShaderChainer> chainer) {
+void ShaderChainerService::associateShaderWithChainer(
+    std::string shaderId, std::shared_ptr<ShaderChainer> chainer) {
   shaderIdShaderChainerMap[shaderId] = chainer;
 }
 
@@ -238,13 +258,15 @@ void ShaderChainerService::breakShaderNextLink(std::shared_ptr<Shader> shader) {
   }
 }
 
-void ShaderChainerService::breakShaderChainerFront(std::shared_ptr<ShaderChainer> shaderChainer) {
+void ShaderChainerService::breakShaderChainerFront(
+    std::shared_ptr<ShaderChainer> shaderChainer) {
   if (shaderChainer != nullptr) {
     shaderChainer->front = nullptr;
   }
 }
 
-std::shared_ptr<ShaderChainer> ShaderChainerService::shaderChainerForShaderId(std::string id) {
+std::shared_ptr<ShaderChainer>
+ShaderChainerService::shaderChainerForShaderId(std::string id) {
   return shaderIdShaderChainerMap[id];
 }
 
@@ -257,6 +279,18 @@ std::shared_ptr<Shader>
 ShaderChainerService::shaderForType(ShaderType type, std::string shaderId,
                                     json shaderJson) {
   switch (type) {
+    case ShaderTypeOctahedron: {
+      auto settings = new OctahedronSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<OctahedronShader>(settings);
+      shader->setup();
+      return shader;
+    }
+  case ShaderTypeVanGogh: {
+    auto settings = new VanGoghSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<VanGoghShader>(settings);
+    shader->setup();
+    return shader;
+  }
   case ShaderTypeRubiks: {
     auto settings = new RubiksSettings(shaderId, shaderJson);
     auto shader = std::make_shared<RubiksShader>(settings);
@@ -392,6 +426,40 @@ ShaderChainerService::shaderForType(ShaderType type, std::string shaderId,
     auto shader = std::make_shared<MixShader>(settings);
     shader.get()->setup();
     return shader;
+  }
+  case ShaderTypePlasma: {
+    auto settings = new PlasmaSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<PlasmaShader>(settings);
+    shader.get()->setup();
+    return shader;
+  }
+  case ShaderTypeFuji: {
+    auto settings = new FujiSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<FujiShader>(settings);
+    shader.get()->setup();
+    return shader;
+    break;
+  }
+  case ShaderTypeFractal: {
+    auto settings = new FractalSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<FractalShader>(settings);
+    shader.get()->setup();
+    return shader;
+    break;
+  }
+  case ShaderTypeClouds: {
+    auto settings = new CloudSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<CloudShader>(settings);
+    shader.get()->setup();
+    return shader;
+    break;
+  }
+  case ShaderTypeMelter: {
+    auto settings = new MeltSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<MeltShader>(settings);
+    shader.get()->setup();
+    return shader;
+    break;
   }
   }
 }

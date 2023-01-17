@@ -1,7 +1,11 @@
+// clang-format off
+
 #ifndef ShaderSource_hpp
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "OctahedronShader.hpp"
+#include "VanGoghShader.hpp"
 #include "RubiksShader.hpp"
 #include "AudioMountainsShader.hpp"
 #include "AudioWaveformShader.hpp"
@@ -16,6 +20,7 @@
 #include "RingsShader.hpp"
 #include "Shader.hpp"
 #include "UUID.hpp"
+#include "ShaderType.hpp"
 
 #include "VideoSource.hpp"
 #include <stdio.h>
@@ -23,6 +28,8 @@
 using json = nlohmann::json;
 
 enum ShaderSourceType {
+  ShaderSource_Octahedron,
+  ShaderSource_VanGogh,
   ShaderSource_Rubiks,
   ShaderSource_Mountains,
   ShaderSource_empty,
@@ -40,6 +47,7 @@ enum ShaderSourceType {
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
   // Available ShaderSourceTypes
+  ShaderSource_Octahedron,
   ShaderSource_Rubiks,
   ShaderSource_Mountains,
   ShaderSource_plasma,
@@ -54,9 +62,50 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_galaxy
 };
 
+static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
+  switch (type) {
+    case ShaderSource_Octahedron:
+      return ShaderTypeOctahedron;
+  case ShaderSource_VanGogh:
+    return ShaderTypeVanGogh;
+  case ShaderSource_Rubiks:
+    return ShaderTypeRubiks;
+  case ShaderSource_Mountains:
+    return ShaderTypeMountains;
+  case ShaderSource_empty:
+    return ShaderTypeNone;
+  case ShaderSource_plasma:
+    return ShaderTypePlasma;
+  case ShaderSource_fractal:
+    return ShaderTypeFractal;
+  case ShaderSource_fuji:
+    return ShaderTypeFuji;
+  case ShaderSource_clouds:
+    return ShaderTypeClouds;
+  case ShaderSource_melter:
+    return ShaderTypeMelter;
+  case ShaderSource_rings:
+    return ShaderTypeRings;
+  case ShaderSource_audioWaveform:
+    return ShaderTypeAudioWaveform;
+  case ShaderSource_audioBumper:
+    return ShaderTypeAudioBumper;
+  case ShaderSource_audioMountains:
+    return ShaderTypeAudioMountains;
+  case ShaderSource_galaxy:
+    return ShaderTypeGalaxy;
+  default:
+    return ShaderTypeNone;
+  }
+}
+
 static std::string shaderSourceTypeName(ShaderSourceType nameType) {
   switch (nameType) {
   // Shader Names
+  case ShaderSource_Octahedron: // Name  
+    return "Octahedron"; // Octahedron
+  case ShaderSource_VanGogh: // Name  
+    return "VanGogh"; // VanGogh
   case ShaderSource_Rubiks: // Name  
     return "Rubiks"; // Rubiks
   case ShaderSource_Mountains: // Name
@@ -104,6 +153,18 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_Octahedron: { // Settings
+      auto settings = new OctahedronSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<OctahedronShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_VanGogh: { // Settings
+      auto settings = new VanGoghSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<VanGoghShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_Rubiks: { // Settings
       auto settings = new RubiksSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<RubiksShader>(settings);

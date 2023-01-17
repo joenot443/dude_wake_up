@@ -41,6 +41,9 @@ public:
   
   std::vector<std::shared_ptr<VideoSource>> videoSources();
   
+  // ofFbo used to draw the Shader previews
+  ofFbo previewFbo();
+  
   // VideoSources which should be used as inputs (non empty, non ShaderChainer)
   std::vector<std::shared_ptr<VideoSource>> inputSources();
   

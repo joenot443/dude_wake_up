@@ -43,15 +43,13 @@ struct FeedbackSettings: public ShaderSettings {
   
   FeedbackSettings(std::string shaderId, json j) :
   index(index),
-  blend(std::make_shared<Parameter>("Blend", shaderId, "blend", 0.0, 0.0, 1.0)),
+  blend(std::make_shared<Parameter>("Blend", shaderId, "blend", 0.5, 0.0, 1.0)),
   blendOscillator(std::make_shared<WaveformOscillator>(blend)),
-  mix(std::make_shared<Parameter>("Mix", shaderId, "fb_mix", 0.0, 0.0, 1.0)),
-  mixOscillator(std::make_shared<WaveformOscillator>(mix)),
   keyValue(std::make_shared<Parameter>("Key Value", shaderId, "lumaKey", 0.0, 0.0, 1.0)),
   keyValueOscillator(std::make_shared<WaveformOscillator>(keyValue)),
   keyThreshold(std::make_shared<Parameter>("Key Threshold", shaderId, "lumaThresh", 0.0, 0.0, 1.0)),
   keyThresholdOscillator(std::make_shared<WaveformOscillator>(keyThreshold)),
-  delayAmount(std::make_shared<Parameter>("Delay Amount", shaderId, 10.0, 0.0, 28.0)),
+  delayAmount(std::make_shared<Parameter>("Delay Amount", shaderId, 20.0, 0.0, 28.0)),
   delayAmountOscillator(std::make_shared<WaveformOscillator>(delayAmount)),
   lumaKeyEnabled(std::make_shared<Parameter>("Luma Key Enabled", shaderId, "lumaEnabled", 0.0, 0.0, 0.0)),
   shaderId(shaderId),

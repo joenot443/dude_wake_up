@@ -11,7 +11,7 @@ void main()
 {
   vec4 tex_color = texture(tex, coord);
   vec4 tex2_color = texture(tex2, coord);
-  outputColor = mix(tex_color, tex2_color, tex2_mix);
+  outputColor = mix(tex2_color, tex_color, tex2_mix);
 }
 
 

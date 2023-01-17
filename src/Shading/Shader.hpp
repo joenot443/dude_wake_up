@@ -39,7 +39,7 @@ struct Shader {
   virtual void clear(){};
   virtual bool supportsAux() { return shaderTypeSupportsAux(type()); }
   
-  std::shared_ptr<FeedbackSource> feedbackDestination();
+  std::shared_ptr<FeedbackSource> feedbackDestination();  
   virtual std::string id() { return settings->shaderId; };
   virtual std::string name() { return shaderTypeName(type()); };
   virtual bool enabled() { return true; };

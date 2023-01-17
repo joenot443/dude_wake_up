@@ -10,5 +10,8 @@
 #include "ShaderChainerService.hpp"
 
 std::shared_ptr<FeedbackSource> Shader::feedbackDestination() {
-  return ShaderChainerService::getService()->shaderChainerForShaderId(id())->feedbackDestination;
+  auto chainer = ShaderChainerService::getService()->shaderChainerForShaderId(id());
+  if (chainer != nullptr) { return chainer->feedbackDestination; }
+  
+  return nullptr;
 }

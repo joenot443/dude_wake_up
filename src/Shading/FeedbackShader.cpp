@@ -14,9 +14,9 @@
 void FeedbackShader::setup() {
   shader.load("../../shaders/feedback");
   if (settings->feedbackSourceId.empty()) {
-    feedbackSource =
-        FeedbackSourceService::getService()->defaultFeedbackSource();
-    settings->feedbackSourceId = feedbackSource->id;
+//    feedbackSource =
+//        FeedbackSourceService::getService()->defaultFeedbackSource();
+//    settings->feedbackSourceId = feedbackSource->id;
   } else {
     feedbackSource = FeedbackSourceService::getService()->feedbackSourceForId(
         settings->feedbackSourceId);
@@ -30,10 +30,13 @@ void FeedbackShader::shade(ofFbo *frame, ofFbo *canvas) {
   int frameIndex = static_cast<int>(settings->delayAmount->max -
                                     settings->delayAmount->value);
   
+  ofTexture feedbackTexture;
   if (aux != nullptr && aux->feedbackDestination() != nullptr) {
-    ofTexture feedbackTexture = aux->feedbackDestination()->getFrame(frameIndex);
-    shader.setUniformTexture("fbTexture", feedbackTexture, 3);
+    feedbackTexture = aux->feedbackDestination()->getFrame(frameIndex);
+  } else if (feedbackDestination() != nullptr) {
+    feedbackTexture = feedbackDestination()->getFrame(frameIndex);
   }
+  shader.setUniformTexture("fbTexture", feedbackTexture, 3);
   
   shader.setUniform1i(settings->lumaKeyEnabled->shaderKey,
                       settings->lumaKeyEnabled->boolValue);
@@ -53,7 +56,6 @@ void FeedbackShader::shade(ofFbo *frame, ofFbo *canvas) {
 void FeedbackShader::disableFeedback() {
   shader.setUniform1f(settings->keyValue->shaderKey, 0.0);
   shader.setUniform1f(settings->keyThreshold->shaderKey, 0.0);
-  shader.setUniform1f(settings->mix->shaderKey, 0.0);
   shader.setUniform1f(settings->blend->shaderKey, 0.0);
 }
 
@@ -97,7 +99,7 @@ void FeedbackShader::drawSettings() {
 
 //  drawFeedbackSourceSelector();
 
-  // Mix
+  // Blend
   CommonViews::ShaderParameter(settings->blend, settings->blendOscillator);
 
   // Delay Amount

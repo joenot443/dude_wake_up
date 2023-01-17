@@ -43,11 +43,6 @@ void NodeLayoutView::draw() {
   auto chainers = ShaderChainerService::getService()->shaderChainers();
   auto shaders = ShaderChainerService::getService()->shaders();
 
-  ImGui::Text("FPS: %.2f (%.2gms)", io.Framerate,
-              io.Framerate ? 1000.0f / io.Framerate : 0.0f);
-
-  ImGui::Separator();
-
   ed::SetCurrentEditor(context);
 
   // Start interaction with editor.
@@ -212,6 +207,7 @@ void NodeLayoutView::draw() {
           break;
         }
         case LinkTypeAux: {
+          ShaderChainerService::getService()->breakShaderAuxLink(link->output->shader, link->input->shader);
           break;
         }
         case LinkTypeShader: {
@@ -238,6 +234,7 @@ void NodeLayoutView::draw() {
         switch (node->type) {
           case NodeTypeSource: {
             VideoSourceService::getService()->removeVideoSource(node->source->id);
+            ShaderChainerService::getService()->removeShaderChainer(node->chainer->chainerId);
             break;
           }
           case NodeTypeShader: {
