@@ -27,7 +27,7 @@ struct OctahedronShader: Shader {
   OctahedronShader(OctahedronSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("../../shaders/Octahedron");
+    shader.load("shaders/Octahedron");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

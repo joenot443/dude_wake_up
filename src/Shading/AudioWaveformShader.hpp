@@ -37,7 +37,7 @@ struct AudioWaveformShader: Shader {
 
   ofShader shader;
   void setup() override {
-    shader.load("../../shaders/AudioWaveform");
+    shader.load("shaders/AudioWaveform");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

@@ -26,7 +26,7 @@ struct EmptyShader: Shader {
   EmptyShader(EmptySettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("../../shaders/empty");
+    shader.load("shaders/empty");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

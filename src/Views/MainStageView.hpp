@@ -40,6 +40,7 @@ private:
   AudioSourceBrowserView audioSourceBrowserView = AudioSourceBrowserView();
   OscillatorView oscillatorView = OscillatorView();
   ShaderChainersStageView shaderChainerStageView = ShaderChainersStageView();
+  FileBrowserView fileBrowserView = FileBrowserView();
 
   void styleWindow();
   void drawMenu();
@@ -59,7 +60,6 @@ public:
   void update();
   void draw();
   void keyReleased(int key);
-
 };
 
 #endif /* MainStageView_hpp */

@@ -43,7 +43,6 @@ public:
   std::shared_ptr<FeedbackSource> feedbackDestination;
 
   std::string chainerId;
-  std::shared_ptr<FileBrowserSettings> fileBrowserSettings;
 
   void pushShader(ShaderType shaderType);
   void deleteShader(std::shared_ptr<Shader> shader);
@@ -54,7 +53,6 @@ public:
   ShaderChainer(std::string chainerId, std::string name,
                 std::shared_ptr<VideoSource> source)
       : chainerId(chainerId),
-        fileBrowserSettings(std::make_shared<FileBrowserSettings>()),
         creationTime(ofGetUnixTime()),
         name(name), source(source),
         VideoSource(UUID::generateUUID(), name, VideoSource_chainer)

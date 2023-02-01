@@ -57,7 +57,7 @@ struct MirrorShader : Shader {
   MirrorShader(MirrorSettings *settings)
       : settings(settings), Shader(settings){};
 
-  void setup() override { shader.load("../../shaders/mirror"); }
+  void setup() override { shader.load("shaders/mirror"); }
 
   ShaderType type() override { return ShaderTypeMirror; }
 
@@ -83,8 +83,6 @@ struct MirrorShader : Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Mirror");
-
     // Mirror X
     CommonViews::ShaderCheckbox(settings->mirrorXEnabled);
 

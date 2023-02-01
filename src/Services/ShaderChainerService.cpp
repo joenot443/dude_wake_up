@@ -7,6 +7,10 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "SobelShader.hpp"
+#include "TriangleMapShader.hpp"
+#include "LiquidShader.hpp"
+#include "DiscoShader.hpp"
 #include "OctahedronShader.hpp"
 #include "AudioBumperShader.hpp"
 #include "AvailableShader.hpp"
@@ -279,6 +283,30 @@ std::shared_ptr<Shader>
 ShaderChainerService::shaderForType(ShaderType type, std::string shaderId,
                                     json shaderJson) {
   switch (type) {
+    case ShaderTypeSobel: {
+      auto settings = new SobelSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<SobelShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeTriangleMap: {
+      auto settings = new TriangleMapSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<TriangleMapShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeLiquid: {
+      auto settings = new LiquidSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<LiquidShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeDisco: {
+      auto settings = new DiscoSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<DiscoShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeOctahedron: {
       auto settings = new OctahedronSettings(shaderId, shaderJson);
       auto shader = std::make_shared<OctahedronShader>(settings);

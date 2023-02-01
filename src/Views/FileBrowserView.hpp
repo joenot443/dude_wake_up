@@ -8,6 +8,9 @@
 #ifndef FileBrowserView_hpp
 #define FileBrowserView_hpp
 #include "Parameter.hpp"
+#include "TileBrowserView.hpp"
+#include "AvailableVideoSource.hpp"
+#include "ofMain.h"
 
 #include <stdio.h>
 #include <string>
@@ -17,6 +20,7 @@ struct File {
   std::string name;
   std::string path;
   bool isDirectory;
+  ofTexture previewTexture;
 
   File(std::string path, bool isDirectory) {
     this->path = path;
@@ -25,27 +29,21 @@ struct File {
   };
 };
 
-struct FileBrowserSettings {
+struct FileBrowserView {
   std::vector<File> files = {};
+  std::vector<std::shared_ptr<AvailableVideoSource>> sources;
   std::shared_ptr<File> selectedFile = nullptr;
 
-  std::string currentDirectory = "/";
+  std::string currentDirectory = ofFilePath::getUserHomeDir();
   
-  void refresh();
-};
-
-struct FileBrowserView {
 public:
   void setup();
   void update();
   void draw();
+  void refresh();
   void teardown();
-  
-  std::shared_ptr<FileBrowserSettings> settings;
-  
-  FileBrowserView(std::shared_ptr<FileBrowserSettings> settings) {
-    this->settings = settings;
-  }
+
+  TileBrowserView tileBrowserView = TileBrowserView({});
 };
 
 #endif /* FileBrowserView_hpp */

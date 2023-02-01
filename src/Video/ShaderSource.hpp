@@ -4,6 +4,8 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "TriangleMapShader.hpp"
+#include "DiscoShader.hpp"
 #include "OctahedronShader.hpp"
 #include "VanGoghShader.hpp"
 #include "RubiksShader.hpp"
@@ -28,6 +30,8 @@
 using json = nlohmann::json;
 
 enum ShaderSourceType {
+  ShaderSource_TriangleMap,
+  ShaderSource_Disco,
   ShaderSource_Octahedron,
   ShaderSource_VanGogh,
   ShaderSource_Rubiks,
@@ -47,6 +51,8 @@ enum ShaderSourceType {
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
   // Available ShaderSourceTypes
+  ShaderSource_TriangleMap,
+  ShaderSource_Disco,
   ShaderSource_Octahedron,
   ShaderSource_Rubiks,
   ShaderSource_Mountains,
@@ -64,8 +70,13 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
-    case ShaderSource_Octahedron:
-      return ShaderTypeOctahedron;
+// shaderTypeForShaderSourceType
+  case ShaderSource_TriangleMap:
+    return ShaderTypeTriangleMap;
+  case ShaderSource_Disco:
+    return ShaderTypeDisco;
+  case ShaderSource_Octahedron:
+    return ShaderTypeOctahedron;
   case ShaderSource_VanGogh:
     return ShaderTypeVanGogh;
   case ShaderSource_Rubiks:
@@ -102,6 +113,10 @@ static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
 static std::string shaderSourceTypeName(ShaderSourceType nameType) {
   switch (nameType) {
   // Shader Names
+  case ShaderSource_TriangleMap: // Name  
+    return "TriangleMap"; // TriangleMap
+  case ShaderSource_Disco: // Name  
+    return "Disco"; // Disco
   case ShaderSource_Octahedron: // Name  
     return "Octahedron"; // Octahedron
   case ShaderSource_VanGogh: // Name  
@@ -153,6 +168,18 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_TriangleMap: { // Settings
+      auto settings = new TriangleMapSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<TriangleMapShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Disco: { // Settings
+      auto settings = new DiscoSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<DiscoShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_Octahedron: { // Settings
       auto settings = new OctahedronSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<OctahedronShader>(settings);

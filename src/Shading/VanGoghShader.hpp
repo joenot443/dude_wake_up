@@ -27,7 +27,7 @@ struct VanGoghShader: Shader {
   VanGoghShader(VanGoghSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("../../shaders/VanGogh");
+    shader.load("shaders/VanGogh");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

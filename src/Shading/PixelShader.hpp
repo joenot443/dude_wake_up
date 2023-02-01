@@ -25,7 +25,7 @@ struct PixelSettings : public ShaderSettings {
 
   PixelSettings(std::string shaderId, json j)
       : size(std::make_shared<Parameter>("pixel_size", shaderId, 24.1, 1.0,
-                                         64.0)),
+                                         200.0)),
         enabled(
             std::make_shared<Parameter>("enabled", shaderId, 0.0, 1.0, 0.0)),
         sizeOscillator(std::make_shared<WaveformOscillator>(size)),
@@ -42,7 +42,7 @@ struct PixelShader : Shader {
 
   ofShader shader;
 
-  void setup() override { shader.load("../../shaders/pixel"); }
+  void setup() override { shader.load("shaders/pixel"); }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
     canvas->begin();
@@ -60,8 +60,6 @@ struct PixelShader : Shader {
   ShaderType type() override { return ShaderTypePixelate; }
 
   void drawSettings() override {
-    CommonViews::H3Title("Pixelation");
-
     CommonViews::ShaderParameter(settings->size, settings->sizeOscillator);
   }
 };

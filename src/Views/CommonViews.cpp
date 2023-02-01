@@ -164,6 +164,16 @@ void CommonViews::ResetButton(std::string id,
   ImGui::PopStyleVar();
 }
 
+bool CommonViews::IconButton(const char* icon, std::string id) {
+  auto buttonId = formatString("%s##%s", icon, id.c_str());
+  ImGui::PushFont(FontService::getService()->audio);
+
+  auto button = ImGui::Button(buttonId.c_str());
+  ImGui::PopFont();
+
+  return button;
+}
+
 void CommonViews::OscillateButton(std::string id, std::shared_ptr<Oscillator> o,
                                   std::shared_ptr<Parameter> p) {
   ImGui::PushFont(FontService::getService()->icon);
@@ -245,4 +255,8 @@ void CommonViews::HorizontallyAligned(float width, float alignment) {
 void CommonViews::CenteredVerticalLine() {
   HorizontallyAligned(1);
   ImGui::Text("|");
+}
+
+ImVec2 CommonViews::windowCanvasSize() {
+  return ImGui::GetWindowContentRegionMax();
 }

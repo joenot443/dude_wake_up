@@ -10,6 +10,7 @@
 #include "FeedbackSourceService.hpp"
 #include "VideoSourceService.hpp"
 #include "ShaderChainerService.hpp"
+#include "LayoutStateService.hpp"
 #include "ParameterService.hpp"
 
 using json = nlohmann::json;
@@ -24,18 +25,21 @@ FeedbackSourceService *FeedbackSourceService::service = 0;
 VideoSourceService *VideoSourceService::service = 0;
 ShaderChainerService *ShaderChainerService::service = 0;
 AudioSourceService *AudioSourceService::service = 0;
+LayoutStateService *LayoutStateService::service = 0;
 
-//========================================================================
+
 int main( ){
+  ofSetDataPathRoot("../Resources/data/");
   ofGLFWWindowSettings settings;
   // Set the window size to be the same as the monitor size
   settings.setSize(1440, 900);
   settings.setGLVersion(3, 2);
-//  ofSetupOpenGL(1280,720, OF_WINDOW);
-//  settings.windowMode = OF_WINDOW;
+  //  ofSetupOpenGL(1280,720, OF_WINDOW);
+  //  settings.windowMode = OF_WINDOW;
   auto window = ofCreateWindow(settings);
   auto app = shared_ptr<MainApp>(new MainApp(window));
   ofSetFrameRate(60);
   ofRunApp(window, app);
   ofRunMainLoop();
 }
+

@@ -50,7 +50,7 @@ public:
   HSBSettings *settings;
   
   void setup() override {
-    shader.load("../../shaders/hsb");
+    shader.load("shaders/hsb");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -69,9 +69,7 @@ public:
     return ShaderTypeHSB;
   }
   
-  void drawSettings() override {
-    CommonViews::H3Title("Basic (HSB)");
-    
+  void drawSettings() override {   
     CommonViews::ShaderParameter(settings->hue, settings->hueOscillator);
     CommonViews::ShaderParameter(settings->saturation, settings->saturationOscillator);
     CommonViews::ShaderParameter(settings->brightness, settings->brightnessOscillator);

@@ -27,7 +27,7 @@ struct RingsShader: Shader {
   RingsShader(RingsSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("../../shaders/Rings");
+    shader.load("shaders/Rings");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

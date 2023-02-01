@@ -80,7 +80,7 @@ void main()
   
   
   // shading/lighting
-  vec3 col = vec3(0.309, 0.4, 0.41);
+  vec3 col = vec3(0.209, 0.22, 0.41);
   if( t<tmax )
   {
     vec3 pos = ro + t*rd;

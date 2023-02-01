@@ -42,7 +42,7 @@ struct TransformSettings : public ShaderSettings {
         rotate(
             std::make_shared<Parameter>("rotate", shaderId, 0.0, 0.0, 360.0)),
         autoRotate(std::make_shared<Parameter>("autoRotate", shaderId, 0.0, 0.0,
-                                               30.0)),
+                                               2.0)),
         xTranslateOscillator(std::make_shared<WaveformOscillator>(xTranslate)),
         yTranslateOscillator(std::make_shared<WaveformOscillator>(yTranslate)),
         xScaleOscillator(std::make_shared<WaveformOscillator>(xScale)),
@@ -107,8 +107,6 @@ public:
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Transform");
-
     // Translate X
     CommonViews::ShaderParameter(settings->xTranslate,
                                  settings->xTranslateOscillator);

@@ -6,10 +6,12 @@
 //
 
 #include "AudioSourceBrowserView.hpp"
+#include "CommonViews.hpp"
 #include "AudioSourceService.hpp"
 #include "FontService.hpp"
 #include "OscillatorView.hpp"
 #include "BarPlotView.hpp"
+#include "LayoutStateService.hpp"
 #include "Strings.hpp"
 #include "ofxImGui.h"
 
@@ -18,8 +20,18 @@ void AudioSourceBrowserView::setup() {}
 void AudioSourceBrowserView::update() {}
 
 void AudioSourceBrowserView::draw() {
-  drawAudioSourceSelector();
-  drawSelectedAudioSource();
+  ImVec2 size = ImVec2(ImGui::GetContentRegionAvail().x, ofGetWindowHeight() * 2./5.);
+  ImGui::SetNextItemOpen(LayoutStateService::getService()->showAudioSettings);
+  
+  if (ImGui::CollapsingHeader("Audio Reactivity Settings", ImGuiTreeNodeFlags_None))
+  {
+    LayoutStateService::getService()->showAudioSettings = true;
+    ImGui::BeginChild("##AudioSourceBrowser");
+    drawSelectedAudioSource();
+    ImGui::EndChild();
+  } else {
+    LayoutStateService::getService()->showAudioSettings = false;
+  }
 }
 
 // Draw a list of audio sources as items in a ListBox
@@ -41,37 +53,39 @@ void AudioSourceBrowserView::drawAudioSourceSelector() {
 
 void AudioSourceBrowserView::drawSelectedAudioSource() {
   auto source = AudioSourceService::getService()->selectedAudioSource;
+  
+  CommonViews::H3Title("Audio");
+  
   if (source) {
-    ImGui::PushFont(FontService::getService()->h3);
-    ImGui::Text("Selected Audio Source");
-    ImGui::PopFont();
-    ImGui::Text(source->name.c_str());
-    
-    if (ImGui::BeginTable("##audioAnalysis", 3)) {
+    if (ImGui::BeginTable("##audioAnalysis", 4)) {
       ImGui::TableNextColumn();
-      ImGui::Text("ZCR");
-      ImGui::Text(formatString("%.5F", source->audioAnalysis.zcr->value).c_str());
+      ImGui::Text("RMS");
+      ImGui::Text("%s", formatString("%.5F", source->audioAnalysis.rms->value).c_str());
       OscillatorView::draw(std::static_pointer_cast<Oscillator>(
-                                                                source->audioAnalysis.zcrOscillator),
-                           source->audioAnalysis.zcr);
+                                                                source->audioAnalysis.rmsOscillator),
+                           source->audioAnalysis.rms);
       
       ImGui::TableNextColumn();
       ImGui::Text("CSD");
-      ImGui::Text(formatString("%.5F", source->audioAnalysis.csd->value).c_str());
+      ImGui::Text("%s", formatString("%.5F", source->audioAnalysis.csd->value).c_str());
       OscillatorView::draw(std::static_pointer_cast<Oscillator>(
                                                                 source->audioAnalysis.csdOscillator),
                            source->audioAnalysis.csd);
       ImGui::TableNextColumn();
       ImGui::Text("Energy");
       ImGui::Text(
-                  formatString("%.5F", source->audioAnalysis.energy->value).c_str());
+                  "%s", formatString("%.5F", source->audioAnalysis.energy->value).c_str());
       OscillatorView::draw(std::static_pointer_cast<Oscillator>(
                                                                 source->audioAnalysis.energyOscillator),
                            source->audioAnalysis.energy);
+      
+      ImGui::TableNextColumn();
+      ImGui::Text("Mel Frequency Buckets");
+      BarPlotView::draw(source->audioAnalysis.melFrequencySpectrum, "mel");
+      
       ImGui::EndTable();
     }
-    //    BarPlotView::draw(source->audioAnalysis.melFrequencySpectrum, "mel");
-    //    BarPlotView::draw(source->audioAnalysis.magnitudeSpectrum, "mag");
     
+    ImGui::Text("Selected Audio Source: %s", source->name.c_str());
   }
 }

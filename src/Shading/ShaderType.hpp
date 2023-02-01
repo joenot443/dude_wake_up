@@ -43,16 +43,14 @@ enum ShaderType {
   ShaderTypeClouds,
   ShaderTypeMelter,
   ShaderTypeOctahedron,
+  ShaderTypeDisco,
+  ShaderTypeLiquid,
+  ShaderTypeTriangleMap,
+  ShaderTypeSobel,
 };
 
 static const ShaderType AvailableShaderTypes[] = {
-  // Available shaders
-  ShaderTypeRainbowRotator, // Generated
-  ShaderTypeDither, // Generated
-  ShaderTypeSlider, // Generated
-  ShaderTypeWobble, // Generated
-  ShaderTypeRGBShift, // Generated
-  ShaderTypeHSB, 
+  ShaderTypeHSB,
   ShaderTypeBlur, 
   ShaderTypePixelate, 
   ShaderTypeMirror, 
@@ -61,12 +59,28 @@ static const ShaderType AvailableShaderTypes[] = {
   ShaderTypeAscii, 
   ShaderTypeKaleidoscope, 
   ShaderTypeTile, 
-  ShaderTypeMix
+  ShaderTypeMix,
+  ShaderTypeLiquid, // Generated
+  ShaderTypeRainbowRotator, // Generated
+  ShaderTypeDither, // Generated
+  ShaderTypeSlider, // Generated
+  ShaderTypeWobble, // Generated
+  ShaderTypeRGBShift, // Generated
+  ShaderTypeSobel, // Generated
+  // Available shaders
 };
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) {
     // Shader names
+    case ShaderTypeSobel:
+      return "Sobel";
+    case ShaderTypeTriangleMap:
+      return "TriangleMap";
+    case ShaderTypeLiquid:
+      return "Liquid";
+    case ShaderTypeDisco:
+      return "Disco";
     case ShaderTypeOctahedron:
       return "Octahedron";
     case ShaderTypeVanGogh:

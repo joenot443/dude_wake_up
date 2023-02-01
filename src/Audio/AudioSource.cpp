@@ -24,7 +24,7 @@ void AudioSource::setup() {
   };
   gist.setAudioFrameSize(512);
   gist.setSamplingFrequency(44100);
-  stream.setup(settings);
+  stream.setup (settings);
 }
 
 void AudioSource::disable() {
@@ -43,7 +43,6 @@ void AudioSource::audioIn(ofSoundBuffer &soundBuffer) {
   
   // If we have mostly silence, return
   if (abs(avg) < 0.001) {
-    log("Mostly silence: %.4f", abs(avg));
     return;
   }
 

@@ -10,6 +10,7 @@
 #include "ShaderChainerService.hpp"
 #include "TransformShader.hpp"
 #include "UUID.hpp"
+#include "LayoutStateService.hpp"
 #include "VideoSourceService.hpp"
 #include "WebcamSource.hpp"
 #include "functional"
@@ -27,6 +28,7 @@ void MainApp::setup() {
   ModulationService::getService();
   MidiService::getService();
   AudioSourceService::getService();
+  LayoutStateService::getService();
   gui.setup();
   ImGui::CreateContext();
   ImPlot::CreateContext();
@@ -61,7 +63,9 @@ void MainApp::drawMainStage() {
   ImGui::SetNextWindowPos(ImVec2(0, 0));
   ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove |
                                  ImGuiWindowFlags_NoTitleBar |
-                                 ImGuiWindowFlags_MenuBar;
+                                 ImGuiWindowFlags_MenuBar |
+                ImGuiWindowFlags_NoBringToFrontOnFocus;
+  
   ImGui::Begin("Main Stage", NULL, windowFlags);
   ImGui::PushFont(FontService::getService()->p);
   mainStageView->draw();

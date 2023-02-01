@@ -9,6 +9,7 @@
 #define VideoSourceBrowserView_hpp
 
 #include "TileBrowserView.hpp"
+#include "FileBrowserView.hpp"
 #include "VideoSource.hpp"
 #include "ofMain.h"
 #include <stdio.h>
@@ -20,11 +21,11 @@ public:
   void draw();
 
 private:
-  void drawVideoSourceSelector();
-  void drawVideoSourceFrame();
-
   ofFbo videoSourceFbo;
   TileBrowserView tileBrowserView = TileBrowserView({});
+  FileBrowserView fileBrowserView = FileBrowserView();
+  std::vector<TileItem> webcamItems;
+  std::vector<TileItem> shaderItems;
 };
 
 #endif /* VideoSourceBrowserView_hpp */

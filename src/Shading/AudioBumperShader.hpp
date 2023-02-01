@@ -28,7 +28,7 @@ struct AudioBumperShader : Shader {
   AudioBumperShader(AudioBumperSettings *settings)
       : settings(settings), Shader(settings){};
   ofShader shader;
-  void setup() override { shader.load("../../shaders/AudioBumper"); }
+  void setup() override { shader.load("shaders/AudioBumper"); }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
     auto source = AudioSourceService::getService()->selectedAudioSource;

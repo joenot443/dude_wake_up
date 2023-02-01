@@ -13,6 +13,7 @@ void FileSource::setup() {
   player.load(path);
   auto wd = player.getWidth();
   player.play();
+  player.setVolume(0.0);
   frameTexture = std::make_shared<ofTexture>();
   frameTexture->allocate(1280, 720, GL_RGB);
   frameBuffer.bind(GL_SAMPLER_2D_RECT);

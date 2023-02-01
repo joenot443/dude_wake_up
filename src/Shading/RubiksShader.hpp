@@ -27,7 +27,7 @@ struct RubiksShader: Shader {
   RubiksShader(RubiksSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("../../shaders/Rubiks");
+    shader.load("shaders/Rubiks");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

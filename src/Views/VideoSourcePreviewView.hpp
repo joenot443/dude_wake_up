@@ -18,6 +18,9 @@ private:
   ofFbo previewFbo;
 public:
   std::shared_ptr<VideoSource> videoSource;
+  ImVec2 lastWindowSize;
+  ImVec2 frameSize;
+  void resize();
   void setup();
   void update();
   void draw();

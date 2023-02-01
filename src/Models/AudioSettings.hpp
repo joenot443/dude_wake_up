@@ -21,6 +21,8 @@
 #include <boost/accumulators/framework/extractor.hpp>
 #include <boost/accumulators/statistics/rolling_count.hpp>
 #include <boost/accumulators/statistics/rolling_mean.hpp>
+#include <boost/accumulators/statistics/max.hpp>
+#include <boost/accumulators/statistics/min.hpp>
 #include <boost/accumulators/statistics/rolling_sum.hpp>
 #include <boost/accumulators/statistics/rolling_window.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
@@ -28,32 +30,40 @@
 using namespace boost::accumulators;
 
 struct AudioAnalysisParameter {
-  float minSeen = 0.0;
-  float maxSeen = 0.0;
+  float windowMin = 0.0;
+  float windowMax = 0.0;
 
   float value = 0.0;
   float rollingMean = 0.0;
+  
+  // Vary from 0.0 to 1.0: rollingMean / windowMax:
+  float rollingMeanRelation = 0.0;
 
   std::shared_ptr<Parameter> param;
-  accumulator_set<double, stats<tag::rolling_mean > > acc;
+  accumulator_set<double, stats<tag::rolling_mean > > valueAcc;
+  accumulator_set<double, stats<tag::max, tag::min>> minMaxAcc;
 
   AudioAnalysisParameter(std::shared_ptr<Parameter> param) :
-  acc(tag::rolling_window::window_size = 10),
+  valueAcc(tag::rolling_window::window_size = 5),
+  minMaxAcc(tag::rolling_window::window_size = 400),
   param(param) {}
 
   void tick(float val) {
     value = val;
-    minSeen = fmin(minSeen, abs(val));
-    maxSeen = fmax(maxSeen, abs(val));
-    acc(relationToRange());
-    rollingMean = rolling_mean(acc);
+    valueAcc(val);
+    minMaxAcc(val);
+    windowMin = boost::accumulators::min(minMaxAcc);
+    windowMax = boost::accumulators::max(minMaxAcc);
     
-    param->value = rollingMean;
+    rollingMean = rolling_mean(valueAcc);
+    rollingMeanRelation = relationToRange(rollingMean);
+    
+    param->value = rollingMeanRelation;
   }
 
-  float relationToRange() {
-    float range = maxSeen - minSeen;
-    return value / range;
+  float relationToRange(float v) {
+    float range = windowMax - windowMin;
+    return v / range;
   }
 };
 

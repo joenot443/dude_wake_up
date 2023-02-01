@@ -17,7 +17,7 @@ struct GlitchShader: Shader {
   ofShader shader;
 public:
   void setup() override {
-    shader.load("../../shaders/shader_glitch");
+    shader.load("shaders/shader_glitch");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

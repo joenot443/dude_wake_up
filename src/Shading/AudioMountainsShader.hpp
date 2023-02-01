@@ -28,7 +28,7 @@ struct AudioMountainsShader: Shader {
   AudioMountainsShader(AudioMountainsSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("../../shaders/AudioMountains");
+    shader.load("shaders/AudioMountains");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -51,8 +51,6 @@ struct AudioMountainsShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("AudioMountains");
-
   }
 };
 

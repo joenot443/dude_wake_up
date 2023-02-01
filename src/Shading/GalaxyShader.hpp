@@ -27,7 +27,7 @@ struct GalaxyShader: Shader {
   GalaxyShader(GalaxySettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("../../shaders/Galaxy");
+    shader.load("shaders/Galaxy");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -51,8 +51,6 @@ struct GalaxyShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Galaxy");
-
   }
 };
 

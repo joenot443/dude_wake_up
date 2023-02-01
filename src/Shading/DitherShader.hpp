@@ -34,7 +34,7 @@ struct DitherShader : Shader {
   DitherShader(DitherSettings *settings)
       : settings(settings), Shader(settings){};
   ofShader shader;
-  void setup() override { shader.load("../../shaders/Dither"); }
+  void setup() override { shader.load("shaders/Dither"); }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
     canvas->begin();
@@ -53,7 +53,6 @@ struct DitherShader : Shader {
   ShaderType type() override { return ShaderTypeDither; }
 
   void drawSettings() override {
-    CommonViews::H3Title("Dither");
     CommonViews::ShaderParameter(settings->shape, settings->shapeOscillator);
   }
 };

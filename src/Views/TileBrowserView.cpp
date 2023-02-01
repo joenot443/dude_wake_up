@@ -11,21 +11,23 @@
 static const ImVec2 TileSize = ImVec2(120, 80);
 
 void TileBrowserView::setup(){
-
 };
 
 void TileBrowserView::draw() {
-//  ImGui::ShowDemoWindow();
-  float maxX = ImGui::GetContentRegionAvail().x;
   auto n = 0;
-  
+  auto size = ImGui::GetContentRegionAvail();
   ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar;
-  ImGui::BeginChild(tileBrowserId.c_str(), ImVec2(maxX, 260), false, window_flags);
+  ImGui::BeginChild(tileBrowserId.c_str(), size, false, window_flags);
   
   
   for (auto tile : tileItems) {
     if (tile.textureID != nullptr) {
-      ImGui::ImageButton(tile.textureID, TileSize);
+      float xPos = ImGui::GetCursorPosX();
+      ImGui::Image(tile.textureID, TileSize);
+      ImGui::SetItemAllowOverlap();
+      ImGui::SameLine();
+      ImGui::SetCursorPosX(xPos);
+      ImGui::Button(tile.name.c_str(), TileSize);
     } else {
       ImGui::Button(tile.name.c_str(), TileSize);
     }
@@ -35,7 +37,7 @@ void TileBrowserView::draw() {
     float nextX = ImGui::GetItemRectMax().x + ImGui::GetStyle().ItemSpacing.x +
                   TileSize.x;
 
-    if (n + 1 < sizeof(tileItems) && nextX < maxX) {
+    if (n + 1 < sizeof(tileItems) && nextX < size.x) {
       ImGui::SameLine();
     }
     n += 1;

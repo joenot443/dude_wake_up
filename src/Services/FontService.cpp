@@ -13,22 +13,24 @@ void FontService::addFontToGui(ofxImGui::Gui *gui) {
   ImFontConfig config;
   config.MergeMode = false;
   static const ImWchar icon_ranges[] = { 0xe000, 0xF8FF, 0 };
-  
+  static const ImWchar audio_icon_range[] = {ICON_MIN_FAD, ICON_MAX_FAD, 0};
 
-  h1 = gui->addFont("../../fonts/Roboto-Medium.ttf", 36);
+  h1 = gui->addFont("Roboto-Medium.ttf", 36);
   
-  h2 = gui->addFont("../../fonts/Roboto-Medium.ttf", 24);
+  h2 = gui->addFont("Roboto-Medium.ttf", 24);
   
-  h3 = gui->addFont("../../fonts/Roboto-Medium.ttf", 18);
+  h3 = gui->addFont("Roboto-Medium.ttf", 18);
   
-  h4 = gui->addFont("../../fonts/Roboto-Bold.ttf", 16);
+  h4 = gui->addFont("Roboto-Bold.ttf", 16);
   
-  p = gui->addFont("../../fonts/Roboto-Regular.ttf", 14);
-  icon = gui->addFont("../../fonts/OpenFontIcons.ttf", 14, &config, icon_ranges);
+  p = gui->addFont("Roboto-Regular.ttf", 14);
+  icon = gui->addFont("OpenFontIcons.ttf", 14, &config, icon_ranges);
 
-  b = gui->addFont("../../fonts/Roboto-Bold.ttf", 14);
+  b = gui->addFont("Roboto-Bold.ttf", 14);
   
-  i = gui->addFont("../../fonts/Roboto-Italic.ttf", 14);
+  audio = gui->addFont("fontaudio.ttf", 20, &config, audio_icon_range);
+  
+  i = gui->addFont("Roboto-Italic.ttf", 14);
   
   int width, height;
   unsigned char* pixels = NULL;

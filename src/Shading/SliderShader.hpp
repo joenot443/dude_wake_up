@@ -35,7 +35,7 @@ struct SliderShader : Shader {
   SliderShader(SliderSettings *settings)
       : settings(settings), Shader(settings){};
   ofShader shader;
-  void setup() override { shader.load("../../shaders/Slider"); }
+  void setup() override { shader.load("shaders/Slider"); }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
     canvas->begin();

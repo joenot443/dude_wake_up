@@ -27,6 +27,12 @@ void AudioSourceService::setup() {
     audioSource->deviceId = device.deviceID;
     audioSource->name = device.name;
     audioSourceMap[audioSource->id] = audioSource;
+    
+    if (device.isDefaultInput) {
+      defaultAudioSource = audioSource;
+      selectedAudioSource = defaultAudioSource;
+      audioSource->setup();
+    }
   }
 }
 

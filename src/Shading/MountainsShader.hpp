@@ -27,7 +27,7 @@ struct MountainsShader: Shader {
   MountainsShader(MountainsSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("../../shaders/Mountains");
+    shader.load("shaders/Mountains");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -50,8 +50,6 @@ struct MountainsShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Mountains");
-
   }
 };
 

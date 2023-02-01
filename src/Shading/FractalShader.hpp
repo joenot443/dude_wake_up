@@ -53,11 +53,10 @@ public:
   };
 
   void setup() override {
-    shader.load("../../shaders/fractal");
+    shader.load("shaders/fractal");
   };
 
   void drawSettings() override {
-    CommonViews::H3Title("Fractal");
     CommonViews::ShaderParameter(settings->zoom, settings->zoomOscillator);
   };
 };

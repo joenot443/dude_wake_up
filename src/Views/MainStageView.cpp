@@ -6,11 +6,13 @@
 //
 
 #include "MainStageView.hpp"
+#include "implot.h"
 #include "ConfigService.hpp"
 #include "FontService.hpp"
 #include "HSBShader.hpp"
 #include "NodeLayoutView.hpp"
 #include "OscillationService.hpp"
+#include "LayoutStateService.hpp"
 #include "ParameterService.hpp"
 #include "ShaderChainerService.hpp"
 #include "ShaderChainerView.hpp"
@@ -23,45 +25,9 @@
 static const ImVec2 ShaderButtonSize = ImVec2(90, 30);
 
 void MainStageView::setup() {
-//    VideoSourceService::getService()->addWebcamVideoSource("Webcam 0", 0);
-//  VideoSourceService::getService()->addWebcamVideoSource("Webcam 1", 1);
-//    VideoSourceService::getService()->addWebcamVideoSource("Webcam 2", 2);
-//  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_plasma);
-//  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_fractal);
-//  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_fuji);
-//  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_clouds);
-//  VideoSourceService::getService()->addShaderVideoSource(
-//      ShaderSource_Mountains);
-//  VideoSourceService::getService()->addShaderVideoSource(
-//      ShaderSource_audioMountains);
-//  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_melter);
-//  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_rings);
-//  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_Rubiks);
-//  VideoSourceService::getService()->addShaderVideoSource(
-//      ShaderSource_audioBumper);
-//  VideoSourceService::getService()->addShaderVideoSource(
-//      ShaderSource_audioWaveform);
-//  VideoSourceService::getService()->addShaderVideoSource(ShaderSource_galaxy);
-  
-  
   nodeLayoutView.setup();
   shaderBrowserView.setup();
-
-  //  ConfigService::getService()->loadDefaultConfigFile();
   populateShaderChainerViews();
-
-  //  // Create a ShaderChainer with first video source
-//  auto shaderChainer = std::make_shared<ShaderChainer>(
-//      UUID::generateUUID(), "Main Chainer",
-//      VideoSourceService::getService()->videoSources().at(0));
-//
-//  shaderChainer->setup();
-//  // Add an HSB shader to the ShaderChainer
-//  shaderChainer->pushShader(ShaderTypeHSB);
-//
-//  // Add the ShaderChainer to the ShaderChainerService
-//  ShaderChainerService::getService()->addShaderChainer(shaderChainer);
-
   videoSourceBrowserView.setup();
   videoSourcePreviewView.setup();
   outputBrowserView.setup();
@@ -87,25 +53,35 @@ void MainStageView::draw() {
   ImGui::SetColumnWidth(1, 3. * (ImGui::GetWindowWidth() / 5.));
   ImGui::SetColumnWidth(2, ImGui::GetWindowWidth() / 5.);
 
-  // | Sources |   ShaderChainers   | Outputs
-  // |               New Chainer
-  // |         | Shader |    Osc    |          |
+  // | Sources |  Node Layout   | Outputs
+  // | Effects |        ''      |   ''
+  // | Library |       Audio    |   ''
 
   // Sources
-  drawVideoSourceBrowser();
-  drawShaderBrowser();
+  auto browserSize = ImVec2(ImGui::GetWindowContentRegionMax().x / 5., ImGui::GetWindowContentRegionMax().y / 3.);
   
-  audioSourceBrowserView.draw();
+  ImGui::BeginChild("##sourceBrowser", browserSize);
+  drawVideoSourceBrowser();
+  ImGui::EndChild();
+  
+  ImGui::BeginChild("##shaderBrowser", browserSize);
+  drawShaderBrowser();
+  ImGui::EndChild();
+  
+  ImGui::BeginChild("##libraryBrowser", browserSize);
+  fileBrowserView.draw();
+  ImGui::EndChild();
+  
   drawMenu();
+  
 
   ImGui::NextColumn();
 
   // Chainers
   nodeLayoutView.draw();
-  drawNewShaderChainerButton();
 
-  drawSelectedShader();
-
+  audioSourceBrowserView.draw();
+  
   ImGui::NextColumn();
 
   // Outputs

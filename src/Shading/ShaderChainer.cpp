@@ -24,16 +24,18 @@
 #include "VideoSourceService.hpp"
 #include "ofMain.h"
 
+static const int EmptyId = -1;
+
 void ShaderChainer::setup() {
   registerFeedbackDestination();
   fbo = ofFbo();
-  fbo.allocate(640, 480);
+  fbo.allocate(1920, 1080);
   fbo.begin();
   ofClear(0, 0, 0, 255);
   fbo.end();
 
   frameTexture = std::make_shared<ofTexture>();
-  frameTexture->allocate(640, 480, GL_RGB);
+  frameTexture->allocate(1920, 1080, GL_RGB);
   frameBuffer.bind(GL_SAMPLER_2D_RECT);
   frameBuffer.allocate(640 * 480 * 4, GL_STATIC_COPY);
   frameTexture->setTextureWrap(GL_REPEAT, GL_REPEAT);
@@ -47,8 +49,8 @@ void ShaderChainer::setup() {
     sh->setup();
   }
 
-  ping.allocate(640, 480);
-  pong.allocate(640, 480);
+  ping.allocate(1920, 1080);
+  pong.allocate(1920, 1080);
 
   ping.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
   pong.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
@@ -76,7 +78,7 @@ ofFbo ShaderChainer::processFrame(std::shared_ptr<ofTexture> texture) {
   pong.end();
 
   pong.begin();
-  texture->draw(0, 0, 640, 480);
+  texture->draw(0, 0, 1920, 1080);
   pong.end();
 
   ofFbo *canv = &ping;
@@ -169,6 +171,12 @@ json ShaderChainer::serialize() {
   j["chainerId"] = chainerId;
   j["name"] = name;
   j["sourceId"] = source->id;
+  
+  // We have a front shader
+  if (front != nullptr)
+    j["front"] = front->id();
+  else
+    j["front"] = EmptyId;
 
   for (auto shader : shaders()) {
     j["shaders"].push_back(shader->serialize());
@@ -185,7 +193,7 @@ void ShaderChainer::load(json j) {
   }
 
   chainerId = j["chainerId"];
-
+ 
   std::shared_ptr<Shader> last = nullptr;
   for (auto shaderJson : j["shaders"]) {
     ShaderType shaderType = shaderJson["shaderType"];
@@ -200,6 +208,9 @@ void ShaderChainer::load(json j) {
 
     last = shader;
   }
+  
+  if (j["front"] != EmptyId)
+    front = ShaderChainerService::getService()->shaderForId(j["front"]);
 }
 
 void ShaderChainer::registerFeedbackDestination() {

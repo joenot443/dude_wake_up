@@ -38,8 +38,7 @@ struct Node {
   std::shared_ptr<Node> auxNode;
 
   Node(ed::NodeId id, ed::PinId outputId, ed::PinId inputId, NodeType type)
-      : id(id), outputId(outputId), inputId(inputId), type(type),
-        shader(shader) {}
+      : id(id), outputId(outputId), inputId(inputId), type(type) {}
 };
 
 struct Pin {

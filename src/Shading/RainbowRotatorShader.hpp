@@ -27,7 +27,7 @@ struct RainbowRotatorShader: Shader {
   RainbowRotatorShader(RainbowRotatorSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("../../shaders/RainbowRotator");
+    shader.load("shaders/RainbowRotator");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -50,8 +50,6 @@ struct RainbowRotatorShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("RainbowRotator");
-
   }
 };
 

@@ -50,7 +50,7 @@ struct Shader {
 
   virtual void drawSettings(){};
 
-  virtual std::string idName() { return formatString("%s", name().c_str()); }
+  virtual std::string idName() { return formatString("%s##%s", name().c_str(), id().c_str()); }
 
   json serialize() {
     json j = settings->serialize();

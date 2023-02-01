@@ -23,12 +23,12 @@ struct FeedbackSource {
 
     for (int i = 0; i < FrameBufferCount; i++) {
       ofFbo fbo;
-      fbo.allocate(640, 480, GL_RGBA);
+      fbo.allocate(1920, 1080, GL_RGBA);
       fbo.begin();
       ofClear(0,0,0,255);
       fbo.end();
       frameBuffer.push_back(fbo);
-    }    
+    }
   }
 
   FeedbackSource(std::string id, std::string name) : name(name), id(id) {};

@@ -40,7 +40,7 @@ struct TileShader : public Shader {
   TileShader(TileSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    shader.load("../../shaders/Tile");
+    shader.load("shaders/Tile");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -60,7 +60,6 @@ struct TileShader : public Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Tile");
     CommonViews::ShaderCheckbox(settings->mirror);
     CommonViews::ShaderParameter(settings->repeat, settings->repeatOscillator);
   }

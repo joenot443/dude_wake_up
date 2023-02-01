@@ -13,10 +13,13 @@
 AvailableVideoSource::AvailableVideoSource(std::string sourceName,
                                            VideoSourceType type,
                                            ShaderSourceType shaderType,
-                                           int webcamId)
+                                           int webcamId,
+                                           std::string path)
     : sourceName(sourceName), type(type),
-      availableVideoSourceId(UUID::generateUUID()), shaderType(shaderType),
-      webcamId(webcamId) {
+      availableVideoSourceId(UUID::generateUUID()),
+      shaderType(shaderType),
+      webcamId(webcamId),
+      path(path) {
   preview = std::make_shared<ofTexture>();
   generatePreview();
 }
@@ -33,6 +36,11 @@ void AvailableVideoSource::generatePreview() {
         shaderTypeForShaderSourceType(shaderType), UUID::generateUUID(), 0);
     shader->setup();
     shader->shade(&blankFbo, &fbo);
+    fbo.begin();
+    // Add a 70% black overlay to the preview
+    ofSetColor(0, 0, 0, 70);
+    ofDrawRectangle(0, 0, 320, 240);
+    fbo.end();
     preview = std::make_shared<ofTexture>(fbo.getTexture());
   }
   case VideoSource_webcam: {

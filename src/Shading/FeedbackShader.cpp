@@ -12,7 +12,7 @@
 #include "FeedbackSourceService.hpp"
 
 void FeedbackShader::setup() {
-  shader.load("../../shaders/feedback");
+  shader.load("shaders/feedback");
   if (settings->feedbackSourceId.empty()) {
 //    feedbackSource =
 //        FeedbackSourceService::getService()->defaultFeedbackSource();
@@ -91,13 +91,7 @@ void FeedbackShader::drawFeedbackSourceSelector() {
 }
 
 void FeedbackShader::drawSettings() {
-  CommonViews::H3Title("Feedback");
-
-  CommonViews::H4Title("Feedback Parameters");
-
   CommonViews::ShaderCheckbox(settings->lumaKeyEnabled);
-
-//  drawFeedbackSourceSelector();
 
   // Blend
   CommonViews::ShaderParameter(settings->blend, settings->blendOscillator);

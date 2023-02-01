@@ -13,10 +13,7 @@
 
 void VideoSourceBrowserView::setup() {
   auto sources = VideoSourceService::getService()->availableVideoSources();
-
-  std::vector<TileItem> tileItems = {};
   for (auto source : sources) {
-
     // Create a closure which will be called when the tile is clicked
     std::function<void()> dragCallback = [source]() {
       // Create a payload to carry the video source
@@ -31,55 +28,41 @@ void VideoSourceBrowserView::setup() {
     
     auto textureId = GetImTextureID(*source->preview.get());
     TileItem tileItem = TileItem(source->sourceName, textureId, 0, dragCallback);
-
-    tileItems.push_back(tileItem);
+    
+    if (source->type == VideoSource_shader) {
+      shaderItems.push_back(tileItem);
+    } else if (source->type == VideoSource_webcam) {
+      webcamItems.push_back(tileItem);
+    }
   }
-
-  tileBrowserView = TileBrowserView(tileItems);
+  
+  tileBrowserView = TileBrowserView(shaderItems);
+  fileBrowserView.setup();
 }
 
 void VideoSourceBrowserView::update() {}
 
 void VideoSourceBrowserView::draw() {
-  drawVideoSourceSelector();
-  drawVideoSourceFrame();
-}
-
-// Draw a list of video sources as items in a ListBox
-void VideoSourceBrowserView::drawVideoSourceSelector() {
-
-  ImGui::PushFont(FontService::getService()->h3);
-  ImGui::Text("Video Source");
-  ImGui::PopFont();
-
-  tileBrowserView.draw();
-
-  // if (ImGui::BeginListBox("##videosources")) {
-  //   for (int i = 0; i < sources.size(); i++) {
-  //     if (ImGui::Selectable(sources[i]->sourceName.c_str())) {
-  //     }
-  //     if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
-  //       // Set payload to carry the index of our item (could be anything)
-  //       auto source = sources[i];
-  //       ImGui::SetDragDropPayload("VideoSource", source.get(),
-  //                                 sizeof(AvailableVideoSource));
-  //       ImGui::Text("%s", source->sourceName.c_str());
-  //       ImGui::EndDragDropSource();
-  //     }
-  //   }
-  //   ImGui::EndListBox();
-  // }
-}
-
-void VideoSourceBrowserView::drawVideoSourceFrame() {
-  //  if (selectedVideoSource) {
-  //    videoSourceFbo.begin();
-  //    selectedVideoSource->frameTexture->draw(0, 480 * 2, 640 * 2, -480 * 2);
-  //    videoSourceFbo.end();
-  //
-  //    ImTextureID textureID =
-  //    (ImTextureID)(uintptr_t)videoSourceFbo.getTexture().getTextureData().textureID;
-  //    auto size = ImGui::GetItemRectSize();
-  //    ImGui::Image(textureID, ImVec2(320, 240));
-  //  }
+  CommonViews::H3Title("Sources");
+  
+  if (ImGui::BeginTabBar("VideoSourceBrowser", ImGuiTabBarFlags_None)) {
+    if (ImGui::BeginTabItem("Generated"))
+    {
+      tileBrowserView.tileItems = shaderItems;
+      tileBrowserView.draw();
+      ImGui::EndTabItem();
+    }
+    if (ImGui::BeginTabItem("Webcam"))
+    {
+      tileBrowserView.tileItems = webcamItems;
+      tileBrowserView.draw();
+      ImGui::EndTabItem();
+    }
+    if (ImGui::BeginTabItem("File Browser"))
+    {
+      fileBrowserView.draw();
+      ImGui::EndTabItem();
+    }
+    ImGui::EndTabBar();
+  }
 }

@@ -20,6 +20,7 @@ class AudioSourceService: public ConfigurableService {
 
   public:
   static AudioSourceService* service;
+  std::shared_ptr<AudioSource> defaultAudioSource;
   std::shared_ptr<AudioSource> selectedAudioSource;
   
   AudioSourceService() {};

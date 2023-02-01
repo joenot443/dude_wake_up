@@ -40,7 +40,7 @@ struct MixShader : public Shader {
   MixShader(MixSettings *settings) : settings(settings), Shader(settings) {};
   
   void setup() override {
-    shader.load("../../shaders/Mix");
+    shader.load("shaders/Mix");
   }
   
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -66,7 +66,6 @@ struct MixShader : public Shader {
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("Mix");
     CommonViews::ShaderParameter(settings->mix, settings->mixOscillator);
   }
   

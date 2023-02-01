@@ -31,7 +31,7 @@ struct <%= name %>Shader: Shader {
   <%= name %>Shader(<%= name %>Settings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("../../shaders/<%= name %>");
+    shader.load("shaders/<%= name %>");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

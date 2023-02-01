@@ -18,7 +18,7 @@ vec4 moves[6] =
             vec4(0, 0, -1, 2.), vec4(0, -1, 0, -1.), vec4(0, 1, 0, -3.));
 
 // Quaternions
-// https://github.com/mattatz/ShibuyaCrowd/blob/master/source/shaders/common/quaternion.glsl
+// https://github.com/mattatz/ShibuyaCrowd/blob/master/source/../../shaderscommon/quaternion.glsl
 
 #define QUATERNION_IDENTITY vec4(0, 0, 0, 1)
 

@@ -15,6 +15,7 @@
 		0230658129534CF600489A9F /* VideoSourceBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0230657F29534CF600489A9F /* VideoSourceBrowserView.cpp */; };
 		0230658429534D0300489A9F /* ShaderChainerView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0230658229534D0300489A9F /* ShaderChainerView.cpp */; };
 		0230658729534E7400489A9F /* AudioSourceService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0230658529534E7400489A9F /* AudioSourceService.cpp */; };
+		02308FAB2983084000EFDF57 /* LibraryBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02308FA92983084000EFDF57 /* LibraryBrowserView.cpp */; };
 		023C633D2922EF5100A8BC9E /* MainStageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 023C633B2922E2D400A8BC9E /* MainStageView.cpp */; };
 		023C63402925742200A8BC9E /* VideoSourcePreviewView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 023C633E2925742200A8BC9E /* VideoSourcePreviewView.cpp */; };
 		023C63432927DC0E00A8BC9E /* OutputBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 023C63412927DC0E00A8BC9E /* OutputBrowserView.cpp */; };
@@ -46,6 +47,7 @@
 		029F41A62975F08B00B6DB77 /* AvailableVideoSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 029F41A52975F08B00B6DB77 /* AvailableVideoSource.cpp */; };
 		029F41A92976EF0F00B6DB77 /* ShaderBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 029F41A72976EF0F00B6DB77 /* ShaderBrowserView.cpp */; };
 		029F41AE29770D9800B6DB77 /* AvailableShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 029F41AC29770D9800B6DB77 /* AvailableShader.cpp */; };
+		029F41BC297B047500B6DB77 /* LibraryService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 029F41BA297B047500B6DB77 /* LibraryService.cpp */; };
 		02B16FC829674AF30043CA74 /* imgui_node_editor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B16F3A29674AF30043CA74 /* imgui_node_editor.cpp */; };
 		02B16FC929674AF30043CA74 /* imgui_node_editor_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B16F4D29674AF30043CA74 /* imgui_node_editor_api.cpp */; };
 		02B16FCA29674AF30043CA74 /* imgui_canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B16F4E29674AF30043CA74 /* imgui_canvas.cpp */; };
@@ -57,6 +59,23 @@
 		02B280EB2915480E00B793D5 /* FileSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B280E529148A7500B793D5 /* FileSource.cpp */; };
 		02B280EC2915487200B793D5 /* VideoSourceService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B280E12914761E00B793D5 /* VideoSourceService.cpp */; };
 		02B280EF291564A100B793D5 /* ShaderChainerService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B280ED291564A100B793D5 /* ShaderChainerService.cpp */; };
+		02E24F2829881F5D0066A05D /* LayoutStateService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02E24F2629881F590066A05D /* LayoutStateService.cpp */; };
+		02E24F3A29889D1C0066A05D /* Roboto-Medium.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 02E24F2A29889D150066A05D /* Roboto-Medium.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		02E24F3B29889D1C0066A05D /* Roboto-Light.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 02E24F2B29889D150066A05D /* Roboto-Light.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		02E24F3C29889D1C0066A05D /* OpenFontIcons.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 02E24F2C29889D150066A05D /* OpenFontIcons.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		02E24F3D29889D1C0066A05D /* Roboto-Regular.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 02E24F2D29889D150066A05D /* Roboto-Regular.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		02E24F3E29889D1C0066A05D /* Roboto-MediumItalic.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 02E24F2E29889D150066A05D /* Roboto-MediumItalic.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		02E24F3F29889D1C0066A05D /* fontaudio.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 02E24F2F29889D150066A05D /* fontaudio.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		02E24F4029889D1C0066A05D /* Minecraft.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 02E24F3029889D150066A05D /* Minecraft.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		02E24F4129889D1C0066A05D /* Roboto-ThinItalic.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 02E24F3129889D150066A05D /* Roboto-ThinItalic.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		02E24F4229889D1C0066A05D /* Roboto-BoldItalic.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 02E24F3229889D150066A05D /* Roboto-BoldItalic.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		02E24F4329889D1C0066A05D /* fa-regular-400.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 02E24F3329889D150066A05D /* fa-regular-400.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		02E24F4429889D1C0066A05D /* Roboto-LightItalic.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 02E24F3429889D150066A05D /* Roboto-LightItalic.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		02E24F4529889D1C0066A05D /* Roboto-Italic.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 02E24F3529889D150066A05D /* Roboto-Italic.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		02E24F4629889D1C0066A05D /* Roboto-BlackItalic.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 02E24F3629889D150066A05D /* Roboto-BlackItalic.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		02E24F4729889D1C0066A05D /* Roboto-Bold.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 02E24F3729889D150066A05D /* Roboto-Bold.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		02E24F4829889D1C0066A05D /* Roboto-Thin.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 02E24F3829889D150066A05D /* Roboto-Thin.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		02E24F4929889D1C0066A05D /* Roboto-Black.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 02E24F3929889D150066A05D /* Roboto-Black.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		02ED91012954EC12002252CC /* ShaderChainersStageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02ED90FF2954EC12002252CC /* ShaderChainersStageView.cpp */; };
 		02ED91042955EDFD002252CC /* AudioSourceBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02ED91022955EDFD002252CC /* AudioSourceBrowserView.cpp */; };
 		02ED91062955F179002252CC /* AudioSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02ED91052955F179002252CC /* AudioSource.cpp */; };
@@ -99,13 +118,30 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		E4C2427710CC5ABF004149E2 /* CopyFiles */ = {
+		E4C2427710CC5ABF004149E2 /* Copy Files */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
+			buildActionMask = 12;
+			dstPath = data;
+			dstSubfolderSpec = 7;
 			files = (
+				02E24F3A29889D1C0066A05D /* Roboto-Medium.ttf in Copy Files */,
+				02E24F3B29889D1C0066A05D /* Roboto-Light.ttf in Copy Files */,
+				02E24F3C29889D1C0066A05D /* OpenFontIcons.ttf in Copy Files */,
+				02E24F3D29889D1C0066A05D /* Roboto-Regular.ttf in Copy Files */,
+				02E24F3E29889D1C0066A05D /* Roboto-MediumItalic.ttf in Copy Files */,
+				02E24F3F29889D1C0066A05D /* fontaudio.ttf in Copy Files */,
+				02E24F4029889D1C0066A05D /* Minecraft.ttf in Copy Files */,
+				02E24F4129889D1C0066A05D /* Roboto-ThinItalic.ttf in Copy Files */,
+				02E24F4229889D1C0066A05D /* Roboto-BoldItalic.ttf in Copy Files */,
+				02E24F4329889D1C0066A05D /* fa-regular-400.ttf in Copy Files */,
+				02E24F4429889D1C0066A05D /* Roboto-LightItalic.ttf in Copy Files */,
+				02E24F4529889D1C0066A05D /* Roboto-Italic.ttf in Copy Files */,
+				02E24F4629889D1C0066A05D /* Roboto-BlackItalic.ttf in Copy Files */,
+				02E24F4729889D1C0066A05D /* Roboto-Bold.ttf in Copy Files */,
+				02E24F4829889D1C0066A05D /* Roboto-Thin.ttf in Copy Files */,
+				02E24F4929889D1C0066A05D /* Roboto-Black.ttf in Copy Files */,
 			);
+			name = "Copy Files";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -132,6 +168,8 @@
 		0230658529534E7400489A9F /* AudioSourceService.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AudioSourceService.cpp; path = Services/AudioSourceService.cpp; sourceTree = "<group>"; };
 		0230658629534E7400489A9F /* AudioSourceService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = AudioSourceService.hpp; path = Services/AudioSourceService.hpp; sourceTree = "<group>"; };
 		0230658A29534EAD00489A9F /* AudioSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = AudioSource.hpp; path = Audio/AudioSource.hpp; sourceTree = "<group>"; };
+		02308FA92983084000EFDF57 /* LibraryBrowserView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = LibraryBrowserView.cpp; path = Views/LibraryBrowserView.cpp; sourceTree = "<group>"; };
+		02308FAA2983084000EFDF57 /* LibraryBrowserView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = LibraryBrowserView.hpp; path = Views/LibraryBrowserView.hpp; sourceTree = "<group>"; };
 		023C633B2922E2D400A8BC9E /* MainStageView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MainStageView.cpp; path = Views/MainStageView.cpp; sourceTree = "<group>"; };
 		023C633C2922E2D400A8BC9E /* MainStageView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = MainStageView.hpp; path = Views/MainStageView.hpp; sourceTree = "<group>"; };
 		023C633E2925742200A8BC9E /* VideoSourcePreviewView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VideoSourcePreviewView.cpp; path = Views/VideoSourcePreviewView.cpp; sourceTree = "<group>"; };
@@ -240,6 +278,21 @@
 		029F41AB29770A0500B6DB77 /* Octahedron.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Octahedron.frag; sourceTree = "<group>"; };
 		029F41AC29770D9800B6DB77 /* AvailableShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AvailableShader.cpp; path = Views/AvailableShader.cpp; sourceTree = "<group>"; };
 		029F41AD29770D9800B6DB77 /* AvailableShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = AvailableShader.hpp; path = Views/AvailableShader.hpp; sourceTree = "<group>"; };
+		029F41AF29775F4B00B6DB77 /* Disco.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Disco.vert; sourceTree = "<group>"; };
+		029F41B029775F4C00B6DB77 /* Disco.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Disco.frag; sourceTree = "<group>"; };
+		029F41B12979AD2B00B6DB77 /* Liquid.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Liquid.vert; sourceTree = "<group>"; };
+		029F41B22979AD2B00B6DB77 /* Liquid.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Liquid.frag; sourceTree = "<group>"; };
+		029F41B32979E85400B6DB77 /* TriangleMap.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = TriangleMap.vert; sourceTree = "<group>"; };
+		029F41B42979E85400B6DB77 /* TriangleMap.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = TriangleMap.frag; sourceTree = "<group>"; };
+		029F41B52979E86800B6DB77 /* TriangleMapShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = TriangleMapShader.hpp; path = Shading/TriangleMapShader.hpp; sourceTree = "<group>"; };
+		029F41B62979E86800B6DB77 /* DiscoShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = DiscoShader.hpp; path = Shading/DiscoShader.hpp; sourceTree = "<group>"; };
+		029F41B72979E86800B6DB77 /* LiquidShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = LiquidShader.hpp; path = Shading/LiquidShader.hpp; sourceTree = "<group>"; };
+		029F41B82979E86B00B6DB77 /* VanGoghShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = VanGoghShader.hpp; path = Shading/VanGoghShader.hpp; sourceTree = "<group>"; };
+		029F41B92979E86B00B6DB77 /* OctahedronShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = OctahedronShader.hpp; path = Shading/OctahedronShader.hpp; sourceTree = "<group>"; };
+		029F41BA297B047500B6DB77 /* LibraryService.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LibraryService.cpp; sourceTree = "<group>"; };
+		029F41BB297B047500B6DB77 /* LibraryService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LibraryService.hpp; sourceTree = "<group>"; };
+		029F41BD297B07E200B6DB77 /* LibraryFile.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LibraryFile.hpp; sourceTree = "<group>"; };
+		029F41BF297B1CF000B6DB77 /* Backblaze.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Backblaze.hpp; sourceTree = "<group>"; };
 		02A19F3C294B904800D3ECC0 /* BlurShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = BlurShader.hpp; path = Shading/BlurShader.hpp; sourceTree = "<group>"; };
 		02A19F3D294B904800D3ECC0 /* EmptyShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = EmptyShader.hpp; path = Shading/EmptyShader.hpp; sourceTree = "<group>"; };
 		02A19F3E294B904800D3ECC0 /* HSBShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = HSBShader.hpp; path = Shading/HSBShader.hpp; sourceTree = "<group>"; };
@@ -302,6 +355,26 @@
 		02B280F129193F4000B793D5 /* ASCIIShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ASCIIShader.hpp; path = Shading/ASCIIShader.hpp; sourceTree = "<group>"; };
 		02B6599D28BBD16700E31AE7 /* GlitchShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = GlitchShader.hpp; path = Shading/GlitchShader.hpp; sourceTree = "<group>"; };
 		02D9D73F2933E6CE00DDBE47 /* KaleidoscopeShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = KaleidoscopeShader.hpp; path = Shading/KaleidoscopeShader.hpp; sourceTree = "<group>"; };
+		02E24F2629881F590066A05D /* LayoutStateService.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = LayoutStateService.cpp; path = Services/LayoutStateService.cpp; sourceTree = "<group>"; };
+		02E24F2729881F590066A05D /* LayoutStateService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = LayoutStateService.hpp; path = Services/LayoutStateService.hpp; sourceTree = "<group>"; };
+		02E24F2A29889D150066A05D /* Roboto-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Medium.ttf"; sourceTree = "<group>"; };
+		02E24F2B29889D150066A05D /* Roboto-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Light.ttf"; sourceTree = "<group>"; };
+		02E24F2C29889D150066A05D /* OpenFontIcons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = OpenFontIcons.ttf; sourceTree = "<group>"; };
+		02E24F2D29889D150066A05D /* Roboto-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Regular.ttf"; sourceTree = "<group>"; };
+		02E24F2E29889D150066A05D /* Roboto-MediumItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-MediumItalic.ttf"; sourceTree = "<group>"; };
+		02E24F2F29889D150066A05D /* fontaudio.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = fontaudio.ttf; sourceTree = "<group>"; };
+		02E24F3029889D150066A05D /* Minecraft.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Minecraft.ttf; sourceTree = "<group>"; };
+		02E24F3129889D150066A05D /* Roboto-ThinItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-ThinItalic.ttf"; sourceTree = "<group>"; };
+		02E24F3229889D150066A05D /* Roboto-BoldItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-BoldItalic.ttf"; sourceTree = "<group>"; };
+		02E24F3329889D150066A05D /* fa-regular-400.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "fa-regular-400.ttf"; sourceTree = "<group>"; };
+		02E24F3429889D150066A05D /* Roboto-LightItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-LightItalic.ttf"; sourceTree = "<group>"; };
+		02E24F3529889D150066A05D /* Roboto-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Italic.ttf"; sourceTree = "<group>"; };
+		02E24F3629889D150066A05D /* Roboto-BlackItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-BlackItalic.ttf"; sourceTree = "<group>"; };
+		02E24F3729889D150066A05D /* Roboto-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Bold.ttf"; sourceTree = "<group>"; };
+		02E24F3829889D150066A05D /* Roboto-Thin.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Thin.ttf"; sourceTree = "<group>"; };
+		02E24F3929889D150066A05D /* Roboto-Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Black.ttf"; sourceTree = "<group>"; };
+		02E24F4B2988A7030066A05D /* RubiksShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = RubiksShader.hpp; path = Shading/RubiksShader.hpp; sourceTree = "<group>"; };
+		02E24F4C2988A75C0066A05D /* SliderShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = SliderShader.hpp; path = Shading/SliderShader.hpp; sourceTree = "<group>"; };
 		02ED90D72954967F002252CC /* darken.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = darken.frag; sourceTree = "<group>"; };
 		02ED90D82954967F002252CC /* plasma.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = plasma.vert; sourceTree = "<group>"; };
 		02ED90D92954967F002252CC /* empty.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = empty.frag; sourceTree = "<group>"; };
@@ -655,9 +728,16 @@
 		024D1686289DFD6200DA807C /* Shading */ = {
 			isa = PBXGroup;
 			children = (
+				02E24F4C2988A75C0066A05D /* SliderShader.hpp */,
+				02E24F4B2988A7030066A05D /* RubiksShader.hpp */,
+				029F41B62979E86800B6DB77 /* DiscoShader.hpp */,
+				029F41B72979E86800B6DB77 /* LiquidShader.hpp */,
+				029F41B52979E86800B6DB77 /* TriangleMapShader.hpp */,
 				0284EBE62960987F00A572E7 /* RainbowRotatorShader.hpp */,
 				0284EBE529608E5A00A572E7 /* DitherShader.hpp */,
 				0284EBE0295F2A1D00A572E7 /* MountainsShader.hpp */,
+				029F41B92979E86B00B6DB77 /* OctahedronShader.hpp */,
+				029F41B82979E86B00B6DB77 /* VanGoghShader.hpp */,
 				0284EBDF295E81D800A572E7 /* GalaxyShader.hpp */,
 				028FA5E9295D0FB200FE6FE3 /* AudioMountainsShader.hpp */,
 				028FA5E8295D062600FE6FE3 /* AudioBumperShader.hpp */,
@@ -774,6 +854,17 @@
 			);
 			name = implot;
 			path = lib/implot;
+			sourceTree = "<group>";
+		};
+		029F41BE297B1CDD00B6DB77 /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				029F41BD297B07E200B6DB77 /* LibraryFile.hpp */,
+				029F41BA297B047500B6DB77 /* LibraryService.cpp */,
+				029F41BB297B047500B6DB77 /* LibraryService.hpp */,
+				029F41BF297B1CF000B6DB77 /* Backblaze.hpp */,
+			);
+			path = Network;
 			sourceTree = "<group>";
 		};
 		02B16F3929674AF30043CA74 /* imgui-node-editor */ = {
@@ -941,9 +1032,38 @@
 			path = Video;
 			sourceTree = "<group>";
 		};
+		02E24F2929889D150066A05D /* fonts */ = {
+			isa = PBXGroup;
+			children = (
+				02E24F2A29889D150066A05D /* Roboto-Medium.ttf */,
+				02E24F2B29889D150066A05D /* Roboto-Light.ttf */,
+				02E24F2C29889D150066A05D /* OpenFontIcons.ttf */,
+				02E24F2D29889D150066A05D /* Roboto-Regular.ttf */,
+				02E24F2E29889D150066A05D /* Roboto-MediumItalic.ttf */,
+				02E24F2F29889D150066A05D /* fontaudio.ttf */,
+				02E24F3029889D150066A05D /* Minecraft.ttf */,
+				02E24F3129889D150066A05D /* Roboto-ThinItalic.ttf */,
+				02E24F3229889D150066A05D /* Roboto-BoldItalic.ttf */,
+				02E24F3329889D150066A05D /* fa-regular-400.ttf */,
+				02E24F3429889D150066A05D /* Roboto-LightItalic.ttf */,
+				02E24F3529889D150066A05D /* Roboto-Italic.ttf */,
+				02E24F3629889D150066A05D /* Roboto-BlackItalic.ttf */,
+				02E24F3729889D150066A05D /* Roboto-Bold.ttf */,
+				02E24F3829889D150066A05D /* Roboto-Thin.ttf */,
+				02E24F3929889D150066A05D /* Roboto-Black.ttf */,
+			);
+			path = fonts;
+			sourceTree = "<group>";
+		};
 		02ED90D62954967F002252CC /* shaders */ = {
 			isa = PBXGroup;
 			children = (
+				029F41B42979E85400B6DB77 /* TriangleMap.frag */,
+				029F41B32979E85400B6DB77 /* TriangleMap.vert */,
+				029F41B22979AD2B00B6DB77 /* Liquid.frag */,
+				029F41B12979AD2B00B6DB77 /* Liquid.vert */,
+				029F41B029775F4C00B6DB77 /* Disco.frag */,
+				029F41AF29775F4B00B6DB77 /* Disco.vert */,
 				029F41AB29770A0500B6DB77 /* Octahedron.frag */,
 				029F41AA29770A0500B6DB77 /* Octahedron.vert */,
 				029F419F29743DCD00B6DB77 /* Rubiks.frag */,
@@ -1029,6 +1149,7 @@
 		47E4E7757DB0771B0C4C58E1 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				029F41BE297B1CDD00B6DB77 /* Network */,
 				0240887328B1BB1400908222 /* macro_scope.hpp */,
 				D994AF12295A8568554AAB57 /* FontService.cpp */,
 				62A6B75A2D3DC6DD3C4DAF71 /* FontService.hpp */,
@@ -1048,6 +1169,8 @@
 				02B280EE291564A100B793D5 /* ShaderChainerService.hpp */,
 				0230658529534E7400489A9F /* AudioSourceService.cpp */,
 				0230658629534E7400489A9F /* AudioSourceService.hpp */,
+				02E24F2629881F590066A05D /* LayoutStateService.cpp */,
+				02E24F2729881F590066A05D /* LayoutStateService.hpp */,
 			);
 			name = Services;
 			sourceTree = "<group>";
@@ -1151,6 +1274,8 @@
 				029F41A32975A86400B6DB77 /* TileBrowserView.hpp */,
 				029F41A72976EF0F00B6DB77 /* ShaderBrowserView.cpp */,
 				029F41A82976EF0F00B6DB77 /* ShaderBrowserView.hpp */,
+				02308FA92983084000EFDF57 /* LibraryBrowserView.cpp */,
+				02308FAA2983084000EFDF57 /* LibraryBrowserView.hpp */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -1590,6 +1715,7 @@
 		E4B69B4A0A3A1720003C02F2 = {
 			isa = PBXGroup;
 			children = (
+				02E24F2929889D150066A05D /* fonts */,
 				024D169928A0420B00DA807C /* schema.json */,
 				02ED90D62954967F002252CC /* shaders */,
 				021026F4289412660060F282 /* libs */,
@@ -1634,7 +1760,7 @@
 				E4B69B580A3A1756003C02F2 /* Sources */,
 				E4B69B590A3A1756003C02F2 /* Frameworks */,
 				E4B6FFFD0C3F9AB9008CF71C /* ShellScript */,
-				E4C2427710CC5ABF004149E2 /* CopyFiles */,
+				E4C2427710CC5ABF004149E2 /* Copy Files */,
 				8466F1851C04CA0E00918B1C /* ShellScript */,
 			);
 			buildRules = (
@@ -1718,7 +1844,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "mkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n# Copy default icon file into App/Resources\nrsync -aved \"$ICON_FILE\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n# Copy libfmod and change install directory for fmod to run\nrsync -aved \"$OF_PATH/libs/fmod/lib/osx/libfmod.dylib\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/\";\n# Not needed as we now call install_name_tool -id @loader_path/../Frameworks/libfmod.dylib libfmod.dylib on the dylib directly which prevents the need for calling every post build - keeping here for reference and possible legacy usage \n# install_name_tool -change @rpath/libfmod.dylib @executable_path/../Frameworks/libfmod.dylib \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/MacOS/$PRODUCT_NAME\";\n\necho \"$GCC_PREPROCESSOR_DEFINITIONS\";\n";
+			shellScript = "mkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n# Copy default icon file into App/Resources\nrsync -aved \"$ICON_FILE\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n# Copy libfmod and change install directory for fmod to run\nrsync -aved \"$OF_PATH/libs/fmod/lib/osx/libfmod.dylib\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/\";\n# Not needed as we now call install_name_tool -id @loader_path/../Frameworks/libfmod.dylib libfmod.dylib on the dylib directly which prevents the need for calling every post build - keeping here for reference and possible legacy usage \n# install_name_tool -change @rpath/libfmod.dylib @executable_path/../Frameworks/libfmod.dylib \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/MacOS/$PRODUCT_NAME\";\n\necho \"$GCC_PREPROCESSOR_DEFINITIONS\";\n\n# Copy the shaders folder into Resources/data\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/\"\n\ncp -R \"$TARGET_BUILD_DIR/../shaders/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/shaders\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1732,6 +1858,7 @@
 				A31728853BA0741D77701E2A /* ValueOscillator.cpp in Sources */,
 				02B280E02913FE8200B793D5 /* FeedbackSourceService.cpp in Sources */,
 				9021CA48E18FB8B26215F64C /* Parameter.cpp in Sources */,
+				029F41BC297B047500B6DB77 /* LibraryService.cpp in Sources */,
 				DAA162C52DA366D4774E2A53 /* OscillatorView.cpp in Sources */,
 				75992458D44C948D353E0BF3 /* CommonViews.cpp in Sources */,
 				02ED91062955F179002252CC /* AudioSource.cpp in Sources */,
@@ -1756,6 +1883,7 @@
 				C41EA6E8F44334B01183F80A /* imgui_impl_opengl2.cpp in Sources */,
 				028FA5B12956062B00FE6FE3 /* Yin.cpp in Sources */,
 				60CBAD6DA6E255EB14CB4FF9 /* imgui_impl_opengl3.cpp in Sources */,
+				02E24F2829881F5D0066A05D /* LayoutStateService.cpp in Sources */,
 				029F41A62975F08B00B6DB77 /* AvailableVideoSource.cpp in Sources */,
 				028FA5B72956062B00FE6FE3 /* AccelerateFFT.cpp in Sources */,
 				5C2607C471F8D48C0036C56E /* imgui.cpp in Sources */,
@@ -1803,6 +1931,7 @@
 				02ED91012954EC12002252CC /* ShaderChainersStageView.cpp in Sources */,
 				023C63402925742200A8BC9E /* VideoSourcePreviewView.cpp in Sources */,
 				024D169C28A046DF00DA807C /* ConfigService.cpp in Sources */,
+				02308FAB2983084000EFDF57 /* LibraryBrowserView.cpp in Sources */,
 				02B16FCA29674AF30043CA74 /* imgui_canvas.cpp in Sources */,
 				0230658129534CF600489A9F /* VideoSourceBrowserView.cpp in Sources */,
 				C6FE64F74F1EA1D98C8F9847 /* ofxMidiMessage.cpp in Sources */,

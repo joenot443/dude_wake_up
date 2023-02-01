@@ -10,6 +10,7 @@
 
 #include "NodeTypes.hpp"
 #include "Shader.hpp"
+#include "Shader.hpp"
 #include "imgui_node_editor.h"
 #include <stdio.h>
 
@@ -22,6 +23,8 @@ public:
   void draw();
   void queryNewLinks();
   void handleDropZone();
+  void drawNodeWindows();
+  void openSettingsWindow(std::shared_ptr<Shader> shader);
   void keyReleased(int key);
 
   ed::EditorContext *context = nullptr;
@@ -40,6 +43,8 @@ public:
 
   // Maps the id of a Link to the ShaderLink
   std::map<long, std::shared_ptr<ShaderLink>> linksMap;
+  
+  std::set<std::shared_ptr<Shader>> shadersToOpen;
 
   std::unique_ptr<ImVec2> shaderDropLocation;
   std::unique_ptr<ImVec2> sourceDropLocation;

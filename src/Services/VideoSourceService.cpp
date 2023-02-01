@@ -14,12 +14,12 @@
 void VideoSourceService::setup() {
   // Add an AvailableVideoSource for each Webcam and each ShaderType
   for (auto const& x : ofVideoGrabber().listDevices()) {
-    auto webcamSource = std::make_shared<AvailableVideoSource>(x.deviceName, VideoSource_webcam, ShaderSource_empty, x.id);
+    auto webcamSource = std::make_shared<AvailableVideoSource>(x.deviceName, VideoSource_webcam, ShaderSource_empty, x.id, "");
     availableSourceMap[webcamSource->availableVideoSourceId] = webcamSource;
   }
   
   for (auto const& x : AvailableShaderSourceTypes) {
-    auto shaderSource = std::make_shared<AvailableVideoSource>(shaderSourceTypeName(x), VideoSource_shader, x, 0);
+    auto shaderSource = std::make_shared<AvailableVideoSource>(shaderSourceTypeName(x), VideoSource_shader, x, 0, "");
     shaderSource->shaderType = x;
     availableSourceMap[shaderSource->availableVideoSourceId] = shaderSource;
   }
@@ -139,7 +139,7 @@ void VideoSourceService::addOutputWindowForVideoSource(std::shared_ptr<VideoSour
   outputWindow->setup();
   ofGLFWWindowSettings settings;
   settings.shareContextWith = ofGetCurrentWindow();
-  settings.setSize(640, 480);
+  settings.setSize(1920, 1080);
   settings.setGLVersion(3, 2);
   auto streamWindow = ofCreateWindow(settings);
   ofRunApp(streamWindow, outputWindow);

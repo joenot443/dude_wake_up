@@ -36,7 +36,7 @@ struct AsciiShader: Shader {
   AsciiShader(AsciiSettings *settings) : settings(settings), Shader(settings) {};
   
   void setup() override {
-    shader.load("../../shaders/ascii");
+    shader.load("shaders/ascii");
   }
   
   ShaderType type() override {
@@ -59,13 +59,6 @@ struct AsciiShader: Shader {
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("ASCII");
-    
-    // Ascii X
-    ImGui::Text("Enabled");
-    ImGui::SetNextItemWidth(150.0);
-    ImGui::SameLine(0, 20);
-    ImGui::Checkbox("Enabled##Ascii_x_enabled", &settings->enabled->boolValue);
   }
 };
 

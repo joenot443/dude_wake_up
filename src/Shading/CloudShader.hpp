@@ -44,7 +44,7 @@ struct CloudShader: Shader {
   Shader(settings) {};
 
   void setup() override {
-    shader.load("../../shaders/clouds");
+    shader.load("shaders/clouds");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

@@ -42,7 +42,7 @@ struct RGBShiftShader: Shader {
   RGBShiftShader(RGBShiftSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("../../shaders/RGBShift");
+    shader.load("shaders/RGBShift");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -67,8 +67,6 @@ struct RGBShiftShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("RGBShift");
-
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
   }

@@ -24,6 +24,7 @@ public:
   ImFont * h2;
   ImFont * h3;
   ImFont * h4;
+  ImFont * audio;
   ImFont * p;
   ImFont * b;
   ImFont * i;

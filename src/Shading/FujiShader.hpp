@@ -77,20 +77,14 @@ public:
   };
 
   void setup() override {
-    shader.load("../../shaders/fuji");
+    shader.load("shaders/fuji");
   };
 
   void drawSettings() override {
-    CommonViews::H3Title("Fuji");
-
     CommonViews::ShaderParameter(settings->cloud1X, settings->cloud1XOscillator);
-    
     CommonViews::ShaderParameter(settings->cloud1Y, settings->cloud1YOscillator);
-
     CommonViews::ShaderParameter(settings->cloud2X, settings->cloud2XOscillator);
-
     CommonViews::ShaderParameter(settings->cloud2Y, settings->cloud2YOscillator);
-
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
   }
 };

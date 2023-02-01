@@ -11,21 +11,24 @@
 #include <stdio.h>
 #include "Oscillator.hpp"
 #include "Parameter.hpp"
+#include "ofxImGui.h"
 
 struct CommonViews {
+  static ImVec2 windowCanvasSize();
+  
   static void sSpacing();
   static void mSpacing();
   static void lSpacing();
   static void xlSpacing();
   static void Spacing(int n);
   
+  static bool IconButton(const char* icon, std::string id);
+  
   static void ShaderParameter(std::shared_ptr<Parameter> param, std::shared_ptr<Oscillator> osc);
 
   static void ShaderCheckbox(std::shared_ptr<Parameter> param);
 
   static void HorizontallyAligned(float width, float alignment = 0.5);
-  
-  static void IconButton(char icon, std::string id, std::function<void> action);
   
   static void MidiSelector(std::shared_ptr<Parameter> videoParam);
   

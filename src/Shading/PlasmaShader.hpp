@@ -61,24 +61,13 @@ public:
   };
 
   void setup() override {
-    shader.load("../../shaders/plasma");
+    shader.load("shaders/plasma");
   };
 
   void drawSettings() override {
-    CommonViews::H3Title("Plasma");
-    ImGui::Text("Plasma Enabled");
-    ImGui::SetNextItemWidth(150.0);
-    ImGui::SameLine(0, 20);
-    ImGui::Checkbox("Enabled##plasma_enabled", &settings->enabled->boolValue);
-  
-    ImGui::Text("Plasma Control"); 
-    ImGui::SetNextItemWidth(150.0);
+    CommonViews::Slider("Plasma", "##plasmaX", settings->plasmaX);
     
-    ImGui::SliderFloat("X##plasma_x", &settings->plasmaX->value, 0.0, 1.0);
-
-    ImGui::SetNextItemWidth(150.0);
-    ImGui::SameLine(0, 20);
-    ImGui::SliderFloat("Y##plasma_y", &settings->plasmaY->value, 0.0, 1.0);
+    CommonViews::Slider("Plasma", "##plasmaY", settings->plasmaY);
   };
 };
 

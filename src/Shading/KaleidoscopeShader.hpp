@@ -45,7 +45,7 @@ struct KaleidoscopeShader : public Shader {
   KaleidoscopeShader(KaleidoscopeSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    shader.load("../../shaders/kaleidoscope");
+    shader.load("shaders/kaleidoscope");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -66,7 +66,6 @@ struct KaleidoscopeShader : public Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Kaleidoscope");
     CommonViews::ShaderParameter(settings->shift, settings->shiftOscillator);
     CommonViews::ShaderParameter(settings->sides, settings->sidesOscillator);
   }

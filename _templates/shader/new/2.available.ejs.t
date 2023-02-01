@@ -1,7 +1,7 @@
 ---
 to: src/Shading/ShaderType.hpp
 inject: true
-after: "// Available shaders"
+before: "// Available shaders"
 skip_if: "ShaderType<%= name %>, // Generated"
 ---
   ShaderType<%= name %>, // Generated

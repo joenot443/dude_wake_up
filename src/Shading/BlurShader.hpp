@@ -43,7 +43,7 @@ public:
   BlurShader(BlurSettings *settings) : Shader(settings),
   settings(settings) {}
   void setup() override {
-    shader.load("../../shaders/blur");
+    shader.load("shaders/blur");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -62,9 +62,7 @@ public:
     return ShaderTypeBlur;
   }
   
-  void drawSettings() override {
-    CommonViews::H3Title("Blur");
-    
+  void drawSettings() override { 
     // Amount
     CommonViews::Slider("Mix", "##mix", settings->mix);
     CommonViews::ModulationSelector(settings->mix);

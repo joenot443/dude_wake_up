@@ -8,6 +8,7 @@
 #include "OutputBrowserView.hpp"
 #include "ShaderChainerService.hpp"
 #include "VideoSourcePreviewView.hpp"
+#include "CommonViews.hpp"
 
 void OutputBrowserView::setup() {
   generatePreviewViews();
@@ -28,10 +29,10 @@ void OutputBrowserView::generatePreviewViews() {
 }
 
 void OutputBrowserView::update() {
-
 }
 
 void OutputBrowserView::draw() {
+  CommonViews::H3Title("Outputs");
   drawPreviewViews();
 }
 

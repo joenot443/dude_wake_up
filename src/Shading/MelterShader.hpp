@@ -34,7 +34,7 @@ struct MeltShader : public Shader {
 
   MeltShader(MeltSettings *settings) : settings(settings),
   Shader(settings) {
-    shader.load("../../shaders/Melt");
+    shader.load("shaders/Melt");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

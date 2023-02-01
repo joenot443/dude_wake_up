@@ -39,7 +39,7 @@ struct WobbleShader: Shader {
   WobbleShader(WobbleSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("../../shaders/Wobble");
+    shader.load("shaders/Wobble");
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -64,7 +64,6 @@ struct WobbleShader: Shader {
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("Wobble");
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
   }

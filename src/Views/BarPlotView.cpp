@@ -28,11 +28,17 @@ void BarPlotView::draw(std::vector<float> yData, std::string id) {
   max = max * 1.2;
   
   if (max < 0.01) { return; }
-
+  
   // Draw the plot
   if (ImPlot::BeginPlot(formatString("##%s", id.c_str()).c_str())) {
     ImPlot::SetupAxesLimits(0.0, 1.0 * yData.size(), 0.0, max);
-    ImPlot::PlotBars(formatString("##%s", id.c_str()).c_str(), &xData[0], &yData[0], yData.size(), 1.0);
+    ImPlot::PlotBars(formatString("##%s", id.c_str()).c_str(),
+                     &xData[0],
+                     &yData[0],
+                     (int)
+                     yData.size(),
+                     0.7,
+                     1.0);
     ImPlot::EndPlot();
   }
 }
