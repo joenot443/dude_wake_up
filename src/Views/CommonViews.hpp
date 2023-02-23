@@ -21,8 +21,11 @@ struct CommonViews {
   static void lSpacing();
   static void xlSpacing();
   static void Spacing(int n);
+  static void HSpacing(int n);
   
   static bool IconButton(const char* icon, std::string id);
+  
+  static void IconTitle(const char* icon);
   
   static void ShaderParameter(std::shared_ptr<Parameter> param, std::shared_ptr<Oscillator> osc);
 
@@ -47,6 +50,7 @@ struct CommonViews {
     
   static void ResetButton(std::string id, std::shared_ptr<Parameter> param);
   static void OscillateButton(std::string id, std::shared_ptr<Oscillator> o, std::shared_ptr<Parameter> param);
+  static void OscillatorWindow(std::shared_ptr<Oscillator> o, std::shared_ptr<Parameter> param);
 };
 
 #endif /* CommonViews_hpp */

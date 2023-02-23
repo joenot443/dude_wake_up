@@ -12,6 +12,7 @@
 #include "FeedbackSource.hpp"
 #include "ShaderSettings.hpp"
 #include "ShaderType.hpp"
+#include "VideoSource.hpp"
 #include "WaveformOscillator.hpp"
 #include "json.hpp"
 #include "ofMain.h"
@@ -30,7 +31,10 @@ struct Shader {
 
   std::shared_ptr<Shader> next;
   std::shared_ptr<Shader> parent;
+  std::shared_ptr<VideoSource> parentSource;
+  
   std::shared_ptr<Shader> aux;
+  std::shared_ptr<VideoSource> sourceAux;
   
   unsigned int creationTime;
 
@@ -39,12 +43,14 @@ struct Shader {
   virtual void clear(){};
   virtual bool supportsAux() { return shaderTypeSupportsAux(type()); }
   
-  std::shared_ptr<FeedbackSource> feedbackDestination();  
+  std::shared_ptr<FeedbackSource> feedbackDestination();
   virtual std::string id() { return settings->shaderId; };
   virtual std::string name() { return shaderTypeName(type()); };
   virtual bool enabled() { return true; };
   virtual bool hasFrameBuffer() { return false; };
   void saveFrame(ofFbo *frame){};
+  
+  std::shared_ptr<ofTexture> auxTexture();
 
   virtual ShaderType type() { return ShaderTypeNone; };
 

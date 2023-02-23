@@ -72,6 +72,7 @@ public:
 
   json config() override;
   void loadConfig(json j) override;
+  void appendConfig(json j);
 };
 
 #endif /* VideoSourceService_hpp */

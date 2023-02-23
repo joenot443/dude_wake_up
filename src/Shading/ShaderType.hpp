@@ -47,6 +47,11 @@ enum ShaderType {
   ShaderTypeLiquid,
   ShaderTypeTriangleMap,
   ShaderTypeSobel,
+  ShaderTypeColorPass,
+  ShaderTypeFishEye,
+  ShaderTypePsycurves,
+  ShaderTypeTissue,
+  ShaderTypeHalfTone,
 };
 
 static const ShaderType AvailableShaderTypes[] = {
@@ -67,12 +72,25 @@ static const ShaderType AvailableShaderTypes[] = {
   ShaderTypeWobble, // Generated
   ShaderTypeRGBShift, // Generated
   ShaderTypeSobel, // Generated
+  ShaderTypeColorPass, // Generated
+  ShaderTypeFishEye, // Generated
+  ShaderTypeHalfTone, // Generated
   // Available shaders
 };
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) {
     // Shader names
+    case ShaderTypeHalfTone:
+      return "HalfTone";
+    case ShaderTypeTissue:
+      return "Tissue";
+    case ShaderTypePsycurves:
+      return "Psycurves";
+    case ShaderTypeFishEye:
+      return "FishEye";
+    case ShaderTypeColorPass:
+      return "ColorPass";
     case ShaderTypeSobel:
       return "Sobel";
     case ShaderTypeTriangleMap:

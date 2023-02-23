@@ -6,13 +6,14 @@
 //
 
 #include "MainStageView.hpp"
-#include "implot.h"
 #include "ConfigService.hpp"
+#include "TileBrowserView.hpp"
+#include "MarkdownView.hpp"
 #include "FontService.hpp"
 #include "HSBShader.hpp"
+#include "LayoutStateService.hpp"
 #include "NodeLayoutView.hpp"
 #include "OscillationService.hpp"
-#include "LayoutStateService.hpp"
 #include "ParameterService.hpp"
 #include "ShaderChainerService.hpp"
 #include "ShaderChainerView.hpp"
@@ -23,11 +24,12 @@
 #include "implot.h"
 
 static const ImVec2 ShaderButtonSize = ImVec2(90, 30);
+static const float MenuBarHeight = 50.0f;
 
 void MainStageView::setup() {
   nodeLayoutView.setup();
   shaderBrowserView.setup();
-  populateShaderChainerViews();
+  fileBrowserView.setup();
   videoSourceBrowserView.setup();
   videoSourcePreviewView.setup();
   outputBrowserView.setup();
@@ -58,22 +60,22 @@ void MainStageView::draw() {
   // | Library |       Audio    |   ''
 
   // Sources
-  auto browserSize = ImVec2(ImGui::GetWindowContentRegionMax().x / 5., ImGui::GetWindowContentRegionMax().y / 3.);
-  
+  auto browserSize = ImVec2(ImGui::GetWindowContentRegionMax().x / 5.,
+                            (ImGui::GetWindowContentRegionMax().y - MenuBarHeight) / 3.);
+
   ImGui::BeginChild("##sourceBrowser", browserSize);
   drawVideoSourceBrowser();
   ImGui::EndChild();
-  
+
   ImGui::BeginChild("##shaderBrowser", browserSize);
   drawShaderBrowser();
   ImGui::EndChild();
-  
+
   ImGui::BeginChild("##libraryBrowser", browserSize);
   fileBrowserView.draw();
   ImGui::EndChild();
-  
+
   drawMenu();
-  
 
   ImGui::NextColumn();
 
@@ -81,7 +83,7 @@ void MainStageView::draw() {
   nodeLayoutView.draw();
 
   audioSourceBrowserView.draw();
-  
+
   ImGui::NextColumn();
 
   // Outputs
@@ -123,113 +125,6 @@ void MainStageView::drawMenu() {
   }
 }
 
-void MainStageView::drawSelectedShader() {
-  ImGui::BeginChild("selected_shader");
-  if (ImGui::BeginTable("##shaderTable", 2)) {
-    ImGui::TableNextColumn();
-
-    if (ShaderChainerService::getService()->selectedShader != nullptr) {
-      ShaderChainerService::getService()->selectedShader->drawSettings();
-    } else {
-      drawShaderChainerSettings();
-    }
-
-    ImGui::TableNextColumn();
-
-    OscillatorView::draw(OscillationService::getService()->selectedOscillator,
-                         ParameterService::getService()->selectedParameter);
-
-    ImGui::EndTable();
-  }
-  ImGui::EndChild();
-}
-
-void MainStageView::drawShaderChainerSettings() {
-  ImGui::Text("Shader Chainer Settings");
-  if (shaderChainerSettingsView.shaderChainer != nullptr) {
-    shaderChainerSettingsView.draw();
-  }
-}
-
-void MainStageView::drawNewShaderButton() {
-  auto selectedShaderName = shaderTypeName(selectedShaderType);
-  auto selectedShaderChainer =
-      ShaderChainerService::getService()->selectedShaderChainer;
-
-  if (ImGui::BeginCombo("ShaderCombo", selectedShaderName.c_str())) {
-    for (auto shaderType : AvailableShaderTypes) {
-      if (ImGui::Selectable(shaderTypeName(shaderType).c_str(),
-                            selectedShaderType == shaderType))
-        selectedShaderType = shaderType;
-    }
-
-    ImGui::EndCombo();
-  }
-
-  ImGui::SameLine();
-
-  if (ImGui::Button("Add New Shader") && selectedShaderType != ShaderTypeNone) {
-    selectedShaderChainer->pushShader(selectedShaderType);
-  }
-}
-
-void MainStageView::drawNewShaderChainerButton() {
-  ImGui::PushFont(FontService::getService()->h4);
-  ImGui::Text("New Shader Chain");
-  ImGui::PopFont();
-
-  ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.3f);
-  static char buf[128] = "";
-  ImGui::InputText("##ShaderChainerName", buf, IM_ARRAYSIZE(buf));
-  ImGui::PopItemWidth();
-  ImGui::SameLine();
-
-  if (ImGui::Button("Create")) {
-    auto name = std::string(buf);
-    if (name.empty()) {
-      name = formatString("Chainer - %d", shaderChainerViews.size());
-    }
-    auto videoSources = VideoSourceService::getService()->videoSources();
-
-    auto shaderChainer = std::make_shared<ShaderChainer>(
-        UUID::generateUUID(), name, videoSources.at(0));
-    shaderChainer->setup();
-    pushShaderChainer(shaderChainer);
-  }
-}
-
-void MainStageView::populateShaderChainerViews() {
-  shaderChainerViews.clear();
-
-  auto chainers = ShaderChainerService::getService()->shaderChainers();
-
-  for (auto c : chainers) {
-    auto shaderChainerView = std::make_shared<ShaderChainerView>(c);
-    shaderChainerViews.push_back(shaderChainerView);
-  }
-
-  std::sort(shaderChainerViews.begin(), shaderChainerViews.end(),
-            [](const std::shared_ptr<ShaderChainerView> &a,
-               const std::shared_ptr<ShaderChainerView> &b) {
-              return a->shaderChainer->name < b->shaderChainer->name;
-            });
-}
-
-void MainStageView::pushShaderChainer(
-    std::shared_ptr<ShaderChainer> shaderChainer) {
-  ShaderChainerService::getService()->addShaderChainer(shaderChainer);
-  shaderChainer->setup();
-  auto shaderChainerView = std::make_shared<ShaderChainerView>(shaderChainer);
-  shaderChainerViews.push_back(shaderChainerView);
-
-  // Sort the ShaderChainerViews by their names
-  std::sort(shaderChainerViews.begin(), shaderChainerViews.end(),
-            [](const std::shared_ptr<ShaderChainerView> &a,
-               const std::shared_ptr<ShaderChainerView> &b) {
-              return a->shaderChainer->name < b->shaderChainer->name;
-            });
-}
-
 void MainStageView::drawVideoSourceBrowser() {
   videoSourceBrowserView.draw();
   videoSourcePreviewView.draw();
@@ -237,8 +132,6 @@ void MainStageView::drawVideoSourceBrowser() {
 
 void MainStageView::drawOutputBrowser() { outputBrowserView.draw(); }
 
-void MainStageView::drawShaderBrowser() {
-  shaderBrowserView.draw();
-}
+void MainStageView::drawShaderBrowser() { shaderBrowserView.draw(); }
 
 void MainStageView::keyReleased(int key) { nodeLayoutView.keyReleased(key); }

@@ -8,23 +8,23 @@
 #ifndef AudioSourceService_hpp
 #define AudioSourceService_hpp
 
-#include <stdio.h>
+#include "AudioSource.hpp"
 #include "ConfigurableService.hpp"
 #include "Parameter.hpp"
-#include "AudioSource.hpp"
+#include <stdio.h>
 
-class AudioSourceService: public ConfigurableService {
-  private:
+class AudioSourceService : public ConfigurableService {
+private:
   std::map<std::string, std::shared_ptr<AudioSource>> audioSourceMap;
   std::map<std::string, std::string> audioSourceIdToParamId;
 
-  public:
-  static AudioSourceService* service;
+public:
+  static AudioSourceService *service;
   std::shared_ptr<AudioSource> defaultAudioSource;
   std::shared_ptr<AudioSource> selectedAudioSource;
-  
-  AudioSourceService() {};
-  static AudioSourceService* getService() {
+
+  AudioSourceService(){};
+  static AudioSourceService *getService() {
     if (!service) {
       service = new AudioSourceService;
       service->setup();
@@ -34,17 +34,15 @@ class AudioSourceService: public ConfigurableService {
   void setup();
   void processAudioSource();
   void selectAudioSource(std::shared_ptr<AudioSource> source);
-  
+
   std::vector<std::shared_ptr<AudioSource>> audioSources();
   std::shared_ptr<AudioSource> audioSourceForId(std::string id);
   std::shared_ptr<AudioSource> audioSourceForParamId(std::string paramId);
-  
-  
+
   void removeParamMapping(std::string paramId);
 
   json config() override;
   void loadConfig(json j) override;
 };
-
 
 #endif /* AudioSourceService_hpp */

@@ -25,9 +25,9 @@ void main() {
       float y = (coord.y + float(j)) / dimensions.y;
 
       // Convolve kernels with image
-      sumX += length(texture(iChannel0, vec2(x, y)).xyz) *
+      sumX += length(texture(tex, vec2(x, y)).xyz) *
               float(sobelX[1 + i][1 + j]);
-      sumY += length(texture(iChannel0, vec2(x, y)).xyz) *
+      sumY += length(texture(tex, vec2(x, y)).xyz) *
               float(sobelY[1 + i][1 + j]);
     }
   }

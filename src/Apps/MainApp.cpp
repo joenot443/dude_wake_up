@@ -12,6 +12,7 @@
 #include "UUID.hpp"
 #include "LayoutStateService.hpp"
 #include "VideoSourceService.hpp"
+#include "MarkdownService.hpp"
 #include "WebcamSource.hpp"
 #include "functional"
 #include "implot.h"
@@ -34,7 +35,7 @@ void MainApp::setup() {
   ImPlot::CreateContext();
   FontService::getService()->addFontToGui(&gui);
   VideoSourceService::getService();
-  
+  MarkdownService::getService();
   mainStageView->setup();
 }
 
@@ -44,7 +45,7 @@ void MainApp::update() {
   ParameterService::getService()->tickParameters();
   VideoSourceService::getService()->updateVideoSources();
   ShaderChainerService::getService()->updateShaderChainers();
-
+  
   mainStageView->update();
 }
 
@@ -62,9 +63,9 @@ void MainApp::drawMainStage() {
   ImGui::SetNextWindowSize(ImVec2(ofGetWindowWidth(), ofGetWindowHeight()));
   ImGui::SetNextWindowPos(ImVec2(0, 0));
   ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove |
-                                 ImGuiWindowFlags_NoTitleBar |
-                                 ImGuiWindowFlags_MenuBar |
-                ImGuiWindowFlags_NoBringToFrontOnFocus;
+  ImGuiWindowFlags_NoTitleBar |
+  ImGuiWindowFlags_MenuBar |
+  ImGuiWindowFlags_NoBringToFrontOnFocus;
   
   ImGui::Begin("Main Stage", NULL, windowFlags);
   ImGui::PushFont(FontService::getService()->p);
@@ -88,7 +89,7 @@ void MainApp::dragEvent(ofDragInfo dragInfo) {
     // Create a new VideoSource for the file
     auto fileName = ofFilePath::getFileName(dragInfo.files[0]);
     auto videoSource = std::make_shared<FileSource>(
-        UUID::generateUUID(), fileName, dragInfo.files[0]);
+                                                    UUID::generateUUID(), fileName, dragInfo.files[0]);
     VideoSourceService::getService()->addVideoSource(videoSource);
   }
 }

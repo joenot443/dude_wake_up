@@ -12,8 +12,8 @@
 #include "NodeLayoutView.hpp"
 #include "OscillatorView.hpp"
 #include "OutputBrowserView.hpp"
-#include "ShaderChainerSettingsView.hpp"
 #include "ShaderBrowserView.hpp"
+#include "ShaderChainerSettingsView.hpp"
 #include "ShaderChainerView.hpp"
 #include "ShaderChainersStageView.hpp"
 #include "VideoSource.hpp"
@@ -40,20 +40,12 @@ private:
   AudioSourceBrowserView audioSourceBrowserView = AudioSourceBrowserView();
   OscillatorView oscillatorView = OscillatorView();
   ShaderChainersStageView shaderChainerStageView = ShaderChainersStageView();
-  FileBrowserView fileBrowserView = FileBrowserView();
+  FileBrowserView fileBrowserView = FileBrowserView(FileBrowserType_JSON);
 
-  void styleWindow();
   void drawMenu();
-  void drawNewShaderChainerButton();
-  void drawNewShaderButton();
   void drawVideoSourceBrowser();
-  void drawShaderChainerSettings();
-  void drawSelectedShader();
   void drawOutputBrowser();
   void drawShaderBrowser();
-
-  void pushShaderChainer(std::shared_ptr<ShaderChainer> shaderChainer);
-  void populateShaderChainerViews();
 
 public:
   void setup();

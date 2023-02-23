@@ -4,9 +4,29 @@
 <dict>
 	<key>files</key>
 	<dict>
+		<key>Resources/2023-02-07_09-34-47.json_Psycurves-Chainer</key>
+		<data>
+		h/BuN4vRRIiFF0gkGJC2wdmBk+w=
+		</data>
+		<key>Resources/2023-02-07_09-56-16.json_Psycurves-Chainer</key>
+		<data>
+		ESD6PdgRoFHnxy/pz4mtlmyF1+0=
+		</data>
+		<key>Resources/2023-02-07_09-56-39.json_Audio Bumper-Chainer</key>
+		<data>
+		2uQug6mYEm8KU607IWnq2WUBKIE=
+		</data>
+		<key>Resources/2023-02-07_09-57-44.json_TriangleMap-Chainer</key>
+		<data>
+		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
+		</data>
 		<key>Resources/NodeLayout.json</key>
 		<data>
-		hCKH6gU8vajUrUkpAKyL0qrmer8=
+		U+WAbnsSVqsjxDAi4nYG8tSXQag=
+		</data>
+		<key>Resources/data/MaterialIcons-Regular.ttf</key>
+		<data>
+		fgLD8AVTL/TSQUhWfIQIl1anhIo=
 		</data>
 		<key>Resources/data/Minecraft.ttf</key>
 		<data>
@@ -66,11 +86,15 @@
 		</data>
 		<key>Resources/data/fa-regular-400.ttf</key>
 		<data>
-		mybXRaHmmyPXG36jbV3hIJyZeQE=
+		TwxaL9PbSu7YG4pf8JX5PQN7/ow=
 		</data>
 		<key>Resources/data/fontaudio.ttf</key>
 		<data>
 		dy0Cto1mL8TzR7YMM6iwqedLNMA=
+		</data>
+		<key>Resources/data/markdown/Blur.md</key>
+		<data>
+		dO/q0V2LBPzZl7RwXUeE501utBg=
 		</data>
 		<key>Resources/data/shaders/AudioBumper.frag</key>
 		<data>
@@ -104,6 +128,14 @@
 		<data>
 		Del3Vq/ZnxpX559oV8S+ihBaobM=
 		</data>
+		<key>Resources/data/shaders/ColorPass.frag</key>
+		<data>
+		4TqpGbOy7J4b8yB8tseCVQQVqbQ=
+		</data>
+		<key>Resources/data/shaders/ColorPass.vert</key>
+		<data>
+		M0lC/95lwJABvm2Z7lQmY14j0Wo=
+		</data>
 		<key>Resources/data/shaders/Disco.frag</key>
 		<data>
 		PR+w6BXjfGxx2HWxO/iAWO+Tfzk=
@@ -120,6 +152,14 @@
 		<data>
 		Del3Vq/ZnxpX559oV8S+ihBaobM=
 		</data>
+		<key>Resources/data/shaders/FishEye.frag</key>
+		<data>
+		iSQI9gJnWA/ZE8t4ebGLIaRc4ic=
+		</data>
+		<key>Resources/data/shaders/FishEye.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
+		</data>
 		<key>Resources/data/shaders/Galaxy.frag</key>
 		<data>
 		x4wV9FMABOI5D3QvdMO08cZpQUA=
@@ -127,6 +167,14 @@
 		<key>Resources/data/shaders/Galaxy.vert</key>
 		<data>
 		aW8x4NhUK5VUHB7kQSwRvYcBcM4=
+		</data>
+		<key>Resources/data/shaders/HalfTone.frag</key>
+		<data>
+		kyafOZt4lTPqzmcm3r7NSRQaLAQ=
+		</data>
+		<key>Resources/data/shaders/HalfTone.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
 		<key>Resources/data/shaders/Liquid.frag</key>
 		<data>
@@ -165,6 +213,14 @@
 		Eb7pqXuhh9i7N7AC8bzsuT7aNNA=
 		</data>
 		<key>Resources/data/shaders/Octahedron.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
+		</data>
+		<key>Resources/data/shaders/Psycurves.frag</key>
+		<data>
+		XtEnCGZrr/yCrqroS7nZnxoLpU8=
+		</data>
+		<key>Resources/data/shaders/Psycurves.vert</key>
 		<data>
 		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
@@ -210,7 +266,7 @@
 		</data>
 		<key>Resources/data/shaders/Sobel.frag</key>
 		<data>
-		qwFL9lH1Du/ul68YFB9zRhvZpxU=
+		cWDEzHANEyHfnktoV92UR0ErmME=
 		</data>
 		<key>Resources/data/shaders/Sobel.vert</key>
 		<data>
@@ -223,6 +279,14 @@
 		<key>Resources/data/shaders/Tile.vert</key>
 		<data>
 		Del3Vq/ZnxpX559oV8S+ihBaobM=
+		</data>
+		<key>Resources/data/shaders/Tissue.frag</key>
+		<data>
+		ZRP5sZq2nFZvC8XHpkA+8OkCvds=
+		</data>
+		<key>Resources/data/shaders/Tissue.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
 		<key>Resources/data/shaders/TriangleMap.frag</key>
 		<data>
@@ -368,11 +432,46 @@
 			<key>requirement</key>
 			<string>identifier libfmod and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: Joe Crozier (7HTR557REQ)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
 		</dict>
+		<key>Resources/2023-02-07_09-34-47.json_Psycurves-Chainer</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			a4wj19koa/+1HQP9wXK0U/sGx/riqtiFUV7VzSyt1cQ=
+			</data>
+		</dict>
+		<key>Resources/2023-02-07_09-56-16.json_Psycurves-Chainer</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			GDgAuyF2XQ0vnl+n3urf6YDFSka2lCbrzs5mxnEDYOk=
+			</data>
+		</dict>
+		<key>Resources/2023-02-07_09-56-39.json_Audio Bumper-Chainer</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			/GoUgtCWsbqLCjssQep8cipkp9zyiav+YoUsxqnRZfw=
+			</data>
+		</dict>
+		<key>Resources/2023-02-07_09-57-44.json_TriangleMap-Chainer</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=
+			</data>
+		</dict>
 		<key>Resources/NodeLayout.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			nAv7zf2Q8jJs5cXsnn64VQ+g3wJ7CcvkfUAcY+Q+8BI=
+			zTM3rxkkCfpv2wi7+w7pI0B/9iz2R7SSWmhRYjo4eBM=
+			</data>
+		</dict>
+		<key>Resources/data/MaterialIcons-Regular.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			7xSfCL3S/wmk4shXNHa3sPP7sVtiOVSt5ZiZ5xdb7do=
 			</data>
 		</dict>
 		<key>Resources/data/Minecraft.ttf</key>
@@ -477,7 +576,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			4tRPyNw9lELX1Y7rUUU6/8fqkk4Jf4JxupcbQceAHyY=
+			GmpZWgL5Po3urukCH4vQxdxDoXd8w56sQDVWoOBwCmk=
 			</data>
 		</dict>
 		<key>Resources/data/fontaudio.ttf</key>
@@ -485,6 +584,13 @@
 			<key>hash2</key>
 			<data>
 			uaFckA9iz3zOgDhHqv8m6HwEAPuv4sCS9MBJop+wNxo=
+			</data>
+		</dict>
+		<key>Resources/data/markdown/Blur.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			BMkmHSR2MR2tJVM/bn8MdQ6Cd4YAkWh0UbFPDhz4YDU=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/AudioBumper.frag</key>
@@ -543,6 +649,20 @@
 			IVoo8eYbEVzWdwLeDcPD0gyLempqcVAwrhf8KR8YFa0=
 			</data>
 		</dict>
+		<key>Resources/data/shaders/ColorPass.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			8zIJZfCDRkyPoACUCilOA/K9w/npXB/0PTSUC4jAMuY=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/ColorPass.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			EzjQ626e/6hJOUBNVvWDMzY8Fa2sZ9KFntQe4SUcr9c=
+			</data>
+		</dict>
 		<key>Resources/data/shaders/Disco.frag</key>
 		<dict>
 			<key>hash2</key>
@@ -571,6 +691,20 @@
 			IVoo8eYbEVzWdwLeDcPD0gyLempqcVAwrhf8KR8YFa0=
 			</data>
 		</dict>
+		<key>Resources/data/shaders/FishEye.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			Son68TcwS9RAR64jSbsVJp0Z67jQQo+Ju0m/LkJwV34=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/FishEye.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			</data>
+		</dict>
 		<key>Resources/data/shaders/Galaxy.frag</key>
 		<dict>
 			<key>hash2</key>
@@ -583,6 +717,20 @@
 			<key>hash2</key>
 			<data>
 			nWwvf+V7e5+iyjq7QnsW708OZEJde08l3MLao3aOH+Q=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/HalfTone.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			a7OJKLq0MgxFj0O72a4K89Mpywr0PaGVp9Be9ax+jyg=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/HalfTone.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Liquid.frag</key>
@@ -649,6 +797,20 @@
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Octahedron.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/Psycurves.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			lVq2lk5804qfwcuUqRAceURsHTqgRtA8gk3Bf1SnU7s=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/Psycurves.vert</key>
 		<dict>
 			<key>hash2</key>
 			<data>
@@ -729,7 +891,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			NFGadnRS/XKuULRBLRfahKl3aC5cXxVWvy9nxbzb4CM=
+			p8UhHzrWYiEbMyckEo3dBBksKt0dXmLjxaM0xxbISYY=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Sobel.vert</key>
@@ -751,6 +913,20 @@
 			<key>hash2</key>
 			<data>
 			IVoo8eYbEVzWdwLeDcPD0gyLempqcVAwrhf8KR8YFa0=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/Tissue.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			yCYgA4cGhsJObFEsTtOWlgMqpMYKTwKSpHJqiirWfgQ=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/Tissue.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/TriangleMap.frag</key>

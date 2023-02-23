@@ -23,7 +23,7 @@ public:
 private:
   ofFbo videoSourceFbo;
   TileBrowserView tileBrowserView = TileBrowserView({});
-  FileBrowserView fileBrowserView = FileBrowserView();
+  FileBrowserView fileBrowserView = FileBrowserView(FileBrowserType_Source);
   std::vector<TileItem> webcamItems;
   std::vector<TileItem> shaderItems;
 };

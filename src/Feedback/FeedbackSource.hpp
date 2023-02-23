@@ -16,6 +16,7 @@ struct FeedbackSource {
   std::string name;
   std::string id;
   std::vector<ofFbo> frameBuffer = {};
+//  std::shared_ptr<Shader> consumingShader;
   int startIndex = 0;
   
   void setup() {
@@ -32,6 +33,10 @@ struct FeedbackSource {
   }
 
   FeedbackSource(std::string id, std::string name) : name(name), id(id) {};
+  
+  ofTexture mostRecentFrame() {
+    return frameBuffer.at(startIndex).getTexture();
+  }
   
   ofTexture getFrame(int index) {
     int destIndex = (startIndex + index) % FrameBufferCount;
@@ -52,6 +57,7 @@ struct FeedbackSource {
   }
   
   void pushFrame(std::shared_ptr<ofTexture> frame) {
+//    if (consumingShader == nullptr) return;
     
     auto canvas = frameBuffer[startIndex];
     canvas.begin();

@@ -37,7 +37,8 @@ public:
   unsigned int creationTime;
   std::vector<std::shared_ptr<Shader>> shaders();
   std::shared_ptr<Shader> front;
-
+  std::shared_ptr<Shader> frontAux;
+  
   std::shared_ptr<VideoSource> source;
 
   std::shared_ptr<FeedbackSource> feedbackDestination;

@@ -40,7 +40,9 @@ public:
     std::vector<std::shared_ptr<Parameter>> allParams;
     allParams.insert(allParams.end(), parameters.begin(), parameters.end());
     for (auto osc : oscillators) {
-      allParams.insert(allParams.end(), osc->parameters.begin(), osc->parameters.end());
+      if (osc != nullptr) {
+        allParams.insert(allParams.end(), osc->parameters.begin(), osc->parameters.end());
+      }
     }
     return allParams;
   }
@@ -50,7 +52,9 @@ public:
     json j;
     
     for (auto p : allParameters()) {
-      j[p->name] = p->serialize();
+      if (p != nullptr) {
+        j[p->name] = p->serialize();
+      }
     }
     return j;
   }

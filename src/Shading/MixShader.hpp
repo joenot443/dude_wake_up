@@ -12,6 +12,7 @@
 
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
+#include "ShaderChainerService.hpp"
 #include "VideoSourceService.hpp"
 #include "Oscillator.hpp"
 #include "Shader.hpp"
@@ -47,9 +48,9 @@ struct MixShader : public Shader {
     canvas->begin();
     shader.begin();
     
-    if (aux != nullptr && aux->feedbackDestination() != nullptr) {
-      ofTexture feedbackTexture = aux->feedbackDestination()->getFrame(0);
-      shader.setUniformTexture("tex2", feedbackTexture, 5);
+    std::shared_ptr<ofTexture> tex2 = auxTexture();
+    if (tex2 != nullptr) {
+      shader.setUniformTexture("tex2", *tex2.get(), 8);
     }
     
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());

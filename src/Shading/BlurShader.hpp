@@ -8,43 +8,41 @@
 #ifndef BlurShader_hpp
 #define BlurShader_hpp
 
-#include "ofMain.h"
 #include "WaveformOscillator.hpp"
+#include "ofMain.h"
 
-#include "ofxImGui.h"
 #include "Math.hpp"
 #include "Shader.hpp"
+#include "ofxImGui.h"
 #include <stdio.h>
 
-struct BlurSettings: public ShaderSettings  {
+struct BlurSettings : public ShaderSettings {
   std::string shaderId;
   std::shared_ptr<Parameter> mix;
   std::shared_ptr<Parameter> radius;
-  
+
   std::shared_ptr<Oscillator> mixOscillator;
   std::shared_ptr<Oscillator> radiusOscillator;
-  BlurSettings(std::string shaderId, json j) :
-  mix(std::make_shared<Parameter>("blur_mix", shaderId, 0.5, 0.0, 1.0)),
-  radius(std::make_shared<Parameter>("blur_radius", shaderId, 25.0, 0.0, 50.0)),
-  mixOscillator(std::make_shared<WaveformOscillator>(mix)),
-  radiusOscillator(std::make_shared<WaveformOscillator>(radius)),
-  shaderId(shaderId),
-  ShaderSettings(shaderId)  {
+  BlurSettings(std::string shaderId, json j)
+      : mix(std::make_shared<Parameter>("blur_mix", shaderId, 0.5, 0.0, 1.0)),
+        radius(std::make_shared<Parameter>("blur_radius", shaderId, 25.0, 0.0,
+                                           50.0)),
+        mixOscillator(std::make_shared<WaveformOscillator>(mix)),
+        radiusOscillator(std::make_shared<WaveformOscillator>(radius)),
+        shaderId(shaderId), ShaderSettings(shaderId) {
     parameters = {mix, radius};
     oscillators = {mixOscillator, radiusOscillator};
     load(j);
   }
 };
 
-struct BlurShader: Shader {
+struct BlurShader : Shader {
   BlurSettings *settings;
   ofShader shader;
+
 public:
-  BlurShader(BlurSettings *settings) : Shader(settings),
-  settings(settings) {}
-  void setup() override {
-    shader.load("shaders/blur");
-  }
+  BlurShader(BlurSettings *settings) : Shader(settings), settings(settings) {}
+  void setup() override { shader.load("shaders/blur"); }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
     canvas->begin();
@@ -57,23 +55,16 @@ public:
     shader.end();
     canvas->end();
   }
-  
-  ShaderType type() override {
-    return ShaderTypeBlur;
-  }
-  
-  void drawSettings() override { 
+
+  ShaderType type() override { return ShaderTypeBlur; }
+
+  void drawSettings() override {
     // Amount
-    CommonViews::Slider("Mix", "##mix", settings->mix);
-    CommonViews::ModulationSelector(settings->mix);
-    CommonViews::MidiSelector(settings->mix);
-    
+    CommonViews::ShaderParameter(settings->mix, settings->mixOscillator);
+
     // Radius
-    CommonViews::Slider("Radius", "##radius", settings->radius);
-    CommonViews::ModulationSelector(settings->radius);
-    CommonViews::MidiSelector(settings->radius);
+    CommonViews::ShaderParameter(settings->radius, settings->radiusOscillator);
   }
 };
-
 
 #endif /* BlurShader_hpp */

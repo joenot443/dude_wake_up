@@ -4,6 +4,12 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "TissueShader.hpp"
+#include "TissueShader.hpp"
+#include "TissueShader.hpp"
+#include "TissueShader.hpp"
+#include "TissueShader.hpp"
+#include "PsycurvesShader.hpp"
 #include "TriangleMapShader.hpp"
 #include "DiscoShader.hpp"
 #include "OctahedronShader.hpp"
@@ -30,6 +36,8 @@
 using json = nlohmann::json;
 
 enum ShaderSourceType {
+  ShaderSource_Tissue, //source enum,
+  ShaderSource_Psycurves,
   ShaderSource_TriangleMap,
   ShaderSource_Disco,
   ShaderSource_Octahedron,
@@ -50,7 +58,9 @@ enum ShaderSourceType {
 };
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
-  // Available ShaderSourceTypes
+// Available ShaderSourceTypes
+  ShaderSource_Tissue, // Available
+  ShaderSource_Psycurves,
   ShaderSource_TriangleMap,
   ShaderSource_Disco,
   ShaderSource_Octahedron,
@@ -71,6 +81,10 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
 // shaderTypeForShaderSourceType
+  case ShaderSource_Tissue: //type enum
+    return ShaderTypeTissue;
+  case ShaderSource_Psycurves:
+    return ShaderTypePsycurves;
   case ShaderSource_TriangleMap:
     return ShaderTypeTriangleMap;
   case ShaderSource_Disco:
@@ -113,6 +127,10 @@ static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
 static std::string shaderSourceTypeName(ShaderSourceType nameType) {
   switch (nameType) {
   // Shader Names
+  case ShaderSource_Tissue: // Name  
+    return "Tissue"; // Tissue
+  case ShaderSource_Psycurves: // Name  
+    return "Psycurves"; // Psycurves
   case ShaderSource_TriangleMap: // Name  
     return "TriangleMap"; // TriangleMap
   case ShaderSource_Disco: // Name  
@@ -168,6 +186,18 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_Tissue: { // Settings
+      auto settings = new TissueSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<TissueShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Psycurves: { // Settings
+      auto settings = new PsycurvesSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<PsycurvesShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_TriangleMap: { // Settings
       auto settings = new TriangleMapSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<TriangleMapShader>(settings);

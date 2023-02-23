@@ -53,7 +53,7 @@ public:
   };
 
   void setup() override {
-    shader.load("shaders/fractal");
+    shader.load("shaders/Fractal");
   };
 
   void drawSettings() override {

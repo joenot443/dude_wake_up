@@ -161,31 +161,37 @@ json VideoSourceService::config() {
   return container;
 }
 
+void VideoSourceService::appendConfig(json j) {
+  std::map<std::string, json> sourcesMap = j;
+  
+  VideoSourceType type = j["videoSourceType"];
+  std::string sourceId = j["id"];
+  
+  switch (type) {
+    case VideoSource_file:
+      addFileVideoSource(j["sourceName"], j["path"], sourceId);
+      return;
+    case VideoSource_webcam:
+      addWebcamVideoSource(j["sourceName"], j["deviceId"], sourceId);
+      return;
+    case VideoSource_shader:
+      addShaderVideoSource(j["shaderSourceType"], sourceId);
+      return;
+    case VideoSource_chainer:
+      return;
+  }
+}
+
 void VideoSourceService::loadConfig(json data) {
   videoSourceMap.clear();
-  addShaderVideoSource(ShaderSource_empty);
+  std::map<std::string, json> sourceMap = data;
   
-  std::map<std::string, json> sourcesMap = data;
-  
-  for (auto pair : sourcesMap) {
-    json j = pair.second;
-    VideoSourceType type = j["videoSourceType"];
-    std::string sourceId = j["id"];
-    
-    switch (type) {
-      case VideoSource_file:
-        addFileVideoSource(j["sourceName"], j["path"], sourceId);
-        continue;
-      case VideoSource_webcam:
-        addWebcamVideoSource(j["sourceName"], j["deviceId"], sourceId);
-        continue;
-      case VideoSource_shader:
-        addShaderVideoSource(j["shaderSourceType"], sourceId);
-        continue;
-      case VideoSource_chainer:
-        continue;
-    }
+  for (auto pair : sourceMap) {
+    std::map<std::string, json> source = pair.second;
+    appendConfig(source);
   }
+  addShaderVideoSource(ShaderSource_empty);
+  appendConfig(data);
 }
 
 std::shared_ptr<VideoSource> VideoSourceService::videoSourceForId(std::string id) {

@@ -1,7 +1,7 @@
 ---
 to: src/Video/ShaderSource.hpp
 inject: true
-skip_if: <%= name %>Settings
-after: "  // Available ShaderSourceTypes"
+skip_if: ShaderSource_<%= name %>, // Available
+after: "// Available ShaderSourceTypes"
 ---
-    ShaderSource_<%= name %>,
+  ShaderSource_<%= name %>, // Available

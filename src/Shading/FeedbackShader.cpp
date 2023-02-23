@@ -12,7 +12,7 @@
 #include "FeedbackSourceService.hpp"
 
 void FeedbackShader::setup() {
-  shader.load("shaders/feedback");
+  shader.load("shaders/Feedback");
   if (settings->feedbackSourceId.empty()) {
 //    feedbackSource =
 //        FeedbackSourceService::getService()->defaultFeedbackSource();
@@ -60,35 +60,6 @@ void FeedbackShader::disableFeedback() {
 }
 
 void FeedbackShader::clearFrameBuffer() { feedbackSource->clearFrameBuffer(); }
-
-// Draw a selector for the feedback source.
-// Use FeedbackSourceService to generate a list of available sources.
-void FeedbackShader::drawFeedbackSourceSelector() {
-  ImGui::Text("Feedback Source");
-  ImGui::SetNextItemWidth(150.0);
-  ImGui::SameLine(0, 20);
-  // Get the list of available sources.
-  std::vector<std::shared_ptr<FeedbackSource>> sources =
-      FeedbackSourceService::getService()->feedbackSources();
-
-  // Draw the selector.
-  if (ImGui::BeginCombo("##feedbackSource", feedbackSource->name.c_str())) {
-    for (int i = 0; i < sources.size(); i++) {
-      // Get the id of the source.
-      auto source = sources[i];
-      bool isSelected = (settings->feedbackSourceId == source->id);
-      if (ImGui::Selectable(source->name.c_str(), isSelected)) {
-        settings->feedbackSourceId = source->id;
-        feedbackSource = source;
-      }
-
-      if (isSelected) {
-        ImGui::SetItemDefaultFocus();
-      }
-    }
-    ImGui::EndCombo();
-  }
-}
 
 void FeedbackShader::drawSettings() {
   CommonViews::ShaderCheckbox(settings->lumaKeyEnabled);

@@ -7,38 +7,44 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
-#include "SobelShader.hpp"
-#include "TriangleMapShader.hpp"
-#include "LiquidShader.hpp"
-#include "DiscoShader.hpp"
-#include "OctahedronShader.hpp"
+#include "HalfToneShader.hpp"
 #include "AudioBumperShader.hpp"
-#include "AvailableShader.hpp"
 #include "AudioMountainsShader.hpp"
+#include "ConfigService.hpp"
 #include "AudioWaveformShader.hpp"
+#include "AvailableShader.hpp"
 #include "BlurShader.hpp"
 #include "CloudShader.hpp"
+#include "ColorPassShader.hpp"
 #include "ConfigService.hpp"
 #include "Console.hpp"
+#include "DiscoShader.hpp"
 #include "DitherShader.hpp"
 #include "FeedbackShader.hpp"
+#include "FishEyeShader.hpp"
 #include "GalaxyShader.hpp"
 #include "GlitchShader.hpp"
 #include "HSBShader.hpp"
 #include "KaleidoscopeShader.hpp"
+#include "LiquidShader.hpp"
 #include "MelterShader.hpp"
 #include "MirrorShader.hpp"
 #include "MixShader.hpp"
 #include "MountainsShader.hpp"
+#include "OctahedronShader.hpp"
 #include "PixelShader.hpp"
+#include "PsycurvesShader.hpp"
 #include "RGBShiftShader.hpp"
 #include "RainbowRotatorShader.hpp"
 #include "RingsShader.hpp"
 #include "RubiksShader.hpp"
 #include "ShaderChainerService.hpp"
 #include "SliderShader.hpp"
+#include "SobelShader.hpp"
 #include "TileShader.hpp"
+#include "TissueShader.hpp"
 #include "TransformShader.hpp"
+#include "TriangleMapShader.hpp"
 #include "VanGoghShader.hpp"
 #include "VideoSourceService.hpp"
 #include "WobbleShader.hpp"
@@ -92,7 +98,10 @@ void ShaderChainerService::removeShaderChainer(std::string id) {
     log("Tried to remove ShaderChainer %s, but it doesn't exist", id.c_str());
     return;
   }
+  auto shaderChainer = shaderChainerMap[id];
+  videoSourceIdShaderChainerMap.erase(shaderChainer->source->id);
   shaderChainerMap.erase(id);
+
   shaderChainerUpdateSubject.notify();
 }
 
@@ -113,12 +122,24 @@ void ShaderChainerService::breakShaderAuxLink(
   endShader->aux = nullptr;
 }
 
+void ShaderChainerService:: breakSourceShaderAuxLink(std::shared_ptr<VideoSource> source,
+                                                     std::shared_ptr<Shader> shader) {
+  auto chainer = shaderChainerForVideoSourceId(source->id);
+  chainer->frontAux = nullptr;
+  shader->sourceAux = nullptr;
+}
+
 void ShaderChainerService::addNewShaderChainer(
     std::shared_ptr<VideoSource> videoSource) {
-  auto name = formatString("%s-Chainer", videoSource->sourceName.c_str());
+  auto name = formatString("%s", videoSource->sourceName.c_str());
   auto chainer =
       std::make_shared<ShaderChainer>(UUID::generateUUID(), name, videoSource);
+  videoSourceIdShaderChainerMap[videoSource->id] = chainer;
   addShaderChainer(chainer);
+}
+
+std::shared_ptr<ShaderChainer> ShaderChainerService::shaderChainerForVideoSourceId(std::string id) {
+  return videoSourceIdShaderChainerMap[id];
 }
 
 void ShaderChainerService::addShaderChainer(
@@ -138,6 +159,13 @@ void ShaderChainerService::addShaderChainer(
   shaderChainerUpdateSubject.notify();
 }
 
+void ShaderChainerService::setAuxShader(std::shared_ptr<VideoSource> auxSource,
+                  std::shared_ptr<Shader> destShader) {
+  destShader->sourceAux = auxSource;
+  auto chainer = shaderChainerForVideoSourceId(auxSource->id);
+  chainer->frontAux = destShader;
+}
+
 std::shared_ptr<Shader> ShaderChainerService::makeShader(ShaderType type) {
   auto shader = shaderForType(type, UUID::generateUUID(), 0);
   addShader(shader);
@@ -154,6 +182,7 @@ void ShaderChainerService::addShaderToFront(
     std::shared_ptr<Shader> destShader,
     std::shared_ptr<ShaderChainer> chainer) {
   chainer->front = destShader;
+  destShader->parentSource = chainer->source;
 }
 
 // ConfigurableService
@@ -166,6 +195,55 @@ json ShaderChainerService::config() {
   }
 
   return container;
+}
+
+std::vector<std::string> ShaderChainerService::loadAvailableShaderChainer(AvailableShaderChainer chainer) {
+  std::fstream fileStream;
+  fileStream.open(*chainer.path.get(), std::ios::in);
+  std::vector<std::string> addedIds;
+  
+  if (fileStream.is_open()) {
+    json data;
+    try {
+      fileStream >> data;
+    } catch (int code) {
+      log("Failed to load JSON file.");
+      return;
+    }
+    
+    if (data.is_object()) {
+      std::map<std::string, json> shaderJson = data[ShaderChainersJsonKey];
+      std::map<std::string, json> sourcesJson = data[SourcesJsonKey];
+      std::vector<std::map<std::string, json>> shaders = shaderJson["shaders"];
+      
+      for (auto shader : shaders) {
+        addedIds.push_back(shader["shaderId"]);
+      }
+      
+      
+      std::string chainerName = shaderJson["name"];
+      std::string sourceId = shaderJson["sourceId"];
+      addedIds.push_back(sourceId);
+      
+      // Add a Node for our VideoSource
+      VideoSourceService::getService()->appendConfig(sourcesJson);
+      
+      auto source =
+      VideoSourceService::getService()->videoSourceForId(sourceId);
+      
+      if (source == nullptr) {
+        log("Failed to find VideoSource for %s", sourceId.c_str());
+        return;
+      }
+      
+      auto shaderChainer = new ShaderChainer(shaderJson["chainerId"], chainerName, source);
+      shaderChainer->load(shaderJson);
+      shaderChainer->setup();
+      addShaderChainer(std::shared_ptr<ShaderChainer>(shaderChainer));
+    }
+  }
+  
+  return addedIds;
 }
 
 void ShaderChainerService::loadConfig(json data) {
@@ -283,36 +361,66 @@ std::shared_ptr<Shader>
 ShaderChainerService::shaderForType(ShaderType type, std::string shaderId,
                                     json shaderJson) {
   switch (type) {
-    case ShaderTypeSobel: {
-      auto settings = new SobelSettings(shaderId, shaderJson);
-      auto shader = std::make_shared<SobelShader>(settings);
+    case ShaderTypeHalfTone: {
+      auto settings = new HalfToneSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<HalfToneShader>(settings);
       shader->setup();
       return shader;
     }
-    case ShaderTypeTriangleMap: {
-      auto settings = new TriangleMapSettings(shaderId, shaderJson);
-      auto shader = std::make_shared<TriangleMapShader>(settings);
-      shader->setup();
-      return shader;
-    }
-    case ShaderTypeLiquid: {
-      auto settings = new LiquidSettings(shaderId, shaderJson);
-      auto shader = std::make_shared<LiquidShader>(settings);
-      shader->setup();
-      return shader;
-    }
-    case ShaderTypeDisco: {
-      auto settings = new DiscoSettings(shaderId, shaderJson);
-      auto shader = std::make_shared<DiscoShader>(settings);
-      shader->setup();
-      return shader;
-    }
-    case ShaderTypeOctahedron: {
-      auto settings = new OctahedronSettings(shaderId, shaderJson);
-      auto shader = std::make_shared<OctahedronShader>(settings);
-      shader->setup();
-      return shader;
-    }
+  case ShaderTypeTissue: {
+    auto settings = new TissueSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<TissueShader>(settings);
+    shader->setup();
+    return shader;
+  }
+  case ShaderTypePsycurves: {
+    auto settings = new PsycurvesSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<PsycurvesShader>(settings);
+    shader->setup();
+    return shader;
+  }
+  case ShaderTypeFishEye: {
+    auto settings = new FishEyeSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<FishEyeShader>(settings);
+    shader->setup();
+    return shader;
+  }
+  case ShaderTypeColorPass: {
+    auto settings = new ColorPassSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<ColorPassShader>(settings);
+    shader->setup();
+    return shader;
+  }
+  case ShaderTypeSobel: {
+    auto settings = new SobelSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<SobelShader>(settings);
+    shader->setup();
+    return shader;
+  }
+  case ShaderTypeTriangleMap: {
+    auto settings = new TriangleMapSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<TriangleMapShader>(settings);
+    shader->setup();
+    return shader;
+  }
+  case ShaderTypeLiquid: {
+    auto settings = new LiquidSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<LiquidShader>(settings);
+    shader->setup();
+    return shader;
+  }
+  case ShaderTypeDisco: {
+    auto settings = new DiscoSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<DiscoShader>(settings);
+    shader->setup();
+    return shader;
+  }
+  case ShaderTypeOctahedron: {
+    auto settings = new OctahedronSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<OctahedronShader>(settings);
+    shader->setup();
+    return shader;
+  }
   case ShaderTypeVanGogh: {
     auto settings = new VanGoghSettings(shaderId, shaderJson);
     auto shader = std::make_shared<VanGoghShader>(settings);

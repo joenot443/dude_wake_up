@@ -15,3 +15,19 @@ std::shared_ptr<FeedbackSource> Shader::feedbackDestination() {
   
   return nullptr;
 }
+
+
+std::shared_ptr<ofTexture> Shader::auxTexture() {
+  // Shader Aux input
+  if (aux != nullptr && aux->feedbackDestination() != nullptr) {
+    ofTexture feedbackTexture = *ShaderChainerService::getService()->shaderChainerForShaderId(aux->shaderId)->frameTexture.get();
+    return std::shared_ptr<ofTexture>(&feedbackTexture);
+  }
+  
+  // VideoSource Aux input
+  if (sourceAux != nullptr) {
+    return sourceAux->frameTexture;
+  }
+  
+  return nullptr;
+}

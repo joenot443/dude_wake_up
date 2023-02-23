@@ -6,6 +6,7 @@
 //
 
 #include "json.hpp"
+#include "Strings.hpp"
 #include <stdio.h>
 #include <string>
 
@@ -105,7 +106,15 @@ struct Parameter {
 
     return static_cast<int>(value);
   }
+  
+  std::string oscPopupId() {
+    return formatString("%s Oscillator##osc_popup", name.c_str());
+  }
 
+  std::string audioPopupId() {
+    return formatString("##%s_audio_popup", name.c_str());
+  }
+  
   Parameter(std::string name, std::string settingsId, float value);
   Parameter(std::string name, std::string settingsId, std::string shaderKey,
             float value);

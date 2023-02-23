@@ -9,6 +9,7 @@
 #include "ConfigService.hpp"
 #include "FeedbackSourceService.hpp"
 #include "VideoSourceService.hpp"
+#include "MarkdownService.hpp"
 #include "ShaderChainerService.hpp"
 #include "LayoutStateService.hpp"
 #include "ParameterService.hpp"
@@ -26,10 +27,20 @@ VideoSourceService *VideoSourceService::service = 0;
 ShaderChainerService *ShaderChainerService::service = 0;
 AudioSourceService *AudioSourceService::service = 0;
 LayoutStateService *LayoutStateService::service = 0;
+MarkdownService *MarkdownService::service = 0;
 
+void setupDirectories() {
+  ofSetDataPathRoot("../Resources/data/");
+  auto homeDir = ofFilePath::getUserHomeDir();
+  auto libraryPath = ofFilePath::join(homeDir, "/nottawa");
+  if (!ofDirectory::doesDirectoryExist(libraryPath)) {
+    ofDirectory::createDirectory(libraryPath);
+  }
+}
 
 int main( ){
-  ofSetDataPathRoot("../Resources/data/");
+  setupDirectories();
+
   ofGLFWWindowSettings settings;
   // Set the window size to be the same as the monitor size
   settings.setSize(1440, 900);
@@ -42,4 +53,6 @@ int main( ){
   ofRunApp(window, app);
   ofRunMainLoop();
 }
+
+
 

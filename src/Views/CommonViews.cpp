@@ -30,6 +30,13 @@ void CommonViews::Spacing(int n) {
   }
 }
 
+void CommonViews::HSpacing(int n) {
+  for (int i = 0; i < n; i++) {
+    ImGui::Spacing();
+    ImGui::SameLine();
+  }
+}
+
 void CommonViews::ShaderParameter(std::shared_ptr<Parameter> param,
                                   std::shared_ptr<Oscillator> osc) {
   sSpacing();
@@ -37,10 +44,22 @@ void CommonViews::ShaderParameter(std::shared_ptr<Parameter> param,
   Slider(param->name, param->paramId, param);
   MidiSelector(param);
   ImGui::SameLine();
-  OscillateButton(param->paramId, osc, param);
-  ImGui::SameLine();
   AudioParameterSelector(param);
+  ImGui::SameLine();
+  OscillateButton(param->paramId, osc, param);
   sSpacing();
+  if (!osc->enabled->boolValue) { return; }
+  OscillatorWindow(osc, param);
+}
+
+void CommonViews::OscillatorWindow(std::shared_ptr<Oscillator> o, std::shared_ptr<Parameter> p) {
+  auto pos = ImGui::GetCursorScreenPos();
+  ImGui::SetNextWindowPos(pos);
+  
+  if (ImGui::Begin(p->oscPopupId().c_str(), 0, ImGuiWindowFlags_AlwaysAutoResize)) {
+    OscillatorView::draw(o, p);
+  }
+  ImGui::End();
 }
 
 void CommonViews::AudioParameterSelector(std::shared_ptr<Parameter> param) {
@@ -48,7 +67,6 @@ void CommonViews::AudioParameterSelector(std::shared_ptr<Parameter> param) {
   
   auto analysisParameters = AudioSourceService::getService()
                                 ->selectedAudioSource->audioAnalysis.parameters;
-  auto popupId = formatString("##%s_popup", param->name.c_str());
   auto buttonId = formatString("##audio_button_%s", param->name.c_str());
 
   // If the parameter is already mapped to an audio parameter, show the name of
@@ -62,11 +80,11 @@ void CommonViews::AudioParameterSelector(std::shared_ptr<Parameter> param) {
 
   // Otherwise, present a button to select an audio parameter
   if (ImGui::Button(formatString("Select Param%s", param->name.c_str()).c_str())) {
-    ImGui::OpenPopup(popupId.c_str());
+    ImGui::OpenPopup(param->audioPopupId().c_str());
   }
     
   // If the user selects an audio parameter, map it to the parameter
-  if (ImGui::BeginPopup(popupId.c_str())) {
+  if (ImGui::BeginPopup(param->audioPopupId().c_str())) {
     ImGui::Text("Select Audio Parameter to Follow");
     for (auto audioParam : analysisParameters) {
       if (ImGui::Selectable(audioParam->name.c_str())) {
@@ -82,41 +100,6 @@ void CommonViews::ShaderCheckbox(std::shared_ptr<Parameter> param) {
   H4Title(param->name);
   ImGui::Checkbox(param->name.c_str(), &param->boolValue);
   sSpacing();
-}
-
-void CommonViews::ModulationSelector(std::shared_ptr<Parameter> videoParam) {
-  return;
-
-  bool hasDriver = videoParam->driver != NULL;
-  auto popupId = formatString("##%s_popup", videoParam->name.c_str());
-  auto buttonId = formatString("##mod_button_%s", videoParam->name.c_str());
-
-  if (hasDriver) {
-    if (ImGui::Button(videoParam->driver->name.c_str())) {
-      ModulationService::getService()->removeMapping(videoParam);
-    }
-    return;
-  }
-
-  if (ImGui::Button(
-          formatString("Select Audio Parameter%s", buttonId.c_str()).c_str())) {
-    ImGui::OpenPopup(popupId.c_str());
-  }
-
-  if (ImGui::BeginPopup(popupId.c_str())) {
-    for (auto const a : ModulationService::getService()->audioAnalysis) {
-      if (ImGui::BeginMenu(a->name.c_str())) {
-        for (auto const audioParam : a->parameters) {
-          bool enabled = audioParam == videoParam->driver;
-          if (ImGui::MenuItem(audioParam->name.c_str(), "", &enabled)) {
-            ModulationService::getService()->addMapping(videoParam, audioParam);
-          }
-        }
-        ImGui::EndMenu();
-      }
-    }
-    ImGui::EndPopup();
-  }
 }
 
 void CommonViews::H3Title(std::string title) {
@@ -166,12 +149,21 @@ void CommonViews::ResetButton(std::string id,
 
 bool CommonViews::IconButton(const char* icon, std::string id) {
   auto buttonId = formatString("%s##%s", icon, id.c_str());
-  ImGui::PushFont(FontService::getService()->audio);
-
-  auto button = ImGui::Button(buttonId.c_str());
+  ImGui::PushFont(FontService::getService()->icon);
+  ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0,0,0,0));
+  ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.,0.));
+  auto button = ImGui::Button(buttonId.c_str(), ImVec2(16., 16.));
+  ImGui::PopStyleColor();
+  ImGui::PopStyleVar();
   ImGui::PopFont();
 
   return button;
+}
+
+void CommonViews::IconTitle(const char* icon) {
+  ImGui::PushFont(FontService::getService()->icon);
+  ImGui::Text(icon);
+  ImGui::PopFont();
 }
 
 void CommonViews::OscillateButton(std::string id, std::shared_ptr<Oscillator> o,
@@ -191,6 +183,12 @@ void CommonViews::OscillateButton(std::string id, std::shared_ptr<Oscillator> o,
   }
 
   if (ImGui::Button(buttonTitle.c_str(), ImVec2(16.0, 16.0))) {
+    if (ImGui::IsPopupOpen(p->oscPopupId().c_str())) {
+      ImGui::CloseCurrentPopup();
+    } else {
+      ImGui::OpenPopup(p->oscPopupId().c_str());
+    }
+    
     o->enabled->boolValue = !o->enabled->boolValue;
     OscillationService::getService()->selectOscillator(o, p);
   }

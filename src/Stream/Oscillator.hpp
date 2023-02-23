@@ -21,6 +21,8 @@ enum OscillatorType {
   Oscillator_waveform
 };
 
+static const int OscillatorValueCount = 400;
+
 struct Oscillator {
 public:
   OscillatorType type;
@@ -75,9 +77,9 @@ public:
   {
     parameters = {enabled};
     data = ImVector<ImVec2>();
-    data.reserve(100);
+//    data.reserve(OscillatorValueCount);
     xRange = {0.0, 10.0};
-    span = 10.0;
+    span = 30.0;
     yRange = {value->min, value->max};
   }
 private:

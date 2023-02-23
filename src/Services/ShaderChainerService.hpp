@@ -8,9 +8,10 @@
 #ifndef ShaderChainerService_hpp
 #define ShaderChainerService_hpp
 
-#include "ConfigurableService.hpp"
 #include "AvailableShader.hpp"
+#include "ConfigurableService.hpp"
 #include "Shader.hpp"
+#include "AvailableShaderChainer.hpp"
 #include "ShaderChainer.hpp"
 #include "observable.hpp"
 #include <stdio.h>
@@ -26,6 +27,9 @@ private:
   // Maps a Shader to its parent ShaderChainer
   std::map<std::string, std::shared_ptr<ShaderChainer>>
       shaderIdShaderChainerMap;
+  // Maps a VideoSource to the ShaderChainer associated
+  std::map<std::string, std::shared_ptr<ShaderChainer>>
+      videoSourceIdShaderChainerMap;
 
   observable::subject<void()> shaderChainerUpdateSubject;
 
@@ -53,6 +57,7 @@ public:
                                   std::shared_ptr<ShaderChainer> chainer);
   std::shared_ptr<ShaderChainer> shaderChainerForId(std::string id);
   std::shared_ptr<ShaderChainer> shaderChainerForShaderId(std::string id);
+  std::shared_ptr<ShaderChainer> shaderChainerForVideoSourceId(std::string id);
   std::vector<std::shared_ptr<ShaderChainer>> shaderChainers();
   std::vector<std::string> shaderChainerNames();
   void updateShaderChainers();
@@ -68,6 +73,10 @@ public:
   // Break the link from a Shader to the Aux Input of another
   void breakShaderAuxLink(std::shared_ptr<Shader> startShader,
                           std::shared_ptr<Shader> endShader);
+  // Break the link from a Source to the Aux Input of a Shader
+  void breakSourceShaderAuxLink(std::shared_ptr<VideoSource> source,
+                          std::shared_ptr<Shader> shader);
+  
   // Breaks the ShaderChainer's link to its front Shader
   void breakShaderChainerFront(std::shared_ptr<ShaderChainer> shaderChainer);
 
@@ -77,6 +86,11 @@ public:
   // Sets an Aux Shader for a Shader
   void setAuxShader(std::shared_ptr<Shader> auxShader,
                     std::shared_ptr<Shader> destShader);
+  
+  // Sets the Aux on a Shader to be a VideoSource.
+  void setAuxShader(std::shared_ptr<VideoSource> auxSource,
+                    std::shared_ptr<Shader> destShader);
+  
   // Sets a Shader to be the front of a ShaderChainer
   void addShaderToFront(std::shared_ptr<Shader> destShader,
                         std::shared_ptr<ShaderChainer> chainer);
@@ -93,6 +107,9 @@ public:
 
   json config() override;
   void loadConfig(json j) override;
+  // Loads the passed AvailableShaderChainer and returns a vector of the ID's of
+  // the Shaders and VideoSources that were added.
+  std::vector<std::string> loadAvailableShaderChainer(AvailableShaderChainer chainer);
 };
 
 #endif /* ShaderChainerService_hpp */

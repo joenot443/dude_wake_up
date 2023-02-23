@@ -22,7 +22,7 @@ private:
   void keyReleased(int key);
 
   void drawMainStage();
-
+  void setupStyle();
   void drawMainSettings();
   void resetState();
 

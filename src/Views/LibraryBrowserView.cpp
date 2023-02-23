@@ -6,3 +6,15 @@
 //
 
 #include "LibraryBrowserView.hpp"
+
+void LibraryBrowserView::setup() {
+  
+}
+
+void LibraryBrowserView::update() {
+  
+}
+
+void LibraryBrowserView::draw() {
+  
+}

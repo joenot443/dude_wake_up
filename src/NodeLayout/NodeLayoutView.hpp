@@ -21,19 +21,43 @@ public:
   void setup();
   void update();
   void draw();
-  void queryNewLinks();
-  void handleDropZone();
+
   void drawNodeWindows();
   void openSettingsWindow(std::shared_ptr<Shader> shader);
   void keyReleased(int key);
+  
+  // Returns the Node for the associated shaderSourceId, if it exists.
+  // If it doesn't, create a new Node.
+  std::shared_ptr<Node> nodeForShaderSourceId(std::string shaderSourceId, NodeType nodeType, std::string name, bool supportsAux);
+  
+  void debug();
+  
+  // Layout
+  void queryNewLinks();
+  void drawNode(std::shared_ptr<Node> node);
+  
+  // Handlers
+  void handleUnplacedNodes();
+  void handleDropZone();
+  void handleDoubleClick();
+  void handleRightClick();
+  void handleSaveNode(std::shared_ptr<Node> node);
+  void handleDeleteNode(std::shared_ptr<Node> node);
+  
+  // Selection
+  
+  void selectChainer(std::shared_ptr<Node> node);
 
   ed::EditorContext *context = nullptr;
+  std::vector<std::string> unplacedNodeIds = {};
   bool firstFrame = true;
   bool shouldDelete = false;
+  int nodeIdTicker = 1;
 
   
   // Maps the id of the Shader or the VideoSource to the Node
   std::map<std::string, std::shared_ptr<Node>> idNodeMap;
+  
   // Maps the id of the Pin to the Node
   std::map<long, std::shared_ptr<Node>> pinIdNodeMap;
   // Maps the id of a Pin to a shared_ptr to the Pin
@@ -44,10 +68,11 @@ public:
   // Maps the id of a Link to the ShaderLink
   std::map<long, std::shared_ptr<ShaderLink>> linksMap;
   
-  std::set<std::shared_ptr<Shader>> shadersToOpen;
+  std::set<std::shared_ptr<Node>> nodesToOpen;
 
-  std::unique_ptr<ImVec2> shaderDropLocation;
-  std::unique_ptr<ImVec2> sourceDropLocation;
+  std::unique_ptr<ImVec2> nodeDropLocation;
+  ed::NodeId contextMenuNodeId = 0;
+  ImVec2 contextMenuLocation;
 };
 
 #endif /* NodeLayoutView_hpp */
