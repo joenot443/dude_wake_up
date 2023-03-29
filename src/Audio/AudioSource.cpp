@@ -12,7 +12,6 @@
 #include <stdio.h>
 
 void AudioSource::setup() {
-
   ofSoundStreamSettings settings = ofSoundStreamSettings();
   settings.setInDevice(device);
   settings.sampleRate = 44100;
@@ -24,10 +23,17 @@ void AudioSource::setup() {
   };
   gist.setAudioFrameSize(512);
   gist.setSamplingFrequency(44100);
+  active = true;
   stream.setup (settings);
 }
 
+void AudioSource::toggle() {
+  if (active) disable();
+  else setup();
+}
+
 void AudioSource::disable() {
+  active = false;
   stream.stop();
   stream.close();
 }
@@ -43,9 +49,9 @@ void AudioSource::audioIn(ofSoundBuffer &soundBuffer) {
   
   // If we have mostly silence, return
   if (abs(avg) < 0.001) {
+    
     return;
   }
-
   auto buffer = soundBuffer.getBuffer();
   processFrame(buffer);
   debugGist();

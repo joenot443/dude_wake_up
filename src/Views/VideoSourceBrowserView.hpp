@@ -26,6 +26,7 @@ private:
   FileBrowserView fileBrowserView = FileBrowserView(FileBrowserType_Source);
   std::vector<TileItem> webcamItems;
   std::vector<TileItem> shaderItems;
+  std::vector<TileItem> textItems;
 };
 
 #endif /* VideoSourceBrowserView_hpp */

@@ -20,10 +20,16 @@ void AudioSourceBrowserView::setup() {}
 void AudioSourceBrowserView::update() {}
 
 void AudioSourceBrowserView::draw() {
+  auto source = AudioSourceService::getService()->selectedAudioSource;
   ImVec2 size = ImVec2(ImGui::GetContentRegionAvail().x, ofGetWindowHeight() * 2./5.);
   ImGui::SetNextItemOpen(LayoutStateService::getService()->showAudioSettings);
   
-  if (ImGui::CollapsingHeader("Audio Reactivity Settings", ImGuiTreeNodeFlags_None))
+  auto title = source->active ? formatString("Audio Reactivity - \t RMS: %0.2f \t CSD: %0.2f \t Energy: %0.2f",
+                            source->audioAnalysis.rms->value,
+                            source->audioAnalysis.csd->value,
+                            source->audioAnalysis.energy->value) : "Audio Reactivity - Disabled";
+  
+  if (ImGui::CollapsingHeader(title.c_str(), ImGuiTreeNodeFlags_CollapsingHeader))
   {
     LayoutStateService::getService()->showAudioSettings = true;
     ImGui::BeginChild("##AudioSourceBrowser");
@@ -85,7 +91,13 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
       
       ImGui::EndTable();
     }
+    ImGui::Columns(2);
+    auto buttonText = source->active ? "Stop Analysis" : "Start Analysis";
     
+    if (ImGui::Button(buttonText)) {
+      source->toggle();
+    }
+    ImGui::NextColumn();
     ImGui::Text("Selected Audio Source: %s", source->name.c_str());
   }
 }

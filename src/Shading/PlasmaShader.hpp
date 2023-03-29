@@ -19,21 +19,21 @@
 
 struct PlasmaSettings: public ShaderSettings {
   std::shared_ptr<Parameter> enabled;
-  std::shared_ptr<Parameter> plasmaX;
-  std::shared_ptr<Parameter> plasmaY;
+  std::shared_ptr<Parameter> speed;
+  std::shared_ptr<Parameter> color;
 
-  std::shared_ptr<Oscillator> plasmaXOscillator;
-  std::shared_ptr<Oscillator> plasmaYOscillator;
+  std::shared_ptr<Oscillator> speedOscillator;
+  std::shared_ptr<Oscillator> colorOscillator;
 
   PlasmaSettings(std::string shaderId, json j) :
   enabled(std::make_shared<Parameter>("enabled", shaderId, 0.0,  1.0, 0.0)),
-  plasmaX(std::make_shared<Parameter>("plasmaX", shaderId, 0.0,  0.0, 1.0)),
-  plasmaY(std::make_shared<Parameter>("plasmaY", shaderId, 0.0,  0.0, 1.0)),
-  plasmaXOscillator(std::make_shared<WaveformOscillator>(plasmaX)),
-  plasmaYOscillator(std::make_shared<WaveformOscillator>(plasmaY)),
+  speed(std::make_shared<Parameter>("speed", shaderId, 1.0,  0.0, 5.0)),
+  color(std::make_shared<Parameter>("color", shaderId, 1.0,  0.0, 20.0)),
+  speedOscillator(std::make_shared<WaveformOscillator>(speed)),
+  colorOscillator(std::make_shared<WaveformOscillator>(color)),
   ShaderSettings(shaderId) {
-    parameters = {enabled, plasmaX, plasmaY};
-    oscillators = {plasmaXOscillator, plasmaYOscillator};
+    parameters = {enabled, speed, color};
+    oscillators = {speedOscillator, colorOscillator};
     load(j);
    };
 };
@@ -48,12 +48,16 @@ public:
   Shader(settings) {};
   
   PlasmaSettings *settings;
-
+  
   void shade(ofFbo *frame, ofFbo *canvas) override {
+    frame->getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
+    canvas->getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
     canvas->begin();
     shader.begin();
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
-    shader.setUniform2f("plasma", frame->getWidth() * settings->plasmaX->value, frame->getHeight() * settings->plasmaY->value);
+    shader.setUniform2f("sourceDimensions", frame->getWidth(), frame->getHeight());
+    shader.setUniform1f("speed", settings->speed->value);
+    shader.setUniform1f("color", settings->color->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     frame->draw(0, 0);
     shader.end();
@@ -65,9 +69,8 @@ public:
   };
 
   void drawSettings() override {
-    CommonViews::Slider("Plasma", "##plasmaX", settings->plasmaX);
-    
-    CommonViews::Slider("Plasma", "##plasmaY", settings->plasmaY);
+    CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
+    CommonViews::ShaderParameter(settings->color, settings->colorOscillator);
   };
 };
 

@@ -20,7 +20,10 @@ public:
   void update();
   void draw();
 
-  TileBrowserView tileBrowserView = TileBrowserView({});
+  TileBrowserView filterTileBrowserView = TileBrowserView({});
+  TileBrowserView mixTileBrowserView = TileBrowserView({});
+  TileBrowserView basicTileBrowserView = TileBrowserView({});
+  TileBrowserView transformTileBrowserView = TileBrowserView({});
 };
 
 #endif /* ShaderBrowserView_hpp */

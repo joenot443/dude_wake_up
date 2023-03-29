@@ -33,6 +33,7 @@ public:
   ofFbo fbo;
   ofFbo ping;
   ofFbo pong;
+  ofShader resizeShader;
   ofFbo processFrame(std::shared_ptr<ofTexture> frameTexture);
   unsigned int creationTime;
   std::vector<std::shared_ptr<Shader>> shaders();
@@ -48,8 +49,8 @@ public:
   void pushShader(ShaderType shaderType);
   void deleteShader(std::shared_ptr<Shader> shader);
 
-  void saveFeedbackFrame(std::shared_ptr<ofTexture> frame);
-  void saveFrame();
+  void saveFeedbackFrame();
+  void resizeFrame();
 
   ShaderChainer(std::string chainerId, std::string name,
                 std::shared_ptr<VideoSource> source)

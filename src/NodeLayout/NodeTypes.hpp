@@ -42,7 +42,7 @@ struct Node {
   std::shared_ptr<Node> auxNode;
   
   std::string idName() {
-    return formatString("%s##%l", name.c_str(), id.Get());
+    return formatString("%s##%d", name.c_str(), id.Get());
   }
   
   bool supportsInput() {
@@ -50,7 +50,8 @@ struct Node {
   }
   
   bool hasAuxLink() {
-    return supportsAux() && ((type == NodeTypeShader && shader->aux != nullptr) || (type == NodeTypeSource && chainer->frontAux != nullptr));
+    return supportsAux() &&
+    (shader->aux != nullptr || shader->sourceAux != nullptr);
   }
   
   bool hasInputLink() {
@@ -72,6 +73,7 @@ struct Node {
       shader->drawSettings();
     } else {
       source->drawSettings();
+      CommonViews::ResolutionSelector(source);
     }
   }
   

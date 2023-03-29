@@ -7,6 +7,7 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "CrosshatchShader.hpp"
 #include "HalfToneShader.hpp"
 #include "AudioBumperShader.hpp"
 #include "AudioMountainsShader.hpp"
@@ -51,10 +52,25 @@
 
 void ShaderChainerService::setup() {
   // Create an AvailableShader for each type
-  for (auto const shaderType : AvailableShaderTypes) {
+  for (auto const shaderType : AvailableBasicShaderTypes) {
     auto shader = std::make_shared<AvailableShader>(shaderType,
                                                     shaderTypeName(shaderType));
-    availableShaders.push_back(shader);
+    availableBasicShaders.push_back(shader);
+  }
+  for (auto const shaderType : AvailableMixShaderTypes) {
+    auto shader = std::make_shared<AvailableShader>(shaderType,
+                                                    shaderTypeName(shaderType));
+    availableMixShaders.push_back(shader);
+  }
+  for (auto const shaderType : AvailableFilterShaderTypes) {
+    auto shader = std::make_shared<AvailableShader>(shaderType,
+                                                    shaderTypeName(shaderType));
+    availableFilterShaders.push_back(shader);
+  }
+  for (auto const shaderType : AvailableTransformShaderTypes) {
+    auto shader = std::make_shared<AvailableShader>(shaderType,
+                                                    shaderTypeName(shaderType));
+    availableTransformShaders.push_back(shader);
   }
 }
 
@@ -101,6 +117,8 @@ void ShaderChainerService::removeShaderChainer(std::string id) {
   auto shaderChainer = shaderChainerMap[id];
   videoSourceIdShaderChainerMap.erase(shaderChainer->source->id);
   shaderChainerMap.erase(id);
+  FeedbackSourceService::getService()->removeFeedbackSource(id);
+  VideoSourceService::getService()->removeVideoSource(id);
 
   shaderChainerUpdateSubject.notify();
 }
@@ -154,8 +172,8 @@ void ShaderChainerService::addShaderChainer(
   }
 
   shaderChainerMap[shaderChainer->chainerId] = shaderChainer;
-
-  VideoSourceService::getService()->addVideoSource(shaderChainer);
+  shaderChainer->setup();
+//  VideoSourceService::getService()->addVideoSource(shaderChainer, shaderChainer->chainerId);
   shaderChainerUpdateSubject.notify();
 }
 
@@ -361,6 +379,12 @@ std::shared_ptr<Shader>
 ShaderChainerService::shaderForType(ShaderType type, std::string shaderId,
                                     json shaderJson) {
   switch (type) {
+    case ShaderTypeCrosshatch: {
+      auto settings = new CrosshatchSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<CrosshatchShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeHalfTone: {
       auto settings = new HalfToneSettings(shaderId, shaderJson);
       auto shader = std::make_shared<HalfToneShader>(settings);
@@ -519,8 +543,12 @@ ShaderChainerService::shaderForType(ShaderType type, std::string shaderId,
     shader->setup();
     return shader;
   }
-  case ShaderTypeGlitch:
-    return 0;
+  case ShaderTypeGlitch: {
+    auto settings = new GlitchSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<GlitchShader>(settings);
+    shader->setup();
+    return shader;
+  }
   case ShaderTypeMirror: {
     auto settings = new MirrorSettings(shaderId, shaderJson);
     auto shader = std::make_shared<MirrorShader>(settings);

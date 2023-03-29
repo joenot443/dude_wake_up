@@ -99,7 +99,10 @@ public:
   std::vector<std::shared_ptr<Shader>> shaders();
 
   // Available Shaders
-  std::vector<std::shared_ptr<AvailableShader>> availableShaders;
+  std::vector<std::shared_ptr<AvailableShader>> availableBasicShaders;
+  std::vector<std::shared_ptr<AvailableShader>> availableMixShaders;
+  std::vector<std::shared_ptr<AvailableShader>> availableTransformShaders;
+  std::vector<std::shared_ptr<AvailableShader>> availableFilterShaders;
 
   // Constructor Ops
   std::shared_ptr<Shader> shaderForType(ShaderType type, std::string shaderId,

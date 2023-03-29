@@ -8,11 +8,15 @@
 #ifndef FeedbackSource_h
 #define FeedbackSource_h
 #include "ofMain.h"
+#include "VideoSourceSettings.hpp"
 #include "Console.hpp"
 
 const int FrameBufferCount=30;
 
 struct FeedbackSource {
+  FeedbackSource(std::string id, std::string name, std::shared_ptr<VideoSourceSettings> sourceSettings) : name(name), id(id), sourceSettings(sourceSettings) {};
+
+  std::shared_ptr<VideoSourceSettings> sourceSettings;
   std::string name;
   std::string id;
   std::vector<ofFbo> frameBuffer = {};
@@ -20,19 +24,28 @@ struct FeedbackSource {
   int startIndex = 0;
   
   void setup() {
+    frameBuffer.clear();
+    
     // Add FrameBufferCount ofFbo to frameBuffer
-
     for (int i = 0; i < FrameBufferCount; i++) {
       ofFbo fbo;
-      fbo.allocate(1920, 1080, GL_RGBA);
+      fbo.allocate(sourceSettings->width->intValue, sourceSettings->height->intValue, GL_RGBA);
       fbo.begin();
       ofClear(0,0,0,255);
       fbo.end();
       frameBuffer.push_back(fbo);
     }
   }
-
-  FeedbackSource(std::string id, std::string name) : name(name), id(id) {};
+  
+  void teardown() {
+    frameBuffer.clear();
+  }
+  
+  void resizeIfNecessary() {
+    if (frameBuffer[0].getWidth() != sourceSettings->width->intValue) {
+      setup();
+    }
+  }
   
   ofTexture mostRecentFrame() {
     return frameBuffer.at(startIndex).getTexture();
@@ -56,8 +69,24 @@ struct FeedbackSource {
     }
   }
   
+  void pushFrame(ofFbo fbo) {
+    resizeIfNecessary();
+    
+    auto canvas = frameBuffer[startIndex];
+    canvas.begin();
+    ofClear(0,0,0,255);
+    fbo.draw(0, 0);
+    canvas.end();
+    
+    startIndex++;
+    
+    if (startIndex == FrameBufferCount) {
+      startIndex = 0;
+    }
+  }
+  
   void pushFrame(std::shared_ptr<ofTexture> frame) {
-//    if (consumingShader == nullptr) return;
+    resizeIfNecessary();
     
     auto canvas = frameBuffer[startIndex];
     canvas.begin();
@@ -71,7 +100,6 @@ struct FeedbackSource {
       startIndex = 0;
     }
   }
-  
 };
 
 #endif /* FeedbackSource_h */

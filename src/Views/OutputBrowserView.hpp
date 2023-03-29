@@ -9,7 +9,7 @@
 #define OutputBrowserView_hpp
 
 #include <stdio.h>
-#include "VideoSourcePreviewView.hpp"
+#include "ShaderChainerPreviewView.hpp"
 
 struct OutputBrowserView {
 public:
@@ -21,7 +21,7 @@ private:
   void drawPreviewViews();
   void generatePreviewViews();
   
-  std::vector<VideoSourcePreviewView> previewViews;
+  std::vector<std::shared_ptr<ShaderChainerPreviewView>> previewViews;
 };
 
 #endif /* OutputBrowserView_hpp */

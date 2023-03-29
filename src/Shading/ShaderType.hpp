@@ -52,35 +52,48 @@ enum ShaderType {
   ShaderTypePsycurves,
   ShaderTypeTissue,
   ShaderTypeHalfTone,
+  ShaderTypeCrosshatch,
 };
 
-static const ShaderType AvailableShaderTypes[] = {
+static const ShaderType AvailableBasicShaderTypes[] = {
   ShaderTypeHSB,
   ShaderTypeBlur, 
   ShaderTypePixelate, 
-  ShaderTypeMirror, 
-  ShaderTypeTransform, 
-  ShaderTypeFeedback, 
-  ShaderTypeAscii, 
-  ShaderTypeKaleidoscope, 
-  ShaderTypeTile, 
+  ShaderTypeMirror,
+  ShaderTypeGlitch,
+};
+
+static const ShaderType AvailableMixShaderTypes[] = {
   ShaderTypeMix,
-  ShaderTypeLiquid, // Generated
-  ShaderTypeRainbowRotator, // Generated
-  ShaderTypeDither, // Generated
+  ShaderTypeFeedback,
+};
+
+static const ShaderType AvailableTransformShaderTypes[] = {
+  ShaderTypeTransform,
+  ShaderTypeWobble,
+  ShaderTypeFishEye, // Generated
+  ShaderTypeTile,
+  ShaderTypeKaleidoscope,
   ShaderTypeSlider, // Generated
-  ShaderTypeWobble, // Generated
+  ShaderTypeLiquid,
+};
+
+static const ShaderType AvailableFilterShaderTypes[] = {
+  ShaderTypeRainbowRotator, // Generated
   ShaderTypeRGBShift, // Generated
+  ShaderTypeAscii,
+  ShaderTypeDither, // Generated
   ShaderTypeSobel, // Generated
   ShaderTypeColorPass, // Generated
-  ShaderTypeFishEye, // Generated
   ShaderTypeHalfTone, // Generated
-  // Available shaders
+  ShaderTypeCrosshatch, // Generated
 };
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) {
     // Shader names
+    case ShaderTypeCrosshatch:
+      return "Crosshatch";
     case ShaderTypeHalfTone:
       return "HalfTone";
     case ShaderTypeTissue:

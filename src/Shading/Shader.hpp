@@ -29,10 +29,12 @@ struct Shader {
   std::unique_ptr<ShaderSettings> settings;
   std::string shaderId;
 
+  // Output
   std::shared_ptr<Shader> next;
+  
+  // Input
   std::shared_ptr<Shader> parent;
   std::shared_ptr<VideoSource> parentSource;
-  
   std::shared_ptr<Shader> aux;
   std::shared_ptr<VideoSource> sourceAux;
   
@@ -42,6 +44,7 @@ struct Shader {
   virtual void shade(ofFbo *frame, ofFbo *canvas){};
   virtual void clear(){};
   virtual bool supportsAux() { return shaderTypeSupportsAux(type()); }
+  virtual bool auxConnected() { return aux != nullptr || sourceAux != nullptr; }
   
   std::shared_ptr<FeedbackSource> feedbackDestination();
   virtual std::string id() { return settings->shaderId; };
@@ -50,7 +53,7 @@ struct Shader {
   virtual bool hasFrameBuffer() { return false; };
   void saveFrame(ofFbo *frame){};
   
-  std::shared_ptr<ofTexture> auxTexture();
+  ofTexture auxTexture();
 
   virtual ShaderType type() { return ShaderTypeNone; };
 

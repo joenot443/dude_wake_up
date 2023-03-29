@@ -1,4 +1,0 @@
-# Blur
-## Test
-
-Hello

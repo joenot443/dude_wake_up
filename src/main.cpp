@@ -8,6 +8,7 @@
 #include "MidiService.hpp"
 #include "ConfigService.hpp"
 #include "FeedbackSourceService.hpp"
+#include "LibraryService.hpp"
 #include "VideoSourceService.hpp"
 #include "MarkdownService.hpp"
 #include "ShaderChainerService.hpp"
@@ -28,6 +29,7 @@ ShaderChainerService *ShaderChainerService::service = 0;
 AudioSourceService *AudioSourceService::service = 0;
 LayoutStateService *LayoutStateService::service = 0;
 MarkdownService *MarkdownService::service = 0;
+LibraryService *LibraryService::service = 0;
 
 void setupDirectories() {
   ofSetDataPathRoot("../Resources/data/");

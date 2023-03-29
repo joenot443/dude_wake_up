@@ -33,6 +33,8 @@ void VideoSourceBrowserView::setup() {
       shaderItems.push_back(tileItem);
     } else if (source->type == VideoSource_webcam) {
       webcamItems.push_back(tileItem);
+    } else if (source->type == VideoSource_text) {
+      textItems.push_back(tileItem);
     }
   }
   
@@ -55,6 +57,12 @@ void VideoSourceBrowserView::draw() {
     if (ImGui::BeginTabItem("Webcam"))
     {
       tileBrowserView.tileItems = webcamItems;
+      tileBrowserView.draw();
+      ImGui::EndTabItem();
+    }
+    if (ImGui::BeginTabItem("Text"))
+    {
+      tileBrowserView.tileItems = textItems;
       tileBrowserView.draw();
       ImGui::EndTabItem();
     }

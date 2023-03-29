@@ -9,6 +9,8 @@
 #define VideoSource_hpp
 
 #include "FeedbackSource.hpp"
+#include "Settings.hpp"
+#include "VideoSourceSettings.hpp"
 #include "json.hpp"
 #include <stdio.h>
 
@@ -18,26 +20,33 @@ enum VideoSourceType {
   VideoSource_webcam,
   VideoSource_file,
   VideoSource_chainer,
-  VideoSource_shader
+  VideoSource_image,
+  VideoSource_shader,
+  VideoSource_text
 };
+
 
 class VideoSource {
 
 public:
   std::string id;
   std::string sourceName;
-
+  
+  VideoSourceSettings settings;
   VideoSourceType type;
   std::shared_ptr<ofTexture> frameTexture;
-  std::shared_ptr<ofTexture> previewTexture;
   ofBufferObject frameBuffer;
-  ofBufferObject previewBuffer;
   std::shared_ptr<FeedbackSource> feedbackDestination;
 
   VideoSource(std::string id, std::string name, VideoSourceType type)
-      : id(id), sourceName(name), type(type){};
+      : id(id), sourceName(name), type(type), settings(id, 0) {};
 
   virtual void setup(){};
+  void update() {
+    if (frameTexture->getWidth() != settings.width->value) {
+      setup();
+    }
+  }
   virtual void saveFrame(){};
   virtual void drawSettings(){};
   virtual json serialize(){};

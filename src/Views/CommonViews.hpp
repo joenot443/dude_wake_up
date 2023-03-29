@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include "Oscillator.hpp"
 #include "Parameter.hpp"
+#include "VideoSource.hpp"
 #include "ofxImGui.h"
 
 struct CommonViews {
@@ -38,6 +39,8 @@ struct CommonViews {
   static void H3Title(std::string title);
   
   static void H4Title(std::string title);
+  
+  static void ResolutionSelector(std::shared_ptr<VideoSource> source);
   
   static void CenteredVerticalLine();
   

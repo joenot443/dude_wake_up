@@ -53,7 +53,7 @@ void MainApp::draw() {
   gui.begin();
   ImGui::PushFont(FontService::getService()->p);
   drawMainStage();
-  //  ImGui::ShowDemoWindow();
+//  ImGui::ShowDemoWindow();
   ImGui::PopFont();
   gui.end();
 }
@@ -88,9 +88,24 @@ void MainApp::dragEvent(ofDragInfo dragInfo) {
       ofIsStringInString(dragInfo.files[0], ".gif")) {
     // Create a new VideoSource for the file
     auto fileName = ofFilePath::getFileName(dragInfo.files[0]);
+    
     auto videoSource = std::make_shared<FileSource>(
                                                     UUID::generateUUID(), fileName, dragInfo.files[0]);
-    VideoSourceService::getService()->addVideoSource(videoSource);
+    VideoSourceService::getService()->addVideoSource(videoSource, videoSource->id);
+    ShaderChainerService::getService()->addNewShaderChainer(videoSource);
+    mainStageView->nodeLayoutView.handleDroppedSource(videoSource);
+  }
+  
+  // Check if the file is a video file
+  if (ofIsStringInString(dragInfo.files[0], ".png") ||
+      ofIsStringInString(dragInfo.files[0], ".jpg") ||
+      ofIsStringInString(dragInfo.files[0], ".jpeg") ||
+      ofIsStringInString(dragInfo.files[0], ".gif")) {
+    // Create a new VideoSource for the file
+    auto fileName = ofFilePath::getFileName(dragInfo.files[0]);
+    auto videoSource = VideoSourceService::getService()->addImageVideoSource(fileName, dragInfo.files[0]);
+    ShaderChainerService::getService()->addNewShaderChainer(videoSource);
+    mainStageView->nodeLayoutView.handleDroppedSource(videoSource);
   }
 }
 

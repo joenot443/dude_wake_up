@@ -100,6 +100,16 @@ struct AudioAnalysis {
 
   std::vector<std::shared_ptr<Parameter>> parameters;
   std::vector<AudioAnalysisParameter *> analysisParameters;
+  
+  void zero() {
+    rms->value = 0.0f;
+    csd->value = 0.0f;
+    energy->value = 0.0f;
+    pitch->value = 0.0f;
+    zcr->value = 0.0f;
+    spectralDiff->value = 0.0f;
+    beat->value = 0.0f;
+  }
 
   AudioAnalysis()
       : rms(std::make_shared<Parameter>("rms", name, 0.0, 0.0, 1.0)),

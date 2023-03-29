@@ -5,53 +5,31 @@
 uniform sampler2D tex;
 in vec2 coord;
 uniform vec2 dimensions;
-uniform int size;
+uniform float size;
 uniform float blur_mix;
 out vec4 outputColor;
 
-// 16x acceleration of https://www.shadertoy.com/view/4tSyzy
-// by applying gaussian at intermediate MIPmap level.
+const int samples = 35,
+          LOD = 2,         // gaussian done on MIPmap at scale LOD
+          sLOD = 1 << LOD; // tile size = 2^LOD
 
-float normpdf(in float x, in float sigma)
-{
-  return 0.39894*exp(-0.5*x*x/(sigma*sigma))/sigma;
+float gaussian(vec2 i) {
+    float sigma = samples * .25 * size;
+    return exp( -.5* dot(i/=sigma,i) ) / ( 6.28 * sigma*sigma );
 }
 
+vec4 blur(sampler2D sp, vec2 U, vec2 scale) {
+    vec4 O = vec4(0);
+    int s = samples/sLOD;
+    
+    for ( int i = 0; i < s*s; i++ ) {
+        vec2 d = vec2(i%s, i/s)*float(sLOD) - float(samples)/2.;
+        O += gaussian(d) * texture( sp, U + scale * d , float(LOD) );
+    }
+    
+    return O / O.a;
+}
 
 void main() {
-  vec2 abscoord = coord * dimensions;
-  vec4 orig = texture(tex, coord);
-  vec3 c = orig.rgb;
-  
-  //declare stuff
-  int mSize = size;
-  int kSize = (size-1)/2;
-  float kernel[MAX_SIZE];
-  vec3 final_colour = vec3(0.0);
-  
-  //create the 1-D kernel
-  float sigma = 7.0;
-  float Z = 0.0;
-  for (int j = 0; j <= kSize; ++j)
-  {
-    kernel[kSize+j] = kernel[kSize-j] = normpdf(float(j), sigma);
-  }
-  
-  //get the normalization factor (as the gaussian has been clamped)
-  for (int j = 0; j < size; ++j)
-  {
-    Z += kernel[j];
-  }
-  
-  //read out the texels
-  for (int i=-kSize; i <= kSize; ++i)
-  {
-    for (int j=-kSize; j <= kSize; ++j)
-    {
-      final_colour += kernel[kSize+j]*kernel[kSize+i]*texture(tex, (abscoord+vec2(float(i), float(j))) / dimensions).rgb;
-    }
-  }
-  
-  
-  outputColor = mix(orig, vec4(final_colour/(Z*Z), 1.0), blur_mix);
+    outputColor = blur(tex, coord/ dimensions.xy, 1./dimensions );
 }

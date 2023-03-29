@@ -13,7 +13,7 @@
 #include "Fonts.hpp"
 #include "CommonViews.hpp"
 
-static const ImVec2 TileSize = ImVec2(100, 70);
+static const ImVec2 TileSize = ImVec2(80, 50);
 
 void TileBrowserView::setup(){
 };
@@ -21,9 +21,6 @@ void TileBrowserView::setup(){
 void TileBrowserView::draw() {
   auto n = 0;
   auto size = ImGui::GetContentRegionAvail();
-  ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar;
-  ImGui::BeginChild(tileBrowserId.c_str(), size, false, window_flags);
-  
   
   for (auto tile : tileItems) {
     float xPos = ImGui::GetCursorPosX();
@@ -38,36 +35,33 @@ void TileBrowserView::draw() {
 
       ImGui::SetCursorPosX(xPos);
       ImGui::Button(tile.name.c_str(), TileSize);
-      
+      tile.dragCallback();
+
       ImGui::SameLine();
       ImGui::SetCursorPosX(xPos);
       ImGui::SetItemAllowOverlap();
       
       // If we have a markdown file, draw the info button
       if (MarkdownService::getService()->hasItemForName(tile.name)) {
-        auto popupId = formatString("##%s_tilepopup");
+        auto popupId = formatString("##%s_tilepopup", tile.name.c_str());
         
         if (ImGui::BeginPopupModal(popupId.c_str(), nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
           MarkdownView(tile.name).draw();
           ImGui::EndPopup();
         }
-        
         if (CommonViews::IconButton(ICON_MD_INFO, tile.name.c_str())) {
           ImGui::OpenPopup(popupId.c_str());
         }
       }
-
-      
-      
-      
+      ImGui::SetCursorPosY(yPos + TileSize.y - 10);
       ImGui::SetCursorPosX(endXPos);
     } else {
       ImGui::Button(tile.name.c_str(), TileSize);
+      tile.dragCallback();
       ImGui::SameLine();
       endXPos = ImGui::GetCursorPosX();
     }
     
-    tile.dragCallback();
 
     float nextX = ImGui::GetCursorPosX() + ImGui::GetStyle().ItemSpacing.x +
                   TileSize.x;
@@ -81,7 +75,7 @@ void TileBrowserView::draw() {
     n += 1;
   }
   
-  ImGui::EndChild();
+  ImGui::NewLine();
 };
 
 void TileBrowserView::update(){

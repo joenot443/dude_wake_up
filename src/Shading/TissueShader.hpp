@@ -54,7 +54,7 @@ struct TissueShader : Shader {
     shader.setUniform1f("beta", settings->beta->value);
     shader.setUniform1f("gamma", settings->gamma->value);
 
-    frame->draw(0, 0, frame->getWidth(), frame->getHeight());
+    frame->draw(0, 0);
     shader.end();
     canvas->end();
   }

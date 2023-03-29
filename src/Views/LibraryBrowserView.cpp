@@ -6,6 +6,7 @@
 //
 
 #include "LibraryBrowserView.hpp"
+#include "httplib.h"
 
 void LibraryBrowserView::setup() {
   

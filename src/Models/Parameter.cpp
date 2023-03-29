@@ -11,13 +11,13 @@
 #include "ParameterService.hpp"
 #include "UUID.hpp"
 
-Parameter::Parameter(std::string name,
-                     std::string settingsId,
-                     float value) :
+Parameter::Parameter(std::string name, float value) :
 name(name),
-shaderKey(name),
 defaultValue(value),
 value(value),
+min(0.0),
+max(1.0),
+intValue(static_cast<int>(value)),
 boolValue(value > 0.0001)
 {
   paramId = UUID::generateParamId(name);
@@ -26,41 +26,6 @@ boolValue(value > 0.0001)
 };
 
 Parameter::Parameter(std::string name,
-                     std::string settingsId,
-                     std::string shaderKey,
-                     float value):
-name(name),
-shaderKey(shaderKey),
-defaultValue(value),
-value(value),
-boolValue(value > 0.0001)
-{
-  paramId = UUID::generateParamId(name);
-  std::shared_ptr<Parameter> sharedSelf = std::shared_ptr<Parameter>(this);
-  ParameterService::getService()->registerParameter(sharedSelf);
-};
-
-Parameter::Parameter(std::string name,
-                     std::string settingsId,
-                     std::string shaderKey,
-                     float value,
-                     float min,
-                     float max) :
-name(name),
-shaderKey(shaderKey),
-defaultValue(value),
-value(value),
-min(min),
-max(max),
-boolValue(value > 0.0001)
-{
-  paramId = UUID::generateParamId(name);
-  std::shared_ptr<Parameter> sharedSelf = std::shared_ptr<Parameter>(this);
-  ParameterService::getService()->registerParameter(sharedSelf);
-};
-
-Parameter::Parameter(std::string name,
-                     std::string settingsId,
                      float value,
                      float min,
                      float max) :
@@ -75,4 +40,3 @@ boolValue(value > 0.0001)
   std::shared_ptr<Parameter> sharedSelf = std::shared_ptr<Parameter>(this);
   ParameterService::getService()->registerParameter(sharedSelf);
 };
-

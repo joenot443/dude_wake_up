@@ -7,7 +7,9 @@
 
 #include "VideoSourceService.hpp"
 #include "UUID.hpp"
+#include "TextSource.hpp"
 #include "WebcamSource.hpp"
+#include "ImageSource.hpp"
 #include "ShaderChainerService.hpp"
 #include "FileSource.hpp"
 
@@ -23,6 +25,9 @@ void VideoSourceService::setup() {
     shaderSource->shaderType = x;
     availableSourceMap[shaderSource->availableVideoSourceId] = shaderSource;
   }
+  
+  auto textSource = std::make_shared<AvailableVideoSource>("Basic Text", VideoSource_text, ShaderSource_empty, 0, "");
+  availableSourceMap[textSource->availableVideoSourceId] = textSource;
 }
 
 ofFbo VideoSourceService::previewFbo() {
@@ -40,7 +45,7 @@ ofFbo VideoSourceService::previewFbo() {
 
 // Create a FeedbackSource for the passed in VideoSource and register it in the FeedbackSourceService
 void VideoSourceService::createFeedbackSource(std::shared_ptr<VideoSource> videoSource) {
-  std::shared_ptr<FeedbackSource> feedbackSource = std::make_shared<FeedbackSource>(videoSource->id, videoSource->sourceName);
+  std::shared_ptr<FeedbackSource> feedbackSource = std::make_shared<FeedbackSource>(videoSource->id, videoSource->sourceName, std::make_shared<VideoSourceSettings>(videoSource->settings));
   FeedbackSourceService::getService()->registerFeedbackSource(feedbackSource);
   videoSource->feedbackDestination = feedbackSource;
 }
@@ -48,6 +53,7 @@ void VideoSourceService::createFeedbackSource(std::shared_ptr<VideoSource> video
 // Iterate over every video source in the map and update them
 void VideoSourceService::updateVideoSources() {
   for (auto const& x : videoSourceMap) {
+    
       x.second->saveFrame();
       x.second->saveFeedbackFrame();
   }
@@ -58,8 +64,8 @@ std::shared_ptr<VideoSource> VideoSourceService::defaultVideoSource() {
 }
 
 // Add a video source to the map
-void VideoSourceService::addVideoSource(std::shared_ptr<VideoSource> videoSource) {
-  videoSourceMap[videoSource->id] = videoSource;
+void VideoSourceService::addVideoSource(std::shared_ptr<VideoSource> videoSource, std::string id) {
+  videoSourceMap[id] = videoSource;
   createFeedbackSource(videoSource);
   videoSource->setup();
 }
@@ -67,6 +73,7 @@ void VideoSourceService::addVideoSource(std::shared_ptr<VideoSource> videoSource
 // Remove a video source from the map
 void VideoSourceService::removeVideoSource(std::string id) {
   videoSourceMap.erase(id);
+  FeedbackSourceService::getService()->removeFeedbackSource(id);
 }
 
 // Return a vector of all video sources
@@ -115,31 +122,47 @@ std::vector<std::string> VideoSourceService::getWebcamNames() {
 // Adds a webcam video source to the map
 std::shared_ptr<VideoSource> VideoSourceService::addWebcamVideoSource(std::string name, int deviceId, std::string id) {
   std::shared_ptr<VideoSource> videoSource = std::make_shared<WebcamSource>(id, name, deviceId);
-  addVideoSource(videoSource);
+  addVideoSource(videoSource, id);
   return videoSource;
 }
 
 // Adds a file video source to the map
 std::shared_ptr<VideoSource> VideoSourceService::addFileVideoSource(std::string name, std::string path, std::string id) {
   std::shared_ptr<VideoSource> videoSource = std::make_shared<FileSource>(id, name, path);
-  addVideoSource(videoSource);
+  addVideoSource(videoSource, id);
   return videoSource;
 }
 
 // Adds a Shader video source to the map
 std::shared_ptr<VideoSource> VideoSourceService::addShaderVideoSource(ShaderSourceType type, std::string id) {
   std::shared_ptr<VideoSource> videoSource = std::make_shared<ShaderSource>(id, type);
-  addVideoSource(videoSource);
+  addVideoSource(videoSource, id);
+  return videoSource;
+}
+
+// Adds an Image video source to the map
+std::shared_ptr<VideoSource> VideoSourceService::addImageVideoSource(std::string name, std::string path, std::string id) {
+  std::shared_ptr<VideoSource> videoSource = std::make_shared<ImageSource>(id, name, path);
+  addVideoSource(videoSource, id);
+  return videoSource;
+}
+
+// Adds an Image video source to the map
+std::shared_ptr<VideoSource> VideoSourceService::addTextVideoSource(std::string name, std::string id) {
+  auto displayText = std::make_shared<DisplayText>();
+  auto textSource = TextSource(id, name, displayText);
+  std::shared_ptr<VideoSource> videoSource = std::make_shared<TextSource>(textSource);
+  addVideoSource(videoSource, id);
   return videoSource;
 }
 
 // Adds an OutputWindow for the passed in VideoSource
-void VideoSourceService::addOutputWindowForVideoSource(std::shared_ptr<VideoSource> videoSource) {
-  std::shared_ptr<OutputWindow> outputWindow = std::make_shared<OutputWindow>(videoSource);
+void VideoSourceService::addOutputWindowForChainer(std::shared_ptr<ShaderChainer> chainer) {
+  std::shared_ptr<OutputWindow> outputWindow = std::make_shared<OutputWindow>(chainer);
   outputWindow->setup();
   ofGLFWWindowSettings settings;
   settings.shareContextWith = ofGetCurrentWindow();
-  settings.setSize(1920, 1080);
+  settings.setSize(chainer->settings.width->value, chainer->settings.height->value);
   settings.setGLVersion(3, 2);
   auto streamWindow = ofCreateWindow(settings);
   ofRunApp(streamWindow, outputWindow);

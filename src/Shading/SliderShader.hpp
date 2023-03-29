@@ -18,14 +18,16 @@
 
 struct SliderSettings : public ShaderSettings {
   std::shared_ptr<Parameter> speed;
+  std::shared_ptr<Parameter> vertical;
 
   std::shared_ptr<Oscillator> speedOscillator;
 
   SliderSettings(std::string shaderId, json j)
       : speed(std::make_shared<Parameter>("Speed", shaderId, 0.5, 0.01, 2.0)),
+      vertical(std::make_shared<Parameter>("Vertical", shaderId, 0., 0., 1.)),
         speedOscillator(std::make_shared<WaveformOscillator>(speed)),
         ShaderSettings(shaderId){
-          parameters = { speed };
+          parameters = { speed, vertical };
           oscillators = { speedOscillator };
         };
 };
@@ -43,6 +45,7 @@ struct SliderShader : Shader {
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform1f("speed", settings->speed->value);
+    shader.setUniform1i("vertical", settings->vertical->boolValue);
     frame->draw(0, 0);
     shader.end();
     canvas->end();
@@ -56,6 +59,7 @@ struct SliderShader : Shader {
     CommonViews::H3Title("Slider");
 
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
+    CommonViews::ShaderCheckbox(settings->vertical);
   }
 };
 

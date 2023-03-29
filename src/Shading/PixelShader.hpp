@@ -42,7 +42,7 @@ struct PixelShader : Shader {
 
   ofShader shader;
 
-  void setup() override { shader.load("shaders/pixel"); }
+  void setup() override { shader.load("shaders/Pixel"); }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
     canvas->begin();

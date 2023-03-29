@@ -6,7 +6,7 @@
 //
 
 #include "ShaderChainer.hpp"
-#include "AsciiShader.hpp"
+#include "ASCIIShader.hpp"
 #include "BlurShader.hpp"
 #include "ConfigService.hpp"
 #include "Console.hpp"
@@ -29,34 +29,39 @@ static const int EmptyId = -1;
 void ShaderChainer::setup() {
   registerFeedbackDestination();
   fbo = ofFbo();
-  fbo.allocate(1920, 1080);
+  fbo.allocate(settings.width->value, settings.height->value);
   fbo.begin();
   ofClear(0, 0, 0, 255);
   fbo.end();
-
+  fbo.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
+  
+  resizeShader.load("shaders/Resize");
+  
   frameTexture = std::make_shared<ofTexture>();
-  frameTexture->allocate(1920, 1080, GL_RGB);
-  frameBuffer.bind(GL_SAMPLER_2D_RECT);
-  frameBuffer.allocate(640 * 480 * 4, GL_STATIC_COPY);
+  frameTexture->allocate(source->settings.width->value, source->settings.height->value, GL_RGB);
   frameTexture->setTextureWrap(GL_REPEAT, GL_REPEAT);
-
-  previewTexture = std::make_shared<ofTexture>();
-  previewTexture->allocate(320, 240, GL_RGB);
-  previewBuffer.bind(GL_SAMPLER_2D_RECT);
-  previewBuffer.allocate(320 * 240 * 4, GL_STATIC_COPY);
-
+  
   for (auto &sh : shaders()) {
     sh->setup();
   }
 
-  ping.allocate(1920, 1080);
-  pong.allocate(1920, 1080);
+  ping.allocate(source->settings.width->value, source->settings.height->value);
+  pong.allocate(source->settings.width->value, source->settings.height->value);
 
   ping.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
   pong.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
 }
 
-void ShaderChainer::update() { fbo = processFrame(source->frameTexture); }
+void ShaderChainer::update() {
+  // If the width of our Source or the width of the Chainer itself (the output)
+  // has changed, then setup again to recreate the textures.
+  if (fbo.getWidth() != settings.width->value || source->settings.width->value != frameTexture->getWidth()) {
+    setup();
+  }
+  processFrame(source->frameTexture);
+  resizeFrame();
+  saveFeedbackFrame();
+}
 
 std::vector<std::shared_ptr<Shader>> ShaderChainer::shaders() {
   std::vector<std::shared_ptr<Shader>> shaders;
@@ -68,21 +73,36 @@ std::vector<std::shared_ptr<Shader>> ShaderChainer::shaders() {
   return shaders;
 }
 
+/// Draws our `frameTexture` into our `fbo` at the size specified by our `ShaderChainer`.
+void ShaderChainer::resizeFrame() {
+  fbo.begin();
+  resizeShader.begin();
+  resizeShader.setUniform2f("inDimensions", frameTexture->getWidth(), frameTexture->getHeight());
+  resizeShader.setUniform2f("outDimensions", fbo.getWidth(), fbo.getHeight());
+  resizeShader.setUniformTexture("tex", *frameTexture.get(), 4);
+  fbo.draw(0, 0);
+  resizeShader.end();
+  fbo.end();
+}
+
 ofFbo ShaderChainer::processFrame(std::shared_ptr<ofTexture> texture) {
   ping.begin();
-  ofClear(255, 255, 255);
+  ofClear(255, 255, 255, 0);
   ping.end();
 
   pong.begin();
-  ofClear(255, 255, 255);
+  ofClear(255, 255, 255, 0);
   pong.end();
 
   pong.begin();
-  texture->draw(0, 0, 1920, 1080);
+  texture->draw(0, 0);
   pong.end();
 
   ofFbo *canv = &ping;
   ofFbo *tex = &pong;
+  
+  ping.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
+  pong.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
 
   bool flip = false;
   auto currentShaders = shaders();
@@ -90,7 +110,6 @@ ofFbo ShaderChainer::processFrame(std::shared_ptr<ofTexture> texture) {
   // Return raw texture if no shaders
   if (currentShaders.empty()) {
     frameTexture = std::make_shared<ofTexture>(pong.getTexture());
-    saveFeedbackFrame(texture);
     return pong;
   }
 
@@ -118,17 +137,9 @@ ofFbo ShaderChainer::processFrame(std::shared_ptr<ofTexture> texture) {
     flip = !flip;
   }
 
-  //  canv->getTexture().copyTo(frameBuffer);
-  //  frameTexture->loadData(frameBuffer, GL_RGB, GL_UNSIGNED_BYTE);
-
   frameTexture = std::make_shared<ofTexture>(canv->getTexture());
-  saveFeedbackFrame(frameTexture);
 
   return *canv;
-}
-
-void ShaderChainer::saveFrame() {
-  // no-op
 }
 
 void ShaderChainer::pushShader(ShaderType shaderType) {
@@ -152,9 +163,9 @@ void ShaderChainer::pushShader(ShaderType shaderType) {
   }
 }
 
-void ShaderChainer::saveFeedbackFrame(std::shared_ptr<ofTexture> frame) {
+void ShaderChainer::saveFeedbackFrame() {
   if (feedbackDestination) {
-    feedbackDestination->pushFrame(frame);
+    feedbackDestination->pushFrame(fbo);
   }
 }
 
@@ -215,7 +226,7 @@ void ShaderChainer::load(json j) {
 
 void ShaderChainer::registerFeedbackDestination() {
   std::shared_ptr<FeedbackSource> source =
-      std::make_shared<FeedbackSource>(chainerId, sourceName);
+      std::make_shared<FeedbackSource>(chainerId, sourceName, std::make_shared<VideoSourceSettings>(settings));
   FeedbackSourceService::getService()->registerFeedbackSource(source);
   feedbackDestination = source;
 }

@@ -31,32 +31,30 @@ void FeedbackShader::shade(ofFbo *frame, ofFbo *canvas) {
                                     settings->delayAmount->value);
   
   ofTexture feedbackTexture;
-  if (aux != nullptr && aux->feedbackDestination() != nullptr) {
-    feedbackTexture = aux->feedbackDestination()->getFrame(frameIndex);
+  // We have an Aux connection
+  if (auxConnected()) {
+    feedbackTexture = auxTexture();
+  // Feedback from ourselves
   } else if (feedbackDestination() != nullptr) {
     feedbackTexture = feedbackDestination()->getFrame(frameIndex);
+  // Default to a blank
+  } else {
+    feedbackTexture = ofTexture();
   }
   shader.setUniformTexture("fbTexture", feedbackTexture, 3);
   
-  shader.setUniform1i(settings->lumaKeyEnabled->shaderKey,
+  shader.setUniform1i("lumaEnabled",
                       settings->lumaKeyEnabled->boolValue);
   shader.setUniformTexture("mainTexture", frame->getTexture(), 4);
-  shader.setUniform1f(settings->blend->shaderKey, settings->blend->value);
-  shader.setUniform1f(settings->keyValue->shaderKey, settings->keyValue->value);
-  shader.setUniform1f(settings->keyThreshold->shaderKey,
-                      settings->keyThreshold->value);
+  shader.setUniform1f("blend", settings->blend->value);
+  shader.setUniform1f("lumaKey", settings->keyValue->value);
+  shader.setUniform1f("lumaThresh", settings->keyThreshold->value);
 
   frame->draw(0, 0);
   shader.end();
   canvas->end();
 
   clear();
-}
-
-void FeedbackShader::disableFeedback() {
-  shader.setUniform1f(settings->keyValue->shaderKey, 0.0);
-  shader.setUniform1f(settings->keyThreshold->shaderKey, 0.0);
-  shader.setUniform1f(settings->blend->shaderKey, 0.0);
 }
 
 void FeedbackShader::clearFrameBuffer() { feedbackSource->clearFrameBuffer(); }

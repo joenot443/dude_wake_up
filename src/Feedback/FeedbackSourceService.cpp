@@ -35,7 +35,10 @@ void FeedbackSourceService::removeFeedbackSource(std::string id) {
     log("Tried to remove FeedbackSource %s, but it doesn't exist", id.c_str());
     return;
   }
+  auto source = feedbackSourceMap[id];
   feedbackSourceMap.erase(id);
+  source->teardown();
+  source.reset();
 }
 
 std::vector<std::shared_ptr<FeedbackSource>> FeedbackSourceService::feedbackSources() {

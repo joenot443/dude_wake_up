@@ -20,13 +20,13 @@ struct BlurSettings : public ShaderSettings {
   std::string shaderId;
   std::shared_ptr<Parameter> mix;
   std::shared_ptr<Parameter> radius;
-
   std::shared_ptr<Oscillator> mixOscillator;
   std::shared_ptr<Oscillator> radiusOscillator;
+  
   BlurSettings(std::string shaderId, json j)
       : mix(std::make_shared<Parameter>("blur_mix", shaderId, 0.5, 0.0, 1.0)),
-        radius(std::make_shared<Parameter>("blur_radius", shaderId, 25.0, 0.0,
-                                           50.0)),
+        radius(std::make_shared<Parameter>("blur_radius", shaderId, 1.0, 0.0,
+                                           5.0)),
         mixOscillator(std::make_shared<WaveformOscillator>(mix)),
         radiusOscillator(std::make_shared<WaveformOscillator>(radius)),
         shaderId(shaderId), ShaderSettings(shaderId) {
@@ -49,7 +49,7 @@ public:
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
-    shader.setUniform1i("size", Math::nearestOdd(settings->radius->value));
+    shader.setUniform1f("size", settings->radius->value);
     shader.setUniform1f("blur_mix", settings->mix->value);
     frame->draw(0, 0);
     shader.end();

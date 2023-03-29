@@ -24,6 +24,7 @@
 #include "GalaxyShader.hpp"
 #include "MelterShader.hpp"
 #include "MountainsShader.hpp"
+#include "CommonViews.hpp"
 #include "PlasmaShader.hpp"
 #include "RingsShader.hpp"
 #include "Shader.hpp"
@@ -306,23 +307,29 @@ public:
 
   void setup() override {
     frameTexture = std::make_shared<ofTexture>();
-    frameTexture->allocate(1280, 720, GL_RGB);
+    frameTexture->allocate(settings.width->value, settings.height->value, GL_RGB);
     frameBuffer.bind(GL_SAMPLER_2D_RECT);
-    frameBuffer.allocate(1280 * 720 * 4, GL_STATIC_COPY);
+    frameBuffer.allocate(settings.width->value * settings.height->value * 4, GL_STATIC_COPY);
 
     shader->setup();
-    fbo.allocate(1280, 720, GL_RGB);
+    fbo.allocate(settings.width->value, settings.height->value, GL_RGB);
     fbo.begin();
     ofClear(0, 0, 0, 255);
     fbo.end();
 
-    canvas.allocate(1280, 720, GL_RGB);
+    canvas.allocate(settings.width->value, settings.height->value, GL_RGB);
     canvas.begin();
     ofClear(0, 0, 0, 255);
     canvas.end();
   };
 
   void saveFrame() override {
+    // If our width or height has changed, setup again
+    if (fbo.getWidth() != settings.width->value ||
+        fbo.getHeight() != settings.height->value) {
+      setup();
+    }
+    
     shader->shade(&fbo, &canvas);
     frameTexture = std::make_shared<ofTexture>(canvas.getTexture());
   }
@@ -333,7 +340,6 @@ public:
     }
   }
 
-  void update();
   void draw();
 
   json serialize() override {

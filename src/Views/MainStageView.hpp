@@ -18,7 +18,7 @@
 #include "ShaderChainersStageView.hpp"
 #include "VideoSource.hpp"
 #include "VideoSourceBrowserView.hpp"
-#include "VideoSourcePreviewView.hpp"
+#include "ShaderChainerPreviewView.hpp"
 #include "ofMain.h"
 #include <stdio.h>
 
@@ -29,10 +29,8 @@ private:
 
   std::vector<std::shared_ptr<ShaderChainerView>> shaderChainerViews;
 
-  NodeLayoutView nodeLayoutView;
 
   VideoSourceBrowserView videoSourceBrowserView = VideoSourceBrowserView();
-  VideoSourcePreviewView videoSourcePreviewView = VideoSourcePreviewView();
   ShaderBrowserView shaderBrowserView = ShaderBrowserView();
   OutputBrowserView outputBrowserView = OutputBrowserView();
   ShaderChainerSettingsView shaderChainerSettingsView =
@@ -52,6 +50,8 @@ public:
   void update();
   void draw();
   void keyReleased(int key);
+  
+  NodeLayoutView nodeLayoutView;
 };
 
 #endif /* MainStageView_hpp */

@@ -7,7 +7,7 @@
 
 #include "OutputBrowserView.hpp"
 #include "ShaderChainerService.hpp"
-#include "VideoSourcePreviewView.hpp"
+#include "ShaderChainerPreviewView.hpp"
 #include "CommonViews.hpp"
 
 void OutputBrowserView::setup() {
@@ -21,14 +21,16 @@ void OutputBrowserView::generatePreviewViews() {
   previewViews.clear();
  
  for (auto shaderChainer : ShaderChainerService::getService()->shaderChainers()) {
-   VideoSourcePreviewView videoSourcePreviewView = VideoSourcePreviewView();
-   videoSourcePreviewView.videoSource = shaderChainer;
-   videoSourcePreviewView.setup();
-   previewViews.push_back(videoSourcePreviewView);
+   auto shaderChainerPreviewView = std::make_shared<ShaderChainerPreviewView>(shaderChainer);
+   shaderChainerPreviewView->setup();
+   previewViews.push_back(shaderChainerPreviewView);
  }
 }
 
 void OutputBrowserView::update() {
+  for (auto view : previewViews) {
+    view->update();
+  }
 }
 
 void OutputBrowserView::draw() {
@@ -37,8 +39,8 @@ void OutputBrowserView::draw() {
 }
 
 void OutputBrowserView::drawPreviewViews() {
- // Draw a VideoSourcePreviewView for every shaderChainer in the ShaderChainerService
+ // Draw a ShaderChainerPreviewView for every shaderChainer in the ShaderChainerService
   for (auto previewView : previewViews) {
-    previewView.draw();
+    previewView->draw();
   }
 }

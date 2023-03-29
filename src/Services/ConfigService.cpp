@@ -76,9 +76,9 @@ bool ConfigService::validateShaderChainerJson(std::string path) {
     json data;
     try {
       fileStream >> data;
-    } catch (int code) {
-      log("Failed to load JSON file.");
-      return;
+    } catch (...) {
+      log("Chainer JSON deemed invalid");
+      return false;
     }
     if (data[ConfigTypeKey] != ConfigTypeAtomic || !data.contains("chainers") || !data.contains("sources")) { return false; }
 
@@ -95,7 +95,7 @@ ConfigService::availableShaderChainerFromPath(std::string path) {
     try {
       fileStream >> data;
     } catch (int code) {
-      log("Failed to load JSON file.");
+      log("Couldn't load available ShaderChainer for %s", path.c_str());
       return;
     }
     std::string chainerName = data["chainers"]["name"];
@@ -150,7 +150,7 @@ void ConfigService::loadConfigFile(std::string path) {
     try {
       fileStream >> data;
     } catch (int code) {
-      log("Failed to load JSON file.");
+      log("Could not load JSON file for %s.", path.c_str());
       return;
     }
   }

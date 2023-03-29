@@ -66,9 +66,9 @@ void CommonViews::AudioParameterSelector(std::shared_ptr<Parameter> param) {
   if (AudioSourceService::getService()->selectedAudioSource == nullptr) return;
   
   auto analysisParameters = AudioSourceService::getService()
-                                ->selectedAudioSource->audioAnalysis.parameters;
+  ->selectedAudioSource->audioAnalysis.parameters;
   auto buttonId = formatString("##audio_button_%s", param->name.c_str());
-
+  
   // If the parameter is already mapped to an audio parameter, show the name of
   // the audio parameter and a button to remove the mapping
   if (param->driver != NULL) {
@@ -77,12 +77,12 @@ void CommonViews::AudioParameterSelector(std::shared_ptr<Parameter> param) {
     }
     return;
   }
-
+  
   // Otherwise, present a button to select an audio parameter
   if (ImGui::Button(formatString("Select Param%s", param->name.c_str()).c_str())) {
     ImGui::OpenPopup(param->audioPopupId().c_str());
   }
-    
+  
   // If the user selects an audio parameter, map it to the parameter
   if (ImGui::BeginPopup(param->audioPopupId().c_str())) {
     ImGui::Text("Select Audio Parameter to Follow");
@@ -93,6 +93,29 @@ void CommonViews::AudioParameterSelector(std::shared_ptr<Parameter> param) {
     }
     ImGui::EndPopup();
   }
+}
+
+void CommonViews::ResolutionSelector(std::shared_ptr<VideoSource> source) {
+  static const char* resolutions[] = { "240p", "360p", "480p", "720p", "1080p", "1440p", "4k" };
+  static const ImVec4 bgColor(0.2f, 0.2f, 0.2f, 1.0f);
+  
+  auto comboId = formatString("##Resolution%s", source->id.c_str());
+  ImGui::BeginGroup();
+  auto selectedIdx = source->settings.resolution->intValue;
+  if (ImGui::BeginCombo(comboId.c_str(), resolutions[source->settings.resolution->intValue])) {
+    
+    for (int i = 0; i < IM_ARRAYSIZE(resolutions); i++) {
+      bool isSelected = (selectedIdx == i);
+      if (ImGui::Selectable(resolutions[i], isSelected)) {
+        source->settings.resolution->intValue = i;
+        source->settings.updateResolutionSettings();
+      }
+      if (isSelected)
+        ImGui::SetItemDefaultFocus();
+    }
+    ImGui::EndCombo();
+  }
+  ImGui::EndGroup();
 }
 
 void CommonViews::ShaderCheckbox(std::shared_ptr<Parameter> param) {
@@ -156,7 +179,7 @@ bool CommonViews::IconButton(const char* icon, std::string id) {
   ImGui::PopStyleColor();
   ImGui::PopStyleVar();
   ImGui::PopFont();
-
+  
   return button;
 }
 
@@ -170,18 +193,18 @@ void CommonViews::OscillateButton(std::string id, std::shared_ptr<Oscillator> o,
                                   std::shared_ptr<Parameter> p) {
   ImGui::PushFont(FontService::getService()->icon);
   ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
-
+  
   std::string buttonTitle;
   if (o->enabled->boolValue) {
     std::string rawTitle = ""
-                           "##%s_osc_button";
+    "##%s_osc_button";
     buttonTitle = formatString(rawTitle, id.c_str()).c_str();
   } else {
     std::string rawTitle = ""
-                           "##%s_osc_button";
+    "##%s_osc_button";
     buttonTitle = formatString(rawTitle, id.c_str()).c_str();
   }
-
+  
   if (ImGui::Button(buttonTitle.c_str(), ImVec2(16.0, 16.0))) {
     if (ImGui::IsPopupOpen(p->oscPopupId().c_str())) {
       ImGui::CloseCurrentPopup();
@@ -198,26 +221,26 @@ void CommonViews::OscillateButton(std::string id, std::shared_ptr<Oscillator> o,
 
 void CommonViews::MidiSelector(std::shared_ptr<Parameter> videoParam) {
   bool hasPairing =
-      MidiService::getService()->hasPairingForParameterId(videoParam->paramId);
+  MidiService::getService()->hasPairingForParameterId(videoParam->paramId);
   bool enabled = false;
-
+  
   std::function<void()> learnParamBlock = [videoParam] {
     MidiService::getService()->beginLearning(videoParam);
   };
-
+  
   std::function<void()> stopLearningBlock = [videoParam] {
     // Currently learning the passed Param, so stop Learning
     MidiService::getService()->stopLearning();
   };
-
+  
   std::string buttonTitle;
   std::function<void()> buttonAction;
-
+  
   if (hasPairing) {
     // Already have a pairing, so reset it and start Learning
     buttonTitle = MidiService::getService()
-                      ->pairingForParameterId(videoParam->paramId)
-                      ->descriptor;
+    ->pairingForParameterId(videoParam->paramId)
+    ->descriptor;
     buttonAction = learnParamBlock;
   } else if (MidiService::getService()->isLearning() &&
              MidiService::getService()->learningParam == videoParam) {
@@ -233,10 +256,10 @@ void CommonViews::MidiSelector(std::shared_ptr<Parameter> videoParam) {
     buttonTitle = "Learn Assignment";
     buttonAction = learnParamBlock;
   }
-
+  
   auto idTitle =
-      formatString("%s##%s", buttonTitle.c_str(), videoParam->name.c_str());
-
+  formatString("%s##%s", buttonTitle.c_str(), videoParam->name.c_str());
+  
   if (ImGui::Button(idTitle.c_str())) {
     buttonAction();
   }

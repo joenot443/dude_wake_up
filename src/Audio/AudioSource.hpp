@@ -19,6 +19,7 @@ struct AudioSource {
   std::string id;
   std::string deviceId;
   std::string name;
+  bool active = false;
   ofSoundDevice device;
   ofSoundStream stream;
   AudioAnalysis audioAnalysis;
@@ -31,6 +32,7 @@ struct AudioSource {
   void load(json j){};
   
   void setup();
+  void toggle();
   void disable();
   
   void update();

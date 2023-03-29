@@ -87,7 +87,6 @@ struct FeedbackShader: Shader  {
   
   void shade();
   void clearFrameBuffer();
-  void disableFeedback();
   void drawFeedbackSourceSelector();
   
   virtual void setup();

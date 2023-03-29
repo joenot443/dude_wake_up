@@ -48,9 +48,9 @@ struct MixShader : public Shader {
     canvas->begin();
     shader.begin();
     
-    std::shared_ptr<ofTexture> tex2 = auxTexture();
-    if (tex2 != nullptr) {
-      shader.setUniformTexture("tex2", *tex2.get(), 8);
+    if (auxConnected()) {
+      ofTexture tex2 = auxTexture();
+      shader.setUniformTexture("tex2", tex2, 8);
     }
     
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());

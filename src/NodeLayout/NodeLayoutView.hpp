@@ -10,19 +10,23 @@
 
 #include "NodeTypes.hpp"
 #include "Shader.hpp"
+#include "VideoSource.hpp"
 #include "Shader.hpp"
 #include "imgui_node_editor.h"
 #include <stdio.h>
 
 namespace ed = ax::NodeEditor;
 
-struct NodeLayoutView {
+class NodeLayoutView {
 public:
   void setup();
   void update();
   void draw();
 
   void drawNodeWindows();
+  void drawResolutionPopup();
+  void drawUploadChainerWindow();
+  
   void openSettingsWindow(std::shared_ptr<Shader> shader);
   void keyReleased(int key);
   
@@ -35,6 +39,7 @@ public:
   // Layout
   void queryNewLinks();
   void drawNode(std::shared_ptr<Node> node);
+  int nodeIdTicker = 1;
   
   // Handlers
   void handleUnplacedNodes();
@@ -43,16 +48,29 @@ public:
   void handleRightClick();
   void handleSaveNode(std::shared_ptr<Node> node);
   void handleDeleteNode(std::shared_ptr<Node> node);
-  
+  void handleDroppedSource(std::shared_ptr<VideoSource> source);
+  void handleUploadChain(std::shared_ptr<Node> node);
+
   // Selection
   
   void selectChainer(std::shared_ptr<Node> node);
 
   ed::EditorContext *context = nullptr;
   std::vector<std::string> unplacedNodeIds = {};
+  std::vector<std::shared_ptr<Node>> nodes;
+  
+  // Resolution Popup
+  std::shared_ptr<Node> resolutionPopupNode;
+  ImVec2 resolutionPopupLocation;
+  bool popupLaunched;
+  
+  // Uploading Chainer
+  std::shared_ptr<ShaderChainer> uploadChainer = nullptr;
+  
+  // Misc.
   bool firstFrame = true;
   bool shouldDelete = false;
-  int nodeIdTicker = 1;
+  
 
   
   // Maps the id of the Shader or the VideoSource to the Node

@@ -10,14 +10,14 @@
 
 #include <stdio.h>
 #include "ofMain.h"
-#include "VideoSource.hpp"
 #include "ofxImGui.h"
+#include "ShaderChainer.hpp"
 
 
 struct OutputWindow : public ofBaseApp {
-  std::shared_ptr<VideoSource> videoSource;
+  std::shared_ptr<ShaderChainer> chainer;
 
-  OutputWindow(std::shared_ptr<VideoSource> videoSource) : videoSource(videoSource) {};
+  OutputWindow(std::shared_ptr<ShaderChainer> chainer) : chainer(chainer) {};
 
   ofFbo outputFbo;
   void setup();

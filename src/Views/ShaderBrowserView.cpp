@@ -9,9 +9,7 @@
 #include "FontService.hpp"
 #include "ShaderChainerService.hpp"
 
-void ShaderBrowserView::setup(){
-  auto shaders = ShaderChainerService::getService()->availableShaders;
-
+TileBrowserView browserViewForShaders(std::vector<std::shared_ptr<AvailableShader>> shaders) {
   std::vector<TileItem> tileItems = {};
   for (auto shader : shaders) {
     // Create a closure which will be called when the tile is clicked
@@ -31,15 +29,35 @@ void ShaderBrowserView::setup(){
     tileItems.push_back(tileItem);
   }
 
-  tileBrowserView = TileBrowserView(tileItems);
+  return TileBrowserView(tileItems);
+}
+
+void ShaderBrowserView::setup(){
+  auto basic = ShaderChainerService::getService()->availableBasicShaders;
+  auto mix = ShaderChainerService::getService()->availableMixShaders;
+  auto transform = ShaderChainerService::getService()->availableTransformShaders;
+  auto filter = ShaderChainerService::getService()->availableFilterShaders;
+
+  basicTileBrowserView = browserViewForShaders(basic);
+  mixTileBrowserView = browserViewForShaders(mix);
+  transformTileBrowserView = browserViewForShaders(transform);
+  filterTileBrowserView = browserViewForShaders(filter);
 };
 
-void ShaderBrowserView::draw() {
-  ImGui::PushFont(FontService::getService()->h3);
-  ImGui::Text("Effects");
-  ImGui::PopFont();
 
-  tileBrowserView.draw();
+void ShaderBrowserView::draw() {
+  CommonViews::H3Title("Effects");
+  CommonViews::H4Title("Basic");
+  basicTileBrowserView.draw();
+  
+  CommonViews::H4Title("Mix");
+  mixTileBrowserView.draw();
+  
+  CommonViews::H4Title("Transform");
+  transformTileBrowserView.draw();
+  
+  CommonViews::H4Title("Filter");
+  filterTileBrowserView.draw();
 };
 
 void ShaderBrowserView::update(){

@@ -31,7 +31,6 @@ void MainStageView::setup() {
   shaderBrowserView.setup();
   fileBrowserView.setup();
   videoSourceBrowserView.setup();
-  videoSourcePreviewView.setup();
   outputBrowserView.setup();
   shaderChainerSettingsView.setup();
   shaderChainerStageView.setup();
@@ -40,7 +39,6 @@ void MainStageView::setup() {
 
 void MainStageView::update() {
   videoSourceBrowserView.update();
-  videoSourcePreviewView.update();
   outputBrowserView.update();
   shaderChainerSettingsView.update();
   shaderChainerStageView.update();
@@ -61,7 +59,7 @@ void MainStageView::draw() {
 
   // Sources
   auto browserSize = ImVec2(ImGui::GetWindowContentRegionMax().x / 5.,
-                            (ImGui::GetWindowContentRegionMax().y - MenuBarHeight) / 3.);
+                            (ImGui::GetWindowContentRegionMax().y - MenuBarHeight) / 2.);
 
   ImGui::BeginChild("##sourceBrowser", browserSize);
   drawVideoSourceBrowser();
@@ -71,9 +69,9 @@ void MainStageView::draw() {
   drawShaderBrowser();
   ImGui::EndChild();
 
-  ImGui::BeginChild("##libraryBrowser", browserSize);
-  fileBrowserView.draw();
-  ImGui::EndChild();
+//  ImGui::BeginChild("##libraryBrowser", browserSize);
+//  fileBrowserView.draw();
+//  ImGui::EndChild();
 
   drawMenu();
 
@@ -127,7 +125,6 @@ void MainStageView::drawMenu() {
 
 void MainStageView::drawVideoSourceBrowser() {
   videoSourceBrowserView.draw();
-  videoSourcePreviewView.draw();
 }
 
 void MainStageView::drawOutputBrowser() { outputBrowserView.draw(); }

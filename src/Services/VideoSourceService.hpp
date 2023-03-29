@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include "VideoSource.hpp"
 #include "ShaderSource.hpp"
+#include "TextSource.hpp"
 #include "FeedbackSourceService.hpp"
 #include "AvailableVideoSource.hpp"
 #include "OutputWindow.hpp"
@@ -58,17 +59,19 @@ public:
   std::vector<std::string> getWebcamNames();
   void updateVideoSources();
   void removeVideoSource(std::string id);
-  void addVideoSource(std::shared_ptr<VideoSource> videoSource);
+  void addVideoSource(std::shared_ptr<VideoSource> videoSource, std::string id);
   std::shared_ptr<VideoSource> videoSourceForId(std::string id);
-
+  
+  std::shared_ptr<VideoSource> addImageVideoSource(std::string name, std::string path, std::string id = UUID::generateUUID());
   std::shared_ptr<VideoSource> addWebcamVideoSource(std::string name, int index, std::string id = UUID::generateUUID());
   std::shared_ptr<VideoSource> addShaderVideoSource(ShaderSourceType type, std::string id = UUID::generateUUID());
   std::shared_ptr<VideoSource> addFileVideoSource(std::string name, std::string path, std::string id = UUID::generateUUID());
-
+  std::shared_ptr<VideoSource> addTextVideoSource(std::string name, std::string id = UUID::generateUUID());
+  
   // Output Windows
 
   std::vector<std::shared_ptr<OutputWindow>> outputWindows;
-  void addOutputWindowForVideoSource(std::shared_ptr<VideoSource> videoSource);
+  void addOutputWindowForChainer(std::shared_ptr<ShaderChainer> chainer);
 
   json config() override;
   void loadConfig(json j) override;

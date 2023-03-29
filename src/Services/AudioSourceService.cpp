@@ -31,7 +31,6 @@ void AudioSourceService::setup() {
     if (device.isDefaultInput) {
       defaultAudioSource = audioSource;
       selectedAudioSource = defaultAudioSource;
-      audioSource->setup();
     }
   }
 }

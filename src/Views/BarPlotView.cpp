@@ -30,7 +30,8 @@ void BarPlotView::draw(std::vector<float> yData, std::string id) {
   if (max < 0.01) { return; }
   
   // Draw the plot
-  if (ImPlot::BeginPlot(formatString("##%s", id.c_str()).c_str())) {
+  if (ImPlot::BeginPlot(formatString("##%s", id.c_str()).c_str(),
+                        ImVec2(200, 200), ImPlotFlags_CanvasOnly)) {
     ImPlot::SetupAxesLimits(0.0, 1.0 * yData.size(), 0.0, max);
     ImPlot::PlotBars(formatString("##%s", id.c_str()).c_str(),
                      &xData[0],
