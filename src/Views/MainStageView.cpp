@@ -27,7 +27,7 @@ static const ImVec2 ShaderButtonSize = ImVec2(90, 30);
 static const float MenuBarHeight = 50.0f;
 
 void MainStageView::setup() {
-  nodeLayoutView.setup();
+  NodeLayoutView::getInstance()->setup();
   shaderBrowserView.setup();
   fileBrowserView.setup();
   videoSourceBrowserView.setup();
@@ -43,7 +43,7 @@ void MainStageView::update() {
   shaderChainerSettingsView.update();
   shaderChainerStageView.update();
   audioSourceBrowserView.update();
-  nodeLayoutView.update();
+  NodeLayoutView::getInstance()->update();
 }
 
 void MainStageView::draw() {
@@ -59,7 +59,7 @@ void MainStageView::draw() {
 
   // Sources
   auto browserSize = ImVec2(ImGui::GetWindowContentRegionMax().x / 5.,
-                            (ImGui::GetWindowContentRegionMax().y - MenuBarHeight) / 2.);
+                            (ImGui::GetWindowContentRegionMax().y - MenuBarHeight) / 3.);
 
   ImGui::BeginChild("##sourceBrowser", browserSize);
   drawVideoSourceBrowser();
@@ -69,16 +69,16 @@ void MainStageView::draw() {
   drawShaderBrowser();
   ImGui::EndChild();
 
-//  ImGui::BeginChild("##libraryBrowser", browserSize);
-//  fileBrowserView.draw();
-//  ImGui::EndChild();
+  ImGui::BeginChild("##libraryBrowser", browserSize);
+  fileBrowserView.draw();
+  ImGui::EndChild();
 
   drawMenu();
 
   ImGui::NextColumn();
 
   // Chainers
-  nodeLayoutView.draw();
+  NodeLayoutView::getInstance()->draw();
 
   audioSourceBrowserView.draw();
 
@@ -131,4 +131,4 @@ void MainStageView::drawOutputBrowser() { outputBrowserView.draw(); }
 
 void MainStageView::drawShaderBrowser() { shaderBrowserView.draw(); }
 
-void MainStageView::keyReleased(int key) { nodeLayoutView.keyReleased(key); }
+void MainStageView::keyReleased(int key) { NodeLayoutView::getInstance()->keyReleased(key); }

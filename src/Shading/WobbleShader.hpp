@@ -13,6 +13,7 @@
 #include "CommonViews.hpp"
 #include "WaveformOscillator.hpp"
 #include "ofxImGui.h"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <string>
 #include <stdio.h>
@@ -25,11 +26,11 @@ struct WobbleSettings: public ShaderSettings {
   std::shared_ptr<Oscillator> amountOscillator;
 
   WobbleSettings(std::string shaderId, json j) :
-  speed(std::make_shared<Parameter>("speed", shaderId, 1.0, 0.0, 2.0)),
-  amount(std::make_shared<Parameter>("amount", shaderId, 1.0, 0.0, 2.0)),
+  speed(std::make_shared<Parameter>("speed", 1.0, 0.0, 2.0)),
+  amount(std::make_shared<Parameter>("amount", 1.0, 0.0, 2.0)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   amountOscillator(std::make_shared<WaveformOscillator>(amount)),
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     
   };
 };
@@ -39,7 +40,12 @@ struct WobbleShader: Shader {
   WobbleShader(WobbleSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("shaders/Wobble");
+    #ifdef TESTING
+shader.load("shaders/Wobble");
+#endif
+#ifdef RELEASE
+shader.load("shaders/Wobble");
+#endif
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -64,6 +70,7 @@ struct WobbleShader: Shader {
   }
   
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
   }

@@ -11,6 +11,9 @@
 		00413C35AAE31B483D7538AB /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9E02D9F3A04B5573758EBCF8 /* imgui_draw.cpp */; };
 		0090B479605B26E7C387B02D /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C525795C6CCB99616535318 /* imgui_widgets.cpp */; };
 		016BB55A143AD429330F07DB /* Gui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F0E2047B4D03D5151730B52B /* Gui.cpp */; };
+		0202C7E029EC42520005248E /* EmptySource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0202C7DE29EC42520005248E /* EmptySource.cpp */; };
+		0202C7E129EC5F2D0005248E /* ofAVFoundationGrabber.mm in Sources */ = {isa = PBXBuildFile; fileRef = E42962C22163EDD300A6A9E2 /* ofAVFoundationGrabber.mm */; };
+		0216672D29E6E79600ABF457 /* FeedbackSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0216672C29E6E76E00ABF457 /* FeedbackSource.cpp */; };
 		0230657C29534CB500489A9F /* ShaderChainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0230657629534CB500489A9F /* ShaderChainer.cpp */; };
 		0230658129534CF600489A9F /* VideoSourceBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0230657F29534CF600489A9F /* VideoSourceBrowserView.cpp */; };
 		0230658429534D0300489A9F /* ShaderChainerView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0230658229534D0300489A9F /* ShaderChainerView.cpp */; };
@@ -63,7 +66,109 @@
 		02B280EB2915480E00B793D5 /* FileSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B280E529148A7500B793D5 /* FileSource.cpp */; };
 		02B280EC2915487200B793D5 /* VideoSourceService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B280E12914761E00B793D5 /* VideoSourceService.cpp */; };
 		02B280EF291564A100B793D5 /* ShaderChainerService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B280ED291564A100B793D5 /* ShaderChainerService.cpp */; };
+		02BE890629DCA12600C65C58 /* ShaderConfigSelectionView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02BE890429DCA12600C65C58 /* ShaderConfigSelectionView.cpp */; };
+		02BE890829DDDB4600C65C58 /* ShaderSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02BE890729DDDB4600C65C58 /* ShaderSource.cpp */; };
+		02BE890B29DEFBD700C65C58 /* ListBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02BE890929DEFBD700C65C58 /* ListBrowserView.cpp */; };
 		02CC58A129AF914E006A50F2 /* ImageSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02CC589F29AF914E006A50F2 /* ImageSource.cpp */; };
+		02DDED8B29EF08E90040382F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02DDED8A29EF08E90040382F /* main.cpp */; };
+		02DDED9329EF092B0040382F /* ShaderChainerServiceTests.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 02DDED9129EF092B0040382F /* ShaderChainerServiceTests.hpp */; };
+		02DDED9929EF1D730040382F /* ShaderChainerService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B280ED291564A100B793D5 /* ShaderChainerService.cpp */; };
+		02DDED9A29EF1DFA0040382F /* FeedbackSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0216672C29E6E76E00ABF457 /* FeedbackSource.cpp */; };
+		02DDED9B29EF1DFD0040382F /* FeedbackSourceService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B280DE2913FE7D00B793D5 /* FeedbackSourceService.cpp */; };
+		02DDED9C29EF1E000040382F /* AudioSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02ED91052955F179002252CC /* AudioSource.cpp */; };
+		02DDED9D29EF1E040040382F /* NodeLayoutView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028BAE9929684984003E7DF8 /* NodeLayoutView.cpp */; };
+		02DDED9E29EF1E080040382F /* Shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 029F419C29742D5000B6DB77 /* Shader.cpp */; };
+		02DDED9F29EF1E0A0040382F /* AvailableShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 029F41AC29770D9800B6DB77 /* AvailableShader.cpp */; };
+		02DDEDA029EF1E0C0040382F /* FontService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D994AF12295A8568554AAB57 /* FontService.cpp */; };
+		02DDEDA129EF1E100040382F /* ModulationService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 67B01FCCC5E47D1538454CD5 /* ModulationService.cpp */; };
+		02DDEDA229EF1E120040382F /* OscillationService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5331C50D24335FF2EE01416F /* OscillationService.cpp */; };
+		02DDEDA329EF1E150040382F /* ParameterService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63D397FA3B8B71D8DFD1D3BA /* ParameterService.cpp */; };
+		02DDEDA429EF1E180040382F /* ConfigService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D169A28A046DF00DA807C /* ConfigService.cpp */; };
+		02DDEDA529EF1E1A0040382F /* VideoSourceService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B280E12914761E00B793D5 /* VideoSourceService.cpp */; };
+		02DDEDA629EF1E1F0040382F /* AudioSourceService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0230658529534E7400489A9F /* AudioSourceService.cpp */; };
+		02DDEDA729EF1E220040382F /* LayoutStateService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02E24F2629881F590066A05D /* LayoutStateService.cpp */; };
+		02DDEDA829EF1E240040382F /* MarkdownService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028E8E5E29A6A0B800B95C92 /* MarkdownService.cpp */; };
+		02DDEDAA29EF1FC50040382F /* LibraryService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 029F41BA297B047500B6DB77 /* LibraryService.cpp */; };
+		02DDEDAB29EF1FCD0040382F /* OutputWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B22C2D293812800095AC89 /* OutputWindow.cpp */; };
+		02DDEDAC29EF1FD00040382F /* FileSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B280E529148A7500B793D5 /* FileSource.cpp */; };
+		02DDEDAD29EF1FD30040382F /* WebcamSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B280E929148A7500B793D5 /* WebcamSource.cpp */; };
+		02DDEDAE29EF1FD60040382F /* AvailableVideoSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 029F41A52975F08B00B6DB77 /* AvailableVideoSource.cpp */; };
+		02DDEDAF29EF1FD80040382F /* ImageSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02CC589F29AF914E006A50F2 /* ImageSource.cpp */; };
+		02DDEDB029EF1FDB0040382F /* TextSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F2A06429C4D8AF0072CE86 /* TextSource.cpp */; };
+		02DDEDB129EF1FDD0040382F /* ShaderSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02BE890729DDDB4600C65C58 /* ShaderSource.cpp */; };
+		02DDEDB229EF1FDF0040382F /* EmptySource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0202C7DE29EC42520005248E /* EmptySource.cpp */; };
+		02DDEDB329EF1FE70040382F /* imgui_node_editor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B16F3A29674AF30043CA74 /* imgui_node_editor.cpp */; };
+		02DDEDB429EF1FEB0040382F /* imgui_node_editor_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B16F4D29674AF30043CA74 /* imgui_node_editor_api.cpp */; };
+		02DDEDB529EF1FED0040382F /* imgui_canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B16F4E29674AF30043CA74 /* imgui_canvas.cpp */; };
+		02DDEDB629EF1FEF0040382F /* crude_json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B16F9829674AF30043CA74 /* crude_json.cpp */; };
+		02DDEDB729EF201F0040382F /* CommonViews.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B21CEA7F3D7E274DE1310FE6 /* CommonViews.cpp */; };
+		02DDEDB829EF20250040382F /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6CF9B1FD213484DDDB7AE362 /* imgui.cpp */; };
+		02DDEDB929EF20290040382F /* imgui_stdlib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 023C6347292A8DC700A8BC9E /* imgui_stdlib.cpp */; };
+		02DDEDBA29EF202B0040382F /* imgui_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CC36552DD0A47E758D71FB5 /* imgui_demo.cpp */; };
+		02DDEDBB29EF202C0040382F /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9E02D9F3A04B5573758EBCF8 /* imgui_draw.cpp */; };
+		02DDEDBC29EF202F0040382F /* imgui_tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 940F78F950A49D35DDB538BA /* imgui_tables.cpp */; };
+		02DDEDBD29EF20310040382F /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C525795C6CCB99616535318 /* imgui_widgets.cpp */; };
+		02DDEDBE29EF20900040382F /* TextEditorView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F2A06629C4D8F30072CE86 /* TextEditorView.cpp */; };
+		02DDEDBF29EF20A10040382F /* UploadChainerView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F2A06E29C90FFD0072CE86 /* UploadChainerView.cpp */; };
+		02DDEDC029EF20B00040382F /* PulseOscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D1696289EEACD00DA807C /* PulseOscillator.cpp */; };
+		02DDEDC129EF20B20040382F /* ValueOscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9A2D495BAB95441239948C26 /* ValueOscillator.cpp */; };
+		02DDEDC229EF20B50040382F /* WaveformOscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA5B8295A2B3E00FE6FE3 /* WaveformOscillator.cpp */; };
+		02DDEDC329EF20CA0040382F /* MidiService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 75213B2C7CC7237BE90401B0 /* MidiService.cpp */; };
+		02DDEDC429EF21170040382F /* Gist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA59B2956062B00FE6FE3 /* Gist.cpp */; };
+		02DDEDC529EF215B0040382F /* ShaderChainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0230657629534CB500489A9F /* ShaderChainer.cpp */; };
+		02DDEDC629EF215E0040382F /* FeedbackShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D1687289DFD8400DA807C /* FeedbackShader.cpp */; };
+		02DDEDC729EF217D0040382F /* Yin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 022498352965BAD40085CC46 /* Yin.cpp */; };
+		02DDEDC829EF21800040382F /* MFCC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA5982956062B00FE6FE3 /* MFCC.cpp */; };
+		02DDEDC929EF21870040382F /* OnsetDetectionFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA59F2956062B00FE6FE3 /* OnsetDetectionFunction.cpp */; };
+		02DDEDCA29EF21890040382F /* CoreFrequencyDomainFeatures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA5A82956062B00FE6FE3 /* CoreFrequencyDomainFeatures.cpp */; };
+		02DDEDCB29EF218C0040382F /* CoreTimeDomainFeatures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA5A92956062B00FE6FE3 /* CoreTimeDomainFeatures.cpp */; };
+		02DDEDCC29EF218F0040382F /* WindowFunctions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA5AB2956062B00FE6FE3 /* WindowFunctions.cpp */; };
+		02DDEDCD29EF21910040382F /* AccelerateFFT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA5AC2956062B00FE6FE3 /* AccelerateFFT.cpp */; };
+		02DDEDCE29EF21A40040382F /* ofxMidi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E238CCDE032640E0FEBFAD82 /* ofxMidi.cpp */; };
+		02DDEDCF29EF21A60040382F /* ofxBaseMidi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94B3C3C21F92F9310CA90986 /* ofxBaseMidi.cpp */; };
+		02DDEDD029EF21A90040382F /* ofxMidiClock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A937731265782800A8359098 /* ofxMidiClock.cpp */; };
+		02DDEDD129EF21AB0040382F /* ofxMidiIn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DD359247F3ED1550D8BB5C9 /* ofxMidiIn.cpp */; };
+		02DDEDD229EF21AD0040382F /* ofxMidiMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C0E7EDA67EDF213FC0E83D17 /* ofxMidiMessage.cpp */; };
+		02DDEDD329EF21B00040382F /* ofxMidiOut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 04F77E5C73A62E2E77C78EC6 /* ofxMidiOut.cpp */; };
+		02DDEDD429EF21B20040382F /* ofxMidiTimecode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 10E2C891AAA166534B1F3B4E /* ofxMidiTimecode.cpp */; };
+		02DDEDD529EF21C10040382F /* ofxRtMidiIn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F634AA6CA2E3C60F3B87B59A /* ofxRtMidiIn.cpp */; };
+		02DDEDD629EF21C60040382F /* OscillatorView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A87A8141F788BEB6F96324A1 /* OscillatorView.cpp */; };
+		02DDEDD729EF21CA0040382F /* ShaderConfigSelectionView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02BE890429DCA12600C65C58 /* ShaderConfigSelectionView.cpp */; };
+		02DDEDD829EF21D30040382F /* Gui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F0E2047B4D03D5151730B52B /* Gui.cpp */; };
+		02DDEDD929EF21D50040382F /* ImHelpers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3A286071F8A3AE1988CAF6D3 /* ImHelpers.cpp */; };
+		02DDEDDA29EF21D80040382F /* EngineGLFW.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2F1C686ADB50E8F79292BA80 /* EngineGLFW.cpp */; };
+		02DDEDDB29EF21DA0040382F /* EngineOpenGLES.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3174462C64E918D8DA23041B /* EngineOpenGLES.cpp */; };
+		02DDEDDC29EF21DD0040382F /* DefaultTheme.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9A7E144D697FCBB4216A73E /* DefaultTheme.cpp */; };
+		02DDEDDD29EF21E00040382F /* BaseEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D7C7BDAD29F580A47FF56B52 /* BaseEngine.cpp */; };
+		02DDEDDE29EF21FF0040382F /* imgui_impl_glfw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4EE7C223D3B53FDA50DECC1C /* imgui_impl_glfw.cpp */; };
+		02DDEDDF29EF22010040382F /* imgui_impl_opengl2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A58DE63B88088C0E8B229705 /* imgui_impl_opengl2.cpp */; };
+		02DDEDE029EF22050040382F /* imgui_impl_opengl3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 680DD0150C73282C048DE300 /* imgui_impl_opengl3.cpp */; };
+		02DDEDE129EF221D0040382F /* Parameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 54DD623E99AFF042FF1E59E7 /* Parameter.cpp */; };
+		02DDEDE229EF22A00040382F /* implot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA5D7295B1ACE00FE6FE3 /* implot.cpp */; };
+		02DDEDE329EF22A20040382F /* implot_items.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA5D8295B1ACE00FE6FE3 /* implot_items.cpp */; };
+		02DDEDE429EF22A40040382F /* implot_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA5D9295B1ACE00FE6FE3 /* implot_demo.cpp */; };
+		02DDEDE529EF22C70040382F /* ofxRtMidiOut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 712B183BC00EBFFB1EEA5AB8 /* ofxRtMidiOut.cpp */; };
+		02DDEDE629EF22D90040382F /* RtMidi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ABDEF0ACF05BF28F5C74E008 /* RtMidi.cpp */; };
+		02DDEDE729EF23000040382F /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 81AC32CCCB56FAABA3E1BDE0 /* CoreMIDI.framework */; };
+		02DDEDE829EF230C0040382F /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0238773529D20CB300B20386 /* ImGuiExtensions.cpp */; };
+		02DDEDE929EF23170040382F /* MainApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0071CACCF0D8316ED4FAA73D /* MainApp.cpp */; };
+		02DDEDEA29EF23450040382F /* MainStageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 023C633B2922E2D400A8BC9E /* MainStageView.cpp */; };
+		02DDEDEB29EF23570040382F /* AudioSettingsView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0EEC8D055B2169673B50822B /* AudioSettingsView.cpp */; };
+		02DDEDEC29EF235B0040382F /* ShaderChainerSettingsView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 023C6344292A862000A8BC9E /* ShaderChainerSettingsView.cpp */; };
+		02DDEDED29EF235F0040382F /* ShaderChainerView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0230658229534D0300489A9F /* ShaderChainerView.cpp */; };
+		02DDEDEE29EF23610040382F /* FileBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 025AD49C291A9E3200F78F46 /* FileBrowserView.cpp */; };
+		02DDEDEF29EF23630040382F /* VideoSourceBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0230657F29534CF600489A9F /* VideoSourceBrowserView.cpp */; };
+		02DDEDF029EF23670040382F /* ShaderChainerPreviewView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 023C633E2925742200A8BC9E /* ShaderChainerPreviewView.cpp */; };
+		02DDEDF129EF23690040382F /* OutputBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 023C63412927DC0E00A8BC9E /* OutputBrowserView.cpp */; };
+		02DDEDF229EF236B0040382F /* ShaderChainersStageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02ED90FF2954EC12002252CC /* ShaderChainersStageView.cpp */; };
+		02DDEDF329EF236E0040382F /* AudioSourceBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02ED91022955EDFD002252CC /* AudioSourceBrowserView.cpp */; };
+		02DDEDF429EF23710040382F /* BarPlotView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA5C1295B117E00FE6FE3 /* BarPlotView.cpp */; };
+		02DDEDF529EF23730040382F /* TileBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 029F41A22975A86400B6DB77 /* TileBrowserView.cpp */; };
+		02DDEDF629EF23750040382F /* ShaderBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 029F41A72976EF0F00B6DB77 /* ShaderBrowserView.cpp */; };
+		02DDEDF729EF23770040382F /* LibraryBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02308FA92983084000EFDF57 /* LibraryBrowserView.cpp */; };
+		02DDEDF829EF237A0040382F /* MarkdownView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028E8E5B29A697FD00B95C92 /* MarkdownView.cpp */; };
+		02DDEDF929EF23820040382F /* ListBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02BE890929DEFBD700C65C58 /* ListBrowserView.cpp */; };
+		02DDEDFA29EF23D40040382F /* kiss_fft.c in Sources */ = {isa = PBXBuildFile; fileRef = 028FA5A22956062B00FE6FE3 /* kiss_fft.c */; };
 		02E24F2829881F5D0066A05D /* LayoutStateService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02E24F2629881F590066A05D /* LayoutStateService.cpp */; };
 		02E24F3A29889D1C0066A05D /* Roboto-Medium.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 02E24F2A29889D150066A05D /* Roboto-Medium.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		02E24F3B29889D1C0066A05D /* Roboto-Light.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 02E24F2B29889D150066A05D /* Roboto-Light.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -125,6 +230,15 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		02DDED8629EF08E90040382F /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 		E4C2427710CC5ABF004149E2 /* Copy Files */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 12;
@@ -156,7 +270,10 @@
 
 /* Begin PBXFileReference section */
 		0071CACCF0D8316ED4FAA73D /* MainApp.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = MainApp.cpp; path = src/Apps/MainApp.cpp; sourceTree = SOURCE_ROOT; };
+		0202C7DE29EC42520005248E /* EmptySource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EmptySource.cpp; sourceTree = "<group>"; };
+		0202C7DF29EC42520005248E /* EmptySource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = EmptySource.hpp; sourceTree = "<group>"; };
 		021026D328940FDB0060F282 /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; path = lib; sourceTree = "<group>"; };
+		0216672C29E6E76E00ABF457 /* FeedbackSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FeedbackSource.cpp; sourceTree = "<group>"; };
 		022498352965BAD40085CC46 /* Yin.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Yin.cpp; sourceTree = "<group>"; };
 		0230657129534CA500489A9F /* Fonts.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Fonts.hpp; path = Util/Fonts.hpp; sourceTree = "<group>"; };
 		0230657329534CA500489A9F /* JSONSerializable.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = JSONSerializable.hpp; path = Util/JSONSerializable.hpp; sourceTree = "<group>"; };
@@ -372,6 +489,12 @@
 		02B280EE291564A100B793D5 /* ShaderChainerService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = ShaderChainerService.hpp; path = Services/ShaderChainerService.hpp; sourceTree = "<group>"; };
 		02B280F129193F4000B793D5 /* ASCIIShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ASCIIShader.hpp; path = Shading/ASCIIShader.hpp; sourceTree = "<group>"; };
 		02B6599D28BBD16700E31AE7 /* GlitchShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = GlitchShader.hpp; path = Shading/GlitchShader.hpp; sourceTree = "<group>"; };
+		02BE890329DC942900C65C58 /* AvailableShaderConfig.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = AvailableShaderConfig.hpp; path = Models/AvailableShaderConfig.hpp; sourceTree = "<group>"; };
+		02BE890429DCA12600C65C58 /* ShaderConfigSelectionView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ShaderConfigSelectionView.cpp; path = Views/ShaderConfigSelectionView.cpp; sourceTree = "<group>"; };
+		02BE890529DCA12600C65C58 /* ShaderConfigSelectionView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = ShaderConfigSelectionView.hpp; path = Views/ShaderConfigSelectionView.hpp; sourceTree = "<group>"; };
+		02BE890729DDDB4600C65C58 /* ShaderSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderSource.cpp; sourceTree = "<group>"; };
+		02BE890929DEFBD700C65C58 /* ListBrowserView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ListBrowserView.cpp; path = Views/ListBrowserView.cpp; sourceTree = "<group>"; };
+		02BE890A29DEFBD700C65C58 /* ListBrowserView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = ListBrowserView.hpp; path = Views/ListBrowserView.hpp; sourceTree = "<group>"; };
 		02CC589F29AF914E006A50F2 /* ImageSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ImageSource.cpp; sourceTree = "<group>"; };
 		02CC58A029AF914E006A50F2 /* ImageSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ImageSource.hpp; sourceTree = "<group>"; };
 		02CC58A329B1567D006A50F2 /* Settings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = Settings.hpp; path = Models/Settings.hpp; sourceTree = "<group>"; };
@@ -385,6 +508,11 @@
 		02DA7B2E29ABD83B007566A1 /* Psycurves.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Psycurves.vert; sourceTree = "<group>"; };
 		02DA7B2F29AD7638007566A1 /* Crosshatch.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Crosshatch.frag; sourceTree = "<group>"; };
 		02DA7B3029AD7638007566A1 /* Crosshatch.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Crosshatch.vert; sourceTree = "<group>"; };
+		02DDED8129EDE4CA0040382F /* Circle.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Circle.frag; sourceTree = "<group>"; };
+		02DDED8229EDE4CB0040382F /* Circle.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Circle.vert; sourceTree = "<group>"; };
+		02DDED8829EF08E90040382F /* dude_wake_up_tests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = dude_wake_up_tests; sourceTree = BUILT_PRODUCTS_DIR; };
+		02DDED8A29EF08E90040382F /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		02DDED9129EF092B0040382F /* ShaderChainerServiceTests.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ShaderChainerServiceTests.hpp; sourceTree = "<group>"; };
 		02E24F2629881F590066A05D /* LayoutStateService.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = LayoutStateService.cpp; path = Services/LayoutStateService.cpp; sourceTree = "<group>"; };
 		02E24F2729881F590066A05D /* LayoutStateService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = LayoutStateService.hpp; path = Services/LayoutStateService.hpp; sourceTree = "<group>"; };
 		02E24F2A29889D150066A05D /* Roboto-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Medium.ttf"; sourceTree = "<group>"; };
@@ -741,6 +869,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		02DDED8529EF08E90040382F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				02DDEDE729EF23000040382F /* CoreMIDI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E4B69B590A3A1756003C02F2 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1067,6 +1203,7 @@
 			isa = PBXGroup;
 			children = (
 				0230657D29534CC000489A9F /* FeedbackSource.hpp */,
+				0216672C29E6E76E00ABF457 /* FeedbackSource.cpp */,
 				02B280DE2913FE7D00B793D5 /* FeedbackSourceService.cpp */,
 				02B280DF2913FE7D00B793D5 /* FeedbackSourceService.hpp */,
 			);
@@ -1091,8 +1228,20 @@
 				02CC58A629C37070006A50F2 /* VideoSourceSettings.hpp */,
 				02F2A06429C4D8AF0072CE86 /* TextSource.cpp */,
 				02F2A06529C4D8AF0072CE86 /* TextSource.hpp */,
+				02BE890729DDDB4600C65C58 /* ShaderSource.cpp */,
+				0202C7DE29EC42520005248E /* EmptySource.cpp */,
+				0202C7DF29EC42520005248E /* EmptySource.hpp */,
 			);
 			path = Video;
+			sourceTree = "<group>";
+		};
+		02DDED8929EF08E90040382F /* dude_wake_up_tests */ = {
+			isa = PBXGroup;
+			children = (
+				02DDED8A29EF08E90040382F /* main.cpp */,
+				02DDED9129EF092B0040382F /* ShaderChainerServiceTests.hpp */,
+			);
+			path = dude_wake_up_tests;
 			sourceTree = "<group>";
 		};
 		02E24F2929889D150066A05D /* fonts */ = {
@@ -1121,6 +1270,8 @@
 		02ED90D62954967F002252CC /* shaders */ = {
 			isa = PBXGroup;
 			children = (
+				02DDED8129EDE4CA0040382F /* Circle.frag */,
+				02DDED8229EDE4CB0040382F /* Circle.vert */,
 				02CC58A829C37C0C006A50F2 /* Glitch.frag */,
 				02CC58A729C37C0B006A50F2 /* Glitch.vert */,
 				02DA7B2F29AD7638007566A1 /* Crosshatch.frag */,
@@ -1283,6 +1434,7 @@
 				02F4083E298FEBF9000632FC /* AvailableShaderChainer.hpp */,
 				02CC58A329B1567D006A50F2 /* Settings.hpp */,
 				02F2A06929C4D9160072CE86 /* DisplayText.hpp */,
+				02BE890329DC942900C65C58 /* AvailableShaderConfig.hpp */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -1372,6 +1524,10 @@
 				02F2A06E29C90FFD0072CE86 /* UploadChainerView.cpp */,
 				0238773529D20CB300B20386 /* ImGuiExtensions.cpp */,
 				0238773629D20CB300B20386 /* ImGuiExtensions.hpp */,
+				02BE890429DCA12600C65C58 /* ShaderConfigSelectionView.cpp */,
+				02BE890529DCA12600C65C58 /* ShaderConfigSelectionView.hpp */,
+				02BE890929DEFBD700C65C58 /* ListBrowserView.cpp */,
+				02BE890A29DEFBD700C65C58 /* ListBrowserView.hpp */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -1823,6 +1979,8 @@
 				BB4B014C10F69532006C3DED /* addons */,
 				6948EE371B920CB800B5AC1A /* local_addons */,
 				E4B69B5B0A3A1756003C02F2 /* dude_wake_upDebug.app */,
+				02DDED8829EF08E90040382F /* dude_wake_up_tests */,
+				02DDED8929EF08E90040382F /* dude_wake_up_tests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1848,6 +2006,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		02DDED8729EF08E90040382F /* dude_wake_up_tests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 02DDED8C29EF08E90040382F /* Build configuration list for PBXNativeTarget "dude_wake_up_tests" */;
+			buildPhases = (
+				02DDED8429EF08E90040382F /* Sources */,
+				02DDED8529EF08E90040382F /* Frameworks */,
+				02DDED8629EF08E90040382F /* CopyFiles */,
+				02DDED9729EF17E90040382F /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = dude_wake_up_tests;
+			productName = dude_wake_up_tests;
+			productReference = 02DDED8829EF08E90040382F /* dude_wake_up_tests */;
+			productType = "com.apple.product-type.tool";
+		};
 		E4B69B5A0A3A1756003C02F2 /* dude_wake_up */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = E4B69B5F0A3A1757003C02F2 /* Build configuration list for PBXNativeTarget "dude_wake_up" */;
@@ -1874,8 +2050,14 @@
 		E4B69B4C0A3A1720003C02F2 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				DefaultBuildSystemTypeForWorkspace = Original;
 				LastUpgradeCheck = 0600;
 				TargetAttributes = {
+					02DDED8729EF08E90040382F = {
+						CreatedOnToolsVersion = 14.2;
+						DevelopmentTeam = 7VUCELU5PL;
+						ProvisioningStyle = Automatic;
+					};
 					E4B69B5A0A3A1756003C02F2 = {
 						DevelopmentTeam = 7VUCELU5PL;
 						ProvisioningStyle = Automatic;
@@ -1898,11 +2080,29 @@
 			projectRoot = "";
 			targets = (
 				E4B69B5A0A3A1756003C02F2 /* dude_wake_up */,
+				02DDED8729EF08E90040382F /* dude_wake_up_tests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		02DDED9729EF17E90040382F /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Copy libfmod and change install directory for fmod to run\nrsync -aved \"$OF_PATH/libs/fmod/lib/osx/libfmod.dylib\" \"$TARGET_BUILD_DIR\";\n\ncodesign -s \"Apple Development: Joe Crozier (7HTR557REQ)\" $TARGET_BUILD_DIR/libfmod.dylib -f\n\necho \"$GCC_PREPROCESSOR_DEFINITIONS\";\n";
+		};
 		8466F1851C04CA0E00918B1C /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 12;
@@ -1945,6 +2145,111 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		02DDED8429EF08E90040382F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				02DDEDBC29EF202F0040382F /* imgui_tables.cpp in Sources */,
+				02DDEDA829EF1E240040382F /* MarkdownService.cpp in Sources */,
+				02DDEDE529EF22C70040382F /* ofxRtMidiOut.cpp in Sources */,
+				02DDED8B29EF08E90040382F /* main.cpp in Sources */,
+				02DDEDE629EF22D90040382F /* RtMidi.cpp in Sources */,
+				02DDEDF829EF237A0040382F /* MarkdownView.cpp in Sources */,
+				02DDEDD829EF21D30040382F /* Gui.cpp in Sources */,
+				02DDEDF029EF23670040382F /* ShaderChainerPreviewView.cpp in Sources */,
+				02DDEDDF29EF22010040382F /* imgui_impl_opengl2.cpp in Sources */,
+				02DDEDAE29EF1FD60040382F /* AvailableVideoSource.cpp in Sources */,
+				02DDEDC829EF21800040382F /* MFCC.cpp in Sources */,
+				02DDED9C29EF1E000040382F /* AudioSource.cpp in Sources */,
+				02DDEDDC29EF21DD0040382F /* DefaultTheme.cpp in Sources */,
+				02DDED9E29EF1E080040382F /* Shader.cpp in Sources */,
+				02DDED9A29EF1DFA0040382F /* FeedbackSource.cpp in Sources */,
+				02DDEDAA29EF1FC50040382F /* LibraryService.cpp in Sources */,
+				02DDEDD029EF21A90040382F /* ofxMidiClock.cpp in Sources */,
+				02DDEDD329EF21B00040382F /* ofxMidiOut.cpp in Sources */,
+				02DDEDF229EF236B0040382F /* ShaderChainersStageView.cpp in Sources */,
+				02DDED9929EF1D730040382F /* ShaderChainerService.cpp in Sources */,
+				02DDEDA529EF1E1A0040382F /* VideoSourceService.cpp in Sources */,
+				02DDEDBE29EF20900040382F /* TextEditorView.cpp in Sources */,
+				02DDEDC929EF21870040382F /* OnsetDetectionFunction.cpp in Sources */,
+				02DDEDA229EF1E120040382F /* OscillationService.cpp in Sources */,
+				02DDEDB329EF1FE70040382F /* imgui_node_editor.cpp in Sources */,
+				02DDEDD529EF21C10040382F /* ofxRtMidiIn.cpp in Sources */,
+				02DDEDE329EF22A20040382F /* implot_items.cpp in Sources */,
+				02DDEDDB29EF21DA0040382F /* EngineOpenGLES.cpp in Sources */,
+				02DDEDB629EF1FEF0040382F /* crude_json.cpp in Sources */,
+				02DDEDD429EF21B20040382F /* ofxMidiTimecode.cpp in Sources */,
+				02DDEDAB29EF1FCD0040382F /* OutputWindow.cpp in Sources */,
+				02DDEDAF29EF1FD80040382F /* ImageSource.cpp in Sources */,
+				02DDEDD929EF21D50040382F /* ImHelpers.cpp in Sources */,
+				02DDEDD729EF21CA0040382F /* ShaderConfigSelectionView.cpp in Sources */,
+				02DDEDB429EF1FEB0040382F /* imgui_node_editor_api.cpp in Sources */,
+				02DDED9F29EF1E0A0040382F /* AvailableShader.cpp in Sources */,
+				02DDEDB529EF1FED0040382F /* imgui_canvas.cpp in Sources */,
+				02DDEDA329EF1E150040382F /* ParameterService.cpp in Sources */,
+				02DDEDE029EF22050040382F /* imgui_impl_opengl3.cpp in Sources */,
+				02DDEDE929EF23170040382F /* MainApp.cpp in Sources */,
+				02DDED9B29EF1DFD0040382F /* FeedbackSourceService.cpp in Sources */,
+				02DDEDA729EF1E220040382F /* LayoutStateService.cpp in Sources */,
+				02DDEDB729EF201F0040382F /* CommonViews.cpp in Sources */,
+				02DDEDB229EF1FDF0040382F /* EmptySource.cpp in Sources */,
+				02DDEDAD29EF1FD30040382F /* WebcamSource.cpp in Sources */,
+				02DDEDCD29EF21910040382F /* AccelerateFFT.cpp in Sources */,
+				02DDEDCF29EF21A60040382F /* ofxBaseMidi.cpp in Sources */,
+				02DDEDCC29EF218F0040382F /* WindowFunctions.cpp in Sources */,
+				02DDEDC129EF20B20040382F /* ValueOscillator.cpp in Sources */,
+				02DDEDBB29EF202C0040382F /* imgui_draw.cpp in Sources */,
+				02DDEDF329EF236E0040382F /* AudioSourceBrowserView.cpp in Sources */,
+				02DDED9D29EF1E040040382F /* NodeLayoutView.cpp in Sources */,
+				02DDEDEE29EF23610040382F /* FileBrowserView.cpp in Sources */,
+				02DDEDB929EF20290040382F /* imgui_stdlib.cpp in Sources */,
+				02DDEDE129EF221D0040382F /* Parameter.cpp in Sources */,
+				02DDEDC229EF20B50040382F /* WaveformOscillator.cpp in Sources */,
+				02DDEDC629EF215E0040382F /* FeedbackShader.cpp in Sources */,
+				02DDEDBA29EF202B0040382F /* imgui_demo.cpp in Sources */,
+				02DDEDE829EF230C0040382F /* ImGuiExtensions.cpp in Sources */,
+				02DDEDF729EF23770040382F /* LibraryBrowserView.cpp in Sources */,
+				02DDEDDE29EF21FF0040382F /* imgui_impl_glfw.cpp in Sources */,
+				02DDEDDA29EF21D80040382F /* EngineGLFW.cpp in Sources */,
+				02DDEDF629EF23750040382F /* ShaderBrowserView.cpp in Sources */,
+				02DDEDEC29EF235B0040382F /* ShaderChainerSettingsView.cpp in Sources */,
+				02DDEDD129EF21AB0040382F /* ofxMidiIn.cpp in Sources */,
+				02DDEDA629EF1E1F0040382F /* AudioSourceService.cpp in Sources */,
+				02DDEDC529EF215B0040382F /* ShaderChainer.cpp in Sources */,
+				02DDEDDD29EF21E00040382F /* BaseEngine.cpp in Sources */,
+				02DDEDED29EF235F0040382F /* ShaderChainerView.cpp in Sources */,
+				02DDEDE229EF22A00040382F /* implot.cpp in Sources */,
+				02DDEDA129EF1E100040382F /* ModulationService.cpp in Sources */,
+				02DDEDCB29EF218C0040382F /* CoreTimeDomainFeatures.cpp in Sources */,
+				02DDEDD229EF21AD0040382F /* ofxMidiMessage.cpp in Sources */,
+				02DDEDBF29EF20A10040382F /* UploadChainerView.cpp in Sources */,
+				02DDEDF929EF23820040382F /* ListBrowserView.cpp in Sources */,
+				02DDEDB829EF20250040382F /* imgui.cpp in Sources */,
+				02DDEDC729EF217D0040382F /* Yin.cpp in Sources */,
+				02DDEDAC29EF1FD00040382F /* FileSource.cpp in Sources */,
+				02DDEDA429EF1E180040382F /* ConfigService.cpp in Sources */,
+				02DDEDBD29EF20310040382F /* imgui_widgets.cpp in Sources */,
+				02DDEDB029EF1FDB0040382F /* TextSource.cpp in Sources */,
+				02DDEDB129EF1FDD0040382F /* ShaderSource.cpp in Sources */,
+				02DDEDC029EF20B00040382F /* PulseOscillator.cpp in Sources */,
+				02DDEDC429EF21170040382F /* Gist.cpp in Sources */,
+				02DDEDD629EF21C60040382F /* OscillatorView.cpp in Sources */,
+				02DDEDA029EF1E0C0040382F /* FontService.cpp in Sources */,
+				02DDEDEA29EF23450040382F /* MainStageView.cpp in Sources */,
+				02DDEDF129EF23690040382F /* OutputBrowserView.cpp in Sources */,
+				02DDEDFA29EF23D40040382F /* kiss_fft.c in Sources */,
+				02DDEDCE29EF21A40040382F /* ofxMidi.cpp in Sources */,
+				02DDEDEF29EF23630040382F /* VideoSourceBrowserView.cpp in Sources */,
+				02DDED9329EF092B0040382F /* ShaderChainerServiceTests.hpp in Sources */,
+				02DDEDF429EF23710040382F /* BarPlotView.cpp in Sources */,
+				02DDEDEB29EF23570040382F /* AudioSettingsView.cpp in Sources */,
+				02DDEDE429EF22A40040382F /* implot_demo.cpp in Sources */,
+				02DDEDF529EF23730040382F /* TileBrowserView.cpp in Sources */,
+				02DDEDCA29EF21890040382F /* CoreFrequencyDomainFeatures.cpp in Sources */,
+				02DDEDC329EF20CA0040382F /* MidiService.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E4B69B580A3A1756003C02F2 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1957,8 +2262,10 @@
 				DAA162C52DA366D4774E2A53 /* OscillatorView.cpp in Sources */,
 				75992458D44C948D353E0BF3 /* CommonViews.cpp in Sources */,
 				02ED91062955F179002252CC /* AudioSource.cpp in Sources */,
+				02BE890629DCA12600C65C58 /* ShaderConfigSelectionView.cpp in Sources */,
 				175464DB3A85014D9DF5BD3C /* AudioSettingsView.cpp in Sources */,
 				028FA5C3295B117E00FE6FE3 /* BarPlotView.cpp in Sources */,
+				02BE890B29DEFBD700C65C58 /* ListBrowserView.cpp in Sources */,
 				6764CEA4D206EE90B9BEE3D4 /* MainApp.cpp in Sources */,
 				02B22C2F293812800095AC89 /* OutputWindow.cpp in Sources */,
 				029F41AE29770D9800B6DB77 /* AvailableShader.cpp in Sources */,
@@ -2011,12 +2318,15 @@
 				023C63432927DC0E00A8BC9E /* OutputBrowserView.cpp in Sources */,
 				A6F396BE5D1E24326E1F796A /* ofxImGuiLoggerChannel.cpp in Sources */,
 				02B16FDD29674AF30043CA74 /* crude_json.cpp in Sources */,
+				0202C7E029EC42520005248E /* EmptySource.cpp in Sources */,
 				028E8E6029A6A0B800B95C92 /* MarkdownService.cpp in Sources */,
 				02B280EA2915480600B793D5 /* WebcamSource.cpp in Sources */,
 				028FA5DE295B1ACE00FE6FE3 /* implot_demo.cpp in Sources */,
 				025AD49E291A9E3200F78F46 /* FileBrowserView.cpp in Sources */,
+				0202C7E129EC5F2D0005248E /* ofAVFoundationGrabber.mm in Sources */,
 				63D0FD8734D5760B8080C901 /* RtMidi.cpp in Sources */,
 				BCC8D420CBA9217E437D2D76 /* ofxRtMidiIn.cpp in Sources */,
+				02BE890829DDDB4600C65C58 /* ShaderSource.cpp in Sources */,
 				02B280EB2915480E00B793D5 /* FileSource.cpp in Sources */,
 				3AEFE4FA8AD5C72671AD07F8 /* ofxRtMidiOut.cpp in Sources */,
 				1A86B7721CAEBC6F1C572C45 /* ofxBaseMidi.cpp in Sources */,
@@ -2033,6 +2343,7 @@
 				023C63402925742200A8BC9E /* ShaderChainerPreviewView.cpp in Sources */,
 				024D169C28A046DF00DA807C /* ConfigService.cpp in Sources */,
 				02308FAB2983084000EFDF57 /* LibraryBrowserView.cpp in Sources */,
+				0216672D29E6E79600ABF457 /* FeedbackSource.cpp in Sources */,
 				02B16FCA29674AF30043CA74 /* imgui_canvas.cpp in Sources */,
 				0230658129534CF600489A9F /* VideoSourceBrowserView.cpp in Sources */,
 				C6FE64F74F1EA1D98C8F9847 /* ofxMidiMessage.cpp in Sources */,
@@ -2052,6 +2363,323 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		02DDED8D29EF08E90040382F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 7VUCELU5PL;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					/System/Library/Frameworks,
+				);
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+					"TESTING=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(OF_CORE_HEADERS)",
+					src,
+					src/Shading,
+					src/Apps,
+					src/Models,
+					src/Services,
+					src/Services/Midi,
+					src/Stream,
+					src/Util,
+					src/Views,
+					src/Video,
+					../../../addons/ofxImGui/libs,
+					../../../addons/ofxImGui/libs/imgui,
+					../../../addons/ofxImGui/libs/imgui/backends,
+					../../../addons/ofxImGui/libs/imgui/docs,
+					../../../addons/ofxImGui/libs/imgui/src,
+					../../../addons/ofxImGui/src,
+					../../../addons/ofxMidi/libs,
+					../../../addons/ofxMidi/libs/pgmidi,
+					../../../addons/ofxMidi/libs/rtmidi,
+					../../../addons/ofxMidi/src,
+					../../../addons/ofxMidi/src/desktop,
+					../../../addons/ofxMidi/src/ios,
+					"lib/**",
+					/usr/local/include,
+					"lib/gist/src/**",
+					"lib/**",
+					lib/implot,
+					"lib/imgui-node-editor/external/**",
+					"lib/imgui-node-editor",
+					/usr/local/include/gtest,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"/usr/local/lib/**",
+					"$(PROJECT_DIR)/lib/imgui-node-editor/external/DXSDK/lib/x64",
+					"$(PROJECT_DIR)/lib/imgui-node-editor/external/DXSDK/lib/x86",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.1;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				OTHER_LDFLAGS = (
+					"$(OF_CORE_LIBS)",
+					"$(OF_CORE_FRAMEWORKS)",
+					"$(LIB_OF)",
+					"-lgtest",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		02DDED8E29EF08E90040382F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 7VUCELU5PL;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					/System/Library/Frameworks,
+				);
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(OF_CORE_HEADERS)",
+					src,
+					src/Shading,
+					src/Apps,
+					src/Models,
+					src/Services,
+					src/Services/Midi,
+					src/Stream,
+					src/Util,
+					src/Views,
+					src/Video,
+					../../../addons/ofxImGui/libs,
+					../../../addons/ofxImGui/libs/imgui,
+					../../../addons/ofxImGui/libs/imgui/backends,
+					../../../addons/ofxImGui/libs/imgui/docs,
+					../../../addons/ofxImGui/libs/imgui/src,
+					../../../addons/ofxImGui/src,
+					../../../addons/ofxMidi/libs,
+					../../../addons/ofxMidi/libs/pgmidi,
+					../../../addons/ofxMidi/libs/rtmidi,
+					../../../addons/ofxMidi/src,
+					../../../addons/ofxMidi/src/desktop,
+					../../../addons/ofxMidi/src/ios,
+					"lib/**",
+					/usr/local/include,
+					"lib/gist/src/**",
+					"lib/**",
+					lib/implot,
+					"lib/imgui-node-editor/external/**",
+					"lib/imgui-node-editor",
+					/usr/local/include/gtest,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"/usr/local/lib/**",
+					"$(PROJECT_DIR)/lib/imgui-node-editor/external/DXSDK/lib/x64",
+					"$(PROJECT_DIR)/lib/imgui-node-editor/external/DXSDK/lib/x86",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				OTHER_LDFLAGS = (
+					"$(OF_CORE_LIBS)",
+					"$(OF_CORE_FRAMEWORKS)",
+					"$(LIB_OF)",
+					"-lgtest",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		02DDED8F29EF08E90040382F /* AppStore */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 7VUCELU5PL;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					/System/Library/Frameworks,
+				);
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(OF_CORE_HEADERS)",
+					src,
+					src/Shading,
+					src/Apps,
+					src/Models,
+					src/Services,
+					src/Services/Midi,
+					src/Stream,
+					src/Util,
+					src/Views,
+					src/Video,
+					../../../addons/ofxImGui/libs,
+					../../../addons/ofxImGui/libs/imgui,
+					../../../addons/ofxImGui/libs/imgui/backends,
+					../../../addons/ofxImGui/libs/imgui/docs,
+					../../../addons/ofxImGui/libs/imgui/src,
+					../../../addons/ofxImGui/src,
+					../../../addons/ofxMidi/libs,
+					../../../addons/ofxMidi/libs/pgmidi,
+					../../../addons/ofxMidi/libs/rtmidi,
+					../../../addons/ofxMidi/src,
+					../../../addons/ofxMidi/src/desktop,
+					../../../addons/ofxMidi/src/ios,
+					"lib/**",
+					/usr/local/include,
+					"lib/gist/src/**",
+					"lib/**",
+					lib/implot,
+					"lib/imgui-node-editor/external/**",
+					"lib/imgui-node-editor",
+					/usr/local/include/gtest,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"/usr/local/lib/**",
+					"$(PROJECT_DIR)/lib/imgui-node-editor/external/DXSDK/lib/x64",
+					"$(PROJECT_DIR)/lib/imgui-node-editor/external/DXSDK/lib/x86",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				OTHER_LDFLAGS = (
+					"$(OF_CORE_LIBS)",
+					"$(OF_CORE_FRAMEWORKS)",
+					"$(LIB_OF)",
+					"-lgtest",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = AppStore;
+		};
 		99FA3DBB1C7456C400CFA0EE /* AppStore */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E4EB6923138AFD0F00A09F29 /* Project.xcconfig */;
@@ -2108,6 +2736,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E4EB6923138AFD0F00A09F29 /* Project.xcconfig */;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
@@ -2274,6 +2903,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E4EB6923138AFD0F00A09F29 /* Project.xcconfig */;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -2287,6 +2917,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = NONE;
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "RELEASE=1";
 				HEADER_SEARCH_PATHS = (
 					"$(OF_CORE_HEADERS)",
 					src,
@@ -2344,6 +2975,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E4EB6923138AFD0F00A09F29 /* Project.xcconfig */;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
@@ -2406,6 +3038,16 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		02DDED8C29EF08E90040382F /* Build configuration list for PBXNativeTarget "dude_wake_up_tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				02DDED8D29EF08E90040382F /* Debug */,
+				02DDED8E29EF08E90040382F /* Release */,
+				02DDED8F29EF08E90040382F /* AppStore */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		E4B69B4D0A3A1720003C02F2 /* Build configuration list for PBXProject "dude_wake_up" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

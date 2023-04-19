@@ -12,12 +12,13 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct CrosshatchSettings: public ShaderSettings {
   CrosshatchSettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     
   };
 };
@@ -27,7 +28,12 @@ struct CrosshatchShader: Shader {
   CrosshatchShader(CrosshatchSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("shaders/Crosshatch");
+    #ifdef TESTING
+shader.load("shaders/Crosshatch");
+#endif
+#ifdef RELEASE
+shader.load("shaders/Crosshatch");
+#endif
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -50,6 +56,7 @@ struct CrosshatchShader: Shader {
   }
 
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     CommonViews::H3Title("Crosshatch");
 
   }

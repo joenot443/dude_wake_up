@@ -29,16 +29,16 @@ static const int EmptyId = -1;
 void ShaderChainer::setup() {
   registerFeedbackDestination();
   fbo = ofFbo();
-  fbo.allocate(settings.width->value, settings.height->value);
+  fbo.allocate(settings.width->value, settings.height->value, GL_RGBA);
   fbo.begin();
-  ofClear(0, 0, 0, 255);
+  ofClear(0, 0, 0, 0);
   fbo.end();
   fbo.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
   
   resizeShader.load("shaders/Resize");
   
   frameTexture = std::make_shared<ofTexture>();
-  frameTexture->allocate(source->settings.width->value, source->settings.height->value, GL_RGB);
+  frameTexture->allocate(source->settings.width->value, source->settings.height->value, GL_RGBA);
   frameTexture->setTextureWrap(GL_REPEAT, GL_REPEAT);
   
   for (auto &sh : shaders()) {
@@ -87,11 +87,13 @@ void ShaderChainer::resizeFrame() {
 
 ofFbo ShaderChainer::processFrame(std::shared_ptr<ofTexture> texture) {
   ping.begin();
-  ofClear(255, 255, 255, 0);
+  ofSetColor(0, 0, 0, 0);
+  ofDrawRectangle(0, 0, fbo.getWidth(), fbo.getHeight());
   ping.end();
 
   pong.begin();
-  ofClear(255, 255, 255, 0);
+  ofSetColor(0, 0, 0, 0);
+  ofDrawRectangle(0, 0, fbo.getWidth(), fbo.getHeight());
   pong.end();
 
   pong.begin();
@@ -117,7 +119,7 @@ ofFbo ShaderChainer::processFrame(std::shared_ptr<ofTexture> texture) {
     auto shader = sharedShader.get();
 
     ShaderChainerService::getService()->associateShaderWithChainer(
-        shader->id(), shared_from_this());
+        shader->shaderId, chainerId);
     // Skip disabled shaders
     if (!shader->enabled()) {
       continue;
@@ -132,7 +134,8 @@ ofFbo ShaderChainer::processFrame(std::shared_ptr<ofTexture> texture) {
     }
     shader->shade(tex, canv);
     tex->begin();
-    ofClear(255, 255, 255);
+    ofSetColor(0, 0, 0, 0);
+    ofDrawRectangle(0, 0, fbo.getWidth(), fbo.getHeight());
     tex->end();
     flip = !flip;
   }
@@ -185,7 +188,7 @@ json ShaderChainer::serialize() {
   
   // We have a front shader
   if (front != nullptr)
-    j["front"] = front->id();
+    j["front"] = front->shaderId;
   else
     j["front"] = EmptyId;
 
@@ -213,12 +216,15 @@ void ShaderChainer::load(json j) {
     auto shader = ShaderChainerService::getService()->shaderForType(
         shaderType, shaderId, shaderJson);
     ShaderChainerService::getService()->addShader(shader);
+    ShaderChainerService::getService()->associateShaderWithChainer(shaderId, chainerId);
     shader->parent = last;
     if (last != nullptr)
       last->next = shader;
 
     last = shader;
   }
+  
+  
   
   if (j["front"] != EmptyId)
     front = ShaderChainerService::getService()->shaderForId(j["front"]);

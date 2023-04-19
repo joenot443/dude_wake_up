@@ -11,6 +11,7 @@
 #include "ofMain.h"
 
 #include "CommonViews.hpp"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include "ofxImGui.h"
 #include <stdio.h>
@@ -24,12 +25,12 @@ struct PixelSettings : public ShaderSettings {
   std::shared_ptr<Oscillator> sizeOscillator;
 
   PixelSettings(std::string shaderId, json j)
-      : size(std::make_shared<Parameter>("pixel_size", shaderId, 24.1, 1.0,
+      : size(std::make_shared<Parameter>("pixel_size", 24.1, 1.0,
                                          200.0)),
         enabled(
-            std::make_shared<Parameter>("enabled", shaderId, 0.0, 1.0, 0.0)),
+            std::make_shared<Parameter>("enabled", 0.0, 1.0, 0.0)),
         sizeOscillator(std::make_shared<WaveformOscillator>(size)),
-        ShaderSettings(shaderId) {
+        ShaderSettings(shaderId, j) {
     parameters = {size, enabled};
     oscillators = {sizeOscillator};
     load(j);
@@ -42,7 +43,15 @@ struct PixelShader : Shader {
 
   ofShader shader;
 
-  void setup() override { shader.load("shaders/Pixel"); }
+  void setup() override {
+#ifdef TESTING
+shader.load("shaders/Pixel");
+#endif
+#ifdef RELEASE
+shader.load("shaders/Pixel");
+#endif
+    
+  }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
     canvas->begin();
@@ -60,6 +69,7 @@ struct PixelShader : Shader {
   ShaderType type() override { return ShaderTypePixelate; }
 
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     CommonViews::ShaderParameter(settings->size, settings->sizeOscillator);
   }
 };

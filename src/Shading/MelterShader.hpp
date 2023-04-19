@@ -13,6 +13,7 @@
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
 #include "Oscillator.hpp"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
@@ -20,7 +21,7 @@ struct MeltSettings : public ShaderSettings {
   std::string shaderId;
 
   MeltSettings(std::string shaderId, json j) : shaderId(shaderId),
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     load(j);
   };
 };
@@ -34,7 +35,12 @@ struct MeltShader : public Shader {
 
   MeltShader(MeltSettings *settings) : settings(settings),
   Shader(settings) {
-    shader.load("shaders/Melt");
+    #ifdef TESTING
+shader.load("shaders/Melt");
+#endif
+#ifdef RELEASE
+shader.load("shaders/Melt");
+#endif
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -49,6 +55,7 @@ struct MeltShader : public Shader {
   }
 
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     ImGui::Text("Melt");
   }
 };

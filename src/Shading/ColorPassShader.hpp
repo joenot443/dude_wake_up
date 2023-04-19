@@ -9,6 +9,7 @@
 #define ColorPassShader_hpp
 
 #include "CommonViews.hpp"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include "ShaderSettings.hpp"
 #include "ofMain.h"
@@ -23,12 +24,12 @@ struct ColorPassSettings : public ShaderSettings {
   std::shared_ptr<Oscillator> highHueOsc;
 
   ColorPassSettings(std::string shaderId, json j)
-      : lowHue(std::make_shared<Parameter>("low_hue", shaderId, 0.0, 0.0, 1.0)),
+      : lowHue(std::make_shared<Parameter>("low_hue", 0.0, 0.0, 1.0)),
         highHue(
-            std::make_shared<Parameter>("high_hue", shaderId, 0.5, 0.0, 1.0)),
+            std::make_shared<Parameter>("high_hue", 0.5, 0.0, 1.0)),
         lowHueOsc(std::make_shared<WaveformOscillator>(lowHue)),
         highHueOsc(std::make_shared<WaveformOscillator>(highHue)),
-        ShaderSettings(shaderId){
+        ShaderSettings(shaderId, j){
 
         };
 };
@@ -38,7 +39,15 @@ struct ColorPassShader : Shader {
   ColorPassShader(ColorPassSettings *settings)
       : settings(settings), Shader(settings){};
   ofShader shader;
-  void setup() override { shader.load("shaders/ColorPass"); }
+  void setup() override {
+#ifdef TESTING
+shader.load("shaders/ColorPass");
+#endif
+#ifdef RELEASE
+shader.load("shaders/ColorPass");
+#endif
+    
+  }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
     canvas->begin();
@@ -60,6 +69,7 @@ struct ColorPassShader : Shader {
   ShaderType type() override { return ShaderTypeColorPass; }
 
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     CommonViews::H3Title("ColorPass");
     CommonViews::ShaderParameter(settings->lowHue, settings->lowHueOsc);
     CommonViews::ShaderParameter(settings->highHue, settings->highHueOsc);

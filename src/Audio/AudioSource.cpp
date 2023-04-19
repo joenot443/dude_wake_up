@@ -27,6 +27,8 @@ void AudioSource::setup() {
   stream.setup (settings);
 }
 
+void AudioSource::update() {}
+
 void AudioSource::toggle() {
   if (active) disable();
   else setup();

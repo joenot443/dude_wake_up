@@ -11,20 +11,36 @@
 std::shared_ptr<Parameter>
 ParameterService::parameterForId(std::string paramId) {
   if (parameterMap.count(paramId) == 0) {
-    return NULL;
+    return nullptr;
   }
-  return parameterMap[paramId];
+  
+  if (auto shared_val = parameterMap[paramId].lock()) {
+    return shared_val;
+  } else {
+    log("Requesting a deleted Parameter");
+    return nullptr;
+  }
 }
 
 void ParameterService::registerParameter(std::shared_ptr<Parameter> parameter) {
+  if (parameter == nullptr) {
+    log("Attempting to add null parameter");
+    return;
+  }
   if (parameterMap.count(parameter->paramId) != 0) {
     log("Reregistering Parameter %s", parameter->paramId.c_str());
   }
-  parameterMap[parameter->paramId] = parameter;
+  log("Registering Parameter %s", parameter->paramId.c_str());
+  parameterMap[parameter->paramId] = std::weak_ptr<Parameter>(parameter);
+
 }
 
 void ParameterService::tickParameters() {
-  for (auto const &[key, val] : parameterMap) {
-    val->tick();
+  for (auto const &[key, weak_val] : parameterMap) {
+      if (auto shared_val = weak_val.lock()) {
+        shared_val->tick();
+      } else {
+        log("Referencing a deleted Parameter");
+      }
   }
 }

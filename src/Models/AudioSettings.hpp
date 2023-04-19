@@ -112,14 +112,14 @@ struct AudioAnalysis {
   }
 
   AudioAnalysis()
-      : rms(std::make_shared<Parameter>("rms", name, 0.0, 0.0, 1.0)),
-        csd(std::make_shared<Parameter>("csd", name, 0.0, 0.0, 1.0)),
-        pitch(std::make_shared<Parameter>("pitch", name, 0.0, 0.0, 1.0)),
-        energy(std::make_shared<Parameter>("energy", name, 0.0, 0.0, 1.0)),
-        zcr(std::make_shared<Parameter>("zcr", name, 0.0, 0.0, 1.0)),
+      : rms(std::make_shared<Parameter>("rms", 0.0, 0.0, 1.0)),
+        csd(std::make_shared<Parameter>("csd", 0.0, 0.0, 1.0)),
+        pitch(std::make_shared<Parameter>("pitch", 0.0, 0.0, 1.0)),
+        energy(std::make_shared<Parameter>("energy", 0.0, 0.0, 1.0)),
+        zcr(std::make_shared<Parameter>("zcr", 0.0, 0.0, 1.0)),
         spectralDiff(
-            std::make_shared<Parameter>("spectralDiff", name, 0.0, 0.0, 1.0)),
-        beat(std::make_shared<Parameter>("beat", name, 0.0, 0.0, 1.0)),
+            std::make_shared<Parameter>("spectralDiff", 0.0, 0.0, 1.0)),
+        beat(std::make_shared<Parameter>("beat", 0.0, 0.0, 1.0)),
         rmsOscillator(std::make_shared<ValueOscillator>(rms)),
         pitchOscillator(std::make_shared<ValueOscillator>(pitch)),
         csdOscillator(std::make_shared<ValueOscillator>(csd)),

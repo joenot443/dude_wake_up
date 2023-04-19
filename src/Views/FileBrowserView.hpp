@@ -9,6 +9,7 @@
 #define FileBrowserView_hpp
 #include "Parameter.hpp"
 #include "TileBrowserView.hpp"
+#include "ListBrowserView.hpp"
 #include "AvailableVideoSource.hpp"
 #include "ofMain.h"
 
@@ -47,7 +48,7 @@ public:
   
   FileBrowserView(FileBrowserType type) : type(type) {};
 
-  TileBrowserView tileBrowserView = TileBrowserView({});
+  ListBrowserView listBrowserView = ListBrowserView({});
 };
 
 #endif /* FileBrowserView_hpp */

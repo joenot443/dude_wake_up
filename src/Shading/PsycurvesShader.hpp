@@ -12,12 +12,13 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct PsycurvesSettings: public ShaderSettings {
   PsycurvesSettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     
   };
 };
@@ -27,7 +28,12 @@ struct PsycurvesShader: Shader {
   PsycurvesShader(PsycurvesSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("shaders/Psycurves");
+    #ifdef TESTING
+shader.load("shaders/Psycurves");
+#endif
+#ifdef RELEASE
+shader.load("shaders/Psycurves");
+#endif
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -50,6 +56,7 @@ struct PsycurvesShader: Shader {
   }
 
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     CommonViews::H3Title("Psycurves");
 
   }

@@ -19,6 +19,16 @@ namespace ed = ax::NodeEditor;
 
 class NodeLayoutView {
 public:
+  static NodeLayoutView *instance;
+  NodeLayoutView(){};
+  
+  static NodeLayoutView *getInstance() {
+    if (!instance) {
+      instance = new NodeLayoutView;
+    }
+    return instance;
+  }
+  
   void setup();
   void update();
   void draw();
@@ -34,10 +44,18 @@ public:
   // If it doesn't, create a new Node.
   std::shared_ptr<Node> nodeForShaderSourceId(std::string shaderSourceId, NodeType nodeType, std::string name, bool supportsAux);
   
+  // Returns the Node for the associated shaderSourceId, if it exists.
+  // nullptr if not.
+  std::shared_ptr<Node> nodeForShaderSourceId(std::string shaderSourceId);
+  
+  /// Returns the x,y coordinates of the Node for the passed ID. If not found, (0,0) is returned.
+  ImVec2 coordinatesForNode(std::string id);
+  
   void debug();
   
   // Layout
   void queryNewLinks();
+  void populateNodePositions();
   void drawNode(std::shared_ptr<Node> node);
   int nodeIdTicker = 1;
   
@@ -70,9 +88,7 @@ public:
   // Misc.
   bool firstFrame = true;
   bool shouldDelete = false;
-  
 
-  
   // Maps the id of the Shader or the VideoSource to the Node
   std::map<std::string, std::shared_ptr<Node>> idNodeMap;
   

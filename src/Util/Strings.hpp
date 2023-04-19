@@ -50,6 +50,15 @@ static std::vector<std::string> split_string (std::string s, std::string delimit
     return res;
 }
 
+static std::string truncateString(const std::string& str, const int x) {
+    if (str.length() <= x) {
+        return str;
+    } else {
+        return str.substr(0, x);
+    }
+}
+
+
 
 //template<class...Durations, class DurationIn>
 //std::tuple<Durations...> break_down_durations( DurationIn d ) {
@@ -66,6 +75,7 @@ static std::vector<std::string> split_string (std::string s, std::string delimit
 //  auto chronoDuration = std::chrono::duration<float>(duration);
 //  return break_down_durations<std::chrono::minutes, std::chrono::seconds>(chronoDuration);
 //}
+
 
 
 #endif Strings_h

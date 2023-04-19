@@ -11,12 +11,13 @@
 #include "ofMain.h"
 
 #include "ofxImGui.h"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct EmptySettings: public ShaderSettings {
   EmptySettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     
   };
 };
@@ -26,7 +27,12 @@ struct EmptyShader: Shader {
   EmptyShader(EmptySettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("shaders/empty");
+    #ifdef TESTING
+shader.load("shaders/empty");
+#endif
+#ifdef RELEASE
+shader.load("shaders/empty");
+#endif
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

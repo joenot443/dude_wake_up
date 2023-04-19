@@ -12,12 +12,13 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct VanGoghSettings: public ShaderSettings {
   VanGoghSettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     
   };
 };
@@ -27,7 +28,12 @@ struct VanGoghShader: Shader {
   VanGoghShader(VanGoghSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("shaders/VanGogh");
+    #ifdef TESTING
+shader.load("shaders/VanGogh");
+#endif
+#ifdef RELEASE
+shader.load("shaders/VanGogh");
+#endif
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

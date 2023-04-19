@@ -5,6 +5,7 @@
 #include "MidiService.hpp"
 #include "ModulationService.hpp"
 #include "OscillationService.hpp"
+#include "ConfigService.hpp"
 #include "ParameterService.hpp"
 #include "ShaderChainer.hpp"
 #include "ShaderChainerService.hpp"
@@ -26,6 +27,8 @@ void MainApp::setup() {
   if (isSetup)
     return;
   ofDisableArbTex();
+  ofEnableAlphaBlending();
+  ofDisableDepthTest();
   ModulationService::getService();
   MidiService::getService();
   AudioSourceService::getService();
@@ -77,15 +80,19 @@ void MainApp::drawMainStage() {
 void MainApp::exitStream(ofEventArgs &args) {}
 
 void MainApp::dragEvent(ofDragInfo dragInfo) {
+  // Check if the file is a JSON file
+  if (ofIsStringInString(dragInfo.files[0], ".json")) {
+    ConfigService::getService()->loadShaderChainerFile(dragInfo.files[0]);
+    return;
+  }
+  
   // Check if the file is a video file
   if (ofIsStringInString(dragInfo.files[0], ".mp4") ||
       ofIsStringInString(dragInfo.files[0], ".mov") ||
       ofIsStringInString(dragInfo.files[0], ".avi") ||
       ofIsStringInString(dragInfo.files[0], ".mkv") ||
       ofIsStringInString(dragInfo.files[0], ".flv") ||
-      ofIsStringInString(dragInfo.files[0], ".wmv") ||
-      ofIsStringInString(dragInfo.files[0], ".webm") ||
-      ofIsStringInString(dragInfo.files[0], ".gif")) {
+      ofIsStringInString(dragInfo.files[0], ".wmv")){
     // Create a new VideoSource for the file
     auto fileName = ofFilePath::getFileName(dragInfo.files[0]);
     
@@ -94,6 +101,7 @@ void MainApp::dragEvent(ofDragInfo dragInfo) {
     VideoSourceService::getService()->addVideoSource(videoSource, videoSource->id);
     ShaderChainerService::getService()->addNewShaderChainer(videoSource);
     mainStageView->nodeLayoutView.handleDroppedSource(videoSource);
+    return;
   }
   
   // Check if the file is a video file

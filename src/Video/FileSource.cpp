@@ -6,18 +6,16 @@
 //
 
 #include "FileSource.hpp"
+#include "NodeLayoutView.hpp"
 
 void FileSource::setup() {
   player.setPixelFormat(OF_PIXELS_RGB);
-  player.setVolume(0.0);
   player.load(path);
   auto wd = player.getWidth();
   player.play();
-  player.setVolume(0.0);
+  player.setVolume(0.5);
   frameTexture = std::make_shared<ofTexture>();
   frameTexture->allocate(1280, 720, GL_RGB);
-  frameBuffer.bind(GL_SAMPLER_2D_RECT);
-  frameBuffer.allocate(1280*720*4, GL_STATIC_COPY);
 }
 
 void FileSource::saveFrame() {
@@ -44,5 +42,13 @@ json FileSource::serialize() {
   j["id"] = id;
   j["sourceName"] = sourceName;
   j["videoSourceType"] = VideoSource_file;
+  j["x"] = NodeLayoutView::getInstance()->nodeForShaderSourceId(id)->position.x;
+  j["y"] = NodeLayoutView::getInstance()->nodeForShaderSourceId(id)->position.y;
+  
   return j;
+}
+
+void FileSource::drawSettings() {
+  player.setVolume(volume->value);
+  CommonViews::Slider("Volume", "##volume", volume);
 }

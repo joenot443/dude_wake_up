@@ -28,7 +28,7 @@ public:
   
   void tickParameters();
   
-  std::map<std::string, std::shared_ptr<Parameter>> parameterMap;
+  std::map<std::string, std::weak_ptr<Parameter>> parameterMap;
   
   std::shared_ptr<Parameter> selectedParameter;
   

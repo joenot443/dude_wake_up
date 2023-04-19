@@ -12,12 +12,13 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct RingsSettings: public ShaderSettings {
   RingsSettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     
   };
 };
@@ -27,7 +28,12 @@ struct RingsShader: Shader {
   RingsShader(RingsSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("shaders/Rings");
+    #ifdef TESTING
+shader.load("shaders/Rings");
+#endif
+#ifdef RELEASE
+shader.load("shaders/Rings");
+#endif
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -50,6 +56,7 @@ struct RingsShader: Shader {
   }
 
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     CommonViews::H3Title("Rings");
 
   }

@@ -12,6 +12,7 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
@@ -23,12 +24,12 @@ struct HalfToneSettings: public ShaderSettings {
   std::shared_ptr<Oscillator> radiusOscillator;
   
   HalfToneSettings(std::string shaderId, json j) :
-  speed(std::make_shared<Parameter>("speed", shaderId, 0., 0., 10.)),
-  radius(std::make_shared<Parameter>("radius", shaderId, 0., 0., 10.)),
+  speed(std::make_shared<Parameter>("speed", 0., 0., 10.)),
+  radius(std::make_shared<Parameter>("radius", 0., 0., 10.)),
   
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   radiusOscillator(std::make_shared<WaveformOscillator>(radius)),
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     
   };
 };
@@ -38,7 +39,7 @@ struct HalfToneShader: Shader {
   HalfToneShader(HalfToneSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("shaders/HalfTone");
+    
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -65,6 +66,7 @@ struct HalfToneShader: Shader {
   }
 
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     CommonViews::H3Title("HalfTone");
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     CommonViews::ShaderParameter(settings->radius, settings->radiusOscillator);

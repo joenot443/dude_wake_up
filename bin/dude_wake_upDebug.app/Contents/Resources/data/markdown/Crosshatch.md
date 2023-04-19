@@ -1,3 +1,0 @@
-# Crosshatch
-
-Information about Crosshatch

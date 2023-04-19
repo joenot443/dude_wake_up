@@ -12,12 +12,13 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct OctahedronSettings: public ShaderSettings {
   OctahedronSettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     
   };
 };
@@ -27,7 +28,12 @@ struct OctahedronShader: Shader {
   OctahedronShader(OctahedronSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("shaders/Octahedron");
+    #ifdef TESTING
+shader.load("shaders/Octahedron");
+#endif
+#ifdef RELEASE
+shader.load("shaders/Octahedron");
+#endif
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

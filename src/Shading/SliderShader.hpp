@@ -10,6 +10,7 @@
 
 #include "CommonViews.hpp"
 #include "Oscillator.hpp"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include "ShaderSettings.hpp"
 #include "ofMain.h"
@@ -23,10 +24,10 @@ struct SliderSettings : public ShaderSettings {
   std::shared_ptr<Oscillator> speedOscillator;
 
   SliderSettings(std::string shaderId, json j)
-      : speed(std::make_shared<Parameter>("Speed", shaderId, 0.5, 0.01, 2.0)),
-      vertical(std::make_shared<Parameter>("Vertical", shaderId, 0., 0., 1.)),
+      : speed(std::make_shared<Parameter>("Speed", 0.5, 0.01, 2.0)),
+      vertical(std::make_shared<Parameter>("Vertical", 0., 0., 1.)),
         speedOscillator(std::make_shared<WaveformOscillator>(speed)),
-        ShaderSettings(shaderId){
+        ShaderSettings(shaderId, j){
           parameters = { speed, vertical };
           oscillators = { speedOscillator };
         };
@@ -37,7 +38,15 @@ struct SliderShader : Shader {
   SliderShader(SliderSettings *settings)
       : settings(settings), Shader(settings){};
   ofShader shader;
-  void setup() override { shader.load("shaders/Slider"); }
+  void setup() override {
+#ifdef TESTING
+shader.load("shaders/Slider");
+#endif
+#ifdef RELEASE
+shader.load("shaders/Slider");
+#endif
+    
+  }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
     canvas->begin();
@@ -56,6 +65,7 @@ struct SliderShader : Shader {
   ShaderType type() override { return ShaderTypeSlider; }
 
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     CommonViews::H3Title("Slider");
 
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);

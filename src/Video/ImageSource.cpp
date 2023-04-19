@@ -6,7 +6,7 @@
 //
 
 #include "ImageSource.hpp"
-
+#include "NodeLayoutView.hpp"
 
 void ImageSource::setup() {
   ofImage image;
@@ -26,7 +26,14 @@ void ImageSource::saveFrame() {
 }
 
 json ImageSource::serialize() {
-  
+  json j;
+  j["path"] = path;
+  j["id"] = id;
+  j["sourceName"] = sourceName;
+  j["videoSourceType"] = VideoSource_file;
+  j["x"] = NodeLayoutView::getInstance()->nodeForShaderSourceId(id)->position.x;
+  j["y"] = NodeLayoutView::getInstance()->nodeForShaderSourceId(id)->position.y;
+  return j;
 }
 
 void ImageSource::load(json j) {

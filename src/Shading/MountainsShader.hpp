@@ -12,12 +12,13 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct MountainsSettings: public ShaderSettings {
   MountainsSettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     
   };
 };
@@ -27,7 +28,12 @@ struct MountainsShader: Shader {
   MountainsShader(MountainsSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("shaders/Mountains");
+    #ifdef TESTING
+shader.load("shaders/Mountains");
+#endif
+#ifdef RELEASE
+shader.load("shaders/Mountains");
+#endif
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

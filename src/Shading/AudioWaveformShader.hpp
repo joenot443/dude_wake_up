@@ -13,6 +13,7 @@
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
 #include "AudioSourceService.hpp"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
@@ -21,7 +22,7 @@ struct AudioWaveformSettings: public ShaderSettings {
   
   AudioWaveformSettings(std::string shaderId, json j) :
   shaderId(shaderId),
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     parameters = {};
     oscillators = {};
     load(j);
@@ -37,7 +38,12 @@ struct AudioWaveformShader: Shader {
 
   ofShader shader;
   void setup() override {
-    shader.load("shaders/AudioWaveform");
+    #ifdef TESTING
+shader.load("shaders/AudioWaveform");
+#endif
+#ifdef RELEASE
+shader.load("shaders/AudioWaveform");
+#endif
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -62,6 +68,7 @@ struct AudioWaveformShader: Shader {
   }
 
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     CommonViews::H3Title("AudioWaveform");
   }
 };

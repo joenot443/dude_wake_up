@@ -14,6 +14,7 @@
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
 #include "Oscillator.hpp"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
@@ -24,10 +25,10 @@ struct TileSettings : public ShaderSettings {
   std::shared_ptr<Oscillator> repeatOscillator;
 
   TileSettings(std::string shaderId, json j) :
-  repeat(std::make_shared<Parameter>("repeat", shaderId, 4.0, 1.0, 10.0)),
-  mirror(std::make_shared<Parameter>("mirror", shaderId, 0.0, 0.0, 1.0)),
+  repeat(std::make_shared<Parameter>("repeat", 4.0, 1.0, 10.0)),
+  mirror(std::make_shared<Parameter>("mirror", 0.0, 0.0, 1.0)),
   repeatOscillator(std::make_shared<WaveformOscillator>(repeat)),
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     parameters = {repeat, mirror};
     oscillators = {repeatOscillator};
     load(j);
@@ -40,7 +41,12 @@ struct TileShader : public Shader {
   TileShader(TileSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    shader.load("shaders/Tile");
+    #ifdef TESTING
+shader.load("shaders/Tile");
+#endif
+#ifdef RELEASE
+shader.load("shaders/Tile");
+#endif
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -60,6 +66,7 @@ struct TileShader : public Shader {
   }
 
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     CommonViews::ShaderCheckbox(settings->mirror);
     CommonViews::ShaderParameter(settings->repeat, settings->repeatOscillator);
   }

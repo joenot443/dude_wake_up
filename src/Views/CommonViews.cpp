@@ -75,6 +75,8 @@ void CommonViews::AudioParameterSelector(std::shared_ptr<Parameter> param) {
     if (ImGui::Button(param->driver->name.c_str())) {
       param->driver = NULL;
     }
+    ImGui::SliderFloat(formatString("Shift##%s", param->paramId.c_str()).c_str(), &param->shift->value, param->shift->min, param->shift->max);
+    ImGui::SliderFloat(formatString("Scale##%s", param->paramId.c_str()).c_str(), &param->scale->value, param->scale->min, param->scale->max);
     return;
   }
   
@@ -88,7 +90,7 @@ void CommonViews::AudioParameterSelector(std::shared_ptr<Parameter> param) {
     ImGui::Text("Select Audio Parameter to Follow");
     for (auto audioParam : analysisParameters) {
       if (ImGui::Selectable(audioParam->name.c_str())) {
-        param->driver = audioParam;
+        param->addDriver(audioParam);
       }
     }
     ImGui::EndPopup();
@@ -102,8 +104,8 @@ void CommonViews::ResolutionSelector(std::shared_ptr<VideoSource> source) {
   auto comboId = formatString("##Resolution%s", source->id.c_str());
   ImGui::BeginGroup();
   auto selectedIdx = source->settings.resolution->intValue;
+  ImGui::PushItemWidth(100.0);
   if (ImGui::BeginCombo(comboId.c_str(), resolutions[source->settings.resolution->intValue])) {
-    
     for (int i = 0; i < IM_ARRAYSIZE(resolutions); i++) {
       bool isSelected = (selectedIdx == i);
       if (ImGui::Selectable(resolutions[i], isSelected)) {
@@ -120,7 +122,6 @@ void CommonViews::ResolutionSelector(std::shared_ptr<VideoSource> source) {
 
 void CommonViews::ShaderCheckbox(std::shared_ptr<Parameter> param) {
   sSpacing();
-  H4Title(param->name);
   ImGui::Checkbox(param->name.c_str(), &param->boolValue);
   sSpacing();
 }
@@ -195,17 +196,9 @@ void CommonViews::OscillateButton(std::string id, std::shared_ptr<Oscillator> o,
   ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
   
   std::string buttonTitle;
-  if (o->enabled->boolValue) {
-    std::string rawTitle = ""
-    "##%s_osc_button";
-    buttonTitle = formatString(rawTitle, id.c_str()).c_str();
-  } else {
-    std::string rawTitle = ""
-    "##%s_osc_button";
-    buttonTitle = formatString(rawTitle, id.c_str()).c_str();
-  }
+  auto icon = o->enabled->boolValue ? ICON_MD_CLOSE : ICON_MD_SCATTER_PLOT;
   
-  if (ImGui::Button(buttonTitle.c_str(), ImVec2(16.0, 16.0))) {
+  if (IconButton(icon, formatString("##%s_osc_button", id.c_str()).c_str())) {
     if (ImGui::IsPopupOpen(p->oscPopupId().c_str())) {
       ImGui::CloseCurrentPopup();
     } else {

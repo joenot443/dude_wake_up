@@ -8,6 +8,7 @@
 #ifndef FractalShader_h
 #define FractalShader_h
 
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include "CommonViews.hpp"
  
@@ -20,9 +21,9 @@ struct FractalSettings: public ShaderSettings {
   std::shared_ptr<Oscillator> zoomOscillator;
 
   FractalSettings(std::string shaderId, json j) :
-  zoom(std::make_shared<Parameter>("zoom", shaderId, 1.0, 1.0, 5.0)),
+  zoom(std::make_shared<Parameter>("zoom", 1.0, 1.0, 5.0)),
   zoomOscillator(std::make_shared<WaveformOscillator>(zoom)),
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     parameters = {zoom};
     oscillators = {zoomOscillator};
     load(j);
@@ -53,10 +54,16 @@ public:
   };
 
   void setup() override {
-    shader.load("shaders/Fractal");
+    #ifdef TESTING
+shader.load("shaders/Fractal");
+#endif
+#ifdef RELEASE
+shader.load("shaders/Fractal");
+#endif
   };
 
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     CommonViews::ShaderParameter(settings->zoom, settings->zoomOscillator);
   };
 };

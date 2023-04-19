@@ -12,12 +12,13 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct RainbowRotatorSettings: public ShaderSettings {
   RainbowRotatorSettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     
   };
 };
@@ -27,7 +28,12 @@ struct RainbowRotatorShader: Shader {
   RainbowRotatorShader(RainbowRotatorSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("shaders/RainbowRotator");
+    #ifdef TESTING
+shader.load("shaders/RainbowRotator");
+#endif
+#ifdef RELEASE
+shader.load("shaders/RainbowRotator");
+#endif
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

@@ -18,11 +18,12 @@ value(value),
 min(0.0),
 max(1.0),
 intValue(static_cast<int>(value)),
-boolValue(value > 0.0001)
+boolValue(value > 0.0001),
+driver(NULL),
+shift(NULL),
+scale(NULL)
 {
   paramId = UUID::generateParamId(name);
-  std::shared_ptr<Parameter> sharedSelf = std::shared_ptr<Parameter>(this);
-  ParameterService::getService()->registerParameter(sharedSelf);
 };
 
 Parameter::Parameter(std::string name,
@@ -34,9 +35,19 @@ defaultValue(value),
 value(value),
 min(min),
 max(max),
-boolValue(value > 0.0001)
+boolValue(value > 0.0001),
+driver(NULL),
+shift(NULL),
+scale(NULL)
 {
   paramId = UUID::generateParamId(name);
-  std::shared_ptr<Parameter> sharedSelf = std::shared_ptr<Parameter>(this);
-  ParameterService::getService()->registerParameter(sharedSelf);
+  intValue = static_cast<int>(value);
+  boolValue = static_cast<bool>(value);
 };
+
+
+void Parameter::tick() {
+  if (driver != nullptr && paramId.length() > 5) {
+    setValue(driver->value * scale->value + shift->value);
+  }
+}

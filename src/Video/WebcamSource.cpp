@@ -6,28 +6,32 @@
 //
 
 #include "WebcamSource.hpp"
+#include "NodeLayoutView.hpp"
 
 void WebcamSource::setup() {
   auto devices = grabber.listDevices();
   
   grabber.setDeviceID(deviceID);
   grabber.setDesiredFrameRate(30);
-  grabber.setPixelFormat(OF_PIXELS_RGB);
-  grabber.setup(640, 480);
+  grabber.setPixelFormat(OF_PIXELS_RGBA);
+  grabber.setup(settings.width->value, settings.height->value);
   
   frameTexture = std::make_shared<ofTexture>();
-  frameTexture->allocate(640, 480, GL_RGB);
-  frameBuffer.bind(GL_SAMPLER_2D_RECT);
-  frameBuffer.allocate(640*480*4, GL_STATIC_COPY);
+  frameTexture->allocate(settings.width->value, settings.height->value, GL_RGBA);
 }
 
 void WebcamSource::saveFrame() {
+  // If our width or height has changed, setup again
+//  if (grabber.getWidth() != settings.width->value ||
+//      grabber.getHeight() != settings.height->value) {
+//    setup();
+//  }
+  if (!grabber.isInitialized()) {
+    return;
+  }
   grabber.update();
   if (grabber.isFrameNew()) {
-    grabber.getTexture().copyTo(frameBuffer);
-    
-    // Copy the grabber's texture to the frame texture
-    frameTexture->loadData(frameBuffer, GL_RGB, GL_UNSIGNED_BYTE);
+    frameTexture = std::make_shared<ofTexture>(grabber.getTexture());
   }
 }
 
@@ -48,5 +52,7 @@ json WebcamSource::serialize() {
   j["id"] = id;
   j["sourceName"] = sourceName;
   j["videoSourceType"] = VideoSource_webcam;
+  j["x"] = NodeLayoutView::getInstance()->nodeForShaderSourceId(id)->position.x;
+  j["y"] = NodeLayoutView::getInstance()->nodeForShaderSourceId(id)->position.y;
   return j;
 }

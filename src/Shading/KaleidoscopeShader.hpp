@@ -9,6 +9,7 @@
 #define KaleidoscopeShader_h
 
 #include <stdio.h>
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include "Parameter.hpp"
 #include "ofxImGui.h"
@@ -26,13 +27,13 @@ struct KaleidoscopeSettings : public ShaderSettings {
   std::shared_ptr<Oscillator> rotationOscillator;
 
   KaleidoscopeSettings(std::string shaderId, json j) :
-  sides(std::make_shared<Parameter>("sides", shaderId, 2.0,  1.0, 6.0)),
-  shift(std::make_shared<Parameter>("shift", shaderId, 0.5,  0.0, 1.0)),
-  rotation(std::make_shared<Parameter>("rotation", shaderId, 1.0,  1.0, TWO_PI)),
+  sides(std::make_shared<Parameter>("sides", 2.0,  1.0, 6.0)),
+  shift(std::make_shared<Parameter>("shift", 0.5,  0.0, 1.0)),
+  rotation(std::make_shared<Parameter>("rotation", 1.0,  1.0, TWO_PI)),
   sidesOscillator(std::make_shared<WaveformOscillator>(sides)),
   shiftOscillator(std::make_shared<WaveformOscillator>(shift)),
   rotationOscillator(std::make_shared<WaveformOscillator>(rotation)),
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     parameters = {sides, shift, rotation};
     oscillators = {sidesOscillator, shiftOscillator, rotationOscillator};
     load(j);
@@ -45,7 +46,12 @@ struct KaleidoscopeShader : public Shader {
   KaleidoscopeShader(KaleidoscopeSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    shader.load("shaders/kaleidoscope");
+    #ifdef TESTING
+shader.load("shaders/kaleidoscope");
+#endif
+#ifdef RELEASE
+shader.load("shaders/kaleidoscope");
+#endif
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -66,6 +72,7 @@ struct KaleidoscopeShader : public Shader {
   }
 
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     CommonViews::ShaderParameter(settings->shift, settings->shiftOscillator);
     CommonViews::ShaderParameter(settings->sides, settings->sidesOscillator);
   }

@@ -12,6 +12,7 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
@@ -20,9 +21,9 @@ struct GlitchSettings: public ShaderSettings {
   std::shared_ptr<Oscillator> amountOscillator;
   
   GlitchSettings(std::string shaderId, json j) :
-  amount(std::make_shared<Parameter>("amount", shaderId, 0.5, 0.0, 1.0)),
+  amount(std::make_shared<Parameter>("amount", 0.5, 0.0, 1.0)),
   amountOscillator(std::make_shared<WaveformOscillator>(amount)),
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     
   };
 };
@@ -32,7 +33,12 @@ struct GlitchShader: Shader {
   GlitchShader(GlitchSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("shaders/Glitch");
+    #ifdef TESTING
+shader.load("shaders/Glitch");
+#endif
+#ifdef RELEASE
+shader.load("shaders/Glitch");
+#endif
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -56,6 +62,7 @@ struct GlitchShader: Shader {
   }
 
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     CommonViews::H3Title("Glitch");
     CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
   }

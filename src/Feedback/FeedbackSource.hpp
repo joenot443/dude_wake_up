@@ -20,22 +20,26 @@ struct FeedbackSource {
   std::string name;
   std::string id;
   std::vector<ofFbo> frameBuffer = {};
-//  std::shared_ptr<Shader> consumingShader;
+
   int startIndex = 0;
   
   void setup() {
     frameBuffer.clear();
-    
+    log("Resizing FeedbackSource");
+
     // Add FrameBufferCount ofFbo to frameBuffer
     for (int i = 0; i < FrameBufferCount; i++) {
       ofFbo fbo;
       fbo.allocate(sourceSettings->width->intValue, sourceSettings->height->intValue, GL_RGBA);
       fbo.begin();
-      ofClear(0,0,0,255);
+      ofSetColor(0, 0, 0, 0);
+      ofDrawRectangle(0, 0, fbo.getWidth(), fbo.getHeight());
       fbo.end();
       frameBuffer.push_back(fbo);
     }
   }
+  
+  bool beingConsumed();
   
   void teardown() {
     frameBuffer.clear();
@@ -52,29 +56,27 @@ struct FeedbackSource {
   }
   
   ofTexture getFrame(int index) {
+    if (!beingConsumed()) {
+      log("Getting Feedback frame for a source not being consumed");
+    }
+    
     int destIndex = (startIndex + index) % FrameBufferCount;
     auto fbo = frameBuffer.at(destIndex);
     return fbo.getTexture();
   }
   
   void clearFrameBuffer() {
-    frameBuffer.clear();
-
-    for (int i = 0; i < FrameBufferCount; i++) {
-      auto canvas = ofFbo();
-      canvas.begin();
-      ofClear(0,0,0,255);
-      canvas.end();
-      frameBuffer.push_back(canvas);
-    }
+    setup();
   }
   
   void pushFrame(ofFbo fbo) {
+    // Return if we have no consumers
+    if (!beingConsumed()) return;
+    
     resizeIfNecessary();
     
     auto canvas = frameBuffer[startIndex];
     canvas.begin();
-    ofClear(0,0,0,255);
     fbo.draw(0, 0);
     canvas.end();
     
@@ -86,11 +88,11 @@ struct FeedbackSource {
   }
   
   void pushFrame(std::shared_ptr<ofTexture> frame) {
+    // Return if we have no consumers
+    if (!beingConsumed()) return;
     resizeIfNecessary();
-    
     auto canvas = frameBuffer[startIndex];
     canvas.begin();
-    ofClear(0,0,0,255);
     frame->draw(0, 0, frame->getWidth(), frame->getHeight());
     canvas.end();
     

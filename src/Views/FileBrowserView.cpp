@@ -73,11 +73,11 @@ void FileBrowserView::refresh() {
       tileItems.push_back(tileItem);
     }
   }
-  tileBrowserView.tileItems = tileItems;
+  listBrowserView.tileItems = tileItems;
 }
 
 void FileBrowserView::setup() {
-  currentDirectory = ConfigService::getService()->nottawaFolderFilePath();
+  currentDirectory = ofDirectory(ConfigService::getService()->nottawaFolderFilePath());
   if (type == FileBrowserType_JSON) { ConfigService::getService()->subscribeToConfigUpdates([this](){
     refresh();
     });
@@ -105,17 +105,36 @@ void FileBrowserView::draw() {
   ImGui::SameLine();
 
   // Add a button to open the file browser to choose the current directory
-  if (ImGui::Button("Choose Directory")) {
+  if (ImGui::Button("Open")) {
     ofFileDialogResult result = ofSystemLoadDialog("Choose Directory", true);
     if (result.bSuccess) {
       currentDirectory = ofDirectory(result.filePath);
       refresh();
     }
   }
+  ImGui::SameLine();
+  
+  if (ImGui::Button("Show in Finder")) {
+#if defined(_WIN32)
+    // Windows
+    std::string command = "explorer " + currentDirectory.getAbsolutePath();
+    system(command.c_str());
+#elif defined(__APPLE__)
+    // macOS
+    std::string command = "open " + currentDirectory.getAbsolutePath();
+    system(command.c_str());
+#else
+    ofLogError("ofApp::openFolder") << "This function is not implemented for this platform.";
+#endif
+  }
+  
+  ImGui::SameLine();
   
   if (ImGui::Button("Refresh")) {
     refresh();
   }
+  
 
-  tileBrowserView.draw();
+  
+  listBrowserView.draw();
 }

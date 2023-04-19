@@ -1,7 +1,7 @@
 #version 150
 
 uniform sampler2DRect tex;
-varying vec2 coord;
+uniform vec2 coord;
 out vec4 outputColor;
 
 void main()

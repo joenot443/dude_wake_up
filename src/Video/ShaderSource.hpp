@@ -4,10 +4,7 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
-#include "TissueShader.hpp"
-#include "TissueShader.hpp"
-#include "TissueShader.hpp"
-#include "TissueShader.hpp"
+#include "CircleShader.hpp"
 #include "TissueShader.hpp"
 #include "PsycurvesShader.hpp"
 #include "TriangleMapShader.hpp"
@@ -37,6 +34,7 @@
 using json = nlohmann::json;
 
 enum ShaderSourceType {
+  ShaderSource_Circle, //source enum,
   ShaderSource_Tissue, //source enum,
   ShaderSource_Psycurves,
   ShaderSource_TriangleMap,
@@ -60,6 +58,7 @@ enum ShaderSourceType {
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
 // Available ShaderSourceTypes
+  ShaderSource_Circle, // Available
   ShaderSource_Tissue, // Available
   ShaderSource_Psycurves,
   ShaderSource_TriangleMap,
@@ -82,6 +81,8 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
 // shaderTypeForShaderSourceType
+  case ShaderSource_Circle: //type enum
+    return ShaderTypeCircle;
   case ShaderSource_Tissue: //type enum
     return ShaderTypeTissue;
   case ShaderSource_Psycurves:
@@ -128,6 +129,8 @@ static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
 static std::string shaderSourceTypeName(ShaderSourceType nameType) {
   switch (nameType) {
   // Shader Names
+  case ShaderSource_Circle: // Name  
+    return "Circle"; // Circle
   case ShaderSource_Tissue: // Name  
     return "Tissue"; // Tissue
   case ShaderSource_Psycurves: // Name  
@@ -187,6 +190,12 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_Circle: { // Settings
+      auto settings = new CircleSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<CircleShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_Tissue: { // Settings
       auto settings = new TissueSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<TissueShader>(settings);
@@ -307,17 +316,15 @@ public:
 
   void setup() override {
     frameTexture = std::make_shared<ofTexture>();
-    frameTexture->allocate(settings.width->value, settings.height->value, GL_RGB);
-    frameBuffer.bind(GL_SAMPLER_2D_RECT);
-    frameBuffer.allocate(settings.width->value * settings.height->value * 4, GL_STATIC_COPY);
+    frameTexture->allocate(settings.width->value, settings.height->value, GL_RGBA);
 
     shader->setup();
-    fbo.allocate(settings.width->value, settings.height->value, GL_RGB);
+    fbo.allocate(settings.width->value, settings.height->value, GL_RGBA);
     fbo.begin();
     ofClear(0, 0, 0, 255);
     fbo.end();
 
-    canvas.allocate(settings.width->value, settings.height->value, GL_RGB);
+    canvas.allocate(settings.width->value, settings.height->value, GL_RGBA);
     canvas.begin();
     ofClear(0, 0, 0, 255);
     canvas.end();
@@ -341,14 +348,8 @@ public:
   }
 
   void draw();
-
-  json serialize() override {
-    json j;
-    j["videoSourceType"] = VideoSource_shader;
-    j["shaderSourceType"] = shaderSourceType;
-    j["id"] = id;
-    return j;
-  }
+  
+  json serialize();
 };
 
 #endif /* ShaderSource_hpp */

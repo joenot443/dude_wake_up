@@ -15,7 +15,7 @@
 #include "Oscillator.hpp"
 
 struct ValueOscillator: public Oscillator {
-  
+  std::shared_ptr<Parameter> shift;
   std::shared_ptr<Parameter> observed = nullptr;
   bool enabled = true;
   float value = 0.0;

@@ -19,6 +19,7 @@
 #include "TransformShader.hpp"
 #include "VideoSourceService.hpp"
 #include "json.hpp"
+#include "ofMain.h"
 #include <fstream>
 #include <ostream>
 
@@ -30,13 +31,12 @@ void ConfigService::subscribeToConfigUpdates(std::function<void()> callback) {
   configUpdateSubject.subscribe(callback);
 }
 
-ofDirectory ConfigService::nottawaFolderFilePath() {
-  auto path = ofFilePath::join(ofFilePath::getUserHomeDir(), "/nottawa");
-  return ofDirectory(path);
+std::string ConfigService::nottawaFolderFilePath() {
+  return ofFilePath::join(ofFilePath::getUserHomeDir(), "/nottawa");
 }
 
 std::string ConfigService::relativeFilePathWithinNottawaFolder(std::string filePath) {
-  return ofFilePath::join(nottawaFolderFilePath().getAbsolutePath(), filePath);
+  return ofFilePath::join(nottawaFolderFilePath(), filePath);
 }
 
 json jsonFromParameters(std::vector<Parameter *> parameters) {
@@ -44,7 +44,59 @@ json jsonFromParameters(std::vector<Parameter *> parameters) {
   for (auto p : parameters) {
     j[p->paramId.c_str()] = p->value;
   }
+  return j;
 }
+
+std::string ConfigService::shaderConfigFolderForType(ShaderType type) {
+  return ofFilePath::join(nottawaFolderFilePath(), formatString("/shaders/%s", shaderTypeName(type).c_str()));
+}
+
+std::vector<std::string> ConfigService::shaderConfigFoldersPaths() {
+  std::vector<ShaderType> types = AllShaderTypes();
+  std::vector<std::string> paths = {};
+  for (auto type : types) {
+    paths.push_back(shaderConfigFolderForType(type));
+  }
+  return paths;
+}
+
+json ConfigService::shaderConfigForPath(std::string path) {
+  std::fstream fileStream;
+  fileStream.open(path, std::ios::in);
+  json data;
+
+  if (fileStream.is_open()) {
+    try {
+      fileStream >> data;
+    } catch (int code) {
+      log("Could not load JSON file for %s.", path.c_str());
+      return 0;
+    }
+  }
+
+  return data;
+}
+
+std::vector<AvailableShaderConfig> ConfigService::availableConfigsForShaderType(ShaderType type) {
+  ofDirectory directory;
+  // Open the subdirectory for that ShaderType
+  directory.open(shaderConfigFolderForType(type));
+  directory.listDir();
+  directory.sort();
+  std::vector<AvailableShaderConfig> configs = {};
+  
+  for (int i = 0; i < directory.size(); i++) {
+    auto file = directory.getFile(i);
+    bool isDirectory = file.isDirectory();
+    if (isDirectory) continue;
+    
+    bool isJson = ofIsStringInString(file.getFileName(), ".json");
+    if (!isJson) continue;;
+    configs.push_back(AvailableShaderConfig(file.getFileName(), file.getAbsolutePath()));
+  }
+  return configs;
+}
+
 
 void ConfigService::saveShaderChainerConfigFile(
     std::shared_ptr<ShaderChainer> chainer, std::string name) {
@@ -54,10 +106,30 @@ void ConfigService::saveShaderChainerConfigFile(
   fileStream.open(filePath.c_str(), std::ios::trunc);
   json container;
 
-  container[ShaderChainersJsonKey] = chainer->serialize();
-  container[SourcesJsonKey] = chainer->source->serialize();
+  container[ShaderChainersJsonKey] = ShaderChainerService::getService()->config();
+  container[SourcesJsonKey] = VideoSourceService::getService()->config();
   container[ConfigTypeKey] = ConfigTypeAtomic;
+  container[NameJsonKey] = name;
 
+  if (fileStream.is_open()) {
+    std::cout << container.dump(4) << std::endl;
+    fileStream << container.dump(4);
+    fileStream.close();
+  } else {
+    log("Problem saving config.");
+  }
+  
+  notifyConfigUpdate();
+}
+
+void ConfigService::saveShaderConfigFile(Shader *shader,
+                                         std::string name) {
+  std::ofstream fileStream;
+  auto fileName = formatString("%s.json", name.c_str());
+  auto filePath = ofFilePath::join(shaderConfigFolderForType(shader->type()), fileName);
+  fileStream.open(filePath.c_str(), std::ios::trunc);
+  json container = shader->serialize();
+  
   if (fileStream.is_open()) {
     std::cout << container.dump(4) << std::endl;
     fileStream << container.dump(4);
@@ -84,6 +156,7 @@ bool ConfigService::validateShaderChainerJson(std::string path) {
 
     return true;
   }
+  return false;
 }
 
 AvailableShaderChainer
@@ -96,12 +169,13 @@ ConfigService::availableShaderChainerFromPath(std::string path) {
       fileStream >> data;
     } catch (int code) {
       log("Couldn't load available ShaderChainer for %s", path.c_str());
-      return;
+      return AvailableShaderChainer("", "");
     }
-    std::string chainerName = data["chainers"]["name"];
+    std::string chainerName = data[NameJsonKey];
 
     return AvailableShaderChainer(chainerName, path);
   }
+  return AvailableShaderChainer("", "");
 }
 
 void ConfigService::loadDefaultConfigFile() {
@@ -140,13 +214,35 @@ void ConfigService::saveConfigFile(std::string path) {
   }
 }
 
+void ConfigService::loadShaderChainerFile(std::string path) {
+  std::fstream fileStream;
+  fileStream.open(path, std::ios::in);
+  json data;
+
+  if (fileStream.is_open()) {
+    try {
+      fileStream >> data;
+    } catch (int code) {
+      log("Could not load chainer file for %s.", path.c_str());
+      return;
+    }
+  }
+  
+  if (data[SourcesJsonKey].is_object()) {
+    VideoSourceService::getService()->loadConfig(data[SourcesJsonKey]);
+  }
+
+  if (data[ShaderChainersJsonKey].is_object()) {
+    ShaderChainerService::getService()->loadConfig(data[ShaderChainersJsonKey]);
+  }
+}
+
 void ConfigService::loadConfigFile(std::string path) {
   std::fstream fileStream;
   fileStream.open(path, std::ios::in);
   json data;
 
   if (fileStream.is_open()) {
-
     try {
       fileStream >> data;
     } catch (int code) {
@@ -170,10 +266,12 @@ void ConfigService::loadConfigFile(std::string path) {
   }
 
   if (data[SourcesJsonKey].is_object()) {
+    VideoSourceService::getService()->clear();
     VideoSourceService::getService()->loadConfig(data[SourcesJsonKey]);
   }
 
   if (data[ShaderChainersJsonKey].is_object()) {
+    ShaderChainerService::getService()->clear();
     ShaderChainerService::getService()->loadConfig(data[ShaderChainersJsonKey]);
   }
 }

@@ -12,12 +12,13 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct RubiksSettings: public ShaderSettings {
   RubiksSettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     
   };
 };
@@ -27,7 +28,12 @@ struct RubiksShader: Shader {
   RubiksShader(RubiksSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("shaders/Rubiks");
+    #ifdef TESTING
+shader.load("shaders/Rubiks");
+#endif
+#ifdef RELEASE
+shader.load("shaders/Rubiks");
+#endif
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -51,7 +57,6 @@ struct RubiksShader: Shader {
 
   void drawSettings() override {
     CommonViews::H3Title("Rubiks");
-
   }
 };
 

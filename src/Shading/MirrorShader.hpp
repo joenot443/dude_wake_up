@@ -10,6 +10,7 @@
 
 #include "ofMain.h"
 
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include "WaveformOscillator.hpp"
 #include "ofxImGui.h"
@@ -33,18 +34,18 @@ struct MirrorSettings : public ShaderSettings {
 
   MirrorSettings(std::string shaderId, json j)
       : shaderId(shaderId),
-        lockXY(std::make_shared<Parameter>("lockXY", shaderId, 0.0, 1.0, 1.0)),
+        lockXY(std::make_shared<Parameter>("lockXY", 0.0, 1.0, 1.0)),
         xOffset(
-            std::make_shared<Parameter>("xOffset", shaderId, 0.15, 0.01, 1.0)),
+            std::make_shared<Parameter>("xOffset", 0.15, 0.01, 1.0)),
         yOffset(
-            std::make_shared<Parameter>("yOffset", shaderId, 0.15, 0.01, 1.0)),
-        mirrorXEnabled(std::make_shared<Parameter>("mirrorXEnabled", shaderId,
+            std::make_shared<Parameter>("yOffset", 0.15, 0.01, 1.0)),
+        mirrorXEnabled(std::make_shared<Parameter>("mirrorXEnabled",
                                                    1.0, 1.0, 0.0)),
-        mirrorYEnabled(std::make_shared<Parameter>("mirrorYEnabled", shaderId,
+        mirrorYEnabled(std::make_shared<Parameter>("mirrorYEnabled",
                                                    1.0, 1.0, 0.0)),
         xOffsetOscillator(std::make_shared<WaveformOscillator>(xOffset)),
         yOffsetOscillator(std::make_shared<WaveformOscillator>(yOffset)),
-        ShaderSettings(shaderId) {
+        ShaderSettings(shaderId, j) {
     parameters = {lockXY, xOffset, yOffset, mirrorXEnabled, mirrorYEnabled};
     oscillators = {xOffsetOscillator, yOffsetOscillator};
     load(j);
@@ -57,7 +58,15 @@ struct MirrorShader : Shader {
   MirrorShader(MirrorSettings *settings)
       : settings(settings), Shader(settings){};
 
-  void setup() override { shader.load("shaders/mirror"); }
+  void setup() override {
+#ifdef TESTING
+shader.load("shaders/mirror");
+#endif
+#ifdef RELEASE
+shader.load("shaders/mirror");
+#endif
+    
+  }
 
   ShaderType type() override { return ShaderTypeMirror; }
 
@@ -83,6 +92,7 @@ struct MirrorShader : Shader {
   }
 
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     // Mirror X
     CommonViews::ShaderCheckbox(settings->mirrorXEnabled);
 

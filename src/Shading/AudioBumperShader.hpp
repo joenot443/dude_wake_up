@@ -10,6 +10,7 @@
 
 #include "AudioSourceService.hpp"
 #include "CommonViews.hpp"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include "ShaderSettings.hpp"
 #include "ofMain.h"
@@ -18,7 +19,7 @@
 
 struct AudioBumperSettings : public ShaderSettings {
   AudioBumperSettings(std::string shaderId, json j)
-      : ShaderSettings(shaderId){
+      : ShaderSettings(shaderId, j){
 
         };
 };
@@ -28,7 +29,15 @@ struct AudioBumperShader : Shader {
   AudioBumperShader(AudioBumperSettings *settings)
       : settings(settings), Shader(settings){};
   ofShader shader;
-  void setup() override { shader.load("shaders/AudioBumper"); }
+  void setup() override {
+#ifdef TESTING
+shader.load("shaders/AudioBumper");
+#endif
+#ifdef RELEASE
+shader.load("shaders/AudioBumper");
+#endif
+    
+  }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
     auto source = AudioSourceService::getService()->selectedAudioSource;
@@ -52,7 +61,8 @@ struct AudioBumperShader : Shader {
 
   ShaderType type() override { return ShaderTypeAudioBumper; }
 
-  void drawSettings() override { CommonViews::H3Title("AudioBumper"); }
+  void drawSettings() override {
+    ShaderConfigSelectionView::draw(this); CommonViews::H3Title("AudioBumper"); }
 };
 
 #endif /* AudioBumperShader_hpp */

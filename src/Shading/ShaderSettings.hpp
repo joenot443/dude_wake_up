@@ -25,18 +25,23 @@ public:
   
   std::string shaderId;
   
-  ShaderSettings(std::string shaderId) :
-  shaderId(shaderId)
-  {}
+  // Layout
+  std::shared_ptr<Parameter> x;
+  std::shared_ptr<Parameter> y;
   
-  ShaderSettings(json j)  {
-    shaderId = j["shaderId"];
+  ShaderSettings(std::string shaderId, json j) :
+  shaderId(shaderId),
+  x(std::make_shared<Parameter>("x", 0.0, 0.0, 10000.0)),
+  y(std::make_shared<Parameter>("y", 0.0, 0.0, 10000.0))
+  {
     load(j);
   }
   
   // Returns all the parameters for the Shader including the ones on the Oscillators
   std::vector<std::shared_ptr<Parameter>> allParameters() {
     std::vector<std::shared_ptr<Parameter>> allParams;
+    allParams.push_back(x);
+    allParams.push_back(y);
     allParams.insert(allParams.end(), parameters.begin(), parameters.end());
     
     for (auto osc : oscillators) {

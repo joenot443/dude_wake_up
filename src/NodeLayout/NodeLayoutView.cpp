@@ -53,7 +53,7 @@ void NodeLayoutView::debug() {
   }
   
   for (auto s : shaders) {
-    auto id = idNodeMap[s->id()]->id;
+    auto id = idNodeMap[s->shaderId]->id;
     log("%s - %d", s->name().c_str(), id.Get());
   }
 }
@@ -86,7 +86,7 @@ void NodeLayoutView::draw() {
   
   // Loop over Shaders, creating a ShaderNode for each
   for (std::shared_ptr<Shader> shader : shaders) {
-    auto shaderNode = nodeForShaderSourceId(shader->id(), NodeTypeShader, shader->name(), shader->supportsAux());
+    auto shaderNode = nodeForShaderSourceId(shader->shaderId, NodeTypeShader, shader->name(), shader->supportsAux());
     shaderNode->shader = shader;
     drawNode(shaderNode);
     
@@ -115,6 +115,7 @@ void NodeLayoutView::draw() {
       link->type = LinkTypeSource;
       linksMap[sourceNodeFrontShaderLink.Get()] = link;
     }
+    nodes.push_back(sourceNode);
   }
   
   // Loop over ShaderNodes and draw links
@@ -129,7 +130,7 @@ void NodeLayoutView::draw() {
     // Create a Link from Shader -> Shader
     if (shaderNode->shader->next != nullptr) {
       std::shared_ptr<Node> nextNode =
-      idNodeMap[shaderNode->shader->next->id()];
+      idNodeMap[shaderNode->shader->next->shaderId];
       ed::LinkId nextShaderLinkId = uniqueId++;
       
       auto shaderLink =
@@ -142,7 +143,7 @@ void NodeLayoutView::draw() {
     // [Aux] Create a Link from Shader -> Shader
     if (shaderNode->shader->supportsAux() &&
         shaderNode->shader->aux != nullptr) {
-      std::shared_ptr<Node> auxNode = idNodeMap[shaderNode->shader->aux->id()];
+      std::shared_ptr<Node> auxNode = idNodeMap[shaderNode->shader->aux->shaderId];
       ed::LinkId nextShaderLinkId = uniqueId++;
       shaderNode->auxNode = auxNode;
       auto shaderLink =
@@ -183,7 +184,7 @@ void NodeLayoutView::draw() {
         case LinkTypeSource: {
           auto chainer =
           ShaderChainerService::getService()->shaderChainerForShaderId(
-                                                                       link->output->shader->id());
+                                                                       link->output->shader->shaderId);
           ShaderChainerService::getService()->breakShaderChainerFront(chainer);
           break;
         }
@@ -240,6 +241,9 @@ void NodeLayoutView::draw() {
   
   
   ed::EndCreate();
+  
+  populateNodePositions();
+  
   ed::End();
   
   drawNodeWindows();
@@ -302,12 +306,21 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node) {
     pinIdNodeMap[auxPinId.Get()] = node;
     pinIdPinMap[auxPinId.Get()] = auxPin;
   }
+  
+  
+  if (node->type == NodeTypeSource) {
+    CommonViews::Spacing(18);
+    if (CommonViews::IconButton(ICON_MD_SAVE, node->idName())) {
+      handleSaveNode(node);
+    }
+  }
+  
   ImGuiEx_NextColumn();
   
   // ----- SECOND COLUMN ------
   CommonViews::mSpacing();
   ImGui::PushFont(FontService::getService()->h3);
-  ImGui::Text("%s", node->name.c_str());
+  ImGui::Text("%s", truncateString(formatString("%s", node->name.c_str()), 10).c_str());
   ImGui::PopFont();
   CommonViews::mSpacing();
   ImGuiEx_NextColumn();
@@ -350,20 +363,39 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node) {
   ed::EndNode();
 }
 
+std::shared_ptr<Node> NodeLayoutView::nodeForShaderSourceId(std::string shaderSourceId) {
+  if (idNodeMap.count(shaderSourceId)) return idNodeMap[shaderSourceId];
+  return nullptr;
+}
+
 // Returns or creates a Node with the id of either the Shader or Source passed.
 std::shared_ptr<Node> NodeLayoutView::nodeForShaderSourceId(std::string shaderSourceId, NodeType nodeType, std::string name, bool supportsAux) {
   std::shared_ptr<Node> node = idNodeMap[shaderSourceId];
+  
+  // We already have a node, return it
   if (node != nullptr) {
     nodeIdNodeMap[node->id.Get()] = node;
     idNodeMap[shaderSourceId] = node;
     return node;
   }
+  
+  // We don't have a node, create one
   auto nodeId = nodeIdTicker++;
   auto outputId = nodeIdTicker++;
   auto inputId = nodeType == NodeTypeShader ? nodeIdTicker++ : NullId;
   auto auxId = supportsAux ? nodeIdTicker++ : NullId;
+  auto origin = ImVec2(0,0);
+  if (nodeType == NodeTypeSource) {
+    origin = VideoSourceService::getService()->videoSourceForId(shaderSourceId)->origin;
+  } else if (nodeType == NodeTypeShader) {
+    origin = ImVec2(ShaderChainerService::getService()->shaderForId(shaderSourceId)->settings->x->value, ShaderChainerService::getService()->shaderForId(shaderSourceId)->settings->y->value);
+  }
+  
   node = std::make_shared<Node>(nodeId, outputId, inputId, name, nodeType);
   node->auxId = auxId;
+   
+  // If we're placing the node from a JSON, we have an origin.
+  if (origin.x != 0.) { ed::SetNodePosition(nodeId, origin); }
   idNodeMap[shaderSourceId] = node;
   nodeIdNodeMap[nodeId] = node;
   return node;
@@ -373,6 +405,19 @@ void NodeLayoutView::keyReleased(int key) {
   if (key == OF_KEY_BACKSPACE) {
     shouldDelete = true;
   }
+}
+
+void NodeLayoutView::populateNodePositions() {
+  for (auto node : nodes) {
+    node->position = ed::GetNodePosition(node->id);
+  }
+}
+
+ImVec2 NodeLayoutView::coordinatesForNode(std::string id) {
+  if (idNodeMap.count(id)) {
+    return ed::GetNodePosition(idNodeMap[id]->id);
+  }
+  return ImVec2(0,0);
 }
 
 void NodeLayoutView::handleUnplacedNodes() {
@@ -413,28 +458,14 @@ void NodeLayoutView::selectChainer(std::shared_ptr<Node> node) {
     auto child = node->shader;
     while (child->parent != nullptr) {
       child = child->parent;
-      auto toSelect = idNodeMap[child->id()];
-      ed::SelectNode(idNodeMap[child->id()]->id, true);
+      auto toSelect = idNodeMap[child->shaderId];
+      ed::SelectNode(idNodeMap[child->shaderId]->id, true);
     }
     
     auto parent = node->shader;
     while (parent->next != nullptr) {
       parent = parent->next;
-      ed::SelectNode(idNodeMap[parent->id()]->id, true);
-    }
-  }
-  
-  if (node->type == NodeTypeSource) {
-    auto source = node->source;
-    if (source == nullptr) return;
-    
-    auto chainer = ShaderChainerService::getService()->shaderChainerForVideoSourceId(source->id);
-    if (chainer == nullptr) return;
-    auto front = chainer->front;
-    
-    while (front != nullptr) {
-      ed::SelectNode(idNodeMap[front->id()]->id, true);
-      front = front->next;
+      ed::SelectNode(idNodeMap[parent->shaderId]->id, true);
     }
   }
 }
@@ -477,8 +508,8 @@ void NodeLayoutView::handleDeleteNode(std::shared_ptr<Node> node) {
       ShaderChainerService::getService()->removeShader(node->shader);
       break;
     case NodeTypeSource:
+      ShaderChainerService::getService()->removeShaderChainersForVideoSourceId(node->source->id);
       VideoSourceService::getService()->removeVideoSource(node->source->id);
-      ShaderChainerService::getService()->removeShaderChainer(node->chainer->chainerId);
       break;
   }
   nodesToOpen.erase(node);
@@ -488,10 +519,13 @@ void NodeLayoutView::handleSaveNode(std::shared_ptr<Node> node) {
   std::shared_ptr<ShaderChainer> shaderChainer;
   
   if (node->type == NodeTypeShader) {
-    shaderChainer = ShaderChainerService::getService()->shaderChainerForShaderId(node->shader->id());
-  } else if (node->type == NodeTypeSource) {
-    shaderChainer = ShaderChainerService::getService()->shaderChainerForVideoSourceId(node->source->id);
+    shaderChainer = ShaderChainerService::getService()->shaderChainerForShaderId(node->shader->shaderId);
   }
+  
+  // TODO: Allow saving from a Source Node
+//  else if (node->type == NodeTypeSource) {
+//    shaderChainer = ShaderChainerService::getService()->shaderChainerForVideoSourceId(node->source->id);
+//  }
   
   if (shaderChainer == nullptr) return;
   
@@ -515,7 +549,7 @@ void NodeLayoutView::handleDropZone() {
       auto shader = ShaderChainerService::getService()->makeShader(shaderType);
       auto canvasPos = ed::ScreenToCanvas(ImVec2(ofGetMouseX(), ofGetMouseY()));
       nodeDropLocation = std::make_unique<ImVec2>(canvasPos);
-      unplacedNodeIds.push_back(shader->id());
+      unplacedNodeIds.push_back(shader->shaderId);
     }
     
     // VideoSource Drop Zone
@@ -572,10 +606,7 @@ void NodeLayoutView::handleDropZone() {
       AvailableShaderChainer availableShaderChainer =
       *(const AvailableShaderChainer *)payload->Data;
       
-      
-      auto newNodes = ShaderChainerService::getService()->loadAvailableShaderChainer(availableShaderChainer);
-      
-      unplacedNodeIds.insert(unplacedNodeIds.end(), newNodes.begin(), newNodes.end());
+      ConfigService::getService()->loadShaderChainerFile(*availableShaderChainer.path);
       
       auto canvasPos = ed::ScreenToCanvas(ImVec2(ofGetMouseX(), ofGetMouseY()));
       nodeDropLocation = std::make_unique<ImVec2>(canvasPos);
@@ -599,8 +630,6 @@ void NodeLayoutView::queryNewLinks() {
       std::shared_ptr<Node> sourceNode = pinIdNodeMap[outputPinId.Get()];
       std::shared_ptr<Node> destNode = pinIdNodeMap[inputPinId.Get()];
       
-      if (sourceNode == nullptr || destNode == nullptr || sourceNode == destNode)
-        return;
       
       // We have a Shader destination
       if (destNode->type == NodeTypeShader) {
@@ -611,10 +640,15 @@ void NodeLayoutView::queryNewLinks() {
             auto destPin = pinIdPinMap[inputPinId.Get()];
             // If our Dest Pin is an Aux Pin
             if (destPin->pinType == PinTypeAux) {
-              ShaderChainerService::getService()->setAuxShader(sourceNode->source, destNode->shader);
-            } else if (destPin->pinType == PinTypeInput) {
-              ShaderChainerService::getService()->addShaderToFront(
-                                                                   destNode->shader, sourceNode->chainer);
+              ShaderChainerService::getService()->
+              linkVideoSourceToShaderAux(sourceNode->source, destNode->shader);
+            }
+            // If our Dest Pin is a standard Input Pin
+            else if (destPin->pinType == PinTypeInput) {
+              // Check if
+              
+              ShaderChainerService::getService()->
+                linkVideoSourceToShader(sourceNode->source, destNode->shader);
             }
           }
           
@@ -628,7 +662,7 @@ void NodeLayoutView::queryNewLinks() {
               // Our Dest Pin is a regular Input
             } else if (destPin->pinType == PinTypeInput) {
               ShaderChainerService::getService()->linkShaderToNext(
-                                                                   destNode->shader, sourceNode->shader);
+                                                                   sourceNode->shader, destNode->shader);
             }
           }
         }
@@ -649,7 +683,7 @@ void NodeLayoutView::drawNodeWindows() {
   for (auto const &node : nodesToOpen) {
     auto pos = ed::GetNodePosition(node->id);
     pos = ed::CanvasToScreen(pos);
-    pos.x = pos.x + ed::GetNodeSize(node->id).x + 20;
+    pos.x = pos.x + ed::GetNodeSize(node->id).x / ed::GetCurrentZoom() + 20;
     ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowCollapsed(false);
     

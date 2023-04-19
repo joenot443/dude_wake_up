@@ -12,6 +12,7 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
@@ -20,9 +21,9 @@ struct FishEyeSettings: public ShaderSettings {
   std::shared_ptr<Oscillator> amountOscillator;
   
   FishEyeSettings(std::string shaderId, json j) :
-  amount(std::make_shared<Parameter>("amount", shaderId, 0.5, 0.0, 1000.0)),
+  amount(std::make_shared<Parameter>("amount", 0.5, 0.0, 1000.0)),
   amountOscillator(std::make_shared<WaveformOscillator>(amount)),
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     
   };
 };
@@ -32,7 +33,12 @@ struct FishEyeShader: Shader {
   FishEyeShader(FishEyeSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("shaders/FishEye");
+    #ifdef TESTING
+shader.load("shaders/FishEye");
+#endif
+#ifdef RELEASE
+shader.load("shaders/FishEye");
+#endif
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -56,6 +62,7 @@ struct FishEyeShader: Shader {
   }
 
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     CommonViews::H3Title("FishEye");
     CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
   }

@@ -13,6 +13,7 @@
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
 #include "Oscillator.hpp"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
@@ -23,9 +24,9 @@ struct CloudSettings : public ShaderSettings {
   std::shared_ptr<Oscillator> speedOscillator;
 
   CloudSettings(std::string shaderId, json j) :
-  speed(std::make_shared<Parameter>("speed", shaderId, 1.0, 0.0, 2.0)),
+  speed(std::make_shared<Parameter>("speed", 1.0, 0.0, 2.0)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     parameters = {speed};
     oscillators = {speedOscillator};
     load(j);
@@ -44,7 +45,12 @@ struct CloudShader: Shader {
   Shader(settings) {};
 
   void setup() override {
-    shader.load("shaders/clouds");
+    #ifdef TESTING
+shader.load("shaders/clouds");
+#endif
+#ifdef RELEASE
+shader.load("shaders/clouds");
+#endif
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -59,6 +65,7 @@ struct CloudShader: Shader {
   }
 
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     ImGui::Text("Clouds");
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
   }

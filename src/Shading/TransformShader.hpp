@@ -10,6 +10,7 @@
 
 #include "ofMain.h"
 
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include "ofxImGui.h"
 #include <stdio.h>
@@ -33,15 +34,15 @@ struct TransformSettings : public ShaderSettings {
   std::shared_ptr<Oscillator> autoRotateOscillator;
 
   TransformSettings(std::string shaderId, json j)
-      : xTranslate(std::make_shared<Parameter>("xTranslate", shaderId, 0.0,
+      : xTranslate(std::make_shared<Parameter>("xTranslate", 0.0,
                                                -1.0, 1.0)),
-        yTranslate(std::make_shared<Parameter>("yTranslate", shaderId, 0.0,
+        yTranslate(std::make_shared<Parameter>("yTranslate", 0.0,
                                                -1.0, 1.0)),
-        xScale(std::make_shared<Parameter>("xScale", shaderId, 1.0, 0.0, 2.0)),
-        yScale(std::make_shared<Parameter>("yScale", shaderId, 1.0, 0.0, 2.0)),
+        xScale(std::make_shared<Parameter>("xScale", 1.0, 0.0, 2.0)),
+        yScale(std::make_shared<Parameter>("yScale", 1.0, 0.0, 2.0)),
         rotate(
-            std::make_shared<Parameter>("rotate", shaderId, 0.0, 0.0, 360.0)),
-        autoRotate(std::make_shared<Parameter>("autoRotate", shaderId, 0.0, 0.0,
+            std::make_shared<Parameter>("rotate", 0.0, 0.0, 360.0)),
+        autoRotate(std::make_shared<Parameter>("autoRotate", 0.0, 0.0,
                                                2.0)),
         xTranslateOscillator(std::make_shared<WaveformOscillator>(xTranslate)),
         yTranslateOscillator(std::make_shared<WaveformOscillator>(yTranslate)),
@@ -49,7 +50,7 @@ struct TransformSettings : public ShaderSettings {
         yScaleOscillator(std::make_shared<WaveformOscillator>(yScale)),
         rotateOscillator(std::make_shared<WaveformOscillator>(rotate)),
         autoRotateOscillator(std::make_shared<WaveformOscillator>(autoRotate)),
-        ShaderSettings(shaderId) {
+        ShaderSettings(shaderId, j) {
     parameters = {xTranslate, yTranslate, xScale, yScale, rotate, autoRotate};
     oscillators = {xTranslateOscillator, yTranslateOscillator,
                    xScaleOscillator,     yScaleOscillator,
@@ -84,7 +85,7 @@ public:
       autoRotating = true;
     }
 
-    ofClear(0, 0, 0, 255);
+    ofClear(0, 0, 0, 0);
 
     ofSetRectMode(OF_RECTMODE_CENTER);
     ofPushMatrix();
@@ -107,6 +108,7 @@ public:
   }
 
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     // Translate X
     CommonViews::ShaderParameter(settings->xTranslate,
                                  settings->xTranslateOscillator);

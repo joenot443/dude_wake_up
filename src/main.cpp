@@ -10,6 +10,7 @@
 #include "FeedbackSourceService.hpp"
 #include "LibraryService.hpp"
 #include "VideoSourceService.hpp"
+#include "NodeLayoutView.hpp"
 #include "MarkdownService.hpp"
 #include "ShaderChainerService.hpp"
 #include "LayoutStateService.hpp"
@@ -17,6 +18,9 @@
 
 using json = nlohmann::json;
 
+#define RELEASE
+
+NodeLayoutView *NodeLayoutView::instance = 0;
 FontService *FontService::service = 0;
 ModulationService *ModulationService::service = 0;
 OscillationService *OscillationService::service = 0;
@@ -35,8 +39,18 @@ void setupDirectories() {
   ofSetDataPathRoot("../Resources/data/");
   auto homeDir = ofFilePath::getUserHomeDir();
   auto libraryPath = ofFilePath::join(homeDir, "/nottawa");
+  auto shadersPath = ofFilePath::join(libraryPath, "/shaders");
   if (!ofDirectory::doesDirectoryExist(libraryPath)) {
     ofDirectory::createDirectory(libraryPath);
+  }
+  if (!ofDirectory::doesDirectoryExist(shadersPath)) {
+    ofDirectory::createDirectory(shadersPath);
+  }
+  
+  for (auto dir : ConfigService::getService()->shaderConfigFoldersPaths()) {
+    if (!ofDirectory::doesDirectoryExist(dir)) {
+      ofDirectory::createDirectory(dir);
+    }
   }
 }
 

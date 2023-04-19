@@ -10,6 +10,7 @@
 #define ShaderType_h
 
 #include <string>
+#include <vector>
 
 enum ShaderType {
   ShaderTypeNone,         
@@ -53,6 +54,7 @@ enum ShaderType {
   ShaderTypeTissue,
   ShaderTypeHalfTone,
   ShaderTypeCrosshatch,
+  ShaderTypeCircle,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -89,9 +91,33 @@ static const ShaderType AvailableFilterShaderTypes[] = {
   ShaderTypeCrosshatch, // Generated
 };
 
+static std::vector<ShaderType> AllShaderTypes() {
+  std::vector<ShaderType> combinedShaderTypes = {};
+
+  for (const ShaderType& shader : AvailableBasicShaderTypes) {
+      combinedShaderTypes.push_back(shader);
+  }
+
+  for (const ShaderType& shader : AvailableMixShaderTypes) {
+      combinedShaderTypes.push_back(shader);
+  }
+
+  for (const ShaderType& shader : AvailableTransformShaderTypes) {
+      combinedShaderTypes.push_back(shader);
+  }
+
+  for (const ShaderType& shader : AvailableFilterShaderTypes) {
+      combinedShaderTypes.push_back(shader);
+  }
+
+  return combinedShaderTypes;
+}
+
 static std::string shaderTypeName(ShaderType type) {
   switch (type) {
     // Shader names
+    case ShaderTypeCircle:
+      return "Circle";
     case ShaderTypeCrosshatch:
       return "Crosshatch";
     case ShaderTypeHalfTone:
@@ -164,6 +190,16 @@ static std::string shaderTypeName(ShaderType type) {
       return "Tile";
     case ShaderTypeMix:
       return "Mix";
+    case ShaderTypePlasma:
+      return "Plasma";
+    case ShaderTypeFuji:
+      return "Fuji";
+    case ShaderTypeFractal:
+      return "Fractal";
+    case ShaderTypeClouds:
+      return "Clouds";
+    case ShaderTypeMelter:
+      return "Melter";
   }
 
   return "";

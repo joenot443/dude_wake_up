@@ -13,12 +13,13 @@
 #include "AudioSourceService.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct AudioMountainsSettings: public ShaderSettings {
   AudioMountainsSettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     
   };
 };
@@ -28,7 +29,12 @@ struct AudioMountainsShader: Shader {
   AudioMountainsShader(AudioMountainsSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("shaders/AudioMountains");
+    #ifdef TESTING
+shader.load("shaders/AudioMountains");
+#endif
+#ifdef RELEASE
+shader.load("shaders/AudioMountains");
+#endif
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {

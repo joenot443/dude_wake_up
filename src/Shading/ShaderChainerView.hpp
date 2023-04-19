@@ -9,6 +9,7 @@
 #define ShaderChainerView_hpp
 
 #include <stdio.h>
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include "AudioSettings.hpp"
 #include "ShaderType.hpp"

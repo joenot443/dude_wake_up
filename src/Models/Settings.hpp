@@ -23,7 +23,7 @@ public:
   std::vector<std::shared_ptr<Parameter>> parameters = {};
   
   // Returns all the parameters for the Shader including the ones on the Oscillators
-  std::vector<std::shared_ptr<Parameter>> allParameters() {
+  virtual std::vector<std::shared_ptr<Parameter>> allParameters() {
     std::vector<std::shared_ptr<Parameter>> allParams = {};
     allParams.insert(allParams.end(), parameters.begin(), parameters.end());
     return allParams;
@@ -42,7 +42,7 @@ public:
   
   std::shared_ptr<Parameter> findParameter(std::string name) {
     for (auto p : allParameters()) {
-      if (p->name == name) {
+      if (p != nullptr && p->name == name) {
         return p;
       }
     }

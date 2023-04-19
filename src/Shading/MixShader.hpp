@@ -15,6 +15,7 @@
 #include "ShaderChainerService.hpp"
 #include "VideoSourceService.hpp"
 #include "Oscillator.hpp"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
@@ -25,9 +26,9 @@ struct MixSettings : public ShaderSettings {
 
   MixSettings(std::string shaderId, json j) :
   mixSourceId(mixSourceId),
-  mix(std::make_shared<Parameter>("mix", shaderId, 0.5, 0.0, 1.0)),
+  mix(std::make_shared<Parameter>("mix", 0.5, 0.0, 1.0)),
   mixOscillator(std::make_shared<WaveformOscillator>(mix)),
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     parameters = {mix};
     oscillators = {mixOscillator};
     load(j);
@@ -41,20 +42,29 @@ struct MixShader : public Shader {
   MixShader(MixSettings *settings) : settings(settings), Shader(settings) {};
   
   void setup() override {
-    shader.load("shaders/Mix");
+    #ifdef TESTING
+shader.load("shaders/Mix");
+#endif
+#ifdef RELEASE
+shader.load("shaders/Mix");
+#endif
   }
   
   void shade(ofFbo *frame, ofFbo *canvas) override {
+    ofEnableAlphaBlending();
     canvas->begin();
     shader.begin();
     
     if (auxConnected()) {
       ofTexture tex2 = auxTexture();
       shader.setUniformTexture("tex2", tex2, 8);
+    } else {
+      ofSetColor(0, 0, 0, 0);
+      ofDrawRectangle(0, 0, canvas->getWidth(), canvas->getHeight());
     }
     
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
-    shader.setUniform1f("tex2_mix", settings->mix->value);
+    shader.setUniform1f("tex2_mix", 1.0f - settings->mix->value);
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     
     frame->draw(0, 0);
@@ -67,6 +77,7 @@ struct MixShader : public Shader {
   }
   
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     CommonViews::ShaderParameter(settings->mix, settings->mixOscillator);
   }
   

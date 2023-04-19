@@ -44,10 +44,11 @@ struct Shader {
   virtual void shade(ofFbo *frame, ofFbo *canvas){};
   virtual void clear(){};
   virtual bool supportsAux() { return shaderTypeSupportsAux(type()); }
-  virtual bool auxConnected() { return aux != nullptr || sourceAux != nullptr; }
+  virtual bool auxConnected() {
+    return aux != nullptr || sourceAux != nullptr;
+  }
   
   std::shared_ptr<FeedbackSource> feedbackDestination();
-  virtual std::string id() { return settings->shaderId; };
   virtual std::string name() { return shaderTypeName(type()); };
   virtual bool enabled() { return true; };
   virtual bool hasFrameBuffer() { return false; };
@@ -59,14 +60,13 @@ struct Shader {
 
   virtual void drawSettings(){};
 
-  virtual std::string idName() { return formatString("%s##%s", name().c_str(), id().c_str()); }
+  virtual std::string idName() { return formatString("%s##%s", name().c_str(), shaderId.c_str()); }
 
-  json serialize() {
-    json j = settings->serialize();
-    j["shaderType"] = type();
-    j["shaderId"] = settings->shaderId;
-    return j;
-  };
+  json serialize();
+  
+  // Called after all the Shaders have been created.
+  // Used to populate aux.
+  void load(json j);
 };
 
 #endif /* Shader_h */

@@ -8,6 +8,8 @@ out vec4 outputColor;
 uniform float blend;
 uniform int fbType;
 
+uniform float scale;
+uniform vec2 translate;
 uniform int lumaEnabled;
 uniform float lumaKey;
 uniform float lumaThresh;
@@ -44,8 +46,18 @@ vec3 hsb2rgb( in vec3 c ){
 vec4 mixStandard(in vec4 mainColor,
                  in vec4 fbColor,
                  in float blend) {
+//  // If either of our colors are close to 0 alpha, return the other.
+  if (fbColor.a < 0.5) {
+    return vec4(mainColor.rgb, 1.0);
+  }
+  
+  if (mainColor.a < 0.5) {
+    return vec4(fbColor.rgb, 1.0);
+  }
+  
   return mix(mainColor, fbColor, blend);
 }
+      
 
 vec4 mixLumaKey(in vec4 mainColor,
                 in vec4 fbColor,
@@ -72,10 +84,24 @@ vec4 mixLumaKey(in vec4 mainColor,
 
 void main()
 {
+  vec2 uv = coord;
+  // Scale if necessary
+  if (abs(1.0 - scale) > 0.01) {
+    vec2 center = vec2(0.5, 0.5); // Center of the texture
+    
+    // Translate the UV coordinates to center the texture
+    uv -= center;
+    
+    // Scale the UV coordinates
+    uv *= scale;
+    
+    // Translate the UV coordinates back to their original position
+    uv += center;
+  }
+  
   vec4 mainColor = texture(mainTexture, coord);
-  vec4 fbColor = texture(fbTexture, coord);
+  vec4 fbColor = texture(fbTexture, uv - translate);
   vec4 outColor = vec4(1.0, 0.0, 1.0, 1.0);
-
   
   if (lumaEnabled == 1) {
     outColor = mixLumaKey(mainColor, fbColor, blend, lumaKey, lumaThresh);

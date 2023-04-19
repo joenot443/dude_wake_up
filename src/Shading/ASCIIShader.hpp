@@ -11,6 +11,7 @@
 #include "ofMain.h"
 
 #include "ofxImGui.h"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
@@ -20,8 +21,8 @@ struct AsciiSettings: public ShaderSettings  {
   std::shared_ptr<Parameter> enabled;
   
   AsciiSettings(std::string shaderId, json j) :
-  enabled(std::make_shared<Parameter>("enabled", shaderId, 0.0,  1.0, 0.0)),
-  ShaderSettings(shaderId)
+  enabled(std::make_shared<Parameter>("enabled", 0.0,  1.0, 0.0)),
+  ShaderSettings(shaderId, j)
   {
     parameters = {enabled};
     oscillators = {};
@@ -36,7 +37,12 @@ struct AsciiShader: Shader {
   AsciiShader(AsciiSettings *settings) : settings(settings), Shader(settings) {};
   
   void setup() override {
-    shader.load("shaders/Ascii");
+    #ifdef TESTING
+shader.load("shaders/Ascii");
+#endif
+#ifdef RELEASE
+shader.load("shaders/Ascii");
+#endif
   }
   
   ShaderType type() override {
@@ -59,6 +65,7 @@ struct AsciiShader: Shader {
   }
   
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
   }
 };
 

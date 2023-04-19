@@ -9,6 +9,7 @@
 #define SobelShader_hpp
 
 #include "CommonViews.hpp"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include "ShaderSettings.hpp"
 #include "ofMain.h"
@@ -17,7 +18,7 @@
 
 struct SobelSettings : public ShaderSettings {
   SobelSettings(std::string shaderId, json j)
-      : ShaderSettings(shaderId){
+      : ShaderSettings(shaderId, j){
 
         };
 };
@@ -26,7 +27,14 @@ struct SobelShader : Shader {
   SobelSettings *settings;
   SobelShader(SobelSettings *settings) : settings(settings), Shader(settings){};
   ofShader shader;
-  void setup() override { shader.load("shaders/Sobel"); }
+  void setup() override {
+#ifdef TESTING
+shader.load("shaders/Sobel");
+#endif
+#ifdef RELEASE
+shader.load("shaders/Sobel");
+#endif    
+  }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
     canvas->begin();
@@ -43,7 +51,8 @@ struct SobelShader : Shader {
 
   ShaderType type() override { return ShaderTypeSobel; }
 
-  void drawSettings() override { CommonViews::H3Title("Sobel"); }
+  void drawSettings() override {
+    ShaderConfigSelectionView::draw(this); CommonViews::H3Title("Sobel"); }
 };
 
 #endif /* SobelShader_hpp */

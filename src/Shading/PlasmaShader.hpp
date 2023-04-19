@@ -9,6 +9,7 @@
 #define PlasmaShader_h
 
 #include <stdio.h>
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include "CommonViews.hpp"
 #include "ShaderSettings.hpp"
@@ -26,12 +27,12 @@ struct PlasmaSettings: public ShaderSettings {
   std::shared_ptr<Oscillator> colorOscillator;
 
   PlasmaSettings(std::string shaderId, json j) :
-  enabled(std::make_shared<Parameter>("enabled", shaderId, 0.0,  1.0, 0.0)),
-  speed(std::make_shared<Parameter>("speed", shaderId, 1.0,  0.0, 5.0)),
-  color(std::make_shared<Parameter>("color", shaderId, 1.0,  0.0, 20.0)),
+  enabled(std::make_shared<Parameter>("enabled", 0.0,  1.0, 0.0)),
+  speed(std::make_shared<Parameter>("speed", 1.0,  0.0, 5.0)),
+  color(std::make_shared<Parameter>("color", 1.0,  0.0, 20.0)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   colorOscillator(std::make_shared<WaveformOscillator>(color)),
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     parameters = {enabled, speed, color};
     oscillators = {speedOscillator, colorOscillator};
     load(j);
@@ -65,10 +66,16 @@ public:
   };
 
   void setup() override {
-    shader.load("shaders/plasma");
+    #ifdef TESTING
+shader.load("shaders/plasma");
+#endif
+#ifdef RELEASE
+shader.load("shaders/plasma");
+#endif
   };
 
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     CommonViews::ShaderParameter(settings->color, settings->colorOscillator);
   };

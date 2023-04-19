@@ -12,12 +12,13 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct TriangleMapSettings: public ShaderSettings {
   TriangleMapSettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     
   };
 };
@@ -27,7 +28,12 @@ struct TriangleMapShader: Shader {
   TriangleMapShader(TriangleMapSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("shaders/TriangleMap");
+    #ifdef TESTING
+shader.load("shaders/TriangleMap");
+#endif
+#ifdef RELEASE
+shader.load("shaders/TriangleMap");
+#endif
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -51,7 +57,6 @@ struct TriangleMapShader: Shader {
 
   void drawSettings() override {
     CommonViews::H3Title("TriangleMap");
-
   }
 };
 

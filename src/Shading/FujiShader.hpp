@@ -8,6 +8,7 @@
 #ifndef FujiShader_h
 #define FujiShader_h
 
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include "CommonViews.hpp"
  
@@ -34,18 +35,18 @@ struct FujiSettings: public ShaderSettings {
   std::shared_ptr<Oscillator> speedOscillator;
 
   FujiSettings(std::string shaderId, json j) :
-  enabled(std::make_shared<Parameter>("enabled", shaderId, 0.0,  1.0, 0.0)),
-  cloud1Y(std::make_shared<Parameter>("cloud1Y", shaderId, 0.0,  -0.5, 0.5)),
-  cloud1X(std::make_shared<Parameter>("cloud1X", shaderId, 0.0,  0.0, 1.0)),
-  cloud2Y(std::make_shared<Parameter>("cloud2Y", shaderId, 0.0,  -0.5, 0.5)),
-  cloud2X(std::make_shared<Parameter>("cloud2X", shaderId, 0.0,  0.0, 1.0)),
-  speed(std::make_shared<Parameter>("speed", shaderId, 1.0, 0.0, 2.0)),
+  enabled(std::make_shared<Parameter>("enabled", 0.0,  1.0, 0.0)),
+  cloud1Y(std::make_shared<Parameter>("cloud1Y", 0.0,  -0.5, 0.5)),
+  cloud1X(std::make_shared<Parameter>("cloud1X", 0.0,  0.0, 1.0)),
+  cloud2Y(std::make_shared<Parameter>("cloud2Y", 0.0,  -0.5, 0.5)),
+  cloud2X(std::make_shared<Parameter>("cloud2X", 0.0,  0.0, 1.0)),
+  speed(std::make_shared<Parameter>("speed", 1.0, 0.0, 2.0)),
   cloud1XOscillator(std::make_shared<WaveformOscillator>(cloud1X)),
   cloud1YOscillator(std::make_shared<WaveformOscillator>(cloud1Y)),
   cloud2XOscillator(std::make_shared<WaveformOscillator>(cloud2X)),
   cloud2YOscillator(std::make_shared<WaveformOscillator>(cloud2Y)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     parameters = {enabled, cloud1Y, cloud1X, cloud2Y, cloud2X};
     oscillators = {cloud1XOscillator, cloud1YOscillator, cloud2XOscillator, cloud2YOscillator};
     load(j);
@@ -77,10 +78,16 @@ public:
   };
 
   void setup() override {
-    shader.load("shaders/fuji");
+    #ifdef TESTING
+shader.load("shaders/fuji");
+#endif
+#ifdef RELEASE
+shader.load("shaders/fuji");
+#endif
   };
 
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     CommonViews::ShaderParameter(settings->cloud1X, settings->cloud1XOscillator);
     CommonViews::ShaderParameter(settings->cloud1Y, settings->cloud1YOscillator);
     CommonViews::ShaderParameter(settings->cloud2X, settings->cloud2XOscillator);

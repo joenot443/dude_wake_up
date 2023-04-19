@@ -12,6 +12,7 @@
 #include "FeedbackSource.hpp"
 #include "FileBrowserView.hpp"
 #include "HSBShader.hpp"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include "UUID.hpp"
 #include "VideoSource.hpp"

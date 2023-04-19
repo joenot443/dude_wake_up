@@ -10,6 +10,7 @@
 
 #include "FeedbackSource.hpp"
 #include "Settings.hpp"
+#include "UUID.hpp"
 #include "VideoSourceSettings.hpp"
 #include "json.hpp"
 #include <stdio.h>
@@ -22,7 +23,8 @@ enum VideoSourceType {
   VideoSource_chainer,
   VideoSource_image,
   VideoSource_shader,
-  VideoSource_text
+  VideoSource_text,
+  VideoSource_empty
 };
 
 
@@ -35,11 +37,16 @@ public:
   VideoSourceSettings settings;
   VideoSourceType type;
   std::shared_ptr<ofTexture> frameTexture;
-  ofBufferObject frameBuffer;
   std::shared_ptr<FeedbackSource> feedbackDestination;
+  
+  // Layout
+  ImVec2 origin;
+  
+  // Dummy Source
+  VideoSource() : id(UUID::generateUUID()), sourceName(UUID::generateUUID()), settings(id, 0), origin(ImVec2(0.,0.)) {};
 
   VideoSource(std::string id, std::string name, VideoSourceType type)
-      : id(id), sourceName(name), type(type), settings(id, 0) {};
+      : id(id), sourceName(name), type(type), settings(id, 0), origin(ImVec2(0.,0.)) {};
 
   virtual void setup(){};
   void update() {
@@ -49,7 +56,7 @@ public:
   }
   virtual void saveFrame(){};
   virtual void drawSettings(){};
-  virtual json serialize(){};
+  virtual json serialize(){ return 0; };
   virtual void load(json j){};
 
   void saveFeedbackFrame() {

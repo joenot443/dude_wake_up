@@ -9,6 +9,7 @@
 #define DitherShader_hpp
 
 #include "CommonViews.hpp"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include "ShaderSettings.hpp"
 #include "ofMain.h"
@@ -21,9 +22,9 @@ struct DitherSettings : public ShaderSettings {
   std::shared_ptr<Oscillator> shapeOscillator;
 
   DitherSettings(std::string shaderId, json j)
-      : shape(std::make_shared<Parameter>("shape", shaderId, 0.0, 0.0, 1.0)),
+      : shape(std::make_shared<Parameter>("shape", 0.0, 0.0, 1.0)),
         shapeOscillator(std::make_shared<WaveformOscillator>(shape)),
-        ShaderSettings(shaderId) {
+        ShaderSettings(shaderId, j) {
     parameters = {shape};
     oscillators = {shapeOscillator};
   };
@@ -34,7 +35,15 @@ struct DitherShader : Shader {
   DitherShader(DitherSettings *settings)
       : settings(settings), Shader(settings){};
   ofShader shader;
-  void setup() override { shader.load("shaders/Dither"); }
+  void setup() override {
+#ifdef TESTING
+shader.load("shaders/Dither");
+#endif
+#ifdef RELEASE
+shader.load("shaders/Dither");
+#endif
+    
+  }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
     canvas->begin();
@@ -53,6 +62,7 @@ struct DitherShader : Shader {
   ShaderType type() override { return ShaderTypeDither; }
 
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     CommonViews::ShaderParameter(settings->shape, settings->shapeOscillator);
   }
 };

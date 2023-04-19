@@ -30,6 +30,7 @@ private:
   ofTrueTypeFont font;
   std::string fontPath;
   std::shared_ptr<DisplayText> displayText;
+  std::string lastText;
   float xPos = 0.0;
   float yPos = 0.0;
 };

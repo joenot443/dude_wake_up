@@ -9,6 +9,7 @@
 #include "ofxImGui.h"
 #include "DisplayText.hpp"
 #include "ImGuiExtensions.hpp"
+#include "CommonViews.hpp"
 #include "TextEditorView.hpp"
 #include "dear_widgets.h"
 #include "ConfigService.hpp"
@@ -62,6 +63,25 @@ void TextEditorView::draw() {
   ImGui::SameLine();
   drawPositionSlider();
   
+  ImGui::Text("X Oscillator");
+  ImGui::SameLine();
+  CommonViews::OscillateButton("##xTextOsc", displayText->xPositionOscillator, displayText->xPosition);
+  if (displayText->xPositionOscillator->enabled->boolValue) {
+    ImGui::SameLine();
+    CommonViews::HSpacing(5);
+    CommonViews::OscillatorWindow(displayText->xPositionOscillator, displayText->xPosition);
+    ImGui::NewLine();
+  }
+  
+  ImGui::Text("Y Oscillator");
+  ImGui::SameLine();
+  CommonViews::OscillateButton("##yTextOsc", displayText->yPositionOscillator, displayText->yPosition);
+  if (displayText->yPositionOscillator->enabled->boolValue) {
+    ImGui::SameLine();
+    CommonViews::HSpacing(5);
+    CommonViews::OscillatorWindow(displayText->yPositionOscillator, displayText->yPosition);
+  }
+  
   // Font selection
   CommonViews::sSpacing();
   ImGui::Text("Fonts");
@@ -83,5 +103,5 @@ void TextEditorView::draw() {
 
 
 void TextEditorView::drawPositionSlider() {
-  ImGuiExtensions::Slider2DFloat("", &displayText->xPosition, &displayText->yPosition, 0., 1., 0., 1., 0.5);
+  ImGuiExtensions::Slider2DFloat("", &displayText->xPosition->value, &displayText->yPosition->value, 0., 1., 0., 1., 0.5);
 }

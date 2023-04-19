@@ -14,13 +14,15 @@
 class FileSource : public VideoSource {
   std::string path;
   ofVideoPlayer player;
+  std::shared_ptr<Parameter> volume;
   
 public:
-  FileSource(std::string id, std::string name, std::string path) : VideoSource(id, name, VideoSource_file), path(path) {};
+  FileSource(std::string id, std::string name, std::string path) : VideoSource(id, name, VideoSource_file), path(path), volume(std::make_shared<Parameter>("volume", 0.5, 0.0, 1.0)) {};
   void setup();
   void saveFrame();
   json serialize() override;
   void load(json j) override;
+  void drawSettings() override;
 };
 
 #endif

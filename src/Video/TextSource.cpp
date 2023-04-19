@@ -22,21 +22,36 @@ void TextSource::saveFrame() {
 
   fbo.begin();
   
-  // Changed font size
-  if (font.getSize() != displayText->fontSize || fontPath != displayText->font.path) {
+  bool shouldClear = false;
+  
+  // Clear if we've changed font size
+  if (font.getSize() != displayText->fontSize
+      || fontPath != displayText->font.path) {
     fontPath = displayText->font.path;
     font.load(displayText->font.path, displayText->fontSize);
-    ofClear(0, 255.);
+    shouldClear = true;
+  }
+  
+  // Clear if our text has changed
+  if (displayText->text != lastText) {
+    lastText = displayText->text;
+    shouldClear = true;
   }
   
   // Clear if we've moved
-  if (xPos != settings.width->intValue * displayText->xPosition->value ||
+  if (
+      xPos != settings.width->intValue * displayText->xPosition->value ||
       yPos != settings.height->intValue * (displayText->yPosition->value)) {
     xPos = settings.width->intValue * displayText->xPosition->value;
     yPos = settings.height->intValue * displayText->yPosition->value;
+    shouldClear = true;
+  }
+  
+  if (shouldClear) {
     ofClear(0, 255.);
   } else {
-    ofClear(0.0, 0.0);
+    ofSetColor(0, 0, 0, 0);
+    ofDrawRectangle(0, 0, fbo.getWidth(), fbo.getHeight());
   }
 
   // Draw the text
@@ -50,12 +65,28 @@ void TextSource::saveFrame() {
 
 json TextSource::serialize() {
   json j;
-  // Serialize TextSource properties
+  j["videoSourceType"] = VideoSource_text;
+  j["id"] = id;
+  j["fontPath"] = displayText->font.path;
+  j["fontName"] = displayText->font.name;
+  j["color"] = displayText->color.getHex();
+  j["sourceName"] = sourceName;
+  j["x"] = displayText->xPosition->value;
+  j["y"] = displayText->yPosition->value;
+  j["fontSize"] = displayText->fontSize;
   return j;
 }
 
 void TextSource::load(json j) {
-  // Load TextSource properties from JSON
+  displayText->font.path = j["fontPath"];
+  displayText->font.name = j["fontName"];
+
+  displayText->color = ofColor::fromHex(j["color"]);
+
+  displayText->xPosition->value = j["x"];
+  displayText->yPosition->value = j["y"];
+
+  displayText->fontSize = j["fontSize"];
 }
 
 void TextSource::drawSettings() {

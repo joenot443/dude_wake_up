@@ -11,12 +11,13 @@ void main()
 {
   vec4 tex_color = texture(tex, coord);
   vec4 tex2_color = texture(tex2, coord);
-  if (tex2_color.w == 0.0) {
-    outputColor = tex_color;
+  
+  if (tex2_color.a < 0.1) {
+    outputColor = vec4(tex_color.rgb, 1.0);
+    return;
+  } else if (tex_color.a < 0.1) {
+    outputColor = vec4(tex2_color.rgb, 1.0);
     return;
   }
   outputColor = mix(tex2_color, tex_color, tex2_mix);
 }
-
-
-

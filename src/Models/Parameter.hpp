@@ -26,6 +26,8 @@ struct Parameter {
   bool boolValue = false;
   // Another Parameter which is driving this one's value
   std::shared_ptr<Parameter> driver = nullptr;
+  std::shared_ptr<Parameter> shift = nullptr;
+  std::shared_ptr<Parameter> scale = nullptr;
 
   float min = 0.0;
   float max = 1.0;
@@ -38,8 +40,18 @@ struct Parameter {
     j["value"] = value;
     return j;
   }
+  
+  void addDriver(std::shared_ptr<Parameter> dr) {
+    driver = dr;
+    shift = std::make_shared<Parameter>("shift", 0.0, -1.0, 1.0);
+    scale = std::make_shared<Parameter>("scale", 1.0, 0.0, 2.0);
+  }
 
   void load(json j) {
+    if (j.is_number()) {
+      setValue(j);
+    }
+    
     if (j.is_object()) {
       if (j.contains("value")) {
         value = j["value"];
@@ -56,11 +68,7 @@ struct Parameter {
     }
   }
 
-  void tick() {
-    if (driver != nullptr) {
-      setValue(driver->value);
-    }
-  }
+  void tick();
 
   std::string description() { return std::to_string(value); }
 
@@ -117,6 +125,9 @@ struct Parameter {
   
   Parameter(std::string name, float value);
   Parameter(std::string name, float value, float min, float max);
+  
+private:
+  Parameter() {};
 };
 
 #endif /* BaseField_h */

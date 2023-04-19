@@ -12,12 +12,13 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct LiquidSettings: public ShaderSettings {
   LiquidSettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId) {
+  ShaderSettings(shaderId, j) {
     
   };
 };
@@ -27,7 +28,12 @@ struct LiquidShader: Shader {
   LiquidShader(LiquidSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("shaders/Liquid");
+    #ifdef TESTING
+shader.load("shaders/Liquid");
+#endif
+#ifdef RELEASE
+shader.load("shaders/Liquid");
+#endif
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -50,8 +56,8 @@ struct LiquidShader: Shader {
   }
 
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     CommonViews::H3Title("Liquid");
-
   }
 };
 

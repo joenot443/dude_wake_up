@@ -41,6 +41,8 @@ struct Node {
   std::shared_ptr<Node> nextNode;
   std::shared_ptr<Node> auxNode;
   
+  ImVec2 position;
+  
   std::string idName() {
     return formatString("%s##%d", name.c_str(), id.Get());
   }
@@ -84,7 +86,7 @@ struct Node {
   }
 
   Node(ed::NodeId id, ed::PinId outputId, ed::PinId inputId, std::string name, NodeType type)
-      : id(id), outputId(outputId), inputId(inputId), type(type), name(name) {}
+      : id(id), outputId(outputId), inputId(inputId), type(type), name(name), position(ImVec2(0,0)) {}
 };
 
 struct Pin {

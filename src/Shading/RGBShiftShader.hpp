@@ -13,6 +13,7 @@
 #include "WaveformOscillator.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
+#include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
@@ -24,11 +25,11 @@ struct RGBShiftSettings: public ShaderSettings {
   std::shared_ptr<Oscillator> amountOscillator;
   
   RGBShiftSettings(std::string shaderId, json j) : 
-  speed(std::make_shared<Parameter>("speed", shaderId, 1.0, 0.0, 5.0)),
-  amount(std::make_shared<Parameter>("amount", shaderId, 1.0, 0.0, 2.0)),
+  speed(std::make_shared<Parameter>("speed", 1.0, 0.0, 5.0)),
+  amount(std::make_shared<Parameter>("amount", 1.0, 0.0, 2.0)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   amountOscillator(std::make_shared<WaveformOscillator>(amount)),
-  ShaderSettings(shaderId)
+  ShaderSettings(shaderId, j)
   {
     parameters = {speed, amount};
     oscillators = {speedOscillator, amountOscillator};
@@ -42,7 +43,12 @@ struct RGBShiftShader: Shader {
   RGBShiftShader(RGBShiftSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("shaders/RGBShift");
+    #ifdef TESTING
+shader.load("shaders/RGBShift");
+#endif
+#ifdef RELEASE
+shader.load("shaders/RGBShift");
+#endif
   }
 
   void shade(ofFbo *frame, ofFbo *canvas) override {
@@ -67,6 +73,7 @@ struct RGBShiftShader: Shader {
   }
 
   void drawSettings() override {
+    ShaderConfigSelectionView::draw(this);
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
   }
