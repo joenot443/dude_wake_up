@@ -24,6 +24,7 @@ public:
   TileBrowserView mixTileBrowserView = TileBrowserView({});
   TileBrowserView basicTileBrowserView = TileBrowserView({});
   TileBrowserView transformTileBrowserView = TileBrowserView({});
+  TileBrowserView maskTileBrowserView = TileBrowserView({});
 };
 
 #endif /* ShaderBrowserView_hpp */

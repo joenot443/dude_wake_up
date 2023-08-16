@@ -30,6 +30,7 @@ struct CloudSettings : public ShaderSettings {
     parameters = {speed};
     oscillators = {speedOscillator};
     load(j);
+  registerParameters();
   };
 };
 

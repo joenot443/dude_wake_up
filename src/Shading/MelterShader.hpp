@@ -23,6 +23,7 @@ struct MeltSettings : public ShaderSettings {
   MeltSettings(std::string shaderId, json j) : shaderId(shaderId),
   ShaderSettings(shaderId, j) {
     load(j);
+  registerParameters();
   };
 };
 

@@ -37,6 +37,7 @@ struct KaleidoscopeSettings : public ShaderSettings {
     parameters = {sides, shift, rotation};
     oscillators = {sidesOscillator, shiftOscillator, rotationOscillator};
     load(j);
+  registerParameters();
   };
 };
 

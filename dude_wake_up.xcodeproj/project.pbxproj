@@ -14,6 +14,8 @@
 		0202C7E029EC42520005248E /* EmptySource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0202C7DE29EC42520005248E /* EmptySource.cpp */; };
 		0202C7E129EC5F2D0005248E /* ofAVFoundationGrabber.mm in Sources */ = {isa = PBXBuildFile; fileRef = E42962C22163EDD300A6A9E2 /* ofAVFoundationGrabber.mm */; };
 		0216672D29E6E79600ABF457 /* FeedbackSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0216672C29E6E76E00ABF457 /* FeedbackSource.cpp */; };
+		022D18F12A71C21000AEBC05 /* VideoRecorder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 022D18EF2A71C21000AEBC05 /* VideoRecorder.cpp */; };
+		022D18F52A71C2DF00AEBC05 /* ofxVideoRecorder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 022D18F32A71C2DF00AEBC05 /* ofxVideoRecorder.cpp */; };
 		0230657C29534CB500489A9F /* ShaderChainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0230657629534CB500489A9F /* ShaderChainer.cpp */; };
 		0230658129534CF600489A9F /* VideoSourceBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0230657F29534CF600489A9F /* VideoSourceBrowserView.cpp */; };
 		0230658429534D0300489A9F /* ShaderChainerView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0230658229534D0300489A9F /* ShaderChainerView.cpp */; };
@@ -30,7 +32,11 @@
 		024D1690289ED64700DA807C /* OnsetDetectionFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D168D289ED64700DA807C /* OnsetDetectionFunction.cpp */; };
 		024D1698289EEACD00DA807C /* PulseOscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D1696289EEACD00DA807C /* PulseOscillator.cpp */; };
 		024D169C28A046DF00DA807C /* ConfigService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D169A28A046DF00DA807C /* ConfigService.cpp */; };
+		02542F112A4C6931005D3C72 /* SubmitFeedbackView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02542F0F2A4C6931005D3C72 /* SubmitFeedbackView.cpp */; };
+		02542F132A4C6FEB005D3C72 /* libsentry.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 02542F122A4C6FEB005D3C72 /* libsentry.dylib */; };
 		025AD49E291A9E3200F78F46 /* FileBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 025AD49C291A9E3200F78F46 /* FileBrowserView.cpp */; };
+		026EA9482A5AF92200AA3E55 /* libcpr.1.9.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 026EA9442A5AF25200AA3E55 /* libcpr.1.9.6.dylib */; };
+		026EA94A2A5EDA7500AA3E55 /* LibraryFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 026EA9492A5ED9F800AA3E55 /* LibraryFile.cpp */; };
 		028BAE9A29684984003E7DF8 /* NodeLayoutView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028BAE9929684984003E7DF8 /* NodeLayoutView.cpp */; };
 		028E8E59299E72FE00B95C92 /* MaterialIcons-Regular.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 028E8E58299E72FE00B95C92 /* MaterialIcons-Regular.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		028E8E5D29A697FD00B95C92 /* MarkdownView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028E8E5B29A697FD00B95C92 /* MarkdownView.cpp */; };
@@ -274,7 +280,18 @@
 		0202C7DF29EC42520005248E /* EmptySource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = EmptySource.hpp; sourceTree = "<group>"; };
 		021026D328940FDB0060F282 /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; path = lib; sourceTree = "<group>"; };
 		0216672C29E6E76E00ABF457 /* FeedbackSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FeedbackSource.cpp; sourceTree = "<group>"; };
+		0224010A2A8B003300CA76DD /* SolidColor.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = SolidColor.frag; sourceTree = "<group>"; };
+		0224010B2A8B003300CA76DD /* SolidColor.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = SolidColor.vert; sourceTree = "<group>"; };
+		0224010C2A8B00A800CA76DD /* SolidColorShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SolidColorShader.hpp; path = Shading/SolidColorShader.hpp; sourceTree = "<group>"; };
 		022498352965BAD40085CC46 /* Yin.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Yin.cpp; sourceTree = "<group>"; };
+		022D18EC2A71BDBD00AEBC05 /* 16bitShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = 16bitShader.hpp; path = Shading/16bitShader.hpp; sourceTree = "<group>"; };
+		022D18ED2A71BDC900AEBC05 /* 16bit.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = 16bit.frag; sourceTree = "<group>"; };
+		022D18EE2A71BDC900AEBC05 /* 16bit.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = 16bit.vert; sourceTree = "<group>"; };
+		022D18EF2A71C21000AEBC05 /* VideoRecorder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = VideoRecorder.cpp; sourceTree = "<group>"; };
+		022D18F02A71C21000AEBC05 /* VideoRecorder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = VideoRecorder.hpp; sourceTree = "<group>"; };
+		022D18F32A71C2DF00AEBC05 /* ofxVideoRecorder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxVideoRecorder.cpp; path = ../lib/ofxVideoRecorder/ofxVideoRecorder.cpp; sourceTree = "<group>"; };
+		022D18F42A71C2DF00AEBC05 /* ofxVideoRecorder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxVideoRecorder.h; path = ../lib/ofxVideoRecorder/ofxVideoRecorder.h; sourceTree = "<group>"; };
+		022D18F62A78533A00AEBC05 /* libPocoData.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libPocoData.a; path = "../../../../Downloads/vcpkg/installed/arm64-osx/lib/libPocoData.a"; sourceTree = "<group>"; };
 		0230657129534CA500489A9F /* Fonts.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Fonts.hpp; path = Util/Fonts.hpp; sourceTree = "<group>"; };
 		0230657329534CA500489A9F /* JSONSerializable.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = JSONSerializable.hpp; path = Util/JSONSerializable.hpp; sourceTree = "<group>"; };
 		0230657429534CA500489A9F /* UUID.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = UUID.hpp; path = Util/UUID.hpp; sourceTree = "<group>"; };
@@ -323,8 +340,15 @@
 		024D169928A0420B00DA807C /* schema.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = schema.json; sourceTree = "<group>"; };
 		024D169A28A046DF00DA807C /* ConfigService.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ConfigService.cpp; path = Services/ConfigService.cpp; sourceTree = "<group>"; };
 		024D169B28A046DF00DA807C /* ConfigService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = ConfigService.hpp; path = Services/ConfigService.hpp; sourceTree = "<group>"; };
+		02542F0E2A4C68FA005D3C72 /* Feedback.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Feedback.hpp; sourceTree = "<group>"; };
+		02542F0F2A4C6931005D3C72 /* SubmitFeedbackView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SubmitFeedbackView.cpp; path = Views/SubmitFeedbackView.cpp; sourceTree = "<group>"; };
+		02542F102A4C6931005D3C72 /* SubmitFeedbackView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SubmitFeedbackView.hpp; path = Views/SubmitFeedbackView.hpp; sourceTree = "<group>"; };
+		02542F122A4C6FEB005D3C72 /* libsentry.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsentry.dylib; path = "lib/sentry-native/xcodebuild/Debug/libsentry.dylib"; sourceTree = "<group>"; };
 		025AD49C291A9E3200F78F46 /* FileBrowserView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FileBrowserView.cpp; path = Views/FileBrowserView.cpp; sourceTree = "<group>"; };
 		025AD49D291A9E3200F78F46 /* FileBrowserView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = FileBrowserView.hpp; path = Views/FileBrowserView.hpp; sourceTree = "<group>"; };
+		026EA9442A5AF25200AA3E55 /* libcpr.1.9.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcpr.1.9.6.dylib; path = ../../../../../../usr/local/lib/libcpr.1.9.6.dylib; sourceTree = "<group>"; };
+		026EA9462A5AF57C00AA3E55 /* libcpr.1.9.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcpr.1.9.6.dylib; path = "../../../../Downloads/cpr-1.9.6/lib/libcpr.1.9.6.dylib"; sourceTree = "<group>"; };
+		026EA9492A5ED9F800AA3E55 /* LibraryFile.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LibraryFile.cpp; sourceTree = "<group>"; };
 		027C3DA5292D4B53005EE417 /* FractalShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = FractalShader.hpp; path = Shading/FractalShader.hpp; sourceTree = "<group>"; };
 		027C3DA7292D5A60005EE417 /* FujiShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = FujiShader.hpp; path = Shading/FujiShader.hpp; sourceTree = "<group>"; };
 		0284EBDD295E81D100A572E7 /* Galaxy.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Galaxy.frag; sourceTree = "<group>"; };
@@ -344,6 +368,19 @@
 		028BAE9829684984003E7DF8 /* NodeLayoutView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = NodeLayoutView.hpp; sourceTree = "<group>"; };
 		028BAE9929684984003E7DF8 /* NodeLayoutView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NodeLayoutView.cpp; sourceTree = "<group>"; };
 		028BAE9B296849A2003E7DF8 /* NodeTypes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = NodeTypes.hpp; sourceTree = "<group>"; };
+		028D52F52A3C9D3B005ADBF9 /* DancingSquaresShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = DancingSquaresShader.hpp; path = Shading/DancingSquaresShader.hpp; sourceTree = "<group>"; };
+		028D52F62A3C9DFC005ADBF9 /* DancingSquares.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = DancingSquares.frag; sourceTree = "<group>"; };
+		028D52F72A3C9DFC005ADBF9 /* DancingSquares.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = DancingSquares.vert; sourceTree = "<group>"; };
+		028D52F82A3F3756005ADBF9 /* PlasmaTwo.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = PlasmaTwo.frag; sourceTree = "<group>"; };
+		028D52F92A3F3756005ADBF9 /* PlasmaTwo.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = PlasmaTwo.vert; sourceTree = "<group>"; };
+		028D52FA2A3F3797005ADBF9 /* PlasmaShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = PlasmaShader.hpp; path = Shading/PlasmaShader.hpp; sourceTree = "<group>"; };
+		028D52FB2A3F38A9005ADBF9 /* PlasmaTwoShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = PlasmaTwoShader.hpp; path = Shading/PlasmaTwoShader.hpp; sourceTree = "<group>"; };
+		028D52FC2A422DD8005ADBF9 /* CurlySquaresShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = CurlySquaresShader.hpp; path = Shading/CurlySquaresShader.hpp; sourceTree = "<group>"; };
+		028D52FD2A422DE2005ADBF9 /* CurlySquares.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CurlySquares.frag; sourceTree = "<group>"; };
+		028D52FE2A422DE2005ADBF9 /* CurlySquares.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CurlySquares.vert; sourceTree = "<group>"; };
+		028D52FF2A422F6F005ADBF9 /* ColorKeyMaskMaker.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = ColorKeyMaskMaker.vert; sourceTree = "<group>"; };
+		028D53002A422F6F005ADBF9 /* ColorKeyMaskMaker.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = ColorKeyMaskMaker.frag; sourceTree = "<group>"; };
+		028D53012A422F7B005ADBF9 /* ColorKeyMaskMakerShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = ColorKeyMaskMakerShader.hpp; path = Shading/ColorKeyMaskMakerShader.hpp; sourceTree = "<group>"; };
 		028E8E58299E72FE00B95C92 /* MaterialIcons-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "MaterialIcons-Regular.ttf"; path = "fonts/MaterialIcons-Regular.ttf"; sourceTree = "<group>"; };
 		028E8E5A29A0457400B95C92 /* Colors.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = Colors.hpp; path = Util/Colors.hpp; sourceTree = "<group>"; };
 		028E8E5B29A697FD00B95C92 /* MarkdownView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MarkdownView.cpp; path = Views/MarkdownView.cpp; sourceTree = "<group>"; };
@@ -433,6 +470,11 @@
 		02A19F3E294B904800D3ECC0 /* HSBShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = HSBShader.hpp; path = Shading/HSBShader.hpp; sourceTree = "<group>"; };
 		02A19F40294BC11800D3ECC0 /* RGBShiftShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = RGBShiftShader.hpp; path = Shading/RGBShiftShader.hpp; sourceTree = "<group>"; };
 		02A19F41294CBA3600D3ECC0 /* WobbleShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = WobbleShader.hpp; path = Shading/WobbleShader.hpp; sourceTree = "<group>"; };
+		02A442AC2A4F1724005B611A /* Warp.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Warp.frag; sourceTree = "<group>"; };
+		02A442AD2A4F1724005B611A /* Warp.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Warp.vert; sourceTree = "<group>"; };
+		02A442AE2A4F1735005B611A /* WarpShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = WarpShader.hpp; path = Shading/WarpShader.hpp; sourceTree = "<group>"; };
+		02A442AF2A544FFC005B611A /* Hilbert.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Hilbert.vert; sourceTree = "<group>"; };
+		02A442B02A544FFC005B611A /* Hilbert.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Hilbert.frag; sourceTree = "<group>"; };
 		02B049C6296DCD8000F68451 /* AvailableVideoSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AvailableVideoSource.hpp; sourceTree = "<group>"; };
 		02B16F3A29674AF30043CA74 /* imgui_node_editor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_node_editor.cpp; sourceTree = "<group>"; };
 		02B16F3C29674AF30043CA74 /* imgui_node_editor.natvis */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = imgui_node_editor.natvis; sourceTree = "<group>"; };
@@ -513,6 +555,11 @@
 		02DDED8829EF08E90040382F /* dude_wake_up_tests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = dude_wake_up_tests; sourceTree = BUILT_PRODUCTS_DIR; };
 		02DDED8A29EF08E90040382F /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		02DDED9129EF092B0040382F /* ShaderChainerServiceTests.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ShaderChainerServiceTests.hpp; sourceTree = "<group>"; };
+		02DDEDFB29F086A10040382F /* Mask.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Mask.vert; sourceTree = "<group>"; };
+		02DDEDFC29F086A10040382F /* Mask.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Mask.frag; sourceTree = "<group>"; };
+		02DDEDFD29F183660040382F /* LumaMaskMaker.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = LumaMaskMaker.frag; sourceTree = "<group>"; };
+		02DDEDFE29F183660040382F /* LumaMaskMaker.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = LumaMaskMaker.vert; sourceTree = "<group>"; };
+		02DDEDFF29F184280040382F /* LumaMaskMakerShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = LumaMaskMakerShader.hpp; path = Shading/LumaMaskMakerShader.hpp; sourceTree = "<group>"; };
 		02E24F2629881F590066A05D /* LayoutStateService.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = LayoutStateService.cpp; path = Services/LayoutStateService.cpp; sourceTree = "<group>"; };
 		02E24F2729881F590066A05D /* LayoutStateService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = LayoutStateService.hpp; path = Services/LayoutStateService.hpp; sourceTree = "<group>"; };
 		02E24F2A29889D150066A05D /* Roboto-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Medium.ttf"; sourceTree = "<group>"; };
@@ -541,7 +588,6 @@
 		02E24F52298C0D280066A05D /* FishEye.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = FishEye.frag; sourceTree = "<group>"; };
 		02E24F53298C0D280066A05D /* FishEye.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = FishEye.vert; sourceTree = "<group>"; };
 		02E24F54298C0DD20066A05D /* FishEyeShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = FishEyeShader.hpp; path = Shading/FishEyeShader.hpp; sourceTree = "<group>"; };
-		02ED90D72954967F002252CC /* darken.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = darken.frag; sourceTree = "<group>"; };
 		02ED90D82954967F002252CC /* plasma.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = plasma.vert; sourceTree = "<group>"; };
 		02ED90D92954967F002252CC /* empty.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = empty.frag; sourceTree = "<group>"; };
 		02ED90DA2954967F002252CC /* fuji.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = fuji.frag; sourceTree = "<group>"; };
@@ -558,7 +604,6 @@
 		02ED90E52954967F002252CC /* fractal.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = fractal.vert; sourceTree = "<group>"; };
 		02ED90E62954967F002252CC /* fuji.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = fuji.vert; sourceTree = "<group>"; };
 		02ED90E72954967F002252CC /* empty.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = empty.vert; sourceTree = "<group>"; };
-		02ED90E82954967F002252CC /* darken.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = darken.vert; sourceTree = "<group>"; };
 		02ED90E92954967F002252CC /* plasma.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = plasma.frag; sourceTree = "<group>"; };
 		02ED90EA2954967F002252CC /* kaleidoscope.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = kaleidoscope.vert; sourceTree = "<group>"; };
 		02ED90EB2954967F002252CC /* ascii.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = ascii.frag; sourceTree = "<group>"; };
@@ -881,6 +926,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				026EA9482A5AF92200AA3E55 /* libcpr.1.9.6.dylib in Frameworks */,
+				02542F132A4C6FEB005D3C72 /* libsentry.dylib in Frameworks */,
 				631702104AFC104323A9EB79 /* CoreMIDI.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -891,6 +938,7 @@
 		021026F4289412660060F282 /* libs */ = {
 			isa = PBXGroup;
 			children = (
+				022D18F22A71C2C700AEBC05 /* ofxVideoRecorder */,
 				02B16F3929674AF30043CA74 /* imgui-node-editor */,
 				028FA5D6295B1ACE00FE6FE3 /* implot */,
 				028FA5942956062B00FE6FE3 /* gist */,
@@ -905,6 +953,15 @@
 			name = libs;
 			sourceTree = "<group>";
 		};
+		022D18F22A71C2C700AEBC05 /* ofxVideoRecorder */ = {
+			isa = PBXGroup;
+			children = (
+				022D18F32A71C2DF00AEBC05 /* ofxVideoRecorder.cpp */,
+				022D18F42A71C2DF00AEBC05 /* ofxVideoRecorder.h */,
+			);
+			path = ofxVideoRecorder;
+			sourceTree = "<group>";
+		};
 		0230658929534E9800489A9F /* Audio */ = {
 			isa = PBXGroup;
 			children = (
@@ -917,6 +974,14 @@
 		024D1686289DFD6200DA807C /* Shading */ = {
 			isa = PBXGroup;
 			children = (
+				022D18EC2A71BDBD00AEBC05 /* 16bitShader.hpp */,
+				02A442AE2A4F1735005B611A /* WarpShader.hpp */,
+				028D53012A422F7B005ADBF9 /* ColorKeyMaskMakerShader.hpp */,
+				028D52FC2A422DD8005ADBF9 /* CurlySquaresShader.hpp */,
+				028D52FB2A3F38A9005ADBF9 /* PlasmaTwoShader.hpp */,
+				028D52FA2A3F3797005ADBF9 /* PlasmaShader.hpp */,
+				028D52F52A3C9D3B005ADBF9 /* DancingSquaresShader.hpp */,
+				02DDEDFF29F184280040382F /* LumaMaskMakerShader.hpp */,
 				02F408412992F678000632FC /* HalfToneShader.hpp */,
 				02F4083D298D4C37000632FC /* TissueShader.hpp */,
 				02E24F54298C0DD20066A05D /* FishEyeShader.hpp */,
@@ -929,6 +994,7 @@
 				029F41B52979E86800B6DB77 /* TriangleMapShader.hpp */,
 				0284EBE62960987F00A572E7 /* RainbowRotatorShader.hpp */,
 				0284EBE529608E5A00A572E7 /* DitherShader.hpp */,
+				0224010C2A8B00A800CA76DD /* SolidColorShader.hpp */,
 				0284EBE0295F2A1D00A572E7 /* MountainsShader.hpp */,
 				029F41B92979E86B00B6DB77 /* OctahedronShader.hpp */,
 				029F41B82979E86B00B6DB77 /* VanGoghShader.hpp */,
@@ -1053,12 +1119,25 @@
 		029F41BE297B1CDD00B6DB77 /* Network */ = {
 			isa = PBXGroup;
 			children = (
+				02542F0E2A4C68FA005D3C72 /* Feedback.hpp */,
 				029F41BD297B07E200B6DB77 /* LibraryFile.hpp */,
 				029F41BA297B047500B6DB77 /* LibraryService.cpp */,
 				029F41BB297B047500B6DB77 /* LibraryService.hpp */,
 				029F41BF297B1CF000B6DB77 /* Backblaze.hpp */,
+				026EA9492A5ED9F800AA3E55 /* LibraryFile.cpp */,
 			);
 			path = Network;
+			sourceTree = "<group>";
+		};
+		02A0C4892A4B0C4500974602 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				022D18F62A78533A00AEBC05 /* libPocoData.a */,
+				026EA9442A5AF25200AA3E55 /* libcpr.1.9.6.dylib */,
+				026EA9462A5AF57C00AA3E55 /* libcpr.1.9.6.dylib */,
+				02542F122A4C6FEB005D3C72 /* libsentry.dylib */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		02B16F3929674AF30043CA74 /* imgui-node-editor */ = {
@@ -1231,6 +1310,8 @@
 				02BE890729DDDB4600C65C58 /* ShaderSource.cpp */,
 				0202C7DE29EC42520005248E /* EmptySource.cpp */,
 				0202C7DF29EC42520005248E /* EmptySource.hpp */,
+				022D18EF2A71C21000AEBC05 /* VideoRecorder.cpp */,
+				022D18F02A71C21000AEBC05 /* VideoRecorder.hpp */,
 			);
 			path = Video;
 			sourceTree = "<group>";
@@ -1270,6 +1351,26 @@
 		02ED90D62954967F002252CC /* shaders */ = {
 			isa = PBXGroup;
 			children = (
+				0224010A2A8B003300CA76DD /* SolidColor.frag */,
+				0224010B2A8B003300CA76DD /* SolidColor.vert */,
+				022D18ED2A71BDC900AEBC05 /* 16bit.frag */,
+				022D18EE2A71BDC900AEBC05 /* 16bit.vert */,
+				02A442B02A544FFC005B611A /* Hilbert.frag */,
+				02A442AF2A544FFC005B611A /* Hilbert.vert */,
+				02A442AC2A4F1724005B611A /* Warp.frag */,
+				02A442AD2A4F1724005B611A /* Warp.vert */,
+				028D53002A422F6F005ADBF9 /* ColorKeyMaskMaker.frag */,
+				028D52FF2A422F6F005ADBF9 /* ColorKeyMaskMaker.vert */,
+				028D52FD2A422DE2005ADBF9 /* CurlySquares.frag */,
+				028D52FE2A422DE2005ADBF9 /* CurlySquares.vert */,
+				028D52F82A3F3756005ADBF9 /* PlasmaTwo.frag */,
+				028D52F92A3F3756005ADBF9 /* PlasmaTwo.vert */,
+				028D52F62A3C9DFC005ADBF9 /* DancingSquares.frag */,
+				028D52F72A3C9DFC005ADBF9 /* DancingSquares.vert */,
+				02DDEDFD29F183660040382F /* LumaMaskMaker.frag */,
+				02DDEDFE29F183660040382F /* LumaMaskMaker.vert */,
+				02DDEDFC29F086A10040382F /* Mask.frag */,
+				02DDEDFB29F086A10040382F /* Mask.vert */,
 				02DDED8129EDE4CA0040382F /* Circle.frag */,
 				02DDED8229EDE4CB0040382F /* Circle.vert */,
 				02CC58A829C37C0C006A50F2 /* Glitch.frag */,
@@ -1336,8 +1437,6 @@
 				02ED90E12954967F002252CC /* ascii.vert */,
 				02ED90E42954967F002252CC /* blur.frag */,
 				02ED90DB2954967F002252CC /* blur.vert */,
-				02ED90D72954967F002252CC /* darken.frag */,
-				02ED90E82954967F002252CC /* darken.vert */,
 				02ED90D92954967F002252CC /* empty.frag */,
 				02ED90E72954967F002252CC /* empty.vert */,
 				02ED90EE2954967F002252CC /* feedback.frag */,
@@ -1484,6 +1583,8 @@
 		721B30BA8F4AAE6EB850CE13 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				02542F0F2A4C6931005D3C72 /* SubmitFeedbackView.cpp */,
+				02542F102A4C6931005D3C72 /* SubmitFeedbackView.hpp */,
 				0EEC8D055B2169673B50822B /* AudioSettingsView.cpp */,
 				1D110EA4D31EF7FAB33600A7 /* AudioSettingsView.hpp */,
 				B21CEA7F3D7E274DE1310FE6 /* CommonViews.cpp */,
@@ -1981,6 +2082,7 @@
 				E4B69B5B0A3A1756003C02F2 /* dude_wake_upDebug.app */,
 				02DDED8829EF08E90040382F /* dude_wake_up_tests */,
 				02DDED8929EF08E90040382F /* dude_wake_up_tests */,
+				02A0C4892A4B0C4500974602 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -2140,7 +2242,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "mkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n# Copy default icon file into App/Resources\nrsync -aved \"$ICON_FILE\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n# Copy libfmod and change install directory for fmod to run\nrsync -aved \"$OF_PATH/libs/fmod/lib/osx/libfmod.dylib\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/\";\n# Not needed as we now call install_name_tool -id @loader_path/../Frameworks/libfmod.dylib libfmod.dylib on the dylib directly which prevents the need for calling every post build - keeping here for reference and possible legacy usage \n# install_name_tool -change @rpath/libfmod.dylib @executable_path/../Frameworks/libfmod.dylib \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/MacOS/$PRODUCT_NAME\";\n\necho \"$GCC_PREPROCESSOR_DEFINITIONS\";\n\n# Copy the shaders folder into Resources/data\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/\"\n\ncp -R \"$TARGET_BUILD_DIR/../shaders/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/shaders\"\n\n# Copy the markdown folder into Resources/data\ncp -R \"$TARGET_BUILD_DIR/../markdown/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/markdown\"\n\n# Copy the fonts folder into Resources/data\ncp -R \"$TARGET_BUILD_DIR/../fonts/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/fonts\"\n";
+			shellScript = "mkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n# Copy default icon file into App/Resources\nrsync -aved \"$ICON_FILE\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n# Copy libfmod and change install directory for fmod to run\nrsync -aved \"$OF_PATH/libs/fmod/lib/osx/libfmod.dylib\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/\";\n# Not needed as we now call install_name_tool -id @loader_path/../Frameworks/libfmod.dylib libfmod.dylib on the dylib directly which prevents the need for calling every post build - keeping here for reference and possible legacy usage \n# install_name_tool -change @rpath/libfmod.dylib @executable_path/../Frameworks/libfmod.dylib \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/MacOS/$PRODUCT_NAME\";\n\nrsync -aved \"$TARGET_BUILD_DIR/../lib/sentry-native/xcodebuild/Debug/libsentry.dylib\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/\";\n\necho \"$GCC_PREPROCESSOR_DEFINITIONS\";\n\n# Copy the shaders folder into Resources/data\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/\"\n\ncp -R \"$TARGET_BUILD_DIR/../shaders/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/shaders\"\n\n# Copy the markdown folder into Resources/data\ncp -R \"$TARGET_BUILD_DIR/../markdown/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/markdown\"\n\n# Copy the fonts folder into Resources/data\ncp -R \"$TARGET_BUILD_DIR/../fonts/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/fonts\"\n\n# Copy the libsentry library into bin/\ncp  \"/Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up/lib/sentry-native/xcodebuild/build/sentry.build/Debug/Objects-normal/x86_64/Binary/libsentry.dylib\" \"$TARGET_BUILD_DIR/libsentry.dylib\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -2273,6 +2375,7 @@
 				5D5F66B1ACC05361D4592A52 /* main.cpp in Sources */,
 				02B16FC829674AF30043CA74 /* imgui_node_editor.cpp in Sources */,
 				12C04C963F830B6A09F5FC7D /* ModulationService.cpp in Sources */,
+				02542F112A4C6931005D3C72 /* SubmitFeedbackView.cpp in Sources */,
 				5B59AD739BB713EF08A9F24B /* FontService.cpp in Sources */,
 				A2D1312F4F8A1C62A7D5FE20 /* MidiService.cpp in Sources */,
 				059638BE8C8A1D59958631C4 /* MidiPairing.cpp in Sources */,
@@ -2284,6 +2387,7 @@
 				023C633D2922EF5100A8BC9E /* MainStageView.cpp in Sources */,
 				3727B026D4D11026D33BEEA2 /* OscillationService.cpp in Sources */,
 				B0F01881AEC796CF3A25ECB3 /* imgui_impl_glfw.cpp in Sources */,
+				022D18F12A71C21000AEBC05 /* VideoRecorder.cpp in Sources */,
 				C41EA6E8F44334B01183F80A /* imgui_impl_opengl2.cpp in Sources */,
 				028FA5B12956062B00FE6FE3 /* Yin.cpp in Sources */,
 				60CBAD6DA6E255EB14CB4FF9 /* imgui_impl_opengl3.cpp in Sources */,
@@ -2304,12 +2408,14 @@
 				DBBE189ECD171A97DCF46C6A /* BaseEngine.cpp in Sources */,
 				028FA5B22956062B00FE6FE3 /* OnsetDetectionFunction.cpp in Sources */,
 				C2114978C2A333BA9867109F /* DefaultTheme.cpp in Sources */,
+				022D18F52A71C2DF00AEBC05 /* ofxVideoRecorder.cpp in Sources */,
 				462C212713EFFA5383B35DAB /* EngineGLFW.cpp in Sources */,
 				000315A9FA4E2F9A09533E05 /* EngineOpenGLES.cpp in Sources */,
 				02CC58A129AF914E006A50F2 /* ImageSource.cpp in Sources */,
 				016BB55A143AD429330F07DB /* Gui.cpp in Sources */,
 				029F419D29742E2000B6DB77 /* Shader.cpp in Sources */,
 				02F2A06A29C4F2A00072CE86 /* TextSource.cpp in Sources */,
+				026EA94A2A5EDA7500AA3E55 /* LibraryFile.cpp in Sources */,
 				DC62E5817CB03447F2ADFB85 /* ImHelpers.cpp in Sources */,
 				028FA5B32956062B00FE6FE3 /* kiss_fft.c in Sources */,
 				028FA5B02956062B00FE6FE3 /* Gist.cpp in Sources */,
@@ -2737,13 +2843,16 @@
 			baseConfigurationReference = E4EB6923138AFD0F00A09F29 /* Project.xcconfig */;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
+				CC = "";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
+				EXCLUDED_ARCHS = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					/System/Library/Frameworks,
 				);
+				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = NONE;
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "APPSTORE=1";
@@ -2785,13 +2894,19 @@
 					"/usr/local/lib/**",
 					"$(PROJECT_DIR)/lib/imgui-node-editor/external/DXSDK/lib/x64",
 					"$(PROJECT_DIR)/lib/imgui-node-editor/external/DXSDK/lib/x86",
+					"lib/sentry-native/install/**",
+					"$(PROJECT_DIR)/lib/sentry-native/install/lib",
+					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/Debug",
+					"/Users/jcrozier/Downloads/vcpkg/installed/arm64-osx/lib",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				OTHER_LDFLAGS = (
 					"$(OF_CORE_LIBS)",
 					"$(OF_CORE_FRAMEWORKS)",
 					"$(LIB_OF)",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRIP_INSTALLED_PRODUCT = NO;
 				WRAPPER_EXTENSION = app;
 				baseConfigurationReference = E4EB6923138AFD0F00A09F29;
 			};
@@ -2904,17 +3019,19 @@
 			baseConfigurationReference = E4EB6923138AFD0F00A09F29 /* Project.xcconfig */;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
+				CC = "";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEVELOPMENT_TEAM = 7VUCELU5PL;
+				EXCLUDED_ARCHS = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					/System/Library/Frameworks,
 				);
-				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = NONE;
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "RELEASE=1";
@@ -2942,13 +3059,14 @@
 					../../../addons/ofxMidi/src,
 					../../../addons/ofxMidi/src/desktop,
 					../../../addons/ofxMidi/src/ios,
-					"lib/**",
+					lib,
 					/usr/local/include,
 					"lib/gist/src/**",
-					"lib/**",
 					lib/implot,
 					"lib/imgui-node-editor/external/**",
 					"lib/imgui-node-editor",
+					"lib/sentry-native/include/**",
+					"lib/observable/**",
 				);
 				ICON = "$(ICON_NAME_DEBUG)";
 				ICON_FILE = "$(ICON_FILE_PATH)$(ICON)";
@@ -2959,7 +3077,11 @@
 					"/usr/local/lib/**",
 					"$(PROJECT_DIR)/lib/imgui-node-editor/external/DXSDK/lib/x64",
 					"$(PROJECT_DIR)/lib/imgui-node-editor/external/DXSDK/lib/x86",
+					"lib/sentry-native/install/**",
+					"$(PROJECT_DIR)/lib/sentry-native/install/lib",
+					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/Debug",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				OTHER_LDFLAGS = (
 					"$(OF_CORE_LIBS)",
 					"$(OF_CORE_FRAMEWORKS)",
@@ -2967,6 +3089,7 @@
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)Debug";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				STRIP_INSTALLED_PRODUCT = NO;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -2976,13 +3099,16 @@
 			baseConfigurationReference = E4EB6923138AFD0F00A09F29 /* Project.xcconfig */;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
+				CC = "";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
+				EXCLUDED_ARCHS = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					/System/Library/Frameworks,
 				);
+				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = NONE;
 				HEADER_SEARCH_PATHS = (
@@ -3023,13 +3149,19 @@
 					"/usr/local/lib/**",
 					"$(PROJECT_DIR)/lib/imgui-node-editor/external/DXSDK/lib/x64",
 					"$(PROJECT_DIR)/lib/imgui-node-editor/external/DXSDK/lib/x86",
+					"lib/sentry-native/install/**",
+					"$(PROJECT_DIR)/lib/sentry-native/install/lib",
+					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/Debug",
+					"/Users/jcrozier/Downloads/vcpkg/installed/arm64-osx/lib",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				OTHER_LDFLAGS = (
 					"$(OF_CORE_LIBS)",
 					"$(OF_CORE_FRAMEWORKS)",
 					"$(LIB_OF)",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRIP_INSTALLED_PRODUCT = NO;
 				WRAPPER_EXTENSION = app;
 				baseConfigurationReference = E4EB6923138AFD0F00A09F29;
 			};

@@ -13,11 +13,12 @@
 #include "ofxImGui.h"
 #include "ShaderChainer.hpp"
 
-
-struct OutputWindow : public ofBaseApp {
+struct OutputWindow : public ofBaseApp
+{
   std::shared_ptr<ShaderChainer> chainer;
+  std::shared_ptr<Shader> shader;
 
-  OutputWindow(std::shared_ptr<ShaderChainer> chainer) : chainer(chainer) {};
+  OutputWindow(std::shared_ptr<ShaderChainer> chainer) : chainer(chainer){};
 
   ofFbo outputFbo;
   void setup();

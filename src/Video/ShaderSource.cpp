@@ -9,12 +9,21 @@
 #include "ShaderSource.hpp"
 #include "NodeLayoutView.hpp"
 
-json ShaderSource::serialize() {
+json ShaderSource::serialize()
+{
   json j;
   j["videoSourceType"] = VideoSource_shader;
   j["shaderSourceType"] = shaderSourceType;
   j["id"] = id;
-  j["x"] = NodeLayoutView::getInstance()->nodeForShaderSourceId(id)->position.x;
-  j["y"] = NodeLayoutView::getInstance()->nodeForShaderSourceId(id)->position.y;
+  auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);
+  if (node)
+  {
+    j["x"] = node->position.x;
+    j["y"] = node->position.y;
+  }
+
+  // Append the shader's json
+  j["shader"] = shader->settings->serialize();
+
   return j;
 }

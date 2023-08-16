@@ -52,7 +52,10 @@ json WebcamSource::serialize() {
   j["id"] = id;
   j["sourceName"] = sourceName;
   j["videoSourceType"] = VideoSource_webcam;
-  j["x"] = NodeLayoutView::getInstance()->nodeForShaderSourceId(id)->position.x;
-  j["y"] = NodeLayoutView::getInstance()->nodeForShaderSourceId(id)->position.y;
+  auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);
+  if (node != nullptr) {
+    j["x"] = node->position.x;
+    j["y"] = node->position.y;
+  }
   return j;
 }

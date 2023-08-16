@@ -50,6 +50,7 @@ struct FujiSettings: public ShaderSettings {
     parameters = {enabled, cloud1Y, cloud1X, cloud2Y, cloud2X};
     oscillators = {cloud1XOscillator, cloud1YOscillator, cloud2XOscillator, cloud2YOscillator};
     load(j);
+  registerParameters();
   };
 };
 

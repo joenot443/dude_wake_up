@@ -6,6 +6,7 @@
 //
 
 #include "ShaderChainerPreviewView.hpp"
+#include "FileSource.hpp"
 #include "CommonViews.hpp"
 #include "ShaderChainerService.hpp"
 
@@ -28,7 +29,10 @@ void ShaderChainerPreviewView::update() {
 }
 
 void ShaderChainerPreviewView::draw() {
-  if (chainer) {
+  if (chainer &&
+      // If the chainer terminates at an aux/mask,
+      // we don't need to display its preview.
+      !ShaderChainerService::getService()->terminatesAtAuxPort(chainer)) {
     auto name = formatString("%s##%s", chainer->sourceName.c_str(), chainer->chainerId.c_str());
     if (ImGui::CollapsingHeader(name.c_str(), ImGuiTreeNodeFlags_DefaultOpen)){
       width = ImGui::GetWindowWidth() / 6. - 5;
@@ -42,15 +46,16 @@ void ShaderChainerPreviewView::draw() {
       ImGui::SameLine();
       CommonViews::ResolutionSelector(chainer);
       
-      previewFbo.begin();
-      ofEnableBlendMode(OF_BLENDMODE_ALPHA);
-      
-//      ofClear(0,255);
-      chainer->fbo.draw(0, 0, width, height);
-      previewFbo.end();
-      
-      previewFbo.draw(ImGui::GetCursorPosX(), ImGui::GetCursorPosY(), width, height);
-      
+      chainer->fbo.draw(ImGui::GetCursorPosX(), ImGui::GetCursorPosY(), width, height);
+      // If the chainer is sourced from a VideoSource, draw playback controls
+      if (chainer->source->type == VideoSource_file) {
+        // Upcast the chainer source to be a FileSource
+        std::shared_ptr<FileSource> fileSource = std::dynamic_pointer_cast<FileSource>(chainer->source);
+        if (fileSource != nullptr) {
+          // Draw a slider representing the current playback position
+          CommonViews::PlaybackSlider(&fileSource->player);
+        }
+      }
       CommonViews::Spacing(height / 2);
     }
   }

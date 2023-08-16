@@ -27,6 +27,7 @@ struct AsciiSettings: public ShaderSettings  {
     parameters = {enabled};
     oscillators = {};
     load(j);
+  registerParameters();
   }
 };
 

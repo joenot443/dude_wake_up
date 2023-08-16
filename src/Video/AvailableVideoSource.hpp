@@ -7,21 +7,115 @@
 
 #ifndef AvailableVideoSource_h
 #define AvailableVideoSource_h
+#include "LibraryFile.hpp"
 #include "VideoSource.hpp"
 #include "UUID.hpp"
 #include "ShaderSource.hpp"
 
-struct AvailableVideoSource {
+class AvailableVideoSource
+{
+public:
+  AvailableVideoSource(std::string sourceName, VideoSourceType type);
+
+  virtual void generatePreview() = 0; // pure virtual function
+  virtual VideoSourceType getType() const { return type; }
+
   std::string availableVideoSourceId;
   std::string sourceName;
   VideoSourceType type;
-  ShaderSourceType shaderType;
-  int webcamId;
-  std::string path;
   std::shared_ptr<ofTexture> preview;
-  
-  void generatePreview();
-  
-  AvailableVideoSource(std::string sourceName, VideoSourceType type, ShaderSourceType shaderType, int webcamId, std::string path);
+  bool hasPreview;
 };
+
+class AvailableVideoSourceWebcam : public AvailableVideoSource
+{
+public:
+  AvailableVideoSourceWebcam(std::string sourceName, int webcamId)
+      : AvailableVideoSource(std::move(sourceName), VideoSource_webcam), webcamId(webcamId) {}
+  int webcamId;
+
+  void generatePreview() override
+  {
+    // webcam-specific implementation
+  }
+};
+
+class AvailableVideoSourceFile : public AvailableVideoSource
+{
+public:
+  AvailableVideoSourceFile(std::string sourceName, std::string path)
+      : AvailableVideoSource(std::move(sourceName), VideoSource_file), path(std::move(path)) {}
+
+  void generatePreview() override
+  {
+    // file-specific implementation
+  }
+  std::string path;
+};
+
+class AvailableVideoSourceShader : public AvailableVideoSource
+{
+public:
+  AvailableVideoSourceShader(std::string sourceName, ShaderSourceType shaderType)
+      : AvailableVideoSource(std::move(sourceName), VideoSource_shader), shaderType(shaderType) {}
+
+  void generatePreview() override;
+  ShaderSourceType shaderType;
+
+private:
+};
+
+class AvailableVideoSourceLibrary : public AvailableVideoSource
+{
+public:
+  AvailableVideoSourceLibrary(std::string sourceName, std::shared_ptr<LibraryFile> libraryFile)
+      : AvailableVideoSource(std::move(sourceName), VideoSource_library), libraryFile(libraryFile) {}
+
+  std::shared_ptr<LibraryFile> libraryFile;
+  void generatePreview() override
+  {
+    // Check if a file exists at libraryFile.thumbnailFilename
+    // If it does, populate the .preview texture with the contents of that file
+
+    if (!ofFile::doesFileExist(libraryFile->thumbnailPath()))
+    {
+      return;
+    }
+
+    auto fbo = ofFbo();
+    fbo.allocate(320, 240);
+    // Read the file from libraryFile->thumbnailFilename and draw it to the fbo
+    auto img = ofImage();
+    img.load(libraryFile->thumbnailPath());
+    if (!img.isAllocated()) {
+        ofLogError("Main") << "Image not correctly loaded!";
+        return;
+    }
+    
+    fbo.begin();
+    img.draw(0, 0, 320, 240);
+    ofSetColor(0, 0, 0, 128);
+    ofDrawRectangle(0, 0, 320, 240);
+    ofSetColor(255);
+    fbo.end();
+    preview = std::make_shared<ofTexture>(fbo.getTexture());
+  }
+
+private:
+  std::string filename;
+};
+
+class AvailableVideoSourceText : public AvailableVideoSource
+{
+public:
+  AvailableVideoSourceText(std::string sourceName)
+      : AvailableVideoSource(std::move(sourceName), VideoSource_text) {}
+
+  void generatePreview() override
+  {
+  }
+
+private:
+};
+
 #endif /* AvailableVideoSource_h */

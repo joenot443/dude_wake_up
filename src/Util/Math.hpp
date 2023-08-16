@@ -9,9 +9,6 @@
 #define Math_h
 
 struct Math {
-  
-  constexpr static const float RELEASE = 0.99;
-  
   static int nearestOdd( float x )
   {
     return 2 * ( (int)(x / 2.0f) ) + 1;

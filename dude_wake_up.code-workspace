@@ -1,15 +1,18 @@
 {
 	"folders": [
-		{
-			"path": "."
-		},
-		{
-			"path": "${workspaceRoot}/../../../../libs/openFrameworks"
-		},
-		{
-			"path": "${workspaceRoot}/../../../../addons"
-		}
-	],
+    {
+      "path": "."
+    },
+    {
+      "path": "${workspaceRoot}/../../../../libs/openFrameworks"
+    },
+    {
+      "path": "${workspaceRoot}/../../../../addons"
+    },
+    {
+      "path": "../../../libs"
+    }
+  ],
   "settings": {
     "files.associations": {
       "__split_buffer": "cpp",
@@ -101,8 +104,23 @@
       "csignal": "cpp",
       "ranges": "cpp",
       "span": "cpp",
-      "strstream": "cpp"
+      "strstream": "cpp",
+      "__verbose_abort": "cpp",
+      "any": "cpp",
+      "charconv": "cpp",
+      "cinttypes": "cpp",
+      "codecvt": "cpp",
+      "csetjmp": "cpp",
+      "coroutine": "cpp",
+      "future": "cpp",
+      "scoped_allocator": "cpp",
+      "shared_mutex": "cpp",
+      "unordered_set": "cpp",
+      "__memory": "cpp"
     },
-    "editor.defaultFormatter": "xaver.clang-format"
+    "editor.defaultFormatter": "xaver.clang-format",
+    "[cpp]": {
+      "editor.defaultFormatter": "ms-vscode.cpptools"
+    }
   }
 }

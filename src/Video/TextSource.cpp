@@ -7,6 +7,7 @@
 
 #include "TextSource.hpp"
 #include "CommonViews.hpp"
+#include "NodeLayoutView.hpp"
 
 void TextSource::setup() {
   fbo.allocate(settings.width->value, settings.height->value, GL_RGBA);
@@ -48,7 +49,7 @@ void TextSource::saveFrame() {
   }
   
   if (shouldClear) {
-    ofClear(0, 255.);
+    ofClear(0, 0.);
   } else {
     ofSetColor(0, 0, 0, 0);
     ofDrawRectangle(0, 0, fbo.getWidth(), fbo.getHeight());
@@ -71,22 +72,31 @@ json TextSource::serialize() {
   j["fontName"] = displayText->font.name;
   j["color"] = displayText->color.getHex();
   j["sourceName"] = sourceName;
-  j["x"] = displayText->xPosition->value;
-  j["y"] = displayText->yPosition->value;
+  j["displayX"] = displayText->xPosition->value;
+  j["displayY"] = displayText->yPosition->value;
   j["fontSize"] = displayText->fontSize;
+  j["text"] = displayText->text;
+  auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);
+  if (node != nullptr) {
+    j["x"] = node->position.x;
+    j["y"] = node->position.y;
+  }
   return j;
 }
 
 void TextSource::load(json j) {
+  if (!j.is_object()) return;
+  
   displayText->font.path = j["fontPath"];
   displayText->font.name = j["fontName"];
 
   displayText->color = ofColor::fromHex(j["color"]);
 
-  displayText->xPosition->value = j["x"];
-  displayText->yPosition->value = j["y"];
+  displayText->xPosition->value = j["displayX"];
+  displayText->yPosition->value = j["displayY"];
 
   displayText->fontSize = j["fontSize"];
+  displayText->text = j["text"];
 }
 
 void TextSource::drawSettings() {

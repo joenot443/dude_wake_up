@@ -16,13 +16,23 @@ to: src/Shading/<%= name %>Shader.hpp
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
+#include "ValueOscillator.hpp"
+#include "Parameter.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct <%= name %>Settings: public ShaderSettings {
+  std::shared_ptr<Parameter> shaderValue;
+  std::shared_ptr<ValueOscillator> shaderValueOscillator;
+
   <%= name %>Settings(std::string shaderId, json j) :
-  ShaderSettings(shaderId) {
-    
+  shaderValue(std::make_shared<Parameter>("shaderValue", 1.0  , -1.0, 2.0)),
+  shaderValueOscillator(std::make_shared<ValueOscillator>(shaderValue)),
+  ShaderSettings(shaderId, j) {
+    parameters = { shaderValue };
+    oscillators = { shaderValueOscillator };
+    load(j);
+    registerParameters();
   };
 };
 
@@ -38,6 +48,7 @@ struct <%= name %>Shader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
+    shader.setUniform1f("color", settings->shaderValue->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
@@ -56,6 +67,7 @@ struct <%= name %>Shader: Shader {
   void drawSettings() override {
     CommonViews::H3Title("<%= name %>");
 
+    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
   }
 };
 

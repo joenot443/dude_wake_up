@@ -12,7 +12,7 @@
 #include "ShaderChainer.hpp"
 
 struct UploadChainerView {
-  static void Draw(std::shared_ptr<ShaderChainer> shaderChainer);
+  static void draw(std::shared_ptr<ShaderChainer> shaderChainer);
 };
 
 #endif /* UploadChainerView_h */

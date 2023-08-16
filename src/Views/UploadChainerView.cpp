@@ -14,7 +14,6 @@
 
 namespace ed = ax::NodeEditor;
 
-// Function to draw the ImGui window
 void drawUploadEffectChainWindow(bool &open, std::shared_ptr<ShaderChainer> shaderChainer) {
   if (!open) return;
   // Get the user's mouse position
@@ -56,7 +55,7 @@ void drawUploadEffectChainWindow(bool &open, std::shared_ptr<ShaderChainer> shad
 }
 
 
-void UploadChainerView::Draw(std::shared_ptr<ShaderChainer> shaderChainer) {
+void UploadChainerView::draw(std::shared_ptr<ShaderChainer> shaderChainer) {
   bool open = true;
   drawUploadEffectChainWindow(open, shaderChainer);
 }

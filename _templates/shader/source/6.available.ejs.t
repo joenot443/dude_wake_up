@@ -2,6 +2,6 @@
 to: src/Video/ShaderSource.hpp
 inject: true
 skip_if: ShaderSource_<%= name %>, // Available
-after: "// Available ShaderSourceTypes"
+before: "}; // End AvailableShaderSourceTypes"
 ---
   ShaderSource_<%= name %>, // Available

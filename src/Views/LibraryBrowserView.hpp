@@ -11,7 +11,8 @@
 #include <stdio.h>
 #include "TileBrowserView.hpp"
 
-struct LibraryBrowserView {
+struct LibraryBrowserView
+{
 public:
   void setup();
   void update();

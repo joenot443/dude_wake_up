@@ -36,6 +36,7 @@ struct PlasmaSettings: public ShaderSettings {
     parameters = {enabled, speed, color};
     oscillators = {speedOscillator, colorOscillator};
     load(j);
+    registerParameters();
    };
 };
 

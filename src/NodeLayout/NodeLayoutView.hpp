@@ -9,6 +9,7 @@
 #define NodeLayoutView_hpp
 
 #include "NodeTypes.hpp"
+#include "VideoRecorder.hpp"
 #include "Shader.hpp"
 #include "VideoSource.hpp"
 #include "Shader.hpp"
@@ -34,6 +35,7 @@ public:
   void draw();
 
   void drawNodeWindows();
+  void drawPreviewWindows();
   void drawResolutionPopup();
   void drawUploadChainerWindow();
   
@@ -42,7 +44,7 @@ public:
   
   // Returns the Node for the associated shaderSourceId, if it exists.
   // If it doesn't, create a new Node.
-  std::shared_ptr<Node> nodeForShaderSourceId(std::string shaderSourceId, NodeType nodeType, std::string name, bool supportsAux);
+  std::shared_ptr<Node> nodeForShaderSourceId(std::string shaderSourceId, NodeType nodeType, std::string name, bool supportsAux, bool supportsMask);
   
   // Returns the Node for the associated shaderSourceId, if it exists.
   // nullptr if not.
@@ -57,6 +59,8 @@ public:
   void queryNewLinks();
   void populateNodePositions();
   void drawNode(std::shared_ptr<Node> node);
+  void drawPreviewWindow(std::shared_ptr<Node> node);
+  void drawZoomButtons();
   int nodeIdTicker = 1;
   
   // Handlers
@@ -68,14 +72,23 @@ public:
   void handleDeleteNode(std::shared_ptr<Node> node);
   void handleDroppedSource(std::shared_ptr<VideoSource> source);
   void handleUploadChain(std::shared_ptr<Node> node);
-
-  // Selection
+  void handleUnplacedDownloadedLibraryFile();
   
+  // Notifications
+  void haveDownloadedAvailableLibraryFile(LibraryFile &file);
+  
+  
+  // Selection
   void selectChainer(std::shared_ptr<Node> node);
 
   ed::EditorContext *context = nullptr;
   std::vector<std::string> unplacedNodeIds = {};
+  std::unique_ptr<ImVec2> nodeDropLocation;
+  std::unique_ptr<LibraryFile> pendingFile;
+  
   std::vector<std::shared_ptr<Node>> nodes;
+  std::set<std::shared_ptr<Node>> previewWindowNodes = {};
+  std::set<std::shared_ptr<Node>> terminalNodes = {};
   
   // Resolution Popup
   std::shared_ptr<Node> resolutionPopupNode;
@@ -103,10 +116,11 @@ public:
   std::map<long, std::shared_ptr<ShaderLink>> linksMap;
   
   std::set<std::shared_ptr<Node>> nodesToOpen;
-
-  std::unique_ptr<ImVec2> nodeDropLocation;
+  
+  
   ed::NodeId contextMenuNodeId = 0;
   ImVec2 contextMenuLocation;
+  VideoRecorder recorder;
 };
 
 #endif /* NodeLayoutView_hpp */

@@ -39,8 +39,6 @@ void ParameterService::tickParameters() {
   for (auto const &[key, weak_val] : parameterMap) {
       if (auto shared_val = weak_val.lock()) {
         shared_val->tick();
-      } else {
-        log("Referencing a deleted Parameter");
       }
   }
 }

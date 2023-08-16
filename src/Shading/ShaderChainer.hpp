@@ -24,7 +24,8 @@
 
 using json = nlohmann::json;
 
-class ShaderChainer : public VideoSource, public std::enable_shared_from_this<ShaderChainer> {
+class ShaderChainer : public VideoSource, public std::enable_shared_from_this<ShaderChainer>
+{
 public:
   void setup();
   void update();
@@ -40,7 +41,8 @@ public:
   std::vector<std::shared_ptr<Shader>> shaders();
   std::shared_ptr<Shader> front;
   std::shared_ptr<Shader> frontAux;
-  
+  std::shared_ptr<Shader> frontMask;
+
   std::shared_ptr<VideoSource> source;
 
   std::shared_ptr<FeedbackSource> feedbackDestination;
@@ -58,8 +60,7 @@ public:
       : chainerId(chainerId),
         creationTime(ofGetUnixTime()),
         name(name), source(source),
-        VideoSource(UUID::generateUUID(), name, VideoSource_chainer)
-  {};
+        VideoSource(UUID::generateUUID(), name, VideoSource_chainer){};
 
   json serialize();
   void load(json j);

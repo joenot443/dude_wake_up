@@ -155,6 +155,8 @@ struct AudioAnalysis {
     zcrAnalysisParam.tick(gist->zeroCrossingRate());
     spectralDiffAnalysisParam.tick(gist->spectralDifference());
   }
+  
+  
 };
 
 #endif /* AudioSettings_h */

@@ -24,6 +24,7 @@ static const std::string OscJsonKey = "osc";
 static const std::string SourcesJsonKey = "sources";
 static const std::string ShaderChainersJsonKey = "chainers";
 static const std::string NameJsonKey = "name";
+static const std::string LayoutJsonKey = "layout";
 
 static const std::string ConfigTypeKey = "configType";
 static const std::string ConfigTypeFull = "full";
@@ -53,20 +54,26 @@ public:
   std::vector<AvailableShaderConfig> availableConfigsForShaderType(ShaderType type);
   std::string shaderConfigFolderForType(ShaderType type);
   json shaderConfigForPath(std::string path);
+  
+  void checkAndSaveDefaultConfigFile();
   void saveDefaultConfigFile();
   void loadDefaultConfigFile();
 
   void saveConfigFile(std::string path);
   void loadConfigFile(std::string path);
-
+  json currentConfig();
   
   std::string nottawaFolderFilePath();
+  std::string libraryFolderFilePath();
   std::string relativeFilePathWithinNottawaFolder(std::string filePath);
 
   json jsonFromParameters(std::vector<Parameter *> parameters);
 
   static ConfigService *service;
   ConfigService(){};
+  
+  json lastConfig = 0;
+  
   static ConfigService *getService() {
     if (!service) {
       service = new ConfigService;

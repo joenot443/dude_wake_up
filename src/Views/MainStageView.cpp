@@ -5,6 +5,7 @@
 //  Created by Joe Crozier on 11/14/22.
 //
 
+#include <sentry.h>
 #include "MainStageView.hpp"
 #include "ConfigService.hpp"
 #include "TileBrowserView.hpp"
@@ -20,13 +21,15 @@
 #include "ShaderSettings.hpp"
 #include "ShaderType.hpp"
 #include "UUID.hpp"
+#include "SubmitFeedbackView.hpp"
 #include "VideoSourceService.hpp"
 #include "implot.h"
 
 static const ImVec2 ShaderButtonSize = ImVec2(90, 30);
 static const float MenuBarHeight = 50.0f;
 
-void MainStageView::setup() {
+void MainStageView::setup()
+{
   NodeLayoutView::getInstance()->setup();
   shaderBrowserView.setup();
   fileBrowserView.setup();
@@ -35,9 +38,16 @@ void MainStageView::setup() {
   shaderChainerSettingsView.setup();
   shaderChainerStageView.setup();
   audioSourceBrowserView.setup();
+
+  sentry_uuid_t uuid = sentry_capture_event(sentry_value_new_message_event(
+      /*   level */ SENTRY_LEVEL_INFO,
+      /*  logger */ "custom",
+      /* message */ "It works!"));
+  uuid;
 }
 
-void MainStageView::update() {
+void MainStageView::update()
+{
   videoSourceBrowserView.update();
   outputBrowserView.update();
   shaderChainerSettingsView.update();
@@ -46,12 +56,12 @@ void MainStageView::update() {
   NodeLayoutView::getInstance()->update();
 }
 
-void MainStageView::draw() {
+void MainStageView::draw()
+{
   // Draw a table with 3 columns, sized 1/5, 3/5, 1/5
-  ImGui::Columns(3, "main_stage_view", false);
+  ImGui::Columns(2, "main_stage_view", false);
   ImGui::SetColumnWidth(0, ImGui::GetWindowWidth() / 5.);
-  ImGui::SetColumnWidth(1, 3. * (ImGui::GetWindowWidth() / 5.));
-  ImGui::SetColumnWidth(2, ImGui::GetWindowWidth() / 5.);
+  ImGui::SetColumnWidth(1, 4. * (ImGui::GetWindowWidth() / 5.));
 
   // | Sources |  Node Layout   | Outputs
   // | Effects |        ''      |   ''
@@ -62,14 +72,17 @@ void MainStageView::draw() {
                             (ImGui::GetWindowContentRegionMax().y - MenuBarHeight) / 3.);
 
   ImGui::BeginChild("##sourceBrowser", browserSize);
+  CommonViews::H3Title("Sources");
   drawVideoSourceBrowser();
   ImGui::EndChild();
 
   ImGui::BeginChild("##shaderBrowser", browserSize);
+  CommonViews::H3Title("Effects");
   drawShaderBrowser();
   ImGui::EndChild();
 
   ImGui::BeginChild("##libraryBrowser", browserSize);
+  CommonViews::H3Title("Saved Chains");
   fileBrowserView.draw();
   ImGui::EndChild();
 
@@ -81,49 +94,66 @@ void MainStageView::draw() {
   NodeLayoutView::getInstance()->draw();
 
   audioSourceBrowserView.draw();
-
-  ImGui::NextColumn();
-
-  // Outputs
-  drawOutputBrowser();
 }
 
-void MainStageView::drawMenu() {
-  if (ImGui::BeginMenuBar()) {
+void MainStageView::drawMenu()
+{
+  if (ImGui::BeginMenuBar())
+  {
     // Save Config
-    if (ImGui::BeginMenu("File")) {
-      if (ImGui::MenuItem("Save Config")) {
+    if (ImGui::BeginMenu("File"))
+    {
+      if (ImGui::MenuItem("Save Config"))
+      {
         // Present a file dialog to save the config file
         // Use a default name of "CURRENT_DATE_TIME.json"
         std::string defaultName =
             ofGetTimestampString("%Y-%m-%d_%H-%M-%S.json");
         ofFileDialogResult result =
             ofSystemSaveDialog(defaultName, "Save File");
-        if (result.bSuccess) {
+        if (result.bSuccess)
+        {
           ConfigService::getService()->saveConfigFile(result.getPath());
         }
       }
-      if (ImGui::MenuItem("Load Config")) {
+      if (ImGui::MenuItem("Load Config"))
+      {
         // Present a file dialog to load the config file
         ofFileDialogResult result = ofSystemLoadDialog("Open File", false);
-        if (result.bSuccess) {
+        if (result.bSuccess)
+        {
           ConfigService::getService()->loadConfigFile(result.getPath());
         }
       }
       ImGui::EndMenu();
     }
 
-    if (ImGui::MenuItem("Save Default Config")) {
+    if (ImGui::MenuItem("Save Default Config"))
+    {
       ConfigService::getService()->saveDefaultConfigFile();
     }
-    if (ImGui::MenuItem("Load Default Config")) {
+    if (ImGui::MenuItem("Load Default Config"))
+    {
       ConfigService::getService()->loadDefaultConfigFile();
     }
+
+    if (ImGui::BeginPopupModal(SubmitFeedbackView::popupId, nullptr, ImGuiPopupFlags_MouseButtonLeft))
+    {
+      submitFeedbackView.draw();
+      ImGui::EndPopup();
+    }
+    // Present the submit feedback view in a popup modal when the menu button is pressed
+    if (ImGui::MenuItem("Submit Feedback"))
+    {
+      ImGui::OpenPopup(SubmitFeedbackView::popupId);
+    }
+
     ImGui::EndMenuBar();
   }
 }
 
-void MainStageView::drawVideoSourceBrowser() {
+void MainStageView::drawVideoSourceBrowser()
+{
   videoSourceBrowserView.draw();
 }
 

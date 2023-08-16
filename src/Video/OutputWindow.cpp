@@ -7,11 +7,12 @@
 
 #include "OutputWindow.hpp"
 
-
 void OutputWindow::setup() {}
 
-void OutputWindow::update() {
-  if (chainer->settings.width->intValue != ofGetWindowWidth()) {
+void OutputWindow::update()
+{
+  if (chainer->settings.width->intValue != ofGetWindowWidth())
+  {
     ofSetWindowShape(chainer->settings.width->intValue, chainer->settings.height->intValue);
   }
   std::stringstream strm;
@@ -19,6 +20,7 @@ void OutputWindow::update() {
   ofSetWindowTitle(strm.str());
 }
 
-void OutputWindow::draw() {
+void OutputWindow::draw()
+{
   chainer->fbo.draw(0, 0);
 }

@@ -49,6 +49,7 @@ struct MirrorSettings : public ShaderSettings {
     parameters = {lockXY, xOffset, yOffset, mirrorXEnabled, mirrorYEnabled};
     oscillators = {xOffsetOscillator, yOffsetOscillator};
     load(j);
+  registerParameters();
   }
 };
 

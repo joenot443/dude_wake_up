@@ -17,6 +17,7 @@
 struct VideoSourceBrowserView {
 public:
   void setup();
+  void refreshSources();
   void update();
   void draw();
 
@@ -24,9 +25,9 @@ private:
   ofFbo videoSourceFbo;
   TileBrowserView tileBrowserView = TileBrowserView({});
   FileBrowserView fileBrowserView = FileBrowserView(FileBrowserType_Source);
-  std::vector<TileItem> webcamItems;
-  std::vector<TileItem> shaderItems;
-  std::vector<TileItem> textItems;
+  std::vector<std::shared_ptr<TileItem>> webcamItems;
+  std::vector<std::shared_ptr<TileItem>> shaderItems;
+  std::vector<std::shared_ptr<LibraryTileItem>> libraryItems;
 };
 
 #endif /* VideoSourceBrowserView_hpp */

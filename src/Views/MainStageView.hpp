@@ -18,6 +18,7 @@
 #include "ShaderChainersStageView.hpp"
 #include "VideoSource.hpp"
 #include "VideoSourceBrowserView.hpp"
+#include "SubmitFeedbackView.hpp"
 #include "ShaderChainerPreviewView.hpp"
 #include "ofMain.h"
 #include <stdio.h>
@@ -39,6 +40,7 @@ private:
   OscillatorView oscillatorView = OscillatorView();
   ShaderChainersStageView shaderChainerStageView = ShaderChainersStageView();
   FileBrowserView fileBrowserView = FileBrowserView(FileBrowserType_JSON);
+  SubmitFeedbackView submitFeedbackView = SubmitFeedbackView();
 
   void drawMenu();
   void drawVideoSourceBrowser();

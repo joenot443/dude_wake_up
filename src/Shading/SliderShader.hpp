@@ -30,6 +30,7 @@ struct SliderSettings : public ShaderSettings {
         ShaderSettings(shaderId, j){
           parameters = { speed, vertical };
           oscillators = { speedOscillator };
+          registerParameters();
         };
 };
 

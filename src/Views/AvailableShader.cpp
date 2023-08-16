@@ -27,7 +27,7 @@ void AvailableShader::generatePreview() {
   shader->shade(&previewCanvas, &fbo);
   fbo.begin();
   // Add a 70% black overlay to the preview
-  ofSetColor(0, 0, 0, 70);
+  ofSetColor(0, 0, 0, 128);
   ofDrawRectangle(0, 0, 320, 240);
   fbo.end();
   preview = std::make_shared<ofTexture>(fbo.getTexture());

@@ -11,20 +11,7 @@
 #include <stdio.h>
 #include <vector>
 
-// template<typename T>
-// std::vector<T> flatten(std::vector<std::vector<T>> const &vec)
-//{
-//     std::vector<T> flattened;
-//     for (auto const &v: vec) {
-//         flattened.insert(flattened.end(), v.begin(), v.end());
-//     }
-//     return flattened;
-// }
-//
-
 struct Vectors {
-  constexpr static const float RELEASE = 0.95;
-
   static std::vector<float> normalize(std::vector<float> vec) {
     std::vector<float> out = {};
     // Get the max value
@@ -65,7 +52,7 @@ struct Vectors {
     std::vector<float> out = std::vector<float>(smooth);
 
     for (int i = 0; i < vec.size(); i++) {
-      out[i] *= RELEASE;
+      out[i] *= 0.95;
       if (vec[i] > smooth[i]) {
         out[i] = vec[i];
       }

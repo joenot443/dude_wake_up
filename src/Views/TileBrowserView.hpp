@@ -13,7 +13,9 @@
 #include "UUID.hpp"
 #include "ofxImGui.h"
 
-struct TileItem {
+class TileItem {
+public:
+  virtual ~TileItem() {} 
   std::string name;
   ImTextureID textureID;
   int index;
@@ -32,11 +34,14 @@ public:
   void draw();
   void update();
 
-  std::vector<TileItem> tileItems;
+  std::vector<std::shared_ptr<TileItem>> tileItems;
   float widthFraction = 0.2;
   std::string tileBrowserId;
+  
+  template <typename T>
+  TileBrowserView(const std::vector<std::shared_ptr<T>>& items) : tileItems(items.begin(), items.end()) {}
 
-  TileBrowserView(std::vector<TileItem> tileItems) : tileItems(tileItems),
+  TileBrowserView(std::vector<std::shared_ptr<TileItem>> tileItems) : tileItems(tileItems),
   tileBrowserId(UUID::generateUUID())
   {};
 };

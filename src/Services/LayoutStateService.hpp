@@ -9,12 +9,22 @@
 #define LayoutStateService_hpp
 
 #include <stdio.h>
+#include "ofMain.h"
+#include "ConfigService.hpp"
+#include "ConfigurableService.hpp"
 
-class LayoutStateService {
+static const std::string ShowAudioSettingsJsonKey = "showAudioSettings";
+static const std::string LibraryPathJsonKey = "libraryPath";
+
+class LayoutStateService: public ConfigurableService {
 public:
   LayoutStateService(){};
 
-  bool showAudioSettings;
+  bool showAudioSettings = false;
+  std::string libraryPath = ConfigService::getService()->nottawaFolderFilePath();
+  
+  void updateLibraryPath(std::string path);
+  
   static LayoutStateService *service;
 
   static LayoutStateService *getService() {
@@ -23,6 +33,9 @@ public:
     }
     return service;
   }
+  
+  json config();
+  void loadConfig(json j);
 };
 
 #endif /* LayoutStateService_hpp */

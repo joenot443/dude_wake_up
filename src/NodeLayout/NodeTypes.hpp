@@ -20,11 +20,12 @@ static const long NullId = -1000;
 namespace ed = ax::NodeEditor;
 
 enum NodeType { NodeTypeSource, NodeTypeShader };
-enum LinkType { LinkTypeShader, LinkTypeSource, LinkTypeAux };
+enum LinkType { LinkTypeShader, LinkTypeSource, LinkTypeAux, LinkTypeMask };
 enum PinType {
   PinTypeInput,
   PinTypeOutput,
-  PinTypeAux
+  PinTypeAux,
+  PinTypeMask
 };
 
 struct Node {
@@ -32,6 +33,7 @@ struct Node {
   ed::PinId outputId;
   ed::PinId inputId;
   ed::PinId auxId;
+  ed::PinId maskId;
   std::string name;
   NodeType type;
   std::shared_ptr<Shader> shader;
@@ -40,6 +42,7 @@ struct Node {
   std::shared_ptr<Node> sourceNode;
   std::shared_ptr<Node> nextNode;
   std::shared_ptr<Node> auxNode;
+  std::shared_ptr<Node> maskNode;
   
   ImVec2 position;
   
@@ -53,7 +56,12 @@ struct Node {
   
   bool hasAuxLink() {
     return supportsAux() &&
-    (shader->aux != nullptr || shader->sourceAux != nullptr);
+    (shader->aux != nullptr || shader->auxSource != nullptr);
+  }
+  
+  bool hasMaskLink() {
+    return supportsMask() &&
+    (shader->mask != nullptr || shader->sourceMask != nullptr);
   }
   
   bool hasInputLink() {
@@ -69,6 +77,10 @@ struct Node {
     return auxId.Get() != NullId;
   }
   
+  bool supportsMask() {
+    return maskId.Get() != NullId;
+  }
+  
   // Draws the settings from the underlying Shader or VideoSource
   void drawSettings() {
     if (type == NodeTypeShader) {
@@ -79,8 +91,19 @@ struct Node {
     }
   }
   
+  // Draws the frame for the node
+  void drawPreview(ImVec2 pos) {
+    if (type == NodeTypeShader) {
+      shader->drawPreview(pos);
+    } else {
+      source->drawPreview(pos);
+    }
+  }
+  
   ImColor nodeColor() {
     if (type == NodeTypeSource) { return SourceNodeColor; }
+    if (supportsAux()) return AuxNodeColor;
+    if (supportsMask()) return MaskNodeColor;
     
     return supportsAux() ? AuxNodeColor : ShaderNodeColor;
   }

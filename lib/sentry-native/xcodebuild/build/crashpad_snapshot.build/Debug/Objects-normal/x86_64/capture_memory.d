@@ -1,0 +1,30 @@
+dependencies: \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/snapshot/capture_memory.cc \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/snapshot/capture_memory.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/snapshot/cpu_context.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/snapshot/cpu_architecture.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/util/numeric/int128.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/third_party/mini_chromium/mini_chromium/build/build_config.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/third_party/mini_chromium/mini_chromium/build/buildflag.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/util/numeric/checked_range.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/third_party/mini_chromium/mini_chromium/base/check.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/third_party/mini_chromium/mini_chromium/base/logging.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/third_party/mini_chromium/mini_chromium/base/check_op.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/third_party/mini_chromium/mini_chromium/base/notreached.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/third_party/mini_chromium/mini_chromium/base/numerics/safe_conversions.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/third_party/mini_chromium/mini_chromium/base/numerics/safe_conversions_impl.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/third_party/mini_chromium/mini_chromium/base/numerics/safe_math.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/third_party/mini_chromium/mini_chromium/base/numerics/checked_math.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/third_party/mini_chromium/mini_chromium/base/numerics/checked_math_impl.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/third_party/mini_chromium/mini_chromium/base/numerics/safe_math_shared_impl.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/third_party/mini_chromium/mini_chromium/base/numerics/safe_math_clang_gcc_impl.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/third_party/mini_chromium/mini_chromium/base/numerics/clamped_math.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/third_party/mini_chromium/mini_chromium/base/numerics/clamped_math_impl.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/util/misc/implicit_cast.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/compat/non_win/windows.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/compat/non_win/dbghelp.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/compat/non_win/timezoneapi.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/compat/non_win/minwinbase.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/compat/non_win/verrsrc.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/compat/non_win/winnt.h \
+  /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/snapshot/memory_snapshot.h

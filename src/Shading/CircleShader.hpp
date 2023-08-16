@@ -27,8 +27,7 @@ struct CircleShader: Shader {
   CircleShader(CircleSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    #ifdef TESTING
-    log("REEEEE");
+#ifdef TESTING
 shader.load("shaders/Circle");
 #endif
 #ifdef RELEASE

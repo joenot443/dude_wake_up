@@ -1,4 +1,6 @@
 #include <errno.h>
+#include <sentry.h>
+
 #include "ofMain.h"
 #include "MainApp.h"
 #include "FontService.hpp"
@@ -20,6 +22,7 @@ using json = nlohmann::json;
 
 #define RELEASE
 
+const char* SubmitFeedbackView::popupId = "Submit Feedback";
 NodeLayoutView *NodeLayoutView::instance = 0;
 FontService *FontService::service = 0;
 ModulationService *ModulationService::service = 0;
@@ -56,6 +59,18 @@ void setupDirectories() {
 
 int main( ){
   setupDirectories();
+  auto homeDir = ofFilePath::getUserHomeDir();
+  auto libraryPath = ofFilePath::join(homeDir, "/nottawa");
+  
+  sentry_options_t *options = sentry_options_new();
+  sentry_options_set_dsn(options, "https://ce0071f5f4c84c6f99f58a6a7d97c5a1@o4505431303847936.ingest.sentry.io/4505431305486336");
+  sentry_options_set_database_path(options, libraryPath.c_str());
+  auto crashpadDirectory = ofFilePath::join(ofFilePath::getCurrentExeDir(), "../../../crashpad_handler");
+  log(crashpadDirectory);
+  sentry_options_set_handler_path(options, crashpadDirectory.c_str());
+  sentry_options_set_release(options, "nottawa@0.1");
+  sentry_options_set_debug(options, 1);
+  sentry_init(options);
 
   ofGLFWWindowSettings settings;
   // Set the window size to be the same as the monitor size
@@ -68,6 +83,7 @@ int main( ){
   ofSetFrameRate(60);
   ofRunApp(window, app);
   ofRunMainLoop();
+  sentry_close();
 }
 
 

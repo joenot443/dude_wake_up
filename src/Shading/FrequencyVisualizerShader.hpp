@@ -1,0 +1,92 @@
+//
+//  FrequencyVisualizerShader.hpp
+//  dude_wake_up
+//
+//  Created by Joe Crozier on 8/30/22.
+//
+
+#ifndef FrequencyVisualizerShader_hpp
+#define FrequencyVisualizerShader_hpp
+
+#include "ofMain.h"
+#include "ShaderSettings.hpp"
+#include "CommonViews.hpp"
+#include "ofxImGui.h"
+#include "ValueOscillator.hpp"
+#include "Parameter.hpp"
+#include "Shader.hpp"
+#include <stdio.h>
+
+struct FrequencyVisualizerSettings : public ShaderSettings
+{
+  std::shared_ptr<Parameter> shaderValue;
+  std::shared_ptr<ValueOscillator> shaderValueOscillator;
+
+  FrequencyVisualizerSettings(std::string shaderId, json j) : shaderValue(std::make_shared<Parameter>("shaderValue", 1.0, -1.0, 2.0)),
+                                                              shaderValueOscillator(std::make_shared<ValueOscillator>(shaderValue)),
+                                                              ShaderSettings(shaderId, j)
+  {
+    parameters = {shaderValue};
+    oscillators = {shaderValueOscillator};
+    load(j);
+    registerParameters();
+  };
+};
+
+struct FrequencyVisualizerShader : Shader
+{
+  FrequencyVisualizerSettings *settings;
+  FrequencyVisualizerShader(FrequencyVisualizerSettings *settings) : settings(settings), Shader(settings){};
+  ofShader shader;
+  void setup() override
+  {
+    shader.load("shaders/FrequencyVisualizer");
+  }
+
+  void shade(ofFbo *frame, ofFbo *canvas) override
+  {
+    auto source = AudioSourceService::getService()->selectedAudioSource;
+
+    canvas->begin();
+    shader.begin();
+    shader.setUniformTexture("tex", frame->getTexture(), 4);
+    shader.setUniform1f("color", settings->shaderValue->value);
+    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
+    if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() > 0)
+      shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0],
+                           256);
+
+    ofPushMatrix();
+    ofScale(1, 1);
+    frame->getTexture().drawSubsection(0, 0, frame->getWidth() / 2, frame->getHeight(), 0, 0);
+    ofPopMatrix();
+
+    ofPushMatrix();                     // push the current transformation matrix
+    ofScale(-1, 1);                    // flip the x-axis
+    ofTranslate(-frame->getWidth(), 0); // translate the drawing back to its original position
+    frame->getTexture().drawSubsection(0, 0, frame->getWidth() / 2, frame->getHeight(), 0, 0);
+    ofPopMatrix(); // reset the transformation matrix
+
+    shader.end();
+    canvas->end();
+  }
+
+  void clear() override
+  {
+  }
+
+  ShaderType type() override
+  {
+    return ShaderTypeFrequencyVisualizer;
+  }
+
+  void drawSettings() override
+  {
+    CommonViews::H3Title("FrequencyVisualizer");
+
+    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
+  }
+};
+
+#endif /* FrequencyVisualizerShader_hpp */

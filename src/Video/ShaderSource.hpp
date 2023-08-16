@@ -4,6 +4,13 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "SolidColorShader.hpp"
+#include "HilbertShader.hpp"
+#include "WarpShader.hpp"
+#include "FrequencyVisualizerShader.hpp"
+#include "CurlySquaresShader.hpp"
+#include "PlasmaTwoShader.hpp"
+#include "DancingSquaresShader.hpp"
 #include "CircleShader.hpp"
 #include "TissueShader.hpp"
 #include "PsycurvesShader.hpp"
@@ -34,6 +41,10 @@
 using json = nlohmann::json;
 
 enum ShaderSourceType {
+  ShaderSource_FrequencyVisualizer, //source enum,
+  ShaderSource_CurlySquares, //source enum,
+  ShaderSource_PlasmaTwo, //source enum,
+  ShaderSource_DancingSquares, //source enum,
   ShaderSource_Circle, //source enum,
   ShaderSource_Tissue, //source enum,
   ShaderSource_Psycurves,
@@ -53,11 +64,18 @@ enum ShaderSourceType {
   ShaderSource_audioWaveform,
   ShaderSource_audioBumper,
   ShaderSource_audioMountains,
-  ShaderSource_galaxy
-};
+  ShaderSource_galaxy,
+  ShaderSource_Warp, //source enum,
+  ShaderSource_Hilbert, //source enum,
+  ShaderSource_SolidColor, //source enum,
+}; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
 // Available ShaderSourceTypes
+  ShaderSource_FrequencyVisualizer, // Available
+  ShaderSource_CurlySquares, // Available
+  ShaderSource_PlasmaTwo, // Available
+  ShaderSource_DancingSquares, // Available
   ShaderSource_Circle, // Available
   ShaderSource_Tissue, // Available
   ShaderSource_Psycurves,
@@ -75,12 +93,29 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_audioWaveform,
   ShaderSource_audioBumper,
   ShaderSource_audioMountains,
-  ShaderSource_galaxy
-};
+  ShaderSource_galaxy,
+  ShaderSource_Warp, // Available
+  ShaderSource_Hilbert, // Available
+  ShaderSource_SolidColor, // Available
+}; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
 // shaderTypeForShaderSourceType
+  case ShaderSource_SolidColor: //type enum
+    return ShaderTypeSolidColor;
+  case ShaderSource_Hilbert: //type enum
+    return ShaderTypeHilbert;
+  case ShaderSource_Warp: //type enum
+    return ShaderTypeWarp;
+  case ShaderSource_FrequencyVisualizer: //type enum
+    return ShaderTypeFrequencyVisualizer;
+  case ShaderSource_CurlySquares: //type enum
+    return ShaderTypeCurlySquares;
+  case ShaderSource_PlasmaTwo: //type enum
+    return ShaderTypePlasmaTwo;
+  case ShaderSource_DancingSquares: //type enum
+    return ShaderTypeDancingSquares;
   case ShaderSource_Circle: //type enum
     return ShaderTypeCircle;
   case ShaderSource_Tissue: //type enum
@@ -129,6 +164,20 @@ static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
 static std::string shaderSourceTypeName(ShaderSourceType nameType) {
   switch (nameType) {
   // Shader Names
+  case ShaderSource_SolidColor: // Name  
+    return "SolidColor"; // SolidColor
+  case ShaderSource_Hilbert: // Name  
+    return "Hilbert"; // Hilbert
+  case ShaderSource_Warp: // Name  
+    return "Warp"; // Warp
+  case ShaderSource_FrequencyVisualizer: // Name  
+    return "FrequencyVisualizer"; // FrequencyVisualizer
+  case ShaderSource_CurlySquares: // Name  
+    return "CurlySquares"; // CurlySquares
+  case ShaderSource_PlasmaTwo: // Name  
+    return "PlasmaTwo"; // PlasmaTwo
+  case ShaderSource_DancingSquares: // Name  
+    return "DancingSquares"; // DancingSquares
   case ShaderSource_Circle: // Name  
     return "Circle"; // Circle
   case ShaderSource_Tissue: // Name  
@@ -190,6 +239,48 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_SolidColor: { // Settings
+      auto settings = new SolidColorSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<SolidColorShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Hilbert: { // Settings
+      auto settings = new HilbertSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<HilbertShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Warp: { // Settings
+      auto settings = new WarpSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<WarpShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_FrequencyVisualizer: { // Settings
+      auto settings = new FrequencyVisualizerSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<FrequencyVisualizerShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_CurlySquares: { // Settings
+      auto settings = new CurlySquaresSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<CurlySquaresShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_PlasmaTwo: { // Settings
+      auto settings = new PlasmaTwoSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<PlasmaTwoShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_DancingSquares: { // Settings
+      auto settings = new DancingSquaresSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<DancingSquaresShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_Circle: { // Settings
       auto settings = new CircleSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<CircleShader>(settings);
@@ -321,12 +412,14 @@ public:
     shader->setup();
     fbo.allocate(settings.width->value, settings.height->value, GL_RGBA);
     fbo.begin();
-    ofClear(0, 0, 0, 255);
+    ofSetColor(0, 0, 0, 0);
+    ofDrawRectangle(0, 0, fbo.getWidth(), fbo.getHeight());
     fbo.end();
 
     canvas.allocate(settings.width->value, settings.height->value, GL_RGBA);
     canvas.begin();
-    ofClear(0, 0, 0, 255);
+    ofSetColor(0, 0, 0, 0);
+    ofDrawRectangle(0, 0, fbo.getWidth(), fbo.getHeight());
     canvas.end();
   };
 

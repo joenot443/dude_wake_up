@@ -13,5 +13,6 @@
 static ImColor SourceNodeColor = ImColor(174, 32, 18);
 static ImColor ShaderNodeColor = ImColor(0, 95, 115);
 static ImColor AuxNodeColor = ImColor(202, 103, 2);
+static ImColor MaskNodeColor = ImColor(54, 78, 2);
 
 #endif /* Colors_h */

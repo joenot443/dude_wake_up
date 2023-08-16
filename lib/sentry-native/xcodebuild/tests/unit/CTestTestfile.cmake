@@ -1,0 +1,36 @@
+# CMake generated Testfile for 
+# Source directory: /Users/jcrozier/Downloads/sentry-nativeee/tests/unit
+# Build directory: /Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/tests/unit
+# 
+# This file includes the relevant testing commands required for 
+# testing this directory and lists subdirectories to be tested as well.
+if(CTEST_CONFIGURATION_TYPE MATCHES "^([Dd][Ee][Bb][Uu][Gg])$")
+  add_test(sentry_test_unit "/Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/tests/unit/Debug/sentry_test_unit")
+  set_tests_properties(sentry_test_unit PROPERTIES  _BACKTRACE_TRIPLES "/Users/jcrozier/Downloads/sentry-nativeee/tests/unit/CMakeLists.txt;90;add_test;/Users/jcrozier/Downloads/sentry-nativeee/tests/unit/CMakeLists.txt;0;")
+elseif(CTEST_CONFIGURATION_TYPE MATCHES "^([Rr][Ee][Ll][Ee][Aa][Ss][Ee])$")
+  add_test(sentry_test_unit "/Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/tests/unit/Release/sentry_test_unit")
+  set_tests_properties(sentry_test_unit PROPERTIES  _BACKTRACE_TRIPLES "/Users/jcrozier/Downloads/sentry-nativeee/tests/unit/CMakeLists.txt;90;add_test;/Users/jcrozier/Downloads/sentry-nativeee/tests/unit/CMakeLists.txt;0;")
+elseif(CTEST_CONFIGURATION_TYPE MATCHES "^([Mm][Ii][Nn][Ss][Ii][Zz][Ee][Rr][Ee][Ll])$")
+  add_test(sentry_test_unit "/Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/tests/unit/MinSizeRel/sentry_test_unit")
+  set_tests_properties(sentry_test_unit PROPERTIES  _BACKTRACE_TRIPLES "/Users/jcrozier/Downloads/sentry-nativeee/tests/unit/CMakeLists.txt;90;add_test;/Users/jcrozier/Downloads/sentry-nativeee/tests/unit/CMakeLists.txt;0;")
+elseif(CTEST_CONFIGURATION_TYPE MATCHES "^([Rr][Ee][Ll][Ww][Ii][Tt][Hh][Dd][Ee][Bb][Ii][Nn][Ff][Oo])$")
+  add_test(sentry_test_unit "/Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/tests/unit/RelWithDebInfo/sentry_test_unit")
+  set_tests_properties(sentry_test_unit PROPERTIES  _BACKTRACE_TRIPLES "/Users/jcrozier/Downloads/sentry-nativeee/tests/unit/CMakeLists.txt;90;add_test;/Users/jcrozier/Downloads/sentry-nativeee/tests/unit/CMakeLists.txt;0;")
+else()
+  add_test(sentry_test_unit NOT_AVAILABLE)
+endif()
+if(CTEST_CONFIGURATION_TYPE MATCHES "^([Dd][Ee][Bb][Uu][Gg])$")
+  add_test(sentry_fuzz_json "/Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/tests/unit/Debug/sentry_fuzz_json")
+  set_tests_properties(sentry_fuzz_json PROPERTIES  _BACKTRACE_TRIPLES "/Users/jcrozier/Downloads/sentry-nativeee/tests/unit/CMakeLists.txt;116;add_test;/Users/jcrozier/Downloads/sentry-nativeee/tests/unit/CMakeLists.txt;0;")
+elseif(CTEST_CONFIGURATION_TYPE MATCHES "^([Rr][Ee][Ll][Ee][Aa][Ss][Ee])$")
+  add_test(sentry_fuzz_json "/Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/tests/unit/Release/sentry_fuzz_json")
+  set_tests_properties(sentry_fuzz_json PROPERTIES  _BACKTRACE_TRIPLES "/Users/jcrozier/Downloads/sentry-nativeee/tests/unit/CMakeLists.txt;116;add_test;/Users/jcrozier/Downloads/sentry-nativeee/tests/unit/CMakeLists.txt;0;")
+elseif(CTEST_CONFIGURATION_TYPE MATCHES "^([Mm][Ii][Nn][Ss][Ii][Zz][Ee][Rr][Ee][Ll])$")
+  add_test(sentry_fuzz_json "/Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/tests/unit/MinSizeRel/sentry_fuzz_json")
+  set_tests_properties(sentry_fuzz_json PROPERTIES  _BACKTRACE_TRIPLES "/Users/jcrozier/Downloads/sentry-nativeee/tests/unit/CMakeLists.txt;116;add_test;/Users/jcrozier/Downloads/sentry-nativeee/tests/unit/CMakeLists.txt;0;")
+elseif(CTEST_CONFIGURATION_TYPE MATCHES "^([Rr][Ee][Ll][Ww][Ii][Tt][Hh][Dd][Ee][Bb][Ii][Nn][Ff][Oo])$")
+  add_test(sentry_fuzz_json "/Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/tests/unit/RelWithDebInfo/sentry_fuzz_json")
+  set_tests_properties(sentry_fuzz_json PROPERTIES  _BACKTRACE_TRIPLES "/Users/jcrozier/Downloads/sentry-nativeee/tests/unit/CMakeLists.txt;116;add_test;/Users/jcrozier/Downloads/sentry-nativeee/tests/unit/CMakeLists.txt;0;")
+else()
+  add_test(sentry_fuzz_json NOT_AVAILABLE)
+endif()

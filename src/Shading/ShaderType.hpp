@@ -55,6 +55,17 @@ enum ShaderType {
   ShaderTypeHalfTone,
   ShaderTypeCrosshatch,
   ShaderTypeCircle,
+  ShaderTypeMask,
+  ShaderTypeLumaMaskMaker,
+  ShaderTypeDancingSquares,
+  ShaderTypePlasmaTwo,
+  ShaderTypeCurlySquares,
+  ShaderTypeColorKeyMaskMaker,
+  ShaderTypeFrequencyVisualizer,
+  ShaderTypeWarp,
+  ShaderTypeHilbert,
+  ShaderType16bit,
+  ShaderTypeSolidColor,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -63,11 +74,18 @@ static const ShaderType AvailableBasicShaderTypes[] = {
   ShaderTypePixelate, 
   ShaderTypeMirror,
   ShaderTypeGlitch,
+  ShaderType16bit
 };
 
 static const ShaderType AvailableMixShaderTypes[] = {
   ShaderTypeMix,
   ShaderTypeFeedback,
+};
+
+static const ShaderType AvailableMaskShaderTypes[] = {
+  ShaderTypeMask,
+  ShaderTypeLumaMaskMaker,
+  ShaderTypeColorKeyMaskMaker
 };
 
 static const ShaderType AvailableTransformShaderTypes[] = {
@@ -116,6 +134,28 @@ static std::vector<ShaderType> AllShaderTypes() {
 static std::string shaderTypeName(ShaderType type) {
   switch (type) {
     // Shader names
+    case ShaderTypeSolidColor:
+      return "SolidColor";
+    case ShaderType16bit:
+      return "16bit";
+    case ShaderTypeHilbert:
+      return "Hilbert";
+    case ShaderTypeWarp:
+      return "Warp";
+    case ShaderTypeFrequencyVisualizer:
+      return "FrequencyVisualizer";
+    case ShaderTypeColorKeyMaskMaker:
+      return "ColorKeyMaskMaker";
+    case ShaderTypeCurlySquares:
+      return "CurlySquares";
+    case ShaderTypePlasmaTwo:
+      return "PlasmaTwo";
+    case ShaderTypeDancingSquares:
+      return "DancingSquares";
+    case ShaderTypeLumaMaskMaker:
+      return "LumaMaskMaker";
+    case ShaderTypeMask:
+      return "Mask";
     case ShaderTypeCircle:
       return "Circle";
     case ShaderTypeCrosshatch:
@@ -207,7 +247,14 @@ static std::string shaderTypeName(ShaderType type) {
 
 static bool shaderTypeSupportsAux(ShaderType type) {
   if (type == ShaderTypeMix ||
-    type == ShaderTypeFeedback)
+    type == ShaderTypeFeedback ||
+      type == ShaderTypeMask)
+  {return true;}
+  return false;
+}
+
+static bool shaderTypeSupportsMask(ShaderType type) {
+  if (type == ShaderTypeMask)
   {return true;}
   return false;
 }

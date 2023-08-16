@@ -24,6 +24,7 @@ enum VideoSourceType {
   VideoSource_image,
   VideoSource_shader,
   VideoSource_text,
+  VideoSource_library,
   VideoSource_empty
 };
 
@@ -58,6 +59,13 @@ public:
   virtual void drawSettings(){};
   virtual json serialize(){ return 0; };
   virtual void load(json j){};
+  
+  virtual void teardown(){};
+  
+  void drawPreview(ImVec2 pos) {
+    ImTextureID texID = (ImTextureID)(uintptr_t)frameTexture->getTextureData().textureID;
+    ImGui::Image(texID, ImVec2(160, 120));
+  }
 
   void saveFeedbackFrame() {
     if (frameTexture != nullptr) {

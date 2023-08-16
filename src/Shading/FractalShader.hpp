@@ -27,6 +27,7 @@ struct FractalSettings: public ShaderSettings {
     parameters = {zoom};
     oscillators = {zoomOscillator};
     load(j);
+  registerParameters();
   };
 };
 

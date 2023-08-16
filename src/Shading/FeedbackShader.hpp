@@ -71,14 +71,16 @@ struct FeedbackSettings: public ShaderSettings {
   sourceSelection(std::make_shared<Parameter>("source", 0.0, 0.0, 3.0)),
   shaderId(shaderId),
   ShaderSettings(shaderId, j) {
-    parameters = {blend, mix, keyValue, keyThreshold, delayAmount, lumaKeyEnabled, xPosition, yPosition, scale};
+    parameters = {blend, mix, keyValue, keyThreshold, delayAmount, lumaKeyEnabled, xPosition, yPosition, scale, sourceSelection};
     oscillators = {blendOscillator, mixOscillator, keyValueOscillator, keyThresholdOscillator, delayAmountOscillator, xPositionOscillator, yPositionOscillator, scaleOscillator};
 
     load(j);
+  registerParameters();
   }
   
   void load(json j) override {
     ShaderSettings::load(j);
+    registerParameters();
     if (!j.is_object()) {
       return;
     }

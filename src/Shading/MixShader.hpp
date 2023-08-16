@@ -32,6 +32,7 @@ struct MixSettings : public ShaderSettings {
     parameters = {mix};
     oscillators = {mixOscillator};
     load(j);
+  registerParameters();
   };
 };
 

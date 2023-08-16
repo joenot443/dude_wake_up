@@ -1,0 +1,19 @@
+#!/bin/sh
+set -e
+if test "$CONFIGURATION" = "Debug"; then :
+  cd /Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/crashpad_build/util
+  /opt/homebrew/bin/python3.11 /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/util/mach/mig.py --arch FROM_ENV --sdk $SDKROOT --include=/Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/util/.. --include=/Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/util/../compat/mac /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.3.sdk/usr/include/mach/exc.defs /Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/crashpad_build/util/util/mach/excUser.c /Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/crashpad_build/util/util/mach/excServer.c /Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/crashpad_build/util/util/mach/exc.h /Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/crashpad_build/util/util/mach/excServer.h
+fi
+if test "$CONFIGURATION" = "Release"; then :
+  cd /Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/crashpad_build/util
+  /opt/homebrew/bin/python3.11 /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/util/mach/mig.py --arch FROM_ENV --sdk $SDKROOT --include=/Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/util/.. --include=/Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/util/../compat/mac /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.3.sdk/usr/include/mach/exc.defs /Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/crashpad_build/util/util/mach/excUser.c /Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/crashpad_build/util/util/mach/excServer.c /Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/crashpad_build/util/util/mach/exc.h /Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/crashpad_build/util/util/mach/excServer.h
+fi
+if test "$CONFIGURATION" = "MinSizeRel"; then :
+  cd /Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/crashpad_build/util
+  /opt/homebrew/bin/python3.11 /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/util/mach/mig.py --arch FROM_ENV --sdk $SDKROOT --include=/Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/util/.. --include=/Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/util/../compat/mac /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.3.sdk/usr/include/mach/exc.defs /Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/crashpad_build/util/util/mach/excUser.c /Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/crashpad_build/util/util/mach/excServer.c /Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/crashpad_build/util/util/mach/exc.h /Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/crashpad_build/util/util/mach/excServer.h
+fi
+if test "$CONFIGURATION" = "RelWithDebInfo"; then :
+  cd /Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/crashpad_build/util
+  /opt/homebrew/bin/python3.11 /Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/util/mach/mig.py --arch FROM_ENV --sdk $SDKROOT --include=/Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/util/.. --include=/Users/jcrozier/Downloads/sentry-nativeee/external/crashpad/util/../compat/mac /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.3.sdk/usr/include/mach/exc.defs /Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/crashpad_build/util/util/mach/excUser.c /Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/crashpad_build/util/util/mach/excServer.c /Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/crashpad_build/util/util/mach/exc.h /Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/crashpad_build/util/util/mach/excServer.h
+fi
+

@@ -6,6 +6,7 @@
 //
 
 #include "FeedbackShader.hpp"
+#include "FeedbackSource.hpp"
 #include "CommonViews.hpp"
 #include "ImGuiExtensions.hpp"
 #include "ShaderConfigSelectionView.hpp"
@@ -32,18 +33,38 @@ void FeedbackShader::populateSource() {
   if (auxConnected()) {
     if (aux != nullptr) {
       chainer = ShaderChainerService::getService()->shaderChainerForShaderId(aux->shaderId);
-    } else if (sourceAux != nullptr) {
-      chainer = ShaderChainerService::getService()->shaderChainerForAuxShaderIdAndVideoSourceId(shaderId, sourceAux->id);
+    } else if (auxSource != nullptr) {
+      chainer = ShaderChainerService::getService()->shaderChainerForAuxShaderIdAndVideoSourceId(shaderId, auxSource->id);
     }
   } else {
     chainer = ShaderChainerService::getService()->shaderChainerForShaderId(shaderId);
+  }
+  
+  if (chainer == nullptr) {
+    log("Failed to find Chainer for FeedbackShader %s", shaderId.c_str());
+    return;
   }
   
   switch (settings->sourceSelection->intValue) {
     case 0: // Origin
       feedbackSource = chainer->source->feedbackDestination;
       break;
-    case 1: //Final
+    case 1: // Current
+      if (parent != nullptr) {
+        // Our first time creating a FeedbackSource for this Shader.
+        if (parent->shaderFeedbackDestination == nullptr) {
+          parent->shaderFeedbackDestination = std::make_shared<FeedbackSource>(parent->shaderId, parent->name(), std::make_shared<VideoSourceSettings>(chainer->settings));
+          FeedbackSourceService::getService()->registerFeedbackSource(parent->shaderFeedbackDestination);
+        }
+        
+        feedbackSource = parent->shaderFeedbackDestination;
+      } else {
+        // If we don't have a parent Shader, just use the Source.
+        feedbackSource = chainer->source->feedbackDestination;
+      }
+      
+      break;
+    case 2: // Final
       feedbackSource = chainer->feedbackDestination;
       break;
   }
@@ -85,7 +106,7 @@ void FeedbackShader::clearFrameBuffer() {
   if (feedbackSource != nullptr) {
     feedbackSource->clearFrameBuffer();
   } else {
-    feedbackDestination()->clearFrameBuffer();
+    chainerFeedbackDestination()->clearFrameBuffer();
   }
 }
 
@@ -93,7 +114,7 @@ void FeedbackShader::drawSettings() {
   CommonViews::H3Title("Feedback Settings");
   ShaderConfigSelectionView::draw(this);
   ImGui::Checkbox(settings->lumaKeyEnabled->name.c_str(), &settings->lumaKeyEnabled->boolValue);
-  if (ImGui::Combo("Source", &settings->sourceSelection->intValue, "Origin\0Final\0")) {
+  if (ImGui::Combo("Source", &settings->sourceSelection->intValue, "Origin\0Current\0Final\0")) {
     populateSource();
   }
 

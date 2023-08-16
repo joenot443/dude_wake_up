@@ -56,6 +56,7 @@ struct TransformSettings : public ShaderSettings {
                    xScaleOscillator,     yScaleOscillator,
                    rotateOscillator,     autoRotateOscillator};
     load(j);
+  registerParameters();
   }
 };
 
@@ -92,6 +93,7 @@ public:
 
     float x = (settings->xTranslate->value + 0.5) * width;
     float y = (settings->yTranslate->value + 0.5) * height;
+    
     ofTranslate(x, y);
     if (autoRotating) {
       ofRotateDeg(autoRotateAmount);

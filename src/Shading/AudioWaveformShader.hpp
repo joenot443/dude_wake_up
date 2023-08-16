@@ -26,6 +26,7 @@ struct AudioWaveformSettings: public ShaderSettings {
     parameters = {};
     oscillators = {};
     load(j);
+  registerParameters();
   };
 };
 

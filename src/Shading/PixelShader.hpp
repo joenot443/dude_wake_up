@@ -34,6 +34,7 @@ struct PixelSettings : public ShaderSettings {
     parameters = {size, enabled};
     oscillators = {sizeOscillator};
     load(j);
+  registerParameters();
   }
 };
 

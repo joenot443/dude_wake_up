@@ -32,6 +32,7 @@ struct TileSettings : public ShaderSettings {
     parameters = {repeat, mirror};
     oscillators = {repeatOscillator};
     load(j);
+  registerParameters();
   };
 };
 

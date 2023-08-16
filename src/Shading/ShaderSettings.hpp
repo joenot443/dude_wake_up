@@ -10,10 +10,12 @@
 
 #include "Parameter.hpp"
 #include "MidiService.hpp"
+#include "ParameterService.hpp"
 #include "Oscillator.hpp"
 #include "JSONSerializable.hpp"
 #include "json.hpp"
 #include "Settings.hpp"
+#include <vector>
 #include <string>
 
 using json = nlohmann::json;
@@ -35,6 +37,7 @@ public:
   y(std::make_shared<Parameter>("y", 0.0, 0.0, 10000.0))
   {
     load(j);
+    registerParameters();
   }
   
   // Returns all the parameters for the Shader including the ones on the Oscillators
@@ -50,6 +53,13 @@ public:
       }
     }
     return allParams;
+  }
+  
+  void registerParameters() {
+    std::vector<std::shared_ptr<Parameter>> params = allParameters();
+    for (auto param : params) {
+      ParameterService::getService()->registerParameter(param);
+    }
   }
   
 };

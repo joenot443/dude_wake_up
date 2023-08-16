@@ -10,56 +10,69 @@
 #include "AvailableVideoSource.hpp"
 #include "ofMain.h"
 #include "ConfigService.hpp"
+#include "LayoutStateService.hpp"
+#include "ConfigService.hpp"
 #include "ofxImGui.h"
 
-void FileBrowserView::refresh() {
+void FileBrowserView::refresh()
+{
   files.clear();
 
   currentDirectory.open(currentDirectory.getAbsolutePath());
   currentDirectory.sort();
-  
-  for (int i = 0; i < currentDirectory.size(); i++) {
+
+  for (int i = 0; i < currentDirectory.size(); i++)
+  {
     bool isDirectory = currentDirectory.getFile(i).isDirectory();
     files.push_back(File(currentDirectory.getPath(i), isDirectory));
   }
   std::vector<TileItem> tileItems = {};
 
-  for (auto file : files) {
-    if (type == FileBrowserType_Source) {
+  for (auto file : files)
+  {
+    if (type == FileBrowserType_Source)
+    {
       // Open the file and get the first frame
-      auto availableSource = std::make_shared<AvailableVideoSource>(
-          file.name, VideoSource_file, ShaderSource_empty, 0, file.path);
+      auto availableSource = std::make_shared<AvailableVideoSourceFile>(
+          file.name, file.path);
       sources.push_back(availableSource);
       // Create a closure which will be called when the tile is clicked
-      std::function<void()> dragCallback = [availableSource]() {
+      std::function<void()> dragCallback = [availableSource]()
+      {
         // Create a payload to carry the video source
-        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
-          // Set payload to carry the index of our item (could be anything)
-          ImGui::SetDragDropPayload("VideoSource", availableSource.get(),
-                                    sizeof(AvailableVideoSource));
+        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+        {
+          ImGui::SetDragDropPayload("VideoSource", &availableSource->availableVideoSourceId,
+                                    sizeof(std::string));
           ImGui::Text("%s", availableSource->sourceName.c_str());
           ImGui::EndDragDropSource();
         }
       };
       TileItem tileItem = TileItem(file.name, 0, 0, dragCallback);
       tileItems.push_back(tileItem);
-    } else if (type == FileBrowserType_JSON) {
+    }
+    else if (type == FileBrowserType_JSON)
+    {
       // Validate the file is a json file
-      if (file.name.find(".json") == std::string::npos) {
+      if (file.name.find(".json") == std::string::npos)
+      {
         continue;
       }
       // Validate that the file is a valid shader chain
-      if (ConfigService::getService()->validateShaderChainerJson(file.path) == false) {
+      if (ConfigService::getService()->validateShaderChainerJson(file.path) == false)
+      {
         continue;
       }
 
       auto availableShaderChainer =
-      ConfigService::getService()->availableShaderChainerFromPath(file.path);
+          ConfigService::getService()->availableShaderChainerFromPath(file.path);
 
       // Create a closure which will be called when the tile is dragged
-      std::function<void()> dragCallback = [availableShaderChainer]() {
+      std::function<void()> dragCallback = [availableShaderChainer]()
+      {
         // Create a payload to carry the video source
-        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+        {
           // Set payload to carry the index of our item (could be anything)
           ImGui::SetDragDropPayload("AvailableShaderChainer", &availableShaderChainer,
                                     sizeof(AvailableShaderChainer));
@@ -67,8 +80,7 @@ void FileBrowserView::refresh() {
           ImGui::EndDragDropSource();
         }
       };
-      
-      
+
       TileItem tileItem = TileItem(*availableShaderChainer.chainerName, 0, 0, dragCallback);
       tileItems.push_back(tileItem);
     }
@@ -76,12 +88,20 @@ void FileBrowserView::refresh() {
   listBrowserView.tileItems = tileItems;
 }
 
-void FileBrowserView::setup() {
-  currentDirectory = ofDirectory(ConfigService::getService()->nottawaFolderFilePath());
-  if (type == FileBrowserType_JSON) { ConfigService::getService()->subscribeToConfigUpdates([this](){
-    refresh();
-    });
+void FileBrowserView::setup()
+{
+  // For our Sources (Video file) browser, let's use the LibraryPath from the LayoutStateService.
+  if (type == FileBrowserType_Source)
+  {
+    currentDirectory = ofDirectory(LayoutStateService::getService()->libraryPath);
   }
+  else
+  {
+    currentDirectory = ofDirectory(ConfigService::getService()->nottawaFolderFilePath());
+    ConfigService::getService()->subscribeToConfigUpdates([this]()
+                                                          { refresh(); });
+  }
+
   refresh();
 }
 
@@ -91,30 +111,47 @@ void FileBrowserView::update() {}
 
 // Display the Files in the files vector as items in a ListBox.
 // If a file is selected, update settings.selectedFile
-void FileBrowserView::draw() {
+void FileBrowserView::draw()
+{
+  // If we're in the JSON browser, just draw the list browser view
+  if (type == FileBrowserType_JSON)
+  {
+    listBrowserView.draw();
+    return;
+  }
+
   // Add a button to change the current directory to the parent directory.
-  if (ImGui::Button("Go Up")) {
+  if (ImGui::Button("Go Up"))
+  {
     ofDirectory dir;
     dir.open(currentDirectory);
     // Get the parent directory of the current directory by removing the last
     // directory from the path.
-    currentDirectory = ofDirectory(currentDirectory.getAbsolutePath().substr(
-        0, dir.getAbsolutePath().find_last_of("/\\")));
+    auto newPath = currentDirectory.getAbsolutePath().substr(
+        0, dir.getAbsolutePath().find_last_of("/\\"));
+    // Save the new path in LayoutStateService
+    LayoutStateService::getService()->updateLibraryPath(newPath);
+    currentDirectory = ofDirectory(newPath);
     refresh();
   }
   ImGui::SameLine();
 
   // Add a button to open the file browser to choose the current directory
-  if (ImGui::Button("Open")) {
+  if (ImGui::Button("Open"))
+  {
     ofFileDialogResult result = ofSystemLoadDialog("Choose Directory", true);
-    if (result.bSuccess) {
+    if (result.bSuccess)
+    {
+      // Save the new path in LayoutStateService
+      LayoutStateService::getService()->updateLibraryPath(result.filePath);
       currentDirectory = ofDirectory(result.filePath);
       refresh();
     }
   }
   ImGui::SameLine();
-  
-  if (ImGui::Button("Show in Finder")) {
+
+  if (ImGui::Button("Show in Finder"))
+  {
 #if defined(_WIN32)
     // Windows
     std::string command = "explorer " + currentDirectory.getAbsolutePath();
@@ -127,14 +164,13 @@ void FileBrowserView::draw() {
     ofLogError("ofApp::openFolder") << "This function is not implemented for this platform.";
 #endif
   }
-  
+
   ImGui::SameLine();
-  
-  if (ImGui::Button("Refresh")) {
+
+  if (ImGui::Button("Refresh"))
+  {
     refresh();
   }
-  
 
-  
   listBrowserView.draw();
 }

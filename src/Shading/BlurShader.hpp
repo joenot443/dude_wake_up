@@ -34,6 +34,7 @@ struct BlurSettings : public ShaderSettings {
     parameters = {mix, radius};
     oscillators = {mixOscillator, radiusOscillator};
     load(j);
+  registerParameters();
   }
 };
 

@@ -9,6 +9,7 @@
 #include "Strings.hpp"
 #include "Parameter.hpp"
 #include "ParameterService.hpp"
+#include <memory>
 #include "UUID.hpp"
 
 Parameter::Parameter(std::string name, float value) :
@@ -21,8 +22,7 @@ intValue(static_cast<int>(value)),
 boolValue(value > 0.0001),
 driver(NULL),
 shift(NULL),
-scale(NULL)
-{
+scale(NULL) {
   paramId = UUID::generateParamId(name);
 };
 
@@ -38,8 +38,7 @@ max(max),
 boolValue(value > 0.0001),
 driver(NULL),
 shift(NULL),
-scale(NULL)
-{
+scale(NULL) {
   paramId = UUID::generateParamId(name);
   intValue = static_cast<int>(value);
   boolValue = static_cast<bool>(value);
