@@ -49,6 +49,11 @@ void LibraryService::uploadChainer(const std::string &name, const std::string &a
   }
 }
 
+void LibraryService::backgroundFetchLibraryFiles()
+{
+  downloadFutures.push_back(std::async(std::launch::async, &LibraryService::fetchLibraryFiles, this));
+}
+
 // Fetches the library files from the server at /api/media.
 // This is a GET request that returns a JSON array of objects of the form:
 // {
@@ -134,14 +139,12 @@ void LibraryService::downloadThumbnail(std::shared_ptr<LibraryFile> file)
 
 void LibraryService::downloadAllThumbnails()
 {
-  std::vector<std::future<void>> futures;
-
   for (const auto &file : libraryFiles)
   {
     if (hasThumbnail(file))
       continue;
 
-    futures.push_back(std::async(std::launch::async, &LibraryService::downloadThumbnail, this, file));
+    downloadFutures.push_back(std::async(std::launch::async, &LibraryService::downloadThumbnail, this, file));
   }
 }
 

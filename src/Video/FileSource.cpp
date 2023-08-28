@@ -15,6 +15,7 @@ void FileSource::setup()
   player.load(path);
   player.play();
   player.setVolume(0.5);
+  player.setLoopState(OF_LOOP_NORMAL);
   frameTexture = std::make_shared<ofTexture>();
   frameTexture->allocate(1280, 720, GL_RGB);
   fbo.allocate(1280, 720, GL_RGB);
@@ -36,6 +37,17 @@ void FileSource::saveFrame()
 
 void FileSource::updatePlaybackPosition()
 {
+  if (player.getPosition() > 0.99 || player.getIsMovieDone()) {
+    position->value = 0.0;
+    player.setPosition(0.0);
+    return;
+  }
+  
+  if (abs(player.getPosition() - 0.01) < 0.01) {
+    position->value = player.getPosition();
+    return;
+  }
+  
   // Only update the video player if the position has changed by more than 0.5%
   if (abs(position->value - player.getPosition()) > 0.02)
   {

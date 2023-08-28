@@ -74,6 +74,9 @@ public:
   std::vector<std::string> shaderChainerNames();
   void updateShaderChainers();
   std::shared_ptr<Shader> selectedShader;
+  
+  // Removes all ShaderChainers and Shaders
+  void reset();
 
   // Accessing
 

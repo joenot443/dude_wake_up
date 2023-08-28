@@ -320,7 +320,15 @@ void VideoSourceService::appendConfig(json j)
 
 void VideoSourceService::clear()
 {
+  for (auto it = videoSourceMap.begin(); it != videoSourceMap.end();)
+  {
+    auto key = it->first;
+    removeVideoSource(key);
+    it = videoSourceMap.erase(it);
+  }
+
   videoSourceMap.clear();
+  outputWindows.clear();
 }
 
 void VideoSourceService::loadConfig(json data)

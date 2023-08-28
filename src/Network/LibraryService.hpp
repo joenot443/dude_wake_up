@@ -42,6 +42,7 @@ public:
 
   void setup();
   void fetchLibraryFiles();
+  void backgroundFetchLibraryFiles();
   void uploadChainer(const std::string &name, const std::string &author, const std::shared_ptr<ShaderChainer> shaderChainer, std::function<void()> success_callback, std::function<void(const std::string &)> error_callback);
 
   void submitFeedback(Feedback feedback, std::function<void()> success_callback, std::function<void(const std::string &)> error_callback);
@@ -51,7 +52,7 @@ public:
   void downloadFile(std::shared_ptr<LibraryFile> file);
 
   bool hasThumbnail(std::shared_ptr<LibraryFile> file);
-  
+
   bool hasMedia(std::shared_ptr<LibraryFile> file);
 
   observable::subject<void()> libraryThumbnailUpdateSubject;
@@ -59,7 +60,7 @@ public:
   std::vector<std::shared_ptr<LibraryFile>> libraryFiles;
 
   std::vector<std::future<void>> downloadFutures;
-  
+
   ofEvent<LibraryFile> downloadNotification;
   ofEvent<void> thumbnailNotification;
 };

@@ -32,7 +32,7 @@ void NodeLayoutView::setup()
   config.SettingsFile = "NodeLayout.json";
   ImVector<float> zooms = ImVector<float>();
   zooms.push_back(1.0f);
-  config.CustomZoomLevels = zooms;
+//  config.CustomZoomLevels = zooms;
 
   context = ed::CreateEditor(&config);
   ofAddListener(LibraryService::getService()->downloadNotification, this, &NodeLayoutView::haveDownloadedAvailableLibraryFile);

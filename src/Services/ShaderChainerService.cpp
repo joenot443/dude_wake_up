@@ -437,7 +437,28 @@ json ShaderChainerService::config()
 
 void ShaderChainerService::clear()
 {
+  for (auto it = shaderChainerMap.begin(); it != shaderChainerMap.end();)
+  {
+    auto key = it->first;
+    removeShaderChainer(key);
+    it = shaderChainerMap.erase(it);
+  }
   shaderChainerMap.clear();
+
+  std::vector<std::shared_ptr<Shader>> shadersToRemove;
+  for (const auto &pair : shadersMap)
+  {
+    keysToRemove.push_back(pair.first);
+  }
+  for (const auto &shader : shadersToRemove)
+  {
+    removeShader(shader);
+  }
+  shadersMap.clear();
+
+  // Clear the shaderChainerMap
+  shaderIdShaderChainerMap.clear();
+  videoSourceIdShaderChainerMap.clear();
 }
 
 void ShaderChainerService::loadConfig(json data)
@@ -481,10 +502,10 @@ void ShaderChainerService::loadConfig(json data)
         shader->load(shaderJson);
       }
     }
-    
+
     // Ensure we have at least one ShaderChainer for each of our VideoSources.
-    
-//    addImplicitShaderChainers();
+
+    //    addImplicitShaderChainers();
   }
 }
 
@@ -612,12 +633,15 @@ void ShaderChainerService::breakShaderChainerFront(
   }
 }
 
-void ShaderChainerService::addImplicitShaderChainers() {
+void ShaderChainerService::addImplicitShaderChainers()
+{
   auto sources = VideoSourceService::getService()->videoSources();
-  
-  for (std::shared_ptr<VideoSource> source : sources) {
+
+  for (std::shared_ptr<VideoSource> source : sources)
+  {
     std::vector<std::shared_ptr<ShaderChainer>> chainers = shaderChainersForVideoSourceId(source->id);
-    if (chainers.size() == 0) {
+    if (chainers.size() == 0)
+    {
       log("Adding new Chainer for %s", source->id.c_str());
       addNewShaderChainer(source);
     }
@@ -638,20 +662,24 @@ std::shared_ptr<Shader>
 ShaderChainerService::shaderForType(ShaderType type, std::string shaderId,
                                     json shaderJson)
 {
-  switch (type) {
-    case ShaderTypeSolidColor: {
-      auto settings = new SolidColorSettings(shaderId, shaderJson);
-      auto shader = std::make_shared<SolidColorShader>(settings);
-      shader->setup();
-      return shader;
-    }
-    case ShaderType16bit: {
-      auto settings = new SixteenBitSettings(shaderId, shaderJson);
-      auto shader = std::make_shared<SixteenBitShader>(settings);
-      shader->setup();
-      return shader;
-    }
-  case ShaderTypeHilbert: {
+  switch (type)
+  {
+  case ShaderTypeSolidColor:
+  {
+    auto settings = new SolidColorSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<SolidColorShader>(settings);
+    shader->setup();
+    return shader;
+  }
+  case ShaderType16bit:
+  {
+    auto settings = new SixteenBitSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<SixteenBitShader>(settings);
+    shader->setup();
+    return shader;
+  }
+  case ShaderTypeHilbert:
+  {
     auto settings = new HilbertSettings(shaderId, shaderJson);
     auto shader = std::make_shared<HilbertShader>(settings);
     shader->setup();

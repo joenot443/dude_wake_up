@@ -125,6 +125,11 @@ void MainStageView::drawMenu()
           ConfigService::getService()->loadConfigFile(result.getPath());
         }
       }
+      if (ImGui::MenuItem("Reset Stage"))
+      {
+        ShaderChainerService::getService()->clear();
+        VideoSourceService::getService()->clear();
+      }
       ImGui::EndMenu();
     }
 
