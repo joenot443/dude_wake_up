@@ -16,13 +16,16 @@
 #include <stdio.h>
 
 struct EmptySettings: public ShaderSettings {
+	public:
   EmptySettings(std::string shaderId, json j) :
   ShaderSettings(shaderId, j) {
     
   };
 };
 
-struct EmptyShader: Shader {
+class EmptyShader: public Shader {
+public:
+
   EmptySettings *settings;
   EmptyShader(EmptySettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
@@ -35,7 +38,7 @@ shader.load("shaders/empty");
 #endif
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);

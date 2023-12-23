@@ -19,6 +19,7 @@
 #include <stdio.h>
 
 struct WobbleSettings: public ShaderSettings {
+	public:
   std::shared_ptr<Parameter> speed;
   std::shared_ptr<Parameter> amount;
 
@@ -35,7 +36,9 @@ struct WobbleSettings: public ShaderSettings {
   };
 };
 
-struct WobbleShader: Shader {
+class WobbleShader: public Shader {
+public:
+
   WobbleSettings *settings;
   WobbleShader(WobbleSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
@@ -48,7 +51,7 @@ shader.load("shaders/Wobble");
 #endif
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
@@ -70,7 +73,7 @@ shader.load("shaders/Wobble");
   }
   
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
+    
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
   }

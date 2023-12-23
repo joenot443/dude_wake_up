@@ -15,7 +15,9 @@
 #include "ShaderSettings.hpp"
 #include "ofxImGui.h"
 
-struct FractalSettings: public ShaderSettings {
+class FractalSettings: public ShaderSettings {
+	public:
+public:
   std::shared_ptr<Parameter> zoom;
 
   std::shared_ptr<Oscillator> zoomOscillator;
@@ -33,6 +35,8 @@ struct FractalSettings: public ShaderSettings {
 
 
 class FractalShader: public Shader {
+public:
+
   private:
   ofShader shader;
 
@@ -43,7 +47,7 @@ public:
 
   FractalSettings *settings;
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
@@ -64,7 +68,7 @@ shader.load("shaders/Fractal");
   };
 
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
+    
     CommonViews::ShaderParameter(settings->zoom, settings->zoomOscillator);
   };
 };

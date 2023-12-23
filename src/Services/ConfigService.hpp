@@ -22,7 +22,8 @@ using json = nlohmann::json;
 static const std::string MidiJsonKey = "midi";
 static const std::string OscJsonKey = "osc";
 static const std::string SourcesJsonKey = "sources";
-static const std::string ShaderChainersJsonKey = "chainers";
+static const std::string ShadersJsonKey = "shaders";
+static const std::string ConnectionsJsonKey = "connections";
 static const std::string NameJsonKey = "name";
 static const std::string LayoutJsonKey = "layout";
 
@@ -43,7 +44,7 @@ public:
   // Chainers
   void saveShaderChainerConfigFile(std::shared_ptr<ShaderChainer> chainer,
                                    std::string path);
-  void saveShaderConfigFile(Shader *shader,
+  void saveShaderConfigFile(std::shared_ptr<Shader> shader,
                                    std::string name);
   bool validateShaderChainerJson(std::string path);
   void loadShaderChainerFile(std::string path);

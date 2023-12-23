@@ -12,7 +12,7 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
-#include "ValueOscillator.hpp"
+#include "WaveformOscillator.hpp"
 #include "Parameter.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
@@ -20,14 +20,14 @@
 struct FrequencyVisualizerSettings : public ShaderSettings
 {
   std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<ValueOscillator> shaderValueOscillator;
+  std::shared_ptr<WaveformOscillator> shaderWaveformOscillator;
 
   FrequencyVisualizerSettings(std::string shaderId, json j) : shaderValue(std::make_shared<Parameter>("shaderValue", 1.0, -1.0, 2.0)),
-                                                              shaderValueOscillator(std::make_shared<ValueOscillator>(shaderValue)),
+                                                              shaderWaveformOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
                                                               ShaderSettings(shaderId, j)
   {
     parameters = {shaderValue};
-    oscillators = {shaderValueOscillator};
+    oscillators = {shaderWaveformOscillator};
     load(j);
     registerParameters();
   };
@@ -43,7 +43,7 @@ struct FrequencyVisualizerShader : Shader
     shader.load("shaders/FrequencyVisualizer");
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override
   {
     auto source = AudioSourceService::getService()->selectedAudioSource;
 
@@ -85,7 +85,7 @@ struct FrequencyVisualizerShader : Shader
   {
     CommonViews::H3Title("FrequencyVisualizer");
 
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
+    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderWaveformOscillator);
   }
 };
 

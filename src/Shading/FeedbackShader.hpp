@@ -21,6 +21,7 @@ using json = nlohmann::json;
 // Feedback
 
 struct FeedbackSettings: public ShaderSettings {
+	public:
   int index;
   std::shared_ptr<Parameter> lumaKeyEnabled;
   std::string shaderId;
@@ -107,7 +108,7 @@ struct FeedbackShader: Shader  {
   void drawFeedbackSourceSelector();
   
   virtual void setup();
-  virtual void shade(ofFbo *frame, ofFbo *canvas);
+  virtual void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas);
   virtual void drawSettings();
   virtual ShaderType type();
 };

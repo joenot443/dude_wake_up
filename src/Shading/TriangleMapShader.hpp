@@ -17,13 +17,16 @@
 #include <stdio.h>
 
 struct TriangleMapSettings: public ShaderSettings {
+	public:
   TriangleMapSettings(std::string shaderId, json j) :
   ShaderSettings(shaderId, j) {
     
   };
 };
 
-struct TriangleMapShader: Shader {
+class TriangleMapShader: public Shader {
+public:
+
   TriangleMapSettings *settings;
   TriangleMapShader(TriangleMapSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
@@ -36,7 +39,7 @@ shader.load("shaders/TriangleMap");
 #endif
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);

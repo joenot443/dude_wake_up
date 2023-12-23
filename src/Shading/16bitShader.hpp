@@ -12,35 +12,40 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
-#include "ValueOscillator.hpp"
+#include "WaveformOscillator.hpp"
 #include "Parameter.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
-struct SixteenBitSettings: public ShaderSettings {
+struct SixteenBitSettings : public ShaderSettings
+{
   std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<ValueOscillator> shaderValueOscillator;
+  std::shared_ptr<WaveformOscillator> shaderWaveformOscillator;
 
-  SixteenBitSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 1.0  , -1.0, 2.0)),
-  shaderValueOscillator(std::make_shared<ValueOscillator>(shaderValue)),
-  ShaderSettings(shaderId, j) {
-    parameters = { shaderValue };
-    oscillators = { shaderValueOscillator };
+  SixteenBitSettings(std::string shaderId, json j) : shaderValue(std::make_shared<Parameter>("shaderValue", 1.0, -1.0, 2.0)),
+                                                     shaderWaveformOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
+                                                     ShaderSettings(shaderId, j)
+  {
+    parameters = {shaderValue};
+    oscillators = {shaderWaveformOscillator};
     load(j);
     registerParameters();
   };
 };
 
-struct SixteenBitShader: Shader {
+class SixteenBitShader : public Shader
+{
+public: 
   SixteenBitSettings *settings;
-  SixteenBitShader(SixteenBitSettings *settings) : settings(settings), Shader(settings) {};
+  SixteenBitShader(SixteenBitSettings *settings) : settings(settings), Shader(settings){};
   ofShader shader;
-  void setup() override {
+  void setup() override
+  {
     shader.load("shaders/16bit");
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override
+  {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
@@ -52,18 +57,20 @@ struct SixteenBitShader: Shader {
     canvas->end();
   }
 
-  void clear() override {
-    
+  void clear() override
+  {
   }
 
-  ShaderType type() override {
+  ShaderType type() override
+  {
     return ShaderType16bit;
   }
 
-  void drawSettings() override {
+  void drawSettings() override
+  {
     CommonViews::H3Title("16bit");
 
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
+    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderWaveformOscillator);
   }
 };
 

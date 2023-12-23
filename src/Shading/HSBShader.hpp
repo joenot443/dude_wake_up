@@ -17,6 +17,7 @@
 
 // Basic
 struct HSBSettings: public ShaderSettings {
+	public:
   std::string shaderId;
   std::shared_ptr<Parameter> hue;
   std::shared_ptr<Parameter> saturation;
@@ -43,8 +44,9 @@ struct HSBSettings: public ShaderSettings {
   }
 };
 
-struct HSBShader: Shader {
-  
+class HSBShader: public Shader {
+public:
+
   ofShader shader;
 public:
   HSBShader(HSBSettings *settings) : Shader(settings), settings(settings) {};
@@ -60,7 +62,7 @@ shader.load("shaders/hsb");
 #endif
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
@@ -77,7 +79,7 @@ shader.load("shaders/hsb");
   }
   
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
+    
     CommonViews::ShaderParameter(settings->hue, settings->hueOscillator);
     CommonViews::ShaderParameter(settings->saturation, settings->saturationOscillator);
     CommonViews::ShaderParameter(settings->brightness, settings->brightnessOscillator);

@@ -2211,6 +2211,10 @@ ed::Link* ed::EditorContext::FindLinkAt(const ImVec2& p)
     return nullptr;
 }
 
+bool ed::EditorContext::ZoomInc(bool in) {
+  m_NavigateAction.ZoomInc(in);
+}
+
 ImU32 ed::EditorContext::GetColor(StyleColor colorIndex) const
 {
     return ImColor(m_Style.Colors[colorIndex]);
@@ -2555,7 +2559,7 @@ ed::Control ed::EditorContext::BuildControl(bool allowOffscreen)
         isBackgroundHot, isBackgroundActive, backgroundClickButonIndex, backgroundDoubleClickButtonIndex);
 }
 
-void ed::EditorContext::ShowMetrics(const Control& control)
+void ed::EditorContext::ShowMetrics()
 {
     auto& io = ImGui::GetIO();
 
@@ -2566,26 +2570,6 @@ void ed::EditorContext::ShowMetrics(const Control& control)
         else if (object->AsPin())   return "Pin";
         else if (object->AsLink())  return "Link";
         else return "";
-    };
-
-    auto getHotObjectName = [&control, &getObjectName]()
-    {
-        if (control.HotObject)
-            return getObjectName(control.HotObject);
-        else if (control.BackgroundHot)
-            return "Background";
-        else
-            return "<unknown>";
-    };
-
-    auto getActiveObjectName = [&control, &getObjectName]()
-    {
-        if (control.ActiveObject)
-            return getObjectName(control.ActiveObject);
-        else if (control.BackgroundActive)
-            return "Background";
-        else
-            return "<unknown>";
     };
 
     auto liveNodeCount  = CountLiveNodes();
@@ -2599,10 +2583,6 @@ void ed::EditorContext::ShowMetrics(const Control& control)
 
     ImGui::SetCursorScreenPos(canvasRect.Min + ImVec2(5, 5));
     ImGui::BeginGroup();
-    ImGui::Text("Is Focused: %s", m_IsFocused ? "true" : "false");
-    ImGui::Text("Is Hovered: %s", m_IsHovered ? "true" : "false");
-    ImGui::Text("Is Hovered (without overlapp): %s", m_IsHoveredWithoutOverlapp ? "true" : "false");
-    ImGui::Text("Accept Input: %s", CanAcceptUserInput() ? "true" : "false");
     ImGui::Text("View Position: { x=%g y=%g }", viewRect.Min.x, viewRect.Min.y);
     ImGui::Text("View Size: { w=%g h=%g }", viewRect.GetWidth(), viewRect.GetHeight());
     ImGui::Text("Canvas Size: { w=%g h=%g }", canvasRect.GetWidth(), canvasRect.GetHeight());
@@ -2610,20 +2590,6 @@ void ed::EditorContext::ShowMetrics(const Control& control)
     ImGui::Text("Live Nodes: %d", liveNodeCount);
     ImGui::Text("Live Pins: %d", livePinCount);
     ImGui::Text("Live Links: %d", liveLinkCount);
-    ImGui::Text("Hot Object: %s (%p)", getHotObjectName(), control.HotObject ? control.HotObject->ID().AsPointer() : nullptr);
-    if (auto node = control.HotObject ? control.HotObject->AsNode() : nullptr)
-    {
-        ImGui::SameLine();
-        ImGui::Text("{ x=%g y=%g w=%g h=%g }", node->m_Bounds.Min.x, node->m_Bounds.Min.y, node->m_Bounds.GetWidth(), node->m_Bounds.GetHeight());
-    }
-    ImGui::Text("Active Object: %s (%p)", getActiveObjectName(), control.ActiveObject ? control.ActiveObject->ID().AsPointer() : nullptr);
-    if (auto node = control.ActiveObject ? control.ActiveObject->AsNode() : nullptr)
-    {
-        ImGui::SameLine();
-        ImGui::Text("{ x=%g y=%g w=%g h=%g }", node->m_Bounds.Min.x, node->m_Bounds.Min.y, node->m_Bounds.GetWidth(), node->m_Bounds.GetHeight());
-    }
-    ImGui::Text("Action: %s", m_CurrentAction ? m_CurrentAction->GetName() : "<none>");
-    ImGui::Text("Action Is Dragging: %s", m_CurrentAction && m_CurrentAction->IsDragging() ? "Yes" : "No");
     m_NavigateAction.ShowMetrics();
     m_SizeAction.ShowMetrics();
     m_DragAction.ShowMetrics();
@@ -3412,6 +3378,33 @@ bool ed::NavigateAction::Process(const Control& control)
     return m_IsActive;
 }
 
+bool ed::NavigateAction::ZoomInc(bool up) {
+  auto savedScroll = m_Scroll;
+  auto savedZoom   = m_Zoom;
+
+  m_Animation.Finish();
+
+  auto newZoom  = MatchZoom(up ? 1 : -1, m_Zoom);
+  
+//  auto origin = m_Canvas.ToLocal(m_Canvas)
+  
+  auto origin = m_VisibleRect.GetTL();
+  auto newSize = m_Canvas.CalcViewRect(ImGuiEx::CanvasView(GetViewRect().GetTL(), newZoom));
+  ImGui::LogText("Test");
+  
+  if (up) {
+    origin -= newSize.GetSize() / 2 * newZoom;
+  } else {
+    origin += newSize.GetSize() / 2 * newZoom;
+  }
+
+  auto targetRect = m_Canvas.CalcViewRect(ImGuiEx::CanvasView(-origin, newZoom));
+
+  NavigateTo(targetRect, 0.45, NavigationReason::MouseZoom);
+
+  return true;
+}
+
 bool ed::NavigateAction::HandleZoom(const Control& control)
 {
     IM_UNUSED(control);
@@ -3421,7 +3414,7 @@ bool ed::NavigateAction::HandleZoom(const Control& control)
 
     auto& io = ImGui::GetIO();
 
-    if (!io.MouseWheel || (!allowOffscreen && !Editor->IsHoveredWithoutOverlapp()))// && !ImGui::IsAnyItemActive())
+    if (!io.MouseWheel || (!allowOffscreen && !Editor->IsHoveredWithoutOverlapp()))
         return false;
 
     auto savedScroll = m_Scroll;

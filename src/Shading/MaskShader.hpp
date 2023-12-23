@@ -20,7 +20,7 @@ struct MaskSettings : public ShaderSettings
   std::shared_ptr<Parameter> blend;
   std::shared_ptr<Oscillator> blendOscillator;
   
-  MaskSettings(std::string shaderId, json j) : blend(std::make_shared<Parameter>("Blend", 0.0, 0.0, 1.0)),
+  MaskSettings(std::string shaderId, json j) : blend(std::make_shared<Parameter>("Blend", 0.5, 0.0, 1.0)),
                                                blendOscillator(std::make_shared<WaveformOscillator>(blend)),
                                                ShaderSettings(shaderId, j)
   {
@@ -42,7 +42,7 @@ struct MaskShader : Shader
     shader.load("shaders/Mask");
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override
   {
     canvas->begin();
     shader.begin();
@@ -50,11 +50,12 @@ struct MaskShader : Shader
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     if (auxConnected())
     {
-      shader.setUniformTexture("tex2", auxTexture(), 8);
+      shader.setUniformTexture("tex2", aux()->frame()->getTexture(), 8);
     }
+    
     if (maskConnected())
     {
-      shader.setUniformTexture("maskTex", maskTexture(), 12);
+      shader.setUniformTexture("maskTex", mask()->frame()->getTexture(), 12);
     }
 
     shader.setUniform1f("time", ofGetElapsedTimef());

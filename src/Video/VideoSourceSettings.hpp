@@ -18,6 +18,15 @@ public:
   std::shared_ptr<Parameter> height;
   std::shared_ptr<Parameter> resolution;
   
+  VideoSourceSettings() :
+  width(std::make_shared<Parameter>("width", 720, 100, 2000)),
+  height(std::make_shared<Parameter>("height", 480, 100, 2000)),
+  resolution(std::make_shared<Parameter>("resolution", 3, 0, 5)),
+  Settings() {
+    parameters = {width, height};
+    updateResolutionSettings();
+  }
+  
   VideoSourceSettings(std::string sourceId, json j) :
   width(std::make_shared<Parameter>("width", 720, 100, 2000)),
   height(std::make_shared<Parameter>("height", 480, 100, 2000)),

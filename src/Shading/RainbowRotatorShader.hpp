@@ -17,13 +17,16 @@
 #include <stdio.h>
 
 struct RainbowRotatorSettings: public ShaderSettings {
+	public:
   RainbowRotatorSettings(std::string shaderId, json j) :
   ShaderSettings(shaderId, j) {
     
   };
 };
 
-struct RainbowRotatorShader: Shader {
+class RainbowRotatorShader: public Shader {
+public:
+
   RainbowRotatorSettings *settings;
   RainbowRotatorShader(RainbowRotatorSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
@@ -36,7 +39,7 @@ shader.load("shaders/RainbowRotator");
 #endif
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);

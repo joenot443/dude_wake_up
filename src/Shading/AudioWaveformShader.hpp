@@ -17,7 +17,8 @@
 #include "Shader.hpp"
 #include <stdio.h>
 
-struct AudioWaveformSettings: public ShaderSettings {
+class AudioWaveformSettings: public ShaderSettings {
+	public:
   std::string shaderId;
   
   AudioWaveformSettings(std::string shaderId, json j) :
@@ -30,7 +31,9 @@ struct AudioWaveformSettings: public ShaderSettings {
   };
 };
 
-struct AudioWaveformShader: Shader {
+class AudioWaveformShader: public Shader {
+public:
+
   AudioWaveformSettings *settings;
   AudioWaveformShader(AudioWaveformSettings *settings) :
   settings(settings),
@@ -47,7 +50,7 @@ shader.load("shaders/AudioWaveform");
 #endif
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     auto source = AudioSourceService::getService()->selectedAudioSource;
     canvas->begin();
     shader.begin();
@@ -69,7 +72,6 @@ shader.load("shaders/AudioWaveform");
   }
 
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
     CommonViews::H3Title("AudioWaveform");
   }
 };

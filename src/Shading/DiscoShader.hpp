@@ -17,13 +17,16 @@
 #include <stdio.h>
 
 struct DiscoSettings: public ShaderSettings {
+	public:
   DiscoSettings(std::string shaderId, json j) :
   ShaderSettings(shaderId, j) {
     
   };
 };
 
-struct DiscoShader: Shader {
+class DiscoShader: public Shader {
+public:
+
   DiscoSettings *settings;
   DiscoShader(DiscoSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
@@ -36,7 +39,7 @@ shader.load("shaders/Disco");
 #endif
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
@@ -56,7 +59,6 @@ shader.load("shaders/Disco");
   }
 
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
     CommonViews::H3Title("Disco");
 
   }

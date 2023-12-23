@@ -14,10 +14,9 @@
 const int FrameBufferCount=30;
 
 struct FeedbackSource {
-  FeedbackSource(std::string id, std::string name, std::shared_ptr<VideoSourceSettings> sourceSettings) : name(name), id(id), sourceSettings(sourceSettings) {};
+  FeedbackSource(std::string id, std::shared_ptr<VideoSourceSettings> sourceSettings) : id(id), sourceSettings(sourceSettings) {};
 
   std::shared_ptr<VideoSourceSettings> sourceSettings;
-  std::string name;
   std::string id;
   std::vector<ofFbo> frameBuffer = {};
 
@@ -41,6 +40,10 @@ struct FeedbackSource {
   
   bool beingConsumed();
   
+  void updateSettings(std::shared_ptr<VideoSourceSettings> settings) {
+    sourceSettings = settings;
+  }
+  
   void teardown() {
     frameBuffer.clear();
   }
@@ -58,6 +61,7 @@ struct FeedbackSource {
   ofTexture getFrame(int index) {
     if (!beingConsumed()) {
       log("Getting Feedback frame for a source not being consumed");
+      
     }
     
     int destIndex = (startIndex + index) % FrameBufferCount;
@@ -69,7 +73,7 @@ struct FeedbackSource {
     setup();
   }
   
-  void pushFrame(ofFbo fbo) {
+  void pushFrame(std::shared_ptr<ofFbo> fbo) {
     // Return if we have no consumers
     if (!beingConsumed()) return;
     
@@ -77,7 +81,7 @@ struct FeedbackSource {
     
     auto canvas = frameBuffer[startIndex];
     canvas.begin();
-    fbo.draw(0, 0);
+    fbo->draw(0, 0);
     canvas.end();
     
     startIndex++;

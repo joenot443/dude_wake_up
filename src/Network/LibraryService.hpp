@@ -43,6 +43,10 @@ public:
   void setup();
   void fetchLibraryFiles();
   void backgroundFetchLibraryFiles();
+  void didFetchLibraryFiles();
+  
+  void repopulateVideoSourcesFromMainThread();
+  
   void uploadChainer(const std::string &name, const std::string &author, const std::shared_ptr<ShaderChainer> shaderChainer, std::function<void()> success_callback, std::function<void(const std::string &)> error_callback);
 
   void submitFeedback(Feedback feedback, std::function<void()> success_callback, std::function<void(const std::string &)> error_callback);

@@ -227,11 +227,11 @@ struct ShaderSource : public VideoSource {
 public:
   std::shared_ptr<Shader> shader;
   ShaderSourceType shaderSourceType;
-  ofFbo fbo;
-  ofFbo canvas;
+  std::shared_ptr<ofFbo> canvas;
 
   ShaderSource(std::string id, ShaderSourceType type)
       : shader(nullptr), shaderSourceType(type),
+  canvas(std::make_shared<ofFbo>()),
         VideoSource(id, shaderSourceTypeName(type), VideoSource_shader) {
     addShader(type);
   };
@@ -406,32 +406,37 @@ public:
   }
 
   void setup() override {
-    frameTexture = std::make_shared<ofTexture>();
-    frameTexture->allocate(settings.width->value, settings.height->value, GL_RGBA);
-
     shader->setup();
-    fbo.allocate(settings.width->value, settings.height->value, GL_RGBA);
-    fbo.begin();
-    ofSetColor(0, 0, 0, 0);
-    ofDrawRectangle(0, 0, fbo.getWidth(), fbo.getHeight());
-    fbo.end();
+    fbo->allocate(settings->width->value, settings->height->value, GL_RGBA);
+    fbo->begin();
+    ofSetColor(0, 0, 0, 255);
+    ofDrawRectangle(0, 0, fbo->getWidth(), fbo->getHeight());
+    fbo->end();
 
-    canvas.allocate(settings.width->value, settings.height->value, GL_RGBA);
-    canvas.begin();
-    ofSetColor(0, 0, 0, 0);
-    ofDrawRectangle(0, 0, fbo.getWidth(), fbo.getHeight());
-    canvas.end();
+    canvas->allocate(settings->width->value, settings->height->value, GL_RGBA);
+    canvas->begin();
+    ofSetColor(0, 0, 0, 255);
+    ofDrawRectangle(0, 0, fbo->getWidth(), fbo->getHeight());
+    canvas->end();
   };
 
   void saveFrame() override {
     // If our width or height has changed, setup again
-    if (fbo.getWidth() != settings.width->value ||
-        fbo.getHeight() != settings.height->value) {
+    if (fbo->getWidth() != settings->width->value ||
+        fbo->getHeight() != settings->height->value) {
       setup();
     }
     
-    shader->shade(&fbo, &canvas);
-    frameTexture = std::make_shared<ofTexture>(canvas.getTexture());
+    canvas->begin();
+    ofClear(0,0,0, 255);
+    canvas->end();
+    
+    shader->shade(fbo, canvas);
+
+    fbo->begin();
+    ofClear(0,0,0, 255);
+    canvas->draw(0, 0);
+    fbo->end();
   }
 
   void drawSettings() override {

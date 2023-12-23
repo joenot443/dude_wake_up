@@ -18,6 +18,7 @@
 #include <stdio.h>
 
 struct RGBShiftSettings: public ShaderSettings {
+	public:
   std::shared_ptr<Parameter> speed;
   std::shared_ptr<Parameter> amount;
 
@@ -39,7 +40,9 @@ struct RGBShiftSettings: public ShaderSettings {
   
 };
 
-struct RGBShiftShader: Shader {
+class RGBShiftShader: public Shader {
+public:
+
   RGBShiftSettings *settings;
   RGBShiftShader(RGBShiftSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
@@ -52,7 +55,7 @@ shader.load("shaders/RGBShift");
 #endif
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
@@ -74,7 +77,7 @@ shader.load("shaders/RGBShift");
   }
 
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
+    
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
   }

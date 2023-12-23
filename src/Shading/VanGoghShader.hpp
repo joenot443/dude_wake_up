@@ -17,13 +17,16 @@
 #include <stdio.h>
 
 struct VanGoghSettings: public ShaderSettings {
+	public:
   VanGoghSettings(std::string shaderId, json j) :
   ShaderSettings(shaderId, j) {
     
   };
 };
 
-struct VanGoghShader: Shader {
+class VanGoghShader: public Shader {
+public:
+
   VanGoghSettings *settings;
   VanGoghShader(VanGoghSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
@@ -36,7 +39,7 @@ shader.load("shaders/VanGogh");
 #endif
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);

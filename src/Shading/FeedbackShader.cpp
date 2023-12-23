@@ -24,55 +24,41 @@ void FeedbackShader::populateSource() {
   // Set to a safe default as a backup.
   feedbackSource = FeedbackSourceService::getService()->defaultFeedbackSource;
   
-  if (parent == nullptr && parentSource == nullptr) {
+  if (inputs.empty()) {
     return;
   }
-  std::shared_ptr<ShaderChainer> chainer;
   
-  // We have an Aux connection to Feedback from
+  // If we have an Aux connection to Feedback from, use that by default.
+  // Don't draw the source selector in this case
   if (auxConnected()) {
-    if (aux != nullptr) {
-      chainer = ShaderChainerService::getService()->shaderChainerForShaderId(aux->shaderId);
-    } else if (auxSource != nullptr) {
-      chainer = ShaderChainerService::getService()->shaderChainerForAuxShaderIdAndVideoSourceId(shaderId, auxSource->id);
-    }
-  } else {
-    chainer = ShaderChainerService::getService()->shaderChainerForShaderId(shaderId);
-  }
-  
-  if (chainer == nullptr) {
-    log("Failed to find Chainer for FeedbackShader %s", shaderId.c_str());
+    feedbackSource = FeedbackSourceService::getService()->feedbackSourceForId(aux()->connId());
+    FeedbackSourceService::getService()->setConsumer(shaderId, feedbackSource);
     return;
   }
   
+  //
   switch (settings->sourceSelection->intValue) {
     case 0: // Origin
-      feedbackSource = chainer->source->feedbackDestination;
+      if (hasParentOfType(ConnectableTypeSource)) {
+        std::shared_ptr<Connectable> videoSource = parentOfType(ConnectableTypeSource);
+        feedbackSource = FeedbackSourceService::getService()->feedbackSourceForId(videoSource->connId());
+      } else {
+        feedbackSource = FeedbackSourceService::getService()->defaultFeedbackSource;
+      }
       break;
     case 1: // Current
-      if (parent != nullptr) {
-        // Our first time creating a FeedbackSource for this Shader.
-        if (parent->shaderFeedbackDestination == nullptr) {
-          parent->shaderFeedbackDestination = std::make_shared<FeedbackSource>(parent->shaderId, parent->name(), std::make_shared<VideoSourceSettings>(chainer->settings));
-          FeedbackSourceService::getService()->registerFeedbackSource(parent->shaderFeedbackDestination);
-        }
-        
-        feedbackSource = parent->shaderFeedbackDestination;
-      } else {
-        // If we don't have a parent Shader, just use the Source.
-        feedbackSource = chainer->source->feedbackDestination;
-      }
-      
+      feedbackSource = FeedbackSourceService::getService()->feedbackSourceForId(shaderId);
       break;
     case 2: // Final
-      feedbackSource = chainer->feedbackDestination;
+      feedbackSource = FeedbackSourceService::getService()->feedbackSourceForId(shaderId);
       break;
   }
-
   FeedbackSourceService::getService()->setConsumer(shaderId, feedbackSource);
+  
+  
 }
 
-void FeedbackShader::shade(ofFbo *frame, ofFbo *canvas) {
+void FeedbackShader::shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) {
   canvas->begin();
   shader.begin();
   // Set the textures
@@ -105,14 +91,12 @@ void FeedbackShader::shade(ofFbo *frame, ofFbo *canvas) {
 void FeedbackShader::clearFrameBuffer() {
   if (feedbackSource != nullptr) {
     feedbackSource->clearFrameBuffer();
-  } else {
-    chainerFeedbackDestination()->clearFrameBuffer();
   }
 }
 
 void FeedbackShader::drawSettings() {
   CommonViews::H3Title("Feedback Settings");
-  ShaderConfigSelectionView::draw(this);
+  
   ImGui::Checkbox(settings->lumaKeyEnabled->name.c_str(), &settings->lumaKeyEnabled->boolValue);
   if (ImGui::Combo("Source", &settings->sourceSelection->intValue, "Origin\0Current\0Final\0")) {
     populateSource();

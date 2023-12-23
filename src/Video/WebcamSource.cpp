@@ -14,24 +14,19 @@ void WebcamSource::setup() {
   grabber.setDeviceID(deviceID);
   grabber.setDesiredFrameRate(30);
   grabber.setPixelFormat(OF_PIXELS_RGBA);
-  grabber.setup(settings.width->value, settings.height->value);
-  
-  frameTexture = std::make_shared<ofTexture>();
-  frameTexture->allocate(settings.width->value, settings.height->value, GL_RGBA);
+  grabber.setup(settings->width->value, settings->height->value);
+  fbo->allocate(settings->width->value, settings->height->value);
 }
 
 void WebcamSource::saveFrame() {
-  // If our width or height has changed, setup again
-//  if (grabber.getWidth() != settings.width->value ||
-//      grabber.getHeight() != settings.height->value) {
-//    setup();
-//  }
   if (!grabber.isInitialized()) {
     return;
   }
   grabber.update();
   if (grabber.isFrameNew()) {
-    frameTexture = std::make_shared<ofTexture>(grabber.getTexture());
+    fbo->begin();
+    grabber.draw(0, 0);
+    fbo->end();
   }
 }
 

@@ -10,16 +10,27 @@
 
 const float OscillatorDampen = 0.3;
 
-void WaveformOscillator::tick()  {
-  if (!enabled->boolValue) return;
-  
+void WaveformOscillator::tick()
+{
+  if (!enabled->boolValue)
+    return;
+
   float t = frameTime();
   float xmod = fmodf(t, span);
   if (!data.empty() && xmod < data.back().x)
-      data.shrink(0);
-  
+    data.shrink(0);
+
   float v = OscillatorDampen * amplitude->value * sin(frequency->value * t) + shift->value;
   value->setValue(fmin(fmax(v, value->min), value->max));
   data.push_back(ImVec2(xmod, value->value));
 }
 
+float WaveformOscillator::max()
+{
+  return amplitude->value + shift->value;
+}
+
+float WaveformOscillator::min()
+{
+  return -amplitude->value + shift->value;
+}

@@ -93,6 +93,14 @@ ax::NodeEditor::EditorContext* ax::NodeEditor::GetCurrentEditor()
     return reinterpret_cast<ax::NodeEditor::EditorContext*>(s_Editor);
 }
 
+bool ax::NodeEditor::ZoomInc(bool in) {
+  return s_Editor->ZoomInc(in);
+}
+
+void ax::NodeEditor::ShowMetrics() {
+  return s_Editor->ShowMetrics();
+}
+
 ax::NodeEditor::Style& ax::NodeEditor::GetStyle()
 {
     return s_Editor->GetStyle();

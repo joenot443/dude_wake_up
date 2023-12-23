@@ -17,6 +17,7 @@
 #include <stdio.h>
 
 struct GlitchSettings: public ShaderSettings {
+	public:
   std::shared_ptr<Parameter> amount;
   std::shared_ptr<Oscillator> amountOscillator;
   
@@ -28,7 +29,9 @@ struct GlitchSettings: public ShaderSettings {
   };
 };
 
-struct GlitchShader: Shader {
+class GlitchShader: public Shader {
+public:
+
   GlitchSettings *settings;
   GlitchShader(GlitchSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
@@ -41,7 +44,7 @@ shader.load("shaders/Glitch");
 #endif
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
@@ -62,7 +65,7 @@ shader.load("shaders/Glitch");
   }
 
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
+    
     CommonViews::H3Title("Glitch");
     CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
   }

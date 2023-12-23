@@ -12,7 +12,7 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
-#include "ValueOscillator.hpp"
+#include "WaveformOscillator.hpp"
 #include "Parameter.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
@@ -20,11 +20,11 @@
 struct PlasmaTwoSettings : public ShaderSettings
 {
   std::shared_ptr<Parameter> color;
-  std::shared_ptr<ValueOscillator> colorOscillator;
+  std::shared_ptr<WaveformOscillator> colorOscillator;
   
   PlasmaTwoSettings(std::string shaderId, json j) :
   color(std::make_shared<Parameter>("color", 1.0  , -1.0, 2.0)),
-  colorOscillator(std::make_shared<ValueOscillator>(color)),
+  colorOscillator(std::make_shared<WaveformOscillator>(color)),
   ShaderSettings(shaderId, j)
   {
     parameters = { color };
@@ -34,8 +34,9 @@ struct PlasmaTwoSettings : public ShaderSettings
   };
 };
 
-struct PlasmaTwoShader : Shader
+class PlasmaTwoShader : public Shader
 {
+public:
   PlasmaTwoSettings *settings;
   PlasmaTwoShader(PlasmaTwoSettings *settings) : settings(settings), Shader(settings){};
   ofShader shader;
@@ -44,7 +45,7 @@ struct PlasmaTwoShader : Shader
     shader.load("shaders/PlasmaTwo");
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override
   {
     canvas->begin();
     shader.begin();

@@ -10,18 +10,18 @@
 #include "NodeLayoutView.hpp"
 
 void TextSource::setup() {
-  fbo.allocate(settings.width->value, settings.height->value, GL_RGBA);
+  fbo->allocate(settings->width->value, settings->height->value, GL_RGBA);
   font.load(displayText->font.path, displayText->fontSize);
   fontPath = displayText->font.path;
 }
 
 void TextSource::saveFrame() {
   // Changed resolution
-  if (static_cast<int>(fbo.getWidth()) != settings.width->intValue) {
+  if (static_cast<int>(fbo->getWidth()) != settings->width->intValue) {
     setup();
   }
 
-  fbo.begin();
+  fbo->begin();
   
   bool shouldClear = false;
   
@@ -41,10 +41,10 @@ void TextSource::saveFrame() {
   
   // Clear if we've moved
   if (
-      xPos != settings.width->intValue * displayText->xPosition->value ||
-      yPos != settings.height->intValue * (displayText->yPosition->value)) {
-    xPos = settings.width->intValue * displayText->xPosition->value;
-    yPos = settings.height->intValue * displayText->yPosition->value;
+      xPos != settings->width->intValue * displayText->xPosition->value ||
+      yPos != settings->height->intValue * (displayText->yPosition->value)) {
+    xPos = settings->width->intValue * displayText->xPosition->value;
+    yPos = settings->height->intValue * displayText->yPosition->value;
     shouldClear = true;
   }
   
@@ -52,16 +52,14 @@ void TextSource::saveFrame() {
     ofClear(0, 0.);
   } else {
     ofSetColor(0, 0, 0, 0);
-    ofDrawRectangle(0, 0, fbo.getWidth(), fbo.getHeight());
+    ofDrawRectangle(0, 0, fbo->getWidth(), fbo->getHeight());
   }
 
   // Draw the text
   ofSetColor(displayText->color);
-  font.drawString(displayText->text, xPos, settings.height->intValue - yPos);
+  font.drawString(displayText->text, xPos, settings->height->intValue - yPos);
 
-  fbo.end();
-  
-  frameTexture = std::make_shared<ofTexture>(fbo.getTexture());
+  fbo->end();
 }
 
 json TextSource::serialize() {

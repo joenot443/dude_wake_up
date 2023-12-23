@@ -17,13 +17,16 @@
 #include <stdio.h>
 
 struct MountainsSettings: public ShaderSettings {
+	public:
   MountainsSettings(std::string shaderId, json j) :
   ShaderSettings(shaderId, j) {
     
   };
 };
 
-struct MountainsShader: Shader {
+class MountainsShader: public Shader {
+public:
+
   MountainsSettings *settings;
   MountainsShader(MountainsSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
@@ -36,7 +39,7 @@ shader.load("shaders/Mountains");
 #endif
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);

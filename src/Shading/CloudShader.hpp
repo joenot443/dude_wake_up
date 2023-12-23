@@ -18,6 +18,7 @@
 #include <stdio.h>
 
 struct CloudSettings : public ShaderSettings {
+	public:
   std::string shaderId;
   std::shared_ptr<Parameter> speed;
 
@@ -34,7 +35,7 @@ struct CloudSettings : public ShaderSettings {
   };
 };
 
-struct CloudShader: Shader {
+class CloudShader: public Shader {
   private:
   ofShader shader;
 
@@ -54,7 +55,7 @@ shader.load("shaders/clouds");
 #endif
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
@@ -66,7 +67,6 @@ shader.load("shaders/clouds");
   }
 
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
     ImGui::Text("Clouds");
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
   }

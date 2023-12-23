@@ -852,6 +852,10 @@ struct NavigateAction final: EditorAction
     bool MoveOverEdge(const ImVec2& canvasSize);
     void StopMoveOverEdge();
     bool IsMovingOverEdge() const { return m_MovingOverEdge; }
+  
+    bool ZoomTo(float zoom);
+  bool ZoomInc(bool dir);
+  
     ImVec2 GetMoveScreenOffset() const { return m_MoveScreenOffset; }
 
     void SetWindow(ImVec2 position, ImVec2 size);
@@ -1361,6 +1365,8 @@ struct EditorContext
     void Suspend(SuspendFlags flags = SuspendFlags::None);
     void Resume(SuspendFlags flags = SuspendFlags::None);
     bool IsSuspended();
+  
+    bool ZoomInc(bool in);
 
     bool IsFocused();
     bool IsHovered() const;
@@ -1453,7 +1459,7 @@ struct EditorContext
     bool   IsBackgroundDoubleClicked()                     const { return m_BackgroundDoubleClickButtonIndex >= 0; }
     ImGuiMouseButton GetBackgroundClickButtonIndex()       const { return m_BackgroundClickButtonIndex; }
     ImGuiMouseButton GetBackgroundDoubleClickButtonIndex() const { return m_BackgroundDoubleClickButtonIndex; }
-
+    void ShowMetrics();
     float AlignPointToGrid(float p) const
     {
         if (!ImGui::GetIO().KeyAlt)
@@ -1474,8 +1480,6 @@ private:
     void SaveSettings();
 
     Control BuildControl(bool allowOffscreen);
-
-    void ShowMetrics(const Control& control);
 
     void UpdateAnimations();
 

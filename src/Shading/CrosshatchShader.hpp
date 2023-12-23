@@ -17,6 +17,7 @@
 #include <stdio.h>
 
 struct CrosshatchSettings: public ShaderSettings {
+	public:
   CrosshatchSettings(std::string shaderId, json j) :
   ShaderSettings(shaderId, j) {
     
@@ -36,7 +37,7 @@ shader.load("shaders/Crosshatch");
 #endif
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
@@ -56,7 +57,7 @@ shader.load("shaders/Crosshatch");
   }
 
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
+    
     CommonViews::H3Title("Crosshatch");
 
   }

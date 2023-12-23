@@ -12,103 +12,91 @@
 #include "FeedbackSourceService.hpp"
 #include "NodeLayoutView.hpp"
 
-// The "Final" selection for a FeedbackShader.
-std::shared_ptr<FeedbackSource> Shader::chainerFeedbackDestination() {
-  auto chainer = ShaderChainerService::getService()->shaderChainerForShaderId(shaderId);
-  if (chainer != nullptr) {
-    // We're consuming this FeedbackSource, make sure it's reflected
-    FeedbackSourceService::getService()->setConsumer(shaderId, chainer->feedbackDestination);
-    return chainer->feedbackDestination;
+void Shader::traverseFrame(std::shared_ptr<ofFbo> frame)
+{
+  clearLastFrame();
+  shade(frame, lastFrame);
+  for (std::shared_ptr<Connection> connection : outputs)
+  {
+    // We don't need to traverse Aux/Mask connections
+    if (connection->type == ConnectionTypeAux ||
+        connection->type == ConnectionTypeMask) continue;
+    
+    // Attempt to cast the connectable to a shader
+    std::shared_ptr<Shader> shader = std::dynamic_pointer_cast<Shader>(connection->end);
+    // If cast succeeded, traverse that shader's frame
+    if (shader)
+    {
+      shader->traverseFrame(lastFrame);
+    }
   }
-  
+
+  // If necessary, copy the texture to the Shader's FeedbackDestination
+  if (feedbackDestination != nullptr && feedbackDestination->beingConsumed())
+  {
+    feedbackDestination->pushFrame(lastFrame);
+  }
+}
+
+void Shader::clearLastFrame() {
+  lastFrame->begin();
+  ofSetColor(0, 0, 0, 255);
+  ofDrawRectangle(0, 0, lastFrame->getWidth(), lastFrame->getHeight());
+  lastFrame->end();
+}
+
+std::shared_ptr<VideoSourceSettings> Shader::sourceSettings() {
+  if (hasParentOfType(ConnectableTypeSource)) {
+    std::shared_ptr<Connectable> parentSource = parentOfType(ConnectableTypeSource);
+    
+    std::shared_ptr<VideoSource> castedSource = std::dynamic_pointer_cast<VideoSource>(parentSource);
+    return castedSource->settings;
+  } else {
+    return VideoSourceService::getService()->defaultVideoSource()->settings;
+  }
+}
+
+std::shared_ptr<Connectable> Shader::aux()
+{
+  // Shader Aux input
+  if (hasInputForType(ConnectionTypeAux))
+  {
+    std::shared_ptr<Connectable> input = inputForType(ConnectionTypeAux);
+    return input;
+  }
+
   return nullptr;
 }
 
-
-ofTexture Shader::auxTexture() {
-  // Shader Aux input
-  if (aux != nullptr) {
-    return aux->lastFrame.getTexture();
-  }
-  
-  // VideoSource Aux input
-  if (auxSource != nullptr) {
-    return *auxSource->frameTexture;
-  }
-  
-  return ofTexture();
-}
-
-ofTexture Shader::maskTexture() {
+std::shared_ptr<Connectable> Shader::mask()
+{
   // Shader Mask input
-  if (mask != nullptr) {
-    auto chainer = ShaderChainerService::getService()->shaderChainerForShaderId(mask->shaderId);
-    
-    if (chainer != nullptr) {
-      return *chainer->frameTexture;
-    }
+  if (hasInputForType(ConnectionTypeMask))
+  {
+    std::shared_ptr<Connectable> input = inputForType(ConnectionTypeMask);
+    return input;
   }
-  
-  // VideoSource Mask input
-  if (sourceMask != nullptr) {
-    return *sourceMask->frameTexture;
-  }
-  
-  return ofTexture();
+
+  return nullptr;
 }
 
-
-void Shader::load(json j) {
-  // We have a standard Shader Aux
-  if (j["auxId"].is_string()) {
-    aux = ShaderChainerService::getService()->shaderForId(j["auxId"]);
-  }
-  
-  // We have a VideoSource Aux
-  if (j["auxSourceId"].is_string()) {
-    auxSource = VideoSourceService::getService()->videoSourceForId(j["auxSourceId"]);
-  }
-  
-  // We have a standard Shader Mask
-  if (j["maskId"].is_string()) {
-    mask = ShaderChainerService::getService()->shaderForId(j["maskId"]);
-  }
-  
-  // We have a VideoSource Mask
-  if (j["sourceMaskId"].is_string()) {
-    sourceMask = VideoSourceService::getService()->videoSourceForId(j["sourceMaskId"]);
-  }
+void Shader::load(json j)
+{
 }
 
-json Shader::serialize() {
+json Shader::serialize()
+{
   json j = settings->serialize();
   j["shaderType"] = type();
   j["shaderId"] = settings->shaderId;
   auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(shaderId);
-  if (node != nullptr) {
+  if (node != nullptr)
+  {
     settings->x->value = NodeLayoutView::getInstance()->nodeForShaderSourceId(shaderId)->position.x;
     settings->y->value = NodeLayoutView::getInstance()->nodeForShaderSourceId(shaderId)->position.y;
     j["x"] = settings->x->value;
     j["y"] = settings->y->value;
   }
-  
-  if (auxConnected()) {
-    if (auxSource != nullptr) {
-      j["auxSourceId"] = auxSource->id;
-    }
-    if (aux != nullptr) {
-      j["auxId"] = aux->shaderId;
-    }
-  }
-  
-  if (maskConnected()) {
-    if (sourceMask != nullptr) {
-      j["sourceMaskId"] = sourceMask->id;
-    }
-    if (mask != nullptr) {
-      j["maskId"] = mask->shaderId;
-    }
-  }
-  
+
   return j;
 };

@@ -130,17 +130,17 @@ void CommonViews::ResolutionSelector(std::shared_ptr<VideoSource> source)
   static const char *resolutions[] = {"240p", "360p", "480p", "720p", "1080p", "1440p", "4k"};
 
   auto comboId = formatString("##Resolution%s", source->id.c_str());
-  auto selectedIdx = source->settings.resolution->intValue;
+  auto selectedIdx = source->settings->resolution->intValue;
   ImGui::PushItemWidth(100.0);
-  if (ImGui::BeginCombo(comboId.c_str(), resolutions[source->settings.resolution->intValue]))
+  if (ImGui::BeginCombo(comboId.c_str(), resolutions[source->settings->resolution->intValue]))
   {
     for (int i = 0; i < IM_ARRAYSIZE(resolutions); i++)
     {
       bool isSelected = (selectedIdx == i);
       if (ImGui::Selectable(resolutions[i], isSelected))
       {
-        source->settings.resolution->intValue = i;
-        source->settings.updateResolutionSettings();
+        source->settings->resolution->intValue = i;
+        source->settings->updateResolutionSettings();
       }
       if (isSelected)
         ImGui::SetItemDefaultFocus();
@@ -249,6 +249,21 @@ void CommonViews::IconTitle(const char *icon)
   ImGui::Text(icon);
   ImGui::PopFont();
 }
+
+bool CommonViews::LargeIconButton(const char *icon, std::string id)
+{
+  auto buttonId = formatString("%s##%s", icon, id.c_str());
+  ImGui::PushFont(FontService::getService()->largeIcon);
+  ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32_BLACK_TRANS);
+  ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0., 0.));
+  auto button = ImGui::Button(buttonId.c_str(), ImVec2(24., 24.));
+  ImGui::PopStyleColor();
+  ImGui::PopStyleVar();
+  ImGui::PopFont();
+  
+  return button;
+}
+
 
 void CommonViews::OscillateButton(std::string id, std::shared_ptr<Oscillator> o,
                                   std::shared_ptr<Parameter> p)

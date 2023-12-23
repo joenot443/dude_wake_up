@@ -28,7 +28,9 @@ struct CommonViews
 
   static bool IconButton(const char *icon, std::string id);
 
-  static void IconTitle(const char *icon);
+  static bool LargeIconButton(const char *icon, std::string id);
+
+  static void IconTitle(const char *icon);  
 
   static void ShaderParameter(std::shared_ptr<Parameter> param, std::shared_ptr<Oscillator> osc);
 

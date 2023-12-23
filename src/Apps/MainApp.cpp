@@ -44,18 +44,18 @@ void MainApp::setup()
   MarkdownService::getService();
   mainStageView->setup();
   ConfigService::getService()->loadDefaultConfigFile();
-  LibraryService::getService()->fetchLibraryFiles();
+  LibraryService::getService()->backgroundFetchLibraryFiles();
 }
 
 void MainApp::update()
 {
+  runMainThreadTasks();
   OscillationService::getService()->tickOscillators();
   ModulationService::getService()->tickMappings();
   ParameterService::getService()->tickParameters();
   VideoSourceService::getService()->updateVideoSources();
-  ShaderChainerService::getService()->updateShaderChainers();
+  ShaderChainerService::getService()->processFrame();
   ConfigService::getService()->checkAndSaveDefaultConfigFile();
-
   mainStageView->update();
 }
 
@@ -111,7 +111,6 @@ void MainApp::dragEvent(ofDragInfo dragInfo)
     auto videoSource = std::make_shared<FileSource>(
         UUID::generateUUID(), fileName, dragInfo.files[0]);
     VideoSourceService::getService()->addVideoSource(videoSource, videoSource->id);
-    ShaderChainerService::getService()->addNewShaderChainer(videoSource);
     mainStageView->nodeLayoutView.handleDroppedSource(videoSource);
     return;
   }
@@ -125,9 +124,28 @@ void MainApp::dragEvent(ofDragInfo dragInfo)
     // Create a new VideoSource for the file
     auto fileName = ofFilePath::getFileName(dragInfo.files[0]);
     auto videoSource = VideoSourceService::getService()->addImageVideoSource(fileName, dragInfo.files[0]);
-    ShaderChainerService::getService()->addNewShaderChainer(videoSource);
     mainStageView->nodeLayoutView.handleDroppedSource(videoSource);
   }
+}
+
+void MainApp::executeOnMainThread(const std::function<void()>& task) {
+    std::lock_guard<std::mutex> lock(mainThreadTasksMutex);
+    mainThreadTasks.push(task);
+}
+
+void MainApp::runMainThreadTasks() {
+    std::queue<std::function<void()>> tasksToRun;
+    
+    {
+        std::lock_guard<std::mutex> lock(mainThreadTasksMutex);
+        std::swap(tasksToRun, mainThreadTasks);
+    }
+
+    while (!tasksToRun.empty()) {
+        auto task = tasksToRun.front();
+        tasksToRun.pop();
+        task();
+    }
 }
 
 void MainApp::resetState() {}

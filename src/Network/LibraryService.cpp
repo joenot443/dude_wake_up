@@ -8,6 +8,7 @@
 #include "LibraryService.hpp"
 #include "VideoSourceService.hpp"
 #include "ConfigService.hpp"
+#include "MainApp.h"
 #include "Console.hpp"
 #include "httplib.h"
 #include "base64.h"
@@ -54,6 +55,17 @@ void LibraryService::backgroundFetchLibraryFiles()
   downloadFutures.push_back(std::async(std::launch::async, &LibraryService::fetchLibraryFiles, this));
 }
 
+void LibraryService::didFetchLibraryFiles() {
+  downloadFutures.push_back(std::async(std::launch::async, &LibraryService::downloadAllThumbnails, this));
+  repopulateVideoSourcesFromMainThread();
+}
+
+void LibraryService::repopulateVideoSourcesFromMainThread() {
+  MainApp::getApp()->executeOnMainThread([]() {
+    VideoSourceService::getService()->populateAvailableVideoSources();
+  });
+}
+
 // Fetches the library files from the server at /api/media.
 // This is a GET request that returns a JSON array of objects of the form:
 // {
@@ -95,8 +107,7 @@ void LibraryService::fetchLibraryFiles()
       }
       libraryFiles.push_back(shared);
     }
-    VideoSourceService::getService()->populateAvailableVideoSources();
-    downloadAllThumbnails();
+    didFetchLibraryFiles();
   }
   else
   {

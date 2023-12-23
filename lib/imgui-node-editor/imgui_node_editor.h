@@ -341,6 +341,7 @@ void RestoreNodeState(NodeId nodeId);
 
 void Suspend();
 void Resume();
+void ShowMetrics();
 bool IsSuspended();
 
 bool IsActive();
@@ -388,6 +389,7 @@ int  GetActionContextLinks(LinkId* links, int size);
 void EndShortcut();
 
 float GetCurrentZoom();
+bool  ZoomInc(bool up);
 
 NodeId GetHoveredNode();
 PinId GetHoveredPin();

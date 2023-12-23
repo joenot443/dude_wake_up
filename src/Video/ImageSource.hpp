@@ -24,7 +24,6 @@ public:
   void load(json j) override;
 
 private:
-  ofFbo fbo;
   std::string path;
 };
 

@@ -17,6 +17,7 @@
 #include <stdio.h>
 
 struct HalfToneSettings: public ShaderSettings {
+	public:
   std::shared_ptr<Parameter> speed;
   std::shared_ptr<Parameter> radius;
   
@@ -34,7 +35,9 @@ struct HalfToneSettings: public ShaderSettings {
   };
 };
 
-struct HalfToneShader: Shader {
+class HalfToneShader: public Shader {
+public:
+
   HalfToneSettings *settings;
   HalfToneShader(HalfToneSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
@@ -42,7 +45,7 @@ struct HalfToneShader: Shader {
     
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
@@ -66,7 +69,7 @@ struct HalfToneShader: Shader {
   }
 
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
+    
     CommonViews::H3Title("HalfTone");
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     CommonViews::ShaderParameter(settings->radius, settings->radiusOscillator);

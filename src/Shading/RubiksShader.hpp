@@ -17,13 +17,16 @@
 #include <stdio.h>
 
 struct RubiksSettings: public ShaderSettings {
+	public:
   RubiksSettings(std::string shaderId, json j) :
   ShaderSettings(shaderId, j) {
     
   };
 };
 
-struct RubiksShader: Shader {
+class RubiksShader: public Shader {
+public:
+
   RubiksSettings *settings;
   RubiksShader(RubiksSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
@@ -36,7 +39,7 @@ shader.load("shaders/Rubiks");
 #endif
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);

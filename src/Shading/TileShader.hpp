@@ -19,6 +19,7 @@
 #include <stdio.h>
 
 struct TileSettings : public ShaderSettings {
+	public:
   std::shared_ptr<Parameter> repeat;
   std::shared_ptr<Parameter> mirror;
 
@@ -36,7 +37,8 @@ struct TileSettings : public ShaderSettings {
   };
 };
 
-struct TileShader : public Shader {
+class TileShader : public Shader {
+public:
   ofShader shader;
   TileSettings *settings;
   TileShader(TileSettings *settings) : settings(settings), Shader(settings) {};
@@ -50,7 +52,7 @@ shader.load("shaders/Tile");
 #endif
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
@@ -67,7 +69,7 @@ shader.load("shaders/Tile");
   }
 
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
+    
     CommonViews::ShaderCheckbox(settings->mirror);
     CommonViews::ShaderParameter(settings->repeat, settings->repeatOscillator);
   }

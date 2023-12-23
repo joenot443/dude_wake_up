@@ -15,12 +15,12 @@
 
 struct OutputWindow : public ofBaseApp
 {
-  std::shared_ptr<ShaderChainer> chainer;
-  std::shared_ptr<Shader> shader;
+  OutputWindow(std::shared_ptr<ofFbo> fbo) : fbo(fbo)
+  { };
 
-  OutputWindow(std::shared_ptr<ShaderChainer> chainer) : chainer(chainer){};
-
-  ofFbo outputFbo;
+  std::shared_ptr<ofFbo> fbo;
+  
+  void setSource(std::shared_ptr<ofFbo> fbo);
   void setup();
   void update();
   void draw();

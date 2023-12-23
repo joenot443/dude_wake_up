@@ -37,6 +37,7 @@ AudioSourceService *AudioSourceService::service = 0;
 LayoutStateService *LayoutStateService::service = 0;
 MarkdownService *MarkdownService::service = 0;
 LibraryService *LibraryService::service = 0;
+MainApp *MainApp::app = 0;
 
 void setupDirectories() {
   ofSetDataPathRoot("../Resources/data/");

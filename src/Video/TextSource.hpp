@@ -26,7 +26,6 @@ public:
   
 private:
   TextEditorView textEditorView;
-  ofFbo fbo;
   ofTrueTypeFont font;
   std::string fontPath;
   std::shared_ptr<DisplayText> displayText;

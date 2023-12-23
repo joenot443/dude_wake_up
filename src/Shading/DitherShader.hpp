@@ -17,6 +17,7 @@
 #include <stdio.h>
 
 struct DitherSettings : public ShaderSettings {
+	public:
   std::shared_ptr<Parameter> shape;
 
   std::shared_ptr<Oscillator> shapeOscillator;
@@ -30,7 +31,9 @@ struct DitherSettings : public ShaderSettings {
   };
 };
 
-struct DitherShader : Shader {
+class DitherShader : public Shader {
+public:
+
   DitherSettings *settings;
   DitherShader(DitherSettings *settings)
       : settings(settings), Shader(settings){};
@@ -45,7 +48,7 @@ shader.load("shaders/Dither");
     
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
@@ -62,7 +65,7 @@ shader.load("shaders/Dither");
   ShaderType type() override { return ShaderTypeDither; }
 
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
+    
     CommonViews::ShaderParameter(settings->shape, settings->shapeOscillator);
   }
 };

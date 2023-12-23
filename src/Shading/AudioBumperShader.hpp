@@ -18,28 +18,31 @@
 #include <stdio.h>
 
 struct AudioBumperSettings : public ShaderSettings {
+	public:
   AudioBumperSettings(std::string shaderId, json j)
-      : ShaderSettings(shaderId, j){
-
-        };
+  : ShaderSettings(shaderId, j){
+    
+  };
 };
 
-struct AudioBumperShader : Shader {
+class AudioBumperShader : public Shader {
+public:
+
   AudioBumperSettings *settings;
   AudioBumperShader(AudioBumperSettings *settings)
-      : settings(settings), Shader(settings){};
+  : settings(settings), Shader(settings){};
   ofShader shader;
   void setup() override {
 #ifdef TESTING
-shader.load("shaders/AudioBumper");
+    shader.load("shaders/AudioBumper");
 #endif
 #ifdef RELEASE
-shader.load("shaders/AudioBumper");
+    shader.load("shaders/AudioBumper");
 #endif
     
   }
-
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     auto source = AudioSourceService::getService()->selectedAudioSource;
     canvas->begin();
     shader.begin();
@@ -56,13 +59,14 @@ shader.load("shaders/AudioBumper");
     shader.end();
     canvas->end();
   }
-
+  
   void clear() override {}
-
+  
   ShaderType type() override { return ShaderTypeAudioBumper; }
-
+  
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this); CommonViews::H3Title("AudioBumper"); }
+    CommonViews::H3Title("AudioBumper");
+  }
 };
 
 #endif /* AudioBumperShader_hpp */

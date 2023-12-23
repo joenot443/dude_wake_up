@@ -17,6 +17,7 @@
 #include <stdio.h>
 
 struct DancingSquaresSettings: public ShaderSettings {
+	public:
   DancingSquaresSettings(std::string shaderId, json j) :
   ShaderSettings(shaderId, j) {
     parameters = {};
@@ -26,7 +27,8 @@ struct DancingSquaresSettings: public ShaderSettings {
   };
 };
 
-struct DancingSquaresShader: Shader {
+class DancingSquaresShader: public Shader {
+public:
   DancingSquaresSettings *settings;
   DancingSquaresShader(DancingSquaresSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
@@ -34,7 +36,7 @@ struct DancingSquaresShader: Shader {
     shader.load("shaders/DancingSquares");
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniform1f("time", ofGetElapsedTimef());
@@ -42,7 +44,6 @@ struct DancingSquaresShader: Shader {
     auto source = AudioSourceService::getService()->selectedAudioSource;
     if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() > 0)
       shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0], 256);
-    
     
     frame->draw(0, 0);
     shader.end();

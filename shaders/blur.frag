@@ -6,7 +6,6 @@ uniform sampler2D tex;
 in vec2 coord;
 uniform vec2 dimensions;
 uniform float size;
-uniform float blur_mix;
 out vec4 outputColor;
 
 const int samples = 35,

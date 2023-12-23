@@ -20,8 +20,8 @@ in vec2 coord;
 out vec4 outputColor;
 
 #define ORIGIN (0.5 * dimensions.xy)
-float R;
-float S;
+float R = 0.;
+float S = 0.;
 
 vec4 rgb2cmyki(in vec3 c)
 {
@@ -54,7 +54,6 @@ vec4 halftone(in vec2 fc,in mat2 m)
   vec2 smp = (grid(m*fc) + 0.5*S) * m;
   float s = min(length(fc-smp) / (DOTSIZE*0.5*S), 1.0);
   vec3 texc = texture(tex, px2uv(smp+ORIGIN)).rgb;
-  texc = pow(texc, vec3(2.2)); // Gamma decode.
   vec4 c = rgb2cmyki(texc);
   return c+s;
 }
@@ -72,7 +71,7 @@ mat2 rotm(in float r)
 void main(  )
 {
   if (speed < 0.1) {
-    S = radius + MIN_S + (MAX_S-MIN_S) * 2.0*abs(0.5 * ORIGIN.x) / dimensions.x;
+    S = radius + MIN_S + (MAX_S-MIN_S) * 2.0*abs(0.5 - ORIGIN.x) / dimensions.x;
     R = D2R(180.0 * (0.5 * ORIGIN.y) / dimensions.y) * rotate;
   } else {
     R = speed*0.333*time;

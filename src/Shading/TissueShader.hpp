@@ -17,6 +17,7 @@
 #include <stdio.h>
 
 struct TissueSettings : public ShaderSettings {
+	public:
   std::shared_ptr<Parameter> alpha;
   std::shared_ptr<Parameter> beta;
   std::shared_ptr<Parameter> gamma;
@@ -37,7 +38,9 @@ struct TissueSettings : public ShaderSettings {
   };
 };
 
-struct TissueShader : Shader {
+class TissueShader : public Shader {
+public:
+
   TissueSettings *settings;
   TissueShader(TissueSettings *settings)
   : settings(settings), Shader(settings){};
@@ -51,7 +54,7 @@ struct TissueShader : Shader {
 #endif
   }
   
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
@@ -72,7 +75,7 @@ struct TissueShader : Shader {
   ShaderType type() override { return ShaderTypeTissue; }
   
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
+    
     CommonViews::H3Title("Tissue");
     CommonViews::ShaderParameter(settings->alpha, settings->alphaOscillator);
     CommonViews::ShaderParameter(settings->beta, settings->betaOscillator);

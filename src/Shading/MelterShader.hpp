@@ -18,6 +18,7 @@
 #include <stdio.h>
 
 struct MeltSettings : public ShaderSettings {
+	public:
   std::string shaderId;
 
   MeltSettings(std::string shaderId, json j) : shaderId(shaderId),
@@ -27,7 +28,9 @@ struct MeltSettings : public ShaderSettings {
   };
 };
 
-struct MeltShader : public Shader {
+class MeltShader : public Shader {
+public:
+
   private:
   ofShader shader;
 
@@ -44,7 +47,7 @@ shader.load("shaders/Melt");
 #endif
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
@@ -56,7 +59,7 @@ shader.load("shaders/Melt");
   }
 
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
+    
     ImGui::Text("Melt");
   }
 };

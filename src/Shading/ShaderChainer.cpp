@@ -1,293 +1,219 @@
+////
+////  ShaderChainer.cpp
+////  dude_wake_up
+////
+////  Created by Joe Crozier on 8/30/22.
+////
 //
-//  ShaderChainer.cpp
-//  dude_wake_up
+//#include "ShaderChainer.hpp"
+//#include "ASCIIShader.hpp"
+//#include "BlurShader.hpp"
+//#include "ConfigService.hpp"
+//#include "Console.hpp"
+//#include "FeedbackShader.hpp"
+//#include "FeedbackSourceService.hpp"
+//#include "GlitchShader.hpp"
+//#include "HSBShader.hpp"
+//#include "KaleidoscopeShader.hpp"
+//#include "MirrorShader.hpp"
+//#include "MixShader.hpp"
+//#include "PixelShader.hpp"
+//#include "ShaderChainerService.hpp"
+//#include "TileShader.hpp"
+//#include "TransformShader.hpp"
+//#include "VideoSourceService.hpp"
+//#include "ofMain.h"
 //
-//  Created by Joe Crozier on 8/30/22.
+//static const int EmptyId = -1;
 //
-
-#include "ShaderChainer.hpp"
-#include "ASCIIShader.hpp"
-#include "BlurShader.hpp"
-#include "ConfigService.hpp"
-#include "Console.hpp"
-#include "FeedbackShader.hpp"
-#include "FeedbackSourceService.hpp"
-#include "GlitchShader.hpp"
-#include "HSBShader.hpp"
-#include "KaleidoscopeShader.hpp"
-#include "MirrorShader.hpp"
-#include "MixShader.hpp"
-#include "PixelShader.hpp"
-#include "ShaderChainerService.hpp"
-#include "TileShader.hpp"
-#include "TransformShader.hpp"
-#include "VideoSourceService.hpp"
-#include "ofMain.h"
-
-static const int EmptyId = -1;
-
-void ShaderChainer::setup()
-{
-  registerFeedbackDestination();
-  fbo = ofFbo();
-  fbo.allocate(settings.width->value, settings.height->value, GL_RGBA);
-  fbo.begin();
-  ofSetColor(0, 0, 0, 0);
-  ofDrawRectangle(0, 0, fbo.getWidth(), fbo.getHeight());
-  fbo.end();
-  fbo.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
-
-  resizeShader.load("shaders/Resize");
-
-  frameTexture = std::make_shared<ofTexture>();
-  frameTexture->allocate(source->settings.width->value, source->settings.height->value, GL_RGBA);
-  frameTexture->setTextureWrap(GL_REPEAT, GL_REPEAT);
-  for (auto &sh : shaders())
-  {
-    sh->setup();
-  }
-
-  ping.allocate(source->settings.width->value, source->settings.height->value);
-  pong.allocate(source->settings.width->value, source->settings.height->value);
-
-  ping.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
-  pong.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
-}
-
-void ShaderChainer::update()
-{
-  // If the width of our Source or the width of the Chainer itself (the output)
-  // has changed, then setup again to recreate the textures.
-  if (fbo.getWidth() != settings.width->value || source->settings.width->value != frameTexture->getWidth())
-  {
-    setup();
-  }
-  processFrame(source->frameTexture);
-  resizeFrame();
-  saveFeedbackFrame();
-}
-
-std::vector<std::shared_ptr<Shader>> ShaderChainer::shaders()
-{
-  std::vector<std::shared_ptr<Shader>> shaders;
-  auto shader = front;
-  while (shader != nullptr)
-  {
-    shaders.push_back(shader);
-    shader = shader->next;
-  }
-  return shaders;
-}
-
-/// Draws our `frameTexture` into our `fbo` at the size specified by our `ShaderChainer`.
-void ShaderChainer::resizeFrame()
-{
-  fbo.begin();
-  resizeShader.begin();
-  resizeShader.setUniform2f("inDimensions", frameTexture->getWidth(), frameTexture->getHeight());
-  resizeShader.setUniform2f("outDimensions", fbo.getWidth(), fbo.getHeight());
-  resizeShader.setUniformTexture("tex", *frameTexture.get(), 4);
-  ofClear(0, 0);
-  ofSetColor(0, 0, 0, 0);
-  ofDrawRectangle(0, 0, pong.getWidth(), pong.getHeight());
-  fbo.draw(0, 0);
-  resizeShader.end();
-  fbo.end();
-}
-
-ofFbo ShaderChainer::processFrame(std::shared_ptr<ofTexture> texture)
-{
-  ping.begin();
-  ofClear(0, 0);
-  ofSetColor(0, 0, 0, 0);
-  ofDrawRectangle(0, 0, ping.getWidth(), ping.getHeight());
-  ping.end();
-
-  pong.begin();
-  ofClear(0, 0);
-  ofSetColor(0, 0, 0, 0);
-  ofDrawRectangle(0, 0, pong.getWidth(), pong.getHeight());
-  pong.end();
-
-  pong.begin();
-  texture->draw(0, 0);
-  pong.end();
-
-  ofFbo *canv = &ping;
-  ofFbo *tex = &pong;
-
-  ping.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
-  pong.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
-
-  bool flip = false;
-  auto currentShaders = shaders();
-
-  // Return raw texture if no shaders
-  if (currentShaders.empty())
-  {
-    frameTexture = std::make_shared<ofTexture>(pong.getTexture());
-    return pong;
-  }
-
-  for (auto sharedShader : currentShaders)
-  {
-    auto shader = sharedShader.get();
-
-    ShaderChainerService::getService()->associateShaderWithChainer(
-        shader->shaderId, chainerId);
-    // Skip disabled shaders
-    if (!shader->enabled())
-    {
-      continue;
-    }
-
-    if (flip)
-    {
-      canv = &pong;
-      tex = &ping;
-    }
-    else
-    {
-      canv = &ping;
-      tex = &pong;
-    }
-    shader->shade(tex, canv);
-    tex->begin();
-    ofClear(0, 0);
-    ofSetColor(0, 0, 0, 0);
-    ofDrawRectangle(0, 0, fbo.getWidth(), fbo.getHeight());
-    tex->end();
-    // Copy tex onto the shader's lastTexture
-    shader->lastFrame.begin();
-    ofClear(0, 0);
-    canv->draw(0, 0, fbo.getWidth(), fbo.getHeight());
-    shader->lastFrame.end();
-    // If necessary, copy the texture to the Shader's FeedbackDestination
-    if (shader->shaderFeedbackDestination != nullptr && shader->shaderFeedbackDestination->beingConsumed()) {
-      shader->shaderFeedbackDestination->pushFrame(shader->lastFrame);
-    }
-    flip = !flip;
-  }
-
-  frameTexture = std::make_shared<ofTexture>(canv->getTexture());
-
-  return *canv;
-}
-
-void ShaderChainer::pushShader(ShaderType shaderType)
-{
-  auto shader = ShaderChainerService::getService()->shaderForType(
-      shaderType, UUID::generateUUID(), 0);
-  ShaderChainerService::getService()->addShader(shader);
-
-  auto frontShader = front;
-
-  if (frontShader == nullptr)
-  {
-    front = shader;
-    shader->parent = nullptr;
-    shader->next = nullptr;
-  }
-  else
-  {
-    while (frontShader->next != nullptr)
-    {
-      frontShader = frontShader->next;
-    }
-    frontShader->next = shader;
-    shader->parent = frontShader;
-    shader->next = nullptr;
-  }
-}
-
-void ShaderChainer::saveFeedbackFrame()
-{
-  if (feedbackDestination)
-  {
-    feedbackDestination->pushFrame(fbo);
-  }
-}
-
-void ShaderChainer::deleteShader(shared_ptr<Shader> shader)
-{
-  //  auto it = std::find(shaders.begin(), shaders.end(), shader);
-  //  if (it != shaders.end()) {
-  //    shaders.erase(it);
-  //  }
-}
-
-json ShaderChainer::serialize()
-{
-  json j;
-  j["shaders"] = json::array();
-  j["chainerId"] = chainerId;
-  j["name"] = name;
-  j["sourceId"] = source->id;
-  
-  // We have a front shader
-  if (front != nullptr)
-    j["front"] = front->shaderId;
-  else
-    j["front"] = EmptyId;
-  
-  if (frontAux != nullptr) {
-    j["frontAux"] = frontAux->shaderId;
-  } else {
-    j["frontAux"] = EmptyId;
-  }
-
-  for (auto shader : shaders())
-  {
-    j["shaders"].push_back(shader->serialize());
-  }
-  return j;
-}
-
-void ShaderChainer::load(json j)
-{
-  //  std::cout << j.dump(4) << std::endl;
-
-  if (VideoSourceService::getService()->videoSourceForId(j["sourceId"]) !=
-      nullptr)
-  {
-    source = VideoSourceService::getService()->videoSourceForId(j["sourceId"]);
-  }
-
-  chainerId = j["chainerId"];
-
-  std::shared_ptr<Shader> last = nullptr;
-  for (auto shaderJson : j["shaders"])
-  {
-    ShaderType shaderType = shaderJson["shaderType"];
-    std::string shaderId = shaderJson["shaderId"];
-
-    auto shader = ShaderChainerService::getService()->shaderForType(
-        shaderType, shaderId, shaderJson);
-    ShaderChainerService::getService()->addShader(shader);
-    ShaderChainerService::getService()->associateShaderWithChainer(shaderId, chainerId);
-    shader->parent = last;
-    if (last != nullptr)
-      last->next = shader;
-
-    last = shader;
-  }
-
-  if (j["front"] != EmptyId)
-  {
-    front = ShaderChainerService::getService()->shaderForId(j["front"]);
-    front->parentSource = shared_from_this();
-  }
-
-  if (j["frontAux"] != EmptyId)
-  {
-    frontAux = ShaderChainerService::getService()->shaderForId(j["frontAux"]);
-  }
-}
-
-void ShaderChainer::registerFeedbackDestination()
-{
-  std::shared_ptr<FeedbackSource> source =
-      std::make_shared<FeedbackSource>(chainerId, sourceName, std::make_shared<VideoSourceSettings>(settings));
-  FeedbackSourceService::getService()->registerFeedbackSource(source);
-  feedbackDestination = source;
-}
+//void ShaderChainer::setup()
+//{
+//  registerFeedbackDestination();
+//  fbo = ofFbo();
+//  fbo.allocate(settings.width->value, settings.height->value, GL_RGBA);
+//  fbo.begin();
+//  ofSetColor(0, 0, 0, 0);
+//  ofDrawRectangle(0, 0, fbo.getWidth(), fbo.getHeight());
+//  fbo.end();
+//  fbo.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
+//
+//  resizeShader.load("shaders/Resize");
+//  for (auto &sh : shaders())
+//  {
+//    sh->setup();
+//  }
+//}
+//
+//void ShaderChainer::update()
+//{
+//  // If the width of our Source or the width of the Chainer itself (the output)
+//  // has changed, then setup again to recreate the textures.
+//  if (fbo.getWidth() != settings.width->value || source->settings.width->value != frameTexture->getWidth())
+//  {
+//    setup();
+//  }
+//  processFrame(source->frameTexture);
+//  resizeFrame();
+//  saveFeedbackFrame();
+//}
+//
+//// Recursively iterates through the std::set shader->next to collect every Shader in the chain.
+//std::vector<std::shared_ptr<Shader>> collectShaders(std::shared_ptr<Shader> shader, std::vector<std::shared_ptr<Shader>> *shaders = {})
+//{
+//  if (!shader) return *shaders;  // Add null pointer check
+//
+//  shaders->push_back(shader);
+//  if (shader->next.size() > 0)
+//  {
+//    for (auto next : shader->next)
+//    {
+//      collectShaders(next, shaders);
+//    }
+//  }
+//  return *shaders;
+//}
+//
+//std::vector<std::shared_ptr<Shader>> ShaderChainer::shaders()
+//{
+//  std::vector<std::shared_ptr<Shader>> shaders;
+//  collectShaders(front, &shaders);
+//  return shaders;
+//}
+//
+///// Draws our `frameTexture` into our `fbo` at the size specified by our `ShaderChainer`.
+//void ShaderChainer::resizeFrame()
+//{
+//  fbo.begin();
+//  resizeShader.begin();
+//  resizeShader.setUniform2f("inDimensions", frameTexture->getWidth(), frameTexture->getHeight());
+//  resizeShader.setUniform2f("outDimensions", fbo.getWidth(), fbo.getHeight());
+//  resizeShader.setUniformTexture("tex", *frameTexture.get(), 4);
+//  ofClear(0, 0);
+//  ofSetColor(0, 0, 0, 0);
+//  ofDrawRectangle(0, 0, fbo.getWidth(), fbo.getHeight());
+//  fbo.draw(0, 0);
+//  resizeShader.end();
+//  fbo.end();
+//}
+//
+///*
+//
+// */
+//void ShaderChainer::processFrame(std::shared_ptr<ofTexture> texture)
+//{
+//  fbo.begin();
+////  ofClear(0, 0);
+////  ofSetColor(0, 0, 0, 0);
+////  ofDrawRectangle(0, 0, fbo.getWidth(), fbo.getHeight());
+////  ofSetColor(0, 0, 0, 255);
+//  texture->draw(0, 0);
+//  fbo.end();
+//
+//  // Return raw texture if no shaders
+//  if (front == nullptr)
+//  {
+//    return;
+//  }
+//
+//  front->traverseFrame(&fbo);
+//}
+//
+//void ShaderChainer::saveFeedbackFrame()
+//{
+//  if (feedbackDestination)
+//  {
+//    feedbackDestination->pushFrame(fbo);
+//  }
+//}
+//
+//json ShaderChainer::serialize()
+//{
+//  json j;
+//  j["shaders"] = json::array();
+//  j["chainerId"] = chainerId;
+//  j["name"] = name;
+//  j["sourceId"] = source->id;
+//
+//  // We have a front shader
+//  if (front != nullptr)
+//  {
+//    j["front"] = front->shaderId;
+//  }
+//  else
+//  {
+//    j["front"] = EmptyId;
+//  }
+//
+//  if (frontAux != nullptr)
+//  {
+//    j["frontAux"] = frontAux->shaderId;
+//  }
+//  else
+//  {
+//    j["frontAux"] = EmptyId;
+//  }
+//
+//  for (auto shader : shaders())
+//  {
+//    j["shaders"].push_back(shader->serialize());
+//  }
+//  return j;
+//}
+//
+//void ShaderChainer::load(json j)
+//{
+//  //  std::cout << j.dump(4) << std::endl;
+//
+//  if (VideoSourceService::getService()->videoSourceForId(j["sourceId"]) !=
+//      nullptr)
+//  {
+//    source = VideoSourceService::getService()->videoSourceForId(j["sourceId"]);
+//  }
+//
+//  chainerId = j["chainerId"];
+//
+//  std::shared_ptr<Shader> last = nullptr;
+//
+//  for (auto shaderJson : j["shaders"])
+//  {
+//    ShaderType shaderType = shaderJson["shaderType"];
+//    std::string shaderId = shaderJson["shaderId"];
+//
+//    auto shader = ShaderChainerService::getService()->shaderForType(
+//        shaderType, shaderId, shaderJson);
+//    ShaderChainerService::getService()->addShader(shader);
+//    ShaderChainerService::getService()->associateShaderWithChainer(shaderId, chainerId);
+//  }
+//
+//  for (auto shaderJson : j["shaders"])
+//  {
+//    auto shader = ShaderChainerService::getService()->shaderForId(shaderJson["shaderId"]);
+//    shader->parent = ShaderChainerService::getService()->shaderForId(shaderJson["parent"]);
+//    // Populate the std::set shader->next with the shaders from shaderJson["next"]
+//    if (shaderJson["next"].is_array())
+//    {
+//      for (auto nextId : shaderJson["next"])
+//      {
+//        shader->next.insert(ShaderChainerService::getService()->shaderForId(nextId));
+//      }
+//    }
+//  }
+//
+//  if (j["front"] != EmptyId)
+//  {
+//    front = ShaderChainerService::getService()->shaderForId(id);
+//  }
+//
+//  if (j["frontAux"] != EmptyId)
+//  {
+//    frontAux = ShaderChainerService::getService()->shaderForId(j["frontAux"]);
+//  }
+//}
+//
+//void ShaderChainer::registerFeedbackDestination()
+//{
+//  std::shared_ptr<FeedbackSource> source =
+//      std::make_shared<FeedbackSource>(chainerId, sourceName, std::make_shared<VideoSourceSettings>(settings));
+//  FeedbackSourceService::getService()->registerFeedbackSource(source);
+//  feedbackDestination = source;
+//}

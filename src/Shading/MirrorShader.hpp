@@ -19,6 +19,7 @@
 // Mirror
 
 struct MirrorSettings : public ShaderSettings {
+	public:
   std::string shaderId;
 
   std::shared_ptr<Parameter> mirrorXEnabled;
@@ -53,7 +54,9 @@ struct MirrorSettings : public ShaderSettings {
   }
 };
 
-struct MirrorShader : Shader {
+class MirrorShader : public Shader {
+public:
+
   ofShader shader;
   MirrorSettings *settings;
   MirrorShader(MirrorSettings *settings)
@@ -71,7 +74,7 @@ shader.load("shaders/mirror");
 
   ShaderType type() override { return ShaderTypeMirror; }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
@@ -93,7 +96,7 @@ shader.load("shaders/mirror");
   }
 
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
+    
     // Mirror X
     CommonViews::ShaderCheckbox(settings->mirrorXEnabled);
 

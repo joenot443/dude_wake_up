@@ -35,8 +35,6 @@ public:
   }
   std::vector<std::shared_ptr<FeedbackSource>> feedbackSources();
   std::shared_ptr<FeedbackSource> defaultFeedbackSource;
-
-  std::vector<std::string> feedbackSourceNames();
   
   void setup();
   void removeFeedbackSource(std::string id);

@@ -58,8 +58,8 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
   void addDriver(std::shared_ptr<Parameter> dr)
   {
     driver = dr;
-    shift = std::make_shared<Parameter>("shift", 0.0, -1.0, 1.0);
-    scale = std::make_shared<Parameter>("scale", 1.0, 0.0, 2.0);
+    shift = std::make_shared<Parameter>("shift", 0.0, -2.0, 2.0);
+    scale = std::make_shared<Parameter>("scale", 1.0, 0.0, 5.0);
   }
 
   void load(json j)

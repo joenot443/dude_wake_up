@@ -39,7 +39,8 @@ std::string ConfigService::nottawaFolderFilePath()
   return ofFilePath::join(ofFilePath::getUserHomeDir(), "/nottawa");
 }
 
-std::string ConfigService::libraryFolderFilePath() {
+std::string ConfigService::libraryFolderFilePath()
+{
   return relativeFilePathWithinNottawaFolder("/videos/");
 }
 
@@ -130,7 +131,7 @@ void ConfigService::saveShaderChainerConfigFile(
   fileStream.open(filePath.c_str(), std::ios::trunc);
   json container;
 
-  container[ShaderChainersJsonKey] = ShaderChainerService::getService()->config();
+  container[ShadersJsonKey] = ShaderChainerService::getService()->config();
   container[SourcesJsonKey] = VideoSourceService::getService()->config();
   container[ConfigTypeKey] = ConfigTypeAtomic;
   container[NameJsonKey] = name;
@@ -149,7 +150,7 @@ void ConfigService::saveShaderChainerConfigFile(
   notifyConfigUpdate();
 }
 
-void ConfigService::saveShaderConfigFile(Shader *shader,
+void ConfigService::saveShaderConfigFile(std::shared_ptr<Shader> shader,
                                          std::string name)
 {
   std::ofstream fileStream;
@@ -256,8 +257,9 @@ json ConfigService::currentConfig()
   json config;
   config[MidiJsonKey] = MidiService::getService()->config();
   config[OscJsonKey] = OscillationService::getService()->config();
-  config[ShaderChainersJsonKey] = ShaderChainerService::getService()->config();
+  config[ShadersJsonKey] = ShaderChainerService::getService()->config();
   config[SourcesJsonKey] = VideoSourceService::getService()->config();
+  config[ConnectionsJsonKey] = ShaderChainerService::getService()->connectionsConfig();
   config[ConfigTypeKey] = ConfigTypeFull;
   return config;
 }
@@ -271,7 +273,7 @@ void ConfigService::saveConfigFile(std::string path)
 
   if (fileStream.is_open())
   {
-//    std::cout << config.dump(4) << std::endl;
+    //    std::cout << config.dump(4) << std::endl;
     fileStream << config.dump(4);
     fileStream.close();
 
@@ -279,7 +281,7 @@ void ConfigService::saveConfigFile(std::string path)
   }
   else
   {
-//    std::cout << config.dump(4) << std::endl;
+    //    std::cout << config.dump(4) << std::endl;
     log("Problem saving config.");
   }
 }
@@ -308,9 +310,9 @@ void ConfigService::loadShaderChainerFile(std::string path)
     VideoSourceService::getService()->loadConfig(data[SourcesJsonKey]);
   }
 
-  if (data[ShaderChainersJsonKey].is_object())
+  if (data[ShadersJsonKey].is_object())
   {
-    ShaderChainerService::getService()->loadConfig(data[ShaderChainersJsonKey]);
+    ShaderChainerService::getService()->loadConfig(data[ShadersJsonKey]);
   }
 }
 
@@ -367,9 +369,14 @@ void ConfigService::loadConfigFile(std::string path)
     VideoSourceService::getService()->loadConfig(data[SourcesJsonKey]);
   }
 
-  if (data[ShaderChainersJsonKey].is_object())
+  if (data[ShadersJsonKey].is_object())
   {
     ShaderChainerService::getService()->clear();
-    ShaderChainerService::getService()->loadConfig(data[ShaderChainersJsonKey]);
+    ShaderChainerService::getService()->loadConfig(data[ShadersJsonKey]);
+  }
+
+  if (data[ConnectionsJsonKey].is_object())
+  {
+    ShaderChainerService::getService()->loadConnectionsConfig(data[ConnectionsJsonKey]);
   }
 }

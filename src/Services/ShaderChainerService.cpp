@@ -7,12 +7,17 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "GameboyShader.hpp"
+#include "StaticFrameShader.hpp"
+#include "SlidingFrameShader.hpp"
+#include "MinMixerShader.hpp"
 #include "SolidColorShader.hpp"
 #include "16BitShader.hpp"
 #include "HilbertShader.hpp"
 #include "WarpShader.hpp"
 #include "FrequencyVisualizerShader.hpp"
 #include "ColorKeyMaskMakerShader.hpp"
+#include "FeedbackSourceService.hpp"
 #include "CurlySquaresShader.hpp"
 #include "PlasmaTwoShader.hpp"
 #include "DancingSquaresShader.hpp"
@@ -102,245 +107,35 @@ void ShaderChainerService::setup()
   }
 }
 
-std::vector<std::shared_ptr<ShaderChainer>>
-ShaderChainerService::shaderChainers()
-{
-  std::vector<std::shared_ptr<ShaderChainer>> shaderChainers;
-  for (auto const &[key, val] : shaderChainerMap)
-  {
-    shaderChainers.push_back(val);
-  }
-  // Sort the ShaderChainers by their names
-  std::sort(shaderChainers.begin(), shaderChainers.end(),
-            [](const std::shared_ptr<ShaderChainer> &a,
-               const std::shared_ptr<ShaderChainer> &b)
-            {
-              return a->creationTime < b->creationTime;
-            });
-
-  return shaderChainers;
-}
-
-std::vector<std::string> ShaderChainerService::shaderChainerNames()
-{
-  std::vector<std::string> names;
-  for (auto const &[key, val] : shaderChainerMap)
-  {
-    names.push_back(val->name);
-  }
-  return names;
-}
-
-void ShaderChainerService::updateShaderChainers()
-{
-  for (auto const &[key, val] : shaderChainerMap)
-  {
-    val->update();
-  }
-}
-
 void ShaderChainerService::subscribeToShaderChainerUpdates(
     std::function<void()> callback)
 {
   shaderChainerUpdateSubject.subscribe(callback);
 }
 
-void ShaderChainerService::removeShaderChainerReferenceFromSourceMap(std::shared_ptr<ShaderChainer> shaderChainer)
+void ShaderChainerService::processFrame()
 {
-  // Remove the ShaderChainer from the vector on the VideoSource map
-  auto chainers = videoSourceIdShaderChainerMap[shaderChainer->source->id];
-  auto it = std::remove(chainers.begin(), chainers.end(), shaderChainer);
-  chainers.erase(it, chainers.end());
-}
-
-void ShaderChainerService::removeShaderChainer(std::string id)
-{
-  if (shaderChainerMap.count(id) == 0)
+  // Collect the `Connections` from connectionMap with a type of ConnectionTypeSource
+  std::vector<std::shared_ptr<Connection>> sourceConnections;
+  for (auto &connectionPair : connectionMap)
   {
-    log("Tried to remove ShaderChainer %s, but it doesn't exist", id.c_str());
-    return;
-  }
-  auto shaderChainer = shaderChainerMap[id];
-  removeShaderChainerReferenceFromSourceMap(shaderChainer);
-
-  shaderChainerMap.erase(id);
-
-  // We might now have floating Shaders without a Chainer/Source
-  // Null the front / frontAux on it, if present.
-
-  if (shaderChainer->front != nullptr)
-  {
-    shaderChainer->front->parentSource = nullptr;
-  }
-  if (shaderChainer->frontAux != nullptr)
-  {
-    shaderChainer->frontAux->auxSource = nullptr;
+    if (connectionPair.second->type == ConnectionTypeSource)
+    {
+      sourceConnections.push_back(connectionPair.second);
+    }
   }
 
-  FeedbackSourceService::getService()->removeFeedbackSource(id);
-  VideoSourceService::getService()->removeVideoSource(shaderChainer->source->id);
-
-  shaderChainerUpdateSubject.notify();
-}
-
-void ShaderChainerService::selectShaderChainer(
-    ::shared_ptr<ShaderChainer> shaderChainer)
-{
-  selectedShaderChainer = shaderChainer;
-  // When we select a ShaderChainer, we deselect the Shader
-  selectedShader = nullptr;
+  for (auto connection : sourceConnections)
+  {
+    std::shared_ptr<VideoSource> videoSource = std::dynamic_pointer_cast<VideoSource>(connection->start);
+    std::shared_ptr<Shader> shader = std::dynamic_pointer_cast<Shader>(connection->end);
+    shader->traverseFrame(videoSource->frame());
+  }
 }
 
 void ShaderChainerService::selectShader(std::shared_ptr<Shader> shader)
 {
   selectedShader = shader;
-}
-
-void ShaderChainerService::linkShaderToShaderAux(std::shared_ptr<Shader> auxShader,
-                                                 std::shared_ptr<Shader> destShader)
-{
-  destShader->aux = auxShader;
-}
-
-void ShaderChainerService::breakShaderAuxLink(
-    std::shared_ptr<Shader> startShader, std::shared_ptr<Shader> endShader)
-{
-  startShader->next = nullptr;
-  endShader->aux = nullptr;
-}
-
-void ShaderChainerService::breakSourceShaderAuxLink(std::shared_ptr<VideoSource> source,
-                                                    std::shared_ptr<Shader> shader)
-{
-  auto chainer = shaderChainerForShaderId(shader->shaderId);
-  if (chainer != nullptr)
-  {
-    chainer->frontAux = nullptr;
-    shader->auxSource = nullptr;
-  }
-}
-
-std::shared_ptr<ShaderChainer> ShaderChainerService::linkVideoSourceToShaderAux(
-    std::shared_ptr<VideoSource> source,
-    std::shared_ptr<Shader> shader)
-{
-
-  auto chainer = addNewShaderChainer(source);
-  chainer->frontAux = shader;
-  shader->auxSource = source;
-  shaderIdShaderChainerMap[shader->shaderId] = chainer;
-  return chainer;
-}
-
-void ShaderChainerService::linkShaderToShaderMask(std::shared_ptr<Shader> maskShader,
-                                                  std::shared_ptr<Shader> destShader)
-{
-  destShader->mask = maskShader;
-}
-
-void ShaderChainerService::breakShaderMaskLink(
-    std::shared_ptr<Shader> startShader, std::shared_ptr<Shader> endShader)
-{
-  startShader->next = nullptr;
-  endShader->mask = nullptr;
-}
-
-void ShaderChainerService::breakSourceShaderMaskLink(std::shared_ptr<VideoSource> source,
-                                                     std::shared_ptr<Shader> shader)
-{
-  auto chainer = shaderChainerForShaderId(shader->shaderId);
-  chainer->frontMask = nullptr;
-  shader->sourceMask = nullptr;
-}
-
-std::shared_ptr<ShaderChainer> ShaderChainerService::linkVideoSourceToShaderMask(
-    std::shared_ptr<VideoSource> source,
-    std::shared_ptr<Shader> shader)
-{
-
-  // Case 2: We already have an active Chainer for this source, so we'll make a new one.
-  auto chainer = addNewShaderChainer(source);
-  chainer->frontMask = shader;
-  shader->sourceMask = source;
-  shaderIdShaderChainerMap[shader->shaderId] = chainer;
-  return chainer;
-}
-
-std::shared_ptr<ShaderChainer> ShaderChainerService::addNewShaderChainer(
-    std::shared_ptr<VideoSource> videoSource)
-{
-  auto name = formatString("%s", videoSource->sourceName.c_str());
-  auto chainer =
-      std::make_shared<ShaderChainer>(UUID::generateUUID(), name, videoSource);
-  addShaderChainer(chainer);
-  return chainer;
-}
-
-std::shared_ptr<ShaderChainer> ShaderChainerService::shaderChainerForAuxShaderIdAndVideoSourceId(std::string auxShaderId, std::string videoSourceId)
-{
-  auto chainers = shaderChainersForVideoSourceId(videoSourceId);
-  for (auto chainer : chainers)
-  {
-    if (chainer->frontAux != nullptr &&
-        chainer->frontAux->shaderId == auxShaderId)
-    {
-      return chainer;
-    }
-  }
-  return nullptr;
-}
-
-std::vector<std::shared_ptr<ShaderChainer>> ShaderChainerService::shaderChainersForVideoSourceId(std::string id)
-{
-  return videoSourceIdShaderChainerMap[id];
-}
-
-std::shared_ptr<ShaderChainer> ShaderChainerService::implicitShaderChainerForVideoSourceId(std::string id)
-{
-  auto chainers = shaderChainersForVideoSourceId(id);
-  if (chainers.empty())
-  {
-    return nullptr;
-  }
-  return chainers.front();
-}
-
-bool ShaderChainerService::implicitShaderChainerForVideoSourceIdIsEmpty(std::string id)
-{
-  auto implicitChainer = implicitShaderChainerForVideoSourceId(id);
-  if (implicitChainer == nullptr)
-    return false;
-
-  return implicitChainer->front == nullptr && implicitChainer->frontAux == nullptr;
-}
-
-bool ShaderChainerService::shaderChainerIsEmpty(std::shared_ptr<ShaderChainer> chainer)
-{
-  return chainer->front == nullptr && chainer->frontAux == nullptr;
-}
-
-void ShaderChainerService::addShaderChainer(
-    std::shared_ptr<ShaderChainer> shaderChainer)
-{
-  if (shaderChainerMap.count(shaderChainer->chainerId) != 0)
-  {
-    log("Reregistering ShaderChainer %s", shaderChainer->chainerId.c_str());
-  }
-
-  // Select the first ShaderChainer to be created
-  if (shaderChainerMap.empty())
-  {
-    selectShaderChainer(shaderChainer);
-  }
-
-  // Update the video source map with this chainer
-  auto chainers = shaderChainersForVideoSourceId(shaderChainer->source->id);
-  chainers.push_back(shaderChainer);
-  videoSourceIdShaderChainerMap[shaderChainer->source->id] = chainers;
-
-  shaderChainerMap[shaderChainer->chainerId] = shaderChainer;
-  shaderChainer->setup();
-  shaderChainerUpdateSubject.notify();
 }
 
 std::shared_ptr<Shader> ShaderChainerService::makeShader(ShaderType type)
@@ -350,109 +145,50 @@ std::shared_ptr<Shader> ShaderChainerService::makeShader(ShaderType type)
   return shader;
 }
 
-void ShaderChainerService::linkShaderToNext(
-    std::shared_ptr<Shader> sourceShader, std::shared_ptr<Shader> destShader)
-{
-  sourceShader->next = destShader;
-  destShader->parent = sourceShader;
-}
-
-void ShaderChainerService::addShaderToFront(
-    std::shared_ptr<Shader> destShader,
-    std::shared_ptr<ShaderChainer> chainer)
-{
-  chainer->front = destShader;
-  destShader->parentSource = chainer->source;
-}
-
-bool ShaderChainerService::terminatesAtAuxPort(std::shared_ptr<ShaderChainer> chainer)
-{
-  if (chainer->frontAux != nullptr || chainer->frontMask != nullptr)
-  {
-    return true;
-  }
-
-  auto parent = chainer->front;
-  while (parent != nullptr)
-  {
-    auto next = parent->next;
-    // If this shader has a parent which is different from the current parent,
-    // we can assume this is an aux/mask connection.
-    if (next != nullptr &&
-        next->parent != parent)
-      return true;
-    parent = next;
-  }
-}
-
 // Returns true if the passed Shader is the terminal node in a Chainer.
 bool ShaderChainerService::isTerminalShader(std::shared_ptr<Shader> shader)
 {
-  auto it = shaderIdShaderChainerMap.find(shader->shaderId);
-  if (it == shaderIdShaderChainerMap.end() || it->second == nullptr)
-  {
-    return false;
-  }
-
-  // If the Shader has a parent but does NOT have a child, it must be terminal
-  return (shader->parent != nullptr || shader->parentSource != nullptr) && shader->next == nullptr;
+  return shader->outputs.empty();
 }
 
-std::shared_ptr<ShaderChainer> ShaderChainerService::linkVideoSourceToShader(
-    std::shared_ptr<VideoSource> source,
-    std::shared_ptr<Shader> shader)
+bool ShaderChainerService::hasParents(std::shared_ptr<Shader> shader)
 {
-
-  // Case 1: First Shader for this VideoSource. Use the implicit chainer.
-  if (ShaderChainerService::getService()->implicitShaderChainerForVideoSourceIdIsEmpty(source->id))
-  {
-    auto chainer = ShaderChainerService::getService()->implicitShaderChainerForVideoSourceId(source->id);
-    chainer->front = shader;
-    shader->parentSource = source;
-    return chainer;
-  }
-
-  // Case 2: We already have an active Chainer for this source, so we'll make a new one.
-  auto chainer = addNewShaderChainer(source);
-  chainer->front = shader;
-  shader->parentSource = source;
-  return chainer;
+  return !shader->inputs.empty();
 }
 
 // ConfigurableService
 
 json ShaderChainerService::config()
 {
-  json container;
-  for (auto &pair : shaderChainerMap)
+  json j;
+
+  for (auto const &[key, val] : shadersMap)
   {
-    if (!shaderChainerIsEmpty(pair.second))
-    {
-      container[pair.first] = pair.second->serialize();
-    }
+    j[val->shaderId] = val->serialize();
   }
 
-  return container;
+  return j;
+}
+
+json ShaderChainerService::connectionsConfig()
+{
+  json j;
+
+  for (auto const &[key, val] : connectionMap)
+  {
+    j[val->id] = val->serialize();
+  }
+
+  return j;
 }
 
 void ShaderChainerService::clear()
 {
-  for (auto it = shaderChainerMap.begin(); it != shaderChainerMap.end();)
+  for (auto it = shadersMap.begin(); it != shadersMap.end();)
   {
-    auto key = it->first;
-    removeShaderChainer(key);
-    it = shaderChainerMap.erase(it);
-  }
-  shaderChainerMap.clear();
-
-  std::vector<std::shared_ptr<Shader>> shadersToRemove;
-  for (const auto &pair : shadersMap)
-  {
-    keysToRemove.push_back(pair.first);
-  }
-  for (const auto &shader : shadersToRemove)
-  {
-    removeShader(shader);
+    auto shader = it->second;
+    removeShader(shader, false);
+    it = shadersMap.erase(it);
   }
   shadersMap.clear();
 
@@ -463,49 +199,61 @@ void ShaderChainerService::clear()
 
 void ShaderChainerService::loadConfig(json data)
 {
-  shaderChainerMap.clear();
+  // Load the shaders included in the data.
+  /* The shaders come in as an object formatted as:
+   {
+      "shaderType": ShaderType,
+      "shaderId": String,
+      "x": Float
+      "y": Float
+      ...remaining ShaderSettings
+   }
+   */
 
-  if (data.is_object())
+  for (auto const &[key, val] : data.items())
   {
-    std::map<std::string, json> items = data;
+    ShaderType shaderType = val["shaderType"];
+    std::string shaderId = key;
+    float x = val["x"];
+    float y = val["y"];
 
-    for (auto const &pair : items)
-    {
-      std::string chainerName = pair.second["name"];
-      std::string sourceId = pair.second["sourceId"];
+    auto shader = shaderForType(shaderType, shaderId, val);
+    addShader(shader);
+    // Set the position of the Shader
+    shader->settings->x->value = x;
+    shader->settings->y->value = y;
+    shader->settings->load(val);
+  }
+}
 
-      auto source =
-          VideoSourceService::getService()->videoSourceForId(sourceId);
-      if (source == nullptr)
-      {
-        log("Failed to find VideoSource for %s", sourceId.c_str());
-        return;
-      }
-
-      auto shaderChainer = new ShaderChainer(pair.first, chainerName, source);
-      addShaderChainer(std::shared_ptr<ShaderChainer>(shaderChainer));
-
-      shaderChainer->load(pair.second);
-      shaderChainer->setup();
+void ShaderChainerService::loadConnectionsConfig(json j)
+{
+  for (auto const &[key, val] : j.items())
+  {
+    ConnectionType type = val["type"];
+    std::string startId = val["start"];
+    std::string endId = val["end"];
+    
+    std::shared_ptr<Connectable> start;
+    std::shared_ptr<Connectable> end = shaderForId(endId);
+    
+    switch (type) {
+      case ConnectionTypeSource:
+        start = VideoSourceService::getService()->videoSourceForId(startId);
+        break;
+      case ConnectionTypeShader:
+      case ConnectionTypeAux:
+      case ConnectionTypeMask:
+        start = shaderForId(startId);
     }
 
-    // Iterate over the map again. This time, fetch every shader and
-    // load its json to populate the Aux.
-
-    for (auto const &pair : items)
+    if (start == nullptr || end == nullptr)
     {
-      json j = pair.second;
-      auto chainerId = j["chainerId"];
-      for (auto shaderJson : j["shaders"])
-      {
-        auto shader = ShaderChainerService::getService()->shaderForId(shaderJson["shaderId"]);
-        shader->load(shaderJson);
-      }
+      log("Couldn't load connection for %s -> %s", startId.c_str(), endId.c_str());
+      continue;
     }
 
-    // Ensure we have at least one ShaderChainer for each of our VideoSources.
-
-    //    addImplicitShaderChainers();
+    makeConnection(start, end, type);
   }
 }
 
@@ -521,19 +269,14 @@ void ShaderChainerService::addShader(std::shared_ptr<Shader> shader)
     return;
   }
 
+  std::shared_ptr<FeedbackSource> feedbackSource = std::make_shared<FeedbackSource>(shader->shaderId, std::make_shared<VideoSourceSettings>());
+
+  FeedbackSourceService::getService()->registerFeedbackSource(feedbackSource);
+  shader->feedbackDestination = feedbackSource;
   shadersMap[shader->shaderId] = shader;
 }
 
-void ShaderChainerService::removeShaderChainersForVideoSourceId(std::string id)
-{
-  auto chainers = shaderChainersForVideoSourceId(id);
-  for (auto chainer : chainers)
-  {
-    removeShaderChainer(chainer->chainerId);
-  }
-}
-
-void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader)
+void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader, bool fromMap)
 {
   if (shadersMap.count(shader->shaderId) == 0)
   {
@@ -542,37 +285,42 @@ void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader)
     return;
   }
 
-  // If the Shader is at the front of our chainer, remove that connection
-  if (shaderChainerForShaderId(shader->shaderId) != nullptr)
+  std::vector<std::string> connectionIdsToRemove;
+
+  // Remove the input Connections
+  if (!shader->inputs.empty())
   {
-    auto chainer = shaderChainerForShaderId(shader->shaderId);
-    // If our Shader is at the front of our Chainer, we can remove that Chainer entirely.
-    if (chainer->front == shader)
+    for (auto conn : shader->inputs)
     {
-      chainer->front = nullptr;
+      // Remove the Connection connecting [Parent] -> [Us]
+      connectionIdsToRemove.push_back(conn->id);
     }
   }
-  shaderIdShaderChainerMap.erase(shader->shaderId);
-  shadersMap.erase(shader->shaderId);
-  if (shader->parent != nullptr)
-    shader->parent->next = nullptr;
 
-  shader->next = nullptr;
-
-  shader.reset();
-}
-
-void ShaderChainerService::associateShaderWithChainer(
-    std::string shaderId, std::string shaderChainerId)
-{
-  auto chainer = shaderChainerForId(shaderChainerId);
-  if (chainer == nullptr)
+  // Remove the output Connections
+  if (!shader->outputs.empty())
   {
-    log("Tried to associate Shader with a null Chainer");
-    return;
+    for (auto conn : shader->outputs)
+    {
+      connectionIdsToRemove.push_back(conn->id);
+    }
   }
 
-  shaderIdShaderChainerMap[shaderId] = chainer;
+  for (auto connId : connectionIdsToRemove)
+  {
+    breakConnectionForConnectionId(connId);
+  }
+
+  for (auto connId : connectionIdsToRemove)
+  {
+    connectionMap.erase(connId);
+  }
+
+  if (fromMap) {
+    shadersMap.erase(shader->shaderId);
+  }
+
+  shader.reset();
 }
 
 std::shared_ptr<Shader> ShaderChainerService::shaderForId(std::string id)
@@ -583,16 +331,6 @@ std::shared_ptr<Shader> ShaderChainerService::shaderForId(std::string id)
     return nullptr;
   }
   return shadersMap[id];
-}
-
-std::shared_ptr<ShaderChainer> ShaderChainerService::shaderChainerForId(std::string id)
-{
-  if (shaderChainerMap.count(id) == 0)
-  {
-    log("Tried to get ShaderChainer %s, but it doesn't exist", id.c_str());
-    return nullptr;
-  }
-  return shaderChainerMap[id];
 }
 
 std::vector<std::shared_ptr<Shader>> ShaderChainerService::shaders()
@@ -611,51 +349,45 @@ std::vector<std::shared_ptr<Shader>> ShaderChainerService::shaders()
   return shaders;
 }
 
-void ShaderChainerService::breakShaderNextLink(std::shared_ptr<Shader> shader)
+std::vector<std::shared_ptr<Connection>> ShaderChainerService::connections()
 {
-  if (shader->next != nullptr)
+  std::vector<std::shared_ptr<Connection>> connections;
+  for (auto const &[key, val] : connectionMap)
   {
-    shader->next->parent = nullptr;
-    shader->next = nullptr;
+    connections.push_back(val);
   }
+  return connections;
 }
 
-void ShaderChainerService::breakShaderChainerFront(
-    std::shared_ptr<ShaderChainer> shaderChainer)
+void ShaderChainerService::breakConnectionForConnectionId(std::string connectionId)
 {
-  if (shaderChainer != nullptr)
-  {
-    if (shaderChainer->front != nullptr)
-    {
-      shaderIdShaderChainerMap.erase(shaderChainer->front->shaderId);
-      shaderChainer->front = nullptr;
-    }
-  }
+  std::shared_ptr<Connection> connection = connectionMap[connectionId];
+  connection->start->removeConnection(connection);
 }
 
-void ShaderChainerService::addImplicitShaderChainers()
+std::shared_ptr<Connection> ShaderChainerService::makeConnection(std::shared_ptr<Connectable> start,
+                                                                 std::shared_ptr<Connectable> end,
+                                                                 ConnectionType type)
 {
-  auto sources = VideoSourceService::getService()->videoSources();
+  auto connection = std::make_shared<Connection>(start, end, type);
+  start->outputs.insert(connection);
+  end->inputs.insert(connection);
+  connectionMap[connection->id] = connection;
 
-  for (std::shared_ptr<VideoSource> source : sources)
-  {
-    std::vector<std::shared_ptr<ShaderChainer>> chainers = shaderChainersForVideoSourceId(source->id);
-    if (chainers.size() == 0)
-    {
-      log("Adding new Chainer for %s", source->id.c_str());
-      addNewShaderChainer(source);
-    }
-  }
-}
+  // Update the Connectable's FeedbackSource
 
-std::shared_ptr<ShaderChainer>
-ShaderChainerService::shaderChainerForShaderId(std::string id)
-{
-  if (shaderIdShaderChainerMap.count(id) == 0)
+  if (end->connectableType() == ConnectableTypeShader)
   {
-    return nullptr;
+    std::shared_ptr<Shader> shader = std::dynamic_pointer_cast<Shader>(end);
+    shader->feedbackDestination->updateSettings(start->sourceSettings());
   }
-  return shaderIdShaderChainerMap[id];
+  
+  // Update the OutputWindow, if necessary
+  if (VideoSourceService::getService()->hasOutputWindowForConnectable(start)) {
+    VideoSourceService::getService()->updateOutputWindow(start, end);
+  }
+  
+  return connection;
 }
 
 std::shared_ptr<Shader>
@@ -664,6 +396,34 @@ ShaderChainerService::shaderForType(ShaderType type, std::string shaderId,
 {
   switch (type)
   {
+  case ShaderTypeGameboy:
+  {
+    auto settings = new GameboySettings(shaderId, shaderJson);
+    auto shader = std::make_shared<GameboyShader>(settings);
+    shader->setup();
+    return shader;
+  }
+  case ShaderTypeStaticFrame:
+  {
+    auto settings = new StaticFrameSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<StaticFrameShader>(settings);
+    shader->setup();
+    return shader;
+  }
+  case ShaderTypeSlidingFrame:
+  {
+    auto settings = new SlidingFrameSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<SlidingFrameShader>(settings);
+    shader->setup();
+    return shader;
+  }
+  case ShaderTypeMinMixer:
+  {
+    auto settings = new MinMixerSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<MinMixerShader>(settings);
+    shader->setup();
+    return shader;
+  }
   case ShaderTypeSolidColor:
   {
     auto settings = new SolidColorSettings(shaderId, shaderJson);

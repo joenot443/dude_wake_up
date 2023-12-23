@@ -5,6 +5,7 @@ uniform vec2 dimensions;
 uniform float time;
 uniform float lower;
 uniform float upper;
+uniform int flip;
 
 in vec2 coord;
 out vec4 outputColor;
@@ -42,10 +43,10 @@ void main()
   
   // Check if we're within bounds
   if (texColorHsb.z > lower && texColorHsb.z < upper) {
-    outputColor = vec4(1.0);
+    outputColor = flip > 0 ? vec4(0.0) : vec4(1.0);
   } else {
   // Transparent black
-    outputColor = vec4(0.0);
+    outputColor = flip > 0 ? vec4(1.0) : vec4(0.0);
   }
 }
 

@@ -17,6 +17,7 @@
 #include <stdio.h>
 
 struct SobelSettings : public ShaderSettings {
+	public:
   SobelSettings(std::string shaderId, json j)
       : ShaderSettings(shaderId, j){
 
@@ -36,7 +37,7 @@ shader.load("shaders/Sobel");
 #endif    
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
@@ -52,7 +53,7 @@ shader.load("shaders/Sobel");
   ShaderType type() override { return ShaderTypeSobel; }
 
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this); CommonViews::H3Title("Sobel"); }
+     CommonViews::H3Title("Sobel"); }
 };
 
 #endif /* SobelShader_hpp */

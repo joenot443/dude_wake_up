@@ -11,48 +11,61 @@
 
 static std::string DefaultSourceKey = "DefaultSource";
 
-void FeedbackSourceService::setup() {
-  std::shared_ptr<FeedbackSource> source = std::make_shared<FeedbackSource>(UUID::generateUUID(), "Empty", std::make_shared<VideoSourceSettings>(UUID::generateUUID(), 0));
+void FeedbackSourceService::setup()
+{
+  std::shared_ptr<FeedbackSource> source = std::make_shared<FeedbackSource>(UUID::generateUUID(), std::make_shared<VideoSourceSettings>(UUID::generateUUID(), 0));
   registerFeedbackSource(source);
   defaultFeedbackSource = source;
+  defaultFeedbackSource->setup();
 }
 
-void FeedbackSourceService::registerFeedbackSource(std::shared_ptr<FeedbackSource> feedbackSource) {
-  if (feedbackSourceMap.count(feedbackSource->id) != 0) {
+void FeedbackSourceService::registerFeedbackSource(std::shared_ptr<FeedbackSource> feedbackSource)
+{
+  if (feedbackSourceMap.count(feedbackSource->id) != 0)
+  {
     log("Reregistering FeedbackSource %s", feedbackSource->id.c_str());
   }
-  feedbackSource->setup();
   feedbackSourceMap[feedbackSource->id] = feedbackSource;
 }
 
-std::vector<std::string> FeedbackSourceService::feedbackSourceNames() {
-  std::vector<std::string> names;
-  for (auto const& [key, val] : feedbackSourceMap) {
-    names.push_back(val->name);
+void FeedbackSourceService::setConsumer(std::string shaderId, std::shared_ptr<FeedbackSource> source)
+{
+  bool found = false;
+  for (auto &consumerPair : consumerMap) {
+    if (consumerPair.second == source) {
+      found = true;
+      break;
+    }
   }
-  return names;
-}
-
-void FeedbackSourceService::setConsumer(std::string shaderId, std::shared_ptr<FeedbackSource> source) {
+  // Setup the feedbackSource if there are no consumers
+  if (!found) source->setup();
+  
   consumerMap[shaderId] = source;
 }
 
-bool FeedbackSourceService::isSourceBeingConsumed(std::string feedbackSourceId) {
-  for (auto const& [key, val] : consumerMap) {
-    if (val->id == feedbackSourceId) return true;
+bool FeedbackSourceService::isSourceBeingConsumed(std::string feedbackSourceId)
+{
+  for (auto const &[key, val] : consumerMap)
+  {
+    if (val->id == feedbackSourceId)
+      return true;
   }
   return false;
 }
 
-std::shared_ptr<FeedbackSource> FeedbackSourceService::feedbackSourceForId(std::string id) {
-  if (feedbackSourceMap.count(id) == 0) {
+std::shared_ptr<FeedbackSource> FeedbackSourceService::feedbackSourceForId(std::string id)
+{
+  if (feedbackSourceMap.count(id) == 0)
+  {
     return NULL;
   }
   return feedbackSourceMap[id];
 }
 
-void FeedbackSourceService::removeFeedbackSource(std::string id) {
-  if (feedbackSourceMap.count(id) == 0) {
+void FeedbackSourceService::removeFeedbackSource(std::string id)
+{
+  if (feedbackSourceMap.count(id) == 0)
+  {
     log("Tried to remove FeedbackSource %s, but it doesn't exist", id.c_str());
     return;
   }
@@ -62,13 +75,16 @@ void FeedbackSourceService::removeFeedbackSource(std::string id) {
   source.reset();
 }
 
-void FeedbackSourceService::removeConsumerForShader(std::string shaderId) {
+void FeedbackSourceService::removeConsumerForShader(std::string shaderId)
+{
   consumerMap.erase(shaderId);
 }
 
-std::vector<std::shared_ptr<FeedbackSource>> FeedbackSourceService::feedbackSources() {
+std::vector<std::shared_ptr<FeedbackSource>> FeedbackSourceService::feedbackSources()
+{
   std::vector<std::shared_ptr<FeedbackSource>> feedbackSources;
-  for (auto const& [key, val] : feedbackSourceMap) {
+  for (auto const &[key, val] : feedbackSourceMap)
+  {
     feedbackSources.push_back(val);
   }
   return feedbackSources;

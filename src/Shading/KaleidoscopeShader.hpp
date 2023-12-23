@@ -18,6 +18,7 @@
 #include "Oscillator.hpp"
 
 struct KaleidoscopeSettings : public ShaderSettings {
+	public:
   std::shared_ptr<Parameter> sides;
   std::shared_ptr<Parameter> shift;
   std::shared_ptr<Parameter> rotation;
@@ -41,7 +42,9 @@ struct KaleidoscopeSettings : public ShaderSettings {
   };
 };
 
-struct KaleidoscopeShader : public Shader {
+class KaleidoscopeShader : public Shader {
+public:
+
   ofShader shader;
   KaleidoscopeSettings *settings;
   KaleidoscopeShader(KaleidoscopeSettings *settings) : settings(settings), Shader(settings) {};
@@ -55,7 +58,7 @@ shader.load("shaders/kaleidoscope");
 #endif
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
@@ -73,7 +76,7 @@ shader.load("shaders/kaleidoscope");
   }
 
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
+    
     CommonViews::ShaderParameter(settings->shift, settings->shiftOscillator);
     CommonViews::ShaderParameter(settings->sides, settings->sidesOscillator);
   }

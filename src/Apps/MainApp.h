@@ -7,11 +7,24 @@
 class MainApp : public ofBaseApp {
 
 public:
+  
+  static MainApp *app;
+  MainApp(){};
+
+  static MainApp *getApp()
+  {
+    return app;
+  }
+  
   void setup();
   void update();
   void draw();
-
-  MainApp(std::shared_ptr<ofAppBaseWindow> window) : window(window){};
+  void executeOnMainThread(const std::function<void()>& task);
+  void runMainThreadTasks();
+  
+  MainApp(std::shared_ptr<ofAppBaseWindow> window) : window(window){
+    app = this;
+  };
 
   // Public
 
@@ -26,9 +39,16 @@ private:
   void drawMainSettings();
   void resetState();
 
+
   std::shared_ptr<ofAppBaseWindow> window;
   ofxImGui::Gui gui;
   MainStageView *mainStageView = new MainStageView();
   int streamDrawIndex;
   bool isSetup = false;
+  
+  // Threading
+  
+  std::queue<std::function<void()>> mainThreadTasks;
+  std::mutex mainThreadTasksMutex;
 };
+

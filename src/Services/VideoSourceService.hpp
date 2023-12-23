@@ -30,7 +30,7 @@ private:
 
 public:
   static VideoSourceService *service;
-  VideoSourceService(){};
+  VideoSourceService() : emptyFbo(std::make_shared<ofFbo>()){};
 
   static VideoSourceService *getService()
   {
@@ -47,7 +47,7 @@ public:
   std::vector<std::shared_ptr<VideoSource>> videoSources();
 
   // ofFbo used to draw the Shader previews
-  ofFbo previewFbo();
+  std::shared_ptr<ofFbo> previewFbo();
 
   // VideoSources which should be used as inputs (non empty, non ShaderChainer)
   std::vector<std::shared_ptr<VideoSource>> inputSources();
@@ -56,6 +56,8 @@ public:
   std::vector<std::shared_ptr<AvailableVideoSource>> availableVideoSources();
 
   std::shared_ptr<VideoSource> defaultVideoSource();
+  
+  std::shared_ptr<ofFbo> emptyFbo;
 
   std::map<std::string, std::shared_ptr<AvailableVideoSource>> availableSourceMap;
 
@@ -81,10 +83,11 @@ public:
 
   // Output Windows
 
-  std::vector<std::shared_ptr<OutputWindow>> outputWindows;
-  void addOutputWindowForChainer(std::shared_ptr<ShaderChainer> chainer);
-  void addOutputWindowForShader(std::shared_ptr<Shader> shader);
-
+  std::map<std::string, std::shared_ptr<OutputWindow>> outputWindows;
+  void addOutputWindow(std::shared_ptr<Connectable> connectable);
+  void updateOutputWindow(std::shared_ptr<Connectable> oldConnectable, std::shared_ptr<Connectable> newConnectable);
+  bool hasOutputWindowForConnectable(std::shared_ptr<Connectable> connectable);
+  
   void clear();
   json config() override;
   void loadConfig(json j) override;

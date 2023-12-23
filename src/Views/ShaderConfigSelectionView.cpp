@@ -9,7 +9,7 @@
 #include "ofxImGui.h"
 #include "ConfigService.hpp"
 
-void ShaderConfigSelectionView::draw(Shader *shader) {
+void ShaderConfigSelectionView::draw(std::shared_ptr<Shader> shader) {
   auto configs = ConfigService::getService()->availableConfigsForShaderType(shader->type());
   std::vector<std::string> names = {};
   //allocate space for pointers

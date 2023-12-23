@@ -16,6 +16,7 @@
 #include "ofxImGui.h"
 
 struct FujiSettings: public ShaderSettings {
+	public:
   std::shared_ptr<Parameter> enabled;
   
   std::shared_ptr<Parameter> speed;
@@ -56,6 +57,8 @@ struct FujiSettings: public ShaderSettings {
 
 
 class FujiShader: public Shader {
+public:
+
   private:
   ofShader shader;
 
@@ -66,7 +69,7 @@ public:
 
   FujiSettings *settings;
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
@@ -88,7 +91,7 @@ shader.load("shaders/fuji");
   };
 
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
+    
     CommonViews::ShaderParameter(settings->cloud1X, settings->cloud1XOscillator);
     CommonViews::ShaderParameter(settings->cloud1Y, settings->cloud1YOscillator);
     CommonViews::ShaderParameter(settings->cloud2X, settings->cloud2XOscillator);

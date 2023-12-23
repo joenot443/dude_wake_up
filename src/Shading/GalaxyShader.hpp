@@ -17,13 +17,16 @@
 #include <stdio.h>
 
 struct GalaxySettings: public ShaderSettings {
+	public:
   GalaxySettings(std::string shaderId, json j) :
   ShaderSettings(shaderId, j) {
     
   };
 };
 
-struct GalaxyShader: Shader {
+class GalaxyShader: public Shader {
+public:
+
   GalaxySettings *settings;
   GalaxyShader(GalaxySettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
@@ -36,7 +39,7 @@ shader.load("shaders/Galaxy");
 #endif
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);

@@ -30,6 +30,7 @@ public:
   ImFont * b;
   ImFont * i;
   ImFont * icon;
+  ImFont * largeIcon;
   
   void loadFonts();
   void addFontToGui(ofxImGui::Gui *gui);

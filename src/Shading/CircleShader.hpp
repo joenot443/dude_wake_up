@@ -16,13 +16,14 @@
 #include <stdio.h>
 
 struct CircleSettings: public ShaderSettings {
+	public:
   CircleSettings(std::string shaderId, json j) :
   ShaderSettings(shaderId, 0) {
     
   };
 };
 
-struct CircleShader: Shader {
+struct CircleShader: public Shader {
   CircleSettings *settings;
   CircleShader(CircleSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
@@ -35,7 +36,7 @@ shader.load("shaders/Circle");
 #endif
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);

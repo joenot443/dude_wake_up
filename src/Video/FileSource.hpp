@@ -23,11 +23,11 @@ public:
 
   std::string path;
   ofVideoPlayer player;
-  ofFbo fbo;
   std::shared_ptr<Parameter> volume;
   std::shared_ptr<Parameter> position;
   std::shared_ptr<Parameter> mute;
   void setup() override;
+  void updateSettings();
   void saveFrame() override;
   json serialize() override;
   void load(json j) override;

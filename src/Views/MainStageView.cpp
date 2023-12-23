@@ -17,7 +17,6 @@
 #include "OscillationService.hpp"
 #include "ParameterService.hpp"
 #include "ShaderChainerService.hpp"
-#include "ShaderChainerView.hpp"
 #include "ShaderSettings.hpp"
 #include "ShaderType.hpp"
 #include "UUID.hpp"
@@ -34,43 +33,31 @@ void MainStageView::setup()
   shaderBrowserView.setup();
   fileBrowserView.setup();
   videoSourceBrowserView.setup();
-  outputBrowserView.setup();
-  shaderChainerSettingsView.setup();
-  shaderChainerStageView.setup();
   audioSourceBrowserView.setup();
-
-  sentry_uuid_t uuid = sentry_capture_event(sentry_value_new_message_event(
-      /*   level */ SENTRY_LEVEL_INFO,
-      /*  logger */ "custom",
-      /* message */ "It works!"));
-  uuid;
 }
 
 void MainStageView::update()
 {
   videoSourceBrowserView.update();
-  outputBrowserView.update();
-  shaderChainerSettingsView.update();
-  shaderChainerStageView.update();
   audioSourceBrowserView.update();
   NodeLayoutView::getInstance()->update();
 }
 
 void MainStageView::draw()
 {
-  // Draw a table with 3 columns, sized 1/5, 3/5, 1/5
+  // Draw a table with 2 columns, sized | 1/5 |   4/5   |
+  
   ImGui::Columns(2, "main_stage_view", false);
   ImGui::SetColumnWidth(0, ImGui::GetWindowWidth() / 5.);
   ImGui::SetColumnWidth(1, 4. * (ImGui::GetWindowWidth() / 5.));
 
-  // | Sources |  Node Layout   | Outputs
-  // | Effects |        ''      |   ''
-  // | Library |       Audio    |   ''
+  // | Sources |  Node Layout
+  // | Effects |        ''
+  // | Library |       Audio
 
   // Sources
   auto browserSize = ImVec2(ImGui::GetWindowContentRegionMax().x / 5.,
                             (ImGui::GetWindowContentRegionMax().y - MenuBarHeight) / 3.);
-
   ImGui::BeginChild("##sourceBrowser", browserSize);
   CommonViews::H3Title("Sources");
   drawVideoSourceBrowser();
@@ -90,7 +77,7 @@ void MainStageView::draw()
 
   ImGui::NextColumn();
 
-  // Chainers
+  // NodeLayout
   NodeLayoutView::getInstance()->draw();
 
   audioSourceBrowserView.draw();
@@ -161,8 +148,6 @@ void MainStageView::drawVideoSourceBrowser()
 {
   videoSourceBrowserView.draw();
 }
-
-void MainStageView::drawOutputBrowser() { outputBrowserView.draw(); }
 
 void MainStageView::drawShaderBrowser() { shaderBrowserView.draw(); }
 

@@ -11,9 +11,6 @@ out vec2 coord;
 
 void main(void)
 {
-  coord = vec2(position.x, position.y);
-  gl_Position = modelViewProjectionMatrix * position;
+  coord = vec2(texcoord.x, texcoord.y);
+  gl_Position = modelViewProjectionMatrix * texcoord;
 }
-
-
-

@@ -18,6 +18,7 @@
 // Transform
 
 struct TransformSettings : public ShaderSettings {
+	public:
   std::shared_ptr<Parameter> xTranslate;
   std::shared_ptr<Parameter> yTranslate;
   std::shared_ptr<Parameter> xScale;
@@ -73,7 +74,7 @@ public:
 
   ShaderType type() override { return ShaderTypeTransform; }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     auto texture = frame->getTexture();
     float width = frame->getWidth();
@@ -110,7 +111,7 @@ public:
   }
 
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
+    
     // Translate X
     CommonViews::ShaderParameter(settings->xTranslate,
                                  settings->xTranslateOscillator);

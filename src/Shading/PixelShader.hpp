@@ -19,6 +19,7 @@
 // Pixelate
 
 struct PixelSettings : public ShaderSettings {
+	public:
   std::shared_ptr<Parameter> enabled;
   std::shared_ptr<Parameter> size;
 
@@ -38,7 +39,9 @@ struct PixelSettings : public ShaderSettings {
   }
 };
 
-struct PixelShader : Shader {
+class PixelShader : public Shader {
+public:
+
   PixelSettings *settings;
   PixelShader(PixelSettings *settings) : settings(settings), Shader(settings){};
 
@@ -54,7 +57,7 @@ shader.load("shaders/Pixel");
     
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
@@ -70,7 +73,6 @@ shader.load("shaders/Pixel");
   ShaderType type() override { return ShaderTypePixelate; }
 
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
     CommonViews::ShaderParameter(settings->size, settings->sizeOscillator);
   }
 };

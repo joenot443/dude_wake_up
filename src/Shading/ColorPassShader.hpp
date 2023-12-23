@@ -17,6 +17,7 @@
 #include <stdio.h>
 
 struct ColorPassSettings : public ShaderSettings {
+	public:
   std::shared_ptr<Parameter> lowHue;
   std::shared_ptr<Parameter> highHue;
 
@@ -34,7 +35,9 @@ struct ColorPassSettings : public ShaderSettings {
         };
 };
 
-struct ColorPassShader : Shader {
+class ColorPassShader : public Shader {
+public:
+
   ColorPassSettings *settings;
   ColorPassShader(ColorPassSettings *settings)
       : settings(settings), Shader(settings){};
@@ -49,7 +52,7 @@ shader.load("shaders/ColorPass");
     
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
@@ -69,7 +72,7 @@ shader.load("shaders/ColorPass");
   ShaderType type() override { return ShaderTypeColorPass; }
 
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
+    
     CommonViews::H3Title("ColorPass");
     CommonViews::ShaderParameter(settings->lowHue, settings->lowHueOsc);
     CommonViews::ShaderParameter(settings->highHue, settings->highHueOsc);

@@ -18,13 +18,14 @@
 #include <stdio.h>
 
 struct SliderSettings : public ShaderSettings {
+	public:
   std::shared_ptr<Parameter> speed;
   std::shared_ptr<Parameter> vertical;
 
   std::shared_ptr<Oscillator> speedOscillator;
 
   SliderSettings(std::string shaderId, json j)
-      : speed(std::make_shared<Parameter>("Speed", 0.5, 0.01, 2.0)),
+      : speed(std::make_shared<Parameter>("Speed", 0.1, 0.01, 2.0)),
       vertical(std::make_shared<Parameter>("Vertical", 0., 0., 1.)),
         speedOscillator(std::make_shared<WaveformOscillator>(speed)),
         ShaderSettings(shaderId, j){
@@ -34,7 +35,9 @@ struct SliderSettings : public ShaderSettings {
         };
 };
 
-struct SliderShader : Shader {
+class SliderShader : public Shader {
+public:
+
   SliderSettings *settings;
   SliderShader(SliderSettings *settings)
       : settings(settings), Shader(settings){};
@@ -49,7 +52,7 @@ shader.load("shaders/Slider");
     
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
@@ -66,7 +69,7 @@ shader.load("shaders/Slider");
   ShaderType type() override { return ShaderTypeSlider; }
 
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
+    
     CommonViews::H3Title("Slider");
 
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);

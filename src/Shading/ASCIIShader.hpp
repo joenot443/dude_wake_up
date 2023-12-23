@@ -32,7 +32,8 @@ struct AsciiSettings: public ShaderSettings  {
 };
 
 
-struct AsciiShader: Shader {
+class AsciiShader: public Shader {
+public:
   ofShader shader;
   AsciiSettings *settings;
   AsciiShader(AsciiSettings *settings) : settings(settings), Shader(settings) {};
@@ -54,7 +55,7 @@ shader.load("shaders/Ascii");
     return true;
   }
   
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
@@ -66,7 +67,7 @@ shader.load("shaders/Ascii");
   }
   
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
+    
   }
 };
 

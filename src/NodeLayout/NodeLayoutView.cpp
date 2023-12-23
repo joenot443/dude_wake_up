@@ -20,6 +20,7 @@
 #include <imgui.h>
 #include <future>
 #include <imgui_node_editor.h>
+#include <imgui_node_editor_internal.h>
 
 static const float ImGuiWindowTitleBarHeight = 70.0f;
 static const float NodeWidth = 100.0f;
@@ -53,39 +54,47 @@ void ImGuiEx_EndColumn() { ImGui::EndGroup(); }
 
 void NodeLayoutView::debug()
 {
-  auto chainers = ShaderChainerService::getService()->shaderChainers();
   auto shaders = ShaderChainerService::getService()->shaders();
+  auto connections = ShaderChainerService::getService()->connections();
+  auto sources = VideoSourceService::getService()->videoSources();
 
-  for (auto c : chainers)
-  {
-    auto id = idNodeMap[c->source->id]->id;
-    log("%s - %d", c->name.c_str(), id.Get());
-  }
-
+  log("==========");
   for (auto s : shaders)
   {
-    auto id = idNodeMap[s->shaderId]->id;
-    log("%s - %d", s->name().c_str(), id.Get());
+    log("%s - %s. Ins: %d, Outs: %d", s->name().c_str(), s->connId().c_str(), s->inputs.size(), s->outputs.size());
   }
+  
+  for (auto s : sources)
+  {
+    log("%s - %s. Ins: %d, Outs: %d", s->sourceName.c_str(), s->connId().c_str(), s->inputs.size(), s->outputs.size());
+  }
+  
+  for (auto c : connections) {
+    log("%s - %s", c->start->connId().c_str(), c->end->connId().c_str());
+  }
+  
+  log("==========");
 }
 
 void NodeLayoutView::draw()
 {
   auto &io = ImGui::GetIO();
 
-  auto chainers = ShaderChainerService::getService()->shaderChainers();
+  auto sources = VideoSourceService::getService()->videoSources();
   auto shaders = ShaderChainerService::getService()->shaders();
 
   nodes = {};
 
   ed::SetCurrentEditor(context);
-
+  ed::PushStyleColor(ax::NodeEditor::StyleColor_Bg, ImVec4(0,0,0,0));
+  ed::PushStyleColor(ax::NodeEditor::StyleColor_Grid, ImVec4(0,0,0,0));
+  
   bool show = LayoutStateService::getService()->showAudioSettings;
   float height = show ? ofGetViewportHeight() * 3.0f / 5.0f
                       : ofGetViewportHeight() - ImGuiWindowTitleBarHeight;
 
   drawPreviewWindows();
-  // Start interaction with editor.
+  
   ed::Begin("My Editor", ImVec2(ofGetWindowWidth() * (4.0f / 5.0f), height));
   ed::NavigateToContent();
   ed::PushStyleVar(ed::StyleVar_ScrollDuration, 0.1f);
@@ -101,46 +110,34 @@ void NodeLayoutView::draw()
   // Loop over Shaders, creating a ShaderNode for each
   for (std::shared_ptr<Shader> shader : shaders)
   {
-    auto shaderNode = nodeForShaderSourceId(shader->shaderId, NodeTypeShader, shader->name(), shader->supportsAux(), shader->supportsMask());
+    auto shaderNode = nodeForShaderSourceId(shader->shaderId, NodeTypeShader, shader->name(), shader->supportsAux(), shader->supportsMask(), shader);
     shaderNode->shader = shader;
     drawNode(shaderNode);
 
     nodes.push_back(shaderNode);
 
     // Check if this is the terminal node, in which case, we'll add it to the preview nodes.
-    if (ShaderChainerService::getService()->isTerminalShader(shaderNode->shader))
+    if (ShaderChainerService::getService()->isTerminalShader(shaderNode->shader) &&
+        ShaderChainerService::getService()->hasParents(shaderNode->shader))
     {
       terminalNodes.insert(shaderNode);
     }
   }
 
   // Create VideoSource Nodes
-  for (std::shared_ptr<ShaderChainer> shaderChainer : chainers)
+  for (std::shared_ptr<VideoSource> source : sources)
   {
     // Create a Link to the front shader, if it exists
     // Make source node
+    std::shared_ptr<Connectable> conn = source;
 
-    auto sourceNode = nodeForShaderSourceId(shaderChainer->source->id, NodeTypeSource, shaderChainer->name, false, false);
-    sourceNode->source = shaderChainer->source;
-    sourceNode->chainer = shaderChainer;
+    auto sourceNode = nodeForShaderSourceId(source->id, NodeTypeSource, source->sourceName, false, false, conn);
+    sourceNode->source = source;
     drawNode(sourceNode);
 
     // Always draw a Preview for our Source
     terminalNodes.insert(sourceNode);
 
-    // If our Source Node is connected, add a Link
-    if (shaderChainer->front != nullptr)
-    {
-      ed::LinkId sourceNodeFrontShaderLink = linkUniqueId++;
-      auto shaderNode = idNodeMap[shaderChainer->front->shaderId];
-      ed::Link(sourceNodeFrontShaderLink, sourceNode->outputId, shaderNode->inputId);
-
-      // Create the ShaderLink
-      auto link = std::make_shared<ShaderLink>(sourceNodeFrontShaderLink,
-                                               sourceNode, shaderNode);
-      link->type = LinkTypeSource;
-      linksMap[sourceNodeFrontShaderLink.Get()] = link;
-    }
     nodes.push_back(sourceNode);
   }
 
@@ -148,84 +145,40 @@ void NodeLayoutView::draw()
 
   for (auto const &x : nodeIdNodeMap)
   {
-    // Only create Links between ShaderNodes
-    if (x.second->type != NodeTypeShader)
-      continue;
-
     auto shaderNode = x.second;
 
-    // Create a Link from Shader -> Shader
-    if (shaderNode->shader->next != nullptr)
+    // Create Links for every Output [Can go to Mask, Aux, etc.]
+    if (!shaderNode->connectable->outputs.empty())
     {
-      std::shared_ptr<Node> nextNode =
-          idNodeMap[shaderNode->shader->next->shaderId];
-      ed::LinkId nextShaderLinkId = uniqueId++;
-
-      auto shaderLink =
-          std::make_shared<ShaderLink>(nextShaderLinkId, nextNode, shaderNode);
-      linksMap[nextShaderLinkId.Get()] = shaderLink;
-      ed::Link(nextShaderLinkId, shaderLink->output->outputId,
-               shaderLink->input->inputId);
-    }
-
-    // [Aux] Create a Link from Shader -> Shader
-    if (shaderNode->shader->supportsAux() &&
-        shaderNode->shader->aux != nullptr)
-    {
-      std::shared_ptr<Node> auxNode = idNodeMap[shaderNode->shader->aux->shaderId];
-      ed::LinkId nextShaderLinkId = uniqueId++;
-      shaderNode->auxNode = auxNode;
-      auto shaderLink =
-          std::make_shared<ShaderLink>(nextShaderLinkId, shaderNode, auxNode);
-      shaderLink->type = LinkTypeAux;
-      linksMap[nextShaderLinkId.Get()] = shaderLink;
-      ed::Link(nextShaderLinkId, shaderLink->output->outputId,
-               shaderLink->input->auxId);
-    }
-
-    // [Aux] Create a Link from Source -> Shader
-    if (shaderNode->shader->supportsAux() &&
-        shaderNode->shader->auxSource != nullptr)
-    {
-      std::shared_ptr<Node> auxNode = idNodeMap[shaderNode->shader->auxSource->id];
-      ed::LinkId nextShaderLinkId = uniqueId++;
-      shaderNode->auxNode = auxNode;
-      auto shaderLink =
-          std::make_shared<ShaderLink>(nextShaderLinkId, shaderNode, auxNode);
-      shaderLink->type = LinkTypeAux;
-      linksMap[nextShaderLinkId.Get()] = shaderLink;
-      ed::Link(nextShaderLinkId, shaderLink->output->outputId,
-               shaderLink->input->auxId);
-    }
-
-    // [Mask] Create a Link from Shader -> Shader
-    if (shaderNode->shader->supportsMask() &&
-        shaderNode->shader->mask != nullptr)
-    {
-      std::shared_ptr<Node> maskNode = idNodeMap[shaderNode->shader->mask->shaderId];
-      ed::LinkId nextShaderLinkId = uniqueId++;
-      shaderNode->maskNode = maskNode;
-      auto shaderLink =
-          std::make_shared<ShaderLink>(nextShaderLinkId, shaderNode, maskNode);
-      shaderLink->type = LinkTypeMask;
-      linksMap[nextShaderLinkId.Get()] = shaderLink;
-      ed::Link(nextShaderLinkId, shaderLink->output->outputId,
-               shaderLink->input->maskId);
-    }
-
-    // [Mask] Create a Link from Source -> Shader
-    if (shaderNode->shader->supportsMask() &&
-        shaderNode->shader->sourceMask != nullptr)
-    {
-      std::shared_ptr<Node> maskNode = idNodeMap[shaderNode->shader->sourceMask->id];
-      ed::LinkId nextShaderLinkId = uniqueId++;
-      shaderNode->maskNode = maskNode;
-      auto shaderLink =
-          std::make_shared<ShaderLink>(nextShaderLinkId, shaderNode, maskNode);
-      shaderLink->type = LinkTypeMask;
-      linksMap[nextShaderLinkId.Get()] = shaderLink;
-      ed::Link(nextShaderLinkId, shaderLink->output->outputId,
-               shaderLink->input->maskId);
+      for (auto connection : shaderNode->connectable->outputs) {
+        std::shared_ptr<Node> nextNode = idNodeMap[connection->end->connId()];
+        ed::LinkId nextShaderLinkId = uniqueId++;
+        
+        auto shaderLink =
+        std::make_shared<ShaderLink>(nextShaderLinkId, nextNode, shaderNode, connection->id);
+        shaderLink->type = connection->linkType();
+        linksMap[nextShaderLinkId.Get()] = shaderLink;
+        ed::PinId inputPinId = 0;
+        
+        switch (connection->type) {
+          case ConnectionTypeShader:
+            inputPinId = shaderLink->input->inputId;
+            break;
+          case ConnectionTypeSource:
+            inputPinId = shaderLink->input->inputId;
+            break;
+          case ConnectionTypeAux:
+            inputPinId = shaderLink->input->auxId;
+            break;
+          case ConnectionTypeMask:
+            inputPinId = shaderLink->input->maskId;
+            break;
+        }
+        
+        ed::Link(nextShaderLinkId,
+                 shaderLink->output->outputId,
+                 inputPinId);
+      }
     }
   }
 
@@ -242,56 +195,10 @@ void NodeLayoutView::draw()
     std::shared_ptr<ShaderLink> link = linksMap[selectedLinkId.Get()];
     if (shouldDelete && link != nullptr)
     {
-      switch (link->type)
-      {
-      case LinkTypeSource:
-      {
-        auto chainer =
-            ShaderChainerService::getService()->shaderChainerForShaderId(
-                link->output->shader->shaderId);
-        ShaderChainerService::getService()->breakShaderChainerFront(chainer);
-        break;
-      }
-      case LinkTypeAux:
-      {
-        // [Source] -> [Aux]
-        if (link->output->type == NodeTypeSource)
-        {
-          ShaderChainerService::getService()->breakSourceShaderAuxLink(link->output->source, link->input->shader);
-        }
-        else
-        {
-          // [Shader] -> [Aux]
-          ShaderChainerService::getService()->breakShaderAuxLink(
-              link->output->shader, link->input->shader);
-        }
-        break;
-      }
-      case LinkTypeMask:
-      {
-        // [Source] -> [Aux]
-        if (link->output->type == NodeTypeSource)
-        {
-          ShaderChainerService::getService()->breakSourceShaderMaskLink(link->output->source, link->input->shader);
-        }
-        else
-        {
-          // [Shader] -> [Mask]
-          ShaderChainerService::getService()->breakShaderMaskLink(
-              link->output->shader, link->input->shader);
-        }
-        break;
-      }
-
-      case LinkTypeShader:
-      {
-        ShaderChainerService::getService()->breakShaderNextLink(
-            link->output->shader);
-        break;
-      }
-      }
+      ShaderChainerService::getService()->breakConnectionForConnectionId(link->connectionId);
     }
   }
+
 
   // Delete the selected Shader
 
@@ -342,12 +249,14 @@ void NodeLayoutView::draw()
 
   drawResolutionPopup();
 
-  drawZoomButtons();
-
   handleDropZone();
 
   ed::SetCurrentEditor(nullptr);
 
+  drawActionButtons();
+  
+//  drawMetrics();
+  
   shouldDelete = false;
 }
 
@@ -444,6 +353,7 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
   // Draw a preview button (eye) if we are NOT the terminal node
   if (node->type == NodeTypeShader &&
       !ShaderChainerService::getService()->isTerminalShader(node->shader) &&
+      ShaderChainerService::getService()->hasParents(node->shader) &&
       CommonViews::IconButton(visIcon, node->idName()))
   {
     bool inSet = previewWindowNodes.find(node) != previewWindowNodes.end();
@@ -463,14 +373,14 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
   {
     if (CommonViews::IconButton(ICON_MD_FULLSCREEN, node->idName()))
     {
-      VideoSourceService::getService()->addOutputWindowForChainer(ShaderChainerService::getService()->shaderChainerForShaderId(node->shader->shaderId));
+      VideoSourceService::getService()->addOutputWindow(node->connectable);
     }
 
     // Draw a Record button, but only for the terminal shader
 
     if (CommonViews::IconButton(ICON_MD_CIRCLE, node->idName()))
     {
-      recorder.setup(ShaderChainerService::getService()->shaderChainerForShaderId(node->shader->shaderId));
+//      recorder.setup(ShaderChainerService::getService()->shaderChainerForShaderId(node->shader->shaderId));
     }
   }
   // Otherwise draw some spacing
@@ -541,7 +451,7 @@ std::shared_ptr<Node> NodeLayoutView::nodeForShaderSourceId(std::string shaderSo
 }
 
 // Returns or creates a Node with the id of either the Shader or Source passed.
-std::shared_ptr<Node> NodeLayoutView::nodeForShaderSourceId(std::string shaderSourceId, NodeType nodeType, std::string name, bool supportsAux, bool supportsMask)
+std::shared_ptr<Node> NodeLayoutView::nodeForShaderSourceId(std::string shaderSourceId, NodeType nodeType, std::string name, bool supportsAux, bool supportsMask, std::shared_ptr<Connectable> connectable)
 {
   std::shared_ptr<Node> node = idNodeMap[shaderSourceId];
 
@@ -569,7 +479,7 @@ std::shared_ptr<Node> NodeLayoutView::nodeForShaderSourceId(std::string shaderSo
     origin = ImVec2(ShaderChainerService::getService()->shaderForId(shaderSourceId)->settings->x->value, ShaderChainerService::getService()->shaderForId(shaderSourceId)->settings->y->value);
   }
 
-  node = std::make_shared<Node>(nodeId, outputId, inputId, name, nodeType);
+  node = std::make_shared<Node>(nodeId, outputId, inputId, name, nodeType, connectable);
   node->auxId = auxId;
   node->maskId = maskId;
 
@@ -648,25 +558,24 @@ void NodeLayoutView::handleDoubleClick()
 
 void NodeLayoutView::selectChainer(std::shared_ptr<Node> node)
 {
-  if (node->type == NodeTypeShader)
-  {
-    //    ed::SelectNode(node->id, true);
-    // Traverse parent direction
-    auto child = node->shader;
-    while (child->parent != nullptr)
-    {
-      child = child->parent;
-      auto toSelect = idNodeMap[child->shaderId];
-      ed::SelectNode(idNodeMap[child->shaderId]->id, true);
-    }
-
-    auto parent = node->shader;
-    while (parent->next != nullptr)
-    {
-      parent = parent->next;
-      ed::SelectNode(idNodeMap[parent->shaderId]->id, true);
-    }
-  }
+//  if (node->type == NodeTypeShader)
+//  {
+//    //    ed::SelectNode(node->id, true);
+//    // Traverse parent direction
+//    auto child = node->shader;
+//    while (child->parent != nullptr)
+//    {
+//      child = child->parent;
+//      auto toSelect = idNodeMap[child->shaderId];
+//      ed::SelectNode(idNodeMap[child->shaderId]->id, true);
+//    }
+//
+//    auto parent = node->shader;
+////    while (parent->next != nullptr)
+////    {
+////      parent = parent->next;
+////      ed::SelectNode(idNodeMap[parent->shaderId]->id, true);
+////    }
 }
 
 void NodeLayoutView::handleRightClick()
@@ -706,7 +615,7 @@ void NodeLayoutView::handleRightClick()
 
 void NodeLayoutView::handleUploadChain(std::shared_ptr<Node> node)
 {
-  uploadChainer = node->chainer;
+//  uploadChainer = node->chainer;
 }
 
 void NodeLayoutView::handleDeleteNode(std::shared_ptr<Node> node)
@@ -717,7 +626,6 @@ void NodeLayoutView::handleDeleteNode(std::shared_ptr<Node> node)
     ShaderChainerService::getService()->removeShader(node->shader);
     break;
   case NodeTypeSource:
-    ShaderChainerService::getService()->removeShaderChainersForVideoSourceId(node->source->id);
     VideoSourceService::getService()->removeVideoSource(node->source->id);
     break;
   }
@@ -729,33 +637,33 @@ void NodeLayoutView::handleSaveNode(std::shared_ptr<Node> node)
 {
   std::shared_ptr<ShaderChainer> shaderChainer;
 
-  if (node->type == NodeTypeShader)
-  {
-    shaderChainer = ShaderChainerService::getService()->shaderChainerForShaderId(node->shader->shaderId);
-  }
-
-  // Save from the first shaderchainer for the source
-  else if (node->type == NodeTypeSource)
-  {
-    shaderChainer = ShaderChainerService::getService()->shaderChainersForVideoSourceId(node->source->id).at(0);
-  }
-
-  if (shaderChainer == nullptr)
-    return;
-
-  // Present a file dialog to save the config file
-  // Use a default name of "CURRENT_DATE_TIME.json"
-
-  std::string defaultName =
-      ofGetTimestampString("%Y-%m-%d_%H-%M-%S.json");
-
-  defaultName = formatString("%s_%s", shaderChainer->name.c_str(), defaultName.c_str());
-
-  auto result = ofSystemSaveDialog(defaultName, "Save Effect Chain");
-  if (result.bSuccess)
-  {
-    ConfigService::getService()->saveShaderChainerConfigFile(shaderChainer, defaultName);
-  }
+//  if (node->type == NodeTypeShader)
+//  {
+//    shaderChainer = ShaderChainerService::getService()->shaderChainerForShaderId(node->shader->shaderId);
+//  }
+//
+//  // Save from the first shaderchainer for the source
+//  else if (node->type == NodeTypeSource)
+//  {
+//    shaderChainer = ShaderChainerService::getService()->shaderChainersForVideoSourceId(node->source->id).at(0);
+//  }
+//
+//  if (shaderChainer == nullptr)
+//    return;
+//
+//  // Present a file dialog to save the config file
+//  // Use a default name of "CURRENT_DATE_TIME.json"
+//
+//  std::string defaultName =
+//      ofGetTimestampString("%Y-%m-%d_%H-%M-%S.json");
+//
+//  defaultName = formatString("%s_%s", shaderChainer->name.c_str(), defaultName.c_str());
+//
+//  auto result = ofSystemSaveDialog(defaultName, "Save Effect Chain");
+//  if (result.bSuccess)
+//  {
+//    ConfigService::getService()->saveShaderChainerConfigFile(shaderChainer, defaultName);
+//  }
 }
 
 void NodeLayoutView::handleDropZone()
@@ -790,7 +698,6 @@ void NodeLayoutView::handleDropZone()
         auto availableWebcamSource = std::dynamic_pointer_cast<AvailableVideoSourceWebcam>(availableSource);
         auto source = VideoSourceService::getService()->addWebcamVideoSource(
             availableWebcamSource->sourceName, availableWebcamSource->webcamId);
-        ShaderChainerService::getService()->addNewShaderChainer(source);
         unplacedNodeIds.push_back(source->id);
         break;
       }
@@ -799,7 +706,6 @@ void NodeLayoutView::handleDropZone()
         auto availableFileSource = std::dynamic_pointer_cast<AvailableVideoSourceFile>(availableSource);
         auto source = VideoSourceService::getService()->addFileVideoSource(
             availableFileSource->sourceName, availableFileSource->path);
-        ShaderChainerService::getService()->addNewShaderChainer(source);
         unplacedNodeIds.push_back(source->id);
         break;
       }
@@ -812,7 +718,6 @@ void NodeLayoutView::handleDropZone()
       case VideoSource_text:
       {
         auto source = VideoSourceService::getService()->addTextVideoSource(availableSource->sourceName);
-        ShaderChainerService::getService()->addNewShaderChainer(source);
         unplacedNodeIds.push_back(source->id);
         break;
       }
@@ -821,7 +726,6 @@ void NodeLayoutView::handleDropZone()
       {
         auto availableShaderSource = std::dynamic_pointer_cast<AvailableVideoSourceShader>(availableSource);
         auto source = VideoSourceService::getService()->addShaderVideoSource(availableShaderSource->shaderType);
-        ShaderChainerService::getService()->addNewShaderChainer(source);
         unplacedNodeIds.push_back(source->id);
         break;
       }
@@ -834,7 +738,6 @@ void NodeLayoutView::handleDropZone()
         {
           auto source = VideoSourceService::getService()->addFileVideoSource(
               file->name, file->videoPath());
-          ShaderChainerService::getService()->addNewShaderChainer(source);
           unplacedNodeIds.push_back(source->id);
           break;
         }
@@ -891,7 +794,6 @@ void NodeLayoutView::handleUnplacedDownloadedLibraryFile()
 
   auto source = VideoSourceService::getService()->addFileVideoSource(
       pendingFile->name, pendingFile->videoPath());
-  ShaderChainerService::getService()->addNewShaderChainer(source);
   unplacedNodeIds.push_back(source->id);
   pendingFile = nullptr;
 }
@@ -914,7 +816,6 @@ void NodeLayoutView::queryNewLinks()
       {
         if (ed::AcceptNewItem())
         {
-
           // VideoSource is our Source
           if (sourceNode->type == NodeTypeSource)
           {
@@ -923,17 +824,17 @@ void NodeLayoutView::queryNewLinks()
             // If our Dest Pin is an Aux Pin
             if (destPin->pinType == PinTypeAux)
             {
-              ShaderChainerService::getService()->linkVideoSourceToShaderAux(sourceNode->source, destNode->shader);
+              ShaderChainerService::getService()->makeConnection(sourceNode->source, destNode->shader, ConnectionTypeAux);
             }
             // If our Dest Pin is a Mask Pin
             else if (destPin->pinType == PinTypeMask)
             {
-              ShaderChainerService::getService()->linkVideoSourceToShaderMask(sourceNode->source, destNode->shader);
+              ShaderChainerService::getService()->makeConnection(sourceNode->source, destNode->shader, ConnectionTypeMask);
             }
             // If our Dest Pin is a standard Input Pin
             else if (destPin->pinType == PinTypeInput)
             {
-              ShaderChainerService::getService()->linkVideoSourceToShader(sourceNode->source, destNode->shader);
+              ShaderChainerService::getService()->makeConnection(sourceNode->source, destNode->shader, ConnectionTypeSource);
             }
           }
 
@@ -944,22 +845,22 @@ void NodeLayoutView::queryNewLinks()
             // If our Dest Pin is an Aux Pin
             if (destPin->pinType == PinTypeAux)
             {
-              ShaderChainerService::getService()->linkShaderToShaderAux(
-                  sourceNode->shader, destNode->shader);
+              ShaderChainerService::getService()->makeConnection(
+                  sourceNode->shader, destNode->shader, ConnectionTypeAux);
 
               // If our Dest Pin is a Mask Pin
             }
             else if (destPin->pinType == PinTypeMask)
             {
-              ShaderChainerService::getService()->linkShaderToShaderMask(
-                  sourceNode->shader, destNode->shader);
+              ShaderChainerService::getService()->makeConnection(
+                  sourceNode->shader, destNode->shader, ConnectionTypeMask);
 
               // If our Dest Pin is standard Input Pin
             }
             else if (destPin->pinType == PinTypeInput)
             {
-              ShaderChainerService::getService()->linkShaderToNext(
-                  sourceNode->shader, destNode->shader);
+              ShaderChainerService::getService()->makeConnection(
+                  sourceNode->shader, destNode->shader, ConnectionTypeShader);
             }
           }
         }
@@ -1019,22 +920,31 @@ void NodeLayoutView::drawPreviewWindows()
 
 void NodeLayoutView::drawPreviewWindow(std::shared_ptr<Node> node)
 {
+  auto sizeScale = ed::GetCurrentZoom();
+  
   auto pos = ed::GetNodePosition(node->id);
   pos = ed::CanvasToScreen(pos);
-  pos.x = pos.x + (ed::GetNodeSize(node->id).x / ed::GetCurrentZoom()) / 2 - 80;
-  pos.y = pos.y - 140;
+  pos.x = pos.x + (ed::GetNodeSize(node->id).x / ed::GetCurrentZoom()) / 2 - 80 / sizeScale;
+  pos.y = pos.y - 140 / sizeScale;
   ImGui::SetNextWindowPos(pos);
   ImGui::SetNextWindowCollapsed(false);
 
   auto style = ImGui::GetStyle();
   style.WindowMenuButtonPosition = ImGuiDir_None;
-  auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize;
-  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10., 10.));
+  auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoBringToFrontOnFocus;
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0, 0.0));
+  ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0,0,0,0));
+  ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0,0,0,0));
   if (ImGui::Begin(formatString("%s-preview", node->idName().c_str()).c_str(), 0, flags))
   {
-    node->drawPreview(pos);
+    if (sizeScale > 5.0) {
+      sizeScale = 5.0;
+    }
+    node->drawPreview(pos, sizeScale);
   }
   ImGui::End();
+  ImGui::PopStyleColor();
+  ImGui::PopStyleColor();
   ImGui::PopStyleVar();
 }
 
@@ -1066,14 +976,58 @@ void NodeLayoutView::drawResolutionPopup()
   }
 }
 
-void NodeLayoutView::drawZoomButtons()
+void NodeLayoutView::drawActionButtons()
 {
-  //  // Set the cursor to the bottom right of the window
-  //  ImGui::SetCursorPos(ImVec2(ImGui::GetWindowSize().x - 50, ImGui::GetWindowSize().y - 50));
-  //
-  //  // Draw the zoom buttons
-  //  if (CommonViews::IconButton(ICON_MD_ZOOM_IN, "zoom_in"))
-  //  {
-  //
-  //  }
+  // Set the cursor to the bottom right of the window
+  auto cursorPos = ImGui::GetCursorPos();
+  ImGui::SetCursorPos(ImVec2(ImGui::GetWindowSize().x - 170, ImGui::GetWindowSize().y - 100));
+  
+  // Draw the reset button
+  if (CommonViews::LargeIconButton(ICON_MD_RECYCLING, "reset"))
+  {
+    ed::SetCurrentEditor(context);
+    ShaderChainerService::getService()->clear();
+    VideoSourceService::getService()->clear();
+    ed::SetCurrentEditor(nullptr);
+  }
+  ImGui::SameLine();
+  CommonViews::HSpacing(2);
+  ImGui::SameLine();
+  
+  // Draw the navigate to content button
+  if (CommonViews::LargeIconButton(ICON_MD_CENTER_FOCUS_WEAK, "navigate"))
+  {
+    ed::SetCurrentEditor(context);
+    ed::NavigateToContent();
+    ed::SetCurrentEditor(nullptr);
+  }
+  ImGui::SameLine();
+  CommonViews::HSpacing(2);
+  ImGui::SameLine();
+  // Draw the zoom buttons
+  if (CommonViews::LargeIconButton(ICON_MD_ZOOM_IN, "zoom_in"))
+  {
+    ed::SetCurrentEditor(context);
+    ed::ZoomInc(true);
+    ed::SetCurrentEditor(nullptr);
+  }
+  ImGui::SameLine();
+  CommonViews::HSpacing(2);
+  ImGui::SameLine();
+  if (CommonViews::LargeIconButton(ICON_MD_ZOOM_OUT, "zoom_out"))
+  {
+    ed::SetCurrentEditor(context);
+    ed::ZoomInc(false);
+    ed::SetCurrentEditor(nullptr);
+  }
+  ImGui::SetCursorPos(cursorPos);
+}
+
+void NodeLayoutView::drawMetrics() {
+  // Set the cursor to the bottom right of the window
+  auto cursorPos = ImGui::GetCursorPos();
+  ImGui::SetCursorPos(ImVec2(ImGui::GetWindowSize().x / 5, ImGui::GetWindowSize().y - 100));
+  
+  ed::SetCurrentEditor(context);
+  ed::ShowMetrics();
 }

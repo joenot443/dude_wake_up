@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 #include "ShaderChainerService.hpp"
-#include "ofxVideoRecorder.h"
+//#include "ofxVideoRecorder.h"
 
 struct VideoRecorder
 {
@@ -24,7 +24,7 @@ public:
 
   std::shared_ptr<ShaderChainer> shaderChainer;
   
-  ofxVideoRecorder recorder;
+//  ofxVideoRecorder recorder;
 };
 
 #endif /* VideoRecorder_hpp */

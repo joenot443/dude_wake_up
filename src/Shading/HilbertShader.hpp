@@ -12,21 +12,22 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
-#include "ValueOscillator.hpp"
+#include "WaveformOscillator.hpp"
 #include "Parameter.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct HilbertSettings: public ShaderSettings {
+	public:
   std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<ValueOscillator> shaderValueOscillator;
+  std::shared_ptr<WaveformOscillator> shaderWaveformOscillator;
 
   HilbertSettings(std::string shaderId, json j) :
   shaderValue(std::make_shared<Parameter>("shaderValue", 1.0  , -1.0, 2.0)),
-  shaderValueOscillator(std::make_shared<ValueOscillator>(shaderValue)),
+  shaderWaveformOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   ShaderSettings(shaderId, j) {
     parameters = { shaderValue };
-    oscillators = { shaderValueOscillator };
+    oscillators = { shaderWaveformOscillator };
     load(j);
     registerParameters();
   };
@@ -40,7 +41,7 @@ struct HilbertShader: Shader {
     shader.load("shaders/Hilbert");
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
@@ -63,7 +64,7 @@ struct HilbertShader: Shader {
   void drawSettings() override {
     CommonViews::H3Title("Hilbert");
 
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
+    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderWaveformOscillator);
   }
 };
 

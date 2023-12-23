@@ -12,20 +12,21 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
-#include "ValueOscillator.hpp"
+#include "WaveformOscillator.hpp"
 #include "Parameter.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct ColorKeyMaskMakerSettings: public ShaderSettings {
+	public:
   std::shared_ptr<Parameter> tolerance;
   std::shared_ptr<Parameter> color;
-  std::shared_ptr<ValueOscillator> toleranceOscillator;
+  std::shared_ptr<WaveformOscillator> toleranceOscillator;
 
   ColorKeyMaskMakerSettings(std::string shaderId, json j) :
   tolerance(std::make_shared<Parameter>("tolerance", 0.1, 0.0, 1.0)),
   color(std::make_shared<Parameter>("color", 0.0)),
-  toleranceOscillator(std::make_shared<ValueOscillator>(tolerance)),
+  toleranceOscillator(std::make_shared<WaveformOscillator>(tolerance)),
   ShaderSettings(shaderId, j) {
     parameters = { tolerance, color };
     oscillators = { toleranceOscillator };
@@ -34,7 +35,8 @@ struct ColorKeyMaskMakerSettings: public ShaderSettings {
   };
 };
 
-struct ColorKeyMaskMakerShader: Shader {
+class ColorKeyMaskMakerShader: public Shader {
+public:
   ColorKeyMaskMakerSettings *settings;
   ColorKeyMaskMakerShader(ColorKeyMaskMakerSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
@@ -42,10 +44,15 @@ struct ColorKeyMaskMakerShader: Shader {
     shader.load("shaders/ColorKeyMaskMaker");
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
+    if (canvas == nullptr) return;
+
     canvas->begin();
     shader.begin();
-    shader.setUniformTexture("tex", frame->getTexture(), 4);
+    // Clear the frame
+    ofClear(0,0,0, 255);
+    ofClear(0,0,0, 0);
+    shader.setUniformTexture("tex", frame->getTexture(), 0);
     shader.setUniform1f("tolerance", settings->tolerance->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());

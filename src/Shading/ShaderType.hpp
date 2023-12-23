@@ -66,6 +66,10 @@ enum ShaderType {
   ShaderTypeHilbert,
   ShaderType16bit,
   ShaderTypeSolidColor,
+  ShaderTypeMinMixer,
+  ShaderTypeSlidingFrame,
+  ShaderTypeStaticFrame,
+  ShaderTypeGameboy,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -79,6 +83,9 @@ static const ShaderType AvailableBasicShaderTypes[] = {
 
 static const ShaderType AvailableMixShaderTypes[] = {
   ShaderTypeMix,
+  ShaderTypeMinMixer,
+  ShaderTypeSlidingFrame,
+  ShaderTypeStaticFrame,
   ShaderTypeFeedback,
 };
 
@@ -99,6 +106,7 @@ static const ShaderType AvailableTransformShaderTypes[] = {
 };
 
 static const ShaderType AvailableFilterShaderTypes[] = {
+  ShaderTypeGameboy,
   ShaderTypeRainbowRotator, // Generated
   ShaderTypeRGBShift, // Generated
   ShaderTypeAscii,
@@ -134,6 +142,14 @@ static std::vector<ShaderType> AllShaderTypes() {
 static std::string shaderTypeName(ShaderType type) {
   switch (type) {
     // Shader names
+    case ShaderTypeGameboy:
+      return "Gameboy";
+    case ShaderTypeStaticFrame:
+      return "StaticFrame";
+    case ShaderTypeSlidingFrame:
+      return "SlidingFrame";
+    case ShaderTypeMinMixer:
+      return "MinMixer";
     case ShaderTypeSolidColor:
       return "SolidColor";
     case ShaderType16bit:
@@ -247,8 +263,11 @@ static std::string shaderTypeName(ShaderType type) {
 
 static bool shaderTypeSupportsAux(ShaderType type) {
   if (type == ShaderTypeMix ||
-    type == ShaderTypeFeedback ||
-      type == ShaderTypeMask)
+      type == ShaderTypeFeedback ||
+      type == ShaderTypeMask ||
+      type == ShaderTypeSlidingFrame ||
+      type == ShaderTypeStaticFrame ||
+      type == ShaderTypeMinMixer)
   {return true;}
   return false;
 }

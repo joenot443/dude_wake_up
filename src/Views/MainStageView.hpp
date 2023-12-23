@@ -11,15 +11,10 @@
 #include "AudioSourceBrowserView.hpp"
 #include "NodeLayoutView.hpp"
 #include "OscillatorView.hpp"
-#include "OutputBrowserView.hpp"
 #include "ShaderBrowserView.hpp"
-#include "ShaderChainerSettingsView.hpp"
-#include "ShaderChainerView.hpp"
-#include "ShaderChainersStageView.hpp"
 #include "VideoSource.hpp"
 #include "VideoSourceBrowserView.hpp"
 #include "SubmitFeedbackView.hpp"
-#include "ShaderChainerPreviewView.hpp"
 #include "ofMain.h"
 #include <stdio.h>
 
@@ -27,18 +22,11 @@ struct MainStageView {
 private:
   std::shared_ptr<VideoSource> selectedVideoSource;
   ShaderType selectedShaderType;
-
-  std::vector<std::shared_ptr<ShaderChainerView>> shaderChainerViews;
-
-
+  
   VideoSourceBrowserView videoSourceBrowserView = VideoSourceBrowserView();
   ShaderBrowserView shaderBrowserView = ShaderBrowserView();
-  OutputBrowserView outputBrowserView = OutputBrowserView();
-  ShaderChainerSettingsView shaderChainerSettingsView =
-      ShaderChainerSettingsView();
   AudioSourceBrowserView audioSourceBrowserView = AudioSourceBrowserView();
   OscillatorView oscillatorView = OscillatorView();
-  ShaderChainersStageView shaderChainerStageView = ShaderChainersStageView();
   FileBrowserView fileBrowserView = FileBrowserView(FileBrowserType_JSON);
   SubmitFeedbackView submitFeedbackView = SubmitFeedbackView();
 

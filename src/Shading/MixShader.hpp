@@ -20,12 +20,11 @@
 #include <stdio.h>
 
 struct MixSettings : public ShaderSettings {
+	public:
   std::shared_ptr<Parameter> mix;
-  std::string mixSourceId = "";
   std::shared_ptr<Oscillator> mixOscillator;
 
   MixSettings(std::string shaderId, json j) :
-  mixSourceId(mixSourceId),
   mix(std::make_shared<Parameter>("mix", 0.5, 0.0, 1.0)),
   mixOscillator(std::make_shared<WaveformOscillator>(mix)),
   ShaderSettings(shaderId, j) {
@@ -36,7 +35,9 @@ struct MixSettings : public ShaderSettings {
   };
 };
 
-struct MixShader : public Shader {
+class MixShader : public Shader {
+public:
+
   ofShader shader;
   MixSettings *settings;
 
@@ -51,14 +52,14 @@ shader.load("shaders/Mix");
 #endif
   }
   
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     ofEnableAlphaBlending();
     canvas->begin();
     shader.begin();
     
     if (auxConnected()) {
-      ofTexture tex2 = auxTexture();
-      shader.setUniformTexture("tex2", tex2, 8);
+      std::shared_ptr<ofFbo> tex2 = aux()->frame();
+      shader.setUniformTexture("tex2", tex2->getTexture(), 8);
     } else {
       ofSetColor(0, 0, 0, 0);
       ofDrawRectangle(0, 0, canvas->getWidth(), canvas->getHeight());
@@ -78,7 +79,7 @@ shader.load("shaders/Mix");
   }
   
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
+    
     CommonViews::ShaderParameter(settings->mix, settings->mixOscillator);
   }
   

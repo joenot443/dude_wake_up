@@ -17,6 +17,7 @@
 #include <stdio.h>
 
 struct FishEyeSettings: public ShaderSettings {
+	public:
   std::shared_ptr<Parameter> amount;
   std::shared_ptr<Oscillator> amountOscillator;
   
@@ -28,7 +29,9 @@ struct FishEyeSettings: public ShaderSettings {
   };
 };
 
-struct FishEyeShader: Shader {
+class FishEyeShader: public Shader {
+public:
+
   FishEyeSettings *settings;
   FishEyeShader(FishEyeSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
@@ -41,7 +44,7 @@ shader.load("shaders/FishEye");
 #endif
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
@@ -62,7 +65,7 @@ shader.load("shaders/FishEye");
   }
 
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
+    
     CommonViews::H3Title("FishEye");
     CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
   }

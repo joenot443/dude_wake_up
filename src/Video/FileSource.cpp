@@ -16,10 +16,15 @@ void FileSource::setup()
   player.play();
   player.setVolume(0.5);
   player.setLoopState(OF_LOOP_NORMAL);
-  frameTexture = std::make_shared<ofTexture>();
-  frameTexture->allocate(1280, 720, GL_RGB);
-  fbo.allocate(1280, 720, GL_RGB);
+//  updateSettings();
+  fbo->allocate(settings->width->value, settings->height->value);
   position->value = 0.0;
+}
+
+void FileSource::updateSettings()
+{
+  settings->width->value = player.getWidth();
+  settings->height->value = player.getHeight();
 }
 
 void FileSource::saveFrame()
@@ -27,10 +32,10 @@ void FileSource::saveFrame()
   player.update();
   if (player.isFrameNew())
   {
-    fbo.begin();
-    player.draw(0, 0, 1280, 720);
-    fbo.end();
-    frameTexture = std::make_shared<ofTexture>(fbo.getTexture());
+    fbo->begin();
+    ofClear(0, 0, 0, 255);
+    player.draw(0, 0, fbo->getWidth(), fbo->getHeight());
+    fbo->end();
   }
   updatePlaybackPosition();
 }

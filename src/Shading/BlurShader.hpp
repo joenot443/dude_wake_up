@@ -18,6 +18,7 @@
 #include <stdio.h>
 
 struct BlurSettings : public ShaderSettings {
+	public:
   std::string shaderId;
   std::shared_ptr<Parameter> mix;
   std::shared_ptr<Parameter> radius;
@@ -38,7 +39,9 @@ struct BlurSettings : public ShaderSettings {
   }
 };
 
-struct BlurShader : Shader {
+class BlurShader : public Shader {
+public:
+
   BlurSettings *settings;
   ofShader shader;
 
@@ -54,13 +57,12 @@ shader.load("shaders/blur");
     
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("size", settings->radius->value);
-    shader.setUniform1f("blur_mix", settings->mix->value);
     frame->draw(0, 0);
     shader.end();
     canvas->end();
@@ -69,10 +71,6 @@ shader.load("shaders/blur");
   ShaderType type() override { return ShaderTypeBlur; }
 
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
-    // Amount
-    CommonViews::ShaderParameter(settings->mix, settings->mixOscillator);
-
     // Radius
     CommonViews::ShaderParameter(settings->radius, settings->radiusOscillator);
   }

@@ -19,6 +19,9 @@ struct WaveformOscillator: public Oscillator {
   
   void tick() override;
   
+  float max();
+  float min();
+  
   WaveformOscillator(std::shared_ptr<Parameter> v) :
   amplitude(std::make_shared<Parameter>("amp", 1.0, 0.0, v->max)),
   shift(std::make_shared<Parameter>("shift", (v->max - v->min) / 2., -3.0, 3.0)),

@@ -10,16 +10,10 @@
 
 #include <stdio.h>
 #include "Console.hpp"
+#include "MarkdownItem.hpp"
 #include <map>
 #include <vector>
 #include <deque>
-
-struct MarkdownItem {
-  std::string name;
-  std::string contents;
-  
-  MarkdownItem(std::string name, std::string contents) : name(name), contents(contents) {};
-};
 
 class MarkdownService {
 private:

@@ -14,7 +14,7 @@
 
 struct ShaderConfigSelectionView {
 public:
-  static void draw(Shader *shader);
+  static void draw(std::shared_ptr<Shader> shader);
 };
 
 #endif /* ShaderConfigSelectionView_hpp */

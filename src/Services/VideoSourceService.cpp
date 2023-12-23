@@ -18,6 +18,7 @@
 void VideoSourceService::setup()
 {
   populateAvailableVideoSources();
+  emptyFbo->allocate(1280, 720, GL_RGBA);
 }
 
 void VideoSourceService::populateAvailableVideoSources()
@@ -61,24 +62,24 @@ void VideoSourceService::subscribeToAvailableVideoSourceUpdates(std::function<vo
   availableVideoSourceUpdateSubject.subscribe(callback);
 }
 
-ofFbo VideoSourceService::previewFbo()
+std::shared_ptr<ofFbo> VideoSourceService::previewFbo()
 {
-  auto fbo = ofFbo();
-  auto blankFbo = ofFbo();
-  fbo.allocate(320, 240);
-  blankFbo.allocate(320, 240);
+  std::shared_ptr<ofFbo> fbo = std::make_shared<ofFbo>();
+  std::shared_ptr<ofFbo> blankFbo = std::make_shared<ofFbo>();
+  fbo->allocate(320, 240);
+  blankFbo->allocate(320, 240);
 
   auto shader = ShaderChainerService::getService()->shaderForType(
       ShaderTypeOctahedron, UUID::generateUUID(), 0);
   shader->setup();
-  shader->shade(&blankFbo, &fbo);
+  shader->shade(blankFbo, fbo);
   return fbo;
 }
 
 // Create a FeedbackSource for the passed in VideoSource and register it in the FeedbackSourceService
 void VideoSourceService::createFeedbackSource(std::shared_ptr<VideoSource> videoSource)
 {
-  std::shared_ptr<FeedbackSource> feedbackSource = std::make_shared<FeedbackSource>(videoSource->id, videoSource->sourceName, std::make_shared<VideoSourceSettings>(videoSource->settings));
+  std::shared_ptr<FeedbackSource> feedbackSource = std::make_shared<FeedbackSource>(videoSource->id, std::shared_ptr<VideoSourceSettings>(videoSource->settings));
   FeedbackSourceService::getService()->registerFeedbackSource(feedbackSource);
   videoSource->feedbackDestination = feedbackSource;
 }
@@ -114,10 +115,9 @@ void VideoSourceService::removeVideoSource(std::string id)
   {
     auto source = videoSourceMap[id];
     source->teardown();
+    FeedbackSourceService::getService()->removeFeedbackSource(id);
     videoSourceMap.erase(id);
   }
-
-  FeedbackSourceService::getService()->removeFeedbackSource(id);
 }
 
 // Return a vector of all video sources
@@ -240,20 +240,34 @@ std::shared_ptr<VideoSource> VideoSourceService::addTextVideoSource(std::string 
   return videoSource;
 }
 
+
 // Adds an OutputWindow for the passed in VideoSource
-void VideoSourceService::addOutputWindowForChainer(std::shared_ptr<ShaderChainer> chainer)
+void VideoSourceService::addOutputWindow(std::shared_ptr<Connectable> connectable)
 {
-  std::shared_ptr<OutputWindow> outputWindow = std::make_shared<OutputWindow>(chainer);
+  std::shared_ptr<OutputWindow> outputWindow = std::make_shared<OutputWindow>(connectable->frame());
   outputWindow->setup();
   ofGLFWWindowSettings settings;
   settings.shareContextWith = ofGetCurrentWindow();
-  settings.setSize(chainer->settings.width->value, chainer->settings.height->value);
+  settings.setSize(connectable->frame()->getWidth(), connectable->frame()->getHeight());
   settings.setGLVersion(3, 2);
   auto streamWindow = ofCreateWindow(settings);
   ofRunApp(streamWindow, outputWindow);
-  outputWindows.push_back(outputWindow);
+  outputWindows[connectable->connId()] = outputWindow;
 }
 
+void VideoSourceService::updateOutputWindow(std::shared_ptr<Connectable> oldConnectable, std::shared_ptr<Connectable> newConnectable) {
+  if (outputWindows.count(oldConnectable->connId()) == 0) return;
+  
+  std::shared_ptr<OutputWindow> outputWindow = outputWindows[oldConnectable->connId()];
+  outputWindow->setSource(newConnectable->frame());
+  outputWindows.erase(oldConnectable->connId());
+  
+  outputWindows[newConnectable->connId()] = outputWindow;
+}
+
+bool VideoSourceService::hasOutputWindowForConnectable(std::shared_ptr<Connectable> connectable) {
+  return outputWindows.count(connectable->connId()) != 0;
+}
 // ConfigurableService
 
 json VideoSourceService::config()
@@ -323,7 +337,9 @@ void VideoSourceService::clear()
   for (auto it = videoSourceMap.begin(); it != videoSourceMap.end();)
   {
     auto key = it->first;
-    removeVideoSource(key);
+    auto source = videoSourceMap[key];
+    source->teardown();
+    FeedbackSourceService::getService()->removeFeedbackSource(key);
     it = videoSourceMap.erase(it);
   }
 
@@ -340,8 +356,6 @@ void VideoSourceService::loadConfig(json data)
     std::map<std::string, json> source = pair.second;
     appendConfig(source);
   }
-
-  addShaderVideoSource(ShaderSource_empty);
 }
 
 std::shared_ptr<VideoSource> VideoSourceService::videoSourceForId(std::string id)

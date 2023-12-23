@@ -12,12 +12,13 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
-#include "ValueOscillator.hpp"
+#include "WaveformOscillator.hpp"
 #include "Parameter.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct SolidColorSettings: public ShaderSettings {
+	public:
   std::shared_ptr<Parameter> color;
 
   SolidColorSettings(std::string shaderId, json j) :
@@ -29,7 +30,9 @@ struct SolidColorSettings: public ShaderSettings {
   };
 };
 
-struct SolidColorShader: Shader {
+class SolidColorShader: public Shader {
+public:
+
   SolidColorSettings *settings;
   SolidColorShader(SolidColorSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
@@ -37,7 +40,7 @@ struct SolidColorShader: Shader {
     shader.load("shaders/SolidColor");
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);

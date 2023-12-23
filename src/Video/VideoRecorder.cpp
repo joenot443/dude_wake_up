@@ -11,8 +11,7 @@
 
 void VideoRecorder::setup(std::shared_ptr<ShaderChainer> target) {
   shaderChainer = target;
-  recorder.setVideoCodec("mpeg4");
-
+//  recorder.setVideoCodec("mpeg4");
 }
 
 void VideoRecorder::startRecording() {

@@ -7,6 +7,8 @@
 
 #include "AudioSourceBrowserView.hpp"
 #include "CommonViews.hpp"
+#include "MarkdownView.hpp"
+#include "Fonts.hpp"
 #include "AudioSourceService.hpp"
 #include "FontService.hpp"
 #include "OscillatorView.hpp"
@@ -47,18 +49,32 @@ void AudioSourceBrowserView::drawAudioSourceSelector() {
   ImGui::Text("Audio Source");
   ImGui::PopFont();
   
-  if (ImGui::BeginListBox("##audiosources")) {
-    for (int i = 0; i < sources.size(); i++) {
-      if (ImGui::Selectable(sources[i]->name.c_str())) {
-        AudioSourceService::getService()->selectAudioSource(sources[i]);
-      }
+  std::vector<std::string> names = {};
+  //allocate space for pointers
+  char** out = new char*[sources.size()];
+  static int selection = -1;
+
+  for(int i = 0; i < sources.size(); ++i){
+    string s = sources[i]->name;
+    if (s == AudioSourceService::getService()->selectedAudioSource->name) {
+      selection = i;
     }
-    ImGui::EndListBox();
+    //allocate space for c string (note +1 for extra space)
+    char* s_cstr = new char[s.size()+1];
+    //copy data to prevent mutation of original vector
+    strcpy(s_cstr, s.c_str());
+    //put pointer in the output
+    out[i] = s_cstr;
+  }
+  ImGui::SetNextItemWidth(200.0);
+  if (ImGui::Combo(AudioSourceService::getService()->selectedAudioSource->name.c_str(), &selection, out, sources.size())) {
+    AudioSourceService::getService()->selectAudioSource(sources[selection]);
   }
 }
 
 void AudioSourceBrowserView::drawSelectedAudioSource() {
   auto source = AudioSourceService::getService()->selectedAudioSource;
+  drawAudioSourceSelector();
   
   CommonViews::H3Title("Audio");
   
@@ -66,6 +82,14 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
     if (ImGui::BeginTable("##audioAnalysis", 4)) {
       ImGui::TableNextColumn();
       ImGui::Text("RMS");
+      ImGui::SameLine();
+      if (ImGui::BeginPopupModal("##RMS", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
+        MarkdownView("RMS").draw();
+        ImGui::EndPopup();
+      }
+      if (CommonViews::IconButton(ICON_MD_INFO, "RMS")) {
+        ImGui::OpenPopup("##RMS");
+      }
       ImGui::Text("%s", formatString("%.5F", source->audioAnalysis.rms->value).c_str());
       OscillatorView::draw(std::static_pointer_cast<Oscillator>(
                                                                 source->audioAnalysis.rmsOscillator),
@@ -73,12 +97,30 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
       
       ImGui::TableNextColumn();
       ImGui::Text("CSD");
+      ImGui::SameLine();
+      if (ImGui::BeginPopupModal("##CSD", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
+        MarkdownView("CSD").draw();
+        ImGui::EndPopup();
+      }
+      if (CommonViews::IconButton(ICON_MD_INFO, "CSD")) {
+        ImGui::OpenPopup("##CSD");
+      }
       ImGui::Text("%s", formatString("%.5F", source->audioAnalysis.csd->value).c_str());
       OscillatorView::draw(std::static_pointer_cast<Oscillator>(
                                                                 source->audioAnalysis.csdOscillator),
                            source->audioAnalysis.csd);
+      
+      
       ImGui::TableNextColumn();
       ImGui::Text("Energy");
+      ImGui::SameLine();
+      if (ImGui::BeginPopupModal("##Energy", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
+        MarkdownView("Energy").draw();
+        ImGui::EndPopup();
+      }
+      if (CommonViews::IconButton(ICON_MD_INFO, "Energy")) {
+        ImGui::OpenPopup("##Energy");
+      }
       ImGui::Text(
                   "%s", formatString("%.5F", source->audioAnalysis.energy->value).c_str());
       OscillatorView::draw(std::static_pointer_cast<Oscillator>(
@@ -86,7 +128,15 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
                            source->audioAnalysis.energy);
       
       ImGui::TableNextColumn();
-      ImGui::Text("Mel Frequency Buckets");
+      ImGui::Text("Frequency");
+      ImGui::SameLine();
+      if (ImGui::BeginPopupModal("##Frequency", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
+        MarkdownView("Frequency").draw();
+        ImGui::EndPopup();
+      }
+      if (CommonViews::IconButton(ICON_MD_INFO, "Frequency")) {
+        ImGui::OpenPopup("##Frequency");
+      }
       BarPlotView::draw(source->audioAnalysis.melFrequencySpectrum, "mel");
       
       ImGui::EndTable();

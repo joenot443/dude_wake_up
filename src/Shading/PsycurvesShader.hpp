@@ -17,13 +17,16 @@
 #include <stdio.h>
 
 struct PsycurvesSettings: public ShaderSettings {
+	public:
   PsycurvesSettings(std::string shaderId, json j) :
   ShaderSettings(shaderId, j) {
     
   };
 };
 
-struct PsycurvesShader: Shader {
+class PsycurvesShader: public Shader {
+public:
+
   PsycurvesSettings *settings;
   PsycurvesShader(PsycurvesSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
@@ -36,7 +39,7 @@ shader.load("shaders/Psycurves");
 #endif
   }
 
-  void shade(ofFbo *frame, ofFbo *canvas) override {
+  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
@@ -56,7 +59,7 @@ shader.load("shaders/Psycurves");
   }
 
   void drawSettings() override {
-    ShaderConfigSelectionView::draw(this);
+    
     CommonViews::H3Title("Psycurves");
 
   }

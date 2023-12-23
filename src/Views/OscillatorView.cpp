@@ -18,27 +18,31 @@
 #include "ofxImGui.h"
 
 void OscillatorView::draw(std::shared_ptr<Oscillator> oscillator,
-                          std::shared_ptr<Parameter> value) {
-  if (oscillator == nullptr) {
+                          std::shared_ptr<Parameter> value)
+{
+  if (oscillator == nullptr)
+  {
     return;
   }
-  
+
   OscillatorType type = oscillator->type;
-  
-  if (oscillator.get()->type == Oscillator_waveform) {
-    WaveformOscillator* waveformOscillator = (WaveformOscillator *) oscillator.get();
+
+  if (oscillator.get()->type == Oscillator_waveform)
+  {
+    WaveformOscillator *waveformOscillator = (WaveformOscillator *)oscillator.get();
     oscillator->tick();
     ImVector<ImVec2> data = waveformOscillator->data;
-    
+
     static int rt_axis = ImPlotAxisFlags_AuxDefault & ~ImPlotAxisFlags_NoTickLabels;
     ImPlot::SetNextAxisLimits(ImAxis_X1, 0.0, waveformOscillator->span);
-    ImPlot::SetNextAxisToFit(ImAxis_Y1);
+    ImPlot::SetNextAxisLimits(ImAxis_Y1, waveformOscillator->min(), waveformOscillator->max());
 
     auto plotStyle = ImPlot::GetStyle();
     ImPlot::PushStyleVar(ImPlotStyleVar_FitPadding, ImVec2(0.3f, 0.3f));
-    
-    if (data.size() > 0 && ImPlot::BeginPlot(formatString("##plot%s", value->name.c_str()).c_str(), ImVec2(200, 200), ImPlotFlags_CanvasOnly)) {
-      ImPlot::PlotLine("", &data[0].x, &data[0].y, data.size(), 0, 5.0, 2*sizeof(float));
+
+    if (data.size() > 0 && ImPlot::BeginPlot(formatString("##plot%s", value->name.c_str()).c_str(), ImVec2(200, 200), ImPlotFlags_CanvasOnly))
+    {
+      ImPlot::PlotLine("", &data[0].x, &data[0].y, data.size(), 0, 5.0, 2 * sizeof(float));
       ImPlot::EndPlot();
     }
     ImGui::SameLine(0, 10);
@@ -55,21 +59,23 @@ void OscillatorView::draw(std::shared_ptr<Oscillator> oscillator,
                         ImVec2(40, 160), &waveformOscillator->shift->value,
                         -value->max * 2, value->max * 2, "Shift\n%.2f");
   }
-  
-  else if (type == Oscillator_value) {
+
+  else if (type == Oscillator_value)
+  {
     oscillator->tick();
-    ValueOscillator* valueOscillator = (ValueOscillator *) oscillator.get();
+    ValueOscillator *valueOscillator = (ValueOscillator *)oscillator.get();
     std::vector<float> data = valueOscillator->values;
-    
+
     static int rt_axis = ImPlotAxisFlags_AuxDefault & ~ImPlotAxisFlags_NoTickLabels;
-    
+
     ImPlot::SetNextAxisLimits(ImAxis_X1, valueOscillator->xRange[0], valueOscillator->xRange[1]);
     ImPlot::SetNextAxisToFit(ImAxis_Y1);
     auto plotStyle = ImPlot::GetStyle();
     ImPlot::PushStyleVar(ImPlotStyleVar_FitPadding, ImVec2(0.3f, 0.3f));
-    
-    if (data.size() > 0 && ImPlot::BeginPlot(formatString("##plot%s", value->name.c_str()).c_str(), ImVec2(200, 200), ImPlotFlags_CanvasOnly)) {
-      ImPlot::PlotLine(value->name.c_str(), &data[0], (int) data.size());
+
+    if (data.size() > 0 && ImPlot::BeginPlot(formatString("##plot%s", value->name.c_str()).c_str(), ImVec2(200, 200), ImPlotFlags_CanvasOnly))
+    {
+      ImPlot::PlotLine(value->name.c_str(), &data[0], (int)data.size());
       ImPlot::EndPlot();
     }
   }

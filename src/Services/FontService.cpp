@@ -29,6 +29,7 @@ void FontService::addFontToGui(ofxImGui::Gui *gui) {
   p = gui->addFont("fonts/Roboto-Regular.ttf", 14);
   audio = gui->addFont("fonts/fontaudio.ttf", 16, &config, audio_icon_range);
   icon = gui->addFont("fonts/MaterialIcons-Regular.ttf", 16, &config, icon_ranges);
+  largeIcon = gui->addFont("fonts/MaterialIcons-Regular.ttf", 24, &config, icon_ranges);
   
   int width, height;
   unsigned char* pixels = NULL;

@@ -36,6 +36,7 @@ public:
 
   void drawNodeWindows();
   void drawPreviewWindows();
+  void drawMetrics();
   void drawResolutionPopup();
   void drawUploadChainerWindow();
   
@@ -44,7 +45,7 @@ public:
   
   // Returns the Node for the associated shaderSourceId, if it exists.
   // If it doesn't, create a new Node.
-  std::shared_ptr<Node> nodeForShaderSourceId(std::string shaderSourceId, NodeType nodeType, std::string name, bool supportsAux, bool supportsMask);
+  std::shared_ptr<Node> nodeForShaderSourceId(std::string shaderSourceId, NodeType nodeType, std::string name, bool supportsAux, bool supportsMask, std::shared_ptr<Connectable> connectable);
   
   // Returns the Node for the associated shaderSourceId, if it exists.
   // nullptr if not.
@@ -60,7 +61,7 @@ public:
   void populateNodePositions();
   void drawNode(std::shared_ptr<Node> node);
   void drawPreviewWindow(std::shared_ptr<Node> node);
-  void drawZoomButtons();
+  void drawActionButtons();
   int nodeIdTicker = 1;
   
   // Handlers
