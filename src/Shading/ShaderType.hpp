@@ -70,6 +70,7 @@ enum ShaderType {
   ShaderTypeSlidingFrame,
   ShaderTypeStaticFrame,
   ShaderTypeGameboy,
+  ShaderTypeLumaFeedback,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -87,6 +88,7 @@ static const ShaderType AvailableMixShaderTypes[] = {
   ShaderTypeSlidingFrame,
   ShaderTypeStaticFrame,
   ShaderTypeFeedback,
+  ShaderTypeLumaFeedback,
 };
 
 static const ShaderType AvailableMaskShaderTypes[] = {
@@ -142,6 +144,8 @@ static std::vector<ShaderType> AllShaderTypes() {
 static std::string shaderTypeName(ShaderType type) {
   switch (type) {
     // Shader names
+    case ShaderTypeLumaFeedback:
+      return "LumaFeedback";
     case ShaderTypeGameboy:
       return "Gameboy";
     case ShaderTypeStaticFrame:
@@ -264,6 +268,7 @@ static std::string shaderTypeName(ShaderType type) {
 static bool shaderTypeSupportsAux(ShaderType type) {
   if (type == ShaderTypeMix ||
       type == ShaderTypeFeedback ||
+      type == ShaderTypeLumaFeedback ||
       type == ShaderTypeMask ||
       type == ShaderTypeSlidingFrame ||
       type == ShaderTypeStaticFrame ||

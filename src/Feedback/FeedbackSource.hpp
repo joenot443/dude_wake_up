@@ -19,6 +19,7 @@ struct FeedbackSource {
   std::shared_ptr<VideoSourceSettings> sourceSettings;
   std::string id;
   std::vector<ofFbo> frameBuffer = {};
+  std::vector<ofFbo> fadedFrameBuffer = {};
 
   int startIndex = 0;
   
@@ -61,7 +62,6 @@ struct FeedbackSource {
   ofTexture getFrame(int index) {
     if (!beingConsumed()) {
       log("Getting Feedback frame for a source not being consumed");
-      
     }
     
     int destIndex = (startIndex + index) % FrameBufferCount;

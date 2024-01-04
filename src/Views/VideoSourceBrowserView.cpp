@@ -50,7 +50,7 @@ void VideoSourceBrowserView::refreshSources()
       }
     };
     auto textureId = GetImTextureID(*source->preview.get());
-    auto tileItem = std::make_shared<TileItem>(source->sourceName, textureId, 0, dragCallback);
+    auto tileItem = std::make_shared<TileItem>(source->sourceName, textureId, 0, dragCallback, source->category);
 
     if (source->type == VideoSource_shader || source->type == VideoSource_text)
     {

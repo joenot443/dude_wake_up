@@ -161,6 +161,53 @@ static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   }
 }
 
+static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
+  switch (nameType) {
+  // Audio Reactive
+    case ShaderSource_audioBumper:
+    case ShaderSource_audioWaveform:
+    case ShaderSource_audioMountains:
+    case ShaderSource_FrequencyVisualizer:
+      return "Audio Reactive";
+    
+  // Simple
+    case ShaderSource_SolidColor: // Name
+    case ShaderSource_Circle: // Name
+    case ShaderSource_Octahedron: // Name
+    case ShaderSource_empty:
+      return "Simple";
+      
+  
+  // Scenic
+    case ShaderSource_TriangleMap: // Name
+    case ShaderSource_VanGogh: // Name
+    case ShaderSource_Mountains: // Name
+    case ShaderSource_clouds:
+    case ShaderSource_galaxy:
+    case ShaderSource_fuji:
+      return "Scenic";
+      
+    
+  // Trippy
+  case ShaderSource_Hilbert: // Name
+  case ShaderSource_Warp: // Name
+  case ShaderSource_CurlySquares: // Name
+  case ShaderSource_PlasmaTwo: // Name
+  case ShaderSource_DancingSquares: // Name
+  case ShaderSource_Tissue: // Name
+  case ShaderSource_Psycurves: // Name
+  case ShaderSource_Disco: // Name
+  case ShaderSource_Rubiks: // Name
+  case ShaderSource_rings:
+  case ShaderSource_melter:
+  case ShaderSource_plasma:
+  case ShaderSource_fractal:
+    return "Trippy";
+  default:
+    return "Unknown";
+  }
+};
+
 static std::string shaderSourceTypeName(ShaderSourceType nameType) {
   switch (nameType) {
   // Shader Names

@@ -7,6 +7,7 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "LumaFeedbackShader.hpp"
 #include "GameboyShader.hpp"
 #include "StaticFrameShader.hpp"
 #include "SlidingFrameShader.hpp"
@@ -239,12 +240,15 @@ void ShaderChainerService::loadConnectionsConfig(json j)
     
     switch (type) {
       case ConnectionTypeSource:
-        start = VideoSourceService::getService()->videoSourceForId(startId);
-        break;
+      start = VideoSourceService::getService()->videoSourceForId(startId);
+      break;
       case ConnectionTypeShader:
       case ConnectionTypeAux:
       case ConnectionTypeMask:
         start = shaderForId(startId);
+        // We might be starting on a Source
+        if (start == nullptr)
+          start = VideoSourceService::getService()->videoSourceForId(startId);
     }
 
     if (start == nullptr || end == nullptr)
@@ -363,6 +367,7 @@ void ShaderChainerService::breakConnectionForConnectionId(std::string connection
 {
   std::shared_ptr<Connection> connection = connectionMap[connectionId];
   connection->start->removeConnection(connection);
+  connectionMap.erase(connectionId);
 }
 
 std::shared_ptr<Connection> ShaderChainerService::makeConnection(std::shared_ptr<Connectable> start,
@@ -396,6 +401,14 @@ ShaderChainerService::shaderForType(ShaderType type, std::string shaderId,
 {
   switch (type)
   {
+      
+  case ShaderTypeLumaFeedback:
+  {
+    auto settings = new LumaFeedbackSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<LumaFeedbackShader>(settings);
+    shader->setup();
+    return shader;
+  }
   case ShaderTypeGameboy:
   {
     auto settings = new GameboySettings(shaderId, shaderJson);

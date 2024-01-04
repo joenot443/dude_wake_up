@@ -11,8 +11,9 @@
 #include <stdio.h>
 
 AvailableVideoSource::AvailableVideoSource(std::string sourceName,
+                                           std::string category,
                                            VideoSourceType type)
-    : sourceName(sourceName), type(type),
+    : sourceName(sourceName), type(type), category(category),
       availableVideoSourceId(UUID::generateUUID()) {
   preview = std::make_shared<ofTexture>();
 }

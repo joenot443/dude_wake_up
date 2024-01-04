@@ -54,8 +54,6 @@ void FeedbackShader::populateSource() {
       break;
   }
   FeedbackSourceService::getService()->setConsumer(shaderId, feedbackSource);
-  
-  
 }
 
 void FeedbackShader::shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) {

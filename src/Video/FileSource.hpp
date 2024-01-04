@@ -23,6 +23,7 @@ public:
 
   std::string path;
   ofVideoPlayer player;
+  ofShader maskShader;
   std::shared_ptr<Parameter> volume;
   std::shared_ptr<Parameter> position;
   std::shared_ptr<Parameter> mute;

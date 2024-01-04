@@ -1,5 +1,6 @@
 #include "MainApp.h"
 #include "AudioSourceService.hpp"
+#include "MSABPMTapper.h"
 #include "FileSource.hpp"
 #include "FontService.hpp"
 #include "MidiService.hpp"

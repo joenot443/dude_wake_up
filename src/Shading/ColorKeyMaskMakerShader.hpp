@@ -54,6 +54,7 @@ public:
     ofClear(0,0,0, 0);
     shader.setUniformTexture("tex", frame->getTexture(), 0);
     shader.setUniform1f("tolerance", settings->tolerance->value);
+    shader.setUniform1i("drawTex", 0);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform4f("chromaKey", settings->color->color->data()[0], settings->color->color->data()[1], settings->color->color->data()[2], 1.0);

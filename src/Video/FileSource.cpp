@@ -16,9 +16,10 @@ void FileSource::setup()
   player.play();
   player.setVolume(0.5);
   player.setLoopState(OF_LOOP_NORMAL);
-//  updateSettings();
+  //  updateSettings();
   fbo->allocate(settings->width->value, settings->height->value);
   position->value = 0.0;
+  maskShader.load("shaders/ColorKeyMaskMaker");
 }
 
 void FileSource::updateSettings()
@@ -30,14 +31,35 @@ void FileSource::updateSettings()
 void FileSource::saveFrame()
 {
   player.update();
-  if (player.isFrameNew())
-  {
+  updatePlaybackPosition();
+  
+  if (!player.isFrameNew()) return;
+  
+  if (settings->maskEnabled->boolValue == true) {
+    fbo->begin();
+    maskShader.begin();
+    maskShader.setUniformTexture("tex", player.getTexture(), 0);
+    maskShader.setUniform1f("time", ofGetElapsedTimef());
+    maskShader.setUniform2f("dimensions", fbo->getWidth(), fbo->getHeight());
+    maskShader.setUniform1i("drawTex", 1);
+    maskShader.setUniform4f("chromaKey",
+                            settings->maskColor->color->data()[0],
+                            settings->maskColor->color->data()[1],
+                            settings->maskColor->color->data()[2], 1.0);
+    maskShader.setUniform1f("tolerance", settings->maskTolerance->value);
+    
+    ofClear(0, 0, 0, 255);
+    ofClear(0, 0, 0, 0);
+    
+    player.draw(0, 0, fbo->getWidth(), fbo->getHeight());
+    maskShader.end();
+    fbo->end();
+  } else {
     fbo->begin();
     ofClear(0, 0, 0, 255);
     player.draw(0, 0, fbo->getWidth(), fbo->getHeight());
     fbo->end();
   }
-  updatePlaybackPosition();
 }
 
 void FileSource::updatePlaybackPosition()
@@ -53,8 +75,9 @@ void FileSource::updatePlaybackPosition()
     return;
   }
   
-  // Only update the video player if the position has changed by more than 0.5%
-  if (abs(position->value - player.getPosition()) > 0.02)
+  // Only update the video player if the position has changed by more than 2%, but not
+  // upon load.
+  if (abs(position->value - player.getPosition()) > 0.02 && position->value > 0.001)
   {
     player.setPosition(position->value);
     player.play();
@@ -72,7 +95,7 @@ void FileSource::load(json j)
     log("Error hydrating WebcamSource from json");
     return;
   }
-
+  
   path = j["path"];
   id = j["id"];
   sourceName = j["sourceName"];
@@ -102,9 +125,9 @@ void FileSource::drawSettings()
 {
   if (mute->value < 0.5)
     player.setVolume(volume->value);
-
+  
   CommonViews::Slider("Volume", "##volume", volume);
-
+  
   ImGui::SameLine();
   auto muteIcon = mute->value > 0.5 ? ICON_MD_VOLUME_MUTE : ICON_MD_VOLUME_UP;
   if (CommonViews::IconButton(muteIcon, "##mute"))
@@ -119,9 +142,16 @@ void FileSource::drawSettings()
       player.setVolume(volume->value);
     }
   }
-
+  
   // Draw a slider to control the video playback position
   CommonViews::Slider("Playback Position", "##playbackPosition", position);
+  
+  
+  CommonViews::ShaderCheckbox(settings->maskEnabled);
+  if (settings->maskEnabled->boolValue) {
+    CommonViews::Slider("Mask Tolerance", "##maskTolerance", settings->maskTolerance);
+    CommonViews::ShaderColor(settings->maskColor);
+  }
 }
 
 void FileSource::teardown() {

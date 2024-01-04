@@ -19,7 +19,9 @@
 
 void AudioSourceBrowserView::setup() {}
 
-void AudioSourceBrowserView::update() {}
+void AudioSourceBrowserView::update() {
+  tapper.update();
+}
 
 void AudioSourceBrowserView::draw() {
   auto source = AudioSourceService::getService()->selectedAudioSource;
@@ -80,15 +82,16 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
   
   if (source) {
     if (ImGui::BeginTable("##audioAnalysis", 4)) {
+      // Loudness
       ImGui::TableNextColumn();
-      ImGui::Text("RMS");
+      ImGui::Text("Loudness");
       ImGui::SameLine();
-      if (ImGui::BeginPopupModal("##RMS", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
-        MarkdownView("RMS").draw();
+      if (ImGui::BeginPopupModal("##Loudness", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
+        MarkdownView("Loudness").draw();
         ImGui::EndPopup();
       }
-      if (CommonViews::IconButton(ICON_MD_INFO, "RMS")) {
-        ImGui::OpenPopup("##RMS");
+      if (CommonViews::IconButton(ICON_MD_INFO, "Loudness")) {
+        ImGui::OpenPopup("##Loudness");
       }
       ImGui::Text("%s", formatString("%.5F", source->audioAnalysis.rms->value).c_str());
       OscillatorView::draw(std::static_pointer_cast<Oscillator>(
@@ -96,14 +99,16 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
                            source->audioAnalysis.rms);
       
       ImGui::TableNextColumn();
-      ImGui::Text("CSD");
+      
+      // Clarity
+      ImGui::Text("Clarity");
       ImGui::SameLine();
-      if (ImGui::BeginPopupModal("##CSD", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
-        MarkdownView("CSD").draw();
+      if (ImGui::BeginPopupModal("##Clarity", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
+        MarkdownView("Clarity").draw();
         ImGui::EndPopup();
       }
-      if (CommonViews::IconButton(ICON_MD_INFO, "CSD")) {
-        ImGui::OpenPopup("##CSD");
+      if (CommonViews::IconButton(ICON_MD_INFO, "Clarity")) {
+        ImGui::OpenPopup("##Clarity");
       }
       ImGui::Text("%s", formatString("%.5F", source->audioAnalysis.csd->value).c_str());
       OscillatorView::draw(std::static_pointer_cast<Oscillator>(
@@ -112,22 +117,27 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
       
       
       ImGui::TableNextColumn();
-      ImGui::Text("Energy");
+      
+      // Beats
+      ImGui::Text("BPM Tracker");
       ImGui::SameLine();
       if (ImGui::BeginPopupModal("##Energy", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
-        MarkdownView("Energy").draw();
+        MarkdownView("BPM Tracker").draw();
         ImGui::EndPopup();
       }
-      if (CommonViews::IconButton(ICON_MD_INFO, "Energy")) {
-        ImGui::OpenPopup("##Energy");
+      if (CommonViews::IconButton(ICON_MD_INFO, "BPM Tracker")) {
+        ImGui::OpenPopup("##BPM Tracker");
       }
-      ImGui::Text(
-                  "%s", formatString("%.5F", source->audioAnalysis.energy->value).c_str());
-      OscillatorView::draw(std::static_pointer_cast<Oscillator>(
-                                                                source->audioAnalysis.energyOscillator),
-                           source->audioAnalysis.energy);
+      
+      
+      ImGui::Text("%s", formatString("BPM: %.0f", tapper.bpm()).c_str());
+      if (ImGui::Button("Tap for BPM (or Spacebar)")) {
+        tapper.tap();
+      }
       
       ImGui::TableNextColumn();
+      
+      // Frequency
       ImGui::Text("Frequency");
       ImGui::SameLine();
       if (ImGui::BeginPopupModal("##Frequency", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
@@ -151,3 +161,8 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
     ImGui::Text("Selected Audio Source: %s", source->name.c_str());
   }
 }
+
+void AudioSourceBrowserView::keyReleased(int key) {
+  tapper.tap();
+}
+

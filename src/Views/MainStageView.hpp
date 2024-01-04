@@ -22,6 +22,8 @@ struct MainStageView {
 private:
   std::shared_ptr<VideoSource> selectedVideoSource;
   ShaderType selectedShaderType;
+  msa::BPMTapper bpmTapper;
+  
   
   VideoSourceBrowserView videoSourceBrowserView = VideoSourceBrowserView();
   ShaderBrowserView shaderBrowserView = ShaderBrowserView();
@@ -29,7 +31,7 @@ private:
   OscillatorView oscillatorView = OscillatorView();
   FileBrowserView fileBrowserView = FileBrowserView(FileBrowserType_JSON);
   SubmitFeedbackView submitFeedbackView = SubmitFeedbackView();
-
+  
   void drawMenu();
   void drawVideoSourceBrowser();
   void drawOutputBrowser();

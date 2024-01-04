@@ -15,13 +15,14 @@
 class AvailableVideoSource
 {
 public:
-  AvailableVideoSource(std::string sourceName, VideoSourceType type);
+  AvailableVideoSource(std::string sourceName, std::string category, VideoSourceType type);
 
   virtual void generatePreview() = 0; // pure virtual function
   virtual VideoSourceType getType() const { return type; }
 
   std::string availableVideoSourceId;
   std::string sourceName;
+  std::string category = "";
   VideoSourceType type;
   std::shared_ptr<ofTexture> preview;
   bool hasPreview;
@@ -31,7 +32,7 @@ class AvailableVideoSourceWebcam : public AvailableVideoSource
 {
 public:
   AvailableVideoSourceWebcam(std::string sourceName, int webcamId)
-      : AvailableVideoSource(std::move(sourceName), VideoSource_webcam), webcamId(webcamId) {}
+      : AvailableVideoSource(std::move(sourceName), "", VideoSource_webcam), webcamId(webcamId) {}
   int webcamId;
 
   void generatePreview() override
@@ -44,7 +45,7 @@ class AvailableVideoSourceFile : public AvailableVideoSource
 {
 public:
   AvailableVideoSourceFile(std::string sourceName, std::string path)
-      : AvailableVideoSource(std::move(sourceName), VideoSource_file), path(std::move(path)) {}
+      : AvailableVideoSource(std::move(sourceName), "", VideoSource_file), path(std::move(path)) {}
 
   void generatePreview() override
   {
@@ -56,8 +57,8 @@ public:
 class AvailableVideoSourceShader : public AvailableVideoSource
 {
 public:
-  AvailableVideoSourceShader(std::string sourceName, ShaderSourceType shaderType)
-      : AvailableVideoSource(std::move(sourceName), VideoSource_shader), shaderType(shaderType) {}
+  AvailableVideoSourceShader(std::string sourceName, std::string category, ShaderSourceType shaderType)
+      : AvailableVideoSource(std::move(sourceName), std::move(category), VideoSource_shader), shaderType(shaderType) {}
 
   void generatePreview() override;
   ShaderSourceType shaderType;
@@ -69,7 +70,7 @@ class AvailableVideoSourceLibrary : public AvailableVideoSource
 {
 public:
   AvailableVideoSourceLibrary(std::string sourceName, std::shared_ptr<LibraryFile> libraryFile)
-      : AvailableVideoSource(std::move(sourceName), VideoSource_library), libraryFile(libraryFile) {}
+      : AvailableVideoSource(std::move(sourceName), "", VideoSource_library), libraryFile(libraryFile) {}
 
   std::shared_ptr<LibraryFile> libraryFile;
   void generatePreview() override
@@ -109,7 +110,7 @@ class AvailableVideoSourceText : public AvailableVideoSource
 {
 public:
   AvailableVideoSourceText(std::string sourceName)
-      : AvailableVideoSource(std::move(sourceName), VideoSource_text) {}
+      : AvailableVideoSource(std::move(sourceName), "Text", VideoSource_text) {}
 
   void generatePreview() override
   {

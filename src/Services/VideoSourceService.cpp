@@ -38,7 +38,7 @@ void VideoSourceService::populateAvailableVideoSources()
 
   for (auto const &x : AvailableShaderSourceTypes)
   {
-    auto shaderSource = std::make_shared<AvailableVideoSourceShader>(shaderSourceTypeName(x), x);
+    auto shaderSource = std::make_shared<AvailableVideoSourceShader>(shaderSourceTypeName(x), shaderSourceTypeCategory(x), x);
     shaderSource->generatePreview();
     availableSourceMap[shaderSource->availableVideoSourceId] = shaderSource;
   }

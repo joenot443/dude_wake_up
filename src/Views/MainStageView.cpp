@@ -151,4 +151,7 @@ void MainStageView::drawVideoSourceBrowser()
 
 void MainStageView::drawShaderBrowser() { shaderBrowserView.draw(); }
 
-void MainStageView::keyReleased(int key) { NodeLayoutView::getInstance()->keyReleased(key); }
+void MainStageView::keyReleased(int key) {
+  NodeLayoutView::getInstance()->keyReleased(key);
+  bpmTapper.tap();
+}

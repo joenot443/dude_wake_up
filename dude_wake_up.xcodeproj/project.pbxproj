@@ -189,6 +189,9 @@
 		02F2A06829C4D8F30072CE86 /* TextEditorView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F2A06629C4D8F30072CE86 /* TextEditorView.cpp */; };
 		02F2A06A29C4F2A00072CE86 /* TextSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F2A06429C4D8AF0072CE86 /* TextSource.cpp */; };
 		02F2A06F29C90FFD0072CE86 /* UploadChainerView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F2A06E29C90FFD0072CE86 /* UploadChainerView.cpp */; };
+		02FAEA372B3C4E8C00CA20F6 /* LumaFeedbackShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02FAEA362B3C4E8C00CA20F6 /* LumaFeedbackShader.cpp */; };
+		02FAEA3D2B3DDFD900CA20F6 /* libfftw3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 02FAEA3B2B3DDDAC00CA20F6 /* libfftw3.a */; };
+		02FAEA402B3DEA2300CA20F6 /* MSABPMTapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02FAEA3F2B3DEA2300CA20F6 /* MSABPMTapper.cpp */; };
 		059638BE8C8A1D59958631C4 /* MidiPairing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D824BC957F369968DA9939C /* MidiPairing.cpp */; };
 		0AC42BFBAC1207FC78527E53 /* ParameterService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63D397FA3B8B71D8DFD1D3BA /* ParameterService.cpp */; };
 		0BFC9C20FD7E3C8D5873AA97 /* ofxMidiIn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DD359247F3ED1550D8BB5C9 /* ofxMidiIn.cpp */; };
@@ -657,6 +660,14 @@
 		02FABA982A9FF316009D69B5 /* HilbertShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HilbertShader.hpp; path = Shading/HilbertShader.hpp; sourceTree = "<group>"; };
 		02FABA992A9FF35A009D69B5 /* CrosshatchShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = CrosshatchShader.hpp; path = Shading/CrosshatchShader.hpp; sourceTree = "<group>"; };
 		02FABA9A2A9FF3A4009D69B5 /* MaskShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = MaskShader.hpp; path = Shading/MaskShader.hpp; sourceTree = "<group>"; };
+		02FAEA332B3C4C4900CA20F6 /* LumaFeedback.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = LumaFeedback.vert; sourceTree = "<group>"; };
+		02FAEA342B3C4C4900CA20F6 /* LumaFeedback.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = LumaFeedback.frag; sourceTree = "<group>"; };
+		02FAEA352B3C4C9E00CA20F6 /* LumaFeedbackShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = LumaFeedbackShader.hpp; path = Shading/LumaFeedbackShader.hpp; sourceTree = "<group>"; };
+		02FAEA362B3C4E8C00CA20F6 /* LumaFeedbackShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = LumaFeedbackShader.cpp; path = Shading/LumaFeedbackShader.cpp; sourceTree = "<group>"; };
+		02FAEA3B2B3DDDAC00CA20F6 /* libfftw3.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfftw3.a; path = ../../../../../../usr/local/lib/libfftw3.a; sourceTree = "<group>"; };
+		02FAEA3E2B3DEA1E00CA20F6 /* MSABPMTapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSABPMTapper.h; sourceTree = "<group>"; };
+		02FAEA3F2B3DEA2300CA20F6 /* MSABPMTapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MSABPMTapper.cpp; sourceTree = "<group>"; };
+		02FAEA412B3DEAD900CA20F6 /* MSATimer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSATimer.h; sourceTree = "<group>"; };
 		04F77E5C73A62E2E77C78EC6 /* ofxMidiOut.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ofxMidiOut.cpp; path = ../../../addons/ofxMidi/src/ofxMidiOut.cpp; sourceTree = SOURCE_ROOT; };
 		05F6CF127D4A621113D4A62F /* ofxMidi.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxMidi.h; path = ../../../addons/ofxMidi/src/ofxMidi.h; sourceTree = SOURCE_ROOT; };
 		0EEC8D055B2169673B50822B /* AudioSettingsView.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = AudioSettingsView.cpp; path = src/Views/AudioSettingsView.cpp; sourceTree = SOURCE_ROOT; };
@@ -939,6 +950,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				02FAEA3D2B3DDFD900CA20F6 /* libfftw3.a in Frameworks */,
 				026EA9482A5AF92200AA3E55 /* libcpr.1.9.6.dylib in Frameworks */,
 				02542F132A4C6FEB005D3C72 /* libsentry.dylib in Frameworks */,
 				02A9130E2B0F053700D5D681 /* libcpr.1.9.6.dylib in Frameworks */,
@@ -956,6 +968,9 @@
 				028FA5D6295B1ACE00FE6FE3 /* implot */,
 				028FA5942956062B00FE6FE3 /* gist */,
 				024D1694289ED65400DA807C /* _kiss_fft_guts.h */,
+				02FAEA412B3DEAD900CA20F6 /* MSATimer.h */,
+				02FAEA3E2B3DEA1E00CA20F6 /* MSABPMTapper.h */,
+				02FAEA3F2B3DEA2300CA20F6 /* MSABPMTapper.cpp */,
 				024D168B289ED64700DA807C /* BTrack.cpp */,
 				024D168A289ED64700DA807C /* BTrack.h */,
 				024D168C289ED64700DA807C /* CircularBuffer.h */,
@@ -1094,6 +1109,7 @@
 		02A0C4892A4B0C4500974602 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				02FAEA3B2B3DDDAC00CA20F6 /* libfftw3.a */,
 				022D18F62A78533A00AEBC05 /* libPocoData.a */,
 				026EA9442A5AF25200AA3E55 /* libcpr.1.9.6.dylib */,
 				026EA9462A5AF57C00AA3E55 /* libcpr.1.9.6.dylib */,
@@ -1312,6 +1328,8 @@
 			isa = PBXGroup;
 			children = (
 				029742E42B34D63A00C4ECDB /* noise.png */,
+				02FAEA342B3C4C4900CA20F6 /* LumaFeedback.frag */,
+				02FAEA332B3C4C4900CA20F6 /* LumaFeedback.vert */,
 				02D1C4B22AAA04B100D80657 /* MinMixer.frag */,
 				02D1C4B32AAA04B100D80657 /* MinMixer.vert */,
 				0224010A2A8B003300CA76DD /* SolidColor.frag */,
@@ -1435,6 +1453,8 @@
 		02FABA912A9EB0C6009D69B5 /* Shaders */ = {
 			isa = PBXGroup;
 			children = (
+				02FAEA352B3C4C9E00CA20F6 /* LumaFeedbackShader.hpp */,
+				02FAEA362B3C4E8C00CA20F6 /* LumaFeedbackShader.cpp */,
 				02D1C4B42AAA04CC00D80657 /* MinMixerShader.hpp */,
 				029742E02B34D1FB00C4ECDB /* GameboyShader.hpp */,
 				022D18EC2A71BDBD00AEBC05 /* 16bitShader.hpp */,
@@ -2449,6 +2469,7 @@
 				0202C7E129EC5F2D0005248E /* ofAVFoundationGrabber.mm in Sources */,
 				63D0FD8734D5760B8080C901 /* RtMidi.cpp in Sources */,
 				BCC8D420CBA9217E437D2D76 /* ofxRtMidiIn.cpp in Sources */,
+				02FAEA372B3C4E8C00CA20F6 /* LumaFeedbackShader.cpp in Sources */,
 				02BE890829DDDB4600C65C58 /* ShaderSource.cpp in Sources */,
 				02B280EB2915480E00B793D5 /* FileSource.cpp in Sources */,
 				3AEFE4FA8AD5C72671AD07F8 /* ofxRtMidiOut.cpp in Sources */,
@@ -2468,6 +2489,7 @@
 				02B16FCA29674AF30043CA74 /* imgui_canvas.cpp in Sources */,
 				0230658129534CF600489A9F /* VideoSourceBrowserView.cpp in Sources */,
 				C6FE64F74F1EA1D98C8F9847 /* ofxMidiMessage.cpp in Sources */,
+				02FAEA402B3DEA2300CA20F6 /* MSABPMTapper.cpp in Sources */,
 				024D1698289EEACD00DA807C /* PulseOscillator.cpp in Sources */,
 				02B16FC929674AF30043CA74 /* imgui_node_editor_api.cpp in Sources */,
 				028FA5B62956062B00FE6FE3 /* WindowFunctions.cpp in Sources */,

@@ -17,11 +17,17 @@ public:
   std::shared_ptr<Parameter> width;
   std::shared_ptr<Parameter> height;
   std::shared_ptr<Parameter> resolution;
+  std::shared_ptr<Parameter> maskColor;
+  std::shared_ptr<Parameter> maskEnabled;
+  std::shared_ptr<Parameter> maskTolerance;
   
   VideoSourceSettings() :
   width(std::make_shared<Parameter>("width", 720, 100, 2000)),
   height(std::make_shared<Parameter>("height", 480, 100, 2000)),
   resolution(std::make_shared<Parameter>("resolution", 3, 0, 5)),
+  maskColor(std::make_shared<Parameter>("maskColor", 3, 0, 5)),
+  maskEnabled(std::make_shared<Parameter>("maskEnabled", 0, 0, 1)),
+  maskTolerance(std::make_shared<Parameter>("maskTolerance", 0.1, 0, 1)),
   Settings() {
     parameters = {width, height};
     updateResolutionSettings();
@@ -31,6 +37,9 @@ public:
   width(std::make_shared<Parameter>("width", 720, 100, 2000)),
   height(std::make_shared<Parameter>("height", 480, 100, 2000)),
   resolution(std::make_shared<Parameter>("resolution", 3, 0, 5)),
+  maskColor(std::make_shared<Parameter>("Mask Color", 3, 0, 5)),
+  maskEnabled(std::make_shared<Parameter>("Mask Enabled", 0, 0, 1)),
+  maskTolerance(std::make_shared<Parameter>("Mask Tolerance", 0.1, 0, 1)),
   Settings() {
     parameters = {width, height};
     updateResolutionSettings();

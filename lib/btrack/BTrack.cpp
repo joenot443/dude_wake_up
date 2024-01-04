@@ -363,7 +363,7 @@ void BTrack::resampleOnsetDetectionFunction()
     src_data.data_out = output;
     src_data.output_frames = outputLength;
     
-    src_simple (&src_data, SRC_SINC_BEST_QUALITY, 1);
+//    src_simple (&src_data, SRC_SINC_BEST_QUALITY, 1);
             
     for (int i = 0; i < outputLength; i++)
         resampledOnsetDF[i] = (double) src_data.data_out[i];

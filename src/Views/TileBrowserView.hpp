@@ -17,14 +17,15 @@ class TileItem {
 public:
   virtual ~TileItem() {} 
   std::string name;
+  std::string category = "";
   ImTextureID textureID;
   int index;
   // Closure which will be called when the tile is clicked
   std::function<void()> dragCallback;
 
   TileItem(std::string name, ImTextureID textureID, int index,
-           std::function<void()> dragCallback)
-      : name(name), textureID(textureID), index(index),
+           std::function<void()> dragCallback, std::string category = "")
+      : name(name), textureID(textureID), index(index), category(category),
         dragCallback(dragCallback){};
 };
 

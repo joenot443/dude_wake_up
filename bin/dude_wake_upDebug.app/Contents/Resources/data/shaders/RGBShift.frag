@@ -15,7 +15,13 @@ vec4 colorShift(vec4 col, vec2 uv){
   frag.r = texture(tex, vec2(uv.x + sin(time * speed) * intensity,uv.y + cos(time * speed)  * intensity)).r;
   frag.g = col.g;
   frag.b = texture(tex, vec2(uv.x - sin(time * speed)  * intensity,uv.y - cos(time * speed)  * intensity)).b;
-  frag.a = col.a;
+  if (frag.r > 0.001 || frag.b > 0.001 || frag.g > 0.001) {
+    frag.a = col.a;
+  } else {
+    frag.a = 0.0;
+  }
+  
+  
   return frag;
 }
 

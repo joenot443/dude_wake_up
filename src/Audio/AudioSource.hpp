@@ -12,6 +12,7 @@
 #include "ofMain.h"
 #include "Gist.h"
 #include "AudioSettings.hpp"
+#include "BTrack.h"
 
 using json = nlohmann::json;
 
@@ -22,6 +23,7 @@ struct AudioSource {
   bool active = false;
   ofSoundDevice device;
   ofSoundStream stream;
+  BTrack bTrack = BTrack(512, 44100);
   AudioAnalysis audioAnalysis;
   
   Gist<float> gist = Gist<float>(512, 44100);
