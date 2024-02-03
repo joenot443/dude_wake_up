@@ -28,9 +28,9 @@ void ParameterService::registerParameter(std::shared_ptr<Parameter> parameter) {
     return;
   }
   if (parameterMap.count(parameter->paramId) != 0) {
-    log("Reregistering Parameter %s", parameter->paramId.c_str());
+//    log("Reregistering Parameter %s", parameter->paramId.c_str());
   }
-  log("Registering Parameter %s", parameter->paramId.c_str());
+//  log("Registering Parameter %s", parameter->paramId.c_str());
   parameterMap[parameter->paramId] = std::weak_ptr<Parameter>(parameter);
 
 }

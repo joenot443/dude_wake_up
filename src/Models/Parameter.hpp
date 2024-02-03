@@ -37,6 +37,10 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
 
   float min = 0.0;
   float max = 1.0;
+  
+  void setColor(std::array<float, 3> newColor) {
+    color = std::make_shared<std::array<float, 3>>(newColor);
+  }
 
   json serialize()
   {
@@ -45,6 +49,9 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
     j["paramId"] = paramId;
     j["midiDescriptor"] = midiDescriptor;
     j["value"] = value;
+    j["intValue"] = intValue;
+    j["boolValue"] = boolValue;
+    
     // If the color RGB values are not all 0, add them to the json
     if (color->at(0) != 0.0 || color->at(1) != 0.0 || color->at(2) != 0.0)
     {
@@ -58,12 +65,15 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
   void addDriver(std::shared_ptr<Parameter> dr)
   {
     driver = dr;
-    shift = std::make_shared<Parameter>("shift", 0.0, -2.0, 2.0);
-    scale = std::make_shared<Parameter>("scale", 1.0, 0.0, 5.0);
+    shift = std::make_shared<Parameter>("shift", 1.0, -5.0, 5.0);
+    scale = std::make_shared<Parameter>("scale", 0.5, 0.0, 5.0);
   }
 
   void load(json j)
   {
+    if (name == "maskEnabled") {
+      std::cout << "re" << std::endl;
+    }
     if (j.is_number())
     {
       setValue(j);
@@ -74,6 +84,7 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
       if (j.contains("value"))
       {
         value = j["value"];
+        setValue(j["value"]);
       }
       if (j.contains("intValue"))
       {

@@ -12,7 +12,12 @@
 		0090B479605B26E7C387B02D /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C525795C6CCB99616535318 /* imgui_widgets.cpp */; };
 		016BB55A143AD429330F07DB /* Gui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F0E2047B4D03D5151730B52B /* Gui.cpp */; };
 		0202C7E129EC5F2D0005248E /* ofAVFoundationGrabber.mm in Sources */ = {isa = PBXBuildFile; fileRef = E42962C22163EDD300A6A9E2 /* ofAVFoundationGrabber.mm */; };
+		020DF7312B4B32E20042C580 /* VideoSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 020DF7302B4B32E20042C580 /* VideoSource.cpp */; };
 		0216672D29E6E79600ABF457 /* FeedbackSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0216672C29E6E76E00ABF457 /* FeedbackSource.cpp */; };
+		021AF0092B6164FA00E1AD75 /* PulseOscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 021AF0042B6164FA00E1AD75 /* PulseOscillator.cpp */; };
+		021AF00A2B6164FA00E1AD75 /* ValueOscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 021AF0062B6164FA00E1AD75 /* ValueOscillator.cpp */; };
+		021AF00B2B6164FA00E1AD75 /* WaveformOscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 021AF0082B6164FA00E1AD75 /* WaveformOscillator.cpp */; };
+		021AF00E2B61651800E1AD75 /* Pulser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 021AF00C2B61651800E1AD75 /* Pulser.cpp */; };
 		022D18F12A71C21000AEBC05 /* VideoRecorder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 022D18EF2A71C21000AEBC05 /* VideoRecorder.cpp */; };
 		0230657C29534CB500489A9F /* ShaderChainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0230657629534CB500489A9F /* ShaderChainer.cpp */; };
 		0230658129534CF600489A9F /* VideoSourceBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0230657F29534CF600489A9F /* VideoSourceBrowserView.cpp */; };
@@ -24,7 +29,6 @@
 		024D1689289DFD8400DA807C /* FeedbackShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D1687289DFD8400DA807C /* FeedbackShader.cpp */; };
 		024D168F289ED64700DA807C /* BTrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D168B289ED64700DA807C /* BTrack.cpp */; };
 		024D1690289ED64700DA807C /* OnsetDetectionFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D168D289ED64700DA807C /* OnsetDetectionFunction.cpp */; };
-		024D1698289EEACD00DA807C /* PulseOscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D1696289EEACD00DA807C /* PulseOscillator.cpp */; };
 		024D169C28A046DF00DA807C /* ConfigService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D169A28A046DF00DA807C /* ConfigService.cpp */; };
 		02542F112A4C6931005D3C72 /* SubmitFeedbackView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02542F0F2A4C6931005D3C72 /* SubmitFeedbackView.cpp */; };
 		02542F132A4C6FEB005D3C72 /* libsentry.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 02542F122A4C6FEB005D3C72 /* libsentry.dylib */; };
@@ -44,7 +48,6 @@
 		028FA5B52956062B00FE6FE3 /* CoreTimeDomainFeatures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA5A92956062B00FE6FE3 /* CoreTimeDomainFeatures.cpp */; };
 		028FA5B62956062B00FE6FE3 /* WindowFunctions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA5AB2956062B00FE6FE3 /* WindowFunctions.cpp */; };
 		028FA5B72956062B00FE6FE3 /* AccelerateFFT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA5AC2956062B00FE6FE3 /* AccelerateFFT.cpp */; };
-		028FA5BA295A2B3E00FE6FE3 /* WaveformOscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA5B8295A2B3E00FE6FE3 /* WaveformOscillator.cpp */; };
 		028FA5C3295B117E00FE6FE3 /* BarPlotView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA5C1295B117E00FE6FE3 /* BarPlotView.cpp */; };
 		028FA5DC295B1ACE00FE6FE3 /* implot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA5D7295B1ACE00FE6FE3 /* implot.cpp */; };
 		028FA5DD295B1ACE00FE6FE3 /* implot_items.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA5D8295B1ACE00FE6FE3 /* implot_items.cpp */; };
@@ -113,9 +116,6 @@
 		02DDEDBD29EF20310040382F /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C525795C6CCB99616535318 /* imgui_widgets.cpp */; };
 		02DDEDBE29EF20900040382F /* TextEditorView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F2A06629C4D8F30072CE86 /* TextEditorView.cpp */; };
 		02DDEDBF29EF20A10040382F /* UploadChainerView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F2A06E29C90FFD0072CE86 /* UploadChainerView.cpp */; };
-		02DDEDC029EF20B00040382F /* PulseOscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D1696289EEACD00DA807C /* PulseOscillator.cpp */; };
-		02DDEDC129EF20B20040382F /* ValueOscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9A2D495BAB95441239948C26 /* ValueOscillator.cpp */; };
-		02DDEDC229EF20B50040382F /* WaveformOscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA5B8295A2B3E00FE6FE3 /* WaveformOscillator.cpp */; };
 		02DDEDC329EF20CA0040382F /* MidiService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 75213B2C7CC7237BE90401B0 /* MidiService.cpp */; };
 		02DDEDC429EF21170040382F /* Gist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028FA59B2956062B00FE6FE3 /* Gist.cpp */; };
 		02DDEDC529EF215B0040382F /* ShaderChainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0230657629534CB500489A9F /* ShaderChainer.cpp */; };
@@ -156,7 +156,6 @@
 		02DDEDE829EF230C0040382F /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0238773529D20CB300B20386 /* ImGuiExtensions.cpp */; };
 		02DDEDE929EF23170040382F /* MainApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0071CACCF0D8316ED4FAA73D /* MainApp.cpp */; };
 		02DDEDEA29EF23450040382F /* MainStageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 023C633B2922E2D400A8BC9E /* MainStageView.cpp */; };
-		02DDEDEB29EF23570040382F /* AudioSettingsView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0EEC8D055B2169673B50822B /* AudioSettingsView.cpp */; };
 		02DDEDEE29EF23610040382F /* FileBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 025AD49C291A9E3200F78F46 /* FileBrowserView.cpp */; };
 		02DDEDEF29EF23630040382F /* VideoSourceBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0230657F29534CF600489A9F /* VideoSourceBrowserView.cpp */; };
 		02DDEDF329EF236E0040382F /* AudioSourceBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02ED91022955EDFD002252CC /* AudioSourceBrowserView.cpp */; };
@@ -197,7 +196,6 @@
 		0BFC9C20FD7E3C8D5873AA97 /* ofxMidiIn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DD359247F3ED1550D8BB5C9 /* ofxMidiIn.cpp */; };
 		1030C647FD06E4D3E054F65D /* ofxMidiTimecode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 10E2C891AAA166534B1F3B4E /* ofxMidiTimecode.cpp */; };
 		12C04C963F830B6A09F5FC7D /* ModulationService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 67B01FCCC5E47D1538454CD5 /* ModulationService.cpp */; };
-		175464DB3A85014D9DF5BD3C /* AudioSettingsView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0EEC8D055B2169673B50822B /* AudioSettingsView.cpp */; };
 		1A86B7721CAEBC6F1C572C45 /* ofxBaseMidi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94B3C3C21F92F9310CA90986 /* ofxBaseMidi.cpp */; };
 		3727B026D4D11026D33BEEA2 /* OscillationService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5331C50D24335FF2EE01416F /* OscillationService.cpp */; };
 		3AEFE4FA8AD5C72671AD07F8 /* ofxRtMidiOut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 712B183BC00EBFFB1EEA5AB8 /* ofxRtMidiOut.cpp */; };
@@ -215,7 +213,6 @@
 		881AF887EC2124F4105DE9E1 /* ofxMidiClock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A937731265782800A8359098 /* ofxMidiClock.cpp */; };
 		9021CA48E18FB8B26215F64C /* Parameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 54DD623E99AFF042FF1E59E7 /* Parameter.cpp */; };
 		A2D1312F4F8A1C62A7D5FE20 /* MidiService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 75213B2C7CC7237BE90401B0 /* MidiService.cpp */; };
-		A31728853BA0741D77701E2A /* ValueOscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9A2D495BAB95441239948C26 /* ValueOscillator.cpp */; };
 		A6F396BE5D1E24326E1F796A /* ofxImGuiLoggerChannel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64438C8902B287DA10BCD63B /* ofxImGuiLoggerChannel.cpp */; };
 		B0F01881AEC796CF3A25ECB3 /* imgui_impl_glfw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4EE7C223D3B53FDA50DECC1C /* imgui_impl_glfw.cpp */; };
 		BCC8D420CBA9217E437D2D76 /* ofxRtMidiIn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F634AA6CA2E3C60F3B87B59A /* ofxRtMidiIn.cpp */; };
@@ -281,8 +278,20 @@
 
 /* Begin PBXFileReference section */
 		0071CACCF0D8316ED4FAA73D /* MainApp.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = MainApp.cpp; path = src/Apps/MainApp.cpp; sourceTree = SOURCE_ROOT; };
+		020DF72D2B4B00F60042C580 /* Paint.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Paint.vert; sourceTree = "<group>"; };
+		020DF72E2B4B00F60042C580 /* Paint.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Paint.frag; sourceTree = "<group>"; };
+		020DF72F2B4B010D0042C580 /* PaintShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = PaintShader.hpp; path = Shading/PaintShader.hpp; sourceTree = "<group>"; };
+		020DF7302B4B32E20042C580 /* VideoSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = VideoSource.cpp; sourceTree = "<group>"; };
 		021026D328940FDB0060F282 /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; path = lib; sourceTree = "<group>"; };
 		0216672C29E6E76E00ABF457 /* FeedbackSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FeedbackSource.cpp; sourceTree = "<group>"; };
+		021AF0022B6164FA00E1AD75 /* PulseOscillator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = PulseOscillator.hpp; path = Oscillation/PulseOscillator.hpp; sourceTree = "<group>"; };
+		021AF0032B6164FA00E1AD75 /* Oscillator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Oscillator.hpp; path = Oscillation/Oscillator.hpp; sourceTree = "<group>"; };
+		021AF0042B6164FA00E1AD75 /* PulseOscillator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PulseOscillator.cpp; path = Oscillation/PulseOscillator.cpp; sourceTree = "<group>"; };
+		021AF0062B6164FA00E1AD75 /* ValueOscillator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ValueOscillator.cpp; path = Oscillation/ValueOscillator.cpp; sourceTree = "<group>"; };
+		021AF0072B6164FA00E1AD75 /* ValueOscillator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ValueOscillator.hpp; path = Oscillation/ValueOscillator.hpp; sourceTree = "<group>"; };
+		021AF0082B6164FA00E1AD75 /* WaveformOscillator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WaveformOscillator.cpp; path = Oscillation/WaveformOscillator.cpp; sourceTree = "<group>"; };
+		021AF00C2B61651800E1AD75 /* Pulser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Pulser.cpp; path = Oscillation/Pulser.cpp; sourceTree = "<group>"; };
+		021AF00D2B61651800E1AD75 /* Pulser.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = Pulser.hpp; path = Oscillation/Pulser.hpp; sourceTree = "<group>"; };
 		0224010A2A8B003300CA76DD /* SolidColor.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = SolidColor.frag; sourceTree = "<group>"; };
 		0224010B2A8B003300CA76DD /* SolidColor.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = SolidColor.vert; sourceTree = "<group>"; };
 		0224010C2A8B00A800CA76DD /* SolidColorShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SolidColorShader.hpp; path = Shading/SolidColorShader.hpp; sourceTree = "<group>"; };
@@ -310,6 +319,9 @@
 		0230658A29534EAD00489A9F /* AudioSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = AudioSource.hpp; path = Audio/AudioSource.hpp; sourceTree = "<group>"; };
 		02308FA92983084000EFDF57 /* LibraryBrowserView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = LibraryBrowserView.cpp; path = Views/LibraryBrowserView.cpp; sourceTree = "<group>"; };
 		02308FAA2983084000EFDF57 /* LibraryBrowserView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = LibraryBrowserView.hpp; path = Views/LibraryBrowserView.hpp; sourceTree = "<group>"; };
+		0230DAF72B6D64FF00C44ADB /* File.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = File.hpp; path = Util/File.hpp; sourceTree = "<group>"; };
+		0230DAF82B6D864B00C44ADB /* BounceShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = BounceShader.hpp; path = Shading/BounceShader.hpp; sourceTree = "<group>"; };
+		0230DAF92B6DAAF400C44ADB /* CirclePathShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = CirclePathShader.hpp; path = Shading/CirclePathShader.hpp; sourceTree = "<group>"; };
 		0238773529D20CB300B20386 /* ImGuiExtensions.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ImGuiExtensions.cpp; path = Views/ImGuiExtensions.cpp; sourceTree = "<group>"; };
 		0238773629D20CB300B20386 /* ImGuiExtensions.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = ImGuiExtensions.hpp; path = Views/ImGuiExtensions.hpp; sourceTree = "<group>"; };
 		023C633B2922E2D400A8BC9E /* MainStageView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MainStageView.cpp; path = Views/MainStageView.cpp; sourceTree = "<group>"; };
@@ -318,6 +330,8 @@
 		023C6348292A8DC700A8BC9E /* imgui_stdlib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = imgui_stdlib.h; path = lib/imgui_stdlib.h; sourceTree = "<group>"; };
 		023C634B292BC55A00A8BC9E /* ShaderSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ShaderSource.hpp; sourceTree = "<group>"; };
 		0240887328B1BB1400908222 /* macro_scope.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = macro_scope.hpp; sourceTree = "<group>"; };
+		02454C5C2B67F878000A84E6 /* Vertex.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Vertex.vert; sourceTree = "<group>"; };
+		02454C5D2B67F878000A84E6 /* Vertex.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Vertex.frag; sourceTree = "<group>"; };
 		024D1687289DFD8400DA807C /* FeedbackShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FeedbackShader.cpp; path = Shading/FeedbackShader.cpp; sourceTree = "<group>"; };
 		024D1688289DFD8400DA807C /* FeedbackShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = FeedbackShader.hpp; path = Shading/FeedbackShader.hpp; sourceTree = "<group>"; };
 		024D168A289ED64700DA807C /* BTrack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BTrack.h; path = lib/btrack/BTrack.h; sourceTree = "<group>"; };
@@ -326,8 +340,6 @@
 		024D168D289ED64700DA807C /* OnsetDetectionFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OnsetDetectionFunction.cpp; path = lib/btrack/OnsetDetectionFunction.cpp; sourceTree = "<group>"; };
 		024D168E289ED64700DA807C /* OnsetDetectionFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OnsetDetectionFunction.h; path = lib/btrack/OnsetDetectionFunction.h; sourceTree = "<group>"; };
 		024D1694289ED65400DA807C /* _kiss_fft_guts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = _kiss_fft_guts.h; path = lib/kiss_fft130/_kiss_fft_guts.h; sourceTree = "<group>"; };
-		024D1696289EEACD00DA807C /* PulseOscillator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = PulseOscillator.cpp; path = Stream/PulseOscillator.cpp; sourceTree = "<group>"; };
-		024D1697289EEACD00DA807C /* PulseOscillator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = PulseOscillator.hpp; path = Stream/PulseOscillator.hpp; sourceTree = "<group>"; };
 		024D169928A0420B00DA807C /* schema.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = schema.json; sourceTree = "<group>"; };
 		024D169A28A046DF00DA807C /* ConfigService.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ConfigService.cpp; path = Services/ConfigService.cpp; sourceTree = "<group>"; };
 		024D169B28A046DF00DA807C /* ConfigService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = ConfigService.hpp; path = Services/ConfigService.hpp; sourceTree = "<group>"; };
@@ -400,8 +412,7 @@
 		028FA5AC2956062B00FE6FE3 /* AccelerateFFT.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AccelerateFFT.cpp; sourceTree = "<group>"; };
 		028FA5AD2956062B00FE6FE3 /* OnsetDetectionFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OnsetDetectionFunction.h; sourceTree = "<group>"; };
 		028FA5AE2956062B00FE6FE3 /* Gist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Gist.h; sourceTree = "<group>"; };
-		028FA5B8295A2B3E00FE6FE3 /* WaveformOscillator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = WaveformOscillator.cpp; path = Stream/WaveformOscillator.cpp; sourceTree = "<group>"; };
-		028FA5B9295A2B3E00FE6FE3 /* WaveformOscillator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = WaveformOscillator.hpp; path = Stream/WaveformOscillator.hpp; sourceTree = "<group>"; };
+		028FA5B9295A2B3E00FE6FE3 /* WaveformOscillator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = WaveformOscillator.hpp; path = Oscillation/WaveformOscillator.hpp; sourceTree = "<group>"; };
 		028FA5BB295A36E500FE6FE3 /* TransformShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = TransformShader.hpp; path = Shading/TransformShader.hpp; sourceTree = "<group>"; };
 		028FA5BC295A4BAA00FE6FE3 /* RingsShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = RingsShader.hpp; path = Shading/RingsShader.hpp; sourceTree = "<group>"; };
 		028FA5BD295A4BBC00FE6FE3 /* Rings.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Rings.vert; sourceTree = "<group>"; };
@@ -637,6 +648,9 @@
 		02ED91022955EDFD002252CC /* AudioSourceBrowserView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AudioSourceBrowserView.cpp; path = Views/AudioSourceBrowserView.cpp; sourceTree = "<group>"; };
 		02ED91032955EDFD002252CC /* AudioSourceBrowserView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = AudioSourceBrowserView.hpp; path = Views/AudioSourceBrowserView.hpp; sourceTree = "<group>"; };
 		02ED91052955F179002252CC /* AudioSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AudioSource.cpp; path = Audio/AudioSource.cpp; sourceTree = "<group>"; };
+		02F064D22B4C47AE0016E67B /* Triple.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Triple.frag; sourceTree = "<group>"; };
+		02F064D32B4C47AE0016E67B /* Triple.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Triple.vert; sourceTree = "<group>"; };
+		02F064D42B4C47C70016E67B /* TripleShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TripleShader.hpp; path = Shading/TripleShader.hpp; sourceTree = "<group>"; };
 		02F2A06429C4D8AF0072CE86 /* TextSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TextSource.cpp; sourceTree = "<group>"; };
 		02F2A06529C4D8AF0072CE86 /* TextSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TextSource.hpp; sourceTree = "<group>"; };
 		02F2A06629C4D8F30072CE86 /* TextEditorView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TextEditorView.cpp; path = Views/TextEditorView.cpp; sourceTree = "<group>"; };
@@ -670,12 +684,10 @@
 		02FAEA412B3DEAD900CA20F6 /* MSATimer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSATimer.h; sourceTree = "<group>"; };
 		04F77E5C73A62E2E77C78EC6 /* ofxMidiOut.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ofxMidiOut.cpp; path = ../../../addons/ofxMidi/src/ofxMidiOut.cpp; sourceTree = SOURCE_ROOT; };
 		05F6CF127D4A621113D4A62F /* ofxMidi.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxMidi.h; path = ../../../addons/ofxMidi/src/ofxMidi.h; sourceTree = SOURCE_ROOT; };
-		0EEC8D055B2169673B50822B /* AudioSettingsView.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = AudioSettingsView.cpp; path = src/Views/AudioSettingsView.cpp; sourceTree = SOURCE_ROOT; };
 		10E2C891AAA166534B1F3B4E /* ofxMidiTimecode.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ofxMidiTimecode.cpp; path = ../../../addons/ofxMidi/src/ofxMidiTimecode.cpp; sourceTree = SOURCE_ROOT; };
 		12EBC5773B81D5E37E068E24 /* imgui_internal.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = imgui_internal.h; path = ../../../addons/ofxImGui/libs/imgui/src/imgui_internal.h; sourceTree = SOURCE_ROOT; };
 		15727A4964A36153C888C1E8 /* ModulationService.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ModulationService.hpp; path = src/Services/ModulationService.hpp; sourceTree = SOURCE_ROOT; };
 		19F3D4684311CC8582634E63 /* Parameter.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Parameter.hpp; path = src/Models/Parameter.hpp; sourceTree = SOURCE_ROOT; };
-		1D110EA4D31EF7FAB33600A7 /* AudioSettingsView.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = AudioSettingsView.hpp; path = src/Views/AudioSettingsView.hpp; sourceTree = SOURCE_ROOT; };
 		1D824BC957F369968DA9939C /* MidiPairing.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = MidiPairing.cpp; path = src/Services/Midi/MidiPairing.cpp; sourceTree = SOURCE_ROOT; };
 		1F6BF263701C1EB978C0D622 /* MidiPairing.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = MidiPairing.hpp; path = src/Services/Midi/MidiPairing.hpp; sourceTree = SOURCE_ROOT; };
 		208298154B11456DCD0BE131 /* ofxRtMidiIn.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxRtMidiIn.h; path = ../../../addons/ofxMidi/src/desktop/ofxRtMidiIn.h; sourceTree = SOURCE_ROOT; };
@@ -722,7 +734,6 @@
 		940F78F950A49D35DDB538BA /* imgui_tables.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = imgui_tables.cpp; path = ../../../addons/ofxImGui/libs/imgui/src/imgui_tables.cpp; sourceTree = SOURCE_ROOT; };
 		94B3C3C21F92F9310CA90986 /* ofxBaseMidi.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ofxBaseMidi.cpp; path = ../../../addons/ofxMidi/src/ofxBaseMidi.cpp; sourceTree = SOURCE_ROOT; };
 		99559F284344A867305900DB /* EngineVk.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = EngineVk.h; path = ../../../addons/ofxImGui/src/EngineVk.h; sourceTree = SOURCE_ROOT; };
-		9A2D495BAB95441239948C26 /* ValueOscillator.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ValueOscillator.cpp; path = src/Stream/ValueOscillator.cpp; sourceTree = SOURCE_ROOT; };
 		9CC36552DD0A47E758D71FB5 /* imgui_demo.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = imgui_demo.cpp; path = ../../../addons/ofxImGui/libs/imgui/src/imgui_demo.cpp; sourceTree = SOURCE_ROOT; };
 		9E02D9F3A04B5573758EBCF8 /* imgui_draw.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = imgui_draw.cpp; path = ../../../addons/ofxImGui/libs/imgui/src/imgui_draw.cpp; sourceTree = SOURCE_ROOT; };
 		9F29250EFB8B209E9192C8B8 /* main.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = main.cpp; path = src/main.cpp; sourceTree = SOURCE_ROOT; };
@@ -743,7 +754,6 @@
 		BD0E7AC8BE205034D5B377A6 /* ofxMidiMessage.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxMidiMessage.h; path = ../../../addons/ofxMidi/src/ofxMidiMessage.h; sourceTree = SOURCE_ROOT; };
 		C0E7EDA67EDF213FC0E83D17 /* ofxMidiMessage.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ofxMidiMessage.cpp; path = ../../../addons/ofxMidi/src/ofxMidiMessage.cpp; sourceTree = SOURCE_ROOT; };
 		CB5C15EA0881D35A88C22937 /* EngineOpenGLES.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = EngineOpenGLES.h; path = ../../../addons/ofxImGui/src/EngineOpenGLES.h; sourceTree = SOURCE_ROOT; };
-		D6C40FFF6BEF0129D3A3237B /* Oscillator.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Oscillator.hpp; path = src/Stream/Oscillator.hpp; sourceTree = SOURCE_ROOT; };
 		D7C7BDAD29F580A47FF56B52 /* BaseEngine.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = BaseEngine.cpp; path = ../../../addons/ofxImGui/src/BaseEngine.cpp; sourceTree = SOURCE_ROOT; };
 		D85FF6DA846FFAB2A241ED93 /* Console.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Console.hpp; path = src/Util/Console.hpp; sourceTree = SOURCE_ROOT; };
 		D91100C1FBA245AD6CB55BD3 /* ofxImGui.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxImGui.h; path = ../../../addons/ofxImGui/src/ofxImGui.h; sourceTree = SOURCE_ROOT; };
@@ -752,7 +762,6 @@
 		E135C7F22D40FCFD9C5AB94B /* imgui.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = imgui.h; path = ../../../addons/ofxImGui/libs/imgui/src/imgui.h; sourceTree = SOURCE_ROOT; };
 		E16BB73D19DD0713FDCC7986 /* ofxMidiTypes.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxMidiTypes.h; path = ../../../addons/ofxMidi/src/ofxMidiTypes.h; sourceTree = SOURCE_ROOT; };
 		E238CCDE032640E0FEBFAD82 /* ofxMidi.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ofxMidi.cpp; path = ../../../addons/ofxMidi/src/ofxMidi.cpp; sourceTree = SOURCE_ROOT; };
-		E320D3D42E18099A6E07B075 /* ValueOscillator.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ValueOscillator.hpp; path = src/Stream/ValueOscillator.hpp; sourceTree = SOURCE_ROOT; };
 		E42962AC2163EDD300A6A9E2 /* ofCamera.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ofCamera.cpp; path = ../../../libs/openFrameworks/3d/ofCamera.cpp; sourceTree = SOURCE_ROOT; };
 		E42962AD2163EDD300A6A9E2 /* ofMesh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ofMesh.h; path = ../../../libs/openFrameworks/3d/ofMesh.h; sourceTree = SOURCE_ROOT; };
 		E42962AE2163EDD300A6A9E2 /* ofNode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ofNode.h; path = ../../../libs/openFrameworks/3d/ofNode.h; sourceTree = SOURCE_ROOT; };
@@ -1277,6 +1286,7 @@
 				02B280E629148A7500B793D5 /* WebcamSource.hpp */,
 				02B280E929148A7500B793D5 /* WebcamSource.cpp */,
 				02B280E729148A7500B793D5 /* VideoSource.hpp */,
+				020DF7302B4B32E20042C580 /* VideoSource.cpp */,
 				02B049C6296DCD8000F68451 /* AvailableVideoSource.hpp */,
 				029F41A52975F08B00B6DB77 /* AvailableVideoSource.cpp */,
 				02CC589F29AF914E006A50F2 /* ImageSource.cpp */,
@@ -1327,7 +1337,13 @@
 		02ED90D62954967F002252CC /* shaders */ = {
 			isa = PBXGroup;
 			children = (
+				02454C5D2B67F878000A84E6 /* Vertex.frag */,
+				02454C5C2B67F878000A84E6 /* Vertex.vert */,
 				029742E42B34D63A00C4ECDB /* noise.png */,
+				02F064D22B4C47AE0016E67B /* Triple.frag */,
+				02F064D32B4C47AE0016E67B /* Triple.vert */,
+				020DF72E2B4B00F60042C580 /* Paint.frag */,
+				020DF72D2B4B00F60042C580 /* Paint.vert */,
 				02FAEA342B3C4C4900CA20F6 /* LumaFeedback.frag */,
 				02FAEA332B3C4C4900CA20F6 /* LumaFeedback.vert */,
 				02D1C4B22AAA04B100D80657 /* MinMixer.frag */,
@@ -1453,6 +1469,10 @@
 		02FABA912A9EB0C6009D69B5 /* Shaders */ = {
 			isa = PBXGroup;
 			children = (
+				0230DAF92B6DAAF400C44ADB /* CirclePathShader.hpp */,
+				0230DAF82B6D864B00C44ADB /* BounceShader.hpp */,
+				02F064D42B4C47C70016E67B /* TripleShader.hpp */,
+				020DF72F2B4B010D0042C580 /* PaintShader.hpp */,
 				02FAEA352B3C4C9E00CA20F6 /* LumaFeedbackShader.hpp */,
 				02FAEA362B3C4E8C00CA20F6 /* LumaFeedbackShader.cpp */,
 				02D1C4B42AAA04CC00D80657 /* MinMixerShader.hpp */,
@@ -1640,8 +1660,6 @@
 			children = (
 				02542F0F2A4C6931005D3C72 /* SubmitFeedbackView.cpp */,
 				02542F102A4C6931005D3C72 /* SubmitFeedbackView.hpp */,
-				0EEC8D055B2169673B50822B /* AudioSettingsView.cpp */,
-				1D110EA4D31EF7FAB33600A7 /* AudioSettingsView.hpp */,
 				B21CEA7F3D7E274DE1310FE6 /* CommonViews.cpp */,
 				746F2159A4FEFD3AF671AC4C /* CommonViews.hpp */,
 				A87A8141F788BEB6F96324A1 /* OscillatorView.cpp */,
@@ -1759,18 +1777,20 @@
 			name = src;
 			sourceTree = "<group>";
 		};
-		9D4EB7020129479136E47D0F /* Stream */ = {
+		9D4EB7020129479136E47D0F /* Oscillation */ = {
 			isa = PBXGroup;
 			children = (
+				021AF0032B6164FA00E1AD75 /* Oscillator.hpp */,
+				021AF0042B6164FA00E1AD75 /* PulseOscillator.cpp */,
+				021AF0022B6164FA00E1AD75 /* PulseOscillator.hpp */,
+				021AF0062B6164FA00E1AD75 /* ValueOscillator.cpp */,
+				021AF0072B6164FA00E1AD75 /* ValueOscillator.hpp */,
+				021AF0082B6164FA00E1AD75 /* WaveformOscillator.cpp */,
 				028FA5B9295A2B3E00FE6FE3 /* WaveformOscillator.hpp */,
-				028FA5B8295A2B3E00FE6FE3 /* WaveformOscillator.cpp */,
-				D6C40FFF6BEF0129D3A3237B /* Oscillator.hpp */,
-				9A2D495BAB95441239948C26 /* ValueOscillator.cpp */,
-				E320D3D42E18099A6E07B075 /* ValueOscillator.hpp */,
-				024D1696289EEACD00DA807C /* PulseOscillator.cpp */,
-				024D1697289EEACD00DA807C /* PulseOscillator.hpp */,
+				021AF00C2B61651800E1AD75 /* Pulser.cpp */,
+				021AF00D2B61651800E1AD75 /* Pulser.hpp */,
 			);
-			name = Stream;
+			name = Oscillation;
 			sourceTree = "<group>";
 		};
 		9E4FC7FE1041D81B7931878E /* Util */ = {
@@ -1785,6 +1805,7 @@
 				0230657429534CA500489A9F /* UUID.hpp */,
 				028FA5E5295B31EF00FE6FE3 /* Vectors.hpp */,
 				028E8E5A29A0457400B95C92 /* Colors.hpp */,
+				0230DAF72B6D64FF00C44ADB /* File.hpp */,
 			);
 			name = Util;
 			sourceTree = "<group>";
@@ -2142,7 +2163,7 @@
 				9F29250EFB8B209E9192C8B8 /* main.cpp */,
 				9E4FC7FE1041D81B7931878E /* Util */,
 				02B280E429148A7500B793D5 /* Video */,
-				9D4EB7020129479136E47D0F /* Stream */,
+				9D4EB7020129479136E47D0F /* Oscillation */,
 				53993C2CF5EE6C972F3A0308 /* Models */,
 				721B30BA8F4AAE6EB850CE13 /* Views */,
 				D1CFEA8461B96256B1B8C57D /* Apps */,
@@ -2342,14 +2363,12 @@
 				02DDEDCD29EF21910040382F /* AccelerateFFT.cpp in Sources */,
 				02DDEDCF29EF21A60040382F /* ofxBaseMidi.cpp in Sources */,
 				02DDEDCC29EF218F0040382F /* WindowFunctions.cpp in Sources */,
-				02DDEDC129EF20B20040382F /* ValueOscillator.cpp in Sources */,
 				02DDEDBB29EF202C0040382F /* imgui_draw.cpp in Sources */,
 				02DDEDF329EF236E0040382F /* AudioSourceBrowserView.cpp in Sources */,
 				02DDED9D29EF1E040040382F /* NodeLayoutView.cpp in Sources */,
 				02DDEDEE29EF23610040382F /* FileBrowserView.cpp in Sources */,
 				02DDEDB929EF20290040382F /* imgui_stdlib.cpp in Sources */,
 				02DDEDE129EF221D0040382F /* Parameter.cpp in Sources */,
-				02DDEDC229EF20B50040382F /* WaveformOscillator.cpp in Sources */,
 				02DDEDC629EF215E0040382F /* FeedbackShader.cpp in Sources */,
 				02DDEDBA29EF202B0040382F /* imgui_demo.cpp in Sources */,
 				02DDEDE829EF230C0040382F /* ImGuiExtensions.cpp in Sources */,
@@ -2374,7 +2393,6 @@
 				02DDEDBD29EF20310040382F /* imgui_widgets.cpp in Sources */,
 				02DDEDB029EF1FDB0040382F /* TextSource.cpp in Sources */,
 				02DDEDB129EF1FDD0040382F /* ShaderSource.cpp in Sources */,
-				02DDEDC029EF20B00040382F /* PulseOscillator.cpp in Sources */,
 				02DDEDC429EF21170040382F /* Gist.cpp in Sources */,
 				02DDEDD629EF21C60040382F /* OscillatorView.cpp in Sources */,
 				02DDEDA029EF1E0C0040382F /* FontService.cpp in Sources */,
@@ -2384,7 +2402,6 @@
 				02DDEDEF29EF23630040382F /* VideoSourceBrowserView.cpp in Sources */,
 				02DDED9329EF092B0040382F /* ShaderChainerServiceTests.hpp in Sources */,
 				02DDEDF429EF23710040382F /* BarPlotView.cpp in Sources */,
-				02DDEDEB29EF23570040382F /* AudioSettingsView.cpp in Sources */,
 				02DDEDE429EF22A40040382F /* implot_demo.cpp in Sources */,
 				02DDEDF529EF23730040382F /* TileBrowserView.cpp in Sources */,
 				02DDEDCA29EF21890040382F /* CoreFrequencyDomainFeatures.cpp in Sources */,
@@ -2396,16 +2413,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A31728853BA0741D77701E2A /* ValueOscillator.cpp in Sources */,
 				02B280E02913FE8200B793D5 /* FeedbackSourceService.cpp in Sources */,
 				9021CA48E18FB8B26215F64C /* Parameter.cpp in Sources */,
 				029742E62B35EF4300C4ECDB /* Connection.cpp in Sources */,
 				029F41BC297B047500B6DB77 /* LibraryService.cpp in Sources */,
 				DAA162C52DA366D4774E2A53 /* OscillatorView.cpp in Sources */,
 				75992458D44C948D353E0BF3 /* CommonViews.cpp in Sources */,
+				020DF7312B4B32E20042C580 /* VideoSource.cpp in Sources */,
 				02ED91062955F179002252CC /* AudioSource.cpp in Sources */,
 				02BE890629DCA12600C65C58 /* ShaderConfigSelectionView.cpp in Sources */,
-				175464DB3A85014D9DF5BD3C /* AudioSettingsView.cpp in Sources */,
 				028FA5C3295B117E00FE6FE3 /* BarPlotView.cpp in Sources */,
 				02BE890B29DEFBD700C65C58 /* ListBrowserView.cpp in Sources */,
 				6764CEA4D206EE90B9BEE3D4 /* MainApp.cpp in Sources */,
@@ -2428,6 +2444,7 @@
 				023C633D2922EF5100A8BC9E /* MainStageView.cpp in Sources */,
 				3727B026D4D11026D33BEEA2 /* OscillationService.cpp in Sources */,
 				B0F01881AEC796CF3A25ECB3 /* imgui_impl_glfw.cpp in Sources */,
+				021AF00E2B61651800E1AD75 /* Pulser.cpp in Sources */,
 				022D18F12A71C21000AEBC05 /* VideoRecorder.cpp in Sources */,
 				C41EA6E8F44334B01183F80A /* imgui_impl_opengl2.cpp in Sources */,
 				028FA5B12956062B00FE6FE3 /* Yin.cpp in Sources */,
@@ -2437,7 +2454,6 @@
 				028FA5B72956062B00FE6FE3 /* AccelerateFFT.cpp in Sources */,
 				5C2607C471F8D48C0036C56E /* imgui.cpp in Sources */,
 				E984796BE84AA4315636B6E7 /* imgui_demo.cpp in Sources */,
-				028FA5BA295A2B3E00FE6FE3 /* WaveformOscillator.cpp in Sources */,
 				00413C35AAE31B483D7538AB /* imgui_draw.cpp in Sources */,
 				024D1689289DFD8400DA807C /* FeedbackShader.cpp in Sources */,
 				DAE67500A7BFCE7D22EEE423 /* imgui_tables.cpp in Sources */,
@@ -2456,6 +2472,7 @@
 				02F2A06A29C4F2A00072CE86 /* TextSource.cpp in Sources */,
 				026EA94A2A5EDA7500AA3E55 /* LibraryFile.cpp in Sources */,
 				DC62E5817CB03447F2ADFB85 /* ImHelpers.cpp in Sources */,
+				021AF00A2B6164FA00E1AD75 /* ValueOscillator.cpp in Sources */,
 				028FA5B32956062B00FE6FE3 /* kiss_fft.c in Sources */,
 				028FA5B02956062B00FE6FE3 /* Gist.cpp in Sources */,
 				023C6349292A8DC700A8BC9E /* imgui_stdlib.cpp in Sources */,
@@ -2479,6 +2496,8 @@
 				63F9FE1D90234FA6DE6F509E /* ofxMidi.cpp in Sources */,
 				881AF887EC2124F4105DE9E1 /* ofxMidiClock.cpp in Sources */,
 				024D1690289ED64700DA807C /* OnsetDetectionFunction.cpp in Sources */,
+				021AF00B2B6164FA00E1AD75 /* WaveformOscillator.cpp in Sources */,
+				021AF0092B6164FA00E1AD75 /* PulseOscillator.cpp in Sources */,
 				02F2A06829C4D8F30072CE86 /* TextEditorView.cpp in Sources */,
 				0BFC9C20FD7E3C8D5873AA97 /* ofxMidiIn.cpp in Sources */,
 				024D168F289ED64700DA807C /* BTrack.cpp in Sources */,
@@ -2490,7 +2509,6 @@
 				0230658129534CF600489A9F /* VideoSourceBrowserView.cpp in Sources */,
 				C6FE64F74F1EA1D98C8F9847 /* ofxMidiMessage.cpp in Sources */,
 				02FAEA402B3DEA2300CA20F6 /* MSABPMTapper.cpp in Sources */,
-				024D1698289EEACD00DA807C /* PulseOscillator.cpp in Sources */,
 				02B16FC929674AF30043CA74 /* imgui_node_editor_api.cpp in Sources */,
 				028FA5B62956062B00FE6FE3 /* WindowFunctions.cpp in Sources */,
 				0230658729534E7400489A9F /* AudioSourceService.cpp in Sources */,

@@ -6,6 +6,8 @@
 //
 
 #include "FileBrowserView.hpp"
+#include "VideoSourceService.hpp"
+#include "File.hpp"
 #include "AvailableShaderChainer.hpp"
 #include "AvailableVideoSource.hpp"
 #include "ofMain.h"
@@ -32,9 +34,17 @@ void FileBrowserView::refresh()
   {
     if (type == FileBrowserType_Source)
     {
+      std::shared_ptr<AvailableVideoSource> availableSource;
+      if (isVideoFile(file.path)) {
+        availableSource = std::make_shared<AvailableVideoSourceFile>(
+                                                                     file.name, file.path);
+      } else if (isImageFile(file.path)) {
+        availableSource = std::make_shared<AvailableVideoSourceImage>(file.name, file.path);
+      } else {
+        continue;
+      }
+      
       // Open the file and get the first frame
-      auto availableSource = std::make_shared<AvailableVideoSourceFile>(
-          file.name, file.path);
       sources.push_back(availableSource);
       // Create a closure which will be called when the tile is clicked
       std::function<void()> dragCallback = [availableSource]()
@@ -85,6 +95,7 @@ void FileBrowserView::refresh()
       tileItems.push_back(tileItem);
     }
   }
+  VideoSourceService::getService()->addAvailableVideoSources(sources);
   listBrowserView.tileItems = tileItems;
 }
 

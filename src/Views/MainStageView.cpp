@@ -139,6 +139,13 @@ void MainStageView::drawMenu()
     {
       ImGui::OpenPopup(SubmitFeedbackView::popupId);
     }
+    
+    static bool showingMenu = false;
+    if (ImGui::MenuItem("ImGui Demo") || showingMenu)
+    {
+      ImGui::ShowDemoWindow();
+      showingMenu = true;
+    }
 
     ImGui::EndMenuBar();
   }

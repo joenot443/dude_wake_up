@@ -6,7 +6,7 @@ uniform vec2 dimensions;
 uniform float time;
 uniform vec4 chromaKey;
 uniform int drawTex;
-
+uniform int invert;
 
 in vec2 coord;
 out vec4 outputColor;
@@ -39,10 +39,18 @@ void main()
   vec4 yuv = RGBtoYUV * texColor0;
   
   float mask = colorclose(yuv.rgb, keyYUV.rgb);
-  if (drawTex == 1) {
-    outputColor = vec4(texColor0.xyz, 1 - mask);
+  float mixf = 0.0;
+  
+  if (invert == 1) {
+    mixf = 1. - mask;
   } else {
-    outputColor = vec4(1.0, 1.0, 1.0, mask);
+    mixf = mask;
+  }
+  
+  if (drawTex == 1) {
+    outputColor = vec4(texColor0.xyz, min(texColor0.a, 1. - mixf));
+  } else {
+    outputColor = vec4(1.0, 1.0, 1.0, mixf);
   }
 }
 

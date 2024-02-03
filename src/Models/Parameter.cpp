@@ -44,9 +44,9 @@ scale(NULL) {
   boolValue = static_cast<bool>(value);
 };
 
-
 void Parameter::tick() {
   if (driver != nullptr && paramId.length() > 5) {
     setValue(driver->value * scale->value + shift->value);
   }
 }
+

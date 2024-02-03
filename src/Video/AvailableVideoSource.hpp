@@ -54,6 +54,19 @@ public:
   std::string path;
 };
 
+class AvailableVideoSourceImage : public AvailableVideoSource
+{
+public:
+  AvailableVideoSourceImage(std::string sourceName, std::string path)
+      : AvailableVideoSource(std::move(sourceName), "", VideoSource_image), path(std::move(path)) {}
+
+  void generatePreview() override
+  {
+    // file-specific implementation
+  }
+  std::string path;
+};
+
 class AvailableVideoSourceShader : public AvailableVideoSource
 {
 public:

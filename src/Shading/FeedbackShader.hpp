@@ -35,11 +35,11 @@ struct FeedbackSettings: public ShaderSettings {
   std::shared_ptr<Parameter> yPosition;
   std::shared_ptr<Oscillator> yPositionOscillator;
 
-  std::shared_ptr<Parameter> blend;
-  std::shared_ptr<Oscillator> blendOscillator;
+  std::shared_ptr<Parameter> mainMix;
+  std::shared_ptr<Oscillator> mainMixOscillator;
   
-  std::shared_ptr<Parameter> mix;
-  std::shared_ptr<Oscillator> mixOscillator;
+  std::shared_ptr<Parameter> feedbackMix;
+  std::shared_ptr<Oscillator> feedbackMixOscillator;
   
   std::shared_ptr<Parameter> delayAmount;
   std::shared_ptr<Oscillator> delayAmountOscillator;
@@ -54,8 +54,11 @@ struct FeedbackSettings: public ShaderSettings {
   
   FeedbackSettings(std::string shaderId, json j) :
   index(index),
-  blend(std::make_shared<Parameter>("Blend", 0.5, 0.0, 1.0)),
-  blendOscillator(std::make_shared<WaveformOscillator>(blend)),
+  mainMix(std::make_shared<Parameter>("Main Mix", 0.5, 0.0, 1.0)),
+  mainMixOscillator(std::make_shared<WaveformOscillator>(mainMix)),
+  feedbackMix(std::make_shared<Parameter>("Feedback Mix", 0.5, 0.0, 1.0)),
+  feedbackMixOscillator(std::make_shared<WaveformOscillator>(feedbackMix)),
+  
   keyValue(std::make_shared<Parameter>("Key Value", 0.5, 0.0, 1.0)),
   keyValueOscillator(std::make_shared<WaveformOscillator>(keyValue)),
   keyThreshold(std::make_shared<Parameter>("Key Threshold", 0.5, 0.0, 1.0)),
@@ -72,8 +75,8 @@ struct FeedbackSettings: public ShaderSettings {
   sourceSelection(std::make_shared<Parameter>("source", 0.0, 0.0, 3.0)),
   shaderId(shaderId),
   ShaderSettings(shaderId, j) {
-    parameters = {blend, mix, keyValue, keyThreshold, delayAmount, lumaKeyEnabled, xPosition, yPosition, scale, sourceSelection};
-    oscillators = {blendOscillator, mixOscillator, keyValueOscillator, keyThresholdOscillator, delayAmountOscillator, xPositionOscillator, yPositionOscillator, scaleOscillator};
+    parameters = {mainMix, feedbackMix, keyValue, keyThreshold, delayAmount, lumaKeyEnabled, xPosition, yPosition, scale, sourceSelection};
+    oscillators = {mainMixOscillator, feedbackMixOscillator, keyValueOscillator, keyThresholdOscillator, delayAmountOscillator, xPositionOscillator, yPositionOscillator, scaleOscillator};
 
     load(j);
   registerParameters();
@@ -82,15 +85,6 @@ struct FeedbackSettings: public ShaderSettings {
   void load(json j) override {
     ShaderSettings::load(j);
     registerParameters();
-    if (!j.is_object()) {
-      return;
-    }
-  }
-  
-  json serialize() override {
-    json j = ShaderSettings::serialize();
-    
-    return j;
   }
 };
 

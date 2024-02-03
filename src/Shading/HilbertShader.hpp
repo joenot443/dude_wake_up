@@ -38,7 +38,7 @@ struct HilbertShader: Shader {
   HilbertShader(HilbertSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    shader.load("shaders/Hilbert");
+    shader.load("shaders/Empty");
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {

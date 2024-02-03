@@ -19,6 +19,8 @@
 
 struct ColorKeyMaskMakerSettings: public ShaderSettings {
 	public:
+  std::shared_ptr<Parameter> invert;
+  std::shared_ptr<Parameter> drawInput;
   std::shared_ptr<Parameter> tolerance;
   std::shared_ptr<Parameter> color;
   std::shared_ptr<WaveformOscillator> toleranceOscillator;
@@ -26,9 +28,11 @@ struct ColorKeyMaskMakerSettings: public ShaderSettings {
   ColorKeyMaskMakerSettings(std::string shaderId, json j) :
   tolerance(std::make_shared<Parameter>("tolerance", 0.1, 0.0, 1.0)),
   color(std::make_shared<Parameter>("color", 0.0)),
+  drawInput(std::make_shared<Parameter>("drawInput", 0.0, 0.0, 1.0)),
+  invert(std::make_shared<Parameter>("Invert", 0.0, 0.0, 1.0)),
   toleranceOscillator(std::make_shared<WaveformOscillator>(tolerance)),
   ShaderSettings(shaderId, j) {
-    parameters = { tolerance, color };
+    parameters = { tolerance, color, invert };
     oscillators = { toleranceOscillator };
     load(j);
     registerParameters();
@@ -54,7 +58,8 @@ public:
     ofClear(0,0,0, 0);
     shader.setUniformTexture("tex", frame->getTexture(), 0);
     shader.setUniform1f("tolerance", settings->tolerance->value);
-    shader.setUniform1i("drawTex", 0);
+    shader.setUniform1i("drawTex", settings->drawInput->intParamValue());
+    shader.setUniform1i("invert", settings->invert->intValue);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform4f("chromaKey", settings->color->color->data()[0], settings->color->color->data()[1], settings->color->color->data()[2], 1.0);
@@ -74,6 +79,8 @@ public:
   void drawSettings() override {
     CommonViews::H3Title("ColorKeyMaskMaker");
     CommonViews::ShaderParameter(settings->tolerance, settings->toleranceOscillator);
+    CommonViews::ShaderCheckbox(settings->drawInput);
+    CommonViews::ShaderCheckbox(settings->invert);
     CommonViews::ShaderColor(settings->color);
   }
 };

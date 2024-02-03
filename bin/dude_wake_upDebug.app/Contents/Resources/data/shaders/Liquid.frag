@@ -27,11 +27,11 @@ lowp float snoise(in lowp vec2 v) {
 void main() {
   vec2 uv = coord.xy / dimensions.xy;
   uv /= 1.1;
-  uv += .05;
+  uv += .01;
   uv *= 1.;
   float t = time * .8;
   float s = smoothstep(0., 1., uv.x);
-  uv.y += s * sin(t + uv.x * 5.) * .05; // * snoise(uv*2.+1.+t*.3);
+  uv.y += s * sin(t + uv.x * 5.) * .05;
   uv.x += s * snoise(uv * (4.3 * (s / 3.7 + 1.2)) - vec2(t * 1.2, 0.));
   float tt = mod(t, 10.);
   outputColor = texture(tex, uv);

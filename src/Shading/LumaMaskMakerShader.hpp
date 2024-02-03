@@ -24,15 +24,17 @@ struct LumaMaskMakerSettings: public ShaderSettings {
   std::shared_ptr<Oscillator> lowerOscillator;
   
   std::shared_ptr<Parameter> flip;
+  std::shared_ptr<Parameter> drawInput;
   
   LumaMaskMakerSettings(std::string shaderId, json j) :
   upper(std::make_shared<Parameter>("upper", 1.0, 0.0, 1.0)),
   lower(std::make_shared<Parameter>("lower", 0.5, 0.0, 1.0)),
-  flip(std::make_shared<Parameter>("flip", 0.0, 0.0, 1.0)),
+  flip(std::make_shared<Parameter>("invert", 0.0, 0.0, 1.0)),
+  drawInput(std::make_shared<Parameter>("drawInput", 0.0, 0.0, 1.0)),
   upperOscillator(std::make_shared<WaveformOscillator>(upper)),
   lowerOscillator(std::make_shared<WaveformOscillator>(lower)),
   ShaderSettings(shaderId, 0) {
-    parameters = {upper, lower, flip };
+    parameters = {upper, lower, flip, drawInput };
     oscillators = { upperOscillator, lowerOscillator };
     registerParameters();
   };
@@ -57,6 +59,7 @@ public:
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform1f("lower", settings->lower->value);
+    shader.setUniform1i("drawTex", settings->drawInput->intParamValue());
     shader.setUniform1f("upper", settings->upper->value);
     shader.setUniform1i("flip", settings->flip->boolValue);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
@@ -77,6 +80,7 @@ public:
     CommonViews::H3Title("LumaMaskMaker");
     CommonViews::ShaderParameter(settings->upper, settings->upperOscillator);
     CommonViews::ShaderParameter(settings->lower, settings->lowerOscillator);
+    CommonViews::ShaderCheckbox(settings->drawInput);
     CommonViews::ShaderCheckbox(settings->flip);
   }
 };

@@ -47,6 +47,8 @@ shader.load("shaders/Glitch");
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
+    ofClear(0,0,0, 255);
+    ofClear(0,0,0, 0);
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform1f("amount", settings->amount->value);
@@ -65,7 +67,6 @@ shader.load("shaders/Glitch");
   }
 
   void drawSettings() override {
-    
     CommonViews::H3Title("Glitch");
     CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
   }

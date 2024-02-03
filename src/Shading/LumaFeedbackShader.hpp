@@ -86,12 +86,6 @@ struct LumaFeedbackSettings: public ShaderSettings {
       return;
     }
   }
-  
-  json serialize() override {
-    json j = ShaderSettings::serialize();
-    
-    return j;
-  }
 };
 
 struct LumaFeedbackShader: Shader  {

@@ -56,6 +56,9 @@ shader.load("shaders/Mix");
     ofEnableAlphaBlending();
     canvas->begin();
     shader.begin();
+    // Clear the frame
+    ofClear(0,0,0, 255);
+    ofClear(0,0,0, 0);
     
     if (auxConnected()) {
       std::shared_ptr<ofFbo> tex2 = aux()->frame();

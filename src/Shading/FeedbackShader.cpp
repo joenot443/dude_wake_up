@@ -50,7 +50,8 @@ void FeedbackShader::populateSource() {
       feedbackSource = FeedbackSourceService::getService()->feedbackSourceForId(shaderId);
       break;
     case 2: // Final
-      feedbackSource = FeedbackSourceService::getService()->feedbackSourceForId(shaderId);
+      std::shared_ptr<Shader> terminalShader = ShaderChainerService::getService()->terminalShader(std::dynamic_pointer_cast<Shader>(shared_from_this()));
+      feedbackSource = FeedbackSourceService::getService()->feedbackSourceForId(terminalShader->shaderId);
       break;
   }
   FeedbackSourceService::getService()->setConsumer(shaderId, feedbackSource);
@@ -71,11 +72,12 @@ void FeedbackShader::shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> 
   shader.setUniform1i("lumaEnabled",
                       settings->lumaKeyEnabled->boolValue);
   shader.setUniformTexture("mainTexture", frame->getTexture(), 4);
-  shader.setUniform1f("blend", settings->blend->value);
+  shader.setUniform1f("mainMix", settings->mainMix->value);
+  shader.setUniform1f("feedbackMix", settings->feedbackMix->value);
   shader.setUniform1f("scale", settings->scale->value);
   shader.setUniform1f("lumaKey", settings->keyValue->value);
   shader.setUniform1f("lumaThresh", settings->keyThreshold->value);
-  shader.setUniform2f("translate", settings->xPosition->value, (0.5 - settings->yPosition->value));
+  shader.setUniform2f("translate", settings->xPosition->value + 0.5, settings->yPosition->value + 0.5);
   shader.setUniform1f("scale", 2.0 - settings->scale->value);
   
 
@@ -109,8 +111,7 @@ void FeedbackShader::drawSettings() {
   
   ImGui::Columns(2);
   ImGui::SetColumnWidth(0, 200);
-  ImGuiExtensions::Slider2DFloat("", &settings->xPosition->value, &settings->yPosition->value, 0., 0.5, 0., 0.5, 0.5);
-//  ImGui::SetCursorPosX(ImGui::GetCursorPosX() - 50);
+  ImGuiExtensions::Slider2DFloat("", &settings->xPosition->value, &settings->yPosition->value, 0., 1., 0., 1., 0.5);
   ImGui::NextColumn();
   ImGui::Text("Oscillate X");
   ImGui::SameLine();
@@ -122,8 +123,9 @@ void FeedbackShader::drawSettings() {
   
 
   // Blend
-  CommonViews::ShaderParameter(settings->blend, settings->blendOscillator);
-
+  CommonViews::ShaderParameter(settings->mainMix, settings->mainMixOscillator);
+  CommonViews::ShaderParameter(settings->feedbackMix, settings->feedbackMixOscillator);
+  
   // Delay Amount
   CommonViews::ShaderParameter(settings->delayAmount,
                                settings->delayAmountOscillator);

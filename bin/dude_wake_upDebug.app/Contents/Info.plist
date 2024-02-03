@@ -37,9 +37,9 @@
 	<key>DTSDKName</key>
 	<string>macosx14.0</string>
 	<key>DTXcode</key>
-	<string>1501</string>
+	<string>1500</string>
 	<key>DTXcodeBuild</key>
-	<string>15A507</string>
+	<string>15A240d</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>13.0</string>
 	<key>NSCameraUsageDescription</key>

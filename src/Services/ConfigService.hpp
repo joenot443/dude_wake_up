@@ -69,7 +69,9 @@ public:
   std::string relativeFilePathWithinNottawaFolder(std::string filePath);
 
   json jsonFromParameters(std::vector<Parameter *> parameters);
-
+  
+  bool isLoading;
+  
   static ConfigService *service;
   ConfigService(){};
   

@@ -76,6 +76,9 @@ public:
   
   // Returns true if the passed Shader is the terminal node in a Chainer.
   bool isTerminalShader(std::shared_ptr<Shader> shader);
+  
+  // Traverses the shader's outputs to find the most terminal.
+  std::shared_ptr<Shader> terminalShader(std::shared_ptr<Shader> shader);
 
   // Modifying
 
@@ -83,6 +86,7 @@ public:
   void addShader(std::shared_ptr<Shader> shader);
   std::shared_ptr<Shader> makeShader(ShaderType type);
   void removeShader(std::shared_ptr<Shader> shader, bool fromMap = true);
+  void removeConnectable(std::shared_ptr<Connectable> connectable);
   
   // Break the connection from a Shader to the Input of another
   void breakConnectionForConnectionId(std::string connectionId);
@@ -91,7 +95,8 @@ public:
   std::shared_ptr<Connection>
   makeConnection(std::shared_ptr<Connectable> start,
            std::shared_ptr<Connectable> end,
-           ConnectionType type);
+           ConnectionType type,
+           bool shouldSaveConfig = false);
   
 
   // Removes the ShaderChainers associated with that VideoSource

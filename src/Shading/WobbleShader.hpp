@@ -54,6 +54,9 @@ shader.load("shaders/Wobble");
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
+    // Clear the frame
+    ofClear(0,0,0, 255);
+    ofClear(0,0,0, 0);
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("time", ofGetElapsedTimef());

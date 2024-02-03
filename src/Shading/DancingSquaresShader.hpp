@@ -60,7 +60,6 @@ public:
 
   void drawSettings() override {
     CommonViews::H3Title("DancingSquares");
-
   }
 };
 

@@ -11,6 +11,7 @@
 #include "ofMain.h"
 
 #include "ShaderConfigSelectionView.hpp"
+#include "ImGuiExtensions.hpp"
 #include "Shader.hpp"
 #include "ofxImGui.h"
 #include <stdio.h>
@@ -26,6 +27,7 @@ struct TransformSettings : public ShaderSettings {
   std::shared_ptr<Parameter> rotate;
 
   std::shared_ptr<Parameter> autoRotate;
+  std::shared_ptr<Parameter> lockXYScale;
 
   std::shared_ptr<Oscillator> xTranslateOscillator;
   std::shared_ptr<Oscillator> yTranslateOscillator;
@@ -39,12 +41,14 @@ struct TransformSettings : public ShaderSettings {
                                                -1.0, 1.0)),
         yTranslate(std::make_shared<Parameter>("yTranslate", 0.0,
                                                -1.0, 1.0)),
-        xScale(std::make_shared<Parameter>("xScale", 1.0, 0.0, 2.0)),
-        yScale(std::make_shared<Parameter>("yScale", 1.0, 0.0, 2.0)),
+        xScale(std::make_shared<Parameter>("xScale", 1.0, 0.0, 10.0)),
+        yScale(std::make_shared<Parameter>("yScale", 1.0, 0.0, 10.0)),
         rotate(
             std::make_shared<Parameter>("rotate", 0.0, 0.0, 360.0)),
         autoRotate(std::make_shared<Parameter>("autoRotate", 0.0, 0.0,
                                                2.0)),
+  lockXYScale(std::make_shared<Parameter>("Lock XY Scale", 1.0, 0.0,
+                                         1.0)),
         xTranslateOscillator(std::make_shared<WaveformOscillator>(xTranslate)),
         yTranslateOscillator(std::make_shared<WaveformOscillator>(yTranslate)),
         xScaleOscillator(std::make_shared<WaveformOscillator>(xScale)),
@@ -52,7 +56,7 @@ struct TransformSettings : public ShaderSettings {
         rotateOscillator(std::make_shared<WaveformOscillator>(rotate)),
         autoRotateOscillator(std::make_shared<WaveformOscillator>(autoRotate)),
         ShaderSettings(shaderId, j) {
-    parameters = {xTranslate, yTranslate, xScale, yScale, rotate, autoRotate};
+    parameters = {xTranslate, yTranslate, xScale, yScale, rotate, autoRotate, lockXYScale};
     oscillators = {xTranslateOscillator, yTranslateOscillator,
                    xScaleOscillator,     yScaleOscillator,
                    rotateOscillator,     autoRotateOscillator};
@@ -102,7 +106,12 @@ public:
       ofRotateDeg(settings->rotate->value);
     }
 
-    ofScale(settings->xScale->value, settings->yScale->value);
+    if (settings->lockXYScale->boolValue) {
+      ofScale(settings->xScale->value, settings->xScale->value);
+    } else {
+      ofScale(settings->xScale->value, settings->yScale->value);
+    }
+    
     texture.draw(0, 0);
     ofPopMatrix();
 
@@ -112,20 +121,26 @@ public:
 
   void drawSettings() override {
     
-    // Translate X
-    CommonViews::ShaderParameter(settings->xTranslate,
-                                 settings->xTranslateOscillator);
-
-    // Translate Y
-    CommonViews::ShaderParameter(settings->yTranslate,
-                                 settings->yTranslateOscillator);
+    ImGui::Columns(2);
+    ImGui::SetColumnWidth(0, 200);
+    ImGuiExtensions::Slider2DFloat("", &settings->xTranslate->value, &settings->yTranslate->value, -1., 1.0, -1., 1.0, 1.0);
+    ImGui::NextColumn();
+    ImGui::Text("Oscillate X");
+    ImGui::SameLine();
+    CommonViews::OscillateButton("##yOscillator", settings->xTranslateOscillator, settings->xTranslate);
+    ImGui::Text("Oscillate Y");
+    ImGui::SameLine();
+    CommonViews::OscillateButton("##yOscillator", settings->yTranslateOscillator, settings->yTranslate);
+    ImGui::Columns(1);
+    CommonViews::ShaderCheckbox(settings->lockXYScale);
 
     // Scale X
     CommonViews::ShaderParameter(settings->xScale, settings->xScaleOscillator);
 
-    // Scale Y
-    CommonViews::ShaderParameter(settings->yScale, settings->yScaleOscillator);
-
+    if (!settings->lockXYScale->boolValue) {
+      // Scale Y
+      CommonViews::ShaderParameter(settings->yScale, settings->yScaleOscillator);
+    }
     // Auto Rotate
     CommonViews::ShaderParameter(settings->autoRotate,
                                  settings->autoRotateOscillator);

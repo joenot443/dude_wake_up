@@ -12,6 +12,11 @@ void main()
   vec4 tex_color = texture(tex, coord);
   vec4 tex2_color = texture(tex2, coord);
   
+  if (tex_color.a < 0.1 && tex2_color.a < 0.1) {
+    outputColor = vec4(0.0);
+    return;
+  }
+  
   if (tex2_color.a < 0.1) {
     outputColor = vec4(tex_color.rgb, 1.0);
     return;

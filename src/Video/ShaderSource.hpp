@@ -4,6 +4,7 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "VertexShader.hpp"
 #include "SolidColorShader.hpp"
 #include "HilbertShader.hpp"
 #include "WarpShader.hpp"
@@ -68,6 +69,7 @@ enum ShaderSourceType {
   ShaderSource_Warp, //source enum,
   ShaderSource_Hilbert, //source enum,
   ShaderSource_SolidColor, //source enum,
+  ShaderSource_Vertex, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -97,11 +99,14 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_Warp, // Available
   ShaderSource_Hilbert, // Available
   ShaderSource_SolidColor, // Available
+  ShaderSource_Vertex, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
 // shaderTypeForShaderSourceType
+  case ShaderSource_Vertex: //type enum
+    return ShaderTypeVertex;
   case ShaderSource_SolidColor: //type enum
     return ShaderTypeSolidColor;
   case ShaderSource_Hilbert: //type enum
@@ -177,16 +182,16 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     case ShaderSource_empty:
       return "Simple";
       
-  
   // Scenic
-    case ShaderSource_TriangleMap: // Name
-    case ShaderSource_VanGogh: // Name
-    case ShaderSource_Mountains: // Name
-    case ShaderSource_clouds:
-    case ShaderSource_galaxy:
-    case ShaderSource_fuji:
-      return "Scenic";
-      
+  case ShaderSource_TriangleMap: // Name
+  case ShaderSource_VanGogh: // Name
+  case ShaderSource_Mountains: // Name
+  case ShaderSource_clouds:
+  case ShaderSource_galaxy:
+  case ShaderSource_fuji:
+  case ShaderSource_Vertex:
+    return "Scenic";
+    
     
   // Trippy
   case ShaderSource_Hilbert: // Name
@@ -211,6 +216,8 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
 static std::string shaderSourceTypeName(ShaderSourceType nameType) {
   switch (nameType) {
   // Shader Names
+  case ShaderSource_Vertex: // Name  
+    return "Vertex"; // Vertex
   case ShaderSource_SolidColor: // Name  
     return "SolidColor"; // SolidColor
   case ShaderSource_Hilbert: // Name  
@@ -272,6 +279,7 @@ static std::string shaderSourceTypeName(ShaderSourceType nameType) {
 
 struct ShaderSource : public VideoSource {
 public:
+  ofShader maskShader;
   std::shared_ptr<Shader> shader;
   ShaderSourceType shaderSourceType;
   std::shared_ptr<ofFbo> canvas;
@@ -286,6 +294,12 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_Vertex: { // Settings
+      auto settings = new VertexSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<VertexShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_SolidColor: { // Settings
       auto settings = new SolidColorSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<SolidColorShader>(settings);
@@ -465,6 +479,9 @@ public:
     ofSetColor(0, 0, 0, 255);
     ofDrawRectangle(0, 0, fbo->getWidth(), fbo->getHeight());
     canvas->end();
+    
+    maskShader.load("shaders/ColorKeyMaskMaker");
+
   };
 
   void saveFrame() override {
@@ -479,16 +496,38 @@ public:
     canvas->end();
     
     shader->shade(fbo, canvas);
-
-    fbo->begin();
-    ofClear(0,0,0, 255);
-    canvas->draw(0, 0);
-    fbo->end();
+    
+    if (settings->maskEnabled->boolValue == true) {
+      fbo->begin();
+      maskShader.begin();
+      maskShader.setUniformTexture("tex", canvas->getTexture(), 0);
+      maskShader.setUniform1f("time", ofGetElapsedTimef());
+      maskShader.setUniform2f("dimensions", fbo->getWidth(), fbo->getHeight());
+      maskShader.setUniform1i("drawTex", 1);
+      maskShader.setUniform4f("chromaKey",
+                              settings->maskColor->color->data()[0],
+                              settings->maskColor->color->data()[1],
+                              settings->maskColor->color->data()[2], 1.0);
+      maskShader.setUniform1f("tolerance", settings->maskTolerance->value);
+      
+      ofClear(0, 0, 0, 255);
+      ofClear(0, 0, 0, 0);
+      
+      canvas->draw(0, 0, fbo->getWidth(), fbo->getHeight());
+      maskShader.end();
+      fbo->end();
+    } else {
+      fbo->begin();
+      ofClear(0, 0, 0, 255);
+      canvas->draw(0, 0, fbo->getWidth(), fbo->getHeight());
+      fbo->end();
+    }
   }
 
   void drawSettings() override {
     if (shader != nullptr) {
       shader->drawSettings();
+      drawMaskSettings();
     }
   }
 

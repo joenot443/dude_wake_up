@@ -33,6 +33,7 @@ public:
     lastFrame->allocate(1280, 720, GL_RGBA);
   };
   
+  ofShader shader;
   std::unique_ptr<ShaderSettings> settings;
   
   std::string shaderId;

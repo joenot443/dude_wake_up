@@ -17,4 +17,10 @@ struct ImGuiExtensions {
   static bool Slider2DFloat(char const* pLabel, float* pValueX, float* pValueY, float minX, float maxX, float minY, float maxY, float const fScale);
 };
 
+namespace ImGui
+{
+ bool RangeSliderFloat(const char* label, float* v1, float* v2, float v_min, float v_max, const char* display_format, float power);
+};
+
+
 #endif /* ImGuiExtensions_hpp */

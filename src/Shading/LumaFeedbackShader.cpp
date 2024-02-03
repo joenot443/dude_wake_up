@@ -106,7 +106,7 @@ void LumaFeedbackShader::drawSettings() {
   
   ImGui::Columns(2);
   ImGui::SetColumnWidth(0, 200);
-  ImGuiExtensions::Slider2DFloat("", &settings->xPosition->value, &settings->yPosition->value, 0., 0.5, 0., 0.5, 0.5);
+  ImGuiExtensions::Slider2DFloat("", &settings->xPosition->value, &settings->yPosition->value, -1., 1.0, -1., 1.0, 1.0);
   //  ImGui::SetCursorPosX(ImGui::GetCursorPosX() - 50);
   ImGui::NextColumn();
   ImGui::Text("Oscillate X");

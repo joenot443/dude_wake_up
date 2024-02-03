@@ -8,6 +8,7 @@
 #include "VideoSourceService.hpp"
 #include "UUID.hpp"
 #include "NodeLayoutView.hpp"
+#include "ConfigService.hpp"
 #include "LibraryService.hpp"
 #include "TextSource.hpp"
 #include "WebcamSource.hpp"
@@ -57,6 +58,14 @@ void VideoSourceService::populateAvailableVideoSources()
   availableVideoSourceUpdateSubject.notify();
 }
 
+void VideoSourceService::addAvailableVideoSources(std::vector<std::shared_ptr<AvailableVideoSource>> sources)
+{
+  for (auto const &source : sources)
+  {
+    availableSourceMap[source->availableVideoSourceId] = source;
+  }
+}
+
 void VideoSourceService::subscribeToAvailableVideoSourceUpdates(std::function<void()> callback)
 {
   availableVideoSourceUpdateSubject.subscribe(callback);
@@ -100,12 +109,21 @@ std::shared_ptr<VideoSource> VideoSourceService::defaultVideoSource()
   return videoSources().front();
 }
 
+std::shared_ptr<VideoSourceSettings> VideoSourceService::defaultVideoSourceSettings()
+{
+  return std::make_shared<VideoSourceSettings>();
+}
+
 // Add a video source to the map
-void VideoSourceService::addVideoSource(std::shared_ptr<VideoSource> videoSource, std::string id)
+void VideoSourceService::addVideoSource(std::shared_ptr<VideoSource> videoSource, std::string id, json j)
 {
   videoSourceMap[id] = videoSource;
   createFeedbackSource(videoSource);
   videoSource->setup();
+  if (j.is_object())
+  {
+    videoSource->load(j);
+  }
 }
 
 // Remove a video source from the map
@@ -116,8 +134,11 @@ void VideoSourceService::removeVideoSource(std::string id)
     auto source = videoSourceMap[id];
     source->teardown();
     FeedbackSourceService::getService()->removeFeedbackSource(id);
+    ShaderChainerService::getService()->removeConnectable(source);
     videoSourceMap.erase(id);
   }
+  
+  ConfigService::getService()->saveDefaultConfigFile();
 }
 
 // Return a vector of all video sources
@@ -185,20 +206,20 @@ std::vector<std::string> VideoSourceService::getWebcamNames()
 }
 
 // Adds a webcam video source to the map
-std::shared_ptr<VideoSource> VideoSourceService::addWebcamVideoSource(std::string name, int deviceId, ImVec2 origin, std::string id)
+std::shared_ptr<VideoSource> VideoSourceService::addWebcamVideoSource(std::string name, int deviceId, ImVec2 origin, std::string id, json j)
 {
   std::shared_ptr<VideoSource> videoSource = std::make_shared<WebcamSource>(id, name, deviceId);
   videoSource->origin = origin;
-  addVideoSource(videoSource, id);
+  addVideoSource(videoSource, id, j);
   return videoSource;
 }
 
 // Adds a file video source to the map
-std::shared_ptr<VideoSource> VideoSourceService::addFileVideoSource(std::string name, std::string path, ImVec2 origin, std::string id)
+std::shared_ptr<VideoSource> VideoSourceService::addFileVideoSource(std::string name, std::string path, ImVec2 origin, std::string id, json j)
 {
   std::shared_ptr<VideoSource> videoSource = std::make_shared<FileSource>(id, name, path);
   videoSource->origin = origin;
-  addVideoSource(videoSource, id);
+  addVideoSource(videoSource, id, j);
   return videoSource;
 }
 
@@ -214,7 +235,7 @@ std::shared_ptr<VideoSource> VideoSourceService::addShaderVideoSource(ShaderSour
   auto videoSource = std::dynamic_pointer_cast<VideoSource>(shaderSource);
 
   videoSource->origin = origin;
-  addVideoSource(videoSource, id);
+  addVideoSource(videoSource, id, j);
   return videoSource;
 }
 
@@ -224,7 +245,7 @@ std::shared_ptr<VideoSource> VideoSourceService::addImageVideoSource(std::string
   std::shared_ptr<VideoSource> videoSource = std::make_shared<ImageSource>(id, name, path);
   videoSource->load(j);
   videoSource->origin = origin;
-  addVideoSource(videoSource, id);
+  addVideoSource(videoSource, id, j);
   return videoSource;
 }
 
@@ -236,10 +257,9 @@ std::shared_ptr<VideoSource> VideoSourceService::addTextVideoSource(std::string 
   textSource.load(j);
   std::shared_ptr<VideoSource> videoSource = std::make_shared<TextSource>(textSource);
   videoSource->origin = origin;
-  addVideoSource(videoSource, id);
+  addVideoSource(videoSource, id, j);
   return videoSource;
 }
-
 
 // Adds an OutputWindow for the passed in VideoSource
 void VideoSourceService::addOutputWindow(std::shared_ptr<Connectable> connectable)
@@ -255,17 +275,20 @@ void VideoSourceService::addOutputWindow(std::shared_ptr<Connectable> connectabl
   outputWindows[connectable->connId()] = outputWindow;
 }
 
-void VideoSourceService::updateOutputWindow(std::shared_ptr<Connectable> oldConnectable, std::shared_ptr<Connectable> newConnectable) {
-  if (outputWindows.count(oldConnectable->connId()) == 0) return;
-  
+void VideoSourceService::updateOutputWindow(std::shared_ptr<Connectable> oldConnectable, std::shared_ptr<Connectable> newConnectable)
+{
+  if (outputWindows.count(oldConnectable->connId()) == 0)
+    return;
+
   std::shared_ptr<OutputWindow> outputWindow = outputWindows[oldConnectable->connId()];
   outputWindow->setSource(newConnectable->frame());
   outputWindows.erase(oldConnectable->connId());
-  
+
   outputWindows[newConnectable->connId()] = outputWindow;
 }
 
-bool VideoSourceService::hasOutputWindowForConnectable(std::shared_ptr<Connectable> connectable) {
+bool VideoSourceService::hasOutputWindowForConnectable(std::shared_ptr<Connectable> connectable)
+{
   return outputWindows.count(connectable->connId()) != 0;
 }
 // ConfigurableService
@@ -294,6 +317,13 @@ json VideoSourceService::config()
     container[source->id] = source->serialize();
   }
 
+  // Check if the container is an object and log its value count
+  int size = container.size();
+  if (container.is_object() && container.size() == 0)
+  {
+    ofLogNotice() << "VideoSourceService::config() container has " << container.size() << " values";
+  }
+
   return container;
 }
 
@@ -308,10 +338,10 @@ void VideoSourceService::appendConfig(json j)
   switch (type)
   {
   case VideoSource_file:
-    addFileVideoSource(j["sourceName"], j["path"], position, sourceId);
+    addFileVideoSource(j["sourceName"], j["path"], position, sourceId, j);
     return;
   case VideoSource_webcam:
-    addWebcamVideoSource(j["sourceName"], j["deviceId"], position, sourceId);
+    addWebcamVideoSource(j["sourceName"], j["deviceId"], position, sourceId, j);
     return;
   case VideoSource_shader:
     addShaderVideoSource(j["shaderSourceType"], position, sourceId, j);

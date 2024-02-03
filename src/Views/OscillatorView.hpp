@@ -14,10 +14,14 @@
 #include "ValueOscillator.hpp"
 #include <stdio.h>
 
+typedef std::tuple<std::shared_ptr<Oscillator>, std::shared_ptr<Parameter>> OscillatorParam;
+
 struct OscillatorView {
 public:
   static void draw(std::shared_ptr<Oscillator> oscillator,
                    std::shared_ptr<Parameter> value);
+  
+  static void draw(std::vector<std::tuple<std::shared_ptr<Oscillator>, std::shared_ptr<Parameter>>> subjects);
 };
 
 #endif /* Waveform_hpp */

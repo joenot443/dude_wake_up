@@ -32,6 +32,7 @@ json ImageSource::serialize()
   j["id"] = id;
   j["sourceName"] = sourceName;
   j["videoSourceType"] = VideoSource_image;
+  j["settings"] = settings->serialize();
   auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);
   if (node != nullptr)
   {
@@ -52,6 +53,7 @@ void ImageSource::load(json j)
   path = j["path"];
   id = j["id"];
   sourceName = j["sourceName"];
+  settings->load(j["settings"]);
   auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);
   if (node != nullptr)
   {

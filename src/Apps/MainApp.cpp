@@ -65,7 +65,6 @@ void MainApp::draw()
   gui.begin();
   ImGui::PushFont(FontService::getService()->p);
   drawMainStage();
-  //  ImGui::ShowDemoWindow();
   ImGui::PopFont();
   gui.end();
 }

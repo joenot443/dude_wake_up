@@ -74,6 +74,7 @@ json TextSource::serialize() {
   j["displayY"] = displayText->yPosition->value;
   j["fontSize"] = displayText->fontSize;
   j["text"] = displayText->text;
+  j["settings"] = settings->serialize();
   auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);
   if (node != nullptr) {
     j["x"] = node->position.x;
@@ -95,6 +96,8 @@ void TextSource::load(json j) {
 
   displayText->fontSize = j["fontSize"];
   displayText->text = j["text"];
+  
+  settings->load(j["settings"]);
 }
 
 void TextSource::drawSettings() {

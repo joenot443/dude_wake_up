@@ -42,6 +42,8 @@ void Shader::clearLastFrame() {
   lastFrame->begin();
   ofSetColor(0, 0, 0, 255);
   ofDrawRectangle(0, 0, lastFrame->getWidth(), lastFrame->getHeight());
+  ofClear(0,0,0, 255);
+  ofClear(0,0,0, 0);
   lastFrame->end();
 }
 
@@ -52,7 +54,7 @@ std::shared_ptr<VideoSourceSettings> Shader::sourceSettings() {
     std::shared_ptr<VideoSource> castedSource = std::dynamic_pointer_cast<VideoSource>(parentSource);
     return castedSource->settings;
   } else {
-    return VideoSourceService::getService()->defaultVideoSource()->settings;
+    return VideoSourceService::getService()->defaultVideoSourceSettings();
   }
 }
 

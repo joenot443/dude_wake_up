@@ -56,6 +56,7 @@ public:
   std::vector<std::shared_ptr<AvailableVideoSource>> availableVideoSources();
 
   std::shared_ptr<VideoSource> defaultVideoSource();
+  std::shared_ptr<VideoSourceSettings> defaultVideoSourceSettings();
   
   std::shared_ptr<ofFbo> emptyFbo;
 
@@ -71,14 +72,15 @@ public:
   std::vector<std::string> getWebcamNames();
   void updateVideoSources();
   void removeVideoSource(std::string id);
-  void addVideoSource(std::shared_ptr<VideoSource> videoSource, std::string id);
+  void addVideoSource(std::shared_ptr<VideoSource> videoSource, std::string id, json j = 0);
   void populateAvailableVideoSources();
+  void addAvailableVideoSources(std::vector<std::shared_ptr<AvailableVideoSource>> sources);
   std::shared_ptr<VideoSource> videoSourceForId(std::string id);
 
   std::shared_ptr<VideoSource> addImageVideoSource(std::string name, std::string path, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
-  std::shared_ptr<VideoSource> addWebcamVideoSource(std::string name, int index, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID());
+  std::shared_ptr<VideoSource> addWebcamVideoSource(std::string name, int index, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
   std::shared_ptr<VideoSource> addShaderVideoSource(ShaderSourceType type, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
-  std::shared_ptr<VideoSource> addFileVideoSource(std::string name, std::string path, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID());
+  std::shared_ptr<VideoSource> addFileVideoSource(std::string name, std::string path, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
   std::shared_ptr<VideoSource> addTextVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
 
   // Output Windows

@@ -71,6 +71,11 @@ enum ShaderType {
   ShaderTypeStaticFrame,
   ShaderTypeGameboy,
   ShaderTypeLumaFeedback,
+  ShaderTypePaint,
+  ShaderTypeTriple,
+  ShaderTypeVertex,
+  ShaderTypeBounce,
+  ShaderTypeCirclePath,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -79,7 +84,8 @@ static const ShaderType AvailableBasicShaderTypes[] = {
   ShaderTypePixelate, 
   ShaderTypeMirror,
   ShaderTypeGlitch,
-  ShaderType16bit
+  ShaderType16bit,
+  ShaderTypePaint
 };
 
 static const ShaderType AvailableMixShaderTypes[] = {
@@ -99,7 +105,10 @@ static const ShaderType AvailableMaskShaderTypes[] = {
 
 static const ShaderType AvailableTransformShaderTypes[] = {
   ShaderTypeTransform,
+  ShaderTypeBounce,
+  ShaderTypeCirclePath,
   ShaderTypeWobble,
+  ShaderTypeTriple,
   ShaderTypeFishEye, // Generated
   ShaderTypeTile,
   ShaderTypeKaleidoscope,
@@ -137,6 +146,10 @@ static std::vector<ShaderType> AllShaderTypes() {
   for (const ShaderType& shader : AvailableFilterShaderTypes) {
       combinedShaderTypes.push_back(shader);
   }
+  
+  for (const ShaderType& shader : AvailableMaskShaderTypes) {
+      combinedShaderTypes.push_back(shader);
+  }
 
   return combinedShaderTypes;
 }
@@ -144,6 +157,16 @@ static std::vector<ShaderType> AllShaderTypes() {
 static std::string shaderTypeName(ShaderType type) {
   switch (type) {
     // Shader names
+    case ShaderTypeCirclePath:
+      return "CirclePath";
+    case ShaderTypeBounce:
+      return "Bounce";
+    case ShaderTypeVertex:
+      return "Vertex";
+    case ShaderTypeTriple:
+      return "Triple";
+    case ShaderTypePaint:
+      return "Paint";
     case ShaderTypeLumaFeedback:
       return "LumaFeedback";
     case ShaderTypeGameboy:
@@ -165,7 +188,7 @@ static std::string shaderTypeName(ShaderType type) {
     case ShaderTypeFrequencyVisualizer:
       return "FrequencyVisualizer";
     case ShaderTypeColorKeyMaskMaker:
-      return "ColorKeyMaskMaker";
+      return "ColorMask";
     case ShaderTypeCurlySquares:
       return "CurlySquares";
     case ShaderTypePlasmaTwo:
@@ -173,7 +196,7 @@ static std::string shaderTypeName(ShaderType type) {
     case ShaderTypeDancingSquares:
       return "DancingSquares";
     case ShaderTypeLumaMaskMaker:
-      return "LumaMaskMaker";
+      return "LumaMask";
     case ShaderTypeMask:
       return "Mask";
     case ShaderTypeCircle:
@@ -269,7 +292,6 @@ static bool shaderTypeSupportsAux(ShaderType type) {
   if (type == ShaderTypeMix ||
       type == ShaderTypeFeedback ||
       type == ShaderTypeLumaFeedback ||
-      type == ShaderTypeMask ||
       type == ShaderTypeSlidingFrame ||
       type == ShaderTypeStaticFrame ||
       type == ShaderTypeMinMixer)

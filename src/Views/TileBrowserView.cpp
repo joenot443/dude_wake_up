@@ -140,7 +140,7 @@ void TileBrowserView::draw()
 
     float nextX = ImGui::GetCursorPosX() + ImGui::GetStyle().ItemSpacing.x + TileSize.x;
 
-    if (n + 1 < sizeof(tileItems) && nextX < size.x)
+    if (n + 1 < tileItems.size() && nextX < size.x)
     {
       ImGui::SameLine();
       ImGui::SetCursorPosX(endXPos);

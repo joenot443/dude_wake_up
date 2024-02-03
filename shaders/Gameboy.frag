@@ -15,6 +15,7 @@ void main(){
   
   vec2 uv = coord/dimensions.xy;
   vec2 pos = floor(uv*uvRes);
+  vec4 text = texture(tex, uv);
   
   vec3 col = vec3(0);
   
@@ -35,5 +36,5 @@ void main(){
     }
   }
   
-  outputColor = vec4(col,1.0);
+  outputColor = vec4(col, text.a);
 }

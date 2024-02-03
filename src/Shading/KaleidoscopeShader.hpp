@@ -29,7 +29,7 @@ struct KaleidoscopeSettings : public ShaderSettings {
 
   KaleidoscopeSettings(std::string shaderId, json j) :
   sides(std::make_shared<Parameter>("sides", 2.0,  1.0, 6.0)),
-  shift(std::make_shared<Parameter>("shift", 0.5,  0.0, 1.0)),
+  shift(std::make_shared<Parameter>("shift", 0.25,  0.0, 2.0)),
   rotation(std::make_shared<Parameter>("rotation", 1.0,  1.0, TWO_PI)),
   sidesOscillator(std::make_shared<WaveformOscillator>(sides)),
   shiftOscillator(std::make_shared<WaveformOscillator>(shift)),
@@ -61,6 +61,9 @@ shader.load("shaders/kaleidoscope");
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
+    // Clear the frame
+    ofClear(0,0,0, 255);
+    ofClear(0,0,0, 0);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("sides", settings->sides->value);
     shader.setUniform1f("shift", settings->shift->value);

@@ -17,7 +17,8 @@
 #include <thread>
 #include <tuple>
 #include <string>
-
+#include <iomanip>
+#include <sstream>
 
 
 template<typename ... Args>
@@ -58,24 +59,37 @@ static std::string truncateString(const std::string& str, const int x) {
     }
 }
 
+static std::string formatTimeDuration(float seconds) {
+    int hours = static_cast<int>(seconds) / 3600;
+    int minutes = (static_cast<int>(seconds) % 3600) / 60;
+    int sec = static_cast<int>(seconds) % 60;
 
+    std::stringstream ss;
+    if (hours > 0) {
+        ss << hours << ":";
+    }
+    ss << std::setw(2) << std::setfill('0') << minutes << ":";
+    ss << std::setw(2) << std::setfill('0') << sec;
 
-//template<class...Durations, class DurationIn>
-//std::tuple<Durations...> break_down_durations( DurationIn d ) {
-//  std::tuple<Durations...> retval;
-//  using discard=int[];
-//  (void)discard{0,(void((
-//    (std::get<Durations>(retval) = std::chrono::duration_cast<Durations>(d)),
-//    (d -= std::chrono::duration_cast<DurationIn>(std::get<Durations>(retval)))
-//  )),0)...};
-//  return retval;
-//}
-//
-//std::string durationToString(float duration) {
-//  auto chronoDuration = std::chrono::duration<float>(duration);
-//  return break_down_durations<std::chrono::minutes, std::chrono::seconds>(chronoDuration);
-//}
+    return ss.str();
+}
 
+static std::vector<std::string> mapColorsToStrings(const std::vector<std::array<float, 3>>& colors) {
+    std::vector<std::string> result;
+    result.reserve(colors.size()); // Reserve memory for efficiency
+
+    for (const auto& color : colors) {
+        std::ostringstream oss;
+        oss << "R: " << color[0] << " G: " << color[1] << " B: " << color[2];
+        result.push_back(oss.str());
+    }
+
+    return result;
+}
+
+static std::string formatColor(std::array<float, 3> color) {
+  return formatString("R: %.2f G: %.2f B: %.2f", color[0], color[1], color[2]);
+}
 
 
 #endif Strings_h

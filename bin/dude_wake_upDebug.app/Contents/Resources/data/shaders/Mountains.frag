@@ -133,8 +133,8 @@ void main() {
   }
   col = sqrt(clamp(acc, 0., 1.));
   // Background
-  vec3 bkg = vec3(0.32, 0.36, 0.4) + p.y * 0.1;
-  col += bkg;
+//  vec3 bkg = vec3(0.32, 0.36, 0.4) + p.y * 0.1;
+//  col += bkg;
   // Vignetting
   vec2 r = -1.0 + 2.0 * (uv);
   float vb = max(abs(r.x), abs(r.y));

@@ -19,7 +19,12 @@ public:
   std::shared_ptr<Parameter> resolution;
   std::shared_ptr<Parameter> maskColor;
   std::shared_ptr<Parameter> maskEnabled;
+  // 0: Color, 1: Luma
+  std::shared_ptr<Parameter> maskType;
   std::shared_ptr<Parameter> maskTolerance;
+  
+  std::shared_ptr<Parameter> start;
+  std::shared_ptr<Parameter> end;
   
   VideoSourceSettings() :
   width(std::make_shared<Parameter>("width", 720, 100, 2000)),
@@ -27,9 +32,11 @@ public:
   resolution(std::make_shared<Parameter>("resolution", 3, 0, 5)),
   maskColor(std::make_shared<Parameter>("maskColor", 3, 0, 5)),
   maskEnabled(std::make_shared<Parameter>("maskEnabled", 0, 0, 1)),
-  maskTolerance(std::make_shared<Parameter>("maskTolerance", 0.1, 0, 1)),
+  maskTolerance(std::make_shared<Parameter>("maskTolerance", 0.05, 0, 1)),
+  start(std::make_shared<Parameter>("start", 0, 0, 1)),
+  end(std::make_shared<Parameter>("end", 1, 0, 1)),
   Settings() {
-    parameters = {width, height};
+    parameters = {width, height, resolution, maskColor, maskEnabled, maskTolerance, start, end};
     updateResolutionSettings();
   }
   
@@ -37,11 +44,13 @@ public:
   width(std::make_shared<Parameter>("width", 720, 100, 2000)),
   height(std::make_shared<Parameter>("height", 480, 100, 2000)),
   resolution(std::make_shared<Parameter>("resolution", 3, 0, 5)),
-  maskColor(std::make_shared<Parameter>("Mask Color", 3, 0, 5)),
-  maskEnabled(std::make_shared<Parameter>("Mask Enabled", 0, 0, 1)),
-  maskTolerance(std::make_shared<Parameter>("Mask Tolerance", 0.1, 0, 1)),
+  maskColor(std::make_shared<Parameter>("maskColor", 3, 0, 5)),
+  maskEnabled(std::make_shared<Parameter>("maskEnabled", 0, 0, 1)),
+  maskTolerance(std::make_shared<Parameter>("maskTolerance", 0.05, 0, 1)),
+  start(std::make_shared<Parameter>("start", 0, 0, 1)),
+  end(std::make_shared<Parameter>("end", 1, 0, 1)),
   Settings() {
-    parameters = {width, height};
+    parameters = {width, height, resolution, maskColor, maskEnabled, maskTolerance, start, end};
     updateResolutionSettings();
     load(j);
   }

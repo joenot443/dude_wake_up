@@ -7,6 +7,11 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "CirclePathShader.hpp"
+#include "BounceShader.hpp"
+#include "VertexShader.hpp"
+#include "TripleShader.hpp"
+#include "PaintShader.hpp"
 #include "LumaFeedbackShader.hpp"
 #include "GameboyShader.hpp"
 #include "StaticFrameShader.hpp"
@@ -152,6 +157,24 @@ bool ShaderChainerService::isTerminalShader(std::shared_ptr<Shader> shader)
   return shader->outputs.empty();
 }
 
+std::shared_ptr<Shader> ShaderChainerService::terminalShader(std::shared_ptr<Shader> shader)
+{
+  if (isTerminalShader(shader))
+  {
+    return shader;
+  }
+
+  for (auto conn : shader->outputs)
+  {
+    if (conn->end->connectableType() == ConnectableTypeShader)
+    {
+      auto nextShader = std::dynamic_pointer_cast<Shader>(conn->end);
+      return terminalShader(nextShader);
+    }
+  }
+  return nullptr;
+}
+
 bool ShaderChainerService::hasParents(std::shared_ptr<Shader> shader)
 {
   return !shader->inputs.empty();
@@ -203,11 +226,11 @@ void ShaderChainerService::loadConfig(json data)
   // Load the shaders included in the data.
   /* The shaders come in as an object formatted as:
    {
-      "shaderType": ShaderType,
-      "shaderId": String,
-      "x": Float
-      "y": Float
-      ...remaining ShaderSettings
+   "shaderType": ShaderType,
+   "shaderId": String,
+   "x": Float
+   "y": Float
+   ...remaining ShaderSettings
    }
    */
 
@@ -215,14 +238,19 @@ void ShaderChainerService::loadConfig(json data)
   {
     ShaderType shaderType = val["shaderType"];
     std::string shaderId = key;
-    float x = val["x"];
-    float y = val["y"];
 
     auto shader = shaderForType(shaderType, shaderId, val);
     addShader(shader);
     // Set the position of the Shader
-    shader->settings->x->value = x;
-    shader->settings->y->value = y;
+
+    if (val["x"].is_number() && val["y"].is_number())
+    {
+      float x = val["x"];
+      float y = val["y"];
+      shader->settings->x->value = x;
+      shader->settings->y->value = y;
+    }
+
     shader->settings->load(val);
   }
 }
@@ -234,21 +262,22 @@ void ShaderChainerService::loadConnectionsConfig(json j)
     ConnectionType type = val["type"];
     std::string startId = val["start"];
     std::string endId = val["end"];
-    
+
     std::shared_ptr<Connectable> start;
     std::shared_ptr<Connectable> end = shaderForId(endId);
-    
-    switch (type) {
-      case ConnectionTypeSource:
+
+    switch (type)
+    {
+    case ConnectionTypeSource:
       start = VideoSourceService::getService()->videoSourceForId(startId);
       break;
-      case ConnectionTypeShader:
-      case ConnectionTypeAux:
-      case ConnectionTypeMask:
-        start = shaderForId(startId);
-        // We might be starting on a Source
-        if (start == nullptr)
-          start = VideoSourceService::getService()->videoSourceForId(startId);
+    case ConnectionTypeShader:
+    case ConnectionTypeAux:
+    case ConnectionTypeMask:
+      start = shaderForId(startId);
+      // We might be starting on a Source
+      if (start == nullptr)
+        start = VideoSourceService::getService()->videoSourceForId(startId);
     }
 
     if (start == nullptr || end == nullptr)
@@ -278,6 +307,7 @@ void ShaderChainerService::addShader(std::shared_ptr<Shader> shader)
   FeedbackSourceService::getService()->registerFeedbackSource(feedbackSource);
   shader->feedbackDestination = feedbackSource;
   shadersMap[shader->shaderId] = shader;
+  ConfigService::getService()->saveDefaultConfigFile();
 }
 
 void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader, bool fromMap)
@@ -289,12 +319,25 @@ void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader, bool fro
     return;
   }
 
+  removeConnectable(shader);
+
+  if (fromMap)
+  {
+    shadersMap.erase(shader->shaderId);
+  }
+
+  shader.reset();
+  ConfigService::getService()->saveDefaultConfigFile();
+}
+
+void ShaderChainerService::removeConnectable(std::shared_ptr<Connectable> connectable)
+{
   std::vector<std::string> connectionIdsToRemove;
 
   // Remove the input Connections
-  if (!shader->inputs.empty())
+  if (!connectable->inputs.empty())
   {
-    for (auto conn : shader->inputs)
+    for (auto conn : connectable->inputs)
     {
       // Remove the Connection connecting [Parent] -> [Us]
       connectionIdsToRemove.push_back(conn->id);
@@ -302,9 +345,9 @@ void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader, bool fro
   }
 
   // Remove the output Connections
-  if (!shader->outputs.empty())
+  if (!connectable->outputs.empty())
   {
-    for (auto conn : shader->outputs)
+    for (auto conn : connectable->outputs)
     {
       connectionIdsToRemove.push_back(conn->id);
     }
@@ -319,12 +362,7 @@ void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader, bool fro
   {
     connectionMap.erase(connId);
   }
-
-  if (fromMap) {
-    shadersMap.erase(shader->shaderId);
-  }
-
-  shader.reset();
+  ConfigService::getService()->saveDefaultConfigFile();
 }
 
 std::shared_ptr<Shader> ShaderChainerService::shaderForId(std::string id)
@@ -368,12 +406,20 @@ void ShaderChainerService::breakConnectionForConnectionId(std::string connection
   std::shared_ptr<Connection> connection = connectionMap[connectionId];
   connection->start->removeConnection(connection);
   connectionMap.erase(connectionId);
+  ConfigService::getService()->saveDefaultConfigFile();
 }
 
 std::shared_ptr<Connection> ShaderChainerService::makeConnection(std::shared_ptr<Connectable> start,
                                                                  std::shared_ptr<Connectable> end,
-                                                                 ConnectionType type)
+                                                                 ConnectionType type,
+                                                                 bool shouldSaveConfig)
 {
+  // Only allow a single input for each type
+  if (end->hasInputForType(type))
+  {
+    return nullptr;
+  }
+
   auto connection = std::make_shared<Connection>(start, end, type);
   start->outputs.insert(connection);
   end->inputs.insert(connection);
@@ -386,22 +432,62 @@ std::shared_ptr<Connection> ShaderChainerService::makeConnection(std::shared_ptr
     std::shared_ptr<Shader> shader = std::dynamic_pointer_cast<Shader>(end);
     shader->feedbackDestination->updateSettings(start->sourceSettings());
   }
-  
+
   // Update the OutputWindow, if necessary
-  if (VideoSourceService::getService()->hasOutputWindowForConnectable(start)) {
+  if (VideoSourceService::getService()->hasOutputWindowForConnectable(start))
+  {
     VideoSourceService::getService()->updateOutputWindow(start, end);
   }
-  
+
+  if (shouldSaveConfig)
+  {
+    ConfigService::getService()->saveDefaultConfigFile();
+  }
+
   return connection;
 }
 
 std::shared_ptr<Shader>
-ShaderChainerService::shaderForType(ShaderType type, std::string shaderId,
+ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
                                     json shaderJson)
 {
-  switch (type)
+  switch (shaderType)
   {
-      
+  case ShaderTypeCirclePath:
+  {
+    auto settings = new CirclePathSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<CirclePathShader>(settings);
+    shader->setup();
+    return shader;
+  }
+  case ShaderTypeBounce:
+  {
+    auto settings = new BounceSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<BounceShader>(settings);
+    shader->setup();
+    return shader;
+  }
+  case ShaderTypeVertex:
+  {
+    auto settings = new VertexSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<VertexShader>(settings);
+    shader->setup();
+    return shader;
+  }
+  case ShaderTypeTriple:
+  {
+    auto settings = new TripleSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<TripleShader>(settings);
+    shader->setup();
+    return shader;
+  }
+  case ShaderTypePaint:
+  {
+    auto settings = new PaintSettings(shaderId, shaderJson);
+    auto shader = std::make_shared<PaintShader>(settings);
+    shader->setup();
+    return shader;
+  }
   case ShaderTypeLumaFeedback:
   {
     auto settings = new LumaFeedbackSettings(shaderId, shaderJson);

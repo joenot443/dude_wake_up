@@ -6,7 +6,7 @@
 	<dict>
 		<key>Resources/NodeLayout.json</key>
 		<data>
-		Gh/Wo+G3rpssJ9N5HmLQz8HLCuM=
+		P/ifMt5Aaa0HkYeEckOzVRwJR8k=
 		</data>
 		<key>Resources/data/MaterialIcons-Regular.ttf</key>
 		<data>
@@ -212,6 +212,10 @@
 		<data>
 		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
 		</data>
+		<key>Resources/data/markdown/Bounce.md</key>
+		<data>
+		6Ki6odsUSvd+Yf1sZEorcQ4LMNw=
+		</data>
 		<key>Resources/data/markdown/CSD.md</key>
 		<data>
 		KObfJpSMIfJQ8kdsdmuHj/7zevU=
@@ -219,6 +223,10 @@
 		<key>Resources/data/markdown/Circle.md</key>
 		<data>
 		odRtExgS46LZE99faGxblZpimgg=
+		</data>
+		<key>Resources/data/markdown/CirclePath.md</key>
+		<data>
+		rUjgg3Cr2f/2GXsAtekirxP9LJI=
 		</data>
 		<key>Resources/data/markdown/Clouds.md</key>
 		<data>
@@ -241,6 +249,10 @@
 		MV4Tjz5SyS48vtqF/nEEwM788Mo=
 		</data>
 		<key>Resources/data/markdown/CurlySquares.md</key>
+		<data>
+		nqw9U8ay+MfDrzPjuinZk49+POM=
+		</data>
+		<key>Resources/data/markdown/DancingSquares.md</key>
 		<data>
 		nqw9U8ay+MfDrzPjuinZk49+POM=
 		</data>
@@ -360,6 +372,10 @@
 		<data>
 		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
 		</data>
+		<key>Resources/data/markdown/Paint.md</key>
+		<data>
+		S348gLvAU90NRLSjFWFf4aDnfjc=
+		</data>
 		<key>Resources/data/markdown/Pixelate.md</key>
 		<data>
 		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
@@ -404,6 +420,10 @@
 		<data>
 		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
 		</data>
+		<key>Resources/data/markdown/SlidingFrame.md</key>
+		<data>
+		lE4sIzQKeFx+3f3X0dcxjyxLB4c=
+		</data>
 		<key>Resources/data/markdown/Sobel.md</key>
 		<data>
 		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
@@ -432,9 +452,17 @@
 		<data>
 		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
 		</data>
+		<key>Resources/data/markdown/Triple.md</key>
+		<data>
+		LBpovs9SLRkKHx+BRZOzum5DiTI=
+		</data>
 		<key>Resources/data/markdown/VanGogh.md</key>
 		<data>
 		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
+		</data>
+		<key>Resources/data/markdown/Vertex.md</key>
+		<data>
+		JwGtwW0qpXvv34JXr2nPrMK1qbo=
 		</data>
 		<key>Resources/data/markdown/Warp.md</key>
 		<data>
@@ -496,11 +524,27 @@
 		<data>
 		iHXtG5txXYcAyl6+N0nbnxDNMeI=
 		</data>
+		<key>Resources/data/shaders/Bounce.frag</key>
+		<data>
+		LC282hiHV3xdskk6vq9/tXzXUDY=
+		</data>
+		<key>Resources/data/shaders/Bounce.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
+		</data>
 		<key>Resources/data/shaders/Circle.frag</key>
 		<data>
 		6LZxbFe5d6s2x2/PLqWUBAlREqY=
 		</data>
 		<key>Resources/data/shaders/Circle.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
+		</data>
+		<key>Resources/data/shaders/CirclePath.frag</key>
+		<data>
+		LC282hiHV3xdskk6vq9/tXzXUDY=
+		</data>
+		<key>Resources/data/shaders/CirclePath.vert</key>
 		<data>
 		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
@@ -522,7 +566,7 @@
 		</data>
 		<key>Resources/data/shaders/ColorKeyMaskMaker.frag</key>
 		<data>
-		ICJhQccGaxeqctrIin14tD8IZdo=
+		U4520O0TuTxx/h/r3pVHLKYwGkU=
 		</data>
 		<key>Resources/data/shaders/ColorKeyMaskMaker.vert</key>
 		<data>
@@ -586,7 +630,7 @@
 		</data>
 		<key>Resources/data/shaders/Feedback.frag</key>
 		<data>
-		VlA/6tFmh0fxED8kmc5dI25mDQk=
+		p+FT9/3senp9hXAiceVRH28Vx6M=
 		</data>
 		<key>Resources/data/shaders/Feedback.vert</key>
 		<data>
@@ -642,7 +686,7 @@
 		</data>
 		<key>Resources/data/shaders/Gameboy.frag</key>
 		<data>
-		tZIm4QzQvZ8pLtjkjk87P2/KD1g=
+		Ml18ngZNW3fL/ehm+eJX77dONAw=
 		</data>
 		<key>Resources/data/shaders/Gameboy.vert</key>
 		<data>
@@ -690,7 +734,7 @@
 		</data>
 		<key>Resources/data/shaders/Liquid.frag</key>
 		<data>
-		MNJBnfsFdRd8hbjxLeP32+8T3ew=
+		2v1UzJLXDOhKn1VXaJ+2wfausRQ=
 		</data>
 		<key>Resources/data/shaders/Liquid.vert</key>
 		<data>
@@ -706,7 +750,7 @@
 		</data>
 		<key>Resources/data/shaders/LumaMaskMaker.frag</key>
 		<data>
-		d5rx1Ud9jTQfgcpU7/D2v6j5bO8=
+		t7V4LwwjM5PBUXG7q7DsTq+FpAs=
 		</data>
 		<key>Resources/data/shaders/LumaMaskMaker.vert</key>
 		<data>
@@ -714,7 +758,7 @@
 		</data>
 		<key>Resources/data/shaders/Mask.frag</key>
 		<data>
-		qwY9cE77VSZb1wGnToBdikBqiWQ=
+		i/xbmhzWdUayEbAWoShtWbeEAHI=
 		</data>
 		<key>Resources/data/shaders/Mask.vert</key>
 		<data>
@@ -750,7 +794,7 @@
 		</data>
 		<key>Resources/data/shaders/Mix.frag</key>
 		<data>
-		cHY3ctwrggR5B3b8Jh/DcBoudGs=
+		RPkyx2lD0WIdfnMw6optJhJegIk=
 		</data>
 		<key>Resources/data/shaders/Mix.vert</key>
 		<data>
@@ -758,7 +802,7 @@
 		</data>
 		<key>Resources/data/shaders/Mountains.frag</key>
 		<data>
-		pOpLTXvXHN7r+Ng2x/WfBVYN27g=
+		J3+OGg2kYfuMKly6eNqYQ61QjFg=
 		</data>
 		<key>Resources/data/shaders/Mountains.vert</key>
 		<data>
@@ -769,6 +813,14 @@
 		Eb7pqXuhh9i7N7AC8bzsuT7aNNA=
 		</data>
 		<key>Resources/data/shaders/Octahedron.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
+		</data>
+		<key>Resources/data/shaders/Paint.frag</key>
+		<data>
+		ryvUiuw/EfqrSYFcn4Eso1OzINE=
+		</data>
+		<key>Resources/data/shaders/Paint.vert</key>
 		<data>
 		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
@@ -916,11 +968,27 @@
 		<data>
 		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
+		<key>Resources/data/shaders/Triple.frag</key>
+		<data>
+		95gFdnfYs7999unmF3bzjPKdZTY=
+		</data>
+		<key>Resources/data/shaders/Triple.vert</key>
+		<data>
+		LmKZSod38L8m+PC3SDXe0JJmQuE=
+		</data>
 		<key>Resources/data/shaders/VanGogh.frag</key>
 		<data>
 		s/MAnQkwyhDs1mxTav6oN/aIM1w=
 		</data>
 		<key>Resources/data/shaders/VanGogh.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
+		</data>
+		<key>Resources/data/shaders/Vertex.frag</key>
+		<data>
+		mDF6qWwjg1z1LOft2aHZaxhqhxo=
+		</data>
+		<key>Resources/data/shaders/Vertex.vert</key>
 		<data>
 		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
@@ -994,7 +1062,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			d+Jdp3A+jqdeURciudD9AqJ7Sz0pJ8amsqvDVGBtjao=
+			rhgTzw8g+6ihbwM/GKXbXEf1lf7HNhWuJKfgZG0qlLA=
 			</data>
 		</dict>
 		<key>Resources/data/MaterialIcons-Regular.ttf</key>
@@ -1333,6 +1401,13 @@
 			47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=
 			</data>
 		</dict>
+		<key>Resources/data/markdown/Bounce.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZZUpIgX2mWY6p01TQOVJ3y/HvdNMf0lL1jcMuByABX4=
+			</data>
+		</dict>
 		<key>Resources/data/markdown/CSD.md</key>
 		<dict>
 			<key>hash2</key>
@@ -1345,6 +1420,13 @@
 			<key>hash2</key>
 			<data>
 			tsCYQpTnCVfkrBKhcDgywk91O/DketLl6TiQJkySiYQ=
+			</data>
+		</dict>
+		<key>Resources/data/markdown/CirclePath.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			PllLq5mJf65kVgjEXpr08expD0gZJqtiD2fct3EfcxM=
 			</data>
 		</dict>
 		<key>Resources/data/markdown/Clouds.md</key>
@@ -1383,6 +1465,13 @@
 			</data>
 		</dict>
 		<key>Resources/data/markdown/CurlySquares.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			2WvvSEZMwy+ZcZ0lge1/WhlcqK2D2rw7JYpSLuDYvuc=
+			</data>
+		</dict>
+		<key>Resources/data/markdown/DancingSquares.md</key>
 		<dict>
 			<key>hash2</key>
 			<data>
@@ -1592,6 +1681,13 @@
 			47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=
 			</data>
 		</dict>
+		<key>Resources/data/markdown/Paint.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			S6p8VVaETariKfMNd4S9wej/nU3CU090inKz//TeQ1g=
+			</data>
+		</dict>
 		<key>Resources/data/markdown/Pixelate.md</key>
 		<dict>
 			<key>hash2</key>
@@ -1669,6 +1765,13 @@
 			47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=
 			</data>
 		</dict>
+		<key>Resources/data/markdown/SlidingFrame.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			eIvPhhupW+CHDfJFY/D1ZvGatAGx6ODMChOPJXUjUjM=
+			</data>
+		</dict>
 		<key>Resources/data/markdown/Sobel.md</key>
 		<dict>
 			<key>hash2</key>
@@ -1718,11 +1821,25 @@
 			47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=
 			</data>
 		</dict>
+		<key>Resources/data/markdown/Triple.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			0zw+kf4BlAO7jOxFhF/2s35knkIxIdw8TKHEIo0iJzA=
+			</data>
+		</dict>
 		<key>Resources/data/markdown/VanGogh.md</key>
 		<dict>
 			<key>hash2</key>
 			<data>
 			47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=
+			</data>
+		</dict>
+		<key>Resources/data/markdown/Vertex.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			YwJcXHuk6WFjYcqjiv8pxy0SvnZcZBIo6SAQb01zJUQ=
 			</data>
 		</dict>
 		<key>Resources/data/markdown/Warp.md</key>
@@ -1823,6 +1940,20 @@
 			BXiAgPB9AA3U/Xu819ApNfVuibF9oLeWaB9X/kfmqAE=
 			</data>
 		</dict>
+		<key>Resources/data/shaders/Bounce.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			OH6EDyenQ1SmdgzROsupsf81AorN48zSfdnY/F4DOXU=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/Bounce.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			</data>
+		</dict>
 		<key>Resources/data/shaders/Circle.frag</key>
 		<dict>
 			<key>hash2</key>
@@ -1831,6 +1962,20 @@
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Circle.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/CirclePath.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			OH6EDyenQ1SmdgzROsupsf81AorN48zSfdnY/F4DOXU=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/CirclePath.vert</key>
 		<dict>
 			<key>hash2</key>
 			<data>
@@ -1869,7 +2014,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			QzrNwNmfGkw9cwJmK7YkcAg4/jgZLFdkTzrFXve/5GQ=
+			LsYPtT8b5BPB18LkOcJ3PXGU/QHzaUs+rPTMl2KW0BA=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/ColorKeyMaskMaker.vert</key>
@@ -1981,7 +2126,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			IO7aAPamx8It9S2ZBs5dEa4h7bXuXgCC5zxNcxtS4pk=
+			Hce1i2Ed3EB7JmnSv1Q5luJ3JTXNaYO9pWALIRaX6Ow=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Feedback.vert</key>
@@ -2079,7 +2224,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			qcRdpm3poWiksQvg1ZNU4bYaxhJNzDqRRiLwm/efYpc=
+			G5IWJB6fPOxzPTSslK709HrHybITVU7M5Gq+SEtL2rE=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Gameboy.vert</key>
@@ -2163,7 +2308,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			keDiQZGw7YGqMofHJLsP2B2fM6se0SAs9SMS82tptBg=
+			WP1FNSVNGw8Ww0t+n2bk7UnVn10YBQ2hvKYsUs75TRs=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Liquid.vert</key>
@@ -2191,7 +2336,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			EfrIfXrNBw9EDg9sgRgTM9WHGt0KJPP2L+oxRcK0wpg=
+			KGqDDDXqxKV2S6Davj8q0kp/fvVlHrq1G16asXv4JVc=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/LumaMaskMaker.vert</key>
@@ -2205,7 +2350,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			qhGtzxt0Vy+yPU+BVHaVkjm7QZYEW8Re4/duMeLWV60=
+			unH0wcnGEjn43h0HTOTPa/+U88hDdlYWp9SA+5N7lA4=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Mask.vert</key>
@@ -2268,7 +2413,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			zcNcOdCCH03eU1HoX/n9iX0n96CtaARsl5dJgY5qRq0=
+			opqz1QsU/N3vpydHIJ21E7hEX6CBxHerPAgjgtSqdpo=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Mix.vert</key>
@@ -2282,7 +2427,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			0UimwxtJFgaTX/WXSh8jOpTU/SkilUPA4mt1AF6gw6U=
+			raf2rx9APjvnDJjsUR966DtZuH8/myyiDsrWsVYB3bE=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Mountains.vert</key>
@@ -2300,6 +2445,20 @@
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Octahedron.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/Paint.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			rfPanW4X0W0CASV7pqVhFVMfWfZlQ/5I1LrByzedf54=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/Paint.vert</key>
 		<dict>
 			<key>hash2</key>
 			<data>
@@ -2558,6 +2717,20 @@
 			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
 			</data>
 		</dict>
+		<key>Resources/data/shaders/Triple.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			VTqRnO8zxqvaS13F9SfXutiYIA/C3AdNIsbVa6eKrQ4=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/Triple.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			THKh4wpHjD5hURY9tYx15ApgUKqbW1JBRnpJCzPQzw4=
+			</data>
+		</dict>
 		<key>Resources/data/shaders/VanGogh.frag</key>
 		<dict>
 			<key>hash2</key>
@@ -2566,6 +2739,20 @@
 			</data>
 		</dict>
 		<key>Resources/data/shaders/VanGogh.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/Vertex.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			yXGTRaDD5IceRBy6jB3VZ9MiOp+Wn38Ayz1U57e8nQM=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/Vertex.vert</key>
 		<dict>
 			<key>hash2</key>
 			<data>

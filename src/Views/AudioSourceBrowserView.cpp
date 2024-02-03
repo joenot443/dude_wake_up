@@ -7,6 +7,7 @@
 
 #include "AudioSourceBrowserView.hpp"
 #include "CommonViews.hpp"
+#include "Colors.hpp"
 #include "MarkdownView.hpp"
 #include "Fonts.hpp"
 #include "AudioSourceService.hpp"
@@ -21,6 +22,7 @@ void AudioSourceBrowserView::setup() {}
 
 void AudioSourceBrowserView::update() {
   tapper.update();
+  AudioSourceService::getService()->selectedAudioSource->audioAnalysis.updateBeat(tapper.beatPerc());
 }
 
 void AudioSourceBrowserView::draw() {
@@ -29,9 +31,9 @@ void AudioSourceBrowserView::draw() {
   ImGui::SetNextItemOpen(LayoutStateService::getService()->showAudioSettings);
   
   auto title = source->active ? formatString("Audio Reactivity - \t RMS: %0.2f \t CSD: %0.2f \t Energy: %0.2f",
-                            source->audioAnalysis.rms->value,
-                            source->audioAnalysis.csd->value,
-                            source->audioAnalysis.energy->value) : "Audio Reactivity - Disabled";
+                                             source->audioAnalysis.rms->value,
+                                             source->audioAnalysis.csd->value,
+                                             source->audioAnalysis.energy->value) : "Audio Reactivity - Disabled";
   
   if (ImGui::CollapsingHeader(title.c_str(), ImGuiTreeNodeFlags_CollapsingHeader))
   {
@@ -55,7 +57,7 @@ void AudioSourceBrowserView::drawAudioSourceSelector() {
   //allocate space for pointers
   char** out = new char*[sources.size()];
   static int selection = -1;
-
+  
   for(int i = 0; i < sources.size(); ++i){
     string s = sources[i]->name;
     if (s == AudioSourceService::getService()->selectedAudioSource->name) {
@@ -94,9 +96,16 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
         ImGui::OpenPopup("##Loudness");
       }
       ImGui::Text("%s", formatString("%.5F", source->audioAnalysis.rms->value).c_str());
-      OscillatorView::draw(std::static_pointer_cast<Oscillator>(
-                                                                source->audioAnalysis.rmsOscillator),
-                           source->audioAnalysis.rms);
+      OscillatorParam original = OscillatorParam (std::static_pointer_cast<Oscillator>(source->audioAnalysis.rmsOscillator), source->audioAnalysis.rms);
+      OscillatorParam pulse = OscillatorParam(source->audioAnalysis.rmsAnalysisParam.pulseOscillator, source->audioAnalysis.rmsAnalysisParam.pulse);
+      OscillatorParam threshold = OscillatorParam( source->audioAnalysis.rmsAnalysisParam.thresholdOscillator, source->audioAnalysis.rmsAnalysisParam.pulseThreshold);
+      std::vector<OscillatorParam> subjects = std::vector<OscillatorParam>(1, original);
+      subjects.push_back(pulse);
+      subjects.push_back(threshold);
+      
+      OscillatorView::draw(subjects);
+      CommonViews::Slider("Threshold", "##threshold", source->audioAnalysis.rmsAnalysisParam.pulseThreshold);
+      CommonViews::Slider("Length", "##length", source->audioAnalysis.rmsAnalysisParam.pulseLength);
       
       ImGui::TableNextColumn();
       
@@ -131,8 +140,47 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
       
       
       ImGui::Text("%s", formatString("BPM: %.0f", tapper.bpm()).c_str());
-      if (ImGui::Button("Tap for BPM (or Spacebar)")) {
-        tapper.tap();
+      
+      static float lastTapTime = ofGetCurrentTime().seconds;
+      if (ImGui::Button("Tap for BPM")) {
+        if (ofGetCurrentTime().seconds - lastTapTime > 5.0f) {
+          tapper.startFresh();
+        } else {
+          tapper.tap();
+        }
+        lastTapTime = ofGetCurrentTime().seconds;
+      }
+      
+      ImGui::SameLine();
+      
+      if (ImGui::Button("Beat Start")) {
+        float bpm = tapper.bpm();
+        tapper.startFresh();
+        tapper.setBpm(bpm);
+      }
+      
+      ImGui::SameLine();
+      
+      if (ImGui::Button("Reset")) {
+        tapper.startFresh();
+      }
+      
+      ImGui::SameLine();
+      const char* buttonText = source->audioAnalysis.bpmEnabled ? "Stop" : "Start";
+      if (ImGui::Button(buttonText)) {
+        source->audioAnalysis.bpmEnabled = !source->audioAnalysis.bpmEnabled;
+      }
+      
+      if (CommonViews::Slider("BPM", "##bpm", source->audioAnalysis.bpm)) {
+        tapper.setBpm(source->audioAnalysis.bpm->value);
+      } else {
+        source->audioAnalysis.bpm->value = tapper.bpm();
+      }
+      
+      // Only draw graph if we're enabled
+      if (source->audioAnalysis.bpmEnabled) {
+        source->audioAnalysis.beatPulseOscillator->enabled = true;
+        OscillatorView::draw(dynamic_pointer_cast<Oscillator>( source->audioAnalysis.beatPulseOscillator), source->audioAnalysis.beatPulse);
       }
       
       ImGui::TableNextColumn();

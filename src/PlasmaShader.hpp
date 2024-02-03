@@ -30,7 +30,7 @@ struct PlasmaSettings: public ShaderSettings {
   PlasmaSettings(std::string shaderId, json j) :
   enabled(std::make_shared<Parameter>("enabled", 0.0,  1.0, 0.0)),
   speed(std::make_shared<Parameter>("speed", 1.0,  0.0, 5.0)),
-  color(std::make_shared<Parameter>("color", 1.0,  0.0, 20.0)),
+  color(std::make_shared<Parameter>("color", 1.0,  0.0, 1.0)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   colorOscillator(std::make_shared<WaveformOscillator>(color)),
   ShaderSettings(shaderId, j) {

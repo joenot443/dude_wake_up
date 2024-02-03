@@ -15,7 +15,7 @@ void OutputWindow::update()
 
 void OutputWindow::draw()
 {
-  fbo->draw(0, 0);
+  fbo->draw(0, 0, ofGetWidth(), ofGetHeight());
 }
 
 void OutputWindow::setSource(std::shared_ptr<ofFbo> newSource) {

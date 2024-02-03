@@ -5,9 +5,12 @@
 //  Created by Joe Crozier on 2022-05-12.
 //
 
+#include "LayoutStateService.hpp"
 #include "CommonViews.hpp"
 #include "AudioSourceService.hpp"
 #include "FontService.hpp"
+#include "ImGuiExtensions.hpp"
+#include "Colors.hpp"
 #include "Fonts.hpp"
 #include "MidiService.hpp"
 #include "ModulationService.hpp"
@@ -16,6 +19,8 @@
 #include "OscillatorView.hpp"
 #include "Strings.hpp"
 #include "imgui.h"
+
+void CommonViews::xsSpacing() { Spacing(4); }
 
 void CommonViews::sSpacing() { Spacing(8); }
 
@@ -52,7 +57,7 @@ void CommonViews::HSpacing(int n)
 void CommonViews::ShaderParameter(std::shared_ptr<Parameter> param,
                                   std::shared_ptr<Oscillator> osc)
 {
-  sSpacing();
+  xsSpacing();
   H4Title(param->name);
   Slider(param->name, param->paramId, param);
   MidiSelector(param);
@@ -105,7 +110,7 @@ void CommonViews::AudioParameterSelector(std::shared_ptr<Parameter> param)
   }
 
   // Otherwise, present a button to select an audio parameter
-  if (ImGui::Button(formatString("Select Param%s", param->name.c_str()).c_str()))
+  if (ImGui::Button(formatString("Audio Param##%s", param->name.c_str()).c_str()))
   {
     ImGui::OpenPopup(param->audioPopupId().c_str());
   }
@@ -152,58 +157,101 @@ void CommonViews::ResolutionSelector(std::shared_ptr<VideoSource> source)
 void CommonViews::ShaderCheckbox(std::shared_ptr<Parameter> param)
 {
   sSpacing();
+  bool old = param->boolValue;
   ImGui::Checkbox(param->name.c_str(), &param->boolValue);
+  if (old != param->boolValue)
+  {
+    param->setValue(static_cast<float>(param->boolValue));
+  }
   sSpacing();
 }
 
 void CommonViews::H3Title(std::string title)
 {
-  CommonViews::Spacing(2);
+  CommonViews::Spacing(1);
   ImGui::PushFont(FontService::getService()->h3);
   ImGui::Text("%s", title.c_str());
-  CommonViews::Spacing(2);
+  CommonViews::Spacing(1);
   ImGui::PopFont();
 }
 
 void CommonViews::H4Title(std::string title)
 {
-  CommonViews::Spacing(2);
+  CommonViews::Spacing(1);
   ImGui::PushFont(FontService::getService()->h4);
   ImGui::Text("%s", title.c_str());
-  CommonViews::Spacing(2);
+  CommonViews::Spacing(1);
   ImGui::PopFont();
 }
 
-void CommonViews::Slider(std::string title, std::string id,
+bool CommonViews::Slider(std::string title, std::string id,
                          std::shared_ptr<Parameter> param)
 {
   ImGui::SetNextItemWidth(200.0);
-  ImGui::SliderFloat(idString(id).c_str(), &param->value, param->min,
+  bool ret = ImGui::SliderFloat(idString(id).c_str(), &param->value, param->min,
                      param->max, "%.3f");
   ImGui::SameLine(0, 20);
   ResetButton(id, param);
+  return ret;
 }
 
 void CommonViews::ShaderColor(std::shared_ptr<Parameter> param)
 {
   ImGui::ColorEdit3(param->name.c_str(), param->color->data());
+  
+  // Color history
+  if (IconButton(ICON_MD_SAVE, "##saveColor")) {
+    LayoutStateService::getService()->pushColor(param->color);
+  }
   ImGui::SameLine(0, 20);
-  ResetButton(param->paramId, param);
+  
+  std::vector<std::array<float, 3>> colors = LayoutStateService::getService()->colorHistory;
+  auto items = mapColorsToStrings(colors);
+  auto preview = formatColor(*param->color.get());
+  if (ImGui::BeginCombo(formatString("Color History##%sColorHistory", param->paramId.c_str()).c_str(), preview.c_str(), 0))
+  {
+      for (int n = 0; n < items.size(); n++)
+      {
+        std::array<float, 3> color = colors[n];
+        ImGui::PushStyleColor(ImGuiCol_Text, ImColor(color[0], color[1], color[2]).Value);
+        if (ImGui::Selectable(items[n].c_str(), false)) {
+          param->setColor(colors[n]);
+        }
+        ImGui::PopStyleColor();
+      }
+      ImGui::EndCombo();
+  }
 }
 
-void CommonViews::PlaybackSlider(ofVideoPlayer *player)
+void CommonViews::RangeSlider(std::string title, std::string id, std::shared_ptr<Parameter> param, std::shared_ptr<Parameter> param2, float duration, bool dirty)
 {
-  // Get the available space and center our slider within it, with 20px of padding on each side.
-  auto space = ImGui::GetContentRegionAvail();
-  auto pos = ImGui::GetCursorScreenPos();
-  ImGui::SetNextItemWidth(space.x - 40.0f);
-  ImGui::SetCursorScreenPos(pos + ImVec2(20.0f, 0.0f));
-  auto position = player->getPosition();
-
-  if (ImGui::SliderFloat("##playback", &position, 0.0f, 1.0f))
-  {
-    player->setPosition(position);
+  if (dirty) {
+    ImGui::PushStyleColor(ImGuiCol_SliderGrab, WarningColor.Value);
   }
+  ImGui::SetNextItemWidth(300.0);
+  auto startTime = formatTimeDuration(duration * param->value);
+  auto endTime = formatTimeDuration(duration * param2->value);
+  auto formattedLabel = formatString("%s : %s", startTime.c_str(), endTime.c_str());
+  ImGui::RangeSliderFloat(title.c_str(), &param->value, &param2->value, fmin(param->min, param2->min), fmax(param->max, param2->max), formattedLabel.c_str(), 1.0);
+  if (dirty) {
+    ImGui::PopStyleColor();
+  }
+}
+
+// Draws a slider driving the param with a label representing the param's value (0..1)
+// represented as a timestamp, with length being the total length in seconds.
+// The timestamp should be converted to a string in the format "mm:ss"
+void CommonViews::PlaybackSlider(std::shared_ptr<Parameter> param, float length)
+{
+  ImGui::SetNextItemWidth(300.0);
+  auto timeString = formatString("%s : %s", formatTimeDuration(param->value * length).c_str(), formatTimeDuration(length).c_str());
+  
+  ImGui::SliderFloat(formatString("##%s", param->paramId.c_str()).c_str(),
+                     &param->value,
+                     0.0, 1.0,
+                     timeString.c_str());
+  ImGui::SameLine(0, 20);
+  ResetButton(param->paramId, param);
 }
 
 void CommonViews::IntSlider(std::string title, std::string id,
@@ -227,6 +275,10 @@ void CommonViews::ResetButton(std::string id,
   }
   ImGui::PopFont();
   ImGui::PopStyleVar();
+}
+
+void CommonViews::ShaderOption(std::shared_ptr<Parameter> param, std::vector<std::string> options) {
+  //todo
 }
 
 bool CommonViews::IconButton(const char *icon, std::string id)
@@ -260,10 +312,9 @@ bool CommonViews::LargeIconButton(const char *icon, std::string id)
   ImGui::PopStyleColor();
   ImGui::PopStyleVar();
   ImGui::PopFont();
-  
+
   return button;
 }
-
 
 void CommonViews::OscillateButton(std::string id, std::shared_ptr<Oscillator> o,
                                   std::shared_ptr<Parameter> p)
@@ -368,3 +419,5 @@ ImVec2 CommonViews::windowCanvasSize()
 {
   return ImGui::GetWindowContentRegionMax();
 }
+
+

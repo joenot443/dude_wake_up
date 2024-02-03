@@ -5,7 +5,8 @@ uniform sampler2D fbTexture;
 in vec2 coord;
 out vec4 outputColor;
 
-uniform float blend;
+uniform float mainMix;
+uniform float feedbackMix;
 uniform int fbType;
 
 uniform float scale;
@@ -44,8 +45,7 @@ vec3 hsb2rgb( in vec3 c ){
 }
 
 vec4 mixStandard(in vec4 mainColor,
-                 in vec4 fbColor,
-                 in float blend) {
+                 in vec4 fbColor) {
 //  // If either of our colors are close to 0 alpha, return the other.
   if (fbColor.a < 0.5) {
     return vec4(mainColor.rgb, 1.0);
@@ -55,13 +55,12 @@ vec4 mixStandard(in vec4 mainColor,
     return vec4(fbColor.rgb, 1.0);
   }
   
-  return mix(mainColor, fbColor, blend);
+  return mix(mainColor, fbColor, mainMix);
 }
       
 
 vec4 mixLumaKey(in vec4 mainColor,
                 in vec4 fbColor,
-                in float blend,
                 in float key,
                 in float thresh) {
   vec3 mainColorHsb = rgb2hsb(mainColor.rgb);
@@ -76,7 +75,7 @@ vec4 mixLumaKey(in vec4 mainColor,
   
   // Check if we're within bounds
   if (fbLuma > lower && fbLuma < upper) {
-    return mix(mainColor, fbColor, blend);
+    return mix(mainColor, fbColor, feedbackMix);
   }
   
   return mainColor;
@@ -101,13 +100,20 @@ void main()
   
   vec4 mainColor = texture(mainTexture, coord);
   vec4 fbColor = texture(fbTexture, uv - translate);
-  vec4 outColor = vec4(1.0, 0.0, 1.0, 1.0);
+  vec4 outColor = vec4(0.0, 0.0, 0.0, 0.0);
+  
+  // If both are empty
+  if (mainColor.a < 0.1 && fbColor.a < 0.1) {
+    outputColor = outColor;
+    return;
+  }
   
   if (lumaEnabled == 1) {
-    outColor = mixLumaKey(mainColor, fbColor, blend, lumaKey, lumaThresh);
+    outColor = mixLumaKey(mainColor, fbColor, lumaKey, lumaThresh);
   } else {
-    outColor = mixStandard(mainColor, fbColor, blend);
+    outColor = mixStandard(mainColor, fbColor);
   }
   
   outputColor = outColor;
 }
+

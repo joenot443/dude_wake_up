@@ -70,7 +70,7 @@ public:
   json serialize();
 };
 
-class Connectable : std::enable_shared_from_this<Connectable>
+class Connectable : public std::enable_shared_from_this<Connectable>
 {
 public:
   std::set<std::shared_ptr<Connection>> inputs;
@@ -110,6 +110,9 @@ public:
 
     for (auto const input : inputs)
     {
+      if (input->type != ConnectionTypeShader) {
+        continue;
+      }
       if (input->start->hasParentOfType(type))
         return true;
     }

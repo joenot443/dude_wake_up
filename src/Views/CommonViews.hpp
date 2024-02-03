@@ -18,6 +18,7 @@ struct CommonViews
 {
   static ImVec2 windowCanvasSize();
 
+  static void xsSpacing();
   static void sSpacing();
   static void mSpacing();
   static void lSpacing();
@@ -35,6 +36,8 @@ struct CommonViews
   static void ShaderParameter(std::shared_ptr<Parameter> param, std::shared_ptr<Oscillator> osc);
 
   static void ShaderCheckbox(std::shared_ptr<Parameter> param);
+  
+  static void ShaderOption(std::shared_ptr<Parameter> param, std::vector<std::string> options);
 
   static void HorizontallyAligned(float width, float alignment = 0.5);
 
@@ -52,9 +55,11 @@ struct CommonViews
 
   static void AudioParameterSelector(std::shared_ptr<Parameter> videoParam);
 
-  static void Slider(std::string title, std::string id, std::shared_ptr<Parameter> param);
+  static bool Slider(std::string title, std::string id, std::shared_ptr<Parameter> param);
+  
+  static void RangeSlider(std::string title, std::string id, std::shared_ptr<Parameter> param, std::shared_ptr<Parameter> param2, float duration, bool dirty = false);
 
-  static void PlaybackSlider(ofVideoPlayer *player);
+  static void PlaybackSlider(std::shared_ptr<Parameter> param, float length);
 
   static void ShaderColor(std::shared_ptr<Parameter> param);
 

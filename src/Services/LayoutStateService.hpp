@@ -15,6 +15,7 @@
 
 static const std::string ShowAudioSettingsJsonKey = "showAudioSettings";
 static const std::string LibraryPathJsonKey = "libraryPath";
+static const std::string ColorHistoryJsonKey = "colorHistory";
 
 class LayoutStateService: public ConfigurableService {
 public:
@@ -22,8 +23,11 @@ public:
 
   bool showAudioSettings = false;
   std::string libraryPath = ConfigService::getService()->nottawaFolderFilePath();
+  std::vector<std::array<float, 3>> colorHistory = std::vector<std::array<float, 3>>(1, std::array<float, 3>{0.0f, 0.0f, 0.0f});
   
   void updateLibraryPath(std::string path);
+  
+  void pushColor(std::shared_ptr<std::array<float, 3>> color);
   
   static LayoutStateService *service;
 

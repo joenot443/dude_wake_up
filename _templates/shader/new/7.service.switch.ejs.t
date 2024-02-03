@@ -2,7 +2,7 @@
 to: src/Services/ShaderChainerService.cpp
 inject: true
 skip_if: case ShaderType<%= name %>
-after: "switch"
+after: "switch (shaderType)"
 ---
     case ShaderType<%= name %>: {
       auto settings = new <%= name %>Settings(shaderId, shaderJson);

@@ -22,7 +22,8 @@ public:
   void saveFrame() override;
   json serialize() override;
   void load(json j) override;
-  
+  ofShader maskShader;
+  void drawSettings() override;
 
 private:
   int deviceID;

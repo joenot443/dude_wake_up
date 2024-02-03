@@ -59,7 +59,7 @@ void AudioSource::audioIn(ofSoundBuffer &soundBuffer)
   avg = avg / static_cast<float>(soundBuffer.size());
   
   // If we have mostly silence, return
-  if (abs(avg) < 0.01)
+  if (abs(avg) < 0.001)
   {
     return;
   }

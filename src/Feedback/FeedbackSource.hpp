@@ -34,6 +34,8 @@ struct FeedbackSource {
       fbo.begin();
       ofSetColor(0, 0, 0, 0);
       ofDrawRectangle(0, 0, fbo.getWidth(), fbo.getHeight());
+      ofClear(0,0,0, 255);
+      ofClear(0,0,0, 0);
       fbo.end();
       frameBuffer.push_back(fbo);
     }
@@ -81,6 +83,9 @@ struct FeedbackSource {
     
     auto canvas = frameBuffer[startIndex];
     canvas.begin();
+    // Clear the frame
+    ofClear(0,0,0, 255);
+    ofClear(0,0,0, 0);
     fbo->draw(0, 0);
     canvas.end();
     
@@ -98,6 +103,8 @@ struct FeedbackSource {
     auto canvas = frameBuffer[startIndex];
     canvas.begin();
     frame->draw(0, 0, frame->getWidth(), frame->getHeight());
+    ofClear(0,0,0, 255);
+    ofClear(0,0,0, 0);
     canvas.end();
     
     startIndex++;

@@ -96,6 +96,8 @@ public:
       feedbackDestination->pushFrame(fbo);
     }
   };
+  
+  void drawMaskSettings();
 };
 
 #endif /* VideoSourceSource_hpp */
