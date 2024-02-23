@@ -97,7 +97,7 @@ public:
     ofPushMatrix();
 
     float x = (settings->xTranslate->value + 0.5) * width;
-    float y = (settings->yTranslate->value + 0.5) * height;
+    float y = (0.5 - settings->yTranslate->value) * height;
     
     ofTranslate(x, y);
     if (autoRotating) {
@@ -121,17 +121,7 @@ public:
 
   void drawSettings() override {
     
-    ImGui::Columns(2);
-    ImGui::SetColumnWidth(0, 200);
-    ImGuiExtensions::Slider2DFloat("", &settings->xTranslate->value, &settings->yTranslate->value, -1., 1.0, -1., 1.0, 1.0);
-    ImGui::NextColumn();
-    ImGui::Text("Oscillate X");
-    ImGui::SameLine();
-    CommonViews::OscillateButton("##yOscillator", settings->xTranslateOscillator, settings->xTranslate);
-    ImGui::Text("Oscillate Y");
-    ImGui::SameLine();
-    CommonViews::OscillateButton("##yOscillator", settings->yTranslateOscillator, settings->yTranslate);
-    ImGui::Columns(1);
+    CommonViews::MultiSlider("Position", formatString("##position%s", shaderId.c_str()), settings->xTranslate, settings->yTranslate, settings->xTranslateOscillator, settings->yTranslateOscillator);
     CommonViews::ShaderCheckbox(settings->lockXYScale);
 
     // Scale X

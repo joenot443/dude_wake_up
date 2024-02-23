@@ -76,11 +76,20 @@ enum ShaderType {
   ShaderTypeVertex,
   ShaderTypeBounce,
   ShaderTypeCirclePath,
+  ShaderTypeVHS,
+  ShaderTypeCanny,
+  ShaderTypeSnowfall,
+  ShaderTypeTextureMask,
+  ShaderTypeLimbo,
+  ShaderTypeAudioCircle,
+  ShaderTypeSmokeRing,
+  ShaderTypeDoubleSwirl,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
   ShaderTypeHSB,
-  ShaderTypeBlur, 
+  ShaderTypeSolidColor,
+  ShaderTypeBlur,
   ShaderTypePixelate, 
   ShaderTypeMirror,
   ShaderTypeGlitch,
@@ -99,11 +108,13 @@ static const ShaderType AvailableMixShaderTypes[] = {
 
 static const ShaderType AvailableMaskShaderTypes[] = {
   ShaderTypeMask,
+  ShaderTypeTextureMask,
   ShaderTypeLumaMaskMaker,
   ShaderTypeColorKeyMaskMaker
 };
 
 static const ShaderType AvailableTransformShaderTypes[] = {
+  ShaderTypeSnowfall,
   ShaderTypeTransform,
   ShaderTypeBounce,
   ShaderTypeCirclePath,
@@ -117,6 +128,7 @@ static const ShaderType AvailableTransformShaderTypes[] = {
 };
 
 static const ShaderType AvailableFilterShaderTypes[] = {
+  ShaderTypeCanny,
   ShaderTypeGameboy,
   ShaderTypeRainbowRotator, // Generated
   ShaderTypeRGBShift, // Generated
@@ -126,6 +138,7 @@ static const ShaderType AvailableFilterShaderTypes[] = {
   ShaderTypeColorPass, // Generated
   ShaderTypeHalfTone, // Generated
   ShaderTypeCrosshatch, // Generated
+  ShaderTypeVHS,
 };
 
 static std::vector<ShaderType> AllShaderTypes() {
@@ -157,6 +170,22 @@ static std::vector<ShaderType> AllShaderTypes() {
 static std::string shaderTypeName(ShaderType type) {
   switch (type) {
     // Shader names
+    case ShaderTypeDoubleSwirl:
+      return "DoubleSwirl";
+    case ShaderTypeSmokeRing:
+      return "SmokeRing";
+    case ShaderTypeAudioCircle:
+      return "AudioCircle";
+    case ShaderTypeLimbo:
+      return "Limbo";
+    case ShaderTypeTextureMask:
+      return "TextureMask";
+    case ShaderTypeSnowfall:
+      return "Snowfall";
+    case ShaderTypeCanny:
+      return "Canny";
+    case ShaderTypeVHS:
+      return "VHS";
     case ShaderTypeCirclePath:
       return "CirclePath";
     case ShaderTypeBounce:
@@ -301,6 +330,12 @@ static bool shaderTypeSupportsAux(ShaderType type) {
 
 static bool shaderTypeSupportsMask(ShaderType type) {
   if (type == ShaderTypeMask)
+  {return true;}
+  return false;
+}
+
+static bool shaderTypeSupportsFeedback(ShaderType type) {
+  if (type == ShaderTypeFeedback || type == ShaderTypeLumaFeedback)
   {return true;}
   return false;
 }

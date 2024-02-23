@@ -8,7 +8,7 @@
 #include "FileBrowserView.hpp"
 #include "VideoSourceService.hpp"
 #include "File.hpp"
-#include "AvailableShaderChainer.hpp"
+#include "AvailableStrand.hpp"
 #include "AvailableVideoSource.hpp"
 #include "ofMain.h"
 #include "ConfigService.hpp"
@@ -68,30 +68,30 @@ void FileBrowserView::refresh()
       {
         continue;
       }
-      // Validate that the file is a valid shader chain
-      if (ConfigService::getService()->validateShaderChainerJson(file.path) == false)
+      // Validate that the file is a valid Strand
+      if (ConfigService::getService()->validateStrandJson(file.path) == false)
       {
         continue;
       }
 
-      auto availableShaderChainer =
-          ConfigService::getService()->availableShaderChainerFromPath(file.path);
+      auto availableStrand =
+          ConfigService::getService()->availableStrandFromPath(file.path);
 
       // Create a closure which will be called when the tile is dragged
-      std::function<void()> dragCallback = [availableShaderChainer]()
+      std::function<void()> dragCallback = [availableStrand]()
       {
         // Create a payload to carry the video source
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
         {
           // Set payload to carry the index of our item (could be anything)
-          ImGui::SetDragDropPayload("AvailableShaderChainer", &availableShaderChainer,
-                                    sizeof(AvailableShaderChainer));
-          ImGui::Text("%s", availableShaderChainer.chainerName->c_str());
+          ImGui::SetDragDropPayload("AvailableStrand", &availableStrand,
+                                    sizeof(availableStrand));
+          ImGui::Text("%s", availableStrand.name.c_str());
           ImGui::EndDragDropSource();
         }
       };
 
-      TileItem tileItem = TileItem(*availableShaderChainer.chainerName, 0, 0, dragCallback);
+      TileItem tileItem = TileItem(availableStrand.name, 0, 0, dragCallback);
       tileItems.push_back(tileItem);
     }
   }

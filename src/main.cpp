@@ -14,9 +14,11 @@
 #include "VideoSourceService.hpp"
 #include "NodeLayoutView.hpp"
 #include "MarkdownService.hpp"
+#include "TextureService.hpp"
 #include "ShaderChainerService.hpp"
 #include "LayoutStateService.hpp"
 #include "ParameterService.hpp"
+#include "IconService.hpp"
 
 using json = nlohmann::json;
 
@@ -25,6 +27,8 @@ using json = nlohmann::json;
 const char* SubmitFeedbackView::popupId = "Submit Feedback";
 NodeLayoutView *NodeLayoutView::instance = 0;
 FontService *FontService::service = 0;
+TextureService *TextureService::service = 0;
+IconService *IconService::service = 0;
 ModulationService *ModulationService::service = 0;
 OscillationService *OscillationService::service = 0;
 MidiService *MidiService::service = 0;
@@ -82,6 +86,7 @@ int main( ){
   auto window = ofCreateWindow(settings);
   auto app = shared_ptr<MainApp>(new MainApp(window));
   ofSetFrameRate(60);
+  ofSetEscapeQuitsApp(false);
   ofRunApp(window, app);
   ofRunMainLoop();
   sentry_close();

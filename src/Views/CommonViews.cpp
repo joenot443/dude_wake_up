@@ -8,8 +8,12 @@
 #include "LayoutStateService.hpp"
 #include "CommonViews.hpp"
 #include "AudioSourceService.hpp"
+#include "Icon.hpp"
+#include "IconService.hpp"
+#include "TextureService.hpp"
 #include "FontService.hpp"
 #include "ImGuiExtensions.hpp"
+#include "ParameterTileBrowserView.hpp"
 #include "Colors.hpp"
 #include "Fonts.hpp"
 #include "MidiService.hpp"
@@ -18,7 +22,13 @@
 #include "ofMain.h"
 #include "OscillatorView.hpp"
 #include "Strings.hpp"
+#include "TextureBrowserView.hpp"
 #include "imgui.h"
+#include <imgui_node_editor.h>
+#include <imgui_node_editor_internal.h>
+
+namespace ed = ax::NodeEditor;
+
 
 void CommonViews::xsSpacing() { Spacing(4); }
 
@@ -154,16 +164,19 @@ void CommonViews::ResolutionSelector(std::shared_ptr<VideoSource> source)
   }
 }
 
-void CommonViews::ShaderCheckbox(std::shared_ptr<Parameter> param)
+bool CommonViews::ShaderCheckbox(std::shared_ptr<Parameter> param)
 {
   sSpacing();
   bool old = param->boolValue;
   ImGui::Checkbox(param->name.c_str(), &param->boolValue);
+  bool ret = false;
   if (old != param->boolValue)
   {
+    ret = true;
     param->setValue(static_cast<float>(param->boolValue));
   }
   sSpacing();
+  return ret;
 }
 
 void CommonViews::H3Title(std::string title)
@@ -188,10 +201,129 @@ bool CommonViews::Slider(std::string title, std::string id,
                          std::shared_ptr<Parameter> param)
 {
   ImGui::SetNextItemWidth(200.0);
-  bool ret = ImGui::SliderFloat(idString(id).c_str(), &param->value, param->min,
-                     param->max, "%.3f");
+  bool ret = ImGui::SliderFloat(idString(id).c_str(), &param->value, param->min, param->max, "%.3f");
+  if (ret) {
+    param->affirmValue();
+  }
   ImGui::SameLine(0, 20);
   ResetButton(id, param);
+  return ret;
+}
+
+bool CommonViews::MultiSlider(std::string title, std::string id, std::shared_ptr<Parameter> param1, std::shared_ptr<Parameter> param2,
+                              std::shared_ptr<Oscillator> param1Oscillator,
+                              std::shared_ptr<Oscillator> param2Oscillator) {
+  CommonViews::H4Title(title);
+  ImGui::Columns(2);
+  ImGui::SetColumnWidth(0, 200);
+  ImGuiExtensions::Slider2DFloat("", &param1->value,
+                                 &param2->value,
+                                 -1, 1., -1, 1., 1.0);
+  ImGui::NextColumn();
+  ImGui::Text("X Translate");
+  ImGui::SameLine();
+  CommonViews::OscillateButton("##xOscillator", param1Oscillator, param1);
+  ImGui::SameLine();
+  CommonViews::ResetButton("##xMultiSliderReset", param1);
+  ImGui::Text("Y Translate");
+  ImGui::SameLine();
+  CommonViews::OscillateButton("##yOscillator", param2Oscillator, param2);
+  ImGui::SameLine();
+  CommonViews::ResetButton("##yMultiSliderReset", param2);
+  CommonViews::Slider(param1->name, param1->paramId, param1);
+  CommonViews::Slider(param2->name, param2->paramId, param2);
+  if (param1Oscillator->enabled->boolValue)
+  {
+    OscillatorWindow(param1Oscillator, param1);
+  }
+  
+  if (param2Oscillator->enabled->boolValue)
+  {
+    OscillatorWindow(param2Oscillator, param2);
+  }
+  ImGui::Columns(1);
+}
+
+bool CommonViews::TextureFieldAndBrowser(std::shared_ptr<Parameter> param) {
+  std::vector<std::shared_ptr<Texture>> textures = TextureService::getService()->availableTextures();
+  std::vector<std::shared_ptr<ParameterTileItem>> items;
+  
+  for (int i = 0; i < textures.size(); i++)
+  {
+    auto texture = textures[i];
+    items.push_back(std::make_shared<ParameterTileItem>(texture->name,  (ImTextureID)(uintptr_t) texture->fbo.getTexture().getTextureData().textureID, i));
+  }
+  
+  std::string currentTextureName = textures[param->intValue]->name;
+  ImGui::Text("Current Texture: ");
+  ImGui::SameLine();
+  static std::map<std::string, bool> openMap;
+  if (openMap.count(param->paramId) == 0) {
+    openMap[param->paramId] = false;
+  }
+  bool ret = false;
+  
+  if (ImGui::Button(currentTextureName.c_str())) {
+    openMap[param->paramId] = !openMap[param->paramId];
+    if (openMap[param->paramId]) {
+      ImGui::SetNextWindowPos(ImGui::GetMousePos());
+      ImGui::SetNextWindowSize(ImVec2(400, 300));
+    }
+  }
+  if (openMap[param->paramId]) {
+    ImGui::SameLine();
+    ImGui::SetNextWindowPos(ImGui::GetCursorScreenPos());
+    if (ImGui::Begin(idString(param->name).c_str()), ImGuiWindowFlags_NoDecoration) {
+      ret = ParameterTileBrowserView::draw(items, param, false);
+    }
+    ImGui::End();
+    ImGui::NewLine();
+  }
+  if (ret) {
+    ImGui::CloseCurrentPopup();
+  }
+  return ret;
+}
+
+bool CommonViews::IconFieldAndBrowser(std::shared_ptr<Parameter> param) {
+  std::vector<std::shared_ptr<Icon>> icons = IconService::getService()->availableIcons();
+  std::vector<std::shared_ptr<ParameterTileItem>> items;
+  
+  for (int i = 0; i < icons.size(); i++)
+  {
+    auto icon = icons[i];
+    items.push_back(std::make_shared<ParameterTileItem>(icon->name,  (ImTextureID)(uintptr_t) icon->fbo.getTexture().getTextureData().textureID, i, icon->category));
+  }
+  
+  std::string currentTextureName = icons[param->intValue]->name;
+  ImGui::Text("Current Icon: ");
+  ImGui::SameLine();
+  static std::map<std::string, bool> openMap;
+  if (openMap.count(param->paramId) == 0) {
+    openMap[param->paramId] = false;
+  }
+  bool ret = false;
+  
+  if (ImGui::Button(currentTextureName.c_str())) {
+    openMap[param->paramId] = !openMap[param->paramId];
+    if (openMap[param->paramId]) {
+      ImGui::SetNextWindowPos(ImGui::GetMousePos());
+      ImGui::SetNextWindowSize(ImVec2(400, 300));
+    }
+  }
+  if (openMap[param->paramId]) {
+    ImGui::SameLine();
+    ImGui::SetNextWindowPos(ImGui::GetCursorScreenPos());
+    auto title = formatString("##%s", param->name.c_str()).c_str();
+    if (ImGui::Begin(title), ImGuiWindowFlags_NoTitleBar) {
+      ret = ParameterTileBrowserView::draw(items, param, false);
+    }
+    ImGui::End();
+    ImGui::NewLine();
+  }
+  if (ret) {
+    ImGui::CloseCurrentPopup();
+  }
   return ret;
 }
 
@@ -277,9 +409,26 @@ void CommonViews::ResetButton(std::string id,
   ImGui::PopStyleVar();
 }
 
-void CommonViews::ShaderOption(std::shared_ptr<Parameter> param, std::vector<std::string> options) {
-  //todo
+bool CommonViews::ShaderOption(std::shared_ptr<Parameter> param, std::vector<std::string> options) {
+    if (options.empty()) return; // Early exit if no options provided
+
+    ImGui::Text("%s", param->name.c_str()); // Display the name of the parameter
+    ImGui::SameLine(0, 20); // Align next item on the same line with spacing
+
+    // Convert vector of std::string to vector of const char* for ImGui::Combo
+    std::vector<const char*> items;
+    for (const auto& option : options) {
+        items.push_back(option.c_str());
+    }
+
+    int currentItem = static_cast<int>(param->value); // Assuming param->value holds the index of the current selected option
+    if (ImGui::Combo(param->name.c_str(), &currentItem, items.data(), items.size())) {
+        param->setValue(static_cast<float>(currentItem));
+      return true;
+    }
+  return false;
 }
+
 
 bool CommonViews::IconButton(const char *icon, std::string id)
 {

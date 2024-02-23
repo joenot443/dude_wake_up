@@ -35,9 +35,13 @@ struct CommonViews
 
   static void ShaderParameter(std::shared_ptr<Parameter> param, std::shared_ptr<Oscillator> osc);
 
-  static void ShaderCheckbox(std::shared_ptr<Parameter> param);
+  static bool ShaderCheckbox(std::shared_ptr<Parameter> param);
   
-  static void ShaderOption(std::shared_ptr<Parameter> param, std::vector<std::string> options);
+  static bool ShaderOption(std::shared_ptr<Parameter> param, std::vector<std::string> options);
+  
+  static bool TextureFieldAndBrowser(std::shared_ptr<Parameter> param);
+  
+  static bool IconFieldAndBrowser(std::shared_ptr<Parameter> param);
 
   static void HorizontallyAligned(float width, float alignment = 0.5);
 
@@ -56,6 +60,10 @@ struct CommonViews
   static void AudioParameterSelector(std::shared_ptr<Parameter> videoParam);
 
   static bool Slider(std::string title, std::string id, std::shared_ptr<Parameter> param);
+  
+  static bool MultiSlider(std::string title, std::string id, std::shared_ptr<Parameter> param1, std::shared_ptr<Parameter> param2,
+                                  std::shared_ptr<Oscillator> param1Oscillator,
+                                  std::shared_ptr<Oscillator> param2Oscillator);
   
   static void RangeSlider(std::string title, std::string id, std::shared_ptr<Parameter> param, std::shared_ptr<Parameter> param2, float duration, bool dirty = false);
 

@@ -21,12 +21,14 @@ struct SolidColorSettings: public ShaderSettings {
 	public:
   std::shared_ptr<Parameter> color;
   std::shared_ptr<Parameter> alpha;
+  std::shared_ptr<Parameter> colorTransparentPixels;
   
   std::shared_ptr<WaveformOscillator> alphaOscillator;
 
   SolidColorSettings(std::string shaderId, json j) :
   color(std::make_shared<Parameter>("Color", 1.0, -1.0, 2.0)),
   alpha(std::make_shared<Parameter>("Alpha", 1.0, 0.0, 1.0)),
+  colorTransparentPixels(std::make_shared<Parameter>("Color Transparent Pixels", 1.0, 0.0, 1.0)),
   alphaOscillator(std::make_shared<WaveformOscillator>(alpha)),
   ShaderSettings(shaderId, j) {
     parameters = { color };
@@ -49,10 +51,11 @@ public:
     canvas->begin();
     shader.begin();
     // Clear the frame
-    ofClear(0,0,0, 255);
-    ofClear(0,0,0, 0);
+//    ofClear(0,0,0, 255);
+//    ofClear(0,0,0, 0);
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1i("colorTransparentPixels", settings->colorTransparentPixels->intValue);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform4f("color", settings->color->color->data()[0], settings->color->color->data()[1], settings->color->color->data()[2], settings->alpha->value);
     frame->draw(0, 0);
@@ -73,6 +76,7 @@ public:
 
     CommonViews::ShaderColor(settings->color);
     CommonViews::ShaderParameter(settings->alpha, settings->alphaOscillator);
+    CommonViews::ShaderCheckbox(settings->colorTransparentPixels);
   }
 };
 

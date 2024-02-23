@@ -38,6 +38,7 @@ public:
   
   void setup();
   void removeFeedbackSource(std::string id);
+  void clearBuffers();
   void removeConsumerForShader(std::string shaderId);
   void setConsumer(std::string shaderId, std::shared_ptr<FeedbackSource> source);
   bool isSourceBeingConsumed(std::string feedbackSourceId);

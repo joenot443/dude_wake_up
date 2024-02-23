@@ -10,17 +10,31 @@
 
 #include <stdio.h>
 #include <ofMain.h>
+#include "Texture.hpp"
+#include "Icon.hpp"
 
-class ImageTexture {
+class ImageTexture
+{
 public:
   std::shared_ptr<ofFbo> fbo;
-  ImageTexture(std::string name) : name(name), fbo(std::make_shared<ofFbo>()) {
-    setup();
+  std::shared_ptr<Icon> icon;
+  // Optional texture
+  std::shared_ptr<Texture> texture;
+  ofShader shader;
+  ofImage image;
+
+  void updateImage(std::shared_ptr<Icon> icon);
+  void updateTexture(std::shared_ptr<Texture> texture);
+  ImageTexture(std::shared_ptr<Icon> icon) :  icon(icon), fbo(std::make_shared<ofFbo>())
+  {
+    shader.load("shaders/Mask");
+    fbo->allocate(500, 500);
   };
-  
+
 private:
-  std::string name;
-  void setup();
+  void prepareImage();
+  void drawImage();
+  void drawImageWithTexture();
 };
 
 #endif /* ImageTexture_hpp */

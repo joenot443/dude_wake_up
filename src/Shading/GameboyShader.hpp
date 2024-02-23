@@ -39,7 +39,7 @@ struct GameboyShader: Shader {
 
   GameboyShader(GameboySettings *settings) : 
   settings(settings),
-  noiseTexture("noise.png"),
+  noiseTexture(nullptr),
   Shader(settings) {};
   ofShader shader;
   void setup() override {
@@ -53,7 +53,7 @@ struct GameboyShader: Shader {
     ofClear(0,0,0, 255);
     ofClear(0,0,0, 0);
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniformTexture("tex2", noiseTexture.fbo->getTexture(), 8);
+//    shader.setUniformTexture("tex2", noiseTexture.fbo->getTexture(), 8);
     shader.setUniform1f("color", settings->shaderValue->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());

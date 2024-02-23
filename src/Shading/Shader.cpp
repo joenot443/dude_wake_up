@@ -18,8 +18,9 @@ void Shader::traverseFrame(std::shared_ptr<ofFbo> frame)
   shade(frame, lastFrame);
   for (std::shared_ptr<Connection> connection : outputs)
   {
-    // We don't need to traverse Aux/Mask connections
+    // We don't need to traverse Aux/Mask/Feedback connections
     if (connection->type == ConnectionTypeAux ||
+        connection->type == ConnectionTypeFeedback ||
         connection->type == ConnectionTypeMask) continue;
     
     // Attempt to cast the connectable to a shader
@@ -76,6 +77,18 @@ std::shared_ptr<Connectable> Shader::mask()
   if (hasInputForType(ConnectionTypeMask))
   {
     std::shared_ptr<Connectable> input = inputForType(ConnectionTypeMask);
+    return input;
+  }
+
+  return nullptr;
+}
+
+std::shared_ptr<Connectable> Shader::feedback()
+{
+  // Shader Mask input
+  if (hasOutputForType(ConnectionTypeFeedback))
+  {
+    std::shared_ptr<Connectable> input = outputForType(ConnectionTypeFeedback);
     return input;
   }
 

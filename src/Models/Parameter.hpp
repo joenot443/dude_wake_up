@@ -124,6 +124,14 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
     intValue = static_cast<int>(newValue);
     boolValue = newValue > 0.0001;
   }
+  
+  /// Sets the int and bool values of the Parameter to the float value.
+  void affirmValue()
+  {
+    intValue = static_cast<int>(value);
+    boolValue = value > 0.0001;
+  }
+  
   /// Drives the Parameter between its min and max by a float percent.
   void driveValue(float percent)
   {

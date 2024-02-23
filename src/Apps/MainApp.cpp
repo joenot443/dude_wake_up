@@ -17,6 +17,7 @@
 #include "MarkdownService.hpp"
 #include "WebcamSource.hpp"
 #include "LibraryService.hpp"
+#include "TextureService.hpp"
 #include "functional"
 #include "implot.h"
 #include "ofMain.h"
@@ -36,6 +37,7 @@ void MainApp::setup()
   ModulationService::getService();
   MidiService::getService();
   AudioSourceService::getService();
+  TextureService::getService();
   LayoutStateService::getService();
   gui.setup();
   ImGui::CreateContext();
@@ -93,7 +95,7 @@ void MainApp::dragEvent(ofDragInfo dragInfo)
   // Check if the file is a JSON file
   if (ofIsStringInString(dragInfo.files[0], ".json"))
   {
-    ConfigService::getService()->loadShaderChainerFile(dragInfo.files[0]);
+    ConfigService::getService()->loadStrandFile(dragInfo.files[0]);
     return;
   }
 

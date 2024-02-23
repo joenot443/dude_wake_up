@@ -55,16 +55,24 @@ public:
   {
     return hasInputForType(ConnectionTypeAux);
   }
+  
+  virtual bool feedbackConnected()
+  {
+    return hasOutputForType(ConnectionTypeFeedback);
+  }
 
   /// Mask
   std::shared_ptr<Connectable> mask();
   virtual bool supportsMask() { return shaderTypeSupportsMask(type()); }
+  virtual bool supportsFeedback() { return shaderTypeSupportsFeedback(type()); }
   virtual bool maskConnected()
   {
     return hasInputForType(ConnectionTypeMask);
   }
 
-  /// Feedback
+  // Feedback
+  // The Feedback OUTPUT pin for shading feedback frames before injection
+  std::shared_ptr<Connectable> feedback();
 
   // The FeedbackSource which this Shader will write to.
   // When this Shader's next is set to a FeedbackShader, this Shader
@@ -80,7 +88,7 @@ public:
 
   virtual void drawSettings(){};
 
-  void drawPreview(ImVec2 pos, float scale)
+  virtual void drawPreview(ImVec2 pos, float scale)
   {
     ImTextureID texID = (ImTextureID)(uintptr_t)lastFrame->getTexture().getTextureData().textureID;
     ImGui::Image(texID, ImVec2(160/scale, 120/scale));

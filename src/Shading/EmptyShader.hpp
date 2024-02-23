@@ -30,12 +30,7 @@ public:
   EmptyShader(EmptySettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    #ifdef TESTING
-shader.load("shaders/empty");
-#endif
-#ifdef RELEASE
-shader.load("shaders/empty");
-#endif
+    shader.load("shaders/empty");
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {

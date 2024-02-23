@@ -4,6 +4,10 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "DoubleSwirlShader.hpp"
+#include "SmokeRingShader.hpp"
+#include "AudioCircleShader.hpp"
+#include "LimboShader.hpp"
 #include "VertexShader.hpp"
 #include "SolidColorShader.hpp"
 #include "HilbertShader.hpp"
@@ -70,6 +74,10 @@ enum ShaderSourceType {
   ShaderSource_Hilbert, //source enum,
   ShaderSource_SolidColor, //source enum,
   ShaderSource_Vertex, //source enum,
+  ShaderSource_Limbo, //source enum,
+  ShaderSource_AudioCircle, //source enum,
+  ShaderSource_SmokeRing, //source enum,
+  ShaderSource_DoubleSwirl, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -100,11 +108,23 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_Hilbert, // Available
   ShaderSource_SolidColor, // Available
   ShaderSource_Vertex, // Available
+  ShaderSource_Limbo, // Available
+  ShaderSource_AudioCircle, // Available
+  ShaderSource_SmokeRing, // Available
+  ShaderSource_DoubleSwirl, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
 // shaderTypeForShaderSourceType
+  case ShaderSource_DoubleSwirl: //type enum
+    return ShaderTypeDoubleSwirl;
+  case ShaderSource_SmokeRing: //type enum
+    return ShaderTypeSmokeRing;
+  case ShaderSource_AudioCircle: //type enum
+    return ShaderTypeAudioCircle;
+  case ShaderSource_Limbo: //type enum
+    return ShaderTypeLimbo;
   case ShaderSource_Vertex: //type enum
     return ShaderTypeVertex;
   case ShaderSource_SolidColor: //type enum
@@ -216,6 +236,14 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
 static std::string shaderSourceTypeName(ShaderSourceType nameType) {
   switch (nameType) {
   // Shader Names
+  case ShaderSource_DoubleSwirl: // Name  
+    return "DoubleSwirl"; // DoubleSwirl
+  case ShaderSource_SmokeRing: // Name  
+    return "SmokeRing"; // SmokeRing
+  case ShaderSource_AudioCircle: // Name  
+    return "AudioCircle"; // AudioCircle
+  case ShaderSource_Limbo: // Name  
+    return "Limbo"; // Limbo
   case ShaderSource_Vertex: // Name  
     return "Vertex"; // Vertex
   case ShaderSource_SolidColor: // Name  
@@ -294,6 +322,30 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_DoubleSwirl: { // Settings
+      auto settings = new DoubleSwirlSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<DoubleSwirlShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_SmokeRing: { // Settings
+      auto settings = new SmokeRingSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<SmokeRingShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_AudioCircle: { // Settings
+      auto settings = new AudioCircleSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<AudioCircleShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Limbo: { // Settings
+      auto settings = new LimboSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<LimboShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_Vertex: { // Settings
       auto settings = new VertexSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<VertexShader>(settings);

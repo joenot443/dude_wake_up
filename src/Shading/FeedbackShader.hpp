@@ -56,7 +56,7 @@ struct FeedbackSettings: public ShaderSettings {
   index(index),
   mainMix(std::make_shared<Parameter>("Main Mix", 0.5, 0.0, 1.0)),
   mainMixOscillator(std::make_shared<WaveformOscillator>(mainMix)),
-  feedbackMix(std::make_shared<Parameter>("Feedback Mix", 0.5, 0.0, 1.0)),
+  feedbackMix(std::make_shared<Parameter>("Feedback Mix", 0.95, 0.0, 1.0)),
   feedbackMixOscillator(std::make_shared<WaveformOscillator>(feedbackMix)),
   
   keyValue(std::make_shared<Parameter>("Key Value", 0.5, 0.0, 1.0)),
@@ -66,8 +66,8 @@ struct FeedbackSettings: public ShaderSettings {
   delayAmount(std::make_shared<Parameter>("Delay Amount", 20.0, 0.0, 28.0)),
   delayAmountOscillator(std::make_shared<WaveformOscillator>(delayAmount)),
   lumaKeyEnabled(std::make_shared<Parameter>("Luma Key Enabled", 0.0, 0.0, 0.0)),
-  xPosition(std::make_shared<Parameter>("xPosition", 0.0, 0.0, 1.0)),
-  yPosition(std::make_shared<Parameter>("yPosition", 0.5, 0.0, 1.0)),
+  xPosition(std::make_shared<Parameter>("xPosition", 0.0, -1.0, 1.0)),
+  yPosition(std::make_shared<Parameter>("yPosition", 0.0, -1.0, 1.0)),
   xPositionOscillator(std::make_shared<WaveformOscillator>(xPosition)),
   yPositionOscillator(std::make_shared<WaveformOscillator>(yPosition)),
   scale(std::make_shared<Parameter>("Scale", 1.0, 0.0, 2.0)),
@@ -100,7 +100,9 @@ struct FeedbackShader: Shader  {
   void clearFrameBuffer();
   void populateSource();
   void drawFeedbackSourceSelector();
+  int frameIndex();
   
+  virtual void drawPreview(ImVec2 pos, float scale);
   virtual void setup();
   virtual void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas);
   virtual void drawSettings();

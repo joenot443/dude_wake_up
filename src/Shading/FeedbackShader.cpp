@@ -30,11 +30,11 @@ void FeedbackShader::populateSource() {
   
   // If we have an Aux connection to Feedback from, use that by default.
   // Don't draw the source selector in this case
-  if (auxConnected()) {
-    feedbackSource = FeedbackSourceService::getService()->feedbackSourceForId(aux()->connId());
-    FeedbackSourceService::getService()->setConsumer(shaderId, feedbackSource);
-    return;
-  }
+//  if (auxConnected()) {
+//    feedbackSource = FeedbackSourceService::getService()->feedbackSourceForId(aux()->connId());
+//    FeedbackSourceService::getService()->setConsumer(shaderId, feedbackSource);
+//    return;
+//  }
   
   //
   switch (settings->sourceSelection->intValue) {
@@ -55,18 +55,36 @@ void FeedbackShader::populateSource() {
       break;
   }
   FeedbackSourceService::getService()->setConsumer(shaderId, feedbackSource);
+  
+  if (feedbackConnected()) {
+    feedbackSource->shadeFrame(feedback());
+  }
+}
+
+void FeedbackShader::drawPreview(ImVec2 pos, float scale) {
+  ImTextureID texID = (ImTextureID)(uintptr_t)lastFrame->getTexture().getTextureData().textureID;
+  ImTextureID fbTexID = (ImTextureID)(uintptr_t)feedbackSource->getFrame(frameIndex()) .getTextureData().textureID;
+  ImGui::Image(texID, ImVec2(160/scale, 120/scale));
+//  ImGui::Image(fbTexID, ImVec2(160/scale, 120/scale));
+}
+
+int FeedbackShader::frameIndex() {
+  return static_cast<int>(settings->delayAmount->max -
+                                    settings->delayAmount->value);
 }
 
 void FeedbackShader::shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) {
   canvas->begin();
   shader.begin();
+  // Clear the frame
+  ofClear(0,0,0, 255);
+  ofClear(0,0,0, 0);
   // Set the textures
   populateSource();
-  int frameIndex = static_cast<int>(settings->delayAmount->max -
-                                    settings->delayAmount->value);
   
-  ofTexture feedbackTexture = feedbackSource->getFrame(frameIndex);
-  feedbackTexture.setTextureWrap(GL_REPEAT, GL_REPEAT);
+  ofTexture feedbackTexture = feedbackSource->getFrame(frameIndex());
+  shader.setUniform1i("overlayEnabled", 0);
+
   shader.setUniformTexture("fbTexture", feedbackTexture, 3);
   
   shader.setUniform1i("lumaEnabled",
@@ -77,11 +95,20 @@ void FeedbackShader::shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> 
   shader.setUniform1f("scale", settings->scale->value);
   shader.setUniform1f("lumaKey", settings->keyValue->value);
   shader.setUniform1f("lumaThresh", settings->keyThreshold->value);
-  shader.setUniform2f("translate", settings->xPosition->value + 0.5, settings->yPosition->value + 0.5);
+  shader.setUniform2f("translate", settings->xPosition->value, settings->yPosition->value);
   shader.setUniform1f("scale", 2.0 - settings->scale->value);
   
-
-  frame->draw(0, 0);
+  // With feedback connected we need to flip our FBO to draw it
+  if (feedbackConnected()) {
+    ofPushMatrix();
+    ofScale(1, -1, 1);
+    ofTranslate(0, -frame->getHeight());
+    frame->draw(0, 0);
+    ofPopMatrix();
+  } else {
+    frame->draw(0, 0);
+  }
+  
   shader.end();
   canvas->end();
 
@@ -106,29 +133,17 @@ void FeedbackShader::drawSettings() {
   if (ImGui::Button(formatString("Clear Feedback Buffer##%s", settings->shaderId.c_str()).c_str())) {
     clearFrameBuffer();
   }
+  // Delay Amount
+  CommonViews::ShaderParameter(settings->delayAmount,
+                               settings->delayAmountOscillator);
   
   CommonViews::ShaderParameter(settings->scale, settings->scaleOscillator);
-  
-  ImGui::Columns(2);
-  ImGui::SetColumnWidth(0, 200);
-  ImGuiExtensions::Slider2DFloat("", &settings->xPosition->value, &settings->yPosition->value, 0., 1., 0., 1., 0.5);
-  ImGui::NextColumn();
-  ImGui::Text("Oscillate X");
-  ImGui::SameLine();
-  CommonViews::OscillateButton("##yOscillator", settings->xPositionOscillator, settings->xPosition);
-  ImGui::Text("Oscillate Y");
-  ImGui::SameLine();
-  CommonViews::OscillateButton("##yOscillator", settings->yPositionOscillator, settings->yPosition);
-  ImGui::Columns(1);
+  CommonViews::MultiSlider("Position", formatString("##position%s", shaderId.c_str()), settings->xPosition, settings->yPosition, settings->xPositionOscillator, settings->yPositionOscillator);
   
 
   // Blend
   CommonViews::ShaderParameter(settings->mainMix, settings->mainMixOscillator);
   CommonViews::ShaderParameter(settings->feedbackMix, settings->feedbackMixOscillator);
-  
-  // Delay Amount
-  CommonViews::ShaderParameter(settings->delayAmount,
-                               settings->delayAmountOscillator);
 
   if (settings->lumaKeyEnabled->boolValue) {
     // Key Value

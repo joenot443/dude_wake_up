@@ -31,16 +31,27 @@ void FeedbackSourceService::registerFeedbackSource(std::shared_ptr<FeedbackSourc
 void FeedbackSourceService::setConsumer(std::string shaderId, std::shared_ptr<FeedbackSource> source)
 {
   bool found = false;
-  for (auto &consumerPair : consumerMap) {
-    if (consumerPair.second == source) {
+  for (auto &consumerPair : consumerMap)
+  {
+    if (consumerPair.second == source)
+    {
       found = true;
       break;
     }
   }
   // Setup the feedbackSource if there are no consumers
-  if (!found) source->setup();
-  
+  if (!found)
+    source->setup();
+
   consumerMap[shaderId] = source;
+}
+
+void FeedbackSourceService::clearBuffers()
+{
+  for (auto const &[key, val] : feedbackSourceMap)
+  {
+    val->clearFrameBuffer();
+  }
 }
 
 bool FeedbackSourceService::isSourceBeingConsumed(std::string feedbackSourceId)
@@ -51,7 +62,7 @@ bool FeedbackSourceService::isSourceBeingConsumed(std::string feedbackSourceId)
       return true;
   }
   return false;
-}
+  }
 
 std::shared_ptr<FeedbackSource> FeedbackSourceService::feedbackSourceForId(std::string id)
 {

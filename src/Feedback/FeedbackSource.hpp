@@ -9,6 +9,7 @@
 #define FeedbackSource_h
 #include "ofMain.h"
 #include "VideoSourceSettings.hpp"
+#include "Connection.hpp"
 #include "Console.hpp"
 
 const int FrameBufferCount=30;
@@ -18,8 +19,7 @@ struct FeedbackSource {
 
   std::shared_ptr<VideoSourceSettings> sourceSettings;
   std::string id;
-  std::vector<ofFbo> frameBuffer = {};
-  std::vector<ofFbo> fadedFrameBuffer = {};
+  std::vector<std::shared_ptr<ofFbo>> frameBuffer = {};
 
   int startIndex = 0;
   
@@ -29,14 +29,14 @@ struct FeedbackSource {
 
     // Add FrameBufferCount ofFbo to frameBuffer
     for (int i = 0; i < FrameBufferCount; i++) {
-      ofFbo fbo;
-      fbo.allocate(sourceSettings->width->intValue, sourceSettings->height->intValue, GL_RGBA);
-      fbo.begin();
+      std::shared_ptr<ofFbo> fbo = std::make_shared<ofFbo>();
+      fbo->allocate(sourceSettings->width->intValue, sourceSettings->height->intValue, GL_RGBA);
+      fbo->begin();
       ofSetColor(0, 0, 0, 0);
-      ofDrawRectangle(0, 0, fbo.getWidth(), fbo.getHeight());
+      ofDrawRectangle(0, 0, fbo->getWidth(), fbo->getHeight());
       ofClear(0,0,0, 255);
       ofClear(0,0,0, 0);
-      fbo.end();
+      fbo->end();
       frameBuffer.push_back(fbo);
     }
   }
@@ -52,13 +52,13 @@ struct FeedbackSource {
   }
   
   void resizeIfNecessary() {
-    if (frameBuffer[0].getWidth() != sourceSettings->width->intValue) {
+    if (frameBuffer[0]->getWidth() != sourceSettings->width->intValue) {
       setup();
     }
   }
   
   ofTexture mostRecentFrame() {
-    return frameBuffer.at(startIndex).getTexture();
+    return frameBuffer.at(startIndex)->getTexture();
   }
   
   ofTexture getFrame(int index) {
@@ -68,12 +68,14 @@ struct FeedbackSource {
     
     int destIndex = (startIndex + index) % FrameBufferCount;
     auto fbo = frameBuffer.at(destIndex);
-    return fbo.getTexture();
+    return fbo->getTexture();
   }
   
   void clearFrameBuffer() {
     setup();
   }
+  
+  void shadeFrame(std::shared_ptr<Connectable> shader);
   
   void pushFrame(std::shared_ptr<ofFbo> fbo) {
     // Return if we have no consumers
@@ -82,12 +84,12 @@ struct FeedbackSource {
     resizeIfNecessary();
     
     auto canvas = frameBuffer[startIndex];
-    canvas.begin();
+    canvas->begin();
     // Clear the frame
     ofClear(0,0,0, 255);
     ofClear(0,0,0, 0);
     fbo->draw(0, 0);
-    canvas.end();
+    canvas->end();
     
     startIndex++;
     
@@ -101,11 +103,11 @@ struct FeedbackSource {
     if (!beingConsumed()) return;
     resizeIfNecessary();
     auto canvas = frameBuffer[startIndex];
-    canvas.begin();
+    canvas->begin();
     frame->draw(0, 0, frame->getWidth(), frame->getHeight());
     ofClear(0,0,0, 255);
     ofClear(0,0,0, 0);
-    canvas.end();
+    canvas->end();
     
     startIndex++;
     

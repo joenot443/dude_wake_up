@@ -1,0 +1,3 @@
+# Paint
+
+Information about Paint

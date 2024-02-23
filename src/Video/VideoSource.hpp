@@ -23,6 +23,7 @@ enum VideoSourceType {
   VideoSource_file,
   VideoSource_chainer,
   VideoSource_image,
+  VideoSource_icon,
   VideoSource_shader,
   VideoSource_text,
   VideoSource_library,
@@ -62,6 +63,10 @@ public:
   virtual void load(json j){};
   
   virtual void teardown(){};
+  
+  std::string name() {
+    return sourceName;
+  }
   
   // Connectable
   

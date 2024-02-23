@@ -12,6 +12,7 @@
 #include "LibraryService.hpp"
 #include "TextSource.hpp"
 #include "WebcamSource.hpp"
+#include "IconSource.hpp"
 #include "ImageSource.hpp"
 #include "ShaderChainerService.hpp"
 #include "FileSource.hpp"
@@ -46,6 +47,9 @@ void VideoSourceService::populateAvailableVideoSources()
 
   auto textSource = std::make_shared<AvailableVideoSourceText>("Basic Text");
   availableSourceMap[textSource->availableVideoSourceId] = textSource;
+  
+  auto iconSource = std::make_shared<AvailableVideoSourceIcon>("Icon");
+  availableSourceMap[iconSource->availableVideoSourceId] = iconSource;
 
   for (auto const &file : LibraryService::getService()->libraryFiles)
   {
@@ -119,11 +123,11 @@ void VideoSourceService::addVideoSource(std::shared_ptr<VideoSource> videoSource
 {
   videoSourceMap[id] = videoSource;
   createFeedbackSource(videoSource);
-  videoSource->setup();
   if (j.is_object())
   {
     videoSource->load(j);
   }
+  videoSource->setup();
 }
 
 // Remove a video source from the map
@@ -222,6 +226,16 @@ std::shared_ptr<VideoSource> VideoSourceService::addFileVideoSource(std::string 
   addVideoSource(videoSource, id, j);
   return videoSource;
 }
+
+// Adds an icon video source to the map
+std::shared_ptr<VideoSource> VideoSourceService::addIconVideoSource(std::string name, ImVec2 origin, std::string id, json j)
+{
+  std::shared_ptr<VideoSource> videoSource = std::make_shared<IconSource>(id, "Icon");
+  videoSource->origin = origin;
+  addVideoSource(videoSource, id, j);
+  return videoSource;
+}
+
 
 // Adds a Shader video source to the map
 std::shared_ptr<VideoSource> VideoSourceService::addShaderVideoSource(ShaderSourceType type, ImVec2 origin, std::string id, json j)
@@ -353,8 +367,10 @@ void VideoSourceService::appendConfig(json j)
     return;
   case VideoSource_text:
     addTextVideoSource(j["sourceName"], position, sourceId, j);
-    // TODO
-    break;
+      return;
+    case VideoSource_icon:
+    addIconVideoSource(j["sourceName"], position, sourceId, j);
+      return;
   case VideoSource_empty:
     break;
   }

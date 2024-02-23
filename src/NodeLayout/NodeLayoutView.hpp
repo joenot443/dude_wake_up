@@ -45,7 +45,7 @@ public:
   
   // Returns the Node for the associated shaderSourceId, if it exists.
   // If it doesn't, create a new Node.
-  std::shared_ptr<Node> nodeForShaderSourceId(std::string shaderSourceId, NodeType nodeType, std::string name, bool supportsAux, bool supportsMask, std::shared_ptr<Connectable> connectable);
+  std::shared_ptr<Node> nodeForShaderSourceId(std::string shaderSourceId, NodeType nodeType, std::string name, std::shared_ptr<Connectable> connectable);
   
   // Returns the Node for the associated shaderSourceId, if it exists.
   // nullptr if not.
@@ -95,9 +95,6 @@ public:
   std::shared_ptr<Node> resolutionPopupNode;
   ImVec2 resolutionPopupLocation;
   bool popupLaunched;
-  
-  // Uploading Chainer
-  std::shared_ptr<ShaderChainer> uploadChainer = nullptr;
   
   // Misc.
   bool firstFrame = true;

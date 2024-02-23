@@ -9,6 +9,7 @@
 #include "MainStageView.hpp"
 #include "ConfigService.hpp"
 #include "TileBrowserView.hpp"
+#include "ParameterTileBrowserView.hpp"
 #include "MarkdownView.hpp"
 #include "FontService.hpp"
 #include "HSBShader.hpp"
@@ -46,7 +47,7 @@ void MainStageView::update()
 void MainStageView::draw()
 {
   // Draw a table with 2 columns, sized | 1/5 |   4/5   |
-  
+
   ImGui::Columns(2, "main_stage_view", false);
   ImGui::SetColumnWidth(0, ImGui::GetWindowWidth() / 5.);
   ImGui::SetColumnWidth(1, 4. * (ImGui::GetWindowWidth() / 5.));
@@ -97,7 +98,7 @@ void MainStageView::drawMenu()
         std::string defaultName =
             ofGetTimestampString("%Y-%m-%d_%H-%M-%S.json");
         ofFileDialogResult result =
-            ofSystemSaveDialog(defaultName, "Save File");
+            ofSystemSaveDialog(defaultName, "Save File", ConfigService::getService()->nottawaFolderFilePath());
         if (result.bSuccess)
         {
           ConfigService::getService()->saveConfigFile(result.getPath());
@@ -116,6 +117,15 @@ void MainStageView::drawMenu()
       {
         ShaderChainerService::getService()->clear();
         VideoSourceService::getService()->clear();
+      }
+      ImGui::EndMenu();
+    }
+
+    if (ImGui::BeginMenu("Effects"))
+    {
+      if (ImGui::MenuItem("Clear Feedback Buffers (C)"))
+      {
+        FeedbackSourceService::getService()->clearBuffers();
       }
       ImGui::EndMenu();
     }
@@ -139,13 +149,13 @@ void MainStageView::drawMenu()
     {
       ImGui::OpenPopup(SubmitFeedbackView::popupId);
     }
-    
-    static bool showingMenu = false;
-    if (ImGui::MenuItem("ImGui Demo") || showingMenu)
-    {
-      ImGui::ShowDemoWindow();
-      showingMenu = true;
-    }
+
+    //    static bool showingMenu = false;
+    //    if (ImGui::MenuItem("ImGui Demo") || showingMenu)
+    //    {
+    //      ImGui::ShowDemoWindow();
+    //      showingMenu = true;
+    //    }
 
     ImGui::EndMenuBar();
   }
@@ -158,7 +168,17 @@ void MainStageView::drawVideoSourceBrowser()
 
 void MainStageView::drawShaderBrowser() { shaderBrowserView.draw(); }
 
-void MainStageView::keyReleased(int key) {
+void MainStageView::keyReleased(int key)
+{
   NodeLayoutView::getInstance()->keyReleased(key);
-  bpmTapper.tap();
+  
+  // If Space is pressed, tap the bpmTapper
+  if (key == ' ')
+  {
+    bpmTapper.tap();
+  }
+  
+  if (key == 'c') {
+    FeedbackSourceService::getService()->clearBuffers();
+  }
 }

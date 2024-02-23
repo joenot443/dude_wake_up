@@ -10,8 +10,9 @@
 
 #include "AvailableShader.hpp"
 #include "ConfigurableService.hpp"
+#include "Strand.hpp"
 #include "Shader.hpp"
-#include "AvailableShaderChainer.hpp"
+#include "AvailableStrand.hpp"
 #include "ShaderChainer.hpp"
 #include "Connection.hpp"
 #include "observable.hpp"
@@ -70,7 +71,9 @@ public:
   // Removes all ShaderChainers and Shaders
   void reset();
 
-  // Accessing
+  /// Accessing
+  
+  Strand strandForConnectable(std::shared_ptr<Connectable> connectable);
   
   bool hasParents(std::shared_ptr<Shader> shader);
   
@@ -80,7 +83,7 @@ public:
   // Traverses the shader's outputs to find the most terminal.
   std::shared_ptr<Shader> terminalShader(std::shared_ptr<Shader> shader);
 
-  // Modifying
+  /// Modifying
 
   void selectShader(std::shared_ptr<Shader> shader);
   void addShader(std::shared_ptr<Shader> shader);

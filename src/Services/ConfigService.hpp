@@ -10,7 +10,8 @@
 
 #include <stdio.h>
 
-#include "AvailableShaderChainer.hpp"
+#include "AvailableStrand.hpp"
+#include "Strand.hpp"
 #include "AvailableShaderConfig.hpp"
 #include "ShaderChainer.hpp"
 #include "observable.hpp"
@@ -18,6 +19,7 @@
 
 
 using json = nlohmann::json;
+static const std::string ConfigFolderName = "shader_configs";
 
 static const std::string MidiJsonKey = "midi";
 static const std::string OscJsonKey = "osc";
@@ -29,10 +31,31 @@ static const std::string LayoutJsonKey = "layout";
 
 static const std::string ConfigTypeKey = "configType";
 static const std::string ConfigTypeFull = "full";
-static const std::string ConfigTypeAtomic = "atomic";
+static const std::string ConfigTypeStrand = "strand";
 
-static const std::string ConfigFolderName = "shader_configs";
+/*
+ Full Config:
+ {
+  "type": full,
+  "midi" : {}
+  "osc" : {}
+  "sources" : {}
+  "shaders" : {}
+  "connections" : {}
+  "layout": {}
+ }
+ */
 
+/*
+ Strand:
+ {
+  "type": strand,
+  "name": "foo",
+  "sources": {},
+  "shaders": {},
+  "connections: {},
+ }
+ */
 
 class ConfigService {
 private:
@@ -41,21 +64,22 @@ public:
   void notifyConfigUpdate();
   void subscribeToConfigUpdates(std::function<void()> callback);
   
-  // Chainers
-  void saveShaderChainerConfigFile(std::shared_ptr<ShaderChainer> chainer,
-                                   std::string path);
-  void saveShaderConfigFile(std::shared_ptr<Shader> shader,
-                                   std::string name);
-  bool validateShaderChainerJson(std::string path);
-  void loadShaderChainerFile(std::string path);
-  AvailableShaderChainer availableShaderChainerFromPath(std::string path);
-
+  // Strands
+  void saveStrandFile(Strand strand, std::string path);
+  bool validateStrandJson(std::string path);
+  void loadStrandFile(std::string path);
+  
+  AvailableStrand availableStrandFromPath(std::string path);
+  
+  // Icons
+  std::vector<std::string> availableIconFilenames();
+  
   // Shaders
   std::vector<std::string> shaderConfigFoldersPaths();
   std::vector<AvailableShaderConfig> availableConfigsForShaderType(ShaderType type);
   std::string shaderConfigFolderForType(ShaderType type);
   json shaderConfigForPath(std::string path);
-  
+  void saveShaderConfigFile(std::shared_ptr<Shader> shader, std::string name);
   void checkAndSaveDefaultConfigFile();
   void saveDefaultConfigFile();
   void loadDefaultConfigFile();

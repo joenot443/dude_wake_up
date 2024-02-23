@@ -132,4 +132,17 @@ public:
 private:
 };
 
+class AvailableVideoSourceIcon : public AvailableVideoSource
+{
+public:
+  AvailableVideoSourceIcon(std::string sourceName)
+      : AvailableVideoSource(std::move(sourceName), "Icon", VideoSource_icon) {}
+
+  void generatePreview() override
+  {
+  }
+
+private:
+};
+
 #endif /* AvailableVideoSource_h */

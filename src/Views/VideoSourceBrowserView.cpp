@@ -52,7 +52,9 @@ void VideoSourceBrowserView::refreshSources()
     auto textureId = GetImTextureID(*source->preview.get());
     auto tileItem = std::make_shared<TileItem>(source->sourceName, textureId, 0, dragCallback, source->category);
 
-    if (source->type == VideoSource_shader || source->type == VideoSource_text)
+    if (source->type == VideoSource_shader || 
+        source->type == VideoSource_text ||
+        source->type == VideoSource_icon)
     {
       shaderItems.push_back(tileItem);
     }

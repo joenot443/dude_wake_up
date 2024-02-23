@@ -25,12 +25,14 @@ enum NodeType
   NodeTypeSource,
   NodeTypeShader
 };
+
 enum PinType
 {
   PinTypeInput,
   PinTypeOutput,
   PinTypeAux,
-  PinTypeMask
+  PinTypeMask,
+  PinTypeFeedback
 };
 
 struct Node
@@ -40,6 +42,7 @@ struct Node
   ed::PinId inputId;
   ed::PinId auxId;
   ed::PinId maskId;
+  ed::PinId feedbackId;
   std::string name;
   NodeType type;
   std::shared_ptr<Shader> shader;
@@ -71,7 +74,13 @@ struct Node
   bool hasMaskLink()
   {
     return supportsMask() &&
-          connectable->hasInputForType(ConnectionTypeMask);
+           connectable->hasInputForType(ConnectionTypeMask);
+  }
+
+  bool hasFeedbackLink()
+  {
+    return supportsFeedback() &&
+           connectable->hasOutputForType(ConnectionTypeFeedback);
   }
 
   bool hasInputLink()
@@ -92,6 +101,11 @@ struct Node
   bool supportsMask()
   {
     return maskId.Get() != NullId;
+  }
+
+  bool supportsFeedback()
+  {
+    return  feedbackId.Get() != NullId;
   }
 
   // Draws the settings from the underlying Shader or VideoSource
