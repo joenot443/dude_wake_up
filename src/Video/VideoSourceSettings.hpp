@@ -23,6 +23,9 @@ public:
   std::shared_ptr<Parameter> maskType;
   std::shared_ptr<Parameter> maskTolerance;
   
+  // Invert
+  std::shared_ptr<Parameter> invert;
+  
   std::shared_ptr<Parameter> start;
   std::shared_ptr<Parameter> end;
   
@@ -33,6 +36,7 @@ public:
   maskColor(std::make_shared<Parameter>("maskColor", 3, 0, 5)),
   maskEnabled(std::make_shared<Parameter>("maskEnabled", 0, 0, 1)),
   maskTolerance(std::make_shared<Parameter>("maskTolerance", 0.05, 0, 1)),
+  invert(std::make_shared<Parameter>("invert", 0.0, 1.0, 1.0)),
   start(std::make_shared<Parameter>("start", 0, 0, 1)),
   end(std::make_shared<Parameter>("end", 1, 0, 1)),
   Settings() {
@@ -47,10 +51,11 @@ public:
   maskColor(std::make_shared<Parameter>("maskColor", 3, 0, 5)),
   maskEnabled(std::make_shared<Parameter>("maskEnabled", 0, 0, 1)),
   maskTolerance(std::make_shared<Parameter>("maskTolerance", 0.05, 0, 1)),
+  invert(std::make_shared<Parameter>("invert", 0.0, 0.0, 1.0)),
   start(std::make_shared<Parameter>("start", 0, 0, 1)),
   end(std::make_shared<Parameter>("end", 1, 0, 1)),
   Settings() {
-    parameters = {width, height, resolution, maskColor, maskEnabled, maskTolerance, start, end};
+    parameters = {width, height, resolution, maskColor, maskEnabled, maskTolerance, start, end, invert};
     updateResolutionSettings();
     load(j);
   }

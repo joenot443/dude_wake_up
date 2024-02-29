@@ -53,6 +53,13 @@ void OscillationService::selectOscillator(std::shared_ptr<Oscillator> osc, std::
   ConfigService::getService()->saveDefaultConfigFile();
 }
 
+void OscillationService::clear() {
+  for (auto & osc : oscillators) {
+    osc->enabled->boolValue = false;
+  }
+  selectedOscillator = nullptr;
+}
+
 
 // ConfigurableService
 

@@ -212,7 +212,8 @@ std::vector<std::string> VideoSourceService::getWebcamNames()
 // Adds a webcam video source to the map
 std::shared_ptr<VideoSource> VideoSourceService::addWebcamVideoSource(std::string name, int deviceId, ImVec2 origin, std::string id, json j)
 {
-  std::shared_ptr<VideoSource> videoSource = std::make_shared<WebcamSource>(id, name, deviceId);
+  std::shared_ptr<WebcamSource> videoSource = std::make_shared<WebcamSource>(id, name);
+  videoSource->settings->deviceId->setValue(static_cast<float>(deviceId));
   videoSource->origin = origin;
   addVideoSource(videoSource, id, j);
   return videoSource;
@@ -395,13 +396,23 @@ void VideoSourceService::clear()
 
 void VideoSourceService::loadConfig(json data)
 {
-  std::map<std::string, json> sourceMap = data;
+  idsFromLoadingConfig(data);
+}
+
+
+std::vector<std::string> VideoSourceService::idsFromLoadingConfig(json j)
+{
+  std::map<std::string, json> sourceMap = j;
+  std::vector<std::string> ids;
 
   for (auto pair : sourceMap)
   {
     std::map<std::string, json> source = pair.second;
     appendConfig(source);
+    ids.push_back(pair.first);
   }
+  
+  return ids;
 }
 
 std::shared_ptr<VideoSource> VideoSourceService::videoSourceForId(std::string id)

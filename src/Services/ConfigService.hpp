@@ -27,7 +27,9 @@ static const std::string SourcesJsonKey = "sources";
 static const std::string ShadersJsonKey = "shaders";
 static const std::string ConnectionsJsonKey = "connections";
 static const std::string NameJsonKey = "name";
+static const std::string PreviewPathJsonKey = "preview";
 static const std::string LayoutJsonKey = "layout";
+static const std::string StrandsJsonKey = "strands";
 
 static const std::string ConfigTypeKey = "configType";
 static const std::string ConfigTypeFull = "full";
@@ -63,18 +65,19 @@ private:
 public:
   void notifyConfigUpdate();
   void subscribeToConfigUpdates(std::function<void()> callback);
+  void setup();
   
   // Strands
-  void saveStrandFile(Strand strand, std::string path);
+  void saveStrandFile(Strand strand, std::string path, std::string previewPath);
   bool validateStrandJson(std::string path);
-  void loadStrandFile(std::string path);
+  std::vector<std::string> loadStrandFile(std::string path);
   
   AvailableStrand availableStrandFromPath(std::string path);
   
   // Icons
   std::vector<std::string> availableIconFilenames();
   
-  // Shaders
+  // Shader Configs
   std::vector<std::string> shaderConfigFoldersPaths();
   std::vector<AvailableShaderConfig> availableConfigsForShaderType(ShaderType type);
   std::string shaderConfigFolderForType(ShaderType type);
@@ -84,10 +87,13 @@ public:
   void saveDefaultConfigFile();
   void loadDefaultConfigFile();
 
+  
+  // Full Config
   void saveConfigFile(std::string path);
   void loadConfigFile(std::string path);
   json currentConfig();
   
+  // File Paths
   std::string nottawaFolderFilePath();
   std::string libraryFolderFilePath();
   std::string relativeFilePathWithinNottawaFolder(std::string filePath);

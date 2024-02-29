@@ -14,19 +14,31 @@
 
 using json = nlohmann::json;
 
+class WebcamVideoSourceSettings : public VideoSourceSettings {
+public:
+    // Additional settings for WebcamVideoSource
+    std::shared_ptr<Parameter> deviceId;
+
+    // Default constructor
+    WebcamVideoSourceSettings()
+  : VideoSourceSettings(), deviceId(std::make_shared<Parameter>("Webcam", 0.0, 0.0, 100.0)) {
+    parameters.push_back(deviceId);
+  }
+};
+
 class WebcamSource : public VideoSource {
   
 public:
-  WebcamSource(std::string id, std::string name, int deviceID) : VideoSource(id, name, VideoSource_webcam), deviceID(deviceID) {};
+  WebcamSource(std::string id, std::string name) : VideoSource(id, name, VideoSource_webcam), settings(std::make_shared<WebcamVideoSourceSettings>()) {};
   void setup() override;
   void saveFrame() override;
   json serialize() override;
   void load(json j) override;
   ofShader maskShader;
   void drawSettings() override;
-
+  std::shared_ptr<WebcamVideoSourceSettings> settings;
+  std::vector<std::string> deviceNames;
 private:
-  int deviceID;
   ofVideoGrabber grabber;
 };
 

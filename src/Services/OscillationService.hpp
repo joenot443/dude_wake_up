@@ -50,6 +50,8 @@ public:
   void loadOscillatorSettings(std::shared_ptr<Oscillator> o);
   
   void tickOscillators();
+
+  void clear();
   
   json config() override;
   void loadConfig(json j) override;

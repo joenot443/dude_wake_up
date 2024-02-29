@@ -126,10 +126,13 @@ public:
   std::shared_ptr<Shader> shaderForType(ShaderType type, std::string shaderId,
                                         json j);
 
+  
+  // Config / JSON
   void clear();
   json config() override;
   json connectionsConfig();
   void loadConfig(json j) override;
+  std::vector<std::string> idsFromLoadingConfig(json j);
   void loadConnectionsConfig(json j);
 };
 

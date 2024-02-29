@@ -6,7 +6,27 @@
 	<dict>
 		<key>Resources/NodeLayout.json</key>
 		<data>
-		ZCShLxOFjVLKmB5KXlTOxPG2hBo=
+		2KHQJLJe+AIuxXS3EtFnxyua1bQ=
+		</data>
+		<key>Resources/data/Audio Mountains -&gt; Mirror.jpg</key>
+		<data>
+		OUfy0Yx1FqKo/e5vzY+I+daNyFY=
+		</data>
+		<key>Resources/data/Audio Mountains -&gt; Mirror.png</key>
+		<data>
+		wLpMFtkNHXepqV5mggKYTZ820vk=
+		</data>
+		<key>Resources/data/Audio Waveform -&gt; Glitch -&gt; Mirror.png</key>
+		<data>
+		n/GHgxbu7cq+HhR82j5WWtbrqsQ=
+		</data>
+		<key>Resources/data/Basic Text -&gt; Mix -&gt; Clouds.png</key>
+		<data>
+		oxTeps2C1FDt89c5w6d0FvNaBBI=
+		</data>
+		<key>Resources/data/Clouds -&gt; 16bit.jpg</key>
+		<data>
+		5Wf/Y+c3mmV/VQu/Ams4ciAqJyE=
 		</data>
 		<key>Resources/data/MaterialIcons-Regular.ttf</key>
 		<data>
@@ -182,19 +202,15 @@
 		</data>
 		<key>Resources/data/images/.DS_Store</key>
 		<data>
-		S97Hg4RKe1OsSUWUc+sKctpxoJc=
+		9z8zjgcT2qXfyPCzEK/MDbWSzEk=
 		</data>
 		<key>Resources/data/images/basic/star.png</key>
 		<data>
 		BUUpFezHZQxeK1UvJpvW1l7/zCQ=
 		</data>
-		<key>Resources/data/images/star.png</key>
-		<data>
-		BUUpFezHZQxeK1UvJpvW1l7/zCQ=
-		</data>
 		<key>Resources/data/images/stylized/.DS_Store</key>
 		<data>
-		ih+/QEObuOXj/9J4E+IWvUEp7q8=
+		vB3saQDliZ0MjWw3YlHrSWFwrks=
 		</data>
 		<key>Resources/data/images/stylized/1.png</key>
 		<data>
@@ -1072,6 +1088,10 @@
 		<data>
 		MV4Tjz5SyS48vtqF/nEEwM788Mo=
 		</data>
+		<key>Resources/data/markdown/Cubify.md</key>
+		<data>
+		zQtHT/mCmaejwp6i9mx6t2yBeGc=
+		</data>
 		<key>Resources/data/markdown/DancingSquares.md</key>
 		<data>
 		nqw9U8ay+MfDrzPjuinZk49+POM=
@@ -1268,6 +1288,10 @@
 		<data>
 		cgzrzQCIjPQq8aYLhSUEHxZtM7c=
 		</data>
+		<key>Resources/data/markdown/SwirlingSoul.md</key>
+		<data>
+		Lqn5vTmKCIFox2RBaBlJY8G/8fw=
+		</data>
 		<key>Resources/data/markdown/TextureMask.md</key>
 		<data>
 		COM2csxoHgv0HUNjF7MQVcn2AFU=
@@ -1314,7 +1338,7 @@
 		</data>
 		<key>Resources/data/shaders/.DS_Store</key>
 		<data>
-		fBqLQU8pkjZC1TMtTD77FVv9z9g=
+		A649wnQlauCDRhUnhc2a31kcS3w=
 		</data>
 		<key>Resources/data/shaders/16bit.frag</key>
 		<data>
@@ -1444,6 +1468,14 @@
 		<data>
 		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
+		<key>Resources/data/shaders/Cubify.frag</key>
+		<data>
+		sjhGMFP38qkhX6xsjLI1B+e4v/I=
+		</data>
+		<key>Resources/data/shaders/Cubify.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
+		</data>
 		<key>Resources/data/shaders/CurlySquares.frag</key>
 		<data>
 		dnEVcgZ86eMS1lIOU0BtXd3vAjg=
@@ -1494,7 +1526,7 @@
 		</data>
 		<key>Resources/data/shaders/Feedback.frag</key>
 		<data>
-		FOXTQVLbOfZe7KbuvVIQR5w3Y8o=
+		xHcq1jIG1YPfVCNR3UyWzT9f+e8=
 		</data>
 		<key>Resources/data/shaders/Feedback.vert</key>
 		<data>
@@ -1542,7 +1574,7 @@
 		</data>
 		<key>Resources/data/shaders/Gameboy.frag</key>
 		<data>
-		Ml18ngZNW3fL/ehm+eJX77dONAw=
+		1ZDamIUt+EnprfLSVGLKY0aynGI=
 		</data>
 		<key>Resources/data/shaders/Gameboy.vert</key>
 		<data>
@@ -1821,6 +1853,14 @@
 		ipa34Z+ul8l/yM0Ua//Ep4Bip6w=
 		</data>
 		<key>Resources/data/shaders/StaticFrame.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
+		</data>
+		<key>Resources/data/shaders/SwirlingSoul.frag</key>
+		<data>
+		RkfV9VMZInLwXr9GUydSImtEBaM=
+		</data>
+		<key>Resources/data/shaders/SwirlingSoul.vert</key>
 		<data>
 		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
@@ -3015,20 +3055,46 @@
 			<key>requirement</key>
 			<string>identifier libsentry and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: Joe Crozier (7HTR557REQ)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
 		</dict>
-		<key>MacOS/dude_wake_upDebug</key>
-		<dict>
-			<key>cdhash</key>
-			<data>
-			DNtlVims9UIoYQGOY8UDZy1onHc=
-			</data>
-			<key>requirement</key>
-			<string>identifier "dude_wake_upDebug" and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: Joe Crozier (7HTR557REQ)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
-		</dict>
 		<key>Resources/NodeLayout.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			rd7o+rZywNJRoH4UKvBXAGMntTnfH7gkuRqbMASb4zA=
+			G8NrInpq1lhABZSYN5yDyf2XA1j2RETTOqC/cSJjWt8=
+			</data>
+		</dict>
+		<key>Resources/data/Audio Mountains -&gt; Mirror.jpg</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			1fvDDXmb2Ik58HsIPbRaWqVx3qCNzelyrWKjwuDz4r4=
+			</data>
+		</dict>
+		<key>Resources/data/Audio Mountains -&gt; Mirror.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			Keax0UhwTrpA+ctNXKJKWI9qb2SV6g2xcz/nuKcWpS0=
+			</data>
+		</dict>
+		<key>Resources/data/Audio Waveform -&gt; Glitch -&gt; Mirror.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			WemsNyHB1ywZu0wdgqlGYUBRfRr0rngi+Mg6WFRlZaU=
+			</data>
+		</dict>
+		<key>Resources/data/Basic Text -&gt; Mix -&gt; Clouds.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			cVl2PRDw9qSJOYvaGDslnqfaMqzBvymO6leSZCbu1Oo=
+			</data>
+		</dict>
+		<key>Resources/data/Clouds -&gt; 16bit.jpg</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			yAu7K8Socj6jmgSc15N+9At6Hg97UqKlrRyMjhE6Zhw=
 			</data>
 		</dict>
 		<key>Resources/data/MaterialIcons-Regular.ttf</key>
@@ -3319,13 +3385,6 @@
 			</data>
 		</dict>
 		<key>Resources/data/images/basic/star.png</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			mPqYuLx89IV5s44Tdgu6bjU97NCdqHGyuoMOiga9OLI=
-			</data>
-		</dict>
-		<key>Resources/data/images/star.png</key>
 		<dict>
 			<key>hash2</key>
 			<data>
@@ -4858,6 +4917,13 @@
 			sMLpu6UhO1/QoGH17S9FclQeDFbYy5AlqWpKgz36x0k=
 			</data>
 		</dict>
+		<key>Resources/data/markdown/Cubify.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			/51l9ojRdWNE+IWMJ1HInkuNOt3zlfk0nGkXXMMLxM8=
+			</data>
+		</dict>
 		<key>Resources/data/markdown/DancingSquares.md</key>
 		<dict>
 			<key>hash2</key>
@@ -5201,6 +5267,13 @@
 			+10VZ3hYliQo7y9FtE8WX/XNIxyv5nc4DHcr+V2SdwA=
 			</data>
 		</dict>
+		<key>Resources/data/markdown/SwirlingSoul.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			n16ORrHrUhXZWwktlCjlVeSAZm/c1E7E0KM8/7mQSes=
+			</data>
+		</dict>
 		<key>Resources/data/markdown/TextureMask.md</key>
 		<dict>
 			<key>hash2</key>
@@ -5502,6 +5575,20 @@
 			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
 			</data>
 		</dict>
+		<key>Resources/data/shaders/Cubify.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			B0A7MNNX6aQEeR/A2hzI4gnVqf3rPsAQcN1aLW8aW5o=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/Cubify.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			</data>
+		</dict>
 		<key>Resources/data/shaders/CurlySquares.frag</key>
 		<dict>
 			<key>hash2</key>
@@ -5590,7 +5677,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			blP5QZzdbzz9i94uEQj2g6buPNoQQub0SqardL/WFqw=
+			shyNvMhEYTyrTQrF+OUyT7OrdwEFZ1C9ux3PwNKa8mw=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Feedback.vert</key>
@@ -5674,7 +5761,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			G5IWJB6fPOxzPTSslK709HrHybITVU7M5Gq+SEtL2rE=
+			afe0LkpR2Yalucju64hyhGS1Ry25ysZMd3mA9vxqgZ0=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Gameboy.vert</key>
@@ -6161,6 +6248,20 @@
 			</data>
 		</dict>
 		<key>Resources/data/shaders/StaticFrame.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/SwirlingSoul.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			5R+DqYZa93BkNx/xNz289UV7iccRFy3gY3Xh6qBrojw=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/SwirlingSoul.vert</key>
 		<dict>
 			<key>hash2</key>
 			<data>

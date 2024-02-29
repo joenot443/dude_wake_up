@@ -7,6 +7,7 @@
 #include "ModulationService.hpp"
 #include "OscillationService.hpp"
 #include "ConfigService.hpp"
+#include "StrandService.hpp"
 #include "ParameterService.hpp"
 #include "ShaderChainer.hpp"
 #include "ShaderChainerService.hpp"
@@ -38,6 +39,7 @@ void MainApp::setup()
   MidiService::getService();
   AudioSourceService::getService();
   TextureService::getService();
+  StrandService::getService();
   LayoutStateService::getService();
   gui.setup();
   ImGui::CreateContext();
@@ -48,6 +50,7 @@ void MainApp::setup()
   mainStageView->setup();
   ConfigService::getService()->loadDefaultConfigFile();
   LibraryService::getService()->backgroundFetchLibraryFiles();
+  StrandService::getService()->setup();
 }
 
 void MainApp::update()

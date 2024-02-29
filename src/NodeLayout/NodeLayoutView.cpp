@@ -15,6 +15,7 @@
 #include "Strings.hpp"
 #include "ConfigService.hpp"
 #include "VideoSourceService.hpp"
+#include "StrandService.hpp"
 #include "Colors.hpp"
 #include "ofMain.h"
 #include <imgui.h>
@@ -384,12 +385,12 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
       VideoSourceService::getService()->addOutputWindow(node->connectable);
     }
     
-    // Draw a Record button, but only for the terminal shader
-    
-    if (CommonViews::IconButton(ICON_MD_CIRCLE, node->idName()))
-    {
-      //      recorder.setup(ShaderChainerService::getService()->shaderChainerForShaderId(node->shader->shaderId));
-    }
+//    // Draw a Record button, but only for the terminal shader
+//    
+//    if (CommonViews::IconButton(ICON_MD_CIRCLE, node->idName()))
+//    {
+//      //      recorder.setup(ShaderChainerService::getService()->shaderChainerForShaderId(node->shader->shaderId));
+//    }
   }
   // Otherwise draw some spacing
   else if (node->type == NodeTypeSource)
@@ -404,7 +405,7 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
 
   // Node Title
   ImGui::PushFont(FontService::getService()->h3);
-  ImGui::Text("%s", truncateString(formatString("%s", node->name.c_str()), 10).c_str());
+  ImGui::Text("%s", truncateString(formatString("%s", node->name.c_str()), 20).c_str());
   ImGui::PopFont();
   node->supportsMask() ? CommonViews::Spacing(28) : CommonViews::mSpacing();
   ImGuiEx_NextColumn();
@@ -591,24 +592,6 @@ void NodeLayoutView::handleDoubleClick()
 
 void NodeLayoutView::selectChainer(std::shared_ptr<Node> node)
 {
-  //  if (node->type == NodeTypeShader)
-  //  {
-  //    //    ed::SelectNode(node->id, true);
-  //    // Traverse parent direction
-  //    auto child = node->shader;
-  //    while (child->parent != nullptr)
-  //    {
-  //      child = child->parent;
-  //      auto toSelect = idNodeMap[child->shaderId];
-  //      ed::SelectNode(idNodeMap[child->shaderId]->id, true);
-  //    }
-  //
-  //    auto parent = node->shader;
-  ////    while (parent->next != nullptr)
-  ////    {
-  ////      parent = parent->next;
-  ////      ed::SelectNode(idNodeMap[parent->shaderId]->id, true);
-  ////    }
 }
 
 void NodeLayoutView::handleRightClick()
@@ -668,17 +651,19 @@ void NodeLayoutView::handleDeleteNode(std::shared_ptr<Node> node)
 
 void NodeLayoutView::handleSaveNode(std::shared_ptr<Node> node)
 {
-  Strand strand = ShaderChainerService::getService()->strandForConnectable( node->connectable);
-  
+    Strand strand = ShaderChainerService::getService()->strandForConnectable( node->connectable);
+    
     std::string defaultName =
-        ofGetTimestampString("%m-%d.json");
+        ofGetTimestampString("%m-%d");
   
     defaultName = formatString("%s_%s", strand.name.c_str(), defaultName.c_str());
-  
-    auto result = ofSystemSaveDialog(defaultName, "Save Strand", ConfigService::getService()->nottawaFolderFilePath());
+  std::string defaultJsonName = formatString("%s.json", defaultName.c_str());
+    
+    auto result = ofSystemSaveDialog(defaultJsonName, "Save Strand");
     if (result.bSuccess)
     {
-      ConfigService::getService()->saveStrandFile(strand, result.filePath);
+      std::string previewPath = StrandService::getService()->savePreview(defaultName, node->connectable);
+      ConfigService::getService()->saveStrandFile(strand, result.filePath, previewPath);
     }
 }
 
@@ -788,13 +773,19 @@ void NodeLayoutView::handleDropZone()
     if (const ImGuiPayload *payload =
         ImGui::AcceptDragDropPayload("AvailableStrand"))
     {
-      AvailableStrand availableStrand =
-      *(const struct AvailableStrand *)payload->Data;
+      std::string id = *(const std::string *)payload->Data;
+      std::shared_ptr<AvailableStrand> availableStrand = StrandService::getService()->availableStrandForId(id);
       
-      ConfigService::getService()->loadStrandFile(availableStrand.path);
-      
-      auto canvasPos = ed::ScreenToCanvas(ImVec2(ofGetMouseX(), ofGetMouseY()));
-      nodeDropLocation = std::make_unique<ImVec2>(canvasPos);
+      if (availableStrand != nullptr)
+      {
+        std::vector<std::string> ids = ConfigService::getService()->loadStrandFile(availableStrand->path);
+        if (ids.size() != 0) {
+          auto canvasPos = ed::ScreenToCanvas(ImVec2(ofGetMouseX(), ofGetMouseY()));
+          nodeDropLocation = std::make_unique<ImVec2>(canvasPos);
+          // Add all the node IDs generated in loading the Strand
+          unplacedNodeIds.insert(unplacedNodeIds.end(), ids.begin(), ids.end());
+        }
+      }
     }
     
     ImGui::EndDragDropTarget();
@@ -1031,9 +1022,12 @@ void NodeLayoutView::drawActionButtons()
   // Draw the reset button
   if (CommonViews::LargeIconButton(ICON_MD_RECYCLING, "reset"))
   {
+    idNodeMap.clear();
     ed::SetCurrentEditor(context);
     ShaderChainerService::getService()->clear();
     VideoSourceService::getService()->clear();
+    ConfigService::getService()->saveDefaultConfigFile();
+    OscillationService::getService()->clear();
     ed::SetCurrentEditor(nullptr);
   }
   ImGui::SameLine();

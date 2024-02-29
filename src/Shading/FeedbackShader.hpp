@@ -20,88 +20,97 @@ using json = nlohmann::json;
 
 // Feedback
 
-struct FeedbackSettings: public ShaderSettings {
-	public:
+struct FeedbackSettings : public ShaderSettings
+{
+public:
   int index;
   std::shared_ptr<Parameter> lumaKeyEnabled;
   std::string shaderId;
-  
+
   std::shared_ptr<Parameter> scale;
   std::shared_ptr<Oscillator> scaleOscillator;
-  
+
   std::shared_ptr<Parameter> xPosition;
   std::shared_ptr<Oscillator> xPositionOscillator;
-  
+
   std::shared_ptr<Parameter> yPosition;
   std::shared_ptr<Oscillator> yPositionOscillator;
 
   std::shared_ptr<Parameter> mainMix;
   std::shared_ptr<Oscillator> mainMixOscillator;
-  
+
   std::shared_ptr<Parameter> feedbackMix;
   std::shared_ptr<Oscillator> feedbackMixOscillator;
-  
+
   std::shared_ptr<Parameter> delayAmount;
   std::shared_ptr<Oscillator> delayAmountOscillator;
-  
+
   std::shared_ptr<Parameter> keyValue;
   std::shared_ptr<Oscillator> keyValueOscillator;
-  
+
   std::shared_ptr<Parameter> keyThreshold;
   std::shared_ptr<Oscillator> keyThresholdOscillator;
-  
+
+  std::shared_ptr<Parameter> rotation;
+  std::shared_ptr<Oscillator> rotationOscillator;
+
   std::shared_ptr<Parameter> sourceSelection;
-  
-  FeedbackSettings(std::string shaderId, json j) :
-  index(index),
-  mainMix(std::make_shared<Parameter>("Main Mix", 0.5, 0.0, 1.0)),
-  mainMixOscillator(std::make_shared<WaveformOscillator>(mainMix)),
-  feedbackMix(std::make_shared<Parameter>("Feedback Mix", 0.95, 0.0, 1.0)),
-  feedbackMixOscillator(std::make_shared<WaveformOscillator>(feedbackMix)),
-  
-  keyValue(std::make_shared<Parameter>("Key Value", 0.5, 0.0, 1.0)),
-  keyValueOscillator(std::make_shared<WaveformOscillator>(keyValue)),
-  keyThreshold(std::make_shared<Parameter>("Key Threshold", 0.5, 0.0, 1.0)),
-  keyThresholdOscillator(std::make_shared<WaveformOscillator>(keyThreshold)),
-  delayAmount(std::make_shared<Parameter>("Delay Amount", 20.0, 0.0, 28.0)),
-  delayAmountOscillator(std::make_shared<WaveformOscillator>(delayAmount)),
-  lumaKeyEnabled(std::make_shared<Parameter>("Luma Key Enabled", 0.0, 0.0, 0.0)),
-  xPosition(std::make_shared<Parameter>("xPosition", 0.0, -1.0, 1.0)),
-  yPosition(std::make_shared<Parameter>("yPosition", 0.0, -1.0, 1.0)),
-  xPositionOscillator(std::make_shared<WaveformOscillator>(xPosition)),
-  yPositionOscillator(std::make_shared<WaveformOscillator>(yPosition)),
-  scale(std::make_shared<Parameter>("Scale", 1.0, 0.0, 2.0)),
-  scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
-  sourceSelection(std::make_shared<Parameter>("source", 0.0, 0.0, 3.0)),
-  shaderId(shaderId),
-  ShaderSettings(shaderId, j) {
+
+  FeedbackSettings(std::string shaderId, json j) : index(index),
+                                                   mainMix(std::make_shared<Parameter>("Main Mix", 0.5, 0.0, 1.0)),
+                                                   mainMixOscillator(std::make_shared<WaveformOscillator>(mainMix)),
+                                                   feedbackMix(std::make_shared<Parameter>("Feedback Mix", 0.95, 0.0, 1.0)),
+                                                   feedbackMixOscillator(std::make_shared<WaveformOscillator>(feedbackMix)),
+                                                   rotation(std::make_shared<Parameter>("Rotation", 0.0, 0.0, TWO_PI)),
+                                                   rotationOscillator(std::make_shared<WaveformOscillator>(rotation)),
+
+                                                   keyValue(std::make_shared<Parameter>("Key Value", 0.5, 0.0, 1.0)),
+                                                   keyValueOscillator(std::make_shared<WaveformOscillator>(keyValue)),
+                                                   keyThreshold(std::make_shared<Parameter>("Key Threshold", 0.5, 0.0, 1.0)),
+                                                   keyThresholdOscillator(std::make_shared<WaveformOscillator>(keyThreshold)),
+                                                   delayAmount(std::make_shared<Parameter>("Delay Amount", 20.0, 0.0, 28.0)),
+                                                   delayAmountOscillator(std::make_shared<WaveformOscillator>(delayAmount)),
+                                                   lumaKeyEnabled(std::make_shared<Parameter>("Luma Key Enabled", 0.0, 0.0, 0.0)),
+                                                   xPosition(std::make_shared<Parameter>("xPosition", 0.0, -1.0, 1.0)),
+                                                   yPosition(std::make_shared<Parameter>("yPosition", 0.0, -1.0, 1.0)),
+                                                   xPositionOscillator(std::make_shared<WaveformOscillator>(xPosition)),
+                                                   yPositionOscillator(std::make_shared<WaveformOscillator>(yPosition)),
+                                                   scale(std::make_shared<Parameter>("Scale", 1.0, 0.0, 2.0)),
+                                                   scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
+                                                   sourceSelection(std::make_shared<Parameter>("source", 1.0, 0.0, 3.0)),
+                                                   shaderId(shaderId),
+                                                   ShaderSettings(shaderId, j)
+  {
     parameters = {mainMix, feedbackMix, keyValue, keyThreshold, delayAmount, lumaKeyEnabled, xPosition, yPosition, scale, sourceSelection};
     oscillators = {mainMixOscillator, feedbackMixOscillator, keyValueOscillator, keyThresholdOscillator, delayAmountOscillator, xPositionOscillator, yPositionOscillator, scaleOscillator};
 
     load(j);
-  registerParameters();
+    registerParameters();
   }
-  
-  void load(json j) override {
+
+  void load(json j) override
+  {
     ShaderSettings::load(j);
     registerParameters();
   }
 };
 
-struct FeedbackShader: Shader  {
+struct FeedbackShader : Shader
+{
   FeedbackSettings *settings;
   ofShader shader;
   ofFbo fboFeedback;
   std::shared_ptr<FeedbackSource> feedbackSource;
-  
-  FeedbackShader(FeedbackSettings *settings) : Shader(settings), settings(settings) {};
-  
+
+  FeedbackShader(FeedbackSettings *settings) : Shader(settings), settings(settings){};
+
   void shade();
   void clearFrameBuffer();
   void populateSource();
+  void drawFbo(std::shared_ptr<ofFbo> fbo);
   void drawFeedbackSourceSelector();
   int frameIndex();
-  
+
   virtual void drawPreview(ImVec2 pos, float scale);
   virtual void setup();
   virtual void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas);

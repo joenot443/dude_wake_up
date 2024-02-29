@@ -55,7 +55,7 @@ void FileSource::saveFrame()
                             settings->maskColor->color->data()[1],
                             settings->maskColor->color->data()[2], 1.0);
     maskShader.setUniform1f("tolerance", settings->maskTolerance->value);
-
+    maskShader.setUniform1i("invert", settings->invert->boolValue);
     ofClear(0, 0, 0, 255);
     ofClear(0, 0, 0, 0);
 

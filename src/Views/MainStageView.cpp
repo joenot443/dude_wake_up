@@ -32,7 +32,7 @@ void MainStageView::setup()
 {
   NodeLayoutView::getInstance()->setup();
   shaderBrowserView.setup();
-  fileBrowserView.setup();
+  strandBrowserView.setup();
   videoSourceBrowserView.setup();
   audioSourceBrowserView.setup();
 }
@@ -70,8 +70,8 @@ void MainStageView::draw()
   ImGui::EndChild();
 
   ImGui::BeginChild("##libraryBrowser", browserSize);
-  CommonViews::H3Title("Saved Chains");
-  fileBrowserView.draw();
+  CommonViews::H3Title("Saved Strands");
+  strandBrowserView.draw();
   ImGui::EndChild();
 
   drawMenu();
@@ -98,7 +98,7 @@ void MainStageView::drawMenu()
         std::string defaultName =
             ofGetTimestampString("%Y-%m-%d_%H-%M-%S.json");
         ofFileDialogResult result =
-            ofSystemSaveDialog(defaultName, "Save File", ConfigService::getService()->nottawaFolderFilePath());
+            ofSystemSaveDialog(defaultName, "Save File");
         if (result.bSuccess)
         {
           ConfigService::getService()->saveConfigFile(result.getPath());
@@ -172,7 +172,7 @@ void MainStageView::keyReleased(int key)
 {
   NodeLayoutView::getInstance()->keyReleased(key);
   
-  // If Space is pressed, tap the bpmTapper
+  // If Space is pressed, tap the bpmTapper 
   if (key == ' ')
   {
     bpmTapper.tap();

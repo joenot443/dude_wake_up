@@ -27,6 +27,8 @@ struct CommonViews
   static void Spacing(int n);
   static void HSpacing(int n);
 
+  static bool InvisibleIconButton(std::string id);
+  
   static bool IconButton(const char *icon, std::string id);
 
   static bool LargeIconButton(const char *icon, std::string id);

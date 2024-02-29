@@ -14,5 +14,6 @@ void VideoSource::drawMaskSettings() {
  if (settings->maskEnabled->boolValue) {
    CommonViews::Slider("Mask Tolerance", "##maskTolerance", settings->maskTolerance);
    CommonViews::ShaderColor(settings->maskColor);
+   CommonViews::ShaderCheckbox(settings->invert);
  }
 }

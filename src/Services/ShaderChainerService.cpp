@@ -7,6 +7,8 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "CubifyShader.hpp"
+#include "SwirlingSoulShader.hpp"
 #include "DoubleSwirlShader.hpp"
 #include "SmokeRingShader.hpp"
 #include "AudioCircleShader.hpp"
@@ -223,7 +225,7 @@ void ShaderChainerService::clear()
     it = shadersMap.erase(it);
   }
   shadersMap.clear();
-  
+  connectionMap.clear();
   // Clear the shaderChainerMap
   shaderIdShaderChainerMap.clear();
   videoSourceIdShaderChainerMap.clear();
@@ -231,6 +233,10 @@ void ShaderChainerService::clear()
 
 void ShaderChainerService::loadConfig(json data)
 {
+  idsFromLoadingConfig(data);
+}
+
+std::vector<std::string> ShaderChainerService::idsFromLoadingConfig(json j) {
   // Load the shaders included in the data.
   /* The shaders come in as an object formatted as:
    {
@@ -241,8 +247,8 @@ void ShaderChainerService::loadConfig(json data)
    ...remaining ShaderSettings
    }
    */
-  
-  for (auto const &[key, val] : data.items())
+  std::vector<std::string> ids;
+  for (auto const &[key, val] : j.items())
   {
     ShaderType shaderType = val["shaderType"];
     std::string shaderId = key;
@@ -260,7 +266,10 @@ void ShaderChainerService::loadConfig(json data)
     }
     
     shader->settings->load(val);
+    ids.push_back(shader->shaderId);
   }
+  
+  return ids;
 }
 
 void ShaderChainerService::loadConnectionsConfig(json j)
@@ -508,6 +517,18 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeCubify: {
+      auto settings = new CubifySettings(shaderId, shaderJson);
+      auto shader = std::make_shared<CubifyShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeSwirlingSoul: {
+      auto settings = new SwirlingSoulSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<SwirlingSoulShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeDoubleSwirl: {
       auto settings = new DoubleSwirlSettings(shaderId, shaderJson);
       auto shader = std::make_shared<DoubleSwirlShader>(settings);

@@ -15,6 +15,7 @@
 #include "VideoSource.hpp"
 #include "VideoSourceBrowserView.hpp"
 #include "SubmitFeedbackView.hpp"
+#include "StrandBrowserView.hpp"
 #include "ofMain.h"
 #include <stdio.h>
 
@@ -28,8 +29,8 @@ private:
   VideoSourceBrowserView videoSourceBrowserView = VideoSourceBrowserView();
   ShaderBrowserView shaderBrowserView = ShaderBrowserView();
   AudioSourceBrowserView audioSourceBrowserView = AudioSourceBrowserView();
+  StrandBrowserView strandBrowserView = StrandBrowserView({});
   OscillatorView oscillatorView = OscillatorView();
-  FileBrowserView fileBrowserView = FileBrowserView(FileBrowserType_JSON);
   SubmitFeedbackView submitFeedbackView = SubmitFeedbackView();
   
   void drawMenu();

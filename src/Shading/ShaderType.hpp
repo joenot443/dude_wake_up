@@ -84,6 +84,8 @@ enum ShaderType {
   ShaderTypeAudioCircle,
   ShaderTypeSmokeRing,
   ShaderTypeDoubleSwirl,
+  ShaderTypeSwirlingSoul,
+  ShaderTypeCubify,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -128,6 +130,7 @@ static const ShaderType AvailableTransformShaderTypes[] = {
 };
 
 static const ShaderType AvailableFilterShaderTypes[] = {
+  ShaderTypeCubify,
   ShaderTypeCanny,
   ShaderTypeGameboy,
   ShaderTypeRainbowRotator, // Generated
@@ -168,18 +171,21 @@ static std::vector<ShaderType> AllShaderTypes() {
 }
 
 static std::string shaderTypeName(ShaderType type) {
-  switch (type) {
-    // Shader names
+  switch (type) { // hygen-source
+    case ShaderTypeCubify:
+      return "Cubify";
+    case ShaderTypeSwirlingSoul:
+      return "Swirling Soul";
     case ShaderTypeDoubleSwirl:
-      return "DoubleSwirl";
+      return "Double Swirl";
     case ShaderTypeSmokeRing:
-      return "SmokeRing";
+      return "Smoke Ring";
     case ShaderTypeAudioCircle:
-      return "AudioCircle";
+      return "Audio Circle";
     case ShaderTypeLimbo:
       return "Limbo";
     case ShaderTypeTextureMask:
-      return "TextureMask";
+      return "Texture Mask";
     case ShaderTypeSnowfall:
       return "Snowfall";
     case ShaderTypeCanny:
@@ -187,7 +193,7 @@ static std::string shaderTypeName(ShaderType type) {
     case ShaderTypeVHS:
       return "VHS";
     case ShaderTypeCirclePath:
-      return "CirclePath";
+      return "Circle Path";
     case ShaderTypeBounce:
       return "Bounce";
     case ShaderTypeVertex:
@@ -197,17 +203,17 @@ static std::string shaderTypeName(ShaderType type) {
     case ShaderTypePaint:
       return "Paint";
     case ShaderTypeLumaFeedback:
-      return "LumaFeedback";
+      return "Luma Feedback";
     case ShaderTypeGameboy:
       return "Gameboy";
     case ShaderTypeStaticFrame:
-      return "StaticFrame";
+      return "Static Frame";
     case ShaderTypeSlidingFrame:
-      return "SlidingFrame";
+      return "Sliding Frame";
     case ShaderTypeMinMixer:
-      return "MinMixer";
+      return "Min Mixer";
     case ShaderTypeSolidColor:
-      return "SolidColor";
+      return "Solid Color";
     case ShaderType16bit:
       return "16bit";
     case ShaderTypeHilbert:
@@ -215,37 +221,37 @@ static std::string shaderTypeName(ShaderType type) {
     case ShaderTypeWarp:
       return "Warp";
     case ShaderTypeFrequencyVisualizer:
-      return "FrequencyVisualizer";
+      return "Frequency Visualizer";
     case ShaderTypeColorKeyMaskMaker:
-      return "ColorMask";
+      return "Color Mask";
     case ShaderTypeCurlySquares:
-      return "CurlySquares";
+      return "Curly Squares";
     case ShaderTypePlasmaTwo:
-      return "PlasmaTwo";
+      return "Plasma Two";
     case ShaderTypeDancingSquares:
-      return "DancingSquares";
+      return "Dancing Squares";
     case ShaderTypeLumaMaskMaker:
-      return "LumaMask";
+      return "Luma Mask";
     case ShaderTypeMask:
       return "Mask";
     case ShaderTypeCircle:
       return "Circle";
     case ShaderTypeCrosshatch:
-      return "Crosshatch";
+      return "Cross hatch";
     case ShaderTypeHalfTone:
-      return "HalfTone";
+      return "Half Tone";
     case ShaderTypeTissue:
       return "Tissue";
     case ShaderTypePsycurves:
       return "Psycurves";
     case ShaderTypeFishEye:
-      return "FishEye";
+      return "Fish Eye";
     case ShaderTypeColorPass:
-      return "ColorPass";
+      return "Color Pass";
     case ShaderTypeSobel:
       return "Sobel";
     case ShaderTypeTriangleMap:
-      return "TriangleMap";
+      return "Triangle Map";
     case ShaderTypeLiquid:
       return "Liquid";
     case ShaderTypeDisco:
@@ -253,11 +259,11 @@ static std::string shaderTypeName(ShaderType type) {
     case ShaderTypeOctahedron:
       return "Octahedron";
     case ShaderTypeVanGogh:
-      return "VanGogh";
+      return "Van Gogh";
     case ShaderTypeRubiks:
       return "Rubiks";
     case ShaderTypeRainbowRotator:
-      return "RainbowRotator";
+      return "Rainbow Rotator";
     case ShaderTypeDither:
       return "Dither";
     case ShaderTypeMountains:
@@ -265,11 +271,11 @@ static std::string shaderTypeName(ShaderType type) {
     case ShaderTypeGalaxy:
       return "Galaxy";
     case ShaderTypeAudioMountains:
-      return "AudioMountains";
+      return "Audio Mountains";
     case ShaderTypeAudioBumper:
-      return "AudioBumper";
+      return "Audio Bumper";
     case ShaderTypeAudioWaveform:
-      return "AudioWaveform";
+      return "Audio Waveform";
     case ShaderTypeRings:
       return "Rings";
     case ShaderTypeSlider:
@@ -277,7 +283,7 @@ static std::string shaderTypeName(ShaderType type) {
     case ShaderTypeWobble:
       return "Wobble";
     case ShaderTypeRGBShift:
-      return "RGBShift";
+      return "RGB Shift";
     case ShaderTypeNone:
       return "Select Shader";
     case ShaderTypeHSB:
@@ -312,9 +318,9 @@ static std::string shaderTypeName(ShaderType type) {
       return "Clouds";
     case ShaderTypeMelter:
       return "Melter";
+    default:
+      return "Unknown Shader"; // Default case if none of the cases match
   }
-
-  return "";
 }
 
 static bool shaderTypeSupportsAux(ShaderType type) {

@@ -4,6 +4,7 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "SwirlingSoulShader.hpp"
 #include "DoubleSwirlShader.hpp"
 #include "SmokeRingShader.hpp"
 #include "AudioCircleShader.hpp"
@@ -78,6 +79,7 @@ enum ShaderSourceType {
   ShaderSource_AudioCircle, //source enum,
   ShaderSource_SmokeRing, //source enum,
   ShaderSource_DoubleSwirl, //source enum,
+  ShaderSource_SwirlingSoul, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -112,11 +114,14 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_AudioCircle, // Available
   ShaderSource_SmokeRing, // Available
   ShaderSource_DoubleSwirl, // Available
+  ShaderSource_SwirlingSoul, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
 // shaderTypeForShaderSourceType
+  case ShaderSource_SwirlingSoul: //type enum
+    return ShaderTypeSwirlingSoul;
   case ShaderSource_DoubleSwirl: //type enum
     return ShaderTypeDoubleSwirl;
   case ShaderSource_SmokeRing: //type enum
@@ -214,6 +219,7 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     
     
   // Trippy
+  case ShaderSource_SwirlingSoul: // Name
   case ShaderSource_Hilbert: // Name
   case ShaderSource_Warp: // Name
   case ShaderSource_CurlySquares: // Name
@@ -236,39 +242,41 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
 static std::string shaderSourceTypeName(ShaderSourceType nameType) {
   switch (nameType) {
   // Shader Names
-  case ShaderSource_DoubleSwirl: // Name  
-    return "DoubleSwirl"; // DoubleSwirl
-  case ShaderSource_SmokeRing: // Name  
-    return "SmokeRing"; // SmokeRing
-  case ShaderSource_AudioCircle: // Name  
-    return "AudioCircle"; // AudioCircle
-  case ShaderSource_Limbo: // Name  
+  case ShaderSource_SwirlingSoul: // Name  
+    return "Swirling Soul"; // SwirlingSoul
+  case ShaderSource_DoubleSwirl: // Name
+    return "Double Swirl"; // DoubleSwirl
+  case ShaderSource_SmokeRing: // Name
+    return "Smoke Ring"; // SmokeRing
+  case ShaderSource_AudioCircle: // Name
+    return "Audio Circle"; // AudioCircle
+  case ShaderSource_Limbo: // Name
     return "Limbo"; // Limbo
   case ShaderSource_Vertex: // Name  
     return "Vertex"; // Vertex
   case ShaderSource_SolidColor: // Name  
-    return "SolidColor"; // SolidColor
-  case ShaderSource_Hilbert: // Name  
+    return "Solid Color"; // SolidColor
+  case ShaderSource_Hilbert: // Name
     return "Hilbert"; // Hilbert
   case ShaderSource_Warp: // Name  
     return "Warp"; // Warp
   case ShaderSource_FrequencyVisualizer: // Name  
-    return "FrequencyVisualizer"; // FrequencyVisualizer
-  case ShaderSource_CurlySquares: // Name  
-    return "CurlySquares"; // CurlySquares
-  case ShaderSource_PlasmaTwo: // Name  
-    return "PlasmaTwo"; // PlasmaTwo
-  case ShaderSource_DancingSquares: // Name  
-    return "DancingSquares"; // DancingSquares
-  case ShaderSource_Circle: // Name  
+    return "Frequency Visualizer"; // FrequencyVisualizer
+  case ShaderSource_CurlySquares: // Name
+    return "Curly Squares"; // CurlySquares
+  case ShaderSource_PlasmaTwo: // Name
+    return "Plasma Two"; // PlasmaTwo
+  case ShaderSource_DancingSquares: // Name
+    return "Dancing Squares"; // DancingSquares
+  case ShaderSource_Circle: // Name
     return "Circle"; // Circle
   case ShaderSource_Tissue: // Name  
     return "Tissue"; // Tissue
   case ShaderSource_Psycurves: // Name  
     return "Psycurves"; // Psycurves
   case ShaderSource_TriangleMap: // Name  
-    return "TriangleMap"; // TriangleMap
-  case ShaderSource_Disco: // Name  
+    return "Triangle Map"; // TriangleMap
+  case ShaderSource_Disco: // Name
     return "Disco"; // Disco
   case ShaderSource_Octahedron: // Name  
     return "Octahedron"; // Octahedron
@@ -322,6 +330,12 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_SwirlingSoul: { // Settings
+      auto settings = new SwirlingSoulSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<SwirlingSoulShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_DoubleSwirl: { // Settings
       auto settings = new DoubleSwirlSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<DoubleSwirlShader>(settings);
@@ -561,7 +575,7 @@ public:
                               settings->maskColor->color->data()[1],
                               settings->maskColor->color->data()[2], 1.0);
       maskShader.setUniform1f("tolerance", settings->maskTolerance->value);
-      
+      maskShader.setUniform1i("invert", settings->invert->boolValue);
       ofClear(0, 0, 0, 255);
       ofClear(0, 0, 0, 0);
       

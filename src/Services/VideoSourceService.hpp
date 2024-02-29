@@ -95,6 +95,7 @@ public:
   void clear();
   json config() override;
   void loadConfig(json j) override;
+  std::vector<std::string> idsFromLoadingConfig(json j);
   void appendConfig(json j);
 };
 

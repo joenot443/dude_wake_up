@@ -7,17 +7,24 @@
 
 #include "WebcamSource.hpp"
 #include "NodeLayoutView.hpp"
+#include "CommonViews.hpp"
 
 void WebcamSource::setup() {
-  auto devices = grabber.listDevices();
-  
-  grabber.setDeviceID(deviceID);
+  grabber.close();
+  grabber.setDeviceID(settings->deviceId->intValue);
   grabber.setDesiredFrameRate(30);
   grabber.setPixelFormat(OF_PIXELS_RGBA);
   grabber.setup(settings->width->value, settings->height->value);
   fbo->allocate(settings->width->value, settings->height->value);
   maskShader.load("shaders/ColorKeyMaskMaker");
 
+  // Collect the device names
+  deviceNames.clear();
+  std::vector<ofVideoDevice> devices = grabber.listDevices();
+  for (int i = 0; i < devices.size(); i++)
+  {
+    deviceNames.push_back(devices[i].deviceName);
+  }
 }
 
 void WebcamSource::saveFrame() {
@@ -39,7 +46,7 @@ void WebcamSource::saveFrame() {
                               settings->maskColor->color->data()[1],
                               settings->maskColor->color->data()[2], 1.0);
       maskShader.setUniform1f("tolerance", settings->maskTolerance->value);
-
+      maskShader.setUniform1i("invert", settings->invert->boolValue);
       ofClear(0, 0, 0, 255);
       ofClear(0, 0, 0, 0);
 
@@ -63,7 +70,6 @@ void WebcamSource::load(json j) {
     return;
   }
   
-  deviceID = j["deviceId"];
   id = j["id"];
   sourceName = j["sourceName"];
   settings->load(j["settings"]);
@@ -71,7 +77,6 @@ void WebcamSource::load(json j) {
 
 json WebcamSource::serialize() {
   json j;
-  j["deviceId"] = deviceID;
   j["id"] = id;
   j["sourceName"] = sourceName;
   j["videoSourceType"] = VideoSource_webcam;
@@ -85,5 +90,9 @@ json WebcamSource::serialize() {
 }
 
 void WebcamSource::drawSettings() {
+  // Collect the names 
+  if (CommonViews::ShaderOption(settings->deviceId, deviceNames)) {
+    setup();
+  }
   drawMaskSettings();
 }

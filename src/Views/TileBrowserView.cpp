@@ -61,18 +61,11 @@ void TileBrowserView::draw()
 
       ImGui::SetCursorPosX(xPos);
 
-      // TITLE
-      if (tile->name.size() > 10)
-      {
-        // Push a smaller font size
-        ImGui::PushFont(FontService::getService()->sm);
-        ImGui::Button(tile->name.c_str(), TileSize);
-        ImGui::PopFont();
-      }
-      else
-      {
-        ImGui::Button(tile->name.c_str(), TileSize);
-      }
+
+      // Push a smaller font size
+      ImGui::PushFont(FontService::getService()->sm);
+      ImGui::Button(truncateString(tile->name, 10).c_str(), TileSize);
+      ImGui::PopFont();
 
       tile->dragCallback();
 
@@ -96,6 +89,8 @@ void TileBrowserView::draw()
         {
           ImGui::OpenPopup(popupId.c_str());
         }
+      } else {
+        CommonViews::InvisibleIconButton(formatString("##%s_invisible_icon", tile->name.c_str()));
       }
       // PROGRESS INDICATOR
       // If we have a LibraryFile as our TileItem, we may need to draw the progress of its download.
@@ -109,7 +104,7 @@ void TileBrowserView::draw()
         }
         else if (file->isDownloading)
         {
-          ImGui::Text(formatString("%.0f %", libraryTileItem->libraryFile->progress * 100.0).c_str());
+          ImGui::Text("%s", formatString("%.0f %", libraryTileItem->libraryFile->progress * 100.0).c_str());
         }
         else
         {

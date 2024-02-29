@@ -116,7 +116,8 @@
       "scoped_allocator": "cpp",
       "shared_mutex": "cpp",
       "unordered_set": "cpp",
-      "__memory": "cpp"
+      "__memory": "cpp",
+      "source_location": "cpp"
     },
     "editor.defaultFormatter": "xaver.clang-format",
     "[cpp]": {

@@ -429,6 +429,11 @@ bool CommonViews::ShaderOption(std::shared_ptr<Parameter> param, std::vector<std
   return false;
 }
 
+bool CommonViews::InvisibleIconButton(std::string id)
+{
+  ImGui::InvisibleButton(id.c_str(), ImVec2(16., 16.));
+}
+
 
 bool CommonViews::IconButton(const char *icon, std::string id)
 {
