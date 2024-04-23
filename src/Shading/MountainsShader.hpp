@@ -1,10 +1,3 @@
-//
-//  MountainsShader.hpp
-//  dude_wake_up
-//
-//  Created by Joe Crozier on 8/30/22.
-//
-
 #ifndef MountainsShader_hpp
 #define MountainsShader_hpp
 
@@ -12,15 +5,22 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
-#include "ShaderConfigSelectionView.hpp"
+#include "Parameter.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct MountainsSettings: public ShaderSettings {
-	public:
-  MountainsSettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId, j) {
-    
+  public:
+  std::shared_ptr<Parameter> color;
+  std::shared_ptr<Parameter> alpha;
+
+  MountainsSettings(std::string shaderId, json j, std::string name) :
+  color(std::make_shared<Parameter>("Color", 1.0, -1.0, 2.0)),
+  alpha(std::make_shared<Parameter>("Alpha", 1.0, 0.0, 1.0)),
+  ShaderSettings(shaderId, j, name) {
+    parameters = { color, alpha };
+    load(j);
+    registerParameters();
   };
 };
 
@@ -31,11 +31,11 @@ public:
   MountainsShader(MountainsSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    #ifdef TESTING
-shader.load("shaders/Mountains");
+#ifdef TESTING
+    shader.load("shaders/Mountains");
 #endif
 #ifdef RELEASE
-shader.load("shaders/Mountains");
+    shader.load("shaders/Mountains");
 #endif
   }
 
@@ -45,6 +45,7 @@ shader.load("shaders/Mountains");
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
+    shader.setUniform4f("color", settings->color->color->data()[0], settings->color->color->data()[1], settings->color->color->data()[2], settings->alpha->value);
     frame->draw(0, 0);
     shader.end();
     canvas->end();
@@ -59,6 +60,9 @@ shader.load("shaders/Mountains");
   }
 
   void drawSettings() override {
+    CommonViews::H3Title("Mountains");
+    CommonViews::ShaderColor(settings->color);
+    CommonViews::ShaderParameter(settings->alpha, nullptr);
   }
 };
 

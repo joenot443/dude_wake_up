@@ -18,8 +18,8 @@
 
 struct DancingSquaresSettings: public ShaderSettings {
 	public:
-  DancingSquaresSettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId, j) {
+  DancingSquaresSettings(std::string shaderId, json j, std::string name) :
+  ShaderSettings(shaderId, j, name) {
     parameters = {};
     oscillators = {};
     load(j);

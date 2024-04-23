@@ -6,6 +6,7 @@
 //
 
 #include "OutputWindow.hpp"
+#include "VideoSourceService.hpp"
 
 void OutputWindow::setup() {}
 
@@ -18,6 +19,11 @@ void OutputWindow::draw()
   fbo->draw(0, 0, ofGetWidth(), ofGetHeight());
 }
 
-void OutputWindow::setSource(std::shared_ptr<ofFbo> newSource) {
-  fbo = newSource;
+
+void OutputWindow::keyReleased(int key) {
+  // If the key released is ESC, close the output window
+  if (key == OF_KEY_ESC) {
+    VideoSourceService::getService()->closeOutputWindow(shared_from_this());
+    ofGetCurrentWindow()->setWindowShouldClose();
+  }
 }

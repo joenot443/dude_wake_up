@@ -22,10 +22,10 @@ struct DitherSettings : public ShaderSettings {
 
   std::shared_ptr<Oscillator> shapeOscillator;
 
-  DitherSettings(std::string shaderId, json j)
+  DitherSettings(std::string shaderId, json j, std::string name)
       : shape(std::make_shared<Parameter>("shape", 0.0, 0.0, 1.0)),
         shapeOscillator(std::make_shared<WaveformOscillator>(shape)),
-        ShaderSettings(shaderId, j) {
+        ShaderSettings(shaderId, j, name) {
     parameters = {shape};
     oscillators = {shapeOscillator};
   };

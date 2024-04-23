@@ -33,7 +33,7 @@ struct MirrorSettings : public ShaderSettings {
 
   std::shared_ptr<Parameter> lockXY;
 
-  MirrorSettings(std::string shaderId, json j)
+  MirrorSettings(std::string shaderId, json j, std::string name)
       : shaderId(shaderId),
         lockXY(std::make_shared<Parameter>("lockXY", 0.0, 1.0, 1.0)),
         xOffset(
@@ -46,7 +46,7 @@ struct MirrorSettings : public ShaderSettings {
                                                    1.0, 1.0, 0.0)),
         xOffsetOscillator(std::make_shared<WaveformOscillator>(xOffset)),
         yOffsetOscillator(std::make_shared<WaveformOscillator>(yOffset)),
-        ShaderSettings(shaderId, j) {
+        ShaderSettings(shaderId, j, name) {
     parameters = {lockXY, xOffset, yOffset, mirrorXEnabled, mirrorYEnabled};
     oscillators = {xOffsetOscillator, yOffsetOscillator};
     load(j);

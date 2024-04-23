@@ -16,14 +16,25 @@
 static const std::string ShowAudioSettingsJsonKey = "showAudioSettings";
 static const std::string LibraryPathJsonKey = "libraryPath";
 static const std::string ColorHistoryJsonKey = "colorHistory";
+static const std::string MidiEnabledJsonKey = "midiEnabled";
+static const std::string StageModeEnabled = "stageModeEnabled";
 
 class LayoutStateService: public ConfigurableService {
 public:
   LayoutStateService(){};
 
   bool showAudioSettings = false;
+  
+  bool midiEnabled = false;
+  
+  bool stageModeEnabled = false;
+  
   std::string libraryPath = ConfigService::getService()->nottawaFolderFilePath();
   std::vector<std::array<float, 3>> colorHistory = std::vector<std::array<float, 3>>(1, std::array<float, 3>{0.0f, 0.0f, 0.0f});
+  
+  float audioSettingsViewHeight();
+  
+  ofRectangle canvasRect();
   
   void updateLibraryPath(std::string path);
   

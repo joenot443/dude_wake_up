@@ -18,8 +18,8 @@
 
 struct PsycurvesSettings: public ShaderSettings {
 	public:
-  PsycurvesSettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId, j) {
+  PsycurvesSettings(std::string shaderId, json j, std::string name) :
+  ShaderSettings(shaderId, j, name) {
     
   };
 };

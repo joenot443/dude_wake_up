@@ -115,7 +115,7 @@ std::shared_ptr<VideoSource> VideoSourceService::defaultVideoSource()
 
 std::shared_ptr<VideoSourceSettings> VideoSourceService::defaultVideoSourceSettings()
 {
-  return std::make_shared<VideoSourceSettings>();
+  return std::make_shared<VideoSourceSettings>(UUID::generateUUID(), 0);
 }
 
 // Add a video source to the map
@@ -213,8 +213,12 @@ std::vector<std::string> VideoSourceService::getWebcamNames()
 std::shared_ptr<VideoSource> VideoSourceService::addWebcamVideoSource(std::string name, int deviceId, ImVec2 origin, std::string id, json j)
 {
   std::shared_ptr<WebcamSource> videoSource = std::make_shared<WebcamSource>(id, name);
-  videoSource->settings->deviceId->setValue(static_cast<float>(deviceId));
   videoSource->origin = origin;
+  videoSource->settings->deviceId->intValue = deviceId;
+//  if (j["settings"].is_object()) {
+//    videoSource->settings->load(j["settings"]);
+//  }
+
   addVideoSource(videoSource, id, j);
   return videoSource;
 }
@@ -279,7 +283,7 @@ std::shared_ptr<VideoSource> VideoSourceService::addTextVideoSource(std::string 
 // Adds an OutputWindow for the passed in VideoSource
 void VideoSourceService::addOutputWindow(std::shared_ptr<Connectable> connectable)
 {
-  std::shared_ptr<OutputWindow> outputWindow = std::make_shared<OutputWindow>(connectable->frame());
+  std::shared_ptr<OutputWindow> outputWindow = std::make_shared<OutputWindow>(connectable->frame(), connectable);
   outputWindow->setup();
   ofGLFWWindowSettings settings;
   settings.shareContextWith = ofGetCurrentWindow();
@@ -296,7 +300,8 @@ void VideoSourceService::updateOutputWindow(std::shared_ptr<Connectable> oldConn
     return;
 
   std::shared_ptr<OutputWindow> outputWindow = outputWindows[oldConnectable->connId()];
-  outputWindow->setSource(newConnectable->frame());
+  outputWindow->fbo = newConnectable->frame();
+  outputWindow->connectable = newConnectable;
   outputWindows.erase(oldConnectable->connId());
 
   outputWindows[newConnectable->connId()] = outputWindow;
@@ -305,6 +310,10 @@ void VideoSourceService::updateOutputWindow(std::shared_ptr<Connectable> oldConn
 bool VideoSourceService::hasOutputWindowForConnectable(std::shared_ptr<Connectable> connectable)
 {
   return outputWindows.count(connectable->connId()) != 0;
+}
+
+void VideoSourceService::closeOutputWindow(std::shared_ptr<OutputWindow> window) {
+  outputWindows.erase(window->connectable->connId());
 }
 // ConfigurableService
 
@@ -356,7 +365,7 @@ void VideoSourceService::appendConfig(json j)
     addFileVideoSource(j["sourceName"], j["path"], position, sourceId, j);
     return;
   case VideoSource_webcam:
-    addWebcamVideoSource(j["sourceName"], j["deviceId"], position, sourceId, j);
+    addWebcamVideoSource(j["sourceName"], 0, position, sourceId, j);
     return;
   case VideoSource_shader:
     addShaderVideoSource(j["shaderSourceType"], position, sourceId, j);
@@ -375,8 +384,6 @@ void VideoSourceService::appendConfig(json j)
   case VideoSource_empty:
     break;
   }
-
-  // Create an implicit
 }
 
 void VideoSourceService::clear()

@@ -3,6 +3,7 @@
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
+uniform vec4 color;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -133,11 +134,6 @@ void main() {
   }
   col = sqrt(clamp(acc, 0., 1.));
   // Background
-//  vec3 bkg = vec3(0.32, 0.36, 0.4) + p.y * 0.1;
-//  col += bkg;
-  // Vignetting
-  vec2 r = -1.0 + 2.0 * (uv);
-  float vb = max(abs(r.x), abs(r.y));
-  col *= (0.15 + 0.85 * (1.0 - exp(-(1.0 - vb) * 30.0)));
-  outputColor = vec4(col, 1.0);
+  col += color.xyz;
+  outputColor = vec4(col, color.a);
 }

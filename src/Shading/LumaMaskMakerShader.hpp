@@ -26,7 +26,7 @@ struct LumaMaskMakerSettings: public ShaderSettings {
   std::shared_ptr<Parameter> flip;
   std::shared_ptr<Parameter> drawInput;
   
-  LumaMaskMakerSettings(std::string shaderId, json j) :
+  LumaMaskMakerSettings(std::string shaderId, json j, std::string name) :
   upper(std::make_shared<Parameter>("upper", 1.0, 0.0, 1.0)),
   lower(std::make_shared<Parameter>("lower", 0.5, 0.0, 1.0)),
   flip(std::make_shared<Parameter>("invert", 0.0, 0.0, 1.0)),

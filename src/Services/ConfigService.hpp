@@ -29,6 +29,7 @@ static const std::string ConnectionsJsonKey = "connections";
 static const std::string NameJsonKey = "name";
 static const std::string PreviewPathJsonKey = "preview";
 static const std::string LayoutJsonKey = "layout";
+static const std::string ParametersJsonKey = "parameters";
 static const std::string StrandsJsonKey = "strands";
 
 static const std::string ConfigTypeKey = "configType";

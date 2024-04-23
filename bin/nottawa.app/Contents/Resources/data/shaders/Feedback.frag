@@ -10,6 +10,7 @@ out vec4 outputColor;
 uniform float mainMix;
 uniform float feedbackMix;
 uniform int fbType;
+uniform int priority;
 
 uniform float scale;
 uniform float rotate;
@@ -40,10 +41,6 @@ vec3 hsb2rgb(in vec3 c) {
 
 vec4 mixStandard(in vec4 mainColor, in vec4 fbColor) {
   vec4 overlayColor = fbColor;
-
-  //  if (overlayEnabled == 1) {
-  //    overlayColor = texture(overlayTexture, coord);
-  //  }
 
   // Empty feedback
   if (fbColor.a < 0.5) {
@@ -118,6 +115,12 @@ void main() {
   // If both are empty
   if (mainColor.a < 0.0001 && fbColor.a < 0.0001) {
     outputColor = outColor;
+    return;
+  }
+  
+  // If we have priority turned on and we're in a main pixel
+  if (mainColor.a > 0.001 && priority > 0) {
+    outputColor = mainColor;
     return;
   }
 

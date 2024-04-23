@@ -11,20 +11,21 @@
 #include "ImGuiExtensions.hpp"
 #include "CommonViews.hpp"
 #include "TextEditorView.hpp"
+#include "UUID.hpp"
 #include "dear_widgets.h"
 #include "ConfigService.hpp"
 
 TextEditorView::TextEditorView(std::shared_ptr<DisplayText> displayText)
-: displayText(displayText), selectedFontIndex(0) {
+: displayText(displayText), selectedFontIndex(0), id(UUID::generateUUID()) {
   ofDirectory fontsDir = ofDirectory("fonts/editor");
   fontsDir.listDir();
   
   
   for (auto& file : fontsDir.getFiles()) {
-    fonts.push_back(Font(file.getFileName(), file.getAbsolutePath()));
+    fonts.push_back(Font(file.getFileName()));
   }
   displayText->font = fonts[selectedFontIndex];
-  font.load(displayText->font.path, displayText->fontSize);
+  font.load(displayText->font.path(), displayText->fontSize);
 }
 
 void TextEditorView::draw() {
@@ -53,34 +54,12 @@ void TextEditorView::draw() {
   CommonViews::sSpacing();
   ImGui::Text("Font Size");
   ImGui::SameLine();
-  if (ImGui::SliderInt("##FontSizeValue", &currentFontSize, 1, 100)) {
+  if (ImGui::SliderInt("##FontSizeValue", &currentFontSize, 1, 300)) {
     displayText->fontSize = currentFontSize;
-    font.load(displayText->font.path, displayText->fontSize);
+    font.load(displayText->font.path(), displayText->fontSize);
   }
   
-  CommonViews::sSpacing();
-  ImGui::Text("Position");
-  ImGui::SameLine();
-  drawPositionSlider();
-  
-  ImGui::Text("X Oscillator");
-  ImGui::SameLine();
-  CommonViews::OscillateButton("##xTextOsc", displayText->xPositionOscillator, displayText->xPosition);
-  if (displayText->xPositionOscillator->enabled->boolValue) {
-    ImGui::SameLine();
-    CommonViews::HSpacing(5);
-    CommonViews::OscillatorWindow(displayText->xPositionOscillator, displayText->xPosition);
-    ImGui::NewLine();
-  }
-  
-  ImGui::Text("Y Oscillator");
-  ImGui::SameLine();
-  CommonViews::OscillateButton("##yTextOsc", displayText->yPositionOscillator, displayText->yPosition);
-  if (displayText->yPositionOscillator->enabled->boolValue) {
-    ImGui::SameLine();
-    CommonViews::HSpacing(5);
-    CommonViews::OscillatorWindow(displayText->yPositionOscillator, displayText->yPosition);
-  }
+  CommonViews::MultiSlider("Position", displayText->id, displayText->xPosition, displayText->yPosition, displayText->xPositionOscillator, displayText->yPositionOscillator);
   
   // Font selection
   CommonViews::sSpacing();
@@ -99,9 +78,4 @@ void TextEditorView::draw() {
     }
     ImGui::EndCombo();
   }
-}
-
-
-void TextEditorView::drawPositionSlider() {
-  ImGuiExtensions::Slider2DFloat("", &displayText->xPosition->value, &displayText->yPosition->value, 0., 1., 0., 1., 0.5);
 }

@@ -21,9 +21,9 @@ class AudioWaveformSettings: public ShaderSettings {
 	public:
   std::string shaderId;
   
-  AudioWaveformSettings(std::string shaderId, json j) :
+  AudioWaveformSettings(std::string shaderId, json j, std::string name) :
   shaderId(shaderId),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, name) {
     parameters = {};
     oscillators = {};
     load(j);

@@ -26,13 +26,13 @@ public:
   std::shared_ptr<Oscillator> mixOscillator;
   std::shared_ptr<Oscillator> radiusOscillator;
 
-  BlurSettings(std::string shaderId, json j)
+  BlurSettings(std::string shaderId, json j, std::string name)
       : mix(std::make_shared<Parameter>("blur_mix", 0.5, 0.0, 1.0)),
         radius(std::make_shared<Parameter>("blur_radius", 1.0, 0.0,
-                                           5.0)),
+                                           100.0)),
         mixOscillator(std::make_shared<WaveformOscillator>(mix)),
         radiusOscillator(std::make_shared<WaveformOscillator>(radius)),
-        shaderId(shaderId), ShaderSettings(shaderId, j)
+        shaderId(shaderId), ShaderSettings(shaderId, j, name)
   {
     parameters = {mix, radius};
     oscillators = {mixOscillator, radiusOscillator};
@@ -66,6 +66,7 @@ public:
     // Clear the frame
     ofClear(0, 0, 0, 255);
     ofClear(0, 0, 0, 0);
+    
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("size", settings->radius->value);

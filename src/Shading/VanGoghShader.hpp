@@ -18,8 +18,8 @@
 
 struct VanGoghSettings: public ShaderSettings {
 	public:
-  VanGoghSettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId, j) {
+  VanGoghSettings(std::string shaderId, json j, std::string name) :
+  ShaderSettings(shaderId, j, name) {
     
   };
 };

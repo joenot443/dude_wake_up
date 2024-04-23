@@ -33,7 +33,7 @@ struct TripleSettings : public ShaderSettings
   std::shared_ptr<Parameter> drawRight;
   std::shared_ptr<Parameter> drawCenter;
 
-  TripleSettings(std::string shaderId, json j) : scale(std::make_shared<Parameter>("scale", 1.0, 0.0, 5.0)),
+  TripleSettings(std::string shaderId, json j, std::string name) : scale(std::make_shared<Parameter>("scale", 1.0, 0.0, 5.0)),
                                                  scaleOscillator(std::make_shared<ValueOscillator>(scale)),
                                                  xShift(std::make_shared<Parameter>("xShift", 0.0, -2.0, 2.0)),
                                                  xShiftOscillator(std::make_shared<ValueOscillator>(xShift)),
@@ -43,7 +43,7 @@ struct TripleSettings : public ShaderSettings
                                                  drawLeft(std::make_shared<Parameter>("drawLeft", true)),
                                                  drawRight(std::make_shared<Parameter>("drawRight", true)),
                                                  drawCenter(std::make_shared<Parameter>("drawCenter", true)),
-                                                 ShaderSettings(shaderId, j)
+                                                 ShaderSettings(shaderId, j, name)
   {
     parameters = {scale, xShift, yShift, drawOriginal, drawLeft, drawRight, drawCenter};
     oscillators = {scaleOscillator, xShiftOscillator, yShiftOscillator};

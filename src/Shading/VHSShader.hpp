@@ -21,10 +21,10 @@ struct VHSSettings: public ShaderSettings {
   std::shared_ptr<Parameter> shaderValue;
   std::shared_ptr<ValueOscillator> shaderValueOscillator;
 
-  VHSSettings(std::string shaderId, json j) :
+  VHSSettings(std::string shaderId, json j, std::string name) :
   shaderValue(std::make_shared<Parameter>("shaderValue", 1.0  , -1.0, 2.0)),
   shaderValueOscillator(std::make_shared<ValueOscillator>(shaderValue)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, name) {
     parameters = { shaderValue };
     oscillators = { shaderValueOscillator };
     load(j);

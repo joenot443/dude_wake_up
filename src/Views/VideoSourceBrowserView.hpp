@@ -20,6 +20,8 @@ public:
   void refreshSources();
   void update();
   void draw();
+  
+  void drawLibraryHeader();
 
 private:
   ofFbo videoSourceFbo;

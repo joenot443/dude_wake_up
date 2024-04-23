@@ -22,10 +22,10 @@ public:
 
   std::shared_ptr<Oscillator> zoomOscillator;
 
-  FractalSettings(std::string shaderId, json j) :
+  FractalSettings(std::string shaderId, json j, std::string name) :
   zoom(std::make_shared<Parameter>("zoom", 1.0, 1.0, 5.0)),
   zoomOscillator(std::make_shared<WaveformOscillator>(zoom)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, name) {
     parameters = {zoom};
     oscillators = {zoomOscillator};
     load(j);

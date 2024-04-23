@@ -24,13 +24,13 @@ struct ColorPassSettings : public ShaderSettings {
   std::shared_ptr<Oscillator> lowHueOsc;
   std::shared_ptr<Oscillator> highHueOsc;
 
-  ColorPassSettings(std::string shaderId, json j)
+  ColorPassSettings(std::string shaderId, json j, std::string name)
       : lowHue(std::make_shared<Parameter>("low_hue", 0.0, 0.0, 1.0)),
         highHue(
             std::make_shared<Parameter>("high_hue", 0.5, 0.0, 1.0)),
         lowHueOsc(std::make_shared<WaveformOscillator>(lowHue)),
         highHueOsc(std::make_shared<WaveformOscillator>(highHue)),
-        ShaderSettings(shaderId, j){
+        ShaderSettings(shaderId, j, name){
 
         };
 };

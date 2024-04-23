@@ -12,7 +12,9 @@
 #include "Parameter.hpp"
 #include "MidiService.hpp"
 #include "Oscillator.hpp"
+#include "OscillationService.hpp"
 #include "JSONSerializable.hpp"
+#include "ParameterService.hpp"
 #include "json.hpp"
 #include <string>
 
@@ -20,7 +22,27 @@ using json = nlohmann::json;
 
 class Settings: public JSONSerializable {
 public:
+  std::vector<std::shared_ptr<Oscillator>> oscillators;
   std::vector<std::shared_ptr<Parameter>> parameters = {};
+  std::string name;
+  
+  Settings() : name("None") {};
+  
+  Settings(std::string name) : name(name) {};
+  
+  virtual void registerParameters() {
+    std::vector<std::shared_ptr<Parameter>> params = allParameters();
+    for (auto param : params) {
+      if (param == nullptr) continue;
+      param->ownerName = name;
+      ParameterService::getService()->registerParameter(param);
+    }
+    
+    for (auto osc : oscillators) {
+      if (osc == nullptr) continue;
+      OscillationService::getService()->addOscillator(osc);
+    }
+  }
   
   // Returns all the parameters for the Shader including the ones on the Oscillators
   virtual std::vector<std::shared_ptr<Parameter>> allParameters() {

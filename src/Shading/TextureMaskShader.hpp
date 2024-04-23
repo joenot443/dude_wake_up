@@ -27,11 +27,11 @@ struct TextureMaskSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> blendOscillator;
   std::vector<std::string> textureOptions;
   
-  TextureMaskSettings(std::string shaderId, json j) :
+  TextureMaskSettings(std::string shaderId, json j, std::string name) :
   texture(std::make_shared<Parameter>("texture", 0.0, 0.0, 1000.0)),
   blend(std::make_shared<Parameter>("blend", 1.0, 0.0, 1.0)),
   blendOscillator(std::make_shared<WaveformOscillator>(blend)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, name)  {
     parameters = { texture, blend };
     oscillators = { blendOscillator };
     load(j);

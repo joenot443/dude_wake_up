@@ -21,10 +21,10 @@ struct LimboSettings: public ShaderSettings {
   std::shared_ptr<Parameter> colorWarp;
   std::shared_ptr<ValueOscillator> colorWarpOscillator;
 
-  LimboSettings(std::string shaderId, json j) :
+  LimboSettings(std::string shaderId, json j, std::string name) :
   colorWarp(std::make_shared<Parameter>("colorWarp", 1.0, -1.0, 2.0)),
   colorWarpOscillator(std::make_shared<ValueOscillator>(colorWarp)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, name) {
     parameters = { colorWarp };
     oscillators = { colorWarpOscillator };
     load(j);

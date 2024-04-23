@@ -18,8 +18,8 @@
 
 struct TriangleMapSettings: public ShaderSettings {
 	public:
-  TriangleMapSettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId, j) {
+  TriangleMapSettings(std::string shaderId, json j, std::string name) :
+  ShaderSettings(shaderId, j, name) {
     
   };
 };

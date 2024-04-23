@@ -19,7 +19,11 @@ struct ImGuiExtensions {
 
 namespace ImGui
 {
- bool RangeSliderFloat(const char* label, float* v1, float* v2, float v_min, float v_max, const char* display_format, float power);
+bool RangeSliderFloat(const char* label, float* v1, float* v2, float v_min, float v_max, const char* display_format, float power);
+
+void BeginGroupPanel(const char* name, const ImVec2& size = ImVec2(-1.0f, -1.0f));
+
+void EndGroupPanel();
 };
 
 

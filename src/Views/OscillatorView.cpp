@@ -67,7 +67,6 @@ void OscillatorView::draw(std::vector<std::tuple<std::shared_ptr<Oscillator>, st
   
   else if (type == Oscillator_value)
   {
-//    oscillator->tick();
     ValueOscillator *valueOscillator = (ValueOscillator *)oscillator.get();
     
     static int rt_axis = ImPlotAxisFlags_AuxDefault & ~ImPlotAxisFlags_NoTickLabels;
@@ -77,7 +76,7 @@ void OscillatorView::draw(std::vector<std::tuple<std::shared_ptr<Oscillator>, st
     auto plotStyle = ImPlot::GetStyle();
     ImPlot::PushStyleVar(ImPlotStyleVar_FitPadding, ImVec2(0.3f, 0.3f));
     
-    if (ImPlot::BeginPlot(formatString("##plot%s", value->name.c_str()).c_str(), ImVec2(200, 200), ImPlotFlags_CanvasOnly))
+    if (ImPlot::BeginPlot(formatString("##plot%s", value->name.c_str()).c_str(), ImVec2(200, 200), ImPlotFlags_None))
     {
       for (auto pair : subjects) {
         ValueOscillator *valueOscillator = (ValueOscillator *)std::get<0>(pair).get();

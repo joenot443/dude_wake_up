@@ -11,29 +11,29 @@
 
 void ShaderConfigSelectionView::draw(std::shared_ptr<Shader> shader) {
   auto configs = ConfigService::getService()->availableConfigsForShaderType(shader->type());
-  std::vector<std::string> names = {};
-  //allocate space for pointers
-  char** out = new char*[configs.size()];
+  std::vector<std::string> names;
   
-  for(int i = 0; i < configs.size(); ++i){
-    string s = configs[i].name;
-    //allocate space for c string (note +1 for extra space)
-    char* s_cstr = new char[s.size()+1];
-    //copy data to prevent mutation of original vector
-    strcpy(s_cstr, s.c_str());
-    //put pointer in the output
-    out[i] = s_cstr;
+  // Populate names vector with configuration names
+  for (const auto& config : configs) {
+    names.push_back(config.name);
   }
+  
   static int selection = -1;
-  if (ImGui::Combo("Select Config", &selection, out, configs.size())) {
+  // Create a vector of const char* pointers pointing to the strings in names vector
+  std::vector<const char*> cStrNames;
+  for (const auto& name : names) {
+    cStrNames.push_back(name.c_str());
+  }
+  ImGui::SetNextItemWidth(200.0);
+  if (ImGui::Combo("Select Config", &selection, cStrNames.data(), cStrNames.size())) {
     shader->settings->load(ConfigService::getService()->shaderConfigForPath(configs[selection].path));
   }
   
+  ImGui::SetNextItemWidth(200.0);
   static char inputText[256] = ""; // Reserve enough space for the input text
   ImGui::InputText("Name", inputText, sizeof(inputText));
   ImGui::SameLine();
   if (ImGui::Button("Save")) {
     ConfigService::getService()->saveShaderConfigFile(shader, std::string(inputText));
   }
-  
 }

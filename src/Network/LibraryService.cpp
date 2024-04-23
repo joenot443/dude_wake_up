@@ -140,7 +140,7 @@ void LibraryService::downloadThumbnail(std::shared_ptr<LibraryFile> file)
     file_stream.close();
     log("Successfully downloaded thumbnail");
     file->thumbnailDownloaded = true;
-    ofNotifyEvent(thumbnailNotification, this);
+//    ofNotifyEvent(thumbnailNotification, this);
   }
   else
   {

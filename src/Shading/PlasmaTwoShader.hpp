@@ -20,15 +20,17 @@
 struct PlasmaTwoSettings : public ShaderSettings
 {
   std::shared_ptr<Parameter> color;
-  std::shared_ptr<WaveformOscillator> colorOscillator;
+  std::shared_ptr<Parameter> mix;
+  std::shared_ptr<WaveformOscillator> mixOscillator;
   
-  PlasmaTwoSettings(std::string shaderId, json j) :
-  color(std::make_shared<Parameter>("color", 1.0  , -1.0, 2.0)),
-  colorOscillator(std::make_shared<WaveformOscillator>(color)),
-  ShaderSettings(shaderId, j)
+  PlasmaTwoSettings(std::string shaderId, json j, std::string name) :
+  color(std::make_shared<Parameter>("Color", 1.0  , -1.0, 2.0)),
+  mix(std::make_shared<Parameter>("Color Mix", 0.0, 0.0, 1.0)),
+  mixOscillator(std::make_shared<WaveformOscillator>(mix)),
+  ShaderSettings(shaderId, j, name)
   {
-    parameters = { color };
-    oscillators = { colorOscillator };
+    parameters = { color, mix };
+    oscillators = { mixOscillator };
     load(j);
     registerParameters();
   };
@@ -52,6 +54,8 @@ public:
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("color", settings->color->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("colorMix", settings->mix->value);
+    shader.setUniform3f("color", settings->color->color->data()[0], settings->color->color->data()[1], settings->color->color->data()[2]);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
     shader.end();
@@ -70,7 +74,8 @@ public:
   void drawSettings() override
   {
     CommonViews::H3Title("PlasmaTwo");
-    CommonViews::ShaderParameter(settings->color, settings->colorOscillator);
+    CommonViews::ShaderColor(settings->color);
+    CommonViews::ShaderParameter(settings->mix, settings->mixOscillator);
   }
 };
 

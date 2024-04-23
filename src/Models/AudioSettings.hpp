@@ -8,6 +8,8 @@
 #ifndef AudioSettings_h
 #define AudioSettings_h
 
+#include <cmath>
+#include <chrono>
 #include <iostream>
 #include "Gist.h"
 #include "Math.hpp"
@@ -89,92 +91,113 @@ struct AudioAnalysis {
   std::string name;
   bool bpmEnabled = false;
   std::shared_ptr<Parameter> rms;
-  std::shared_ptr<Parameter> csd;
-  std::shared_ptr<Parameter> pitch;
-  std::shared_ptr<Parameter> energy;
-  std::shared_ptr<Parameter> zcr;
-  std::shared_ptr<Parameter> spectralDiff;
+  std::shared_ptr<Parameter> highs;
+  std::shared_ptr<Parameter> lows;
+  std::shared_ptr<Parameter> mids;
   std::shared_ptr<Parameter> beatPulse;
   std::shared_ptr<Parameter> beatOscillatorSelection;
   std::shared_ptr<Parameter> bpm;
+  std::shared_ptr<Parameter> frequencyRelease;
+  
+  // Enable pulsers
+  std::shared_ptr<Parameter> enableRmsPulse;
 
   std::shared_ptr<ValueOscillator> rmsOscillator;
-  std::shared_ptr<ValueOscillator> csdOscillator;
-  std::shared_ptr<ValueOscillator> pitchOscillator;
-  std::shared_ptr<ValueOscillator> energyOscillator;
-  std::shared_ptr<ValueOscillator> zcrOscillator;
-  std::shared_ptr<ValueOscillator> spectralDiffOscillator;
   std::shared_ptr<PulseOscillator> beatPulseOscillator;
+  std::shared_ptr<ValueOscillator> highsOscillator;
+  std::shared_ptr<ValueOscillator> midsOscillator;
+  std::shared_ptr<ValueOscillator> lowsOscillator;
 
   std::vector<float> melFrequencySpectrum;
   std::vector<float> magnitudeSpectrum;
   std::vector<float> smoothSpectrum;
   std::vector<float> smoothMelSpectrum;
 
-  AudioAnalysisParameter rmsAnalysisParam;
-  AudioAnalysisParameter csdAnalysisParam;
-  AudioAnalysisParameter pitchAnalysisParam;
-  AudioAnalysisParameter energyAnalysisParam;
-  AudioAnalysisParameter zcrAnalysisParam;
-  AudioAnalysisParameter spectralDiffAnalysisParam;
+  AudioAnalysisParameter rmsAnalysisParam;  
+  AudioAnalysisParameter highsAnalysisParam;
+  AudioAnalysisParameter midsAnalysisParam;
+  AudioAnalysisParameter lowsAnalysisParam;
 
   std::vector<std::shared_ptr<Parameter>> parameters;
   std::vector<AudioAnalysisParameter *> analysisParameters;
   
   void zero() {
     rms->value = 0.0f;
-    csd->value = 0.0f;
-    energy->value = 0.0f;
-    pitch->value = 0.0f;
-    zcr->value = 0.0f;
-    spectralDiff->value = 0.0f;
     beatPulse->value = 0.0f;
   }
 
   AudioAnalysis()
-      : rms(std::make_shared<Parameter>("rms", 0.0, 0.0, 1.0)),
-        csd(std::make_shared<Parameter>("csd", 0.0, 0.0, 1.0)),
-        pitch(std::make_shared<Parameter>("pitch", 0.0, 0.0, 1.0)),
-        energy(std::make_shared<Parameter>("energy", 0.0, 0.0, 1.0)),
-        zcr(std::make_shared<Parameter>("zcr", 0.0, 0.0, 1.0)),
-        spectralDiff(
-            std::make_shared<Parameter>("spectralDiff", 0.0, 0.0, 1.0)),
+      : rms(std::make_shared<Parameter>("Loudness", 0.0, 0.0, 1.0)),
+        highs(std::make_shared<Parameter>("highs", 0.0, 0.0, 1.0)),
+        mids(std::make_shared<Parameter>("mids", 0.0, 0.0, 1.0)),
+        lows(std::make_shared<Parameter>("lows", 0.0, 0.0, 1.0)),
         beatPulse(std::make_shared<Parameter>("beatPulse", 0.0, 0.0, 1.0)),
         bpm(std::make_shared<Parameter>("bpm", 60.0, 0.0, 300.0)),
+        frequencyRelease(std::make_shared<Parameter>("Frequency Release", 0.95, 0.5, 1.0)),
+        enableRmsPulse(std::make_shared<Parameter>("Pulser", 0.0, 0.0, 1.0)),
         rmsOscillator(std::make_shared<ValueOscillator>(rms)),
-        pitchOscillator(std::make_shared<ValueOscillator>(pitch)),
-        csdOscillator(std::make_shared<ValueOscillator>(csd)),
-        zcrOscillator(std::make_shared<ValueOscillator>(zcr)),
-        energyOscillator(std::make_shared<ValueOscillator>(energy)),
-        spectralDiffOscillator(std::make_shared<ValueOscillator>(spectralDiff)),
         beatPulseOscillator(std::make_shared<PulseOscillator>(beatPulse)),
+        highsOscillator(std::make_shared<ValueOscillator>(highs)),
+        midsOscillator(std::make_shared<ValueOscillator>(mids)),
+        lowsOscillator(std::make_shared<ValueOscillator>(lows)),
         rmsAnalysisParam(AudioAnalysisParameter(rms)),
-        csdAnalysisParam(AudioAnalysisParameter(csd)),
-        pitchAnalysisParam(AudioAnalysisParameter(pitch)),
-        energyAnalysisParam(AudioAnalysisParameter(energy)),
-        zcrAnalysisParam(AudioAnalysisParameter(zcr)),
-        spectralDiffAnalysisParam(AudioAnalysisParameter(spectralDiff)),
-        parameters({rms, csd, pitch, energy, zcr, beatPulse, rmsAnalysisParam.pulse}),
-        analysisParameters({&rmsAnalysisParam, &csdAnalysisParam,
-                            &pitchAnalysisParam, &energyAnalysisParam,
-                            &zcrAnalysisParam, &spectralDiffAnalysisParam}){};
+        highsAnalysisParam(AudioAnalysisParameter(highs)),
+        midsAnalysisParam(AudioAnalysisParameter(mids)),
+        lowsAnalysisParam(AudioAnalysisParameter(lows)),
+        parameters({rms, beatPulse, rmsAnalysisParam.pulse, highs, mids, lows, enableRmsPulse}),
+        analysisParameters({&rmsAnalysisParam, &lowsAnalysisParam, &midsAnalysisParam, &highsAnalysisParam
+  }){};
 
   void analyzeFrame(Gist<float> *gist) {
     magnitudeSpectrum =
         Vectors::normalize(Vectors::sqrt(gist->getMagnitudeSpectrum()));
     melFrequencySpectrum =
         Vectors::normalize(Vectors::sqrt(gist->getMelFrequencySpectrum()));
-
-    smoothSpectrum = Vectors::release(magnitudeSpectrum, smoothSpectrum);
+    smoothSpectrum = Vectors::release(magnitudeSpectrum, smoothSpectrum, frequencyRelease->value);
     smoothMelSpectrum =
-        Vectors::release(melFrequencySpectrum, smoothMelSpectrum);
-
+        Vectors::release(melFrequencySpectrum, smoothMelSpectrum, frequencyRelease->value);
+    
+    std::vector<float> highsMidsLows = splitAndAverage(smoothMelSpectrum, 3);
+    if (highsMidsLows.size() == 3) {
+      highsAnalysisParam.tick(highsMidsLows[2]);
+      midsAnalysisParam.tick(highsMidsLows[1]);
+      lowsAnalysisParam.tick(highsMidsLows[0]);
+    }
+    
     rmsAnalysisParam.tick(gist->rootMeanSquare());
-    pitchAnalysisParam.tick(gist->pitch());
-    csdAnalysisParam.tick(gist->complexSpectralDifference());
-    energyAnalysisParam.tick(gist->energyDifference());
-    zcrAnalysisParam.tick(gist->zeroCrossingRate());
-    spectralDiffAnalysisParam.tick(gist->spectralDifference());
+  }
+  
+
+  std::vector<float> splitAndAverage(const std::vector<float>& frequencies, int count) {
+      std::vector<float> averages;
+      if (count <= 0 || frequencies.empty()) {
+          // Return an empty vector if count is non-positive or frequencies is empty
+          return averages;
+      }
+
+      int totalSize = frequencies.size();
+      int baseSize = totalSize / count;
+      int remainder = totalSize % count;
+
+      int start = 0;
+      for (int i = 0; i < count; ++i) {
+          // Calculate the size of the current split, adding an extra element if remainder > 0
+          int currentSize = baseSize + (i < remainder ? 1 : 0);
+          if (start + currentSize > totalSize) {
+              // Avoid going out of bounds
+              break;
+          }
+
+          // Calculate the average for the current split
+          float sum = std::accumulate(frequencies.begin() + start, frequencies.begin() + start + currentSize, 0.0f);
+          float average = sum / currentSize;
+          averages.push_back(average);
+
+          // Update the start index for the next split
+          start += currentSize;
+      }
+
+      return averages;
   }
   
   void updateBeat(float pct) {
@@ -193,9 +216,24 @@ struct AudioAnalysis {
       const float C = 0.0f; // Offset
 
       float y = A * exp(B * pct) + C;
-      beatPulse->value = y;
+      beatPulse->value = sineAtBPM(bpm->value);
     }
     }
+  
+  float sineAtBPM(float bpm) {
+      // Convert bpm to frequency in Hz
+      float frequency = bpm / 60.0f;
+
+      // Get the current time in seconds since the app started
+      float seconds = ofGetElapsedTimef();
+
+      // Calculate the phase of the sine wave, using the frequency.
+      // The calculation is: 2 * PI * frequency * time
+      float phase = 2.0f * PI * frequency * seconds;
+
+      // Return the sine of the phase, which is the wave's value at the current time
+      return sin(phase);
+  }
 };
 
 #endif /* AudioSettings_h */

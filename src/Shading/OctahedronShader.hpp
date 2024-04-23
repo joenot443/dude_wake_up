@@ -18,8 +18,8 @@
 
 struct OctahedronSettings: public ShaderSettings {
 	public:
-  OctahedronSettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId, j) {
+  OctahedronSettings(std::string shaderId, json j, std::string name) :
+  ShaderSettings(shaderId, j, name) {
     
   };
 };

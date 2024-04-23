@@ -21,11 +21,12 @@ struct GlitchSettings: public ShaderSettings {
   std::shared_ptr<Parameter> amount;
   std::shared_ptr<Oscillator> amountOscillator;
   
-  GlitchSettings(std::string shaderId, json j) :
+  GlitchSettings(std::string shaderId, json j, std::string name) :
   amount(std::make_shared<Parameter>("amount", 0.5, 0.0, 1.0)),
   amountOscillator(std::make_shared<WaveformOscillator>(amount)),
-  ShaderSettings(shaderId, j) {
-    
+  ShaderSettings(shaderId, j, name) {
+    parameters = {amount};
+    oscillators = {amountOscillator};
   };
 };
 

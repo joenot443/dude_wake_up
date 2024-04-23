@@ -18,8 +18,8 @@
 
 struct DiscoSettings: public ShaderSettings {
 	public:
-  DiscoSettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId, j) {
+  DiscoSettings(std::string shaderId, json j, std::string name) :
+  ShaderSettings(shaderId, j, name) {
     
   };
 };

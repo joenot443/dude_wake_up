@@ -21,10 +21,10 @@ struct FishEyeSettings: public ShaderSettings {
   std::shared_ptr<Parameter> amount;
   std::shared_ptr<Oscillator> amountOscillator;
   
-  FishEyeSettings(std::string shaderId, json j) :
+  FishEyeSettings(std::string shaderId, json j, std::string name) :
   amount(std::make_shared<Parameter>("amount", 0.5, 0.0, 1000.0)),
   amountOscillator(std::make_shared<WaveformOscillator>(amount)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, name) {
     
   };
 };

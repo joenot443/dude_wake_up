@@ -27,14 +27,14 @@ struct KaleidoscopeSettings : public ShaderSettings {
   std::shared_ptr<Oscillator> shiftOscillator;
   std::shared_ptr<Oscillator> rotationOscillator;
 
-  KaleidoscopeSettings(std::string shaderId, json j) :
-  sides(std::make_shared<Parameter>("sides", 2.0,  1.0, 6.0)),
-  shift(std::make_shared<Parameter>("shift", 0.25,  0.0, 1.0)),
-  rotation(std::make_shared<Parameter>("rotation", 1.0,  1.0, TWO_PI)),
+  KaleidoscopeSettings(std::string shaderId, json j, std::string name) :
+  sides(std::make_shared<Parameter>("Sides", 4.0,  1.0, 10.0)),
+  shift(std::make_shared<Parameter>("Frame Shift", 0.25,  0.0, 1.0)),
+  rotation(std::make_shared<Parameter>("Rotation", 1.0,  1.0, TWO_PI)),
   sidesOscillator(std::make_shared<WaveformOscillator>(sides)),
   shiftOscillator(std::make_shared<WaveformOscillator>(shift)),
   rotationOscillator(std::make_shared<WaveformOscillator>(rotation)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, name) {
     parameters = {sides, shift, rotation};
     oscillators = {sidesOscillator, shiftOscillator, rotationOscillator};
     load(j);
@@ -79,9 +79,9 @@ shader.load("shaders/kaleidoscope");
   }
 
   void drawSettings() override {
-    
     CommonViews::ShaderParameter(settings->shift, settings->shiftOscillator);
-    CommonViews::ShaderParameter(settings->sides, settings->sidesOscillator);
+    CommonViews::ShaderIntParameter(settings->sides);
+    CommonViews::ShaderParameter(settings->rotation, settings->rotationOscillator);
   }
 };
 

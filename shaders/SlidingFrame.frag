@@ -9,59 +9,47 @@ out vec4 outputColor;
 
 uniform float lineWidth;
 uniform float speed;
+uniform float angle; // Angle for the line
 
-void main(  )
+void main()
 {
-    vec2 uv = coord.xy / dimensions.xy;
-    
-    // Make the line move over time, looping back to the start
-    float linePosition = mod(time * speed, dimensions.x * 2.0);
-    
-    // Check if the animation is in the first or second half of its cycle
-    bool isSecondHalf = linePosition >= dimensions.x;
-
-    // Bring the line back into screen space if it's in the second half
-    if(isSecondHalf)
+  vec2 uv = coord.xy / dimensions.xy;
+  
+  // Calculate the moving line's position independently of the angle
+  float linePosition = mod(time * speed, dimensions.x);
+  
+  // Calculate pivot for rotation based on current line position
+  vec2 pivot = vec2(0.0, dimensions.y * 0.5); // Pivot in the middle of the height
+  
+  // Translate coordinates to pivot for rotation
+  vec2 translatedCoord = coord.xy - vec2(linePosition, pivot.y);
+  
+  // Rotate coordinates around pivot
+  float cosAngle = cos(angle);
+  float sinAngle = sin(angle);
+  vec2 rotatedCoord;
+  rotatedCoord.x = cosAngle * translatedCoord.x - sinAngle * translatedCoord.y;
+  rotatedCoord.y = sinAngle * translatedCoord.x + cosAngle * translatedCoord.y;
+  
+  // Determine if the pixel is within the line width after rotation
+  bool withinLineWidth = abs(rotatedCoord.x) <= lineWidth * 0.5;
+  
+  // Logic for drawing the line or sampling textures
+  if (withinLineWidth)
+  {
+    outputColor = vec4(0.0, 0.0, 0.0, 1.0); // Draw black line
+  }
+  else
+  {
+    // Corrected texture sampling:
+    // Decide based on original uv and linePosition, not the rotated coordinates.
+    if (coord.x <= linePosition)
     {
-        linePosition -= dimensions.x;
-    }
-
-    float lineStart = linePosition - lineWidth * 0.5;
-    float lineEnd = linePosition + lineWidth * 0.5;
-
-    // Draw the black line
-    if(coord.x >= lineStart && coord.x <= lineEnd)
-    {
-        outputColor = vec4(0.0, 0.0, 0.0, 1.0);
+      outputColor = texture(tex, uv); // Sample from tex
     }
     else
     {
-        if(isSecondHalf)
-        {
-            // Sample from iChannel1 when the line is to the right
-            if(coord.x < linePosition)
-            {
-                outputColor = vec4(texture(tex2, uv));
-            }
-            // Sample from tex when the line is to the left
-            else if(coord.x > linePosition)
-            {
-                outputColor = vec4(texture(tex, uv));
-            }
-        }
-        else
-        {
-            // Sample from tex when the line is to the right
-            if(coord.x < linePosition)
-            {
-                outputColor = vec4(texture(tex, uv));
-            }
-            // Sample from iChannel1 when the line is to the left
-            else if(coord.x > linePosition)
-            {
-                outputColor = vec4(texture(tex2, uv));
-            }
-        }
+      outputColor = texture(tex2, uv); // Sample from tex2
     }
+  }
 }
-

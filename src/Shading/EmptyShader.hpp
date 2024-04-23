@@ -17,8 +17,8 @@
 
 struct EmptySettings: public ShaderSettings {
 	public:
-  EmptySettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId, j) {
+  EmptySettings(std::string shaderId, json j, std::string name) :
+  ShaderSettings(shaderId, j, name) {
     
   };
 };

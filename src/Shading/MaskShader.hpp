@@ -20,9 +20,9 @@ struct MaskSettings : public ShaderSettings
   std::shared_ptr<Parameter> blend;
   std::shared_ptr<Oscillator> blendOscillator;
   
-  MaskSettings(std::string shaderId, json j) : blend(std::make_shared<Parameter>("Blend", 0.5, 0.0, 1.0)),
+  MaskSettings(std::string shaderId, json j, std::string name) : blend(std::make_shared<Parameter>("Blend", 0.5, 0.0, 1.0)),
                                                blendOscillator(std::make_shared<WaveformOscillator>(blend)),
-                                               ShaderSettings(shaderId, j)
+                                               ShaderSettings(shaderId, j, name)
   {
     parameters = {blend};
     oscillators = {blendOscillator};

@@ -22,16 +22,15 @@ using json = nlohmann::json;
 
 class ShaderSettings: public Settings {
   
-public:
-  std::vector<std::shared_ptr<Oscillator>> oscillators;
-  
+public:  
   std::string shaderId;
   
   // Layout
   std::shared_ptr<Parameter> x;
   std::shared_ptr<Parameter> y;
   
-  ShaderSettings(std::string shaderId, json j) :
+  ShaderSettings(std::string shaderId, json j, std::string name = "Shader") :
+  Settings(name),
   shaderId(shaderId),
   x(std::make_shared<Parameter>("x", 0.0, 0.0, 10000.0)),
   y(std::make_shared<Parameter>("y", 0.0, 0.0, 10000.0))
@@ -54,14 +53,6 @@ public:
     }
     return allParams;
   }
-  
-  void registerParameters() {
-    std::vector<std::shared_ptr<Parameter>> params = allParameters();
-    for (auto param : params) {
-      ParameterService::getService()->registerParameter(param);
-    }
-  }
-  
 };
 
 #endif

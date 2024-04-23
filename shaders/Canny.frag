@@ -4,6 +4,7 @@
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
+uniform vec4 backgroundColor;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -96,5 +97,5 @@ float cannyEdge(vec2 coord, float mn, float mx){
 void main(  ){
     vec4 mous = vec4(0.02, 0.02, 0.02, 0.02);
     float edge = cannyEdge(coord, mous.x*5., mous.y*30.);
-    outputColor = mix(vec4(0,0,0,1), vec4(1,1,1,0), 1.-edge);
+    outputColor = mix(vec4(0,0,0,1), backgroundColor, 1.-edge);
 }

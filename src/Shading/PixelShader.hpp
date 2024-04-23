@@ -25,13 +25,13 @@ struct PixelSettings : public ShaderSettings {
 
   std::shared_ptr<Oscillator> sizeOscillator;
 
-  PixelSettings(std::string shaderId, json j)
+  PixelSettings(std::string shaderId, json j, std::string name)
       : size(std::make_shared<Parameter>("pixel_size", 24.1, 1.0,
                                          200.0)),
         enabled(
             std::make_shared<Parameter>("enabled", 0.0, 1.0, 0.0)),
         sizeOscillator(std::make_shared<WaveformOscillator>(size)),
-        ShaderSettings(shaderId, j) {
+        ShaderSettings(shaderId, j, name) {
     parameters = {size, enabled};
     oscillators = {sizeOscillator};
     load(j);

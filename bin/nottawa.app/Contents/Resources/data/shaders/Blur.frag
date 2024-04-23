@@ -1,34 +1,40 @@
 #version 150
 
-#define MAX_SIZE 99
-
+// Add uniforms to select channels
 uniform sampler2D tex;
-in vec2 coord;
 uniform vec2 dimensions;
 uniform float size;
+
+in vec2 coord;
 out vec4 outputColor;
 
-const int samples = 35,
-          LOD = 2,         // gaussian done on MIPmap at scale LOD
-          sLOD = 1 << LOD; // tile size = 2^LOD
-
-float gaussian(vec2 i) {
-    float sigma = samples * .25 * size;
-    return exp( -.5* dot(i/=sigma,i) ) / ( 6.28 * sigma*sigma );
-}
-
-vec4 blur(sampler2D sp, vec2 U, vec2 scale) {
-    vec4 O = vec4(0);
-    int s = samples/sLOD;
+void main(  )
+{
+    float Pi = 6.28318530718; // Pi*2
     
-    for ( int i = 0; i < s*s; i++ ) {
-        vec2 d = vec2(i%s, i/s)*float(sLOD) - float(samples)/2.;
-        O += gaussian(d) * texture( sp, U + scale * d , float(LOD) );
+    // GAUSSIAN BLUR SETTINGS {{{
+    float Directions = 16.0; // BLUR DIRECTIONS (Default 16.0 - More is better but slower)
+    float Quality = 3.0; // BLUR QUALITY (Default 4.0 - More is better but slower)
+    float Size = size; // BLUR SIZE (Radius)
+    // GAUSSIAN BLUR SETTINGS }}}
+   
+    vec2 Radius = Size/dimensions.xy;
+    
+    // Normalized pixel coordinates (from 0 to 1)
+    vec2 uv = coord/dimensions.xy;
+    // Pixel colour
+    vec4 Color = texture(tex, uv);
+    
+    // Blur calculations
+    for( float d=0.0; d<Pi; d+=Pi/Directions)
+    {
+    for(float i=1.0/Quality; i<=1.0; i+=1.0/Quality)
+        {
+      Color += texture( tex, uv+vec2(cos(d),sin(d))*Radius*i);
+        }
     }
     
-    return O / O.a;
-}
-
-void main() {
-    outputColor = blur(tex, coord/ dimensions.xy, 1./dimensions );
+    // Output to screen
+    Color /= Quality * Directions - 15.0;
+    outputColor =  Color;
 }

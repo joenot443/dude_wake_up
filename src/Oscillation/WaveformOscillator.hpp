@@ -29,7 +29,6 @@ struct WaveformOscillator: public Oscillator {
   Oscillator(v) {
     type = Oscillator_waveform;
     parameters = {amplitude, frequency, shift};
-    OscillationService::getService()->addOscillator(std::shared_ptr<Oscillator>(this));
   }
 };
 

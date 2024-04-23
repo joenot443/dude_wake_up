@@ -26,14 +26,14 @@ struct TissueSettings : public ShaderSettings {
   std::shared_ptr<Oscillator> betaOscillator;
   std::shared_ptr<Oscillator> gammaOscillator;
   
-  TissueSettings(std::string shaderId, json j)
+  TissueSettings(std::string shaderId, json j, std::string name)
   : alpha(std::make_shared<Parameter>("alpha", 3, 0., 10.)),
   beta(std::make_shared<Parameter>("beta", 7, 0., 10.)),
   gamma(std::make_shared<Parameter>("gamma", 4, 0., 10.)),
   alphaOscillator(std::make_shared<WaveformOscillator>(alpha)),
   betaOscillator(std::make_shared<WaveformOscillator>(beta)),
   gammaOscillator(std::make_shared<WaveformOscillator>(gamma)),
-  ShaderSettings(shaderId, j){
+  ShaderSettings(shaderId, j, name){
     
   };
 };

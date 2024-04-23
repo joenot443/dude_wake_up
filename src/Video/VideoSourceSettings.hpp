@@ -29,29 +29,29 @@ public:
   std::shared_ptr<Parameter> start;
   std::shared_ptr<Parameter> end;
   
-  VideoSourceSettings() :
-  width(std::make_shared<Parameter>("width", 720, 100, 2000)),
-  height(std::make_shared<Parameter>("height", 480, 100, 2000)),
-  resolution(std::make_shared<Parameter>("resolution", 3, 0, 5)),
-  maskColor(std::make_shared<Parameter>("maskColor", 3, 0, 5)),
-  maskEnabled(std::make_shared<Parameter>("maskEnabled", 0, 0, 1)),
-  maskTolerance(std::make_shared<Parameter>("maskTolerance", 0.05, 0, 1)),
-  invert(std::make_shared<Parameter>("invert", 0.0, 1.0, 1.0)),
-  start(std::make_shared<Parameter>("start", 0, 0, 1)),
-  end(std::make_shared<Parameter>("end", 1, 0, 1)),
-  Settings() {
-    parameters = {width, height, resolution, maskColor, maskEnabled, maskTolerance, start, end};
-    updateResolutionSettings();
-  }
+//  VideoSourceSettings() :
+//  width(std::make_shared<Parameter>("width", 720, 100, 2000)),
+//  height(std::make_shared<Parameter>("height", 480, 100, 2000)),
+//  resolution(std::make_shared<Parameter>("resolution", 3, 0, 5)),
+//  maskColor(std::make_shared<Parameter>("maskColor", 3, 0, 5)),
+//  maskEnabled(std::make_shared<Parameter>("Mask Enabled", 0, 0, 1)),
+//  maskTolerance(std::make_shared<Parameter>("maskTolerance", 0.05, 0, 1)),
+//  invert(std::make_shared<Parameter>("invert", 0.0, 1.0, 1.0)),
+//  start(std::make_shared<Parameter>("start", 0, 0, 1)),
+//  end(std::make_shared<Parameter>("end", 1, 0, 1)),
+//  Settings() {
+//    parameters = {width, height, resolution, maskColor, maskEnabled, maskTolerance, start, end};
+//    updateResolutionSettings();
+//  }
   
   VideoSourceSettings(std::string sourceId, json j) :
   width(std::make_shared<Parameter>("width", 720, 100, 2000)),
   height(std::make_shared<Parameter>("height", 480, 100, 2000)),
   resolution(std::make_shared<Parameter>("resolution", 3, 0, 5)),
   maskColor(std::make_shared<Parameter>("maskColor", 3, 0, 5)),
-  maskEnabled(std::make_shared<Parameter>("maskEnabled", 0, 0, 1)),
+  maskEnabled(std::make_shared<Parameter>("Mask Enabled", 0, 0, 1)),
   maskTolerance(std::make_shared<Parameter>("maskTolerance", 0.05, 0, 1)),
-  invert(std::make_shared<Parameter>("invert", 0.0, 0.0, 1.0)),
+  invert(std::make_shared<Parameter>("invert", 0.0, 1.0, 1.0)),
   start(std::make_shared<Parameter>("start", 0, 0, 1)),
   end(std::make_shared<Parameter>("end", 1, 0, 1)),
   Settings() {

@@ -6,6 +6,7 @@
 //
 
 #include <sentry.h>
+#include "CommonStrings.hpp"
 #include "MainStageView.hpp"
 #include "ConfigService.hpp"
 #include "TileBrowserView.hpp"
@@ -35,27 +36,35 @@ void MainStageView::setup()
   strandBrowserView.setup();
   videoSourceBrowserView.setup();
   audioSourceBrowserView.setup();
+  stageModeView.setup();
 }
 
 void MainStageView::update()
 {
   videoSourceBrowserView.update();
   audioSourceBrowserView.update();
+  shaderBrowserView.update();
+  stageModeView.update();
   NodeLayoutView::getInstance()->update();
 }
 
 void MainStageView::draw()
 {
   // Draw a table with 2 columns, sized | 1/5 |   4/5   |
-
+  float width = ImGui::GetWindowContentRegionMax().x;
+  float height = ImGui::GetWindowContentRegionMax().y;
+  
+  float nodeLayoutWidth = (getScaledWindowWidth() * 4) / 5;
+  float nodeLayoutHeight = getScaledWindowHeight() - LayoutStateService::getService()->audioSettingsViewHeight();
+  
   ImGui::Columns(2, "main_stage_view", false);
-  ImGui::SetColumnWidth(0, ImGui::GetWindowWidth() / 5.);
-  ImGui::SetColumnWidth(1, 4. * (ImGui::GetWindowWidth() / 5.));
-
+  ImGui::SetColumnWidth(0, getScaledWindowWidth() / 5);
+  ImGui::SetColumnWidth(1, (getScaledWindowWidth() * 4) / 5);
+  
   // | Sources |  Node Layout
   // | Effects |        ''
   // | Library |       Audio
-
+  
   // Sources
   auto browserSize = ImVec2(ImGui::GetWindowContentRegionMax().x / 5.,
                             (ImGui::GetWindowContentRegionMax().y - MenuBarHeight) / 3.);
@@ -75,13 +84,16 @@ void MainStageView::draw()
   ImGui::EndChild();
 
   drawMenu();
-
+  
   ImGui::NextColumn();
-
-  // NodeLayout
-  NodeLayoutView::getInstance()->draw();
-
-  audioSourceBrowserView.draw();
+  
+  // NodeLayout OR StageMode
+  if (LayoutStateService::getService()->stageModeEnabled) {
+    stageModeView.draw();
+  } else {
+    NodeLayoutView::getInstance()->draw();
+    audioSourceBrowserView.draw();
+  }
 }
 
 void MainStageView::drawMenu()
@@ -96,9 +108,9 @@ void MainStageView::drawMenu()
         // Present a file dialog to save the config file
         // Use a default name of "CURRENT_DATE_TIME.json"
         std::string defaultName =
-            ofGetTimestampString("%Y-%m-%d_%H-%M-%S.json");
+        ofGetTimestampString("%Y-%m-%d_%H-%M-%S.json");
         ofFileDialogResult result =
-            ofSystemSaveDialog(defaultName, "Save File");
+        ofSystemSaveDialog(defaultName, "Save File");
         if (result.bSuccess)
         {
           ConfigService::getService()->saveConfigFile(result.getPath());
@@ -120,7 +132,7 @@ void MainStageView::drawMenu()
       }
       ImGui::EndMenu();
     }
-
+    
     if (ImGui::BeginMenu("Effects"))
     {
       if (ImGui::MenuItem("Clear Feedback Buffers (C)"))
@@ -129,7 +141,17 @@ void MainStageView::drawMenu()
       }
       ImGui::EndMenu();
     }
-
+    
+    if (ImGui::BeginMenu("View"))
+    {
+      std::string title = LayoutStateService::getService()->midiEnabled ? CommonStrings::DisableMidi : CommonStrings::EnableMidi;
+      if (ImGui::MenuItem(title.c_str()))
+      {
+        LayoutStateService::getService()->midiEnabled = !LayoutStateService::getService()->midiEnabled;
+      }
+      ImGui::EndMenu();
+    }
+    
     if (ImGui::MenuItem("Save Default Config"))
     {
       ConfigService::getService()->saveDefaultConfigFile();
@@ -138,7 +160,7 @@ void MainStageView::drawMenu()
     {
       ConfigService::getService()->loadDefaultConfigFile();
     }
-
+    
     if (ImGui::BeginPopupModal(SubmitFeedbackView::popupId, nullptr, ImGuiPopupFlags_MouseButtonLeft))
     {
       submitFeedbackView.draw();
@@ -149,16 +171,28 @@ void MainStageView::drawMenu()
     {
       ImGui::OpenPopup(SubmitFeedbackView::popupId);
     }
-
+    
     //    static bool showingMenu = false;
     //    if (ImGui::MenuItem("ImGui Demo") || showingMenu)
     //    {
     //      ImGui::ShowDemoWindow();
     //      showingMenu = true;
     //    }
-
+    
     ImGui::EndMenuBar();
   }
+}
+
+void MainStageView::drawMasks() {
+  ImVec2 windowSize = ofGetWindowSize();
+  float audioViewHeight = LayoutStateService::getService()->audioSettingsViewHeight();
+  ofRectangle browserRect = ofRectangle(0, 0, windowSize.x / 5.0, windowSize.y);
+  ofRectangle audioRect = ofRectangle(0, windowSize.y - audioViewHeight, windowSize.x, audioViewHeight);
+  auto cursor = ImGui::GetCursorPos();
+  ImGui::SetCursorPos(ImVec2(0,0));
+  ImGui::SetNextWindowSize(ImVec2(windowSize.x / 5.0, windowSize.y));
+  ImGui::End();
+  ImGui::SetCursorPos(cursor);
 }
 
 void MainStageView::drawVideoSourceBrowser()
@@ -172,7 +206,7 @@ void MainStageView::keyReleased(int key)
 {
   NodeLayoutView::getInstance()->keyReleased(key);
   
-  // If Space is pressed, tap the bpmTapper 
+  // If Space is pressed, tap the bpmTapper
   if (key == ' ')
   {
     bpmTapper.tap();

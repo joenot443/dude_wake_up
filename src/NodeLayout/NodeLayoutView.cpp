@@ -7,6 +7,7 @@
 
 #include "NodeLayoutView.hpp"
 #include "FontService.hpp"
+#include "ImGuiExtensions.hpp"
 #include "LibraryService.hpp"
 #include "Fonts.hpp"
 #include "UploadChainerView.h"
@@ -92,14 +93,17 @@ void NodeLayoutView::draw()
   ed::PushStyleColor(ax::NodeEditor::StyleColor_Grid, ImVec4(0, 0, 0, 0));
   
   bool show = LayoutStateService::getService()->showAudioSettings;
-  float height = show ? ofGetViewportHeight() * 3.0f / 5.0f
-  : ofGetViewportHeight() - ImGuiWindowTitleBarHeight;
   
-  drawPreviewWindows();
+  float width = (ImGui::GetWindowContentRegionMax().x * 4) / 5;
+  float height = ImGui::GetWindowContentRegionMax().y - LayoutStateService::getService()->audioSettingsViewHeight() - ImGuiWindowTitleBarHeight;
   
-  ed::Begin("My Editor", ImVec2(ofGetWindowWidth() * (4.0f / 5.0f), height));
+  ed::Begin("My Editor", ImVec2(width, height));
   ed::NavigateToContent();
+  
   ed::PushStyleVar(ed::StyleVar_ScrollDuration, 0.1f);
+  ed::PushStyleVar(ax::NodeEditor::StyleVar_NodeRounding, 0.0);
+  ed::PushStyleVar(ax::NodeEditor::StyleVar_NodeBorderWidth, 1.0);
+  ed::PushStyleColor(ax::NodeEditor::StyleColor_NodeBorder, ImVec4(1.0, 1.0, 1.0, 1.0));
   int uniqueId = 1;
   int linkUniqueId = 1000;
   int sourceUniqueId = 10000;
@@ -259,6 +263,8 @@ void NodeLayoutView::draw()
   
   handleDropZone();
   
+  drawPreviewWindows();
+  
   ed::SetCurrentEditor(nullptr);
   
   drawActionButtons();
@@ -292,6 +298,7 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
     ed::BeginPin(inputPinId, ed::PinKind::Input);
     
     auto icon = node->hasInputLink() ? ICON_MD_RADIO_BUTTON_ON : ICON_MD_RADIO_BUTTON_OFF;
+    
     CommonViews::IconTitle(icon);
     
     ed::EndPin();
@@ -353,7 +360,6 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
   
   // ----- SECOND COLUMN ------
   
-  // Title
   // Draw preview button
   bool inSet = previewWindowNodes.find(node) != previewWindowNodes.end();
   auto visIcon = inSet ? ICON_MD_VISIBILITY_OFF : ICON_MD_VISIBILITY;
@@ -384,24 +390,9 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
     {
       VideoSourceService::getService()->addOutputWindow(node->connectable);
     }
-    
-//    // Draw a Record button, but only for the terminal shader
-//    
-//    if (CommonViews::IconButton(ICON_MD_CIRCLE, node->idName()))
-//    {
-//      //      recorder.setup(ShaderChainerService::getService()->shaderChainerForShaderId(node->shader->shaderId));
-//    }
-  }
-  // Otherwise draw some spacing
-  else if (node->type == NodeTypeSource)
-  {
-    CommonViews::Spacing(16);
-  }
-  else
-  {
-    CommonViews::sSpacing();
   }
   
+  CommonViews::sSpacing();
 
   // Node Title
   ImGui::PushFont(FontService::getService()->h3);
@@ -448,6 +439,19 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
     ed::Suspend();
     resolutionPopupLocation = ImGui::GetMousePos();
     ed::Resume();
+  }
+  
+  if (node->type == NodeTypeShader)
+  {
+    if (ParameterService::getService()->isShaderIdStage(node->shader->shaderId)) {
+      if (CommonViews::IconButton(ICON_MD_STAR, node->idName())) {
+        ParameterService::getService()->toggleStageShaderId(node->shader->shaderId);
+      }
+    } else {
+      if (CommonViews::IconButton(ICON_MD_STAR_OUTLINE, node->idName())) {
+        ParameterService::getService()->toggleStageShaderId(node->shader->shaderId);
+      }
+    }
   }
   
   // Feedback Pin
@@ -543,6 +547,20 @@ void NodeLayoutView::populateNodePositions()
   }
 }
 
+bool NodeLayoutView::pointIsWithinNode(ImVec2 position, std::shared_ptr<Node> node) {
+	return position.x > node->position.x && position.x < node->position.x + 150 && position.y > node->position.y && position.y < node->position.y + 75;
+}
+
+std::shared_ptr<Node> NodeLayoutView::nodeAtPosition(ImVec2 position) {
+  for (auto node : nodes) {
+    if (pointIsWithinNode(position, node)) {
+      return node;
+    }
+  }
+  
+  return nullptr;
+}
+
 ImVec2 NodeLayoutView::coordinatesForNode(std::string id)
 {
   if (idNodeMap.count(id))
@@ -556,18 +574,23 @@ void NodeLayoutView::handleUnplacedNodes()
 {
   if (nodeDropLocation == nullptr)
   {
-    auto canvasPos = ed::ScreenToCanvas(ImVec2(ofGetMouseX(), ofGetMouseY()));
+    auto canvasPos = ed::ScreenToCanvas(getScaledMouseLocation());
     nodeDropLocation = std::make_unique<ImVec2>(canvasPos);
   }
+  
+  if (unplacedNodeIds.size() == 0) return;
+  
+  auto node = idNodeMap[unplacedNodeIds[unplacedNodeIds.size() - 1]];
+  ImVec2 offset = *nodeDropLocation.get() - node->savedPosition();
   
   for (auto id : unplacedNodeIds)
   {
     auto node = idNodeMap[id];
+    
     if (nodeDropLocation != nullptr)
     {
-      ed::SetNodePosition(node.get()->id,
-                          *nodeDropLocation.get());
-      nodeDropLocation = std::make_unique<ImVec2>(nodeDropLocation->x - 200., nodeDropLocation->y);
+      ImVec2 nodePosition = node->savedPosition();
+      ed::SetNodePosition(node.get()->id, nodePosition + offset);
     }
   }
   
@@ -651,17 +674,25 @@ void NodeLayoutView::handleDeleteNode(std::shared_ptr<Node> node)
 
 void NodeLayoutView::handleSaveNode(std::shared_ptr<Node> node)
 {
-    Strand strand = ShaderChainerService::getService()->strandForConnectable( node->connectable);
+    Strand strand = ShaderChainerService::getService()->strandForConnectable(node->connectable);
     
     std::string defaultName =
         ofGetTimestampString("%m-%d");
   
     defaultName = formatString("%s_%s", strand.name.c_str(), defaultName.c_str());
-  std::string defaultJsonName = formatString("%s.json", defaultName.c_str());
+    std::string defaultJsonName = formatString("%s.json", defaultName.c_str());
     
     auto result = ofSystemSaveDialog(defaultJsonName, "Save Strand");
     if (result.bSuccess)
     {
+      // Trim extension from result.fileName
+      std::string fileName = result.fileName;
+      auto dotPos = fileName.find_last_of('.');
+      if (dotPos != std::string::npos)
+      {
+        fileName = fileName.substr(0, dotPos);
+      }
+      strand.name = fileName;
       std::string previewPath = StrandService::getService()->savePreview(defaultName, node->connectable);
       ConfigService::getService()->saveStrandFile(strand, result.filePath, previewPath);
     }
@@ -678,7 +709,7 @@ void NodeLayoutView::handleDropZone()
       int n = *(const int *)payload->Data;
       ShaderType shaderType = (ShaderType)n;
       auto shader = ShaderChainerService::getService()->makeShader(shaderType);
-      auto canvasPos = ed::ScreenToCanvas(ImVec2(ofGetMouseX(), ofGetMouseY()));
+      auto canvasPos = ed::ScreenToCanvas(getScaledMouseLocation());
       nodeDropLocation = std::make_unique<ImVec2>(canvasPos);
       unplacedNodeIds.push_back(shader->shaderId);
     }
@@ -691,13 +722,14 @@ void NodeLayoutView::handleDropZone()
       std::shared_ptr<AvailableVideoSource> availableSource = VideoSourceService::getService()->availableVideoSourceForId(id);
       
       VideoSourceType sourceType = availableSource->type;
+      std::shared_ptr<VideoSource> source = nullptr;
       
       switch (sourceType)
       {
         case VideoSource_webcam:
         {
           auto availableWebcamSource = std::dynamic_pointer_cast<AvailableVideoSourceWebcam>(availableSource);
-          auto source = VideoSourceService::getService()->addWebcamVideoSource(
+          source = VideoSourceService::getService()->addWebcamVideoSource(
                                                                                availableWebcamSource->sourceName, availableWebcamSource->webcamId);
           unplacedNodeIds.push_back(source->id);
           break;
@@ -705,7 +737,7 @@ void NodeLayoutView::handleDropZone()
         case VideoSource_file:
         {
           auto availableFileSource = std::dynamic_pointer_cast<AvailableVideoSourceFile>(availableSource);
-          auto source = VideoSourceService::getService()->addFileVideoSource(
+          source = VideoSourceService::getService()->addFileVideoSource(
                                                                              availableFileSource->sourceName, availableFileSource->path);
           unplacedNodeIds.push_back(source->id);
           break;
@@ -716,21 +748,21 @@ void NodeLayoutView::handleDropZone()
         case VideoSource_image:
         {
           auto availableFileSource = std::dynamic_pointer_cast<AvailableVideoSourceImage>(availableSource);
-          auto source = VideoSourceService::getService()->addImageVideoSource(
+          source = VideoSourceService::getService()->addImageVideoSource(
                                                                               availableFileSource->sourceName, availableFileSource->path);
           unplacedNodeIds.push_back(source->id);
           break;
         }
         case VideoSource_text:
         {
-          auto source = VideoSourceService::getService()->addTextVideoSource(availableSource->sourceName);
+          source = VideoSourceService::getService()->addTextVideoSource(availableSource->sourceName);
           unplacedNodeIds.push_back(source->id);
           break;
         }
           
         case VideoSource_icon:
         {
-          auto source = VideoSourceService::getService()->addIconVideoSource(availableSource->sourceName);
+          source = VideoSourceService::getService()->addIconVideoSource(availableSource->sourceName);
           unplacedNodeIds.push_back(source->id);
           break;
         }
@@ -738,7 +770,7 @@ void NodeLayoutView::handleDropZone()
         case VideoSource_shader:
         {
           auto availableShaderSource = std::dynamic_pointer_cast<AvailableVideoSourceShader>(availableSource);
-          auto source = VideoSourceService::getService()->addShaderVideoSource(availableShaderSource->shaderType);
+          source = VideoSourceService::getService()->addShaderVideoSource(availableShaderSource->shaderType);
           unplacedNodeIds.push_back(source->id);
           break;
         }
@@ -765,7 +797,13 @@ void NodeLayoutView::handleDropZone()
           break;
       }
       
-      auto canvasPos = ed::ScreenToCanvas(ImVec2(ofGetMouseX(), ofGetMouseY()));
+      auto within = nodeAtPosition(ed::ScreenToCanvas(getScaledMouseLocation()));
+      if (within != nullptr && within->type == NodeTypeSource && source != nullptr) {
+        ShaderChainerService::getService()->copyConnections(within->source, source);
+        VideoSourceService::getService()->removeVideoSource(within->source->id);
+      }
+      
+      auto canvasPos = ed::ScreenToCanvas(getScaledMouseLocation());
       nodeDropLocation = std::make_unique<ImVec2>(canvasPos);
     }
     
@@ -780,7 +818,7 @@ void NodeLayoutView::handleDropZone()
       {
         std::vector<std::string> ids = ConfigService::getService()->loadStrandFile(availableStrand->path);
         if (ids.size() != 0) {
-          auto canvasPos = ed::ScreenToCanvas(ImVec2(ofGetMouseX(), ofGetMouseY()));
+          auto canvasPos = ed::ScreenToCanvas(getScaledMouseLocation());
           nodeDropLocation = std::make_unique<ImVec2>(canvasPos);
           // Add all the node IDs generated in loading the Strand
           unplacedNodeIds.insert(unplacedNodeIds.end(), ids.begin(), ids.end());
@@ -795,8 +833,7 @@ void NodeLayoutView::handleDropZone()
 void NodeLayoutView::handleDroppedSource(std::shared_ptr<VideoSource> source)
 {
   unplacedNodeIds.push_back(source->id);
-  auto canvasPos = ImVec2(ofGetMouseX(), ofGetMouseY());
-  nodeDropLocation = std::make_unique<ImVec2>(canvasPos);
+  nodeDropLocation = std::make_unique<ImVec2>(getScaledMouseLocation());
 }
 
 void NodeLayoutView::haveDownloadedAvailableLibraryFile(LibraryFile &file)
@@ -907,32 +944,27 @@ void NodeLayoutView::drawUploadChainerWindow()
 
 void NodeLayoutView::drawNodeWindows()
 {
+  auto cursor = ImGui::GetCursorPos();
   if (nodesToOpen.size() == 0)
     return;
   
   for (auto const &node : nodesToOpen)
   {
-    auto pos = ed::GetNodePosition(node->id);
+    ImVec2 pos = ed::GetNodePosition(node->id);
     pos = ed::CanvasToScreen(pos);
     pos.x = pos.x + ed::GetNodeSize(node->id).x / ed::GetCurrentZoom() + 20;
+    auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize;
     ImGui::SetNextWindowPos(pos);
-    ImGui::SetNextWindowCollapsed(false);
-    
-    auto style = ImGui::GetStyle();
-    style.WindowMenuButtonPosition = ImGuiDir_None;
-    auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize;
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10., 10.));
-    if (ImGui::Begin(node->idName().c_str(), 0, flags))
-    {
-      node->drawSettings();
-    }
-    ImGui::PopStyleVar();
+    ImGui::Begin(node->idName().c_str(), 0, flags);
+    node->drawSettings();
     ImGui::End();
-  }
+    }
+  ImGui::SetCursorPos(cursor);
 }
 
 void NodeLayoutView::drawPreviewWindows()
 {
+  auto start = ImGui::GetCursorPos();
   if (previewWindowNodes.size() == 0 && terminalNodes.size() == 0)
     return;
   
@@ -944,37 +976,30 @@ void NodeLayoutView::drawPreviewWindows()
   {
     drawPreviewWindow(node);
   }
+  ImGui::SetCursorPos(start);
 }
 
 void NodeLayoutView::drawPreviewWindow(std::shared_ptr<Node> node)
 {
   auto sizeScale = ed::GetCurrentZoom();
   
+  auto windowSize = ImVec2(160 / sizeScale, 120 / sizeScale);
+  
   auto pos = ed::GetNodePosition(node->id);
   pos = ed::CanvasToScreen(pos);
+  
   pos.x = pos.x + (ed::GetNodeSize(node->id).x / ed::GetCurrentZoom()) / 2 - 80 / sizeScale;
+  ofRectangle previewRect = ofRectangle(pos.x, pos.y, windowSize.x, windowSize.y);
   pos.y = pos.y - 140 / sizeScale;
-  ImGui::SetNextWindowPos(pos);
-  ImGui::SetNextWindowCollapsed(false);
   
   auto style = ImGui::GetStyle();
-  style.WindowMenuButtonPosition = ImGuiDir_None;
-  auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoBringToFrontOnFocus;
-  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0, 0.0));
-  ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0));
-  ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
-  if (ImGui::Begin(formatString("%s-preview", node->idName().c_str()).c_str(), 0, flags))
+
+  ImGui::SetCursorPos(pos);
+  if (sizeScale > 5.0)
   {
-    if (sizeScale > 5.0)
-    {
-      sizeScale = 5.0;
-    }
-    node->drawPreview(pos, sizeScale);
+    sizeScale = 5.0;
   }
-  ImGui::End();
-  ImGui::PopStyleColor();
-  ImGui::PopStyleColor();
-  ImGui::PopStyleVar();
+  node->drawPreview(pos, sizeScale);
 }
 
 void NodeLayoutView::drawResolutionPopup()
@@ -1007,28 +1032,15 @@ void NodeLayoutView::drawResolutionPopup()
 
 void NodeLayoutView::drawActionButtons()
 {
-  // Set the cursor to the bottom right of the window
-  auto cursorPos = ImGui::GetCursorPos();
-  ImGui::SetCursorPos(ImVec2(ImGui::GetWindowSize().x - 170,
-                             ImGui::GetWindowSize().y - 100));
+  auto pos = ImGui::GetCursorPos();
   
-  if (LayoutStateService::getService()->showAudioSettings)
-  {
-    ImGui::SetCursorPos(ImVec2(ImGui::GetCursorPos().x,
-                               ImGui::GetWindowSize().y -
-                               ofGetWindowHeight() * 2. / 5. - 50));
-  }
+  // Set the cursor to the bottom right of the window
+  ImGui::SetCursorPos(ImVec2(getScaledWindowWidth() - 250.0, getScaledWindowHeight() - LayoutStateService::getService()->audioSettingsViewHeight() - 100.0));
   
   // Draw the reset button
   if (CommonViews::LargeIconButton(ICON_MD_RECYCLING, "reset"))
   {
-    idNodeMap.clear();
-    ed::SetCurrentEditor(context);
-    ShaderChainerService::getService()->clear();
-    VideoSourceService::getService()->clear();
-    ConfigService::getService()->saveDefaultConfigFile();
-    OscillationService::getService()->clear();
-    ed::SetCurrentEditor(nullptr);
+    clear();
   }
   ImGui::SameLine();
   CommonViews::HSpacing(2);
@@ -1044,6 +1056,15 @@ void NodeLayoutView::drawActionButtons()
   ImGui::SameLine();
   CommonViews::HSpacing(2);
   ImGui::SameLine();
+  // Draw the stage mode button
+  if (CommonViews::LargeIconButton(ICON_MD_VIEW_AGENDA, "stageMode"))
+  {
+    LayoutStateService::getService()->stageModeEnabled = true;
+  }
+  ImGui::SameLine();
+  CommonViews::HSpacing(2);
+  ImGui::SameLine();
+  
   // Draw the zoom buttons
   if (CommonViews::LargeIconButton(ICON_MD_ZOOM_IN, "zoom_in"))
   {
@@ -1060,14 +1081,29 @@ void NodeLayoutView::drawActionButtons()
     ed::ZoomInc(false);
     ed::SetCurrentEditor(nullptr);
   }
-  ImGui::SetCursorPos(cursorPos);
+  
+  ImGui::SetCursorPos(pos);
+}
+
+void NodeLayoutView::clear() {
+  idNodeMap.clear();
+  previewWindowNodes.clear();
+  terminalNodes.clear();
+  nodesToOpen.clear();
+  ed::SetCurrentEditor(context);
+  ShaderChainerService::getService()->clear();
+  VideoSourceService::getService()->clear();
+  ParameterService::getService()->clear();
+  ConfigService::getService()->saveDefaultConfigFile();
+  OscillationService::getService()->clear();
+  ed::SetCurrentEditor(nullptr);
 }
 
 void NodeLayoutView::drawMetrics()
 {
   // Set the cursor to the bottom right of the window
   auto cursorPos = ImGui::GetCursorPos();
-  ImGui::SetCursorPos(ImVec2(ImGui::GetWindowSize().x / 5, ImGui::GetWindowSize().y - 100));
+  ImGui::SetCursorPos(ImVec2(getScaledWindowWidth() / 5, getScaledWindowHeight() - 100));
   
   ed::SetCurrentEditor(context);
   ed::ShowMetrics();

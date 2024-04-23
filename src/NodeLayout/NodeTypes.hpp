@@ -149,6 +149,17 @@ struct Node
 
     return supportsAux() ? AuxNodeColor : ShaderNodeColor;
   }
+  
+  ImVec2 savedPosition() {
+    if (type == NodeTypeShader)
+    {
+      return ImVec2(shader->settings->x->value, shader->settings->y->value);
+    }
+    else
+    {
+      return source->origin;
+    }
+  }
 
   Node(ed::NodeId id, ed::PinId outputId, ed::PinId inputId, std::string name, NodeType type, std::shared_ptr<Connectable> conn)
       : id(id), outputId(outputId), inputId(inputId), type(type), name(name), position(ImVec2(0, 0)), connectable(conn) {}

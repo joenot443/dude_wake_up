@@ -36,7 +36,7 @@ struct TransformSettings : public ShaderSettings {
   std::shared_ptr<Oscillator> rotateOscillator;
   std::shared_ptr<Oscillator> autoRotateOscillator;
 
-  TransformSettings(std::string shaderId, json j)
+  TransformSettings(std::string shaderId, json j, std::string name)
       : xTranslate(std::make_shared<Parameter>("xTranslate", 0.0,
                                                -1.0, 1.0)),
         yTranslate(std::make_shared<Parameter>("yTranslate", 0.0,
@@ -55,7 +55,7 @@ struct TransformSettings : public ShaderSettings {
         yScaleOscillator(std::make_shared<WaveformOscillator>(yScale)),
         rotateOscillator(std::make_shared<WaveformOscillator>(rotate)),
         autoRotateOscillator(std::make_shared<WaveformOscillator>(autoRotate)),
-        ShaderSettings(shaderId, j) {
+        ShaderSettings(shaderId, j, name) {
     parameters = {xTranslate, yTranslate, xScale, yScale, rotate, autoRotate, lockXYScale};
     oscillators = {xTranslateOscillator, yTranslateOscillator,
                    xScaleOscillator,     yScaleOscillator,

@@ -19,8 +19,8 @@
 
 struct AudioMountainsSettings: public ShaderSettings {
 	public:
-  AudioMountainsSettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId, j) {
+  AudioMountainsSettings(std::string shaderId, json j, std::string name) :
+  ShaderSettings(shaderId, j, name) {
     
   };
 };

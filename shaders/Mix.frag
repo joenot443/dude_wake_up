@@ -18,11 +18,12 @@ void main()
   }
   
   if (tex2_color.a < 0.1) {
-    outputColor = vec4(tex_color.rgb, 1.0);
+    outputColor = vec4(tex_color.rgb, tex_color.a);
     return;
   } else if (tex_color.a < 0.1) {
-    outputColor = vec4(tex2_color.rgb, 1.0);
+    outputColor = vec4(tex2_color.rgb, tex2_color.a);
     return;
   }
+  
   outputColor = mix(tex2_color, tex_color, tex2_mix);
 }

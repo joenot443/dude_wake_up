@@ -2,7 +2,7 @@
 to: src/Video/ShaderSource.hpp
 inject: true
 skip_if: return "<%= name %>"; // <%= name %>
-after: "  // Shader Names"
+after: "ShaderNames"
 ---
   case ShaderSource_<%= name %>: // Name  
     return "<%= name %>"; // <%= name %>

@@ -7,6 +7,10 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "GridRunShader.hpp"
+#include "ColorSwapShader.hpp"
+#include "AlphaMixShader.hpp"
+#include "GyroidsShader.hpp"
 #include "CubifyShader.hpp"
 #include "SwirlingSoulShader.hpp"
 #include "DoubleSwirlShader.hpp"
@@ -96,31 +100,52 @@ void ShaderChainerService::setup()
     auto shader = std::make_shared<AvailableShader>(shaderType,
                                                     shaderTypeName(shaderType));
     availableBasicShaders.push_back(shader);
+    availableShadersMap[shaderType] = shader;
+    allAvailableShaders.push_back(shader);
   }
   for (auto const shaderType : AvailableMixShaderTypes)
   {
     auto shader = std::make_shared<AvailableShader>(shaderType,
                                                     shaderTypeName(shaderType));
     availableMixShaders.push_back(shader);
+    availableShadersMap[shaderType] = shader;
+    allAvailableShaders.push_back(shader);
   }
   for (auto const shaderType : AvailableFilterShaderTypes)
   {
     auto shader = std::make_shared<AvailableShader>(shaderType,
                                                     shaderTypeName(shaderType));
     availableFilterShaders.push_back(shader);
+    availableShadersMap[shaderType] = shader;
+    allAvailableShaders.push_back(shader);
   }
   for (auto const shaderType : AvailableTransformShaderTypes)
   {
     auto shader = std::make_shared<AvailableShader>(shaderType,
                                                     shaderTypeName(shaderType));
     availableTransformShaders.push_back(shader);
+    availableShadersMap[shaderType] = shader;
+    allAvailableShaders.push_back(shader);
   }
   for (auto const shaderType : AvailableMaskShaderTypes)
   {
     auto shader = std::make_shared<AvailableShader>(shaderType,
                                                     shaderTypeName(shaderType));
     availableMaskShaders.push_back(shader);
+    availableShadersMap[shaderType] = shader;
+    allAvailableShaders.push_back(shader);
   }
+}
+
+std::vector<std::shared_ptr<AvailableShader>> ShaderChainerService::availableFavoriteShaders() {
+  std::vector<std::shared_ptr<AvailableShader>> favorites = {};
+  std::set<ShaderType> favoriteTypes = ParameterService::getService()->favoriteShaderTypes;
+  
+  for (auto type : favoriteTypes) {
+    favorites.push_back(availableShadersMap[type]);
+  }
+  
+  return favorites;
 }
 
 void ShaderChainerService::subscribeToShaderChainerUpdates(
@@ -229,6 +254,7 @@ void ShaderChainerService::clear()
   // Clear the shaderChainerMap
   shaderIdShaderChainerMap.clear();
   videoSourceIdShaderChainerMap.clear();
+  stageModeShader = nullptr;
 }
 
 void ShaderChainerService::loadConfig(json data)
@@ -319,7 +345,7 @@ void ShaderChainerService::addShader(std::shared_ptr<Shader> shader)
     return;
   }
   
-  std::shared_ptr<FeedbackSource> feedbackSource = std::make_shared<FeedbackSource>(shader->shaderId, std::make_shared<VideoSourceSettings>());
+  std::shared_ptr<FeedbackSource> feedbackSource = std::make_shared<FeedbackSource>(shader->shaderId, std::make_shared<VideoSourceSettings>(UUID::generateUUID(), 0));
   
   FeedbackSourceService::getService()->registerFeedbackSource(feedbackSource);
   shader->feedbackDestination = feedbackSource;
@@ -338,10 +364,18 @@ void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader, bool fro
   
   removeConnectable(shader);
   
+  for (auto param : shader->settings->parameters) {
+    if (param->favorited) {
+      ParameterService::getService()->removeFavoriteParameter(param);
+    }
+  }
+  
   if (fromMap)
   {
     shadersMap.erase(shader->shaderId);
   }
+  
+  ParameterService::getService()->removeStageShaderId(shader->shaderId);
   
   shader.reset();
   ConfigService::getService()->saveDefaultConfigFile();
@@ -380,6 +414,16 @@ void ShaderChainerService::removeConnectable(std::shared_ptr<Connectable> connec
     connectionMap.erase(connId);
   }
   ConfigService::getService()->saveDefaultConfigFile();
+}
+
+void ShaderChainerService::copyConnections(std::shared_ptr<Connectable> source, std::shared_ptr<Connectable> dest) {
+  for (auto conn : source->inputs) {
+    makeConnection(conn->start, dest, conn->type, false, true);
+  }
+  
+  for (auto conn : source->outputs) {
+    makeConnection(dest, conn->end, conn->type, false, true);
+  }
 }
 
 std::shared_ptr<Shader> ShaderChainerService::shaderForId(std::string id)
@@ -475,10 +519,11 @@ void ShaderChainerService::breakConnectionForConnectionId(std::string connection
 std::shared_ptr<Connection> ShaderChainerService::makeConnection(std::shared_ptr<Connectable> start,
                                                                  std::shared_ptr<Connectable> end,
                                                                  ConnectionType type,
-                                                                 bool shouldSaveConfig)
+                                                                 bool shouldSaveConfig,
+                                                                 bool copy)
 {
   // Only allow a single input for each type
-  if (end->hasInputForType(type))
+  if (end->hasInputForType(type) && !copy)
   {
     return nullptr;
   }
@@ -517,389 +562,413 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeGridRun: {
+      auto settings = new GridRunSettings(shaderId, shaderJson, shaderTypeName(shaderType));
+      auto shader = std::make_shared<GridRunShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeColorSwap: {
+      auto settings = new ColorSwapSettings(shaderId, shaderJson, shaderTypeName(shaderType));
+      auto shader = std::make_shared<ColorSwapShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeAlphaMix: {
+      auto settings = new AlphaMixSettings(shaderId, shaderJson, shaderTypeName(shaderType));
+      auto shader = std::make_shared<AlphaMixShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeGyroids: {
+      auto settings = new GyroidsSettings(shaderId, shaderJson, shaderTypeName(shaderType));
+      auto shader = std::make_shared<GyroidsShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeCubify: {
-      auto settings = new CubifySettings(shaderId, shaderJson);
+      auto settings = new CubifySettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<CubifyShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeSwirlingSoul: {
-      auto settings = new SwirlingSoulSettings(shaderId, shaderJson);
+      auto settings = new SwirlingSoulSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<SwirlingSoulShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeDoubleSwirl: {
-      auto settings = new DoubleSwirlSettings(shaderId, shaderJson);
+      auto settings = new DoubleSwirlSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<DoubleSwirlShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeSmokeRing: {
-      auto settings = new SmokeRingSettings(shaderId, shaderJson);
+      auto settings = new SmokeRingSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<SmokeRingShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeAudioCircle: {
-      auto settings = new AudioCircleSettings(shaderId, shaderJson);
+      auto settings = new AudioCircleSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<AudioCircleShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeLimbo:
     {
-      auto settings = new LimboSettings(shaderId, shaderJson);
+      auto settings = new LimboSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<LimboShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeTextureMask:
     {
-      auto settings = new TextureMaskSettings(shaderId, shaderJson);
+      auto settings = new TextureMaskSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<TextureMaskShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeSnowfall:
     {
-      auto settings = new SnowfallSettings(shaderId, shaderJson);
+      auto settings = new SnowfallSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<SnowfallShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeCanny:
     {
-      auto settings = new CannySettings(shaderId, shaderJson);
+      auto settings = new CannySettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<CannyShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeVHS:
     {
-      auto settings = new VHSSettings(shaderId, shaderJson);
+      auto settings = new VHSSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<VHSShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeCirclePath:
     {
-      auto settings = new CirclePathSettings(shaderId, shaderJson);
+      auto settings = new CirclePathSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<CirclePathShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeBounce:
     {
-      auto settings = new BounceSettings(shaderId, shaderJson);
+      auto settings = new BounceSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<BounceShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeVertex:
     {
-      auto settings = new VertexSettings(shaderId, shaderJson);
+      auto settings = new VertexSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<VertexShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeTriple:
     {
-      auto settings = new TripleSettings(shaderId, shaderJson);
+      auto settings = new TripleSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<TripleShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypePaint:
     {
-      auto settings = new PaintSettings(shaderId, shaderJson);
+      auto settings = new PaintSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<PaintShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeLumaFeedback:
     {
-      auto settings = new LumaFeedbackSettings(shaderId, shaderJson);
+      auto settings = new LumaFeedbackSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<LumaFeedbackShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeGameboy:
     {
-      auto settings = new GameboySettings(shaderId, shaderJson);
+      auto settings = new GameboySettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<GameboyShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeStaticFrame:
     {
-      auto settings = new StaticFrameSettings(shaderId, shaderJson);
+      auto settings = new StaticFrameSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<StaticFrameShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeSlidingFrame:
     {
-      auto settings = new SlidingFrameSettings(shaderId, shaderJson);
+      auto settings = new SlidingFrameSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<SlidingFrameShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeMinMixer:
     {
-      auto settings = new MinMixerSettings(shaderId, shaderJson);
+      auto settings = new MinMixerSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<MinMixerShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeSolidColor:
     {
-      auto settings = new SolidColorSettings(shaderId, shaderJson);
+      auto settings = new SolidColorSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<SolidColorShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderType16bit:
     {
-      auto settings = new SixteenBitSettings(shaderId, shaderJson);
+      auto settings = new SixteenBitSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<SixteenBitShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeHilbert:
     {
-      auto settings = new HilbertSettings(shaderId, shaderJson);
+      auto settings = new HilbertSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<HilbertShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeWarp:
     {
-      auto settings = new WarpSettings(shaderId, shaderJson);
+      auto settings = new WarpSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<WarpShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeFrequencyVisualizer:
     {
-      auto settings = new FrequencyVisualizerSettings(shaderId, shaderJson);
+      auto settings = new FrequencyVisualizerSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<FrequencyVisualizerShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeColorKeyMaskMaker:
     {
-      auto settings = new ColorKeyMaskMakerSettings(shaderId, shaderJson);
+      auto settings = new ColorKeyMaskMakerSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<ColorKeyMaskMakerShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeCurlySquares:
     {
-      auto settings = new CurlySquaresSettings(shaderId, shaderJson);
+      auto settings = new CurlySquaresSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<CurlySquaresShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypePlasmaTwo:
     {
-      auto settings = new PlasmaTwoSettings(shaderId, shaderJson);
+      auto settings = new PlasmaTwoSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<PlasmaTwoShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeDancingSquares:
     {
-      auto settings = new DancingSquaresSettings(shaderId, shaderJson);
+      auto settings = new DancingSquaresSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<DancingSquaresShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeLumaMaskMaker:
     {
-      auto settings = new LumaMaskMakerSettings(shaderId, shaderJson);
+      auto settings = new LumaMaskMakerSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<LumaMaskMakerShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeMask:
     {
-      auto settings = new MaskSettings(shaderId, shaderJson);
+      auto settings = new MaskSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<MaskShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeCircle:
     {
-      auto settings = new CircleSettings(shaderId, shaderJson);
+      auto settings = new CircleSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<CircleShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeCrosshatch:
     {
-      auto settings = new CrosshatchSettings(shaderId, shaderJson);
+      auto settings = new CrosshatchSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<CrosshatchShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeHalfTone:
     {
-      auto settings = new HalfToneSettings(shaderId, shaderJson);
+      auto settings = new HalfToneSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<HalfToneShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeTissue:
     {
-      auto settings = new TissueSettings(shaderId, shaderJson);
+      auto settings = new TissueSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<TissueShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypePsycurves:
     {
-      auto settings = new PsycurvesSettings(shaderId, shaderJson);
+      auto settings = new PsycurvesSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<PsycurvesShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeFishEye:
     {
-      auto settings = new FishEyeSettings(shaderId, shaderJson);
+      auto settings = new FishEyeSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<FishEyeShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeColorPass:
     {
-      auto settings = new ColorPassSettings(shaderId, shaderJson);
+      auto settings = new ColorPassSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<ColorPassShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeSobel:
     {
-      auto settings = new SobelSettings(shaderId, shaderJson);
+      auto settings = new SobelSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<SobelShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeTriangleMap:
     {
-      auto settings = new TriangleMapSettings(shaderId, shaderJson);
+      auto settings = new TriangleMapSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<TriangleMapShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeLiquid:
     {
-      auto settings = new LiquidSettings(shaderId, shaderJson);
+      auto settings = new LiquidSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<LiquidShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeDisco:
     {
-      auto settings = new DiscoSettings(shaderId, shaderJson);
+      auto settings = new DiscoSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<DiscoShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeOctahedron:
     {
-      auto settings = new OctahedronSettings(shaderId, shaderJson);
+      auto settings = new OctahedronSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<OctahedronShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeVanGogh:
     {
-      auto settings = new VanGoghSettings(shaderId, shaderJson);
+      auto settings = new VanGoghSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<VanGoghShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeRubiks:
     {
-      auto settings = new RubiksSettings(shaderId, shaderJson);
+      auto settings = new RubiksSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<RubiksShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeRainbowRotator:
     {
-      auto settings = new RainbowRotatorSettings(shaderId, shaderJson);
+      auto settings = new RainbowRotatorSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<RainbowRotatorShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeDither:
     {
-      auto settings = new DitherSettings(shaderId, shaderJson);
+      auto settings = new DitherSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<DitherShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeMountains:
     {
-      auto settings = new MountainsSettings(shaderId, shaderJson);
+      auto settings = new MountainsSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<MountainsShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeGalaxy:
     {
-      auto settings = new GalaxySettings(shaderId, shaderJson);
+      auto settings = new GalaxySettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<GalaxyShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeAudioMountains:
     {
-      auto settings = new AudioMountainsSettings(shaderId, shaderJson);
+      auto settings = new AudioMountainsSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<AudioMountainsShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeAudioBumper:
     {
-      auto settings = new AudioBumperSettings(shaderId, shaderJson);
+      auto settings = new AudioBumperSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<AudioBumperShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeAudioWaveform:
     {
-      auto settings = new AudioWaveformSettings(shaderId, shaderJson);
+      auto settings = new AudioWaveformSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<AudioWaveformShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeRings:
     {
-      auto settings = new RingsSettings(shaderId, shaderJson);
+      auto settings = new RingsSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<RingsShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeSlider:
     {
-      auto settings = new SliderSettings(shaderId, shaderJson);
+      auto settings = new SliderSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<SliderShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeWobble:
     {
-      auto settings = new WobbleSettings(shaderId, shaderJson);
+      auto settings = new WobbleSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<WobbleShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeRGBShift:
     {
-      auto settings = new RGBShiftSettings(shaderId, shaderJson);
+      auto settings = new RGBShiftSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<RGBShiftShader>(settings);
       shader->setup();
       return shader;
@@ -908,91 +977,91 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
       return 0;
     case ShaderTypeHSB:
     {
-      auto settings = new HSBSettings(shaderId, shaderJson);
+      auto settings = new HSBSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<HSBShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeBlur:
     {
-      auto settings = new BlurSettings(shaderId, shaderJson);
+      auto settings = new BlurSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<BlurShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypePixelate:
     {
-      auto settings = new PixelSettings(shaderId, shaderJson);
+      auto settings = new PixelSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<PixelShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeGlitch:
     {
-      auto settings = new GlitchSettings(shaderId, shaderJson);
+      auto settings = new GlitchSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<GlitchShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeMirror:
     {
-      auto settings = new MirrorSettings(shaderId, shaderJson);
+      auto settings = new MirrorSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<MirrorShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeTransform:
     {
-      auto settings = new TransformSettings(shaderId, shaderJson);
+      auto settings = new TransformSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<TransformShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeFeedback:
     {
-      auto settings = new FeedbackSettings(shaderId, shaderJson);
+      auto settings = new FeedbackSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<FeedbackShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeAscii:
     {
-      auto settings = new AsciiSettings(shaderId, shaderJson);
+      auto settings = new AsciiSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<AsciiShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeKaleidoscope:
     {
-      auto settings = new KaleidoscopeSettings(shaderId, shaderJson);
+      auto settings = new KaleidoscopeSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<KaleidoscopeShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeTile:
     {
-      auto settings = new TileSettings(shaderId, shaderJson);
+      auto settings = new TileSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<TileShader>(settings);
       shader->setup();
       return shader;
     }
     case ShaderTypeMix:
     {
-      auto settings = new MixSettings(shaderId, shaderJson);
+      auto settings = new MixSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<MixShader>(settings);
       shader.get()->setup();
       return shader;
     }
     case ShaderTypePlasma:
     {
-      auto settings = new PlasmaSettings(shaderId, shaderJson);
+      auto settings = new PlasmaSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<PlasmaShader>(settings);
       shader.get()->setup();
       return shader;
     }
     case ShaderTypeFuji:
     {
-      auto settings = new FujiSettings(shaderId, shaderJson);
+      auto settings = new FujiSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<FujiShader>(settings);
       shader.get()->setup();
       return shader;
@@ -1000,7 +1069,7 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
     }
     case ShaderTypeFractal:
     {
-      auto settings = new FractalSettings(shaderId, shaderJson);
+      auto settings = new FractalSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<FractalShader>(settings);
       shader.get()->setup();
       return shader;
@@ -1008,7 +1077,7 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
     }
     case ShaderTypeClouds:
     {
-      auto settings = new CloudSettings(shaderId, shaderJson);
+      auto settings = new CloudSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<CloudShader>(settings);
       shader.get()->setup();
       return shader;
@@ -1016,7 +1085,7 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
     }
     case ShaderTypeMelter:
     {
-      auto settings = new MeltSettings(shaderId, shaderJson);
+      auto settings = new MeltSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<MeltShader>(settings);
       shader.get()->setup();
       return shader;

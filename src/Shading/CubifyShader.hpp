@@ -21,10 +21,10 @@ struct CubifySettings: public ShaderSettings {
   std::shared_ptr<Parameter> cubeSize;
   std::shared_ptr<ValueOscillator> cubeSizeOscillator;
 
-  CubifySettings(std::string shaderId, json j) :
+  CubifySettings(std::string shaderId, json j, std::string name) :
   cubeSize(std::make_shared<Parameter>("cubeSize", 1.0, 0.0, 10.0)),
   cubeSizeOscillator(std::make_shared<ValueOscillator>(cubeSize)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, name)  {
     parameters = { cubeSize };
     oscillators = { cubeSizeOscillator };
     load(j);

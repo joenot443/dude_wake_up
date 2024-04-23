@@ -21,17 +21,20 @@
 struct TileSettings : public ShaderSettings {
 	public:
   std::shared_ptr<Parameter> repeat;
+  std::shared_ptr<Parameter> spacing;
   std::shared_ptr<Parameter> mirror;
 
   std::shared_ptr<Oscillator> repeatOscillator;
-
-  TileSettings(std::string shaderId, json j) :
+  std::shared_ptr<Oscillator> spacingOscillator;
+  
+  TileSettings(std::string shaderId, json j, std::string name) :
   repeat(std::make_shared<Parameter>("repeat", 4.0, 1.0, 10.0)),
+  spacing(std::make_shared<Parameter>("spacing", 5.0, 0.0, 50.0)),
   mirror(std::make_shared<Parameter>("mirror", 0.0, 0.0, 1.0)),
   repeatOscillator(std::make_shared<WaveformOscillator>(repeat)),
-  ShaderSettings(shaderId, j) {
-    parameters = {repeat, mirror};
-    oscillators = {repeatOscillator};
+  ShaderSettings(shaderId, j, name) {
+    parameters = {repeat, mirror, spacing};
+    oscillators = {repeatOscillator, spacingOscillator};
     load(j);
   registerParameters();
   };
@@ -57,6 +60,7 @@ shader.load("shaders/Tile");
     shader.begin();
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("repeat", settings->repeat->value);
+    shader.setUniform1f("spacing", settings->spacing->value);
     shader.setUniform1i("mirror", settings->mirror->boolValue);
     shader.setUniformTexture("tex", *frame, 0);
     frame->draw(0, 0);
@@ -72,6 +76,7 @@ shader.load("shaders/Tile");
     
     CommonViews::ShaderCheckbox(settings->mirror);
     CommonViews::ShaderParameter(settings->repeat, settings->repeatOscillator);
+    CommonViews::ShaderParameter(settings->spacing, settings->spacingOscillator);
   }
 };
 

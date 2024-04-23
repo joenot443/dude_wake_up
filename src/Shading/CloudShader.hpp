@@ -24,10 +24,10 @@ struct CloudSettings : public ShaderSettings {
 
   std::shared_ptr<Oscillator> speedOscillator;
 
-  CloudSettings(std::string shaderId, json j) :
+  CloudSettings(std::string shaderId, json j, std::string name) :
   speed(std::make_shared<Parameter>("speed", 1.0, 0.0, 2.0)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, name) {
     parameters = {speed};
     oscillators = {speedOscillator};
     load(j);

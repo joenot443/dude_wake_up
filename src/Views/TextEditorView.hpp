@@ -23,6 +23,7 @@ private:
   std::shared_ptr<DisplayText> displayText;
   ofTrueTypeFont font;
   std::vector<Font> fonts;
+  std::string id;
   int selectedFontIndex;
 };
 

@@ -27,14 +27,14 @@ struct StaticFrameSettings: public ShaderSettings {
   std::shared_ptr<Parameter> angle;
   std::shared_ptr<WaveformOscillator> angleOscillator;
 
-  StaticFrameSettings(std::string shaderId, json j) :
+  StaticFrameSettings(std::string shaderId, json j, std::string name) :
   position(std::make_shared<Parameter>("Position", 0.5, 0.0, 1.0)),
   lineWidth(std::make_shared<Parameter>("Line Width", 10.0, 0.0, 50.0)),
   angle(std::make_shared<Parameter>("Angle", 0.0, 0.0, M_PI)),
   positionOscillator(std::make_shared<WaveformOscillator>(position)),
   lineWidthOscillator(std::make_shared<WaveformOscillator>(lineWidth)),
   angleOscillator(std::make_shared<WaveformOscillator>(angle)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, name) {
     parameters = { position, lineWidth, angle };
     oscillators = { positionOscillator, lineWidthOscillator, angleOscillator };
     load(j);

@@ -25,12 +25,12 @@ struct RGBShiftSettings: public ShaderSettings {
   std::shared_ptr<Oscillator> speedOscillator;
   std::shared_ptr<Oscillator> amountOscillator;
   
-  RGBShiftSettings(std::string shaderId, json j) : 
+  RGBShiftSettings(std::string shaderId, json j, std::string name) : 
   speed(std::make_shared<Parameter>("speed", 1.0, 0.0, 5.0)),
   amount(std::make_shared<Parameter>("amount", 1.0, 0.0, 2.0)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   amountOscillator(std::make_shared<WaveformOscillator>(amount)),
-  ShaderSettings(shaderId, j)
+  ShaderSettings(shaderId, j, name)
   {
     parameters = {speed, amount};
     oscillators = {speedOscillator, amountOscillator};

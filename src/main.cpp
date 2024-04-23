@@ -21,6 +21,8 @@
 #include "ParameterService.hpp"
 #include "IconService.hpp"
 
+const static ofVec2f windowSize = ofVec2f(2400, 1600);
+
 using json = nlohmann::json;
 
 #define RELEASE
@@ -51,11 +53,16 @@ void setupDirectories() {
   auto homeDir = ofFilePath::getUserHomeDir();
   auto libraryPath = ofFilePath::join(homeDir, "/nottawa");
   auto shadersPath = ofFilePath::join(libraryPath, "/shaders");
+  auto videosPath = ofFilePath::join(libraryPath, "/videos");
+  
   if (!ofDirectory::doesDirectoryExist(libraryPath)) {
     ofDirectory::createDirectory(libraryPath);
   }
   if (!ofDirectory::doesDirectoryExist(shadersPath)) {
     ofDirectory::createDirectory(shadersPath);
+  }
+  if (!ofDirectory::doesDirectoryExist(videosPath)) {
+    ofDirectory::createDirectory(videosPath);
   }
   
   for (auto dir : ConfigService::getService()->shaderConfigFoldersPaths()) {
@@ -81,11 +88,8 @@ int main( ){
   sentry_init(options);
 
   ofGLFWWindowSettings settings;
-  // Set the window size to be the same as the monitor size
-  settings.setSize(1440, 900);
+  settings.setSize(windowSize.x, windowSize.y);
   settings.setGLVersion(3, 2);
-  //  ofSetupOpenGL(1280,720, OF_WINDOW);
-  //  settings.windowMode = OF_WINDOW;
   auto window = ofCreateWindow(settings);
   auto app = shared_ptr<MainApp>(new MainApp(window));
   ofSetFrameRate(60);

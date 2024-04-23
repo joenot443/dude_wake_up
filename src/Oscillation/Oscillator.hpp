@@ -9,6 +9,7 @@
 #define Oscillator_hpp
 
 #include "Parameter.hpp"
+#include <memory>
 #include "imgui.h"
 #include "json.hpp"
 #include <stdio.h>
@@ -22,7 +23,7 @@ enum OscillatorType
   Oscillator_waveform
 };
 
-struct Oscillator
+struct Oscillator: public std::enable_shared_from_this<Oscillator>
 {
 public:
   OscillatorType type;

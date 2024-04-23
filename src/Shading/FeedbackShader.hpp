@@ -26,6 +26,8 @@ public:
   int index;
   std::shared_ptr<Parameter> lumaKeyEnabled;
   std::string shaderId;
+  
+  std::shared_ptr<Parameter> priority;
 
   std::shared_ptr<Parameter> scale;
   std::shared_ptr<Oscillator> scaleOscillator;
@@ -56,7 +58,8 @@ public:
 
   std::shared_ptr<Parameter> sourceSelection;
 
-  FeedbackSettings(std::string shaderId, json j) : index(index),
+  FeedbackSettings(std::string shaderId, json j, std::string name) : index(index),
+  priority(std::make_shared<Parameter>("priority", 0.0, 0.0, 1.0)),
                                                    mainMix(std::make_shared<Parameter>("Main Mix", 0.5, 0.0, 1.0)),
                                                    mainMixOscillator(std::make_shared<WaveformOscillator>(mainMix)),
                                                    feedbackMix(std::make_shared<Parameter>("Feedback Mix", 0.95, 0.0, 1.0)),
@@ -79,7 +82,7 @@ public:
                                                    scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
                                                    sourceSelection(std::make_shared<Parameter>("source", 1.0, 0.0, 3.0)),
                                                    shaderId(shaderId),
-                                                   ShaderSettings(shaderId, j)
+                                                   ShaderSettings(shaderId, j, name)
   {
     parameters = {mainMix, feedbackMix, keyValue, keyThreshold, delayAmount, lumaKeyEnabled, xPosition, yPosition, scale, sourceSelection};
     oscillators = {mainMixOscillator, feedbackMixOscillator, keyValueOscillator, keyThresholdOscillator, delayAmountOscillator, xPositionOscillator, yPositionOscillator, scaleOscillator};

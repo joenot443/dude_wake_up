@@ -20,13 +20,14 @@ using json = nlohmann::json;
 struct Parameter : public std::enable_shared_from_this<Parameter>
 {
   std::string name = "";
-  std::string shaderKey = "";
+  std::string ownerName = "";
   std::string paramId;
   std::string midiDescriptor = "";
   float defaultValue = 0.0;
   float value = 0.0;
   int intValue = 0;
   bool boolValue = false;
+  bool favorited = false;
   // Another Parameter which is driving this one's value
   std::shared_ptr<Parameter> driver = nullptr;
   std::shared_ptr<Parameter> shift = nullptr;
@@ -51,6 +52,7 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
     j["value"] = value;
     j["intValue"] = intValue;
     j["boolValue"] = boolValue;
+    j["favorited"] = favorited;
     
     // If the color RGB values are not all 0, add them to the json
     if (color->at(0) != 0.0 || color->at(1) != 0.0 || color->at(2) != 0.0)
@@ -71,9 +73,6 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
 
   void load(json j)
   {
-    if (name == "maskEnabled") {
-      std::cout << "re" << std::endl;
-    }
     if (j.is_number())
     {
       setValue(j);
@@ -103,6 +102,9 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
         color->at(0) = j["r"];
         color->at(1) = j["g"];
         color->at(2) = j["b"];
+      }
+      if (j.contains("favorited")) {
+        favorited = j["favorited"];
       }
     }
   }

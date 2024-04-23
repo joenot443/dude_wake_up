@@ -25,8 +25,6 @@
 #include "ofxImGui.h"
 #include <stdio.h>
 
-const static ofVec2f windowSize = ofVec2f(1200, 800);
-
 void MainApp::setup()
 {
   glEnable(GL_DEPTH_TEST);
@@ -47,8 +45,8 @@ void MainApp::setup()
   FontService::getService()->addFontToGui(&gui);
   VideoSourceService::getService();
   MarkdownService::getService();
-  mainStageView->setup();
   ConfigService::getService()->loadDefaultConfigFile();
+  mainStageView->setup();
   LibraryService::getService()->backgroundFetchLibraryFiles();
   StrandService::getService()->setup();
 }
@@ -77,7 +75,7 @@ void MainApp::draw()
 void MainApp::drawMainStage()
 {
   // Get the current screen size
-  ImGui::SetNextWindowSize(ImVec2(ofGetWindowWidth(), ofGetWindowHeight()));
+  ImGui::SetNextWindowSize(getScaledWindowSize());
   ImGui::SetNextWindowPos(ImVec2(0, 0));
   ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove |
                                  ImGuiWindowFlags_NoTitleBar |
@@ -155,4 +153,6 @@ void MainApp::runMainThreadTasks() {
 
 void MainApp::resetState() {}
 
-void MainApp::keyReleased(int key) { mainStageView->keyReleased(key); }
+void MainApp::keyReleased(int key) {
+  mainStageView->keyReleased(key);
+}

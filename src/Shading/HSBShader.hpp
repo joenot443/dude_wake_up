@@ -27,7 +27,7 @@ struct HSBSettings: public ShaderSettings {
   std::shared_ptr<Oscillator> saturationOscillator;
   std::shared_ptr<Oscillator> brightnessOscillator;
   
-  HSBSettings(std::string shaderId, json j) :
+  HSBSettings(std::string shaderId, json j, std::string name) :
   shaderId(shaderId),
   hue(std::make_shared<Parameter>("Hue", 0.0, 0.0, 1.0)),
   saturation(std::make_shared<Parameter>("Saturation", 1.0, 0.0, 2.0)),
@@ -35,7 +35,7 @@ struct HSBSettings: public ShaderSettings {
   hueOscillator(std::make_shared<WaveformOscillator>(hue)),
   saturationOscillator(std::make_shared<WaveformOscillator>(saturation)),
   brightnessOscillator(std::make_shared<WaveformOscillator>(brightness)),
-  ShaderSettings(shaderId, j)
+  ShaderSettings(shaderId, j, name)
   {
     parameters = {hue, saturation, brightness};
     oscillators = {hueOscillator, saturationOscillator, brightnessOscillator};

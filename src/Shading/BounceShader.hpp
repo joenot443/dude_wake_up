@@ -24,12 +24,12 @@ struct BounceSettings: public ShaderSettings {
   std::shared_ptr<Parameter> scale;
   std::shared_ptr<ValueOscillator> scaleOscillator;
   
-  BounceSettings(std::string shaderId, json j) :
+  BounceSettings(std::string shaderId, json j, std::string name) :
   speed(std::make_shared<Parameter>("speed", 1.0, 0.0, 10.0)),
   scale(std::make_shared<Parameter>("scale", 0.1, 0.0, 1.0)),
   speedOscillator(std::make_shared<ValueOscillator>(speed)),
   scaleOscillator(std::make_shared<ValueOscillator>(scale)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, name) {
     parameters = { speed, scale };
     oscillators = { speedOscillator, scaleOscillator };
     load(j);
@@ -90,6 +90,7 @@ struct BounceShader: Shader {
     
     if (ImGui::Button("Reset")) {
       position = ImVec2(0, 0);
+      velocity = ImVec2(-5., -5.);
     }
   }
 };

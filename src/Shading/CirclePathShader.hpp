@@ -27,10 +27,10 @@ struct CirclePathSettings : public ShaderSettings
   std::shared_ptr<ValueOscillator> scaleOscillator;
   std::shared_ptr<ValueOscillator> speedOscillator;
 
-  CirclePathSettings(std::string shaderId, json j) : radius(std::make_shared<Parameter>("radius", 0.4, 0.1, 1.0)),
+  CirclePathSettings(std::string shaderId, json j, std::string name) : radius(std::make_shared<Parameter>("radius", 0.4, 0.1, 1.0)),
                                                      scale(std::make_shared<Parameter>("scale", 1.0, 0.1, 10.0)),
                                                      speed(std::make_shared<Parameter>("speed", 0.05, 0.01, 0.2)), // Default speed and range, adjust as needed
-                                                     ShaderSettings(shaderId, j)
+                                                     ShaderSettings(shaderId, j, name)
   {
     radiusOscillator = std::make_shared<ValueOscillator>(radius);
     scaleOscillator = std::make_shared<ValueOscillator>(scale);

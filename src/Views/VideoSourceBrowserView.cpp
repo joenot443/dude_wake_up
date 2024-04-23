@@ -92,9 +92,11 @@ void VideoSourceBrowserView::refreshSources()
 
 void VideoSourceBrowserView::update() {}
 
+void VideoSourceBrowserView::drawLibraryHeader() {}
+
 void VideoSourceBrowserView::draw()
 {
-  if (ImGui::BeginTabBar("VideoSourceBrowser", ImGuiTabBarFlags_None))
+  if (ImGui::BeginTabBar("VideoSourceBrowser"))
   {
     if (ImGui::BeginTabItem("Generated"))
     {

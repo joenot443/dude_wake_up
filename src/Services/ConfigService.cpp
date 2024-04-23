@@ -156,6 +156,7 @@ void ConfigService::saveStrandFile(Strand strand, std::string path, std::string 
   container[SourcesJsonKey] = VideoSourceService::getService()->config();
   container[ConnectionsJsonKey] = ShaderChainerService::getService()->connectionsConfig();
   container[ConfigTypeKey] = ConfigTypeStrand;
+  container[ParametersJsonKey] = ParameterService::getService()->config();
   container[PreviewPathJsonKey] = previewPath;
 
   if (fileStream.is_open())
@@ -286,6 +287,7 @@ json ConfigService::currentConfig()
   config[SourcesJsonKey] = VideoSourceService::getService()->config();
   config[ConnectionsJsonKey] = ShaderChainerService::getService()->connectionsConfig();
   config[StrandsJsonKey] = StrandService::getService()->config();
+  config[ParametersJsonKey] = ParameterService::getService()->config();
   config[ConfigTypeKey] = ConfigTypeFull;
   return config;
 }
@@ -349,6 +351,11 @@ std::vector<std::string> ConfigService::loadStrandFile(std::string path)
   if (data[ConnectionsJsonKey].is_object())
   {
     ShaderChainerService::getService()->loadConnectionsConfig(data[ConnectionsJsonKey]);
+  }
+  
+  if (data[ParametersJsonKey].is_object())
+  {
+    ParameterService::getService()->loadConfig(data[ParametersJsonKey]);
   }
   return ids;
 }
@@ -423,6 +430,11 @@ void ConfigService::loadConfigFile(std::string path)
     if (data[StrandsJsonKey].is_object())
     {
       StrandService::getService()->loadConfig(data[StrandsJsonKey]);
+    }
+    
+    if (data[ParametersJsonKey].is_object())
+    {
+      ParameterService::getService()->loadConfig(data[ParametersJsonKey]);
     }
 
   } catch (const std::exception& e) {

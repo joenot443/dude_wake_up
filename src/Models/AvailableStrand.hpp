@@ -45,6 +45,8 @@ struct AvailableStrand : public JSONSerializable
     if (image.getWidth() > 0 && image.getHeight() > 0) {
       image.draw(0, 0, 320, 240);
     }
+    ofSetColor(0, 0, 0, 128);
+    ofDrawRectangle(0, 0, 320, 240);
     fbo->end();
   }
 };

@@ -24,11 +24,11 @@ struct SliderSettings : public ShaderSettings {
 
   std::shared_ptr<Oscillator> speedOscillator;
 
-  SliderSettings(std::string shaderId, json j)
+  SliderSettings(std::string shaderId, json j, std::string name)
       : speed(std::make_shared<Parameter>("Speed", 0.1, 0.01, 2.0)),
       vertical(std::make_shared<Parameter>("Vertical", 0., 0., 1.)),
         speedOscillator(std::make_shared<WaveformOscillator>(speed)),
-        ShaderSettings(shaderId, j){
+        ShaderSettings(shaderId, j, name){
           parameters = { speed, vertical };
           oscillators = { speedOscillator };
           registerParameters();

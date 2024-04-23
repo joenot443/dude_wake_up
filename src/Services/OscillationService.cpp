@@ -15,12 +15,12 @@
 // Service
 
 void OscillationService::addOscillator(std::shared_ptr<Oscillator> obj) {
-  oscillators.push_front(obj);
+  oscillators[obj->value->paramId] = obj;
   loadOscillatorSettings(obj);
 }
 
 void OscillationService::tickOscillators() {
-  for (auto & osc : oscillators) {
+  for (auto & [key, osc] : oscillators) {
     osc->tick();
   }
 }
@@ -55,11 +55,16 @@ void OscillationService::selectOscillator(std::shared_ptr<Oscillator> osc, std::
 
 void OscillationService::clear() {
   for (auto & osc : oscillators) {
-    osc->enabled->boolValue = false;
+    osc.second->enabled->boolValue = false;
   }
+  oscillators.clear();
   selectedOscillator = nullptr;
 }
 
+std::shared_ptr<Oscillator> OscillationService::oscillatorForParameter(std::shared_ptr<Parameter> param) {
+  if (oscillators.count(param->paramId) == 0) { return nullptr; }
+  return oscillators[param->paramId];
+}
 
 // ConfigurableService
 
@@ -67,7 +72,7 @@ json OscillationService::config() {
   json j = json::object();
   
   for (auto & osc : oscillators) {
-    j[osc->name] = osc->parameterValueMap();
+    j[osc.second->name] = osc.second->parameterValueMap();
   }
   
   return j;

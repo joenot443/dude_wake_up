@@ -6,13 +6,14 @@
 //
 
 #include "TextSource.hpp"
+#include "Console.hpp"
 #include "CommonViews.hpp"
 #include "NodeLayoutView.hpp"
 
 void TextSource::setup() {
   fbo->allocate(settings->width->value, settings->height->value, GL_RGBA);
-  font.load(displayText->font.path, displayText->fontSize);
-  fontPath = displayText->font.path;
+  font.load(displayText->font.path(), displayText->fontSize);
+  fontPath = displayText->font.path();
 }
 
 void TextSource::saveFrame() {
@@ -26,10 +27,11 @@ void TextSource::saveFrame() {
   bool shouldClear = false;
   
   // Clear if we've changed font size
-  if (font.getSize() != displayText->fontSize
-      || fontPath != displayText->font.path) {
-    fontPath = displayText->font.path;
-    font.load(displayText->font.path, displayText->fontSize);
+  if (!font.isLoaded() ||
+      font.getSize() != displayText->fontSize
+      || fontPath != displayText->font.path()) {
+    fontPath = displayText->font.path();
+    font.load(displayText->font.path(), displayText->fontSize);
     shouldClear = true;
   }
   
@@ -66,7 +68,6 @@ json TextSource::serialize() {
   json j;
   j["videoSourceType"] = VideoSource_text;
   j["id"] = id;
-  j["fontPath"] = displayText->font.path;
   j["fontName"] = displayText->font.name;
   j["color"] = displayText->color.getHex();
   j["sourceName"] = sourceName;
@@ -85,10 +86,8 @@ json TextSource::serialize() {
 
 void TextSource::load(json j) {
   if (!j.is_object()) return;
-  
-  displayText->font.path = j["fontPath"];
   displayText->font.name = j["fontName"];
-
+  font.load(displayText->font.path(), displayText->fontSize);
   displayText->color = ofColor::fromHex(j["color"]);
 
   displayText->xPosition->value = j["displayX"];

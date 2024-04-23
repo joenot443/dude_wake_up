@@ -20,12 +20,13 @@
 struct WarpSettings: public ShaderSettings {
 	public:
   std::shared_ptr<Parameter> shaderValue;
+  std::shared_ptr<Parameter> color;
   std::shared_ptr<WaveformOscillator> shaderWaveformOscillator;
 
-  WarpSettings(std::string shaderId, json j) :
+  WarpSettings(std::string shaderId, json j, std::string name) :
   shaderValue(std::make_shared<Parameter>("shaderValue", 1.0  , -1.0, 2.0)),
   shaderWaveformOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, name) {
     parameters = { shaderValue };
     oscillators = { shaderWaveformOscillator };
     load(j);

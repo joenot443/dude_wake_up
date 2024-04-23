@@ -26,12 +26,12 @@ struct SnowfallSettings: public ShaderSettings {
   std::shared_ptr<ValueOscillator> descentSpeedOscillator;
   std::shared_ptr<ValueOscillator> sizeOscillator;
   
-  SnowfallSettings(std::string shaderId, json j) :
+  SnowfallSettings(std::string shaderId, json j, std::string name) :
   flakesCount(std::make_shared<Parameter>("flakesCount", 50, 1, 100)),
   descentSpeed(std::make_shared<Parameter>("descentSpeed", 10, 0, 50)),
   size(std::make_shared<Parameter>("size", 0.3, 0.0, 1.0)),
   
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, name) {
     flakesCountOscillator = std::make_shared<ValueOscillator>(flakesCount);
     descentSpeedOscillator = std::make_shared<ValueOscillator>(descentSpeed);
     sizeOscillator = std::make_shared<ValueOscillator>(size);

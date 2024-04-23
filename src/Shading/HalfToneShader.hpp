@@ -24,13 +24,13 @@ struct HalfToneSettings: public ShaderSettings {
   std::shared_ptr<Oscillator> speedOscillator;
   std::shared_ptr<Oscillator> radiusOscillator;
   
-  HalfToneSettings(std::string shaderId, json j) :
+  HalfToneSettings(std::string shaderId, json j, std::string name) :
   speed(std::make_shared<Parameter>("speed", 0., 0., 10.)),
   radius(std::make_shared<Parameter>("radius", 0., 0., 10.)),
   
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   radiusOscillator(std::make_shared<WaveformOscillator>(radius)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, name) {
     
   };
 };

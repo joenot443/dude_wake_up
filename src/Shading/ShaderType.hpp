@@ -86,6 +86,10 @@ enum ShaderType {
   ShaderTypeDoubleSwirl,
   ShaderTypeSwirlingSoul,
   ShaderTypeCubify,
+  ShaderTypeGyroids,
+  ShaderTypeAlphaMix,
+  ShaderTypeColorSwap,
+  ShaderTypeGridRun,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -100,6 +104,7 @@ static const ShaderType AvailableBasicShaderTypes[] = {
 };
 
 static const ShaderType AvailableMixShaderTypes[] = {
+  ShaderTypeColorSwap,
   ShaderTypeMix,
   ShaderTypeMinMixer,
   ShaderTypeSlidingFrame,
@@ -171,7 +176,15 @@ static std::vector<ShaderType> AllShaderTypes() {
 }
 
 static std::string shaderTypeName(ShaderType type) {
-  switch (type) { // hygen-source
+  switch (type) { // ShaderNames
+    case ShaderTypeGridRun:
+      return "GridRun";
+    case ShaderTypeColorSwap:
+      return "ColorSwap";
+    case ShaderTypeAlphaMix:
+      return "AlphaMix";
+    case ShaderTypeGyroids:
+      return "Gyroids";
     case ShaderTypeCubify:
       return "Cubify";
     case ShaderTypeSwirlingSoul:
@@ -213,7 +226,7 @@ static std::string shaderTypeName(ShaderType type) {
     case ShaderTypeMinMixer:
       return "Min Mixer";
     case ShaderTypeSolidColor:
-      return "Solid Color";
+      return "Color Overlay";
     case ShaderType16bit:
       return "16bit";
     case ShaderTypeHilbert:
@@ -329,6 +342,7 @@ static bool shaderTypeSupportsAux(ShaderType type) {
       type == ShaderTypeLumaFeedback ||
       type == ShaderTypeSlidingFrame ||
       type == ShaderTypeStaticFrame ||
+      type == ShaderTypeColorSwap || 
       type == ShaderTypeMinMixer)
   {return true;}
   return false;

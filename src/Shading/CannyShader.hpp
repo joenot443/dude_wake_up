@@ -18,15 +18,15 @@
 #include <stdio.h>
 
 struct CannySettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<ValueOscillator> shaderValueOscillator;
+  std::shared_ptr<Parameter> backgroundColor;
+  std::shared_ptr<Parameter> alpha;
 
-  CannySettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 1.0  , -1.0, 2.0)),
-  shaderValueOscillator(std::make_shared<ValueOscillator>(shaderValue)),
-  ShaderSettings(shaderId, j) {
-    parameters = { shaderValue };
-    oscillators = { shaderValueOscillator };
+  CannySettings(std::string shaderId, json j, std::string name) :
+  backgroundColor(std::make_shared<Parameter>("Background Color", 1.0, -1.0, 2.0)),
+  alpha(std::make_shared<Parameter>("Alpha", 1.0, 0.0, 1.0)),
+  ShaderSettings(shaderId, j, name) {
+    parameters = { backgroundColor, alpha };
+    oscillators = { };
     load(j);
     registerParameters();
   };
@@ -44,7 +44,7 @@ struct CannyShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("color", settings->shaderValue->value);
+    shader.setUniform4f("backgroundColor", settings->backgroundColor->color->data()[0], settings->backgroundColor->color->data()[1], settings->backgroundColor->color->data()[2], settings->alpha->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
@@ -63,7 +63,8 @@ struct CannyShader: Shader {
   void drawSettings() override {
     CommonViews::H3Title("Canny");
 
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
+    CommonViews::ShaderColor(settings->backgroundColor);
+    CommonViews::ShaderParameter(settings->alpha, nullptr);
   }
 };
 

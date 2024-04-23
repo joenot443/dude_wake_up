@@ -18,8 +18,8 @@
 
 struct RingsSettings: public ShaderSettings {
 	public:
-  RingsSettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId, j) {
+  RingsSettings(std::string shaderId, json j, std::string name) :
+  ShaderSettings(shaderId, j, name) {
     
   };
 };

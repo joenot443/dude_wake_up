@@ -41,6 +41,8 @@ private:
 
   observable::subject<void()> shaderChainerUpdateSubject;
 
+  std::shared_ptr<Shader> stageModeShader;
+  
 public:
   static ShaderChainerService *service;
   ShaderChainerService(){};
@@ -83,13 +85,13 @@ public:
   // Traverses the shader's outputs to find the most terminal.
   std::shared_ptr<Shader> terminalShader(std::shared_ptr<Shader> shader);
 
-  /// Modifying
 
   void selectShader(std::shared_ptr<Shader> shader);
   void addShader(std::shared_ptr<Shader> shader);
   std::shared_ptr<Shader> makeShader(ShaderType type);
   void removeShader(std::shared_ptr<Shader> shader, bool fromMap = true);
   void removeConnectable(std::shared_ptr<Connectable> connectable);
+  void copyConnections(std::shared_ptr<Connectable> source, std::shared_ptr<Connectable> dest);
   
   // Break the connection from a Shader to the Input of another
   void breakConnectionForConnectionId(std::string connectionId);
@@ -99,7 +101,8 @@ public:
   makeConnection(std::shared_ptr<Connectable> start,
            std::shared_ptr<Connectable> end,
            ConnectionType type,
-           bool shouldSaveConfig = false);
+           bool shouldSaveConfig = false,
+           bool copy = false);
   
 
   // Removes the ShaderChainers associated with that VideoSource
@@ -116,11 +119,14 @@ public:
   std::vector<std::shared_ptr<Connection>> connections();
 
   // Available Shaders
+  std::vector<std::shared_ptr<AvailableShader>> allAvailableShaders;
   std::vector<std::shared_ptr<AvailableShader>> availableBasicShaders;
   std::vector<std::shared_ptr<AvailableShader>> availableMixShaders;
   std::vector<std::shared_ptr<AvailableShader>> availableTransformShaders;
   std::vector<std::shared_ptr<AvailableShader>> availableFilterShaders;
   std::vector<std::shared_ptr<AvailableShader>> availableMaskShaders;
+  std::vector<std::shared_ptr<AvailableShader>> availableFavoriteShaders();
+  std::map<ShaderType, std::shared_ptr<AvailableShader>> availableShadersMap;
 
   // Constructor Ops
   std::shared_ptr<Shader> shaderForType(ShaderType type, std::string shaderId,

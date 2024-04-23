@@ -18,8 +18,8 @@
 
 struct CrosshatchSettings: public ShaderSettings {
 	public:
-  CrosshatchSettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId, j) {
+  CrosshatchSettings(std::string shaderId, json j, std::string name) :
+  ShaderSettings(shaderId, j, name) {
     
   };
 };

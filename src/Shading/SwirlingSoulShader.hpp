@@ -18,15 +18,24 @@
 #include <stdio.h>
 
 struct SwirlingSoulSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<ValueOscillator> shaderValueOscillator;
+  std::shared_ptr<Parameter> centerX;
+  std::shared_ptr<WaveformOscillator> centerXOscillator;
+  std::shared_ptr<Parameter> centerY;
+  std::shared_ptr<WaveformOscillator> centerYOscillator;
 
-  SwirlingSoulSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 1.0  , -1.0, 2.0)),
-  shaderValueOscillator(std::make_shared<ValueOscillator>(shaderValue)),
-  ShaderSettings(shaderId, j) {
-    parameters = { shaderValue };
-    oscillators = { shaderValueOscillator };
+  std::shared_ptr<Parameter> size;
+  std::shared_ptr<WaveformOscillator> sizeOscillator;
+
+  SwirlingSoulSettings(std::string shaderId, json j, std::string name) :
+  centerX(std::make_shared<Parameter>("centerX", 0.0, -1.0, 1.0)),
+  centerY(std::make_shared<Parameter>("centerY", 0.0, -1.0, 1.0)),
+  size(std::make_shared<Parameter>("size", 2.0, 0.0, 4.0)),
+  centerXOscillator(std::make_shared<WaveformOscillator>(centerX)),
+  centerYOscillator(std::make_shared<WaveformOscillator>(centerY)),
+  sizeOscillator(std::make_shared<WaveformOscillator>(size)),
+  ShaderSettings(shaderId, j, name)  {
+    parameters = { centerX, centerY, size };
+    oscillators = { centerXOscillator, centerYOscillator, sizeOscillator };
     load(j);
     registerParameters();
   };
@@ -44,9 +53,10 @@ struct SwirlingSoulShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("color", settings->shaderValue->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("size", settings->size->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
+    shader.setUniform2f("center", settings->centerX->value + 1.0, settings->centerY->value + 1.0);
     frame->draw(0, 0);
     shader.end();
     canvas->end();
@@ -63,7 +73,9 @@ struct SwirlingSoulShader: Shader {
   void drawSettings() override {
     CommonViews::H3Title("SwirlingSoul");
 
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
+    CommonViews::ShaderParameter(settings->centerX, settings->centerXOscillator);
+    CommonViews::ShaderParameter(settings->centerY, settings->centerYOscillator);
+    CommonViews::ShaderParameter(settings->size, settings->sizeOscillator);
   }
 };
 

@@ -18,8 +18,7 @@
 
 class OscillationService: public ConfigurableService {
 private:
-  std::deque<std::shared_ptr<Oscillator>> oscillators;
-  
+  std::map<std::string, std::shared_ptr<Oscillator>> oscillators;
   // map of form:
   /*
    "HSB_hue": {
@@ -48,7 +47,7 @@ public:
   void selectOscillator(std::shared_ptr<Oscillator>, std::shared_ptr<Parameter>);
   void addOscillator(std::shared_ptr<Oscillator> o);
   void loadOscillatorSettings(std::shared_ptr<Oscillator> o);
-  
+  std::shared_ptr<Oscillator> oscillatorForParameter(std::shared_ptr<Parameter> param);
   void tickOscillators();
 
   void clear();

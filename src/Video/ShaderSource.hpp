@@ -4,6 +4,8 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "GridRunShader.hpp"
+#include "GyroidsShader.hpp"
 #include "SwirlingSoulShader.hpp"
 #include "DoubleSwirlShader.hpp"
 #include "SmokeRingShader.hpp"
@@ -80,6 +82,8 @@ enum ShaderSourceType {
   ShaderSource_SmokeRing, //source enum,
   ShaderSource_DoubleSwirl, //source enum,
   ShaderSource_SwirlingSoul, //source enum,
+  ShaderSource_Gyroids, //source enum,
+  ShaderSource_GridRun, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -115,11 +119,17 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_SmokeRing, // Available
   ShaderSource_DoubleSwirl, // Available
   ShaderSource_SwirlingSoul, // Available
+  ShaderSource_Gyroids, // Available
+  ShaderSource_GridRun, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
 // shaderTypeForShaderSourceType
+  case ShaderSource_GridRun: //type enum
+    return ShaderTypeGridRun;
+  case ShaderSource_Gyroids: //type enum
+    return ShaderTypeGyroids;
   case ShaderSource_SwirlingSoul: //type enum
     return ShaderTypeSwirlingSoul;
   case ShaderSource_DoubleSwirl: //type enum
@@ -208,6 +218,7 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
       return "Simple";
       
   // Scenic
+  case ShaderSource_Gyroids:
   case ShaderSource_TriangleMap: // Name
   case ShaderSource_VanGogh: // Name
   case ShaderSource_Mountains: // Name
@@ -241,7 +252,11 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
 
 static std::string shaderSourceTypeName(ShaderSourceType nameType) {
   switch (nameType) {
-  // Shader Names
+  // ShaderNames
+  case ShaderSource_GridRun: // Name  
+    return "GridRun"; // GridRun
+  case ShaderSource_Gyroids: // Name  
+    return "Gyroids"; // Gyroids
   case ShaderSource_SwirlingSoul: // Name  
     return "Swirling Soul"; // SwirlingSoul
   case ShaderSource_DoubleSwirl: // Name
@@ -330,201 +345,213 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_GridRun: { // Settings
+      auto settings = new GridRunSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+      shader = std::make_shared<GridRunShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Gyroids: { // Settings
+      auto settings = new GyroidsSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+      shader = std::make_shared<GyroidsShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_SwirlingSoul: { // Settings
-      auto settings = new SwirlingSoulSettings(UUID::generateUUID(), 0);
+      auto settings = new SwirlingSoulSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<SwirlingSoulShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_DoubleSwirl: { // Settings
-      auto settings = new DoubleSwirlSettings(UUID::generateUUID(), 0);
+      auto settings = new DoubleSwirlSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<DoubleSwirlShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_SmokeRing: { // Settings
-      auto settings = new SmokeRingSettings(UUID::generateUUID(), 0);
+      auto settings = new SmokeRingSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<SmokeRingShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_AudioCircle: { // Settings
-      auto settings = new AudioCircleSettings(UUID::generateUUID(), 0);
+      auto settings = new AudioCircleSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<AudioCircleShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Limbo: { // Settings
-      auto settings = new LimboSettings(UUID::generateUUID(), 0);
+      auto settings = new LimboSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<LimboShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Vertex: { // Settings
-      auto settings = new VertexSettings(UUID::generateUUID(), 0);
+      auto settings = new VertexSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<VertexShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_SolidColor: { // Settings
-      auto settings = new SolidColorSettings(UUID::generateUUID(), 0);
+      auto settings = new SolidColorSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<SolidColorShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Hilbert: { // Settings
-      auto settings = new HilbertSettings(UUID::generateUUID(), 0);
+      auto settings = new HilbertSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<HilbertShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Warp: { // Settings
-      auto settings = new WarpSettings(UUID::generateUUID(), 0);
+      auto settings = new WarpSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<WarpShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_FrequencyVisualizer: { // Settings
-      auto settings = new FrequencyVisualizerSettings(UUID::generateUUID(), 0);
+      auto settings = new FrequencyVisualizerSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<FrequencyVisualizerShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_CurlySquares: { // Settings
-      auto settings = new CurlySquaresSettings(UUID::generateUUID(), 0);
+      auto settings = new CurlySquaresSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<CurlySquaresShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_PlasmaTwo: { // Settings
-      auto settings = new PlasmaTwoSettings(UUID::generateUUID(), 0);
+      auto settings = new PlasmaTwoSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<PlasmaTwoShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_DancingSquares: { // Settings
-      auto settings = new DancingSquaresSettings(UUID::generateUUID(), 0);
+      auto settings = new DancingSquaresSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<DancingSquaresShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Circle: { // Settings
-      auto settings = new CircleSettings(UUID::generateUUID(), 0);
+      auto settings = new CircleSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<CircleShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Tissue: { // Settings
-      auto settings = new TissueSettings(UUID::generateUUID(), 0);
+      auto settings = new TissueSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<TissueShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Psycurves: { // Settings
-      auto settings = new PsycurvesSettings(UUID::generateUUID(), 0);
+      auto settings = new PsycurvesSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<PsycurvesShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_TriangleMap: { // Settings
-      auto settings = new TriangleMapSettings(UUID::generateUUID(), 0);
+      auto settings = new TriangleMapSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<TriangleMapShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Disco: { // Settings
-      auto settings = new DiscoSettings(UUID::generateUUID(), 0);
+      auto settings = new DiscoSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<DiscoShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Octahedron: { // Settings
-      auto settings = new OctahedronSettings(UUID::generateUUID(), 0);
+      auto settings = new OctahedronSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<OctahedronShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_VanGogh: { // Settings
-      auto settings = new VanGoghSettings(UUID::generateUUID(), 0);
+      auto settings = new VanGoghSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<VanGoghShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Rubiks: { // Settings
-      auto settings = new RubiksSettings(UUID::generateUUID(), 0);
+      auto settings = new RubiksSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<RubiksShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Mountains: { // Settings
-      auto settings = new MountainsSettings(UUID::generateUUID(), 0);
+      auto settings = new MountainsSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<MountainsShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_empty: {
-      auto plasmaSettings = new EmptySettings(UUID::generateUUID(), 0);
+      auto plasmaSettings = new EmptySettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<EmptyShader>(plasmaSettings);
       shader->setup();
       return;
     }
     case ShaderSource_audioMountains: {
-      auto plasmaSettings = new AudioMountainsSettings(UUID::generateUUID(), 0);
+      auto plasmaSettings = new AudioMountainsSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<AudioMountainsShader>(plasmaSettings);
       shader->setup();
       return;
     }
     case ShaderSource_galaxy: {
-      auto plasmaSettings = new GalaxySettings(UUID::generateUUID(), 0);
+      auto plasmaSettings = new GalaxySettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<GalaxyShader>(plasmaSettings);
       shader->setup();
       return;
     }
     case ShaderSource_audioBumper: {
-      auto plasmaSettings = new AudioBumperSettings(UUID::generateUUID(), 0);
+      auto plasmaSettings = new AudioBumperSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<AudioBumperShader>(plasmaSettings);
       shader->setup();
       return;
     }
 
     case ShaderSource_audioWaveform: {
-      auto plasmaSettings = new AudioWaveformSettings(UUID::generateUUID(), 0);
+      auto plasmaSettings = new AudioWaveformSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<AudioWaveformShader>(plasmaSettings);
       shader->setup();
       return;
     }
     case ShaderSource_rings: {
-      auto plasmaSettings = new RingsSettings(UUID::generateUUID(), 0);
+      auto plasmaSettings = new RingsSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<RingsShader>(plasmaSettings);
       shader->setup();
       return;
     }
     case ShaderSource_plasma: {
-      auto plasmaSettings = new PlasmaSettings(UUID::generateUUID(), 0);
+      auto plasmaSettings = new PlasmaSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<PlasmaShader>(plasmaSettings);
       shader->setup();
       return;
     }
     case ShaderSource_fractal: {
-      auto fractalSettings = new FractalSettings(UUID::generateUUID(), 0);
+      auto fractalSettings = new FractalSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<FractalShader>(fractalSettings);
       shader->setup();
       return;
     }
     case ShaderSource_fuji: {
-      auto fujiSettings = new FujiSettings(UUID::generateUUID(), 0);
+      auto fujiSettings = new FujiSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<FujiShader>(fujiSettings);
       shader->setup();
       return;
     }
     case ShaderSource_clouds: {
-      auto cloudsSettings = new CloudSettings(UUID::generateUUID(), 0);
+      auto cloudsSettings = new CloudSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<CloudShader>(cloudsSettings);
       shader->setup();
       return;
     }
     case ShaderSource_melter: {
-      auto melterSettings = new MeltSettings(UUID::generateUUID(), 0);
+      auto melterSettings = new MeltSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<MeltShader>(melterSettings);
       shader->setup();
       return;

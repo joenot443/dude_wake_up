@@ -19,8 +19,8 @@
 
 struct AudioBumperSettings : public ShaderSettings {
 	public:
-  AudioBumperSettings(std::string shaderId, json j)
-  : ShaderSettings(shaderId, j){
+  AudioBumperSettings(std::string shaderId, json j, std::string name)
+  : ShaderSettings(shaderId, j, name){
     
   };
 };

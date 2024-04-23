@@ -9,19 +9,27 @@
 #define DisplayText_h
 #include "Parameter.hpp"
 #include "WaveformOscillator.hpp"
+#include "ConfigService.hpp"
+#include "UUID.hpp"
+#include "Strings.hpp"
 
 struct Font {
-  std::string path = "";
   std::string name = "";
-  Font(std::string name, std::string path) : path(path), name(name) {};
+  
+  std::string path() {
+    return formatString("fonts/editor/%s", name.c_str());
+  }
+  
+  Font(std::string name) : name(name) {};
 };
 
 
 struct DisplayText {
   std::string text = "Sample text";
+  std::string id;
   ofColor color = ofColor::white;
   int fontSize = 36;
-  Font font = Font("", "");
+  Font font = Font("");
   
   std::shared_ptr<Parameter> xPosition;
   std::shared_ptr<Parameter> yPosition;
@@ -29,7 +37,8 @@ struct DisplayText {
   std::shared_ptr<Oscillator> xPositionOscillator;
   std::shared_ptr<Oscillator> yPositionOscillator;
 public:
-  DisplayText() : font(Font("","")),
+  DisplayText() : font(Font("")),
+  id(UUID::generateUUID()),
   xPosition(std::make_shared<Parameter>("xPosition", 0.1, 0.0, 1.0)),
   yPosition(std::make_shared<Parameter>("yPosition", 0.1, 0.0, 1.0)),
   xPositionOscillator(std::make_shared<WaveformOscillator>(xPosition)),

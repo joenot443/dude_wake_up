@@ -39,7 +39,8 @@ struct Vectors {
   }
 
   static std::vector<float> release(std::vector<float> vec,
-                                    std::vector<float> smooth) {
+                                    std::vector<float> smooth,
+                                    float release = 0.95) {
     if (vec.size() != smooth.size()) {
       // Return a vector of 0s
       std::vector<float> out = {};
@@ -52,7 +53,7 @@ struct Vectors {
     std::vector<float> out = std::vector<float>(smooth);
 
     for (int i = 0; i < vec.size(); i++) {
-      out[i] *= 0.95;
+      out[i] *= release;
       if (vec[i] > smooth[i]) {
         out[i] = vec[i];
       }

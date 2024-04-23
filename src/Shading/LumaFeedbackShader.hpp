@@ -52,7 +52,7 @@ struct LumaFeedbackSettings: public ShaderSettings {
   
   std::shared_ptr<Parameter> sourceSelection;
   
-  LumaFeedbackSettings(std::string shaderId, json j) :
+  LumaFeedbackSettings(std::string shaderId, json j, std::string name) :
   index(index),
   blend(std::make_shared<Parameter>("Blend", 0.5, 0.0, 1.0)),
   blendOscillator(std::make_shared<WaveformOscillator>(blend)),
@@ -71,7 +71,7 @@ struct LumaFeedbackSettings: public ShaderSettings {
   scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
   sourceSelection(std::make_shared<Parameter>("source", 0.0, 0.0, 3.0)),
   shaderId(shaderId),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, name) {
     parameters = {blend, mix, keyValue, keyThreshold, delayAmount, lumaKeyEnabled, xPosition, yPosition, scale, sourceSelection};
     oscillators = {blendOscillator, mixOscillator, keyValueOscillator, keyThresholdOscillator, delayAmountOscillator, xPositionOscillator, yPositionOscillator, scaleOscillator};
 

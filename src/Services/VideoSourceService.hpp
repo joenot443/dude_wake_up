@@ -79,7 +79,7 @@ public:
 
   std::shared_ptr<VideoSource> addImageVideoSource(std::string name, std::string path, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
   std::shared_ptr<VideoSource> addIconVideoSource(std::string name, std::string path, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
-  std::shared_ptr<VideoSource> addWebcamVideoSource(std::string name, int index, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
+  std::shared_ptr<VideoSource> addWebcamVideoSource(std::string name, int deviceId, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
   std::shared_ptr<VideoSource> addShaderVideoSource(ShaderSourceType type, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
   std::shared_ptr<VideoSource> addFileVideoSource(std::string name, std::string path, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
   std::shared_ptr<VideoSource> addTextVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
@@ -88,6 +88,7 @@ public:
   // Output Windows
 
   std::map<std::string, std::shared_ptr<OutputWindow>> outputWindows;
+  void closeOutputWindow(std::shared_ptr<OutputWindow> window);
   void addOutputWindow(std::shared_ptr<Connectable> connectable);
   void updateOutputWindow(std::shared_ptr<Connectable> oldConnectable, std::shared_ptr<Connectable> newConnectable);
   bool hasOutputWindowForConnectable(std::shared_ptr<Connectable> connectable);

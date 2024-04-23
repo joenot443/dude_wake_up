@@ -24,10 +24,10 @@ struct MixSettings : public ShaderSettings {
   std::shared_ptr<Parameter> mix;
   std::shared_ptr<Oscillator> mixOscillator;
 
-  MixSettings(std::string shaderId, json j) :
+  MixSettings(std::string shaderId, json j, std::string name) :
   mix(std::make_shared<Parameter>("mix", 0.5, 0.0, 1.0)),
   mixOscillator(std::make_shared<WaveformOscillator>(mix)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, name) {
     parameters = {mix};
     oscillators = {mixOscillator};
     load(j);
@@ -64,8 +64,11 @@ shader.load("shaders/Mix");
       std::shared_ptr<ofFbo> tex2 = aux()->frame();
       shader.setUniformTexture("tex2", tex2->getTexture(), 8);
     } else {
-      ofSetColor(0, 0, 0, 0);
-      ofDrawRectangle(0, 0, canvas->getWidth(), canvas->getHeight());
+      shader.end();
+      frame->draw(0, 0);
+      shader.end();
+      canvas->end();
+      return;
     }
     
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());

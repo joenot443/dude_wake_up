@@ -9,7 +9,6 @@
 #include "Console.hpp"
 #include "AudioSourceService.hpp"
 #include "Gist.h"
-#include "BTrack.h"
 #include <stdio.h>
 
 void AudioSource::setup()
@@ -73,20 +72,6 @@ void AudioSource::processFrame(std::vector<float> frame)
 {
   gist.processAudioFrame(frame);
   audioAnalysis.analyzeFrame(&gist);
-  
-//  // Convert to a double* for bTrack
-//  double *doubleFrame = new double[frame.size()];
-//  for (int i = 0; i < frame.size(); i++)
-//  {
-//    doubleFrame[i] = frame[i];
-//  }
-//  
-//  
-//  
-//  bTrack.processAudioFrame(doubleFrame);
-//  if (bTrack.beatDueInCurrentFrame()) {
-//    log("That's a beat!");
-//  }
 }
 
 void AudioSource::debugGist()

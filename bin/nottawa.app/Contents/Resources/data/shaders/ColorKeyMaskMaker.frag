@@ -21,11 +21,7 @@ mat4 RGBtoYUV = mat4(0.257,  0.439, -0.148, 0.0,
 //compute color distance in the UV (CbCr, PbPr) plane
 float colorclose(vec3 yuv, vec3 keyYuv)
 {
-  float tmp = sqrt(pow(keyYuv.g - yuv.g, 2.0) + pow(keyYuv.b - yuv.b, 2.0));
-  if (tmp < tolerance)
-    return 1.0;
-  else
-    return 0.0;
+  return sqrt(pow(keyYuv.g - yuv.g, 2.0) + pow(keyYuv.b - yuv.b, 2.0));
 }
 
 
@@ -41,10 +37,16 @@ void main()
   float mask = colorclose(yuv.rgb, keyYUV.rgb);
   float mixf = 0.0;
   
-  if (invert == 1) {
-    mixf = 1. - mask;
-  } else {
+  if (mask > tolerance) {
+    mixf = 0.0;
+  } else if (abs(mask - tolerance) < 0.05) {
     mixf = mask;
+  } else {
+    mixf = 1.0;
+  }
+  
+  if (invert == 1) {
+    mixf = 1. - mixf;
   }
   
   if (drawTex == 1) {

@@ -20,9 +20,9 @@
 struct AsciiSettings: public ShaderSettings  {
   std::shared_ptr<Parameter> enabled;
   
-  AsciiSettings(std::string shaderId, json j) :
+  AsciiSettings(std::string shaderId, json j, std::string name) :
   enabled(std::make_shared<Parameter>("enabled", 0.0,  1.0, 0.0)),
-  ShaderSettings(shaderId, j)
+  ShaderSettings(shaderId, j, name)
   {
     parameters = {enabled};
     oscillators = {};

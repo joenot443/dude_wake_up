@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>BuildMachineOSBuild</key>
-	<string>23D60</string>
+	<string>23B2073</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
@@ -37,15 +37,15 @@
 	<key>DTSDKName</key>
 	<string>macosx14.2</string>
 	<key>DTXcode</key>
-	<string>1510</string>
+	<string>1520</string>
 	<key>DTXcodeBuild</key>
-	<string>15C65</string>
+	<string>15C500b</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>13.0</string>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs to access the camera</string>
 	<key>NSHighResolutionCapable</key>
-	<false/>
+	<true/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app needs to access the microphone</string>
 </dict>

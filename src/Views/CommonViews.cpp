@@ -13,6 +13,7 @@
 #include "TextureService.hpp"
 #include "FontService.hpp"
 #include "ImGuiExtensions.hpp"
+#include "FavoriteParameter.hpp"
 #include "ParameterTileBrowserView.hpp"
 #include "Colors.hpp"
 #include "Fonts.hpp"
@@ -76,6 +77,8 @@ void CommonViews::ShaderParameter(std::shared_ptr<Parameter> param,
   if (osc == nullptr)
     return;
   ImGui::SameLine();
+  FavoriteButton(param);
+  ImGui::SameLine();
   OscillateButton(param->paramId, osc, param);
   sSpacing();
   if (!osc->enabled->boolValue)
@@ -137,6 +140,8 @@ void CommonViews::AudioParameterSelector(std::shared_ptr<Parameter> param)
       }
     }
     ImGui::EndPopup();
+    
+    
   }
 }
 
@@ -164,9 +169,10 @@ void CommonViews::ResolutionSelector(std::shared_ptr<VideoSource> source)
   }
 }
 
-bool CommonViews::ShaderCheckbox(std::shared_ptr<Parameter> param)
+bool CommonViews::ShaderCheckbox(std::shared_ptr<Parameter> param, bool sameLine)
 {
-  sSpacing();
+  if (!sameLine) sSpacing();
+  
   bool old = param->boolValue;
   ImGui::Checkbox(param->name.c_str(), &param->boolValue);
   bool ret = false;
@@ -175,16 +181,40 @@ bool CommonViews::ShaderCheckbox(std::shared_ptr<Parameter> param)
     ret = true;
     param->setValue(static_cast<float>(param->boolValue));
   }
-  sSpacing();
+  if (!sameLine) sSpacing();
   return ret;
+}
+
+void CommonViews::H1Title(std::string title)
+{
+  CommonViews::Spacing(1);
+  ImGui::PushFont(FontService::getService()->h1);
+  ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.0, 5.0));
+  ImGui::Text("%s", title.c_str());
+  CommonViews::Spacing(1);
+  ImGui::PopStyleVar();
+  ImGui::PopFont();
+}
+
+void CommonViews::H2Title(std::string title)
+{
+  CommonViews::Spacing(1);
+  ImGui::PushFont(FontService::getService()->h2);
+  ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.0, 5.0));
+  ImGui::Text("%s", title.c_str());
+  CommonViews::Spacing(1);
+  ImGui::PopStyleVar();
+  ImGui::PopFont();
 }
 
 void CommonViews::H3Title(std::string title)
 {
   CommonViews::Spacing(1);
   ImGui::PushFont(FontService::getService()->h3);
+  ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.0, 5.0));
   ImGui::Text("%s", title.c_str());
   CommonViews::Spacing(1);
+  ImGui::PopStyleVar();
   ImGui::PopFont();
 }
 
@@ -210,32 +240,84 @@ bool CommonViews::Slider(std::string title, std::string id,
   return ret;
 }
 
+void CommonViews::ShaderStageParameter(std::shared_ptr<FavoriteParameter> favorite, std::shared_ptr<Oscillator> osc) {
+  auto param = favorite->parameter;
+  ImGui::Columns(2, formatString("%s_param_columns", param->paramId.c_str()).c_str(), ImGuiColumnsFlags_NoResize | ImGuiColumnsFlags_NoBorder);
+  ImGui::SetColumnWidth(0, 70);
+  ImGui::SetColumnWidth(1, 130);
+  bool ret = ImGui::VSliderFloat(idString(param->paramId).c_str(), ImVec2(20, 200), &param->value, param->min, param->max, "");
+  if (ret) {
+    param->affirmValue();
+  }
+  ImGui::SameLine();
+  ImGui::Text("%s", formatString("%0.2f", param->max).c_str());
+  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetContentRegionAvail().y - 20);
+  ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 22);
+  ImGui::Text("%s", formatString("%0.2f", param->min).c_str());
+  ImGui::NextColumn();
+  
+  // TITLE
+  auto yPos = ImGui::GetCursorPosY();
+  H3Title(param->name);
+  auto xPos = ImGui::GetCursorPosX();
+  ImGui::SameLine();
+  ImGui::SetCursorPos(ImVec2(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - 25, yPos));
+  if (IconButton(ICON_MD_CLOSE, formatString("%s_close_button", param->paramId.c_str()).c_str())) {
+    ParameterService::getService()->removeFavoriteParameter(param);
+  }
+  ImGui::SetCursorPosX(xPos);
+  H4Title(favorite->settingsName);
+  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetContentRegionAvail().y / 2 - 25);
+  H2Title(formatString("%0.2f", param->value));
+  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetContentRegionAvail().y - 25);
+  ResetButton(param->paramId, param);
+  ImGui::SameLine();
+  OscillateButton(param->paramId, osc, param);
+  ImGui::Columns(1, formatString("%s_param_columns", param->paramId.c_str()).c_str());
+  return ret;
+}
+
 bool CommonViews::MultiSlider(std::string title, std::string id, std::shared_ptr<Parameter> param1, std::shared_ptr<Parameter> param2,
                               std::shared_ptr<Oscillator> param1Oscillator,
                               std::shared_ptr<Oscillator> param2Oscillator) {
+  ImGui::PushItemWidth(400);
   CommonViews::H4Title(title);
   ImGui::Columns(2);
   ImGui::SetColumnWidth(0, 200);
+  ImGui::SetColumnWidth(1, 200);
   ImGuiExtensions::Slider2DFloat("", &param1->value,
                                  &param2->value,
                                  -1, 1., -1, 1., 1.0);
   ImGui::NextColumn();
   ImGui::Text("X Translate");
   ImGui::SameLine();
-  CommonViews::OscillateButton("##xOscillator", param1Oscillator, param1);
-  ImGui::SameLine();
   CommonViews::ResetButton("##xMultiSliderReset", param1);
+  ImGui::SameLine();
+  MidiSelector(param1);
+  ImGui::SameLine();
+  AudioParameterSelector(param1);
+  ImGui::SameLine();
+  FavoriteButton(param1);
+  ImGui::SameLine();
+  CommonViews::OscillateButton(formatString("##xOscillator_%s", id.c_str()).c_str(), param1Oscillator, param1);
+  CommonViews::Slider(param1->name, param1->paramId, param1);
   ImGui::Text("Y Translate");
   ImGui::SameLine();
-  CommonViews::OscillateButton("##yOscillator", param2Oscillator, param2);
-  ImGui::SameLine();
   CommonViews::ResetButton("##yMultiSliderReset", param2);
-  CommonViews::Slider(param1->name, param1->paramId, param1);
+  ImGui::SameLine();
+  MidiSelector(param2);
+  ImGui::SameLine();
+  AudioParameterSelector(param2);
+  ImGui::SameLine();
+  FavoriteButton(param2);
+  ImGui::SameLine();  
+  CommonViews::OscillateButton(formatString("##xOscillator_%s", id.c_str()).c_str(), param2Oscillator, param2);
   CommonViews::Slider(param2->name, param2->paramId, param2);
   if (param1Oscillator->enabled->boolValue)
   {
     OscillatorWindow(param1Oscillator, param1);
   }
+  
   
   if (param2Oscillator->enabled->boolValue)
   {
@@ -386,27 +468,22 @@ void CommonViews::PlaybackSlider(std::shared_ptr<Parameter> param, float length)
   ResetButton(param->paramId, param);
 }
 
-void CommonViews::IntSlider(std::string title, std::string id,
-                            std::shared_ptr<Parameter> param)
+void CommonViews::ShaderIntParameter(std::shared_ptr<Parameter> param)
 {
-  ImGui::Text("%s", title.c_str());
-  ImGui::SameLine(0, 20);
+  H4Title(param->name);
   ImGui::SetNextItemWidth(200.0);
-  ImGui::SliderInt(id.c_str(), &param->intValue, param->min, param->max, "%d");
+  if (ImGui::SliderInt(formatString("##%s", param->paramId.c_str()).c_str(), &param->intValue, param->min, param->max, "%d")) {
+    param->setValue(static_cast<float>(param->intValue));
+  }
 }
 
 void CommonViews::ResetButton(std::string id,
                               std::shared_ptr<Parameter> param)
 {
-  ImGui::PushFont(FontService::getService()->icon);
-  ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
-  if (ImGui::Button(formatString(" ##%s_reset_button", id.c_str()).c_str(),
-                    ImVec2(16.0, 16.0)))
+  if (IconButton(ICON_MD_RESTORE, 	formatString(" ##%s_reset_button", id.c_str()).c_str()))
   {
     param->resetValue();
   }
-  ImGui::PopFont();
-  ImGui::PopStyleVar();
 }
 
 bool CommonViews::ShaderOption(std::shared_ptr<Parameter> param, std::vector<std::string> options) {
@@ -477,7 +554,7 @@ void CommonViews::OscillateButton(std::string id, std::shared_ptr<Oscillator> o,
   ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
 
   std::string buttonTitle;
-  auto icon = o->enabled->boolValue ? ICON_MD_CLOSE : ICON_MD_SCATTER_PLOT;
+  auto icon = o->enabled->boolValue ? ICON_MD_CLOSE : ICON_MD_WAVES;
 
   if (IconButton(icon, formatString("##%s_osc_button", id.c_str()).c_str()))
   {
@@ -499,6 +576,8 @@ void CommonViews::OscillateButton(std::string id, std::shared_ptr<Oscillator> o,
 
 void CommonViews::MidiSelector(std::shared_ptr<Parameter> videoParam)
 {
+  if (!LayoutStateService::getService()->midiEnabled) return;
+  
   bool hasPairing =
       MidiService::getService()->hasPairingForParameterId(videoParam->paramId);
   bool enabled = false;
@@ -551,6 +630,21 @@ void CommonViews::MidiSelector(std::shared_ptr<Parameter> videoParam)
   if (ImGui::Button(idTitle.c_str()))
   {
     buttonAction();
+  }
+}
+
+void CommonViews::FavoriteButton(std::shared_ptr<Parameter> param) {
+  if (param == nullptr) {
+    return;
+  }
+  bool hasFavorite = ParameterService::getService()->hasFavoriteParameterFor(param);
+  auto icon = hasFavorite ? ICON_MD_UNDO : ICON_MD_FAVORITE;
+  if (IconButton(icon, param->paramId)) {
+    if (!hasFavorite) {
+      ParameterService::getService()->addFavoriteParameter(param);
+    } else {
+      ParameterService::getService()->removeFavoriteParameter(param);
+    }
   }
 }
 

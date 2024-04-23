@@ -72,9 +72,7 @@ void FeedbackShader::populateSource()
 void FeedbackShader::drawPreview(ImVec2 pos, float scale)
 {
   ImTextureID texID = (ImTextureID)(uintptr_t)lastFrame->getTexture().getTextureData().textureID;
-  ImTextureID fbTexID = (ImTextureID)(uintptr_t)feedbackSource->getFrame(frameIndex()).getTextureData().textureID;
   ImGui::Image(texID, ImVec2(160 / scale, 120 / scale));
-  //  ImGui::Image(fbTexID, ImVec2(160/scale, 120/scale));
 }
 
 int FeedbackShader::frameIndex()
@@ -102,6 +100,7 @@ void FeedbackShader::shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> 
                       settings->lumaKeyEnabled->boolValue);
   shader.setUniformTexture("mainTexture", frame->getTexture(), 4);
   shader.setUniform1f("mainMix", settings->mainMix->value);
+  shader.setUniform1i("priority", settings->priority->boolValue);
   shader.setUniform1f("feedbackMix", settings->feedbackMix->value);
   shader.setUniform1f("scale", settings->scale->value);
   shader.setUniform1f("rotate", settings->rotation->value);
@@ -155,6 +154,7 @@ void FeedbackShader::drawSettings()
   CommonViews::H3Title("Feedback Settings");
 
   ImGui::Checkbox(settings->lumaKeyEnabled->name.c_str(), &settings->lumaKeyEnabled->boolValue);
+  ImGui::Checkbox(settings->priority->name.c_str(), &settings->priority->boolValue);
   if (ImGui::Combo("Source", &settings->sourceSelection->intValue, "Origin\0Current\0Final\0"))
   {
     populateSource();

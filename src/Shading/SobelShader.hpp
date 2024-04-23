@@ -18,8 +18,8 @@
 
 struct SobelSettings : public ShaderSettings {
 	public:
-  SobelSettings(std::string shaderId, json j)
-      : ShaderSettings(shaderId, j){
+  SobelSettings(std::string shaderId, json j, std::string name)
+      : ShaderSettings(shaderId, j, name){
 
         };
 };

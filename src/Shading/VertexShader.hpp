@@ -18,15 +18,13 @@
 #include <stdio.h>
 
 struct VertexSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<ValueOscillator> shaderValueOscillator;
+  std::shared_ptr<Parameter> color;
 
-  VertexSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 1.0  , -1.0, 2.0)),
-  shaderValueOscillator(std::make_shared<ValueOscillator>(shaderValue)),
-  ShaderSettings(shaderId, j) {
-    parameters = { shaderValue };
-    oscillators = { shaderValueOscillator };
+  VertexSettings(std::string shaderId, json j, std::string name) :
+  color(std::make_shared<Parameter>("color", 1.0  , -1.0, 2.0)),
+  ShaderSettings(shaderId, j, name)  {
+    parameters = { color };
+    oscillators = { };
     load(j);
     registerParameters();
   };
@@ -44,7 +42,7 @@ struct VertexShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("color", settings->shaderValue->value);
+    shader.setUniform3f("color", settings->color->color->data()[0], settings->color->color->data()[1], settings->color->color->data()[2]);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
@@ -63,7 +61,7 @@ struct VertexShader: Shader {
   void drawSettings() override {
     CommonViews::H3Title("Vertex");
 
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
+    CommonViews::ShaderColor(settings->color);
   }
 };
 

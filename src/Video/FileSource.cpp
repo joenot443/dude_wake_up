@@ -83,10 +83,10 @@ void FileSource::load(json j)
   path = j["path"];
   id = j["id"];
   sourceName = j["sourceName"];
-  mute->value = j["mute"];
+  mute->boolValue = j["mute"];
   volume->value = j["volume"];
   settings->load(j["settings"]);
-  boomerang->value = j["boomerang"];
+  boomerang->boolValue = j["boomerang"];
   start = settings->start->value;
   end = settings->end->value;
   applyRanges();
@@ -99,9 +99,9 @@ json FileSource::serialize()
   j["id"] = id;
   j["sourceName"] = sourceName;
   j["videoSourceType"] = VideoSource_file;
-  j["mute"] = mute->value;
+  j["mute"] = mute->boolValue;
   j["volume"] = volume->value;
-  j["boomerang"] = volume->value;
+  j["boomerang"] = boomerang->boolValue;
   j["settings"] = settings->serialize();
   auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);
   if (node != nullptr)
@@ -160,6 +160,13 @@ void FileSource::updatePlaybackPosition()
       position = start;
       player.setPosition(start);
     }
+    return;
+  }
+  
+  if (player.getPosition() < start ) {
+    player.setSpeed(1.0);
+    player.setPosition(start);
+    position = start;
     return;
   }
   

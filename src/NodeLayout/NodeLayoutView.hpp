@@ -9,6 +9,7 @@
 #define NodeLayoutView_hpp
 
 #include "NodeTypes.hpp"
+#include "imgui.h"
 #include "VideoRecorder.hpp"
 #include "Shader.hpp"
 #include "VideoSource.hpp"
@@ -54,6 +55,8 @@ public:
   /// Returns the x,y coordinates of the Node for the passed ID. If not found, (0,0) is returned.
   ImVec2 coordinatesForNode(std::string id);
   
+  
+  
   void debug();
   
   // Layout
@@ -62,22 +65,28 @@ public:
   void drawNode(std::shared_ptr<Node> node);
   void drawPreviewWindow(std::shared_ptr<Node> node);
   void drawActionButtons();
+  void clear();
   int nodeIdTicker = 1;
   
   // Handlers
   void handleUnplacedNodes();
-  void handleDropZone();
   void handleDoubleClick();
   void handleRightClick();
   void handleSaveNode(std::shared_ptr<Node> node);
   void handleDeleteNode(std::shared_ptr<Node> node);
-  void handleDroppedSource(std::shared_ptr<VideoSource> source);
   void handleUploadChain(std::shared_ptr<Node> node);
   void handleUnplacedDownloadedLibraryFile();
   
+  // Drag/Drop
+  void handleDropZone();
+  void handleDroppedSource(std::shared_ptr<VideoSource> source);
+  std::shared_ptr<Node> nodeAtPosition(ImVec2 position);
+  bool pointIsWithinNode(ImVec2 position, std::shared_ptr<Node> node);
+
   // Notifications
   void haveDownloadedAvailableLibraryFile(LibraryFile &file);
   
+  // Layout
   
   // Selection
   void selectChainer(std::shared_ptr<Node> node);

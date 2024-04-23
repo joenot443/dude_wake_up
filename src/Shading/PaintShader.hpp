@@ -18,9 +18,9 @@
 #include <stdio.h>
 
 struct PaintSettings: public ShaderSettings {
-  PaintSettings(std::string shaderId, json j) :
+  PaintSettings(std::string shaderId, json j, std::string name) :
 
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, name) {
     parameters = { };
     oscillators = { };
     load(j);

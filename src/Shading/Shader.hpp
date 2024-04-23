@@ -9,6 +9,7 @@
 #define Shader_h
 
 #include "Console.hpp"
+#include "imgui.h"
 #include "FeedbackSource.hpp"
 #include "ShaderSettings.hpp"
 #include "ShaderType.hpp"
@@ -18,6 +19,7 @@
 #include "ofMain.h"
 #include "ofxImGui.h"
 #include "Connection.hpp"
+#include "Colors.hpp"
 #include <stdio.h>
 
 using json = nlohmann::json;
@@ -28,13 +30,18 @@ public:
   
   Shader(ShaderSettings *settings)
       : settings(std::unique_ptr<ShaderSettings>(settings)),
-        shaderId(settings->shaderId), creationTime(ofGetUnixTime()), lastFrame(std::make_shared<ofFbo>())
+        shaderId(settings->shaderId),
+  creationTime(ofGetUnixTime()),
+  lastFrame(std::make_shared<ofFbo>())
   {
+    color = colorFromName(settings->name);
     lastFrame->allocate(1280, 720, GL_RGBA);
   };
   
   ofShader shader;
   std::unique_ptr<ShaderSettings> settings;
+  
+  ImColor color;
   
   std::string shaderId;
 

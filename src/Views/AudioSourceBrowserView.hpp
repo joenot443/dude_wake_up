@@ -26,6 +26,7 @@ public:
 private:
   void drawAudioSourceSelector();
   void drawSelectedAudioSource();
+  void drawStartAnalysisButton();
 };
 
 #endif /* AudioSourceBrowserView_hpp */

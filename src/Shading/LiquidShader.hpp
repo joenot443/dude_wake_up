@@ -18,8 +18,8 @@
 
 struct LiquidSettings: public ShaderSettings {
 	public:
-  LiquidSettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId, j) {
+  LiquidSettings(std::string shaderId, json j, std::string name) :
+  ShaderSettings(shaderId, j, name) {
     
   };
 };
