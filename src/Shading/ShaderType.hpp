@@ -90,6 +90,7 @@ enum ShaderType {
   ShaderTypeAlphaMix,
   ShaderTypeColorSwap,
   ShaderTypeGridRun,
+  ShaderTypeColorStepper,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -100,7 +101,8 @@ static const ShaderType AvailableBasicShaderTypes[] = {
   ShaderTypeMirror,
   ShaderTypeGlitch,
   ShaderType16bit,
-  ShaderTypePaint
+  ShaderTypePaint,
+  ShaderTypeColorStepper
 };
 
 static const ShaderType AvailableMixShaderTypes[] = {
@@ -177,6 +179,8 @@ static std::vector<ShaderType> AllShaderTypes() {
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) { // ShaderNames
+    case ShaderTypeColorStepper:
+      return "ColorStepper";
     case ShaderTypeGridRun:
       return "GridRun";
     case ShaderTypeColorSwap:

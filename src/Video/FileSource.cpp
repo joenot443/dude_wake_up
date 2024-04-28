@@ -19,7 +19,7 @@ void FileSource::setup()
   player.setVolume(0.5);
   player.setSpeed(1.0);
   player.setLoopState(OF_LOOP_NORMAL);
-  //  updateSettings();
+//	updateSettings();
   fbo->allocate(settings->width->value, settings->height->value);
   sliderPosition->value = settings->start->value;
   position = start;
@@ -34,7 +34,6 @@ void FileSource::updateSettings()
 
 void FileSource::saveFrame()
 {
-
   player.setLoopState(boomerang->boolValue ? OF_LOOP_PALINDROME : OF_LOOP_NORMAL);
   player.update();
   updatePlaybackPosition();
@@ -136,7 +135,7 @@ void FileSource::drawSettings()
 
   // Draw a slider to control the video playback position
   CommonViews::PlaybackSlider(sliderPosition, player.getDuration());
-  CommonViews::RangeSlider("Playback Range", "##playbackRange", settings->start, settings->end, player.getDuration(), playbackRangeDirty());
+  CommonViews::PlaybackRangeSlider("Playback Range", "##playbackRange", settings->start, settings->end, player.getDuration(), playbackRangeDirty());
   
   if (playbackRangeDirty())
   {

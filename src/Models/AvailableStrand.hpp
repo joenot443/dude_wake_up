@@ -40,13 +40,13 @@ struct AvailableStrand : public JSONSerializable
     // Load the image from the imagePath and draw it to the fbo
     ofImage image;
     image.load(imagePath);
-    fbo->allocate(320, 240);
+    fbo->allocate(426, 240);
     fbo->begin();
     if (image.getWidth() > 0 && image.getHeight() > 0) {
-      image.draw(0, 0, 320, 240);
+      image.draw(0, 0, 426, 240);
     }
     ofSetColor(0, 0, 0, 128);
-    ofDrawRectangle(0, 0, 320, 240);
+    ofDrawRectangle(0, 0, 426, 240);
     fbo->end();
   }
 };

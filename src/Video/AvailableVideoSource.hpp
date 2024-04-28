@@ -97,7 +97,7 @@ public:
     }
 
     auto fbo = ofFbo();
-    fbo.allocate(320, 240);
+    fbo.allocate(426, 240);
     // Read the file from libraryFile->thumbnailFilename and draw it to the fbo
     auto img = ofImage();
     img.load(libraryFile->thumbnailPath());
@@ -107,9 +107,9 @@ public:
     }
     
     fbo.begin();
-    img.draw(0, 0, 320, 240);
+    img.draw(0, 0, 426, 240);
     ofSetColor(0, 0, 0, 128);
-    ofDrawRectangle(0, 0, 320, 240);
+    ofDrawRectangle(0, 0, 426, 240);
     ofSetColor(255);
     fbo.end();
     preview = std::make_shared<ofTexture>(fbo.getTexture());

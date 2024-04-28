@@ -19,7 +19,7 @@ public:
     std::shared_ptr<Parameter> deviceId;
 
     WebcamVideoSourceSettings(std::string sourceId, json j)
-  : VideoSourceSettings(sourceId, j), deviceId(std::make_shared<Parameter>("deviceId", 0.0, 0.0, 100.0)) {
+  : VideoSourceSettings(sourceId, j), deviceId(std::make_shared<Parameter>("Device", 0.0, 0.0, 100.0)) {
     parameters.push_back(deviceId);
   }
 };

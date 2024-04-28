@@ -17,7 +17,7 @@ AvailableShader::AvailableShader(ShaderType type, std::string name)
 
 void AvailableShader::generatePreview() {
   std::shared_ptr<ofFbo> canvas = std::make_shared<ofFbo>();
-  canvas->allocate(320, 240);
+  canvas->allocate(426, 240);
 
   auto previewFbo = VideoSourceService::getService()->previewFbo();
 
@@ -28,7 +28,7 @@ void AvailableShader::generatePreview() {
   canvas->begin();
   // Add a 70% black overlay to the preview
   ofSetColor(0, 0, 0, 128);
-  ofDrawRectangle(0, 0, 320, 240);
+  ofDrawRectangle(0, 0, 426, 240);
   canvas->end();
   preview = std::make_shared<ofTexture>(canvas->getTexture());
 }

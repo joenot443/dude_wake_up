@@ -45,6 +45,7 @@ public:
   float end;
   
   bool playbackRangeDirty();
+  void validateSettings();
   void applyRanges();
   void updatePlaybackPosition();
 };

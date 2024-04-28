@@ -71,7 +71,6 @@ void StageModeView::draw() {
   
   if (ParameterService::getService()->stageShaderIds.size() == 0) {
     CommonViews::H3Title("Star a Node to view it in Stage Mode!");
-    return;
   }
   
   drawActionButtons();

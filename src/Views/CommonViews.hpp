@@ -18,7 +18,7 @@
 struct CommonViews
 {
   static ImVec2 windowCanvasSize();
-
+  
   static void xsSpacing();
   static void sSpacing();
   static void mSpacing();
@@ -27,23 +27,23 @@ struct CommonViews
   static void blankSpacing(int n);
   static void Spacing(int n);
   static void HSpacing(int n);
-
+  
   static bool InvisibleIconButton(std::string id);
   
   static bool IconButton(const char *icon, std::string id);
-
+  
   static bool LargeIconButton(const char *icon, std::string id);
-
+  
   static void IconTitle(const char *icon);
   
   static void ShaderStageParameter(std::shared_ptr<FavoriteParameter> param, std::shared_ptr<Oscillator> osc);
-
+  
   static void ShaderParameter(std::shared_ptr<Parameter> param, std::shared_ptr<Oscillator> osc);
-
+  
   static bool ShaderCheckbox(std::shared_ptr<Parameter> param, bool sameLine = false);
   
   static void ShaderColor(std::shared_ptr<Parameter> param);
-
+  
   static void ShaderIntParameter(std::shared_ptr<Parameter> param);
   
   static bool ShaderOption(std::shared_ptr<Parameter> param, std::vector<std::string> options);
@@ -51,42 +51,55 @@ struct CommonViews
   static bool TextureFieldAndBrowser(std::shared_ptr<Parameter> param);
   
   static bool IconFieldAndBrowser(std::shared_ptr<Parameter> param);
-
+  
   static void HorizontallyAligned(float width, float alignment = 0.5);
-
+  
   static void MidiSelector(std::shared_ptr<Parameter> videoParam);
-	
+  
   static void H1Title(std::string title);
   
   static void H2Title(std::string title);
   
   static void H3Title(std::string title);
-
+  
   static void H4Title(std::string title);
-
+  
   static void ResolutionSelector(std::shared_ptr<VideoSource> source);
-
+  
   static void CenteredVerticalLine();
-
+  
   static void ModulationSelector(std::shared_ptr<Parameter> videoParam);
   
   static void FavoriteButton(std::shared_ptr<Parameter> param);
-
+  
   static void AudioParameterSelector(std::shared_ptr<Parameter> videoParam);
-
+  
   static bool Slider(std::string title, std::string id, std::shared_ptr<Parameter> param);
   
   static bool MultiSlider(std::string title, std::string id, std::shared_ptr<Parameter> param1, std::shared_ptr<Parameter> param2,
-                                  std::shared_ptr<Oscillator> param1Oscillator,
-                                  std::shared_ptr<Oscillator> param2Oscillator);
+                          std::shared_ptr<Oscillator> param1Oscillator,
+                          std::shared_ptr<Oscillator> param2Oscillator);
   
-  static void RangeSlider(std::string title, std::string id, std::shared_ptr<Parameter> param, std::shared_ptr<Parameter> param2, float duration, bool dirty = false);
-
+  static bool AreaSlider(std::string id,
+                         std::shared_ptr<Parameter> minX, std::shared_ptr<Parameter> maxX,
+                         std::shared_ptr<Parameter> minY, std::shared_ptr<Parameter> maxY,
+                         std::shared_ptr<Oscillator> minXOscillator, std::shared_ptr<Oscillator> maxXOscillator,
+                         std::shared_ptr<Oscillator> minYOscillator, std::shared_ptr<Oscillator> maxYOscillator) ;
+  
+  static void RangeSlider(std::string title, std::string id, std::shared_ptr<Parameter> param, std::shared_ptr<Parameter> param2, std::string label, bool dirty = false);
+  
   static void PlaybackSlider(std::shared_ptr<Parameter> param, float length);
+  
+  static void PlaybackRangeSlider(std::string title, std::string id, std::shared_ptr<Parameter> param, std::shared_ptr<Parameter> param2, float duration, bool dirty = false);
+  
+  static bool SelectionRect(ImVec2* start_pos, ImVec2* end_pos, ImVec2 topLeft, ImVec2 bottomRight);
 
-  static void ResetButton(std::string id, std::shared_ptr<Parameter> param);
+  
+  static bool ResetButton(std::string id, std::shared_ptr<Parameter> param);
   static void OscillateButton(std::string id, std::shared_ptr<Oscillator> o, std::shared_ptr<Parameter> param);
   static void OscillatorWindow(std::shared_ptr<Oscillator> o, std::shared_ptr<Parameter> param);
+  
+  static bool IsMouseWithin(ImVec2 topLeft, ImVec2 bottomRight, ImVec2 offset = ImVec2(0.0, 0.0));
 };
 
 static ImVec2 getScaledWindowSize() {

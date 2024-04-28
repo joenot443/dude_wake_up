@@ -277,6 +277,77 @@ void CommonViews::ShaderStageParameter(std::shared_ptr<FavoriteParameter> favori
   return ret;
 }
 
+bool CommonViews::AreaSlider(std::string id,
+                             std::shared_ptr<Parameter> minX, std::shared_ptr<Parameter> maxX,
+                             std::shared_ptr<Parameter> minY, std::shared_ptr<Parameter> maxY,
+                             std::shared_ptr<Oscillator> minXOscillator, std::shared_ptr<Oscillator> maxXOscillator,
+                             std::shared_ptr<Oscillator> minYOscillator, std::shared_ptr<Oscillator> maxYOscillator)  {
+  
+  static ImVec2 selectionCanvas = ImVec2(256.0, 144.0);
+  
+  ImVec2 start = ImVec2(minX->value, minY->value);
+  ImVec2 end = ImVec2(maxX->value, maxY->value);
+  auto screenPos = ImGui::GetCursorScreenPos() + ImVec2(200.0, 100.0);
+  auto endPos = screenPos + selectionCanvas;
+  
+  ImDrawList* draw_list = ImGui::GetForegroundDrawList();
+  // Full canvas
+  draw_list->AddRectFilled(ImGui::GetCursorScreenPos(), ImGui::GetCursorScreenPos() + selectionCanvas, ImGui::GetColorU32(IM_COL32(0, 130, 216, 50)));
+  
+  // Selection window
+  draw_list->AddRectFilled(ImGui::GetCursorScreenPos() + ImVec2(start.x * selectionCanvas.x, start.y * selectionCanvas.y), ImGui::GetCursorScreenPos() + ImVec2(end.x * selectionCanvas.x, end.y * selectionCanvas.y), ImGui::GetColorU32(IM_COL32(215, 30, 0, 100)));
+  
+  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + selectionCanvas.y);
+  
+  if (IsMouseWithin(screenPos, endPos, ImVec2(200.0, 100.0)) && ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+    
+    // Call the selection rectangle and handle interactions.
+    bool selectionModified = CommonViews::SelectionRect(&start, &end, screenPos, endPos);
+
+    ImVec2 size = ImVec2(endPos.x - screenPos.x, endPos.y - screenPos.y);
+
+    // Mapping back the normalized coordinates to parameter space.
+    minX->value = start.x;
+    maxX->value = end.x;
+    minY->value = start.y;
+    maxY->value = end.y;
+    ImGui::Text("%s", formatString("(%.2f, %.2f)", minX->value, minY->value).c_str());
+    ImGui::Text("%s", formatString("(%.2f, %.2f)", maxX->value, maxY->value).c_str());
+
+    return selectionModified;
+  }
+
+  return false;
+}
+
+bool CommonViews::SelectionRect(ImVec2 *start_pos, ImVec2 *end_pos, ImVec2 topLeft, ImVec2 bottomRight) {
+  IM_ASSERT(start_pos != NULL);
+  IM_ASSERT(end_pos != NULL);
+  
+  ImVec2 size = ImVec2(bottomRight.x - topLeft.x, bottomRight.y - topLeft.y);
+
+  if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+    	ImVec2 mousePos = getScaledMouseLocation() + ImVec2(200.0, 100.0);
+      start_pos->x = (mousePos.x - topLeft.x) / size.x;
+      start_pos->y = (mousePos.y - topLeft.y) / size.y;
+  }
+  
+  if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+    	ImVec2 mousePos = getScaledMouseLocation() + ImVec2(200.0, 100.0);
+      end_pos->x = (mousePos.x - topLeft.x) / size.x;
+      end_pos->y = (mousePos.y - topLeft.y) / size.y;
+
+      ImDrawList* draw_list = ImGui::GetForegroundDrawList();
+    ImVec2 actual_start_pos = ImVec2(topLeft.x + start_pos->x * size.x, topLeft.y + start_pos->y * size.y) - ImVec2(200.0, 100.0);;
+    ImVec2 actual_end_pos = ImVec2(topLeft.x + end_pos->x * size.x, topLeft.y + end_pos->y * size.y) - ImVec2(200.0, 100.0);;
+
+      draw_list->AddRect(actual_start_pos, actual_end_pos, ImGui::GetColorU32(IM_COL32(0, 130, 216, 255))); // Border
+      draw_list->AddRectFilled(actual_start_pos, actual_end_pos, ImGui::GetColorU32(IM_COL32(0, 130, 216, 50))); // Background
+  }
+
+  return ImGui::IsMouseReleased(ImGuiMouseButton_Left);
+}
+
 bool CommonViews::MultiSlider(std::string title, std::string id, std::shared_ptr<Parameter> param1, std::shared_ptr<Parameter> param2,
                               std::shared_ptr<Oscillator> param1Oscillator,
                               std::shared_ptr<Oscillator> param2Oscillator) {
@@ -437,16 +508,22 @@ void CommonViews::ShaderColor(std::shared_ptr<Parameter> param)
   }
 }
 
-void CommonViews::RangeSlider(std::string title, std::string id, std::shared_ptr<Parameter> param, std::shared_ptr<Parameter> param2, float duration, bool dirty)
+void CommonViews::PlaybackRangeSlider(std::string title, std::string id, std::shared_ptr<Parameter> param, std::shared_ptr<Parameter> param2, float duration, bool dirty) {
+  auto startTime = formatTimeDuration(duration * param->value);
+  auto endTime = formatTimeDuration(duration * param2->value);
+  auto formattedLabel = formatString("%s : %s", startTime.c_str(), endTime.c_str());
+  
+  RangeSlider(title, id, param, param2, formattedLabel, dirty);
+}
+
+void CommonViews::RangeSlider(std::string title, std::string id, std::shared_ptr<Parameter> param, std::shared_ptr<Parameter> param2, std::string label, bool dirty)
 {
   if (dirty) {
     ImGui::PushStyleColor(ImGuiCol_SliderGrab, WarningColor.Value);
   }
+
   ImGui::SetNextItemWidth(300.0);
-  auto startTime = formatTimeDuration(duration * param->value);
-  auto endTime = formatTimeDuration(duration * param2->value);
-  auto formattedLabel = formatString("%s : %s", startTime.c_str(), endTime.c_str());
-  ImGui::RangeSliderFloat(title.c_str(), &param->value, &param2->value, fmin(param->min, param2->min), fmax(param->max, param2->max), formattedLabel.c_str(), 1.0);
+  ImGui::RangeSliderFloat(title.c_str(), &param->value, &param2->value, fmin(param->min, param2->min), fmax(param->max, param2->max), label.c_str(), 1.0);
   if (dirty) {
     ImGui::PopStyleColor();
   }
@@ -477,13 +554,16 @@ void CommonViews::ShaderIntParameter(std::shared_ptr<Parameter> param)
   }
 }
 
-void CommonViews::ResetButton(std::string id,
+bool CommonViews::ResetButton(std::string id,
                               std::shared_ptr<Parameter> param)
 {
-  if (IconButton(ICON_MD_RESTORE, 	formatString(" ##%s_reset_button", id.c_str()).c_str()))
+  bool hit = IconButton(ICON_MD_RESTORE,   formatString(" ##%s_reset_button", id.c_str()).c_str());
+  
+  if (hit)
   {
     param->resetValue();
   }
+  return hit;
 }
 
 bool CommonViews::ShaderOption(std::shared_ptr<Parameter> param, std::vector<std::string> options) {
@@ -668,4 +748,9 @@ ImVec2 CommonViews::windowCanvasSize()
   return ImGui::GetWindowContentRegionMax();
 }
 
-
+bool CommonViews::IsMouseWithin(ImVec2 topLeft, ImVec2 bottomRight, ImVec2 offset) {
+  auto mousePos = ImGui::GetMousePos();
+  mousePos += offset;
+  return mousePos.x >= topLeft.x && mousePos.x <= bottomRight.x &&
+         mousePos.y >= topLeft.y && mousePos.y <= bottomRight.y;
+}

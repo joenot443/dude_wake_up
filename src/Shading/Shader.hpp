@@ -98,7 +98,7 @@ public:
   virtual void drawPreview(ImVec2 pos, float scale)
   {
     ImTextureID texID = (ImTextureID)(uintptr_t)lastFrame->getTexture().getTextureData().textureID;
-    ImGui::Image(texID, ImVec2(160/scale, 120/scale));
+    ImGui::Image(texID, ImVec2(160/scale, 90/scale));
   }
 
   virtual std::string idName() { return formatString("%s##%s", name().c_str(), shaderId.c_str()); }

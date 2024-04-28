@@ -92,7 +92,7 @@ public:
     ofTexture tex = fbo->getTexture();
     if (tex.isAllocated()) {
       ImTextureID texID = (ImTextureID)(uintptr_t)tex.getTextureData().textureID;
-      ImGui::Image(texID, ImVec2(160/scale, 120/scale));
+      ImGui::Image(texID, ImVec2(160/scale, 90/scale));
     }
   }
 

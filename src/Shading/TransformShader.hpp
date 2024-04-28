@@ -1,15 +1,7 @@
-//
-//  TransformShader.hpp
-//  dude_wake_up
-//
-//  Created by Joe Crozier on 8/30/22.
-//
-
 #ifndef TransformShader_hpp
 #define TransformShader_hpp
 
 #include "ofMain.h"
-
 #include "ShaderConfigSelectionView.hpp"
 #include "ImGuiExtensions.hpp"
 #include "Shader.hpp"
@@ -19,127 +11,115 @@
 // Transform
 
 struct TransformSettings : public ShaderSettings {
-	public:
-  std::shared_ptr<Parameter> xTranslate;
-  std::shared_ptr<Parameter> yTranslate;
-  std::shared_ptr<Parameter> xScale;
-  std::shared_ptr<Parameter> yScale;
-  std::shared_ptr<Parameter> rotate;
+public:
+    std::shared_ptr<Parameter> minX;
+    std::shared_ptr<Parameter> maxX;
+    std::shared_ptr<Parameter> minY;
+    std::shared_ptr<Parameter> maxY;
+    std::shared_ptr<Parameter> rotate;
+  
+    std::shared_ptr<Parameter> scale;
 
-  std::shared_ptr<Parameter> autoRotate;
-  std::shared_ptr<Parameter> lockXYScale;
+    std::shared_ptr<Parameter> autoRotate;
 
-  std::shared_ptr<Oscillator> xTranslateOscillator;
-  std::shared_ptr<Oscillator> yTranslateOscillator;
-  std::shared_ptr<Oscillator> xScaleOscillator;
-  std::shared_ptr<Oscillator> yScaleOscillator;
-  std::shared_ptr<Oscillator> rotateOscillator;
-  std::shared_ptr<Oscillator> autoRotateOscillator;
+    std::shared_ptr<Oscillator> minXOscillator;
+    std::shared_ptr<Oscillator> maxXOscillator;
+    std::shared_ptr<Oscillator> minYOscillator;
+    std::shared_ptr<Oscillator> maxYOscillator;
+    std::shared_ptr<Oscillator> rotateOscillator;
+    std::shared_ptr<Oscillator> scaleOscillator;
+    std::shared_ptr<Oscillator> autoRotateOscillator;
 
-  TransformSettings(std::string shaderId, json j, std::string name)
-      : xTranslate(std::make_shared<Parameter>("xTranslate", 0.0,
-                                               -1.0, 1.0)),
-        yTranslate(std::make_shared<Parameter>("yTranslate", 0.0,
-                                               -1.0, 1.0)),
-        xScale(std::make_shared<Parameter>("xScale", 1.0, 0.0, 10.0)),
-        yScale(std::make_shared<Parameter>("yScale", 1.0, 0.0, 10.0)),
-        rotate(
-            std::make_shared<Parameter>("rotate", 0.0, 0.0, 360.0)),
-        autoRotate(std::make_shared<Parameter>("autoRotate", 0.0, 0.0,
-                                               2.0)),
-  lockXYScale(std::make_shared<Parameter>("Lock XY Scale", 1.0, 0.0,
-                                         1.0)),
-        xTranslateOscillator(std::make_shared<WaveformOscillator>(xTranslate)),
-        yTranslateOscillator(std::make_shared<WaveformOscillator>(yTranslate)),
-        xScaleOscillator(std::make_shared<WaveformOscillator>(xScale)),
-        yScaleOscillator(std::make_shared<WaveformOscillator>(yScale)),
-        rotateOscillator(std::make_shared<WaveformOscillator>(rotate)),
-        autoRotateOscillator(std::make_shared<WaveformOscillator>(autoRotate)),
-        ShaderSettings(shaderId, j, name) {
-    parameters = {xTranslate, yTranslate, xScale, yScale, rotate, autoRotate, lockXYScale};
-    oscillators = {xTranslateOscillator, yTranslateOscillator,
-                   xScaleOscillator,     yScaleOscillator,
-                   rotateOscillator,     autoRotateOscillator};
-    load(j);
-  registerParameters();
-  }
+    TransformSettings(std::string shaderId, json j, std::string name)
+        : minX(std::make_shared<Parameter>("minX", 0.1, 0.0, 1.0)),
+          maxX(std::make_shared<Parameter>("maxX", 0.8, 0.0, 1.0)),
+          minY(std::make_shared<Parameter>("minY", 0.1, 0.0, 1.0)),
+          maxY(std::make_shared<Parameter>("maxY", 0.8, 0.0, 1.0)),
+          rotate(std::make_shared<Parameter>("rotate", 0.0, 0.0, 360.0)),
+          autoRotate(std::make_shared<Parameter>("autoRotate", 0.0, 0.0, 2.0)),
+          scale(std::make_shared<Parameter>("scale", 1.0, 0.0, 5.0)),
+          minXOscillator(std::make_shared<WaveformOscillator>(minX)),
+          maxXOscillator(std::make_shared<WaveformOscillator>(maxX)),
+          minYOscillator(std::make_shared<WaveformOscillator>(minY)),
+          maxYOscillator(std::make_shared<WaveformOscillator>(maxY)),
+          rotateOscillator(std::make_shared<WaveformOscillator>(rotate)),
+          scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
+          autoRotateOscillator(std::make_shared<WaveformOscillator>(autoRotate)),
+          ShaderSettings(shaderId, j, name) {
+        parameters = {minX, maxX, minY, maxY, rotate, autoRotate, scale};
+        oscillators = {minXOscillator, maxXOscillator, minYOscillator, maxYOscillator, rotateOscillator, autoRotateOscillator};
+        load(j);
+        registerParameters();
+    }
 };
 
 struct TransformShader : public Shader {
 public:
-  ofShader shader;
-  TransformSettings *settings;
-  float autoRotateAmount;
+    ofShader shader;
+    TransformSettings *settings;
+    float autoRotateAmount;
 
-  TransformShader(TransformSettings *settings)
-      : settings(settings), Shader(settings){};
+    TransformShader(TransformSettings *settings)
+        : settings(settings), Shader(settings){};
 
-  void setup() override {}
+    void setup() override {}
 
-  ShaderType type() override { return ShaderTypeTransform; }
+    ShaderType type() override { return ShaderTypeTransform; }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
-    canvas->begin();
-    auto texture = frame->getTexture();
-    float width = frame->getWidth();
-    float height = frame->getHeight();
-    bool autoRotating = false;
+      canvas->begin();
 
-    // Increment autoRotate
-    if (settings->autoRotate->value > 0.01) {
-      autoRotateAmount += settings->autoRotate->value;
-      autoRotating = true;
-    }
+      auto texture = frame->getTexture();
+      float frameWidth = frame->getWidth();
+      float frameHeight = frame->getHeight();
 
-    ofClear(0, 0, 0, 0);
+      // Define cropping region based on parameters
+      float cropX = settings->minX->value * frameWidth;
+      float cropY = settings->minY->value * frameHeight;
+      float cropWidth = (settings->maxX->value - settings->minX->value) * frameWidth;
+      float cropHeight = (settings->maxY->value - settings->minY->value) * frameHeight;
+      float scaleX = cropWidth * settings->scale->value;
+      float scaleY = cropHeight * settings->scale->value;
 
-    ofSetRectMode(OF_RECTMODE_CENTER);
-    ofPushMatrix();
+      ofClear(0, 0, 0, 0);
+      ofPushMatrix();
 
-    float x = (settings->xTranslate->value + 0.5) * width;
-    float y = (0.5 - settings->yTranslate->value) * height;
-    
-    ofTranslate(x, y);
-    if (autoRotating) {
-      ofRotateDeg(autoRotateAmount);
-    } else {
-      ofRotateDeg(settings->rotate->value);
-    }
+      // Calculate the position to center the scaled texture
+      float scaledWidth = scaleX;
+      float scaledHeight = scaleY;
+      float translateX = (canvas->getWidth() - scaledWidth) / 2;
+      float translateY = (canvas->getHeight() - scaledHeight) / 2;
 
-    if (settings->lockXYScale->boolValue) {
-      ofScale(settings->xScale->value, settings->xScale->value);
-    } else {
-      ofScale(settings->xScale->value, settings->yScale->value);
-    }
-    
-    texture.draw(0, 0);
-    ofPopMatrix();
+      // Translate to center the scaled image on the canvas
+      ofTranslate(translateX, translateY);
 
-    shader.end();
-    canvas->end();
+      // Draw the cropped and scaled texture
+      texture.drawSubsection(0, 0, scaledWidth, scaledHeight, cropX, cropY, cropWidth, cropHeight);
+
+      ofPopMatrix();
+
+      shader.end();
+      canvas->end();
   }
 
-  void drawSettings() override {
-    
-    CommonViews::MultiSlider("Position", formatString("##position%s", shaderId.c_str()), settings->xTranslate, settings->yTranslate, settings->xTranslateOscillator, settings->yTranslateOscillator);
-    CommonViews::ShaderCheckbox(settings->lockXYScale);
 
-    // Scale X
-    CommonViews::ShaderParameter(settings->xScale, settings->xScaleOscillator);
+    void drawSettings() override {
+      CommonViews::H4Title("Area");
+      auto frame = parentFrame();
+      auto cursorPos = ImGui::GetCursorPos();
+      if (frame != nullptr) {
+        ofxImGui::AddImage(frame->getTexture(), ofVec2f(256.0, 144.0));
+      }
+      ImGui::SetCursorPos(cursorPos);
+      
+      CommonViews::AreaSlider(shaderId, settings->minX, settings->maxX, settings->minY, settings->maxY, settings->minXOscillator, settings->maxXOscillator, settings->minYOscillator, settings->maxYOscillator);
 
-    if (!settings->lockXYScale->boolValue) {
-      // Scale Y
-      CommonViews::ShaderParameter(settings->yScale, settings->yScaleOscillator);
+        CommonViews::ShaderParameter(settings->scale, settings->scaleOscillator);
+        CommonViews::ShaderParameter(settings->autoRotate, settings->autoRotateOscillator);
+        CommonViews::ShaderParameter(settings->rotate, settings->rotateOscillator);
     }
-    // Auto Rotate
-    CommonViews::ShaderParameter(settings->autoRotate,
-                                 settings->autoRotateOscillator);
 
-    // Rotate
-    CommonViews::ShaderParameter(settings->rotate, settings->rotateOscillator);
-  }
-
-  void clear() override {}
+    void clear() override {}
 };
 
 #endif

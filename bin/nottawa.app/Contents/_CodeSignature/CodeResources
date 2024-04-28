@@ -1088,6 +1088,10 @@
 		<data>
 		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
 		</data>
+		<key>Resources/data/markdown/ColorStepper.md</key>
+		<data>
+		aQ67bmFUHVoahUwyuUjYHl7S3vE=
+		</data>
 		<key>Resources/data/markdown/ColorSwap.md</key>
 		<data>
 		xGgLPWvOhZ6PKZY7EoBdcL3PCec=
@@ -1484,6 +1488,14 @@
 		<data>
 		M0lC/95lwJABvm2Z7lQmY14j0Wo=
 		</data>
+		<key>Resources/data/shaders/ColorStepper.frag</key>
+		<data>
+		PkTrNg0GlNR2OdeONS9xt9GazVc=
+		</data>
+		<key>Resources/data/shaders/ColorStepper.vert</key>
+		<data>
+		IMfNhMDTO4icYyXsGRHlbxXDf+4=
+		</data>
 		<key>Resources/data/shaders/ColorSwap.frag</key>
 		<data>
 		n8ykZPo9GVpax4PftRlN/1Seeho=
@@ -1694,7 +1706,7 @@
 		</data>
 		<key>Resources/data/shaders/LumaMaskMaker.frag</key>
 		<data>
-		t7V4LwwjM5PBUXG7q7DsTq+FpAs=
+		J76mp0yxqYq7WPRkD+FFQ2bkwyo=
 		</data>
 		<key>Resources/data/shaders/LumaMaskMaker.vert</key>
 		<data>
@@ -4965,6 +4977,13 @@
 			47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=
 			</data>
 		</dict>
+		<key>Resources/data/markdown/ColorStepper.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			+vyrZM+udV2jI75414Xj+Nb8/+cK3yU61BokZZzlKyY=
+			</data>
+		</dict>
 		<key>Resources/data/markdown/ColorSwap.md</key>
 		<dict>
 			<key>hash2</key>
@@ -5651,6 +5670,20 @@
 			EzjQ626e/6hJOUBNVvWDMzY8Fa2sZ9KFntQe4SUcr9c=
 			</data>
 		</dict>
+		<key>Resources/data/shaders/ColorStepper.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			qkdZ+UFlP4FpVnhu8UdRuDP1T4n0WyHwk3Pu/gk9EU0=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/ColorStepper.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			BpVpx+Ee2/oO5CalPi81Ft1l4dsYvWyzxlLw4TDXU4Q=
+			</data>
+		</dict>
 		<key>Resources/data/shaders/ColorSwap.frag</key>
 		<dict>
 			<key>hash2</key>
@@ -6019,7 +6052,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			KGqDDDXqxKV2S6Davj8q0kp/fvVlHrq1G16asXv4JVc=
+			lWJo56nguMyvZ/hFnPMXQdA2EduQsrutE6rBAxvQEVs=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/LumaMaskMaker.vert</key>

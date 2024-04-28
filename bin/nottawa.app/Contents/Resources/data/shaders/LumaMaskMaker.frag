@@ -42,7 +42,7 @@ void main()
   
   vec3 texColorHsb = rgb2hsb(texColor.rgb);
   
-  bool inBounds = texColorHsb.z >= lower && texColorHsb.z <= upper;
+bool inBounds = texColorHsb.z >= lower && texColorHsb.z <= upper;
   if (flip == 1) {
     inBounds = !inBounds;
   }

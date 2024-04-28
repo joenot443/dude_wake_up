@@ -395,6 +395,7 @@
 		028D52FB2A3F38A9005ADBF9 /* PlasmaTwoShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = PlasmaTwoShader.hpp; path = Shading/PlasmaTwoShader.hpp; sourceTree = "<group>"; };
 		028D52FC2A422DD8005ADBF9 /* CurlySquaresShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = CurlySquaresShader.hpp; path = Shading/CurlySquaresShader.hpp; sourceTree = "<group>"; };
 		028D53012A422F7B005ADBF9 /* ColorKeyMaskMakerShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = ColorKeyMaskMakerShader.hpp; path = Shading/ColorKeyMaskMakerShader.hpp; sourceTree = "<group>"; };
+		028DD23F2BD815260052F518 /* ColorStepperShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ColorStepperShader.hpp; path = Shading/ColorStepperShader.hpp; sourceTree = "<group>"; };
 		028E8E58299E72FE00B95C92 /* MaterialIcons-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "MaterialIcons-Regular.ttf"; path = "fonts/MaterialIcons-Regular.ttf"; sourceTree = "<group>"; };
 		028E8E5A29A0457400B95C92 /* Colors.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = Colors.hpp; path = Util/Colors.hpp; sourceTree = "<group>"; };
 		028E8E5B29A697FD00B95C92 /* MarkdownView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MarkdownView.cpp; path = Views/MarkdownView.cpp; sourceTree = "<group>"; };
@@ -1265,6 +1266,7 @@
 		02FABA912A9EB0C6009D69B5 /* Shaders */ = {
 			isa = PBXGroup;
 			children = (
+				028DD23F2BD815260052F518 /* ColorStepperShader.hpp */,
 				023380C92BD05B700060A697 /* AlphaMixShader.hpp */,
 				023380D02BD05B700060A697 /* AudioCircleShader.hpp */,
 				023380CF2BD05B700060A697 /* Connection.hpp */,

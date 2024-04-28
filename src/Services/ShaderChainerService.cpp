@@ -7,6 +7,7 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "ColorStepperShader.hpp"
 #include "GridRunShader.hpp"
 #include "ColorSwapShader.hpp"
 #include "AlphaMixShader.hpp"
@@ -562,6 +563,12 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeColorStepper: {
+      auto settings = new ColorStepperSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<ColorStepperShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeGridRun: {
       auto settings = new GridRunSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<GridRunShader>(settings);

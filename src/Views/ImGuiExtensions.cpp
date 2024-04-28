@@ -5,9 +5,32 @@
 //  Created by Joe Crozier on 3/27/23.
 //
 
+#include "CommonViews.hpp"
 #include "ImGuiExtensions.hpp"
 #include <imgui.h>
 #include <imgui_internal.h>
+
+float Rescale01(float const x, float const min, float const max)
+{
+  return (x - min) / (max - min);
+}
+ImVec2 Rescale01v(ImVec2 const v, ImVec2 const min, ImVec2 const max)
+{
+  return ImVec2(Rescale01(v.x, min.x, max.x), Rescale01(v.y, min.y, max.y));
+}
+float Rescale(float const x, float const min, float const max, float const newMin, float const newMax)
+{
+  return Rescale01(x, min, max) * (newMax - newMin) + newMin;
+}
+ImVec2 Rescalev(ImVec2 const x, ImVec2 const min, ImVec2 const max, ImVec2 const newMin, ImVec2 const newMax)
+{
+  ImVec2 const vNorm = Rescale01v(x, min, max);
+  return ImVec2(vNorm.x * (newMax.x - newMin.x) + newMin.x, vNorm.y * (newMax.y - newMin.y) + newMin.y);
+}
+float Sign(float x)
+{
+  return x < 0.0f ? -1.0f : 1.0f;
+}
 
 bool  IsNegativeScalar(ImGuiDataType data_type, ImU64* src)
 {
@@ -1021,6 +1044,76 @@ void ImGui::BeginGroupPanel(const char* name, const ImVec2& size)
   
   ImGui::PushItemWidth(effectiveSize.x - frameHeight);
 }
+
+bool ImGuiExtensions::RangeSelect2D(const char *pLabel, float *pCurMinX, float *pCurMinY, float *pCurMaxX, float *pCurMaxY, const float fBoundMinX, const float fBoundMinY, const float fBoundMaxX, const float fBoundMaxY, const float fScale) {
+  float& fCurMinX = *pCurMinX;
+  float& fCurMinY = *pCurMinY;
+  float& fCurMaxX = *pCurMaxX;
+  float& fCurMaxY = *pCurMaxY;
+
+  ImGuiID const iID = ImGui::GetID(pLabel);
+  ImGui::PushID(iID);
+
+  float const vSizeFull = (ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("1.0").x) * fScale;
+  ImVec2 const vSize(vSizeFull, vSizeFull);
+
+  ImVec2 vPos = ImGui::GetCursorScreenPos();
+  ImRect oRect(vPos, vPos + vSize);
+  CommonViews::Spacing(vSizeFull);
+
+  // Convert current min and max from data space to screen space
+  float const fScaleMinX = Rescale01(fCurMinX, fBoundMinX, fBoundMaxX);
+  float const fScaleMinY = Rescale01(fCurMinY, fBoundMinY, fBoundMaxY);
+  float const fScaleMaxX = Rescale01(fCurMaxX, fBoundMinX, fBoundMaxX);
+  float const fScaleMaxY = Rescale01(fCurMaxY, fBoundMinY, fBoundMaxY);
+
+  float const fRegMinX = ImLerp(oRect.Min.x, oRect.Max.x, fScaleMinX);
+  float const fRegMinY = ImLerp(oRect.Min.y, oRect.Max.y, fScaleMinY);
+  float const fRegMaxX = ImLerp(oRect.Min.x, oRect.Max.x, fScaleMaxX);
+  float const fRegMaxY = ImLerp(oRect.Min.y, oRect.Max.y, fScaleMaxY);
+
+  ImRect oRegionRect(fRegMinX, fRegMinY, fRegMaxX, fRegMaxY);
+	
+  bool bModified = false;
+
+  ImVec2 vHandleSize(10.0f, 10.0f);  // Handle size for visuals
+  ImU32 handleColor = ImGui::GetColorU32(ImGuiCol_Button);  // Color of the handles
+
+  // Min handle interaction
+  ImRect minHandleRect(fRegMinX - vHandleSize.x / 2, fRegMinY - vHandleSize.y / 2, fRegMinX + vHandleSize.x / 2, fRegMinY + vHandleSize.y / 2);
+  bool hovered, held;
+  bool pressed = ImGui::ButtonBehavior(minHandleRect, ImGui::GetID("##minHandle"), &hovered, &held);
+  if (held) {
+      ImVec2 mouseDelta = ImGui::GetIO().MouseDelta;
+      ImVec2 newMin = { ImClamp(fCurMinX + mouseDelta.x, fBoundMinX, fCurMaxX), ImClamp(fCurMinY + mouseDelta.y, fBoundMinY, fCurMaxY) };
+      fCurMinX = newMin.x;
+      fCurMinY = newMin.y;
+      bModified = true;
+  }
+
+  // Max handle interaction
+  ImRect maxHandleRect(fRegMaxX - vHandleSize.x / 2, fRegMaxY - vHandleSize.y / 2, fRegMaxX + vHandleSize.x / 2, fRegMaxY + vHandleSize.y / 2);
+  pressed = ImGui::ButtonBehavior(maxHandleRect, ImGui::GetID("##maxHandle"), &hovered, &held);
+  if (held) {
+      ImVec2 mouseDelta = ImGui::GetIO().MouseDelta;
+      ImVec2 newMax = { ImClamp(fCurMaxX + mouseDelta.x, fCurMinX, fBoundMaxX), ImClamp(fCurMaxY + mouseDelta.y, fCurMinY, fBoundMaxY) };
+      fCurMaxX = newMax.x;
+      fCurMaxY = newMax.y;
+      bModified = true;
+  }
+
+  // Draw the frame and handles
+  ImDrawList* draw_list = ImGui::GetWindowDrawList();
+  draw_list->AddRect(oRect.Min, oRect.Max, ImGui::GetColorU32(ImGuiCol_FrameBgActive));
+  draw_list->AddRectFilled(minHandleRect.Min, minHandleRect.Max, handleColor);
+  draw_list->AddRectFilled(maxHandleRect.Min, maxHandleRect.Max, handleColor);
+
+  ImGui::PopID();
+
+  return bModified;
+}
+
+
 
 void ImGui::EndGroupPanel()
 {

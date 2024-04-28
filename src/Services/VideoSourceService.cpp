@@ -79,8 +79,8 @@ std::shared_ptr<ofFbo> VideoSourceService::previewFbo()
 {
   std::shared_ptr<ofFbo> fbo = std::make_shared<ofFbo>();
   std::shared_ptr<ofFbo> blankFbo = std::make_shared<ofFbo>();
-  fbo->allocate(320, 240);
-  blankFbo->allocate(320, 240);
+  fbo->allocate(426, 240);
+  blankFbo->allocate(426, 240);
 
   auto shader = ShaderChainerService::getService()->shaderForType(
       ShaderTypeOctahedron, UUID::generateUUID(), 0);

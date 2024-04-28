@@ -983,14 +983,14 @@ void NodeLayoutView::drawPreviewWindow(std::shared_ptr<Node> node)
 {
   auto sizeScale = ed::GetCurrentZoom();
   
-  auto windowSize = ImVec2(160 / sizeScale, 120 / sizeScale);
+  auto windowSize = ImVec2(160 / sizeScale, 90 / sizeScale);
   
   auto pos = ed::GetNodePosition(node->id);
   pos = ed::CanvasToScreen(pos);
   
   pos.x = pos.x + (ed::GetNodeSize(node->id).x / ed::GetCurrentZoom()) / 2 - 80 / sizeScale;
   ofRectangle previewRect = ofRectangle(pos.x, pos.y, windowSize.x, windowSize.y);
-  pos.y = pos.y - 140 / sizeScale;
+  pos.y = pos.y - 90 / sizeScale - 10;
   
   auto style = ImGui::GetStyle();
 

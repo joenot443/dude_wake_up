@@ -77,9 +77,8 @@ public:
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("LumaMaskMaker");
-    CommonViews::ShaderParameter(settings->upper, settings->upperOscillator);
-    CommonViews::ShaderParameter(settings->lower, settings->lowerOscillator);
+    CommonViews::H3Title("Luma Mask Maker");
+    CommonViews::RangeSlider("Luma Mask Range", shaderId, settings->upper, settings->lower, formatString("%.2f - %.2f", settings->lower->value, settings->upper->value));
     CommonViews::ShaderCheckbox(settings->drawInput);
     CommonViews::ShaderCheckbox(settings->flip);
   }

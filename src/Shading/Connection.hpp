@@ -239,6 +239,15 @@ public:
     }
   }
   
+  
+  // Returns the first parent's current frame
+  std::shared_ptr<ofFbo> parentFrame() {
+    for (auto connection : inputs) {
+      return connection->start->frame();
+    }
+    return nullptr;
+  }
+  
   void removeConnection(std::shared_ptr<Connection> conn)
   {
     if (!conn)
