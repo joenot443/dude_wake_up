@@ -30,16 +30,7 @@ void FeedbackShader::populateSource()
   {
     return;
   }
-
-  // If we have an Aux connection to Feedback from, use that by default.
-  // Don't draw the source selector in this case
-  //  if (auxConnected()) {
-  //    feedbackSource = FeedbackSourceService::getService()->feedbackSourceForId(aux()->connId());
-  //    FeedbackSourceService::getService()->setConsumer(shaderId, feedbackSource);
-  //    return;
-  //  }
-
-  //
+  
   switch (settings->sourceSelection->intValue)
   {
   case 0: // Origin
@@ -63,10 +54,10 @@ void FeedbackShader::populateSource()
   }
   FeedbackSourceService::getService()->setConsumer(shaderId, feedbackSource);
 
-  if (feedbackConnected())
-  {
-    feedbackSource->shadeFrame(feedback());
-  }
+//  if (feedbackConnected())
+//  {
+//    feedbackSource->shadeFrame(feedback());
+//  }
 }
 
 void FeedbackShader::drawPreview(ImVec2 pos, float scale)
@@ -109,19 +100,22 @@ void FeedbackShader::shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> 
   shader.setUniform2f("translate", settings->xPosition->value, settings->yPosition->value);
   shader.setUniform1f("scale", 2.0 - settings->scale->value);
 
-  // With feedback connected we need to flip our FBO to draw it
-  if (feedbackConnected())
-  {
-    ofPushMatrix();
-    ofScale(1, -1, 1);
-    ofTranslate(0, -frame->getHeight());
-    drawFbo(frame);
-    ofPopMatrix();
-  }
-  else
-  {
-    drawFbo(frame);
-  }
+  
+  drawFbo(frame);
+
+//  // With feedback connected we need to flip our FBO to draw it
+//  if (feedbackConnected())
+//  {
+//    ofPushMatrix();
+//    ofScale(1, -1, 1);
+//    ofTranslate(0, -frame->getHeight());
+//    drawFbo(frame);
+//    ofPopMatrix();
+//  }
+//  else
+//  {
+//    drawFbo(frame);
+//  }
 
   shader.end();
   canvas->end();

@@ -59,12 +59,14 @@ public:
   }
   virtual void saveFrame(){};
   virtual void drawSettings(){};
-  virtual json serialize(){ return 0; };
+  virtual json serialize() { return 0; };
+  int inputCount() override { return 0; };
+  
   virtual void load(json j){};
   
   virtual void teardown(){};
   
-  std::string name() {
+  std::string name() override  {
     return sourceName;
   }
   

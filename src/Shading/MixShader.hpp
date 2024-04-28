@@ -40,8 +40,9 @@ public:
 
   ofShader shader;
   MixSettings *settings;
+  int inputCount;
 
-  MixShader(MixSettings *settings) : settings(settings), Shader(settings) {};
+  MixShader(MixSettings *settings) : settings(settings), inputCount(2), Shader(settings) {};
   
   void setup() override {
     #ifdef TESTING

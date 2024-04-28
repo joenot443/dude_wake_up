@@ -529,6 +529,7 @@
 		02B280EE291564A100B793D5 /* ShaderChainerService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = ShaderChainerService.hpp; path = Services/ShaderChainerService.hpp; sourceTree = "<group>"; };
 		02B280F129193F4000B793D5 /* ASCIIShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ASCIIShader.hpp; path = Shading/ASCIIShader.hpp; sourceTree = "<group>"; };
 		02B6599D28BBD16700E31AE7 /* GlitchShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = GlitchShader.hpp; path = Shading/GlitchShader.hpp; sourceTree = "<group>"; };
+		02B756902BDEBE1D00DE97FF /* MultiMixShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = MultiMixShader.hpp; path = Shading/MultiMixShader.hpp; sourceTree = "<group>"; };
 		02BE890329DC942900C65C58 /* AvailableShaderConfig.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = AvailableShaderConfig.hpp; path = Models/AvailableShaderConfig.hpp; sourceTree = "<group>"; };
 		02BE890429DCA12600C65C58 /* ShaderConfigSelectionView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ShaderConfigSelectionView.cpp; path = Views/ShaderConfigSelectionView.cpp; sourceTree = "<group>"; };
 		02BE890529DCA12600C65C58 /* ShaderConfigSelectionView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = ShaderConfigSelectionView.hpp; path = Views/ShaderConfigSelectionView.hpp; sourceTree = "<group>"; };
@@ -1342,6 +1343,7 @@
 				0230657729534CB500489A9F /* PixelShader.hpp */,
 				028FA5BC295A4BAA00FE6FE3 /* RingsShader.hpp */,
 				02B6599D28BBD16700E31AE7 /* GlitchShader.hpp */,
+				02B756902BDEBE1D00DE97FF /* MultiMixShader.hpp */,
 				02B22C39294A4C860095AC89 /* MixShader.hpp */,
 				02B280F129193F4000B793D5 /* ASCIIShader.hpp */,
 				027C3DA5292D4B53005EE417 /* FractalShader.hpp */,

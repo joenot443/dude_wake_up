@@ -68,6 +68,10 @@ struct GridRunShader: Shader {
   ShaderType type() override {
     return ShaderTypeGridRun;
   }
+  
+  int inputCount() override {
+    return 0;
+  }
 
   void drawSettings() override {
     CommonViews::H3Title("GridRun");

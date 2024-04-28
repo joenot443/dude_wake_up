@@ -7,6 +7,7 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "MultiMixShader.hpp"
 #include "ColorStepperShader.hpp"
 #include "GridRunShader.hpp"
 #include "ColorSwapShader.hpp"
@@ -563,6 +564,12 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeMultiMix: {
+      auto settings = new MultiMixSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<MultiMixShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeColorStepper: {
       auto settings = new ColorStepperSettings(shaderId, shaderJson);
       auto shader = std::make_shared<ColorStepperShader>(settings);

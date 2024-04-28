@@ -29,28 +29,18 @@ enum NodeType
 enum PinType
 {
   PinTypeInput,
-  PinTypeOutput,
-  PinTypeAux,
-  PinTypeMask,
-  PinTypeFeedback
+  PinTypeOutput
 };
 
 struct Node
 {
   ed::NodeId id;
   ed::PinId outputId;
-  ed::PinId inputId;
-  ed::PinId auxId;
-  ed::PinId maskId;
-  ed::PinId feedbackId;
+  std::map<InputSlot, ed::PinId> inputIds;
   std::string name;
   NodeType type;
   std::shared_ptr<Shader> shader;
   std::shared_ptr<VideoSource> source;
-  std::shared_ptr<Node> sourceNode;
-  std::shared_ptr<Node> nextNode;
-  std::shared_ptr<Node> auxNode;
-  std::shared_ptr<Node> maskNode;
   std::shared_ptr<Connectable> connectable;
 
   ImVec2 position;
@@ -59,55 +49,16 @@ struct Node
   {
     return formatString("%s##%d", name.c_str(), id.Get());
   }
-
-  bool supportsInput()
+  
+  bool hasInputLinkAt(InputSlot slot)
   {
-    return inputId.Get() != NullId;
-  }
-
-  bool hasAuxLink()
-  {
-    return supportsAux() &&
-           shader->hasInputForType(ConnectionTypeAux);
-  }
-
-  bool hasMaskLink()
-  {
-    return supportsMask() &&
-           connectable->hasInputForType(ConnectionTypeMask);
-  }
-
-  bool hasFeedbackLink()
-  {
-    return supportsFeedback() &&
-           connectable->hasOutputForType(ConnectionTypeFeedback);
-  }
-
-  bool hasInputLink()
-  {
-    return connectable->hasInputForType(ConnectionTypeShader) || connectable->hasInputForType(ConnectionTypeSource);
+    return connectable->hasInputAtSlot(slot);
   }
 
   bool hasOutputLink()
   {
     return !connectable->outputs.empty();
   }
-
-  bool supportsAux()
-  {
-    return auxId.Get() != NullId;
-  }
-
-  bool supportsMask()
-  {
-    return maskId.Get() != NullId;
-  }
-
-  bool supportsFeedback()
-  {
-    return  feedbackId.Get() != NullId;
-  }
-
   // Draws the settings from the underlying Shader or VideoSource
   void drawSettings()
   {
@@ -142,12 +93,9 @@ struct Node
     {
       return SourceNodeColor;
     }
-    if (supportsAux())
-      return AuxNodeColor;
-    if (supportsMask())
-      return MaskNodeColor;
-
-    return supportsAux() ? AuxNodeColor : ShaderNodeColor;
+    static ImColor nodeColors[4] = {AuxNodeColor, MaskNodeColor, MaskNodeColor, MaskNodeColor};
+    
+    return nodeColors[connectable->inputCount()];
   }
   
   ImVec2 savedPosition() {
@@ -161,8 +109,8 @@ struct Node
     }
   }
 
-  Node(ed::NodeId id, ed::PinId outputId, ed::PinId inputId, std::string name, NodeType type, std::shared_ptr<Connectable> conn)
-      : id(id), outputId(outputId), inputId(inputId), type(type), name(name), position(ImVec2(0, 0)), connectable(conn) {}
+  Node(ed::NodeId id, ed::PinId outputId, std::map<InputSlot, ed::PinId> inputIds, std::string name, NodeType type, std::shared_ptr<Connectable> conn)
+      : id(id), outputId(outputId), inputIds(inputIds), type(type), name(name), position(ImVec2(0, 0)), connectable(conn) {}
 };
 
 struct Pin
@@ -180,12 +128,12 @@ struct ShaderLink
   ed::LinkId id;
   std::shared_ptr<Node> input;
   std::shared_ptr<Node> output;
-  LinkType type;
+  InputSlot inputSlot;
   std::string connectionId;
 
   ShaderLink(ed::LinkId id, std::shared_ptr<Node> inputNode,
-             std::shared_ptr<Node> outputNode, std::string connectionId)
-      : id(id), output(outputNode), input(inputNode), type(LinkTypeShader), connectionId(connectionId) {}
+             std::shared_ptr<Node> outputNode, InputSlot inputSlot, std::string connectionId)
+      : id(id), output(outputNode), input(inputNode), inputSlot(inputSlot), connectionId(connectionId) {}
 };
 
 #endif /* NodeTypes_h */

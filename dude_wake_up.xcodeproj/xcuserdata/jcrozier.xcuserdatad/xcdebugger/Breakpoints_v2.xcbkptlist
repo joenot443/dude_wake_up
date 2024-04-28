@@ -198,22 +198,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "1FC14A28-39FA-4F92-803C-F7B2A19D19F9"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "src/Shading/FeedbackShader.cpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "33"
-            endingLineNumber = "33"
-            landmarkName = "FeedbackShader::populateSource()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "0770D766-CD93-4E8E-A74D-17CA7825BCE6"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -792,8 +776,8 @@
             filePath = "src/Video/VideoSource.hpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "92"
-            endingLineNumber = "92"
+            startingLineNumber = "94"
+            endingLineNumber = "94"
             landmarkName = "drawPreview(pos, scale)"
             landmarkType = "7">
          </BreakpointContent>
@@ -808,8 +792,8 @@
             filePath = "src/Video/VideoSource.hpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "90"
-            endingLineNumber = "90"
+            startingLineNumber = "92"
+            endingLineNumber = "92"
             landmarkName = "drawPreview(pos, scale)"
             landmarkType = "7">
          </BreakpointContent>
@@ -890,8 +874,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "90"
             endingLineNumber = "90"
-            landmarkName = "ShaderChainerService::setup()"
-            landmarkType = "7">
+            landmarkName = "unknown"
+            landmarkType = "0">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1189,8 +1173,8 @@
             filePath = "src/Shading/Shader.hpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "101"
-            endingLineNumber = "101"
+            startingLineNumber = "77"
+            endingLineNumber = "77"
             landmarkName = "drawPreview(pos, scale)"
             landmarkType = "7">
             <Locations>
@@ -2578,8 +2562,8 @@
             filePath = "src/Shading/FeedbackShader.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "43"
-            endingLineNumber = "43"
+            startingLineNumber = "34"
+            endingLineNumber = "34"
             landmarkName = "FeedbackShader::populateSource()"
             landmarkType = "7">
          </BreakpointContent>
@@ -2610,8 +2594,8 @@
             filePath = "src/Shading/FeedbackShader.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "50"
-            endingLineNumber = "50"
+            startingLineNumber = "41"
+            endingLineNumber = "41"
             landmarkName = "FeedbackShader::populateSource()"
             landmarkType = "7">
          </BreakpointContent>
@@ -2817,8 +2801,8 @@
             filePath = "src/Shading/Connection.hpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "217"
-            endingLineNumber = "217"
+            startingLineNumber = "191"
+            endingLineNumber = "191"
             landmarkName = "connectionFor(conn)"
             landmarkType = "7">
          </BreakpointContent>
@@ -2833,8 +2817,8 @@
             filePath = "src/Shading/Connection.hpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "232"
-            endingLineNumber = "232"
+            startingLineNumber = "206"
+            endingLineNumber = "206"
             landmarkName = "removeInputConnections(type)"
             landmarkType = "7">
          </BreakpointContent>
@@ -2849,8 +2833,8 @@
             filePath = "src/Shading/FeedbackShader.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "46"
-            endingLineNumber = "46"
+            startingLineNumber = "37"
+            endingLineNumber = "37"
             landmarkName = "FeedbackShader::populateSource()"
             landmarkType = "7">
             <Locations>
@@ -2927,8 +2911,8 @@
             filePath = "src/Shading/FeedbackShader.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "60"
-            endingLineNumber = "60"
+            startingLineNumber = "51"
+            endingLineNumber = "51"
             landmarkName = "FeedbackShader::populateSource()"
             landmarkType = "7">
          </BreakpointContent>
@@ -2975,8 +2959,8 @@
             filePath = "src/Shading/FeedbackShader.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "68"
-            endingLineNumber = "68"
+            startingLineNumber = "59"
+            endingLineNumber = "59"
             landmarkName = "FeedbackShader::populateSource()"
             landmarkType = "7">
          </BreakpointContent>
@@ -3007,8 +2991,8 @@
             filePath = "src/Shading/FeedbackShader.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "104"
-            endingLineNumber = "104"
+            startingLineNumber = "95"
+            endingLineNumber = "95"
             landmarkName = "FeedbackShader::shade(frame, canvas)"
             landmarkType = "7">
          </BreakpointContent>
@@ -4140,7 +4124,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "64"
             endingLineNumber = "64"
-            landmarkName = "FeedbackSettings(shaderId, j)"
+            landmarkName = "FeedbackSettings(shaderId, j, name)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -4346,8 +4330,8 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "851"
-            endingLineNumber = "851"
+            startingLineNumber = "775"
+            endingLineNumber = "775"
             landmarkName = "NodeLayoutView::handleUnplacedDownloadedLibraryFile()"
             landmarkType = "7">
          </BreakpointContent>
@@ -4410,8 +4394,8 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "556"
-            endingLineNumber = "556"
+            startingLineNumber = "480"
+            endingLineNumber = "480"
             landmarkName = "NodeLayoutView::nodeAtPosition(position)"
             landmarkType = "7">
          </BreakpointContent>
@@ -4426,8 +4410,8 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "836"
-            endingLineNumber = "836"
+            startingLineNumber = "760"
+            endingLineNumber = "760"
             landmarkName = "NodeLayoutView::handleDroppedSource(source)"
             landmarkType = "7">
             <Locations>
@@ -4474,8 +4458,8 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "802"
-            endingLineNumber = "802"
+            startingLineNumber = "726"
+            endingLineNumber = "726"
             landmarkName = "NodeLayoutView::handleDropZone()"
             landmarkType = "7">
          </BreakpointContent>

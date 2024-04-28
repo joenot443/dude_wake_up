@@ -21,54 +21,41 @@ enum ConnectableType
   ConnectableTypeShader
 };
 
-enum LinkType
-{
-  LinkTypeShader,
-  LinkTypeSource,
-  LinkTypeAux,
-  LinkTypeMask,
-  LinkTypeFeedback
-};
-
 enum ConnectionType
 {
   // Shader to Shader
   ConnectionTypeShader,
   // Source to Shader
-  ConnectionTypeSource,
-  // Source/Shader to Shader [Aux]
-  ConnectionTypeAux,
-  // Source/Shader to Shader [Mask]
-  ConnectionTypeMask,
-  // Source/Shader to Shader [Feedback]
-  ConnectionTypeFeedback
+  ConnectionTypeSource
+};
+
+// 0-9
+enum InputSlot
+{
+  InputSlotZero,
+  InputSlotOne,
+  InputSlotTwo,
+  InputSlotThree,
+  InputSlotFour,
+  InputSlotFive,
+  InputSlotSix,
+  InputSlotSeven,
+  InputSlotEight,
+  InputSlotNine
 };
 
 class Connection : std::enable_shared_from_this<Connectable>
 {
 public:
   std::string id;
+  // Output
   std::shared_ptr<Connectable> start;
+  // Input
   std::shared_ptr<Connectable> end;
   
   ConnectionType type;
+  InputSlot inputSlot;
   
-  LinkType linkType()
-  {
-    switch (type)
-    {
-      case ConnectionTypeShader:
-        return LinkTypeShader;
-      case ConnectionTypeSource:
-        return LinkTypeSource;
-      case ConnectionTypeAux:
-        return LinkTypeAux;
-      case ConnectionTypeMask:
-        return LinkTypeMask;
-      case ConnectionTypeFeedback:
-        return LinkTypeFeedback;
-    }
-  }
   Connection(std::shared_ptr<Connectable> start,
              std::shared_ptr<Connectable> end,
              ConnectionType type)
@@ -82,7 +69,7 @@ public:
 class Connectable : public std::enable_shared_from_this<Connectable>
 {
 public:
-  std::set<std::shared_ptr<Connection>> inputs;
+  std::map<InputSlot, std::shared_ptr<Connection>> inputs;
   std::set<std::shared_ptr<Connection>> outputs;
   
   // Either a Shader::shaderId or a VideoSource::id
@@ -90,6 +77,9 @@ public:
   
   // The Shader name or VideoSource name
   virtual std::string name() = 0;
+  
+  // The max number of inputs supported.
+  virtual int inputCount() = 0;
   
   // The settings for the VideoSource itself, or the parent VideoSource,
   // or the defaultVideoSource if the Connectable has no VideoSource parent.
@@ -105,14 +95,9 @@ public:
     return !outputs.empty();
   }
   
-  bool hasInputForType(ConnectionType type)
+  bool hasInputAtSlot(InputSlot slot)
   {
-    for (auto const input : inputs)
-    {
-      if (input->type == type)
-        return true;
-    }
-    return false;
+    return inputs.find(slot) != inputs.end();
   }
   
   bool hasOutputForType(ConnectionType type)
@@ -148,7 +133,7 @@ public:
     // Mark the current Connectable as visited
     visited.insert(shared_from_this());
     
-    for (auto const& input : inputs)
+    for (auto const& [key, input] : inputs)
     {
       // If the direct parent matches the type, return it
       if (input->start->connectableType() == type)
@@ -177,7 +162,7 @@ public:
     // Mark the current Connectable as visited
     visited.insert(shared_from_this());
     
-    for (auto const& input : inputs)
+    for (auto const& [key, input] : inputs)
     {
       // Check if the current connectable's parent matches the type
       if (input->start->connectableType() == type)
@@ -188,17 +173,6 @@ public:
         return true;
     }
     return false; // Return false if no ancestor of the specified type is found
-  }
-  
-  
-  std::shared_ptr<Connectable> inputForType(ConnectionType type)
-  {
-    for (auto inputConnection : inputs)
-    {
-      if (inputConnection->type == type)
-        return inputConnection->start;
-    }
-    return nullptr;
   }
   
   std::shared_ptr<Connectable> outputForType(ConnectionType type)
@@ -214,7 +188,7 @@ public:
   
   std::shared_ptr<Connection> connectionFor(std::shared_ptr<Connectable> conn)
   {
-    for (auto const connection : inputs)
+    for (auto const [key, connection] : inputs)
     {
       if (connection->start == conn)
         return connection;
@@ -230,7 +204,7 @@ public:
   std::vector<std::string> removeInputConnections(ConnectionType type)
   {
     std::vector<std::string> idsToRemove;
-    for (auto connection : inputs)
+    for (auto [key, connection] : inputs)
     {
       if (connection->type == type)
       {
@@ -242,7 +216,7 @@ public:
   
   // Returns the first parent's current frame
   std::shared_ptr<ofFbo> parentFrame() {
-    for (auto connection : inputs) {
+    for (auto [key, connection] : inputs) {
       return connection->start->frame();
     }
     return nullptr;
@@ -262,7 +236,11 @@ public:
     // Remove the connection from the 'inputs' set of the ending Connectable
     if (conn->end)
     {
-      conn->end->inputs.erase(conn);
+      for (auto &[key, val] : conn->end->inputs) {
+        if (conn == val) {
+          conn->end->inputs.erase(key);
+        }
+      }
     }
   }
 };

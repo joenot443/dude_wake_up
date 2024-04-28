@@ -103,9 +103,12 @@ struct FeedbackShader : Shader
   FeedbackSettings *settings;
   ofShader shader;
   ofFbo fboFeedback;
+  int inputCount;
   std::shared_ptr<FeedbackSource> feedbackSource;
-
-  FeedbackShader(FeedbackSettings *settings) : Shader(settings), settings(settings){};
+	
+  FeedbackShader(FeedbackSettings *settings) : Shader(settings),
+  inputCount(2),
+  settings(settings){};
 
   void shade();
   void clearFrameBuffer();
