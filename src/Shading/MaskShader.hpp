@@ -51,9 +51,9 @@ struct MaskShader : Shader
     ofClear(0,0,0, 0);
     shader.setUniformTexture("tex", frame->getTexture(), 4);
 
-    if (maskConnected())
+    if (hasInputAtSlot(InputSlotTwo))
     {
-      shader.setUniformTexture("maskTex", mask()->frame()->getTexture(), 12);
+      shader.setUniformTexture("maskTex", inputAtSlot(InputSlotTwo)->frame()->getTexture(), 12);
     }
 
     shader.setUniform1f("time", ofGetElapsedTimef());
@@ -68,8 +68,11 @@ struct MaskShader : Shader
   {
   }
 
-  ShaderType type() override
-  {
+  int inputCount() override {
+    return 2;
+  }
+  
+  ShaderType type() override {
     return ShaderTypeMask;
   }
 

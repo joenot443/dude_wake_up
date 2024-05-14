@@ -12,7 +12,7 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
-#include "ValueOscillator.hpp"
+#include "WaveformOscillator.hpp"
 #include "Parameter.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
@@ -23,18 +23,18 @@ struct CirclePathSettings : public ShaderSettings
   std::shared_ptr<Parameter> scale;
   std::shared_ptr<Parameter> speed;
 
-  std::shared_ptr<ValueOscillator> radiusOscillator;
-  std::shared_ptr<ValueOscillator> scaleOscillator;
-  std::shared_ptr<ValueOscillator> speedOscillator;
+  std::shared_ptr<WaveformOscillator> radiusOscillator;
+  std::shared_ptr<WaveformOscillator> scaleOscillator;
+  std::shared_ptr<WaveformOscillator> speedOscillator;
 
   CirclePathSettings(std::string shaderId, json j, std::string name) : radius(std::make_shared<Parameter>("radius", 0.4, 0.1, 1.0)),
                                                      scale(std::make_shared<Parameter>("scale", 1.0, 0.1, 10.0)),
                                                      speed(std::make_shared<Parameter>("speed", 0.05, 0.01, 0.2)), // Default speed and range, adjust as needed
                                                      ShaderSettings(shaderId, j, name)
   {
-    radiusOscillator = std::make_shared<ValueOscillator>(radius);
-    scaleOscillator = std::make_shared<ValueOscillator>(scale);
-    speedOscillator = std::make_shared<ValueOscillator>(speed);
+    radiusOscillator = std::make_shared<WaveformOscillator>(radius);
+    scaleOscillator = std::make_shared<WaveformOscillator>(scale);
+    speedOscillator = std::make_shared<WaveformOscillator>(speed);
 
     parameters = {radius, scale, speed};
     oscillators = {radiusOscillator, scaleOscillator, speedOscillator};
@@ -88,8 +88,10 @@ struct CirclePathShader : Shader
     // Implement any necessary cleanup
   }
 
-  ShaderType type() override
-  {
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override { 
     return ShaderTypeCirclePath;
   }
 

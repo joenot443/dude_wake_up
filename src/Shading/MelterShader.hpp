@@ -46,6 +46,10 @@ shader.load("shaders/Melt");
 shader.load("shaders/Melt");
 #endif
   }
+  
+  int inputCount() override {
+    return 0;
+  }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();

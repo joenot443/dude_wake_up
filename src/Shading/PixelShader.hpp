@@ -70,7 +70,10 @@ shader.load("shaders/Pixel");
 
   bool enabled() override { return true; }
 
-  ShaderType type() override { return ShaderTypePixelate; }
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override { return ShaderTypePixelate; }
 
   void drawSettings() override {
     CommonViews::ShaderParameter(settings->size, settings->sizeOscillator);

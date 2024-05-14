@@ -77,7 +77,10 @@ shader.load("shaders/hsb");
     canvas->end();
   }
   
-  ShaderType type() override {
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override {
     return ShaderTypeHSB;
   }
   

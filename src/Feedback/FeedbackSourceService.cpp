@@ -62,7 +62,7 @@ bool FeedbackSourceService::isSourceBeingConsumed(std::string feedbackSourceId)
       return true;
   }
   return false;
-  }
+}
 
 std::shared_ptr<FeedbackSource> FeedbackSourceService::feedbackSourceForId(std::string id)
 {

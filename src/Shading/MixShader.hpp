@@ -40,9 +40,8 @@ public:
 
   ofShader shader;
   MixSettings *settings;
-  int inputCount;
 
-  MixShader(MixSettings *settings) : settings(settings), inputCount(2), Shader(settings) {};
+  MixShader(MixSettings *settings) : settings(settings), Shader(settings) {};
   
   void setup() override {
     #ifdef TESTING
@@ -61,13 +60,12 @@ shader.load("shaders/Mix");
     ofClear(0,0,0, 255);
     ofClear(0,0,0, 0);
     
-    if (auxConnected()) {
-      std::shared_ptr<ofFbo> tex2 = aux()->frame();
+    if (hasInputAtSlot(InputSlotTwo)) {
+      std::shared_ptr<ofFbo> tex2 = inputAtSlot(InputSlotTwo)->frame();
       shader.setUniformTexture("tex2", tex2->getTexture(), 8);
     } else {
       shader.end();
       frame->draw(0, 0);
-      shader.end();
       canvas->end();
       return;
     }
@@ -81,7 +79,11 @@ shader.load("shaders/Mix");
     canvas->end();
   }
   
-  ShaderType type() override {
+  int inputCount() override {
+    return 2;
+  }
+  
+	ShaderType type() override {
     return ShaderType::ShaderTypeMix;
   }
   

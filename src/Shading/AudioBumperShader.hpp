@@ -62,7 +62,10 @@ public:
   
   void clear() override {}
   
-  ShaderType type() override { return ShaderTypeAudioBumper; }
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override { return ShaderTypeAudioBumper; }
   
   void drawSettings() override {
     CommonViews::H3Title("AudioBumper");

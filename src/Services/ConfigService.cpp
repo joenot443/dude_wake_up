@@ -277,6 +277,20 @@ void ConfigService::saveDefaultConfigFile()
   saveConfigFile(path);
 }
 
+void ConfigService::saveCurrentWorkspace() {
+  if (currentWorkspace == nullptr) return;
+  
+  saveConfigFile(currentWorkspace->path);
+}
+
+void ConfigService::closeWorkspace() {
+  currentWorkspace = nullptr;
+}
+
+bool ConfigService::isEditingWorkspace() {
+  return currentWorkspace != nullptr;
+}
+
 json ConfigService::currentConfig()
 {
   json config;
@@ -315,6 +329,17 @@ void ConfigService::saveConfigFile(std::string path)
     log("Problem saving config.");
   }
 }
+
+void ConfigService::saveWorkspace(std::shared_ptr<Workspace> workspace) {
+  currentWorkspace = workspace;
+  saveConfigFile(workspace->path);
+}
+
+void ConfigService::loadWorkspace(std::shared_ptr<Workspace> workspace) {
+  currentWorkspace = workspace;
+  loadConfigFile(workspace->path);
+}
+
 
 std::vector<std::string> ConfigService::loadStrandFile(std::string path)
 {

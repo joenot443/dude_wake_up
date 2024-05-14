@@ -20,7 +20,7 @@ void WaveformOscillator::tick()
   if (!data.empty() && xmod < data.back().x)
     data.shrink(0);
 
-  float v = OscillatorDampen * amplitude->value * sin(frequency->value * t) + shift->value;
+  float v = OscillatorDampen * amplitude->value * sin(frequency->value * t + TWO_PI) + shift->value;
   value->setValue(fmin(fmax(v, value->min), value->max));
   data.push_back(ImVec2(xmod, value->value));
 }

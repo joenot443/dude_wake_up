@@ -54,7 +54,11 @@ shader.load("shaders/Rings");
     
   }
 
-  ShaderType type() override {
+  int inputCount() override {
+    return 0;
+  }
+  
+	ShaderType type() override {
     return ShaderTypeRings;
   }
 

@@ -54,7 +54,10 @@ shader.load("shaders/TriangleMap");
     
   }
 
-  ShaderType type() override {
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override {
     return ShaderTypeTriangleMap;
   }
 

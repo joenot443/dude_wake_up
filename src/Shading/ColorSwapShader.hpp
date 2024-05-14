@@ -23,7 +23,7 @@ struct ColorSwapSettings: public ShaderSettings {
   std::shared_ptr<Parameter> blend;
   
   std::shared_ptr<WaveformOscillator> blendOscillator;
-
+  
   ColorSwapSettings(std::string shaderId, json j, std::string name) :
   mainRGB(std::make_shared<Parameter>("Main RGB", 0.0, 0.0, 2.0)),
   auxRGB(std::make_shared<Parameter>("Aux RGB", 0.0, 0.0, 2.0)),
@@ -44,7 +44,7 @@ struct ColorSwapShader: Shader {
   void setup() override {
     shader.load("shaders/ColorSwap");
   }
-
+  
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
@@ -52,8 +52,8 @@ struct ColorSwapShader: Shader {
     ofClear(0,0,0, 255);
     ofClear(0,0,0, 0);
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    if (auxConnected()) {
-      shader.setUniformTexture("tex2", aux()->frame()->getTexture(), 8);
+    if (hasInputAtSlot(InputSlotTwo)) {
+      shader.setUniformTexture("tex2", inputAtSlot(InputSlotTwo)->frame()->getTexture(), 8);
     }
     shader.setUniform1i("mainRGB", settings->mainRGB->intValue);
     shader.setUniform1i("auxRGB", settings->auxRGB->intValue);
@@ -64,15 +64,19 @@ struct ColorSwapShader: Shader {
     shader.end();
     canvas->end();
   }
-
+  
   void clear() override {
     
   }
-
+  
+  int inputCount() override {
+    return 2;
+  }
+  
   ShaderType type() override {
     return ShaderTypeColorSwap;
   }
-
+  
   void drawSettings() override {
     CommonViews::H3Title("ColorSwap");
     CommonViews::ShaderIntParameter(settings->mainRGB);

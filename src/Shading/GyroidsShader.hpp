@@ -56,7 +56,10 @@ struct GyroidsShader: Shader {
     
   }
 
-  ShaderType type() override {
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override {
     return ShaderTypeGyroids;
   }
 

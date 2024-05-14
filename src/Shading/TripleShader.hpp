@@ -12,7 +12,7 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
-#include "ValueOscillator.hpp"
+#include "WaveformOscillator.hpp"
 #include "Parameter.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
@@ -20,13 +20,13 @@
 struct TripleSettings : public ShaderSettings
 {
   std::shared_ptr<Parameter> scale;
-  std::shared_ptr<ValueOscillator> scaleOscillator;
+  std::shared_ptr<WaveformOscillator> scaleOscillator;
 
   std::shared_ptr<Parameter> xShift;
-  std::shared_ptr<ValueOscillator> xShiftOscillator;
+  std::shared_ptr<WaveformOscillator> xShiftOscillator;
 
   std::shared_ptr<Parameter> yShift;
-  std::shared_ptr<ValueOscillator> yShiftOscillator;
+  std::shared_ptr<WaveformOscillator> yShiftOscillator;
 
   std::shared_ptr<Parameter> drawOriginal;
   std::shared_ptr<Parameter> drawLeft;
@@ -34,11 +34,11 @@ struct TripleSettings : public ShaderSettings
   std::shared_ptr<Parameter> drawCenter;
 
   TripleSettings(std::string shaderId, json j, std::string name) : scale(std::make_shared<Parameter>("scale", 1.0, 0.0, 5.0)),
-                                                 scaleOscillator(std::make_shared<ValueOscillator>(scale)),
+                                                 scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
                                                  xShift(std::make_shared<Parameter>("xShift", 0.0, -2.0, 2.0)),
-                                                 xShiftOscillator(std::make_shared<ValueOscillator>(xShift)),
+                                                 xShiftOscillator(std::make_shared<WaveformOscillator>(xShift)),
                                                  yShift(std::make_shared<Parameter>("yShift", 0.0, -2.0, 2.0)),
-                                                 yShiftOscillator(std::make_shared<ValueOscillator>(yShift)),
+                                                 yShiftOscillator(std::make_shared<WaveformOscillator>(yShift)),
                                                  drawOriginal(std::make_shared<Parameter>("drawOriginal", true)),
                                                  drawLeft(std::make_shared<Parameter>("drawLeft", true)),
                                                  drawRight(std::make_shared<Parameter>("drawRight", true)),
@@ -92,8 +92,10 @@ struct TripleShader : Shader
   {
   }
 
-  ShaderType type() override
-  {
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override { 
     return ShaderTypeTriple;
   }
 

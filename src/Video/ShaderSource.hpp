@@ -4,6 +4,7 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "FullHouseShader.hpp"
 #include "GridRunShader.hpp"
 #include "GyroidsShader.hpp"
 #include "SwirlingSoulShader.hpp"
@@ -84,6 +85,7 @@ enum ShaderSourceType {
   ShaderSource_SwirlingSoul, //source enum,
   ShaderSource_Gyroids, //source enum,
   ShaderSource_GridRun, //source enum,
+  ShaderSource_FullHouse, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -121,11 +123,14 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_SwirlingSoul, // Available
   ShaderSource_Gyroids, // Available
   ShaderSource_GridRun, // Available
+  ShaderSource_FullHouse, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
 // shaderTypeForShaderSourceType
+  case ShaderSource_FullHouse: //type enum
+    return ShaderTypeFullHouse;
   case ShaderSource_GridRun: //type enum
     return ShaderTypeGridRun;
   case ShaderSource_Gyroids: //type enum
@@ -253,6 +258,8 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
 static std::string shaderSourceTypeName(ShaderSourceType nameType) {
   switch (nameType) {
   // ShaderNames
+  case ShaderSource_FullHouse: // Name  
+    return "FullHouse"; // FullHouse
   case ShaderSource_GridRun: // Name  
     return "GridRun"; // GridRun
   case ShaderSource_Gyroids: // Name  
@@ -345,6 +352,12 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_FullHouse: { // Settings
+      auto settings = new FullHouseSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<FullHouseShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_GridRun: { // Settings
       auto settings = new GridRunSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
       shader = std::make_shared<GridRunShader>(settings);

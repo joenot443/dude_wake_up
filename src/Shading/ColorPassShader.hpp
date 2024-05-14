@@ -69,7 +69,10 @@ shader.load("shaders/ColorPass");
 
   void clear() override {}
 
-  ShaderType type() override { return ShaderTypeColorPass; }
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override { return ShaderTypeColorPass; }
 
   void drawSettings() override {
     

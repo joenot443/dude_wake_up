@@ -9,6 +9,7 @@
 #define Connection_hpp
 
 #include <stdio.h>
+
 #include "VideoSourceSettings.hpp"
 #include "UUID.hpp"
 
@@ -32,8 +33,7 @@ enum ConnectionType
 // 0-9
 enum InputSlot
 {
-  InputSlotZero,
-  InputSlotOne,
+  InputSlotMain,
   InputSlotTwo,
   InputSlotThree,
   InputSlotFour,
@@ -43,6 +43,16 @@ enum InputSlot
   InputSlotEight,
   InputSlotNine
 };
+
+static const InputSlot AllInputSlots[] = {   InputSlotMain,
+  InputSlotTwo,
+  InputSlotThree,
+  InputSlotFour,
+  InputSlotFive,
+  InputSlotSix,
+  InputSlotSeven,
+  InputSlotEight,
+  InputSlotNine };
 
 class Connection : std::enable_shared_from_this<Connectable>
 {
@@ -58,10 +68,10 @@ public:
   
   Connection(std::shared_ptr<Connectable> start,
              std::shared_ptr<Connectable> end,
-             ConnectionType type)
-  : start(start), end(end), type(type), id(UUID::generateUUID())
-  {
-  }
+             ConnectionType type,
+             InputSlot inputSlot)
+  : start(start), end(end), type(type), id(UUID::generateUUID()), inputSlot(inputSlot)
+  {}
   
   json serialize();
 };
@@ -80,7 +90,7 @@ public:
   
   // The max number of inputs supported.
   virtual int inputCount() = 0;
-  
+    
   // The settings for the VideoSource itself, or the parent VideoSource,
   // or the defaultVideoSource if the Connectable has no VideoSource parent.
   virtual std::shared_ptr<VideoSourceSettings> sourceSettings() = 0;
@@ -108,6 +118,11 @@ public:
         return true;
     }
     return false;
+  }
+  
+  std::shared_ptr<Connectable> inputAtSlot(InputSlot slot)
+  {
+    return inputs.at(slot)->start;
   }
   
   // Returns the furthest descendent of the Connectable
@@ -236,9 +251,12 @@ public:
     // Remove the connection from the 'inputs' set of the ending Connectable
     if (conn->end)
     {
-      for (auto &[key, val] : conn->end->inputs) {
-        if (conn == val) {
-          conn->end->inputs.erase(key);
+      auto it = conn->end->inputs.begin();
+      while (it != conn->end->inputs.end()) {
+        if (conn == it->second) {
+          it = conn->end->inputs.erase(it);
+        } else {
+          ++it;
         }
       }
     }

@@ -12,18 +12,18 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
-#include "ValueOscillator.hpp"
+#include "WaveformOscillator.hpp"
 #include "Parameter.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct LimboSettings: public ShaderSettings {
   std::shared_ptr<Parameter> colorWarp;
-  std::shared_ptr<ValueOscillator> colorWarpOscillator;
+  std::shared_ptr<WaveformOscillator> colorWarpOscillator;
 
   LimboSettings(std::string shaderId, json j, std::string name) :
   colorWarp(std::make_shared<Parameter>("colorWarp", 1.0, -1.0, 2.0)),
-  colorWarpOscillator(std::make_shared<ValueOscillator>(colorWarp)),
+  colorWarpOscillator(std::make_shared<WaveformOscillator>(colorWarp)),
   ShaderSettings(shaderId, j, name) {
     parameters = { colorWarp };
     oscillators = { colorWarpOscillator };
@@ -56,7 +56,10 @@ struct LimboShader: Shader {
     
   }
 
-  ShaderType type() override {
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override {
     return ShaderTypeLimbo;
   }
 

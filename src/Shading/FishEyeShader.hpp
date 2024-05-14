@@ -60,7 +60,10 @@ shader.load("shaders/FishEye");
     
   }
 
-  ShaderType type() override {
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override {
     return ShaderTypeFishEye;
   }
 

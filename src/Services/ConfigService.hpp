@@ -16,7 +16,7 @@
 #include "ShaderChainer.hpp"
 #include "observable.hpp"
 #include "ShaderType.hpp"
-
+#include "Workspace.hpp"
 
 using json = nlohmann::json;
 static const std::string ConfigFolderName = "shader_configs";
@@ -100,6 +100,14 @@ public:
   std::string relativeFilePathWithinNottawaFolder(std::string filePath);
 
   json jsonFromParameters(std::vector<Parameter *> parameters);
+  
+  // Workspaces
+  std::shared_ptr<Workspace> currentWorkspace;
+  bool isEditingWorkspace();
+  void saveCurrentWorkspace();
+  void saveWorkspace(std::shared_ptr<Workspace> workspace);
+  void loadWorkspace(std::shared_ptr<Workspace> workspace);
+  void closeWorkspace();
   
   bool isLoading;
   

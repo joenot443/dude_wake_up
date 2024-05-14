@@ -12,7 +12,7 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
-#include "ValueOscillator.hpp"
+#include "WaveformOscillator.hpp"
 #include "Parameter.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
@@ -20,15 +20,15 @@
 struct SmokeRingSettings : public ShaderSettings
 {
   std::shared_ptr<Parameter> radius;
-  std::shared_ptr<ValueOscillator> radiusOscillator;
+  std::shared_ptr<WaveformOscillator> radiusOscillator;
 
   std::shared_ptr<Parameter> colorFactor;
-  std::shared_ptr<ValueOscillator> colorFactorOscillator;
+  std::shared_ptr<WaveformOscillator> colorFactorOscillator;
 
   SmokeRingSettings(std::string shaderId, json j, std::string name) : radius(std::make_shared<Parameter>("radius", 1.0, 0.0, 2.0)),
                                                     colorFactor(std::make_shared<Parameter>("colorFactor", 0.0, -2.0, 2.0)),
-                                                    colorFactorOscillator(std::make_shared<ValueOscillator>(colorFactor)),
-                                                    radiusOscillator(std::make_shared<ValueOscillator>(radius)),
+                                                    colorFactorOscillator(std::make_shared<WaveformOscillator>(colorFactor)),
+                                                    radiusOscillator(std::make_shared<WaveformOscillator>(radius)),
                                                     ShaderSettings(shaderId, j, name) 
   {
     parameters = {radius, colorFactor};
@@ -66,8 +66,10 @@ struct SmokeRingShader : Shader
   {
   }
 
-  ShaderType type() override
-  {
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override { 
     return ShaderTypeSmokeRing;
   }
 

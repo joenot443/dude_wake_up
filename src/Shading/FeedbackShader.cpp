@@ -25,7 +25,14 @@ void FeedbackShader::populateSource()
 {
   // Set to a safe default as a backup.
   feedbackSource = FeedbackSourceService::getService()->defaultFeedbackSource;
-
+  
+  // If our input slot is connected, we'll use that
+  if (hasInputAtSlot(InputSlotTwo)) {
+    feedbackSource = FeedbackSourceService::getService()->feedbackSourceForId(inputAtSlot(InputSlotTwo)->connId());
+    FeedbackSourceService::getService()->setConsumer(shaderId, feedbackSource);
+    return;
+  }
+  
   if (inputs.empty())
   {
     return;
@@ -53,11 +60,6 @@ void FeedbackShader::populateSource()
     break;
   }
   FeedbackSourceService::getService()->setConsumer(shaderId, feedbackSource);
-
-//  if (feedbackConnected())
-//  {
-//    feedbackSource->shadeFrame(feedback());
-//  }
 }
 
 void FeedbackShader::drawPreview(ImVec2 pos, float scale)
@@ -93,6 +95,7 @@ void FeedbackShader::shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> 
   shader.setUniform1f("mainMix", settings->mainMix->value);
   shader.setUniform1i("priority", settings->priority->boolValue);
   shader.setUniform1f("feedbackMix", settings->feedbackMix->value);
+  shader.setUniform1i("blendMode", settings->blendMode->intValue);
   shader.setUniform1f("scale", settings->scale->value);
   shader.setUniform1f("rotate", settings->rotation->value);
   shader.setUniform1f("lumaKey", settings->keyValue->value);
@@ -149,7 +152,8 @@ void FeedbackShader::drawSettings()
 
   ImGui::Checkbox(settings->lumaKeyEnabled->name.c_str(), &settings->lumaKeyEnabled->boolValue);
   ImGui::Checkbox(settings->priority->name.c_str(), &settings->priority->boolValue);
-  if (ImGui::Combo("Source", &settings->sourceSelection->intValue, "Origin\0Current\0Final\0"))
+  
+  if (!hasInputAtSlot(InputSlotTwo) && ImGui::Combo("Source", &settings->sourceSelection->intValue, "Origin\0Current\0Final\0"))
   {
     populateSource();
   }
@@ -180,7 +184,16 @@ void FeedbackShader::drawSettings()
     // Threshold
     CommonViews::ShaderParameter(settings->keyThreshold,
                                  settings->keyThresholdOscillator);
+  } else {
+    // Convert the strings to C strings
+    std::vector<const char *> blendModeNamesC;
+    for (auto &name : blendModeNames) {
+      blendModeNamesC.push_back(name.c_str());
+    }
+    ImGui::Combo("##BlendMode", &settings->blendMode->intValue, blendModeNamesC.data(), (int) blendModeNames.size());
   }
 }
+
+int FeedbackShader::inputCount() { return 2; }
 
 ShaderType FeedbackShader::type() { return ShaderTypeFeedback; }

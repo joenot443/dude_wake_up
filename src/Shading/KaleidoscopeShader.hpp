@@ -74,7 +74,10 @@ shader.load("shaders/kaleidoscope");
     canvas->end();
   }
 
-  ShaderType type() override {
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override {
     return ShaderType::ShaderTypeKaleidoscope;
   }
 

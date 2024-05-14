@@ -72,7 +72,10 @@ public:
   
   void clear() override {}
   
-  ShaderType type() override { return ShaderTypeTissue; }
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override { return ShaderTypeTissue; }
   
   void drawSettings() override {
     

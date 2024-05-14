@@ -13,6 +13,7 @@
 #include "CommonViews.hpp"
 #include "Fonts.hpp"
 
+static const float ImGuiWindowTitleBarHeight = 70.0f;
 
 void StageModeView::setup() {
   
@@ -23,35 +24,27 @@ void StageModeView::update() {
 }
 
 void StageModeView::draw() {
-  ImGui::BeginChild("stage_mode_child");
-  CommonViews::mSpacing();
+  auto stageSize = ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y - LayoutStateService::getService()->audioSettingsViewHeight() - ImGuiWindowTitleBarHeight);
   
-  // |     3/4    |  1/4  |
-  float width = ImGui::GetWindowContentRegionMax().x;
+  ImGui::BeginChild("stage_mode_child", stageSize);
   ImGui::Columns(2, "stage_mode_view", false);
-  ImGui::SetColumnWidth(0, width / 2.);
-  ImGui::SetColumnWidth(1, width / 2.);
+  ImGui::SetColumnWidth(0, stageSize.x / 2.);
+  ImGui::SetColumnWidth(1, stageSize.x / 2.);
   
   auto pos = getScaledCursorScreenLocation();
-  auto size = getScaledContentRegionAvail();
   ofSetColor(200, 200, 200);
-  ofDrawRectangle(pos.x, pos.y, size.x, size.y);
+  ofDrawRectangle(pos.x, pos.y, scaleFloat(stageSize.x / 2.), scaleFloat(stageSize.y));
   
   
   float itemWidth = StageParameterViewSize.x;
-  int itemsPerRow = (int)(ImGui::GetContentRegionAvail().x / itemWidth);
+  int itemsPerRow = (int)((stageSize.x / 2.) / itemWidth);
   if (itemsPerRow < 1)
     itemsPerRow = 1; // Ensure there is at least one item per row
-  std::vector<ImColor> colors = {
-     ImColor(73, 36, 62),
-    ImColor(112, 66, 100),
-    ImColor(187, 132, 147),
-    ImColor(219, 175, 160)
-  };
+  
   for (int idx = 0; idx < favoriteParams.size(); ++idx)
   {
     // Draw item
-    ImGui::PushStyleColor(ImGuiCol_ChildBg, colorFromName(favoriteParams[idx]->settingsName).Value);
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, colorScaledBy(colorFromInt(idx), 0.7).Value);
     StageParameterView::draw(favoriteParams[idx]);
     ImGui::PopStyleColor();
     // Check if we need to wrap to the next line
@@ -89,7 +82,7 @@ void StageModeView::drawActionButtons()
   auto pos = ImGui::GetCursorScreenPos();
   
   // Set the cursor to the bottom right of the window
-  ImGui::SetCursorScreenPos(ImVec2(getScaledWindowWidth() - 150.0, getScaledWindowHeight() - LayoutStateService::getService()->audioSettingsViewHeight() - 100.0));
+  ImGui::SetCursorScreenPos(ImVec2(getScaledWindowWidth() - 82.0, getScaledWindowHeight() - LayoutStateService::getService()->audioSettingsViewHeight() - 100.0));
   
   // Draw the node mode button
   if (CommonViews::LargeIconButton(ICON_MD_NETWORK_CELL, "stageModeDisable"))

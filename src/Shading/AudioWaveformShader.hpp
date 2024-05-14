@@ -67,7 +67,10 @@ shader.load("shaders/AudioWaveform");
 
   }
 
-  ShaderType type() override {
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override {
     return ShaderTypeAudioWaveform;
   }
 

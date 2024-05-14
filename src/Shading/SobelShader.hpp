@@ -50,7 +50,10 @@ shader.load("shaders/Sobel");
 
   void clear() override {}
 
-  ShaderType type() override { return ShaderTypeSobel; }
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override { return ShaderTypeSobel; }
 
   void drawSettings() override {
      CommonViews::H3Title("Sobel"); }

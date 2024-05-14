@@ -25,25 +25,28 @@ void TileBrowserView::setTileItems(std::vector<std::shared_ptr<TileItem>> items)
 }
 
 void TileBrowserView::sortTileItems() {
-    // Count the number of times each category appears in the tileItems
-    std::map<std::string, int> categoryCounts;
-    for (const auto &tileItem : tileItems) {
-        categoryCounts[tileItem->category]++;
-    }
-
+  // Count the number of times each category appears in the tileItems
+  std::map<std::string, int> categoryCounts;
+  for (const auto &tileItem : tileItems) {
+    categoryCounts[tileItem->category]++;
+  }
+  
   // Sort the tileItems based on the number of times each category appears
   // Sort the tileItems based on the number of times each category appears
   std::sort(tileItems.begin(), tileItems.end(),
             [&](const auto &a, const auto &b) {
-                // Compare based on category counts
-                if (categoryCounts[a->category] != categoryCounts[b->category]) {
-                    return categoryCounts[a->category] > categoryCounts[b->category];
-                }
-                // If counts are equal, compare categories alphabetically
-                return a->category < b->category;
-            });
-
-
+    // Compare based on category counts
+    if (categoryCounts[a->category] != categoryCounts[b->category]) {
+      return categoryCounts[a->category] > categoryCounts[b->category];
+    }
+    if (a->category == b->category) {
+      return a->name < b->name;
+    }
+    // If counts are equal, compare categories alphabetically
+    return a->category < b->category;
+  });
+  
+  
 }
 
 void TileBrowserView::draw()
@@ -59,6 +62,7 @@ void TileBrowserView::draw()
     auto tile = tileItems[idx];
     
     if (lastCategory != tile->category) {
+      if (idx != 0) CommonViews::Spacing(20);
       CommonViews::H4Title(tile->category);
       lastCategory = tile->category;
     }
@@ -189,5 +193,5 @@ void TileBrowserView::draw()
 };
 
 void TileBrowserView::update(){
-
+  
 };

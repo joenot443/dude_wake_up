@@ -54,8 +54,8 @@ struct SlidingFrameShader: Shader {
   void shade(std::shared_ptr<ofFbo> SlidingFrame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
-    if (auxConnected()) {
-      std::shared_ptr<ofFbo> tex2 = aux()->frame();
+    if (hasInputAtSlot(InputSlotTwo)) {
+      std::shared_ptr<ofFbo> tex2 = inputAtSlot(InputSlotTwo)->frame();
       shader.setUniformTexture("tex2", tex2->getTexture(), 8);
     } else {
       shader.setUniformTexture("tex2", SlidingFrame->getTexture(), 8);
@@ -76,7 +76,10 @@ struct SlidingFrameShader: Shader {
     
   }
   
-  ShaderType type() override {
+  int inputCount() override {
+    return 2;
+  }
+ShaderType type() override {
     return ShaderTypeSlidingFrame;
   }
   

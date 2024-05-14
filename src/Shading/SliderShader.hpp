@@ -69,7 +69,10 @@ shader.load("shaders/Slider");
 
   void clear() override {}
 
-  ShaderType type() override { return ShaderTypeSlider; }
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override { return ShaderTypeSlider; }
 
   void drawSettings() override {
     

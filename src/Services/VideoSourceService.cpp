@@ -250,6 +250,7 @@ std::shared_ptr<VideoSource> VideoSourceService::addShaderVideoSource(ShaderSour
   if (j.count("shader"))
   {
     shaderSource->shader->settings->load(j["shader"]);
+    shaderSource->shader->settings->registerParameters();
   }
   auto videoSource = std::dynamic_pointer_cast<VideoSource>(shaderSource);
 

@@ -166,7 +166,7 @@ void NodeLayoutView::draw()
         linksMap[nextShaderLinkId.Get()] = shaderLink;
         ed::PinId inputPinId = 0;
         ed::PinId outputPinId = shaderLink->output->outputId;
-        inputPinId = shaderLink->inputSlot;
+        inputPinId = nextNode->inputIds[connection->inputSlot];
         
         ed::Link(nextShaderLinkId,
                  outputPinId,
@@ -272,12 +272,12 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
   CommonViews::sSpacing();
   
   // Input Pin
-  for (auto &[key, input] : node->connectable->inputs)
-  {
-    ed::PinId inputPinId = node->inputIds[key];
+  for (int i = 0; i < node->connectable->inputCount(); i++) {
+    InputSlot slot = static_cast<InputSlot>(i);
+    ed::PinId inputPinId = node->inputIds[slot];
     ed::BeginPin(inputPinId, ed::PinKind::Input);
     
-    auto icon = node->hasInputLinkAt(key) ? ICON_MD_RADIO_BUTTON_ON : ICON_MD_RADIO_BUTTON_OFF;
+    auto icon = node->hasInputLinkAt(slot) ? ICON_MD_RADIO_BUTTON_ON : ICON_MD_RADIO_BUTTON_OFF;
     
     CommonViews::IconTitle(icon);
     
@@ -339,8 +339,6 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
   ImGui::PushFont(FontService::getService()->h3);
   ImGui::Text("%s", truncateString(formatString("%s", node->name.c_str()), 20).c_str());
   ImGui::PopFont();
-  // Extend a bit if we have 2+ inputs
-  node->inputIds.size() > 2 ? CommonViews::Spacing(28) : CommonViews::mSpacing();
   ImGuiEx_NextColumn();
   
   // ----- THIRD COLUMN ------
@@ -383,7 +381,7 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
     ed::Resume();
   }
   
-  if (node->type == NodeTypeShader)
+  if (node->type == NodeTypeShader && ShaderChainerService::getService()->isTerminalShader(node->shader))
   {
     if (ParameterService::getService()->isShaderIdStage(node->shader->shaderId)) {
       if (CommonViews::IconButton(ICON_MD_STAR, node->idName())) {
@@ -429,8 +427,11 @@ std::shared_ptr<Node> NodeLayoutView::nodeForShaderSourceId(std::string shaderSo
   auto nodeId = nodeIdTicker++;
   auto outputId = nodeIdTicker++;
   std::map<InputSlot, ed::PinId> inputIds;
-  for (int i = 0; i < node->connectable->inputCount(); i++) {
-    inputIds.insert(i, nodeIdTicker++);
+  
+  // Create 10 inputIds for each Node, even though most of them won't be used.
+  for (int i = 0; i < 10; i++) {
+    InputSlot slot = static_cast<InputSlot>(i);
+    inputIds[slot] = nodeIdTicker++;
   }
   
   auto origin = ImVec2(0, 0);
@@ -555,7 +556,7 @@ void NodeLayoutView::handleRightClick()
   if (ImGui::BeginPopup("Node"))
   {
     auto node = nodeIdNodeMap[contextMenuNodeId.Get()];
-    if (ImGui::MenuItem("Save Chain"))
+    if (ImGui::MenuItem("Save Strand"))
     {
       handleSaveNode(node);
     }
@@ -790,6 +791,15 @@ void NodeLayoutView::queryNewLinks()
     {
       std::shared_ptr<Node> sourceNode = pinIdNodeMap[outputPinId.Get()];
       std::shared_ptr<Node> destNode = pinIdNodeMap[inputPinId.Get()];
+      InputSlot inputSlot;
+      
+      if (sourceNode == nullptr && destNode == nullptr) { return; }
+      
+      // Get the InputSlot for this connection
+      for (auto [slot, inputId] : destNode->inputIds) {
+        if (inputId == inputPinId) inputSlot = slot;
+      }
+      
       
       // We have a Shader destination
       if (destNode->type == NodeTypeShader)
@@ -800,14 +810,15 @@ void NodeLayoutView::queryNewLinks()
           if (sourceNode->type == NodeTypeSource)
           {
             auto destPin = pinIdPinMap[inputPinId.Get()];
-            ShaderChainerService::getService()->makeConnection(sourceNode->source, destNode->shader, ConnectionTypeSource, true);
+            ShaderChainerService::getService()->makeConnection(sourceNode->source, destNode->shader, ConnectionTypeSource, inputSlot, true);
           }
           
           // Shader is our Source
           if (sourceNode->type == NodeTypeShader)
           {
             ShaderChainerService::getService()->makeConnection(
-                                                               sourceNode->shader, destNode->shader, ConnectionTypeShader, true);
+                                                               sourceNode->shader, destNode->shader,
+                                                               ConnectionTypeShader, inputSlot, true);
           }
         }
       }
@@ -937,14 +948,6 @@ void NodeLayoutView::drawActionButtons()
   ImGui::SameLine();
   CommonViews::HSpacing(2);
   ImGui::SameLine();
-  // Draw the stage mode button
-  if (CommonViews::LargeIconButton(ICON_MD_VIEW_AGENDA, "stageMode"))
-  {
-    LayoutStateService::getService()->stageModeEnabled = true;
-  }
-  ImGui::SameLine();
-  CommonViews::HSpacing(2);
-  ImGui::SameLine();
   
   // Draw the zoom buttons
   if (CommonViews::LargeIconButton(ICON_MD_ZOOM_IN, "zoom_in"))
@@ -961,6 +964,14 @@ void NodeLayoutView::drawActionButtons()
     ed::SetCurrentEditor(context);
     ed::ZoomInc(false);
     ed::SetCurrentEditor(nullptr);
+  }
+  ImGui::SameLine();
+  CommonViews::HSpacing(2);
+  ImGui::SameLine();
+  // Draw the stage mode button
+  if (CommonViews::LargeIconButton(ICON_MD_VIEW_AGENDA, "stageMode"))
+  {
+    LayoutStateService::getService()->stageModeEnabled = true;
   }
   
   ImGui::SetCursorPos(pos);

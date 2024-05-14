@@ -101,6 +101,7 @@ public:
   makeConnection(std::shared_ptr<Connectable> start,
            std::shared_ptr<Connectable> end,
            ConnectionType type,
+           InputSlot slot,
            bool shouldSaveConfig = false,
            bool copy = false);
   

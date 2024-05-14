@@ -19,14 +19,41 @@ static ImColor MaskNodeColor = ImColor(54, 78, 2);
 static ImColor WarningColor = ImColor(233, 196, 106);
 static ImColor GoodColor = ImColor(46, 204, 113);
 
+// Whites
+
+static ImColor White50 = ImColor(128, 128, 128);
+static ImColor White60 = ImColor(153, 153, 153);
+static ImColor White70 = ImColor(179, 179, 179);
+static ImColor White80 = ImColor(204, 204, 204);
+static ImColor White90 = ImColor(230, 230, 230);
+static ImColor White100 = ImColor(255, 255, 255);
+
+static std::vector<ImColor> colors = {
+  ImColor(231, 76, 60), // Red
+  ImColor(230, 126, 34), // Orange
+  ImColor(241, 196, 15), // Yellow
+  ImColor(46, 204, 113), // Bright green
+  ImColor(26, 188, 156), // Aqua-green
+  ImColor(52, 152, 219), // Sky blue
+  ImColor(155, 89, 182), // Purple
+  ImColor(52, 73, 94), // Dark gray-blue
+  ImColor(236, 240, 241), // Light gray
+  ImColor(149, 165, 166) // Medium gray
+};
+
+static std::vector<ImColor> nodeColors = {
+    ImColor(22, 160, 133),
+    ImColor(39, 174, 96),
+    ImColor(41, 128, 185),
+    ImColor(142, 68, 173),
+    ImColor(44, 62, 80),
+    ImColor(243, 156, 18),
+    ImColor(211, 84, 0),
+    ImColor(192, 57, 43),
+};
+
+
 static ImColor colorFromName(std::string name) {
-  std::vector<ImColor> colors = {
-     ImColor(73, 36, 62),
-    ImColor(112, 66, 100),
-    ImColor(187, 132, 147),
-    ImColor(219, 175, 160)
-  };
-  
   // Calculate the sum of ASCII values of characters in the name
   int ascii_sum = 0;
   for (char c : name) {
@@ -34,8 +61,21 @@ static ImColor colorFromName(std::string name) {
   }
   
   // Use the sum to index into the colors vector, using modulo to wrap around
-  int index = ascii_sum % colors.size();
-  return colors[index];
+  int index = ascii_sum % nodeColors.size();
+  return nodeColors[index];
+}
+
+static ImColor colorFromInt(int i) {
+  int index = i % nodeColors.size();
+  return nodeColors[index];
+}
+
+static ImColor colorScaledBy(ImColor color, float scale) {
+  return ImColor(color.Value.x * scale, color.Value.y * scale, color.Value.z * scale, color.Value.w * scale);
+}
+
+static ImColor colorForIndex(int index) {
+  
 }
 
 

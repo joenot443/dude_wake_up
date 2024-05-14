@@ -11,6 +11,7 @@
 #include "Oscillator.hpp"
 #include "Parameter.hpp"
 #include "PulseOscillator.hpp"
+#include "WaveformOscillator.hpp"
 #include "ValueOscillator.hpp"
 #include <stdio.h>
 
@@ -22,6 +23,9 @@ public:
                    std::shared_ptr<Parameter> value);
   
   static void draw(std::vector<std::tuple<std::shared_ptr<Oscillator>, std::shared_ptr<Parameter>>> subjects);
+  
+  static void drawMini(std::shared_ptr<Oscillator> oscillator,
+                       std::shared_ptr<Parameter> value);
 };
 
 #endif /* Waveform_hpp */

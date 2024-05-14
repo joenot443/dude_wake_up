@@ -12,7 +12,7 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
-#include "ValueOscillator.hpp"
+#include "WaveformOscillator.hpp"
 #include "Parameter.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
@@ -22,9 +22,9 @@ struct SnowfallSettings: public ShaderSettings {
   std::shared_ptr<Parameter> descentSpeed;
   std::shared_ptr<Parameter> size;
   
-  std::shared_ptr<ValueOscillator> flakesCountOscillator;
-  std::shared_ptr<ValueOscillator> descentSpeedOscillator;
-  std::shared_ptr<ValueOscillator> sizeOscillator;
+  std::shared_ptr<WaveformOscillator> flakesCountOscillator;
+  std::shared_ptr<WaveformOscillator> descentSpeedOscillator;
+  std::shared_ptr<WaveformOscillator> sizeOscillator;
   
   SnowfallSettings(std::string shaderId, json j, std::string name) :
   flakesCount(std::make_shared<Parameter>("flakesCount", 50, 1, 100)),
@@ -32,9 +32,9 @@ struct SnowfallSettings: public ShaderSettings {
   size(std::make_shared<Parameter>("size", 0.3, 0.0, 1.0)),
   
   ShaderSettings(shaderId, j, name) {
-    flakesCountOscillator = std::make_shared<ValueOscillator>(flakesCount);
-    descentSpeedOscillator = std::make_shared<ValueOscillator>(descentSpeed);
-    sizeOscillator = std::make_shared<ValueOscillator>(size);
+    flakesCountOscillator = std::make_shared<WaveformOscillator>(flakesCount);
+    descentSpeedOscillator = std::make_shared<WaveformOscillator>(descentSpeed);
+    sizeOscillator = std::make_shared<WaveformOscillator>(size);
     
     parameters = { flakesCount, descentSpeed, size };
     oscillators = { flakesCountOscillator, descentSpeedOscillator, sizeOscillator };
@@ -119,7 +119,10 @@ struct SnowfallShader: Shader {
     flakes.clear();
   }
   
-  ShaderType type() override {
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override {
     return ShaderTypeSnowfall;
   }
   

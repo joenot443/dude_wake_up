@@ -61,8 +61,10 @@ public:
   {
   }
 
-  ShaderType type() override
-  {
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override { 
     return ShaderType16bit;
   }
 

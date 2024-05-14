@@ -12,23 +12,23 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
-#include "ValueOscillator.hpp"
+#include "WaveformOscillator.hpp"
 #include "Parameter.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct BounceSettings: public ShaderSettings {
   std::shared_ptr<Parameter> speed;
-  std::shared_ptr<ValueOscillator> speedOscillator;
+  std::shared_ptr<WaveformOscillator> speedOscillator;
   
   std::shared_ptr<Parameter> scale;
-  std::shared_ptr<ValueOscillator> scaleOscillator;
+  std::shared_ptr<WaveformOscillator> scaleOscillator;
   
   BounceSettings(std::string shaderId, json j, std::string name) :
   speed(std::make_shared<Parameter>("speed", 1.0, 0.0, 10.0)),
   scale(std::make_shared<Parameter>("scale", 0.1, 0.0, 1.0)),
-  speedOscillator(std::make_shared<ValueOscillator>(speed)),
-  scaleOscillator(std::make_shared<ValueOscillator>(scale)),
+  speedOscillator(std::make_shared<WaveformOscillator>(speed)),
+  scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
   ShaderSettings(shaderId, j, name) {
     parameters = { speed, scale };
     oscillators = { speedOscillator, scaleOscillator };
@@ -79,7 +79,10 @@ struct BounceShader: Shader {
     // Implement any necessary cleanup
   }
   
-  ShaderType type() override {
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override {
     return ShaderTypeBounce;
   }
   

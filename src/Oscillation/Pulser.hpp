@@ -30,7 +30,7 @@ public:
     double pulsePct = isPulsing ? delta / (double) duration->value : 0.0;
     
     // Allow the pulse to restart after 80% through
-    if ((!isPulsing || pulsePct > 0.9)  && value > threshold->value) {
+    if ((!isPulsing || pulsePct > 0.9) && value > threshold->value) {
       // Start a new pulse
       isPulsing = true;
       startTime = currentTime;

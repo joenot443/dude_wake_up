@@ -54,7 +54,10 @@ shader.load("shaders/Rubiks");
     
   }
 
-  ShaderType type() override {
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override {
     return ShaderTypeRubiks;
   }
 

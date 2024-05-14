@@ -128,10 +128,10 @@ struct AudioAnalysis {
 
   AudioAnalysis()
       : rms(std::make_shared<Parameter>("Loudness", 0.0, 0.0, 1.0)),
-        highs(std::make_shared<Parameter>("highs", 0.0, 0.0, 1.0)),
-        mids(std::make_shared<Parameter>("mids", 0.0, 0.0, 1.0)),
-        lows(std::make_shared<Parameter>("lows", 0.0, 0.0, 1.0)),
-        beatPulse(std::make_shared<Parameter>("beatPulse", 0.0, 0.0, 1.0)),
+        highs(std::make_shared<Parameter>("Highs", 0.0, 0.0, 1.0)),
+        mids(std::make_shared<Parameter>("Mids", 0.0, 0.0, 1.0)),
+        lows(std::make_shared<Parameter>("Lows", 0.0, 0.0, 1.0)),
+        beatPulse(std::make_shared<Parameter>("BPM", 0.0, 0.0, 1.0)),
         bpm(std::make_shared<Parameter>("bpm", 60.0, 0.0, 300.0)),
         frequencyRelease(std::make_shared<Parameter>("Frequency Release", 0.95, 0.5, 1.0)),
         enableRmsPulse(std::make_shared<Parameter>("Pulser", 0.0, 0.0, 1.0)),
@@ -144,7 +144,8 @@ struct AudioAnalysis {
         highsAnalysisParam(AudioAnalysisParameter(highs)),
         midsAnalysisParam(AudioAnalysisParameter(mids)),
         lowsAnalysisParam(AudioAnalysisParameter(lows)),
-        parameters({rms, beatPulse, rmsAnalysisParam.pulse, highs, mids, lows, enableRmsPulse}),
+  			// TODO: Readd/fix Pulser
+        parameters({rms, beatPulse, highs, mids, lows, enableRmsPulse}),
         analysisParameters({&rmsAnalysisParam, &lowsAnalysisParam, &midsAnalysisParam, &highsAnalysisParam
   }){};
 
@@ -216,9 +217,9 @@ struct AudioAnalysis {
       const float C = 0.0f; // Offset
 
       float y = A * exp(B * pct) + C;
-      beatPulse->value = sineAtBPM(bpm->value);
+      beatPulse->value = y;
     }
-    }
+  }
   
   float sineAtBPM(float bpm) {
       // Convert bpm to frequency in Hz

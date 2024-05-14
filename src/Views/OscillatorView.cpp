@@ -120,3 +120,53 @@ void OscillatorView::draw(std::shared_ptr<Oscillator> oscillator,
   (1, std::tuple<std::shared_ptr<Oscillator>, std::shared_ptr<Parameter>>(oscillator, value));
   draw(subjects);
 }
+
+void OscillatorView::drawMini(std::shared_ptr<Oscillator> oscillator, std::shared_ptr<Parameter> value) {
+  if (oscillator.get()->type == Oscillator_waveform)
+  {
+    WaveformOscillator *waveformOscillator = (WaveformOscillator *)oscillator.get();
+    oscillator->tick();
+    ImVector<ImVec2> data = waveformOscillator->data;
+    
+    static int rt_axis = ImPlotAxisFlags_AuxDefault & ~ImPlotAxisFlags_NoTickLabels;
+    ImPlot::SetNextAxisLimits(ImAxis_X1, 0.0, waveformOscillator->span);
+    ImPlot::SetNextAxisLimits(ImAxis_Y1, waveformOscillator->min(), waveformOscillator->max());
+    
+    auto plotStyle = ImPlot::GetStyle();
+    ImPlot::PushStyleVar(ImPlotStyleVar_FitPadding, ImVec2(0.0f, 0.0f));
+    ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0,0));
+
+    if (data.size() > 0 && ImPlot::BeginPlot(formatString("##plot%s", value->name.c_str()).c_str(), ImVec2(50, 50), ImPlotFlags_CanvasOnly | ImPlotFlags_NoFrame))
+    {
+      ImPlot::SetupAxis(ImAxis_X1, "", ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels);
+      ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels);
+      ImPlot::SetupAxisFormat(ImAxis_X1, "");
+      ImPlot::SetupAxisFormat(ImAxis_Y1, "");
+      ImPlot::SetupLegend(ImPlotLocation_SouthWest);
+      ImPlot::PlotLine("", &data[0].x, &data[0].y, data.size(), 0, 5.0, 2 * sizeof(float));
+      ImPlot::EndPlot();
+    }
+    
+    ImGui::SameLine(0, 5);
+    ImGui::VSliderFloat(formatString("##freq%s", value->name.c_str()).c_str(),
+                        ImVec2(15, 50), &waveformOscillator->frequency->value, 0.0f,
+                        100.0f, "F", ImGuiSliderFlags_Logarithmic);
+    ImGui::SameLine();
+    ImGui::VSliderFloat(formatString("##amp%s", value->name.c_str()).c_str(),
+                        ImVec2(15, 50), &waveformOscillator->amplitude->value, 0.0f,
+                        waveformOscillator->amplitude->max, "A",
+                        ImGuiSliderFlags_None);
+    ImGui::SameLine();
+    ImGui::VSliderFloat(formatString("##shift%s", value->name.c_str()).c_str(),
+                        ImVec2(15, 50), &waveformOscillator->shift->value,
+                        -value->max * 2, value->max * 2, "S");
+    ImGui::PushFont(FontService::getService()->sm);
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 50);
+    ImGui::Text("%s", formatString("%.2f", waveformOscillator->frequency->value).c_str());
+    ImGui::SameLine(0, 5);
+    ImGui::Text("%s", formatString("%.2f", waveformOscillator->amplitude->value).c_str());
+    ImGui::SameLine(0, 5);
+    ImGui::Text("%s", formatString("%.2f", waveformOscillator->shift->value).c_str());
+    ImGui::PopFont();
+  }
+}

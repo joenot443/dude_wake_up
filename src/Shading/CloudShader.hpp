@@ -55,6 +55,10 @@ shader.load("shaders/clouds");
 #endif
   }
 
+  int inputCount() override {
+    return 0;
+  }
+  
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
@@ -65,6 +69,8 @@ shader.load("shaders/clouds");
     shader.end();
     canvas->end();
   }
+  
+  
 
   void drawSettings() override {
     ImGui::Text("Clouds");

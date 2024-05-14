@@ -75,6 +75,10 @@ shader.load("shaders/plasma");
 shader.load("shaders/plasma");
 #endif
   };
+  
+  int inputCount() override {
+    return 0;
+  }
 
   void drawSettings() override {
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);

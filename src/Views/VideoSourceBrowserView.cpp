@@ -63,7 +63,7 @@ void VideoSourceBrowserView::refreshSources()
       if (std::dynamic_pointer_cast<AvailableVideoSourceLibrary>(source) != nullptr)
       {
         auto librarySource = std::dynamic_pointer_cast<AvailableVideoSourceLibrary>(source);
-        auto libraryTileItem = std::make_shared<LibraryTileItem>(source->sourceName, textureId, 0, librarySource->libraryFile, dragCallback);
+        auto libraryTileItem = std::make_shared<LibraryTileItem>(source->sourceName, textureId, 0, librarySource->libraryFile, dragCallback, librarySource->libraryFile->category);
         libraryItems.push_back(libraryTileItem);
       }
     }

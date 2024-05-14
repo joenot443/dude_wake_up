@@ -12,18 +12,18 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
-#include "ValueOscillator.hpp"
+#include "WaveformOscillator.hpp"
 #include "Parameter.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct CubifySettings: public ShaderSettings {
   std::shared_ptr<Parameter> cubeSize;
-  std::shared_ptr<ValueOscillator> cubeSizeOscillator;
+  std::shared_ptr<WaveformOscillator> cubeSizeOscillator;
 
   CubifySettings(std::string shaderId, json j, std::string name) :
   cubeSize(std::make_shared<Parameter>("cubeSize", 1.0, 0.0, 10.0)),
-  cubeSizeOscillator(std::make_shared<ValueOscillator>(cubeSize)),
+  cubeSizeOscillator(std::make_shared<WaveformOscillator>(cubeSize)),
   ShaderSettings(shaderId, j, name)  {
     parameters = { cubeSize };
     oscillators = { cubeSizeOscillator };
@@ -58,7 +58,10 @@ struct CubifyShader: Shader {
     
   }
 
-  ShaderType type() override {
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override {
     return ShaderTypeCubify;
   }
 
