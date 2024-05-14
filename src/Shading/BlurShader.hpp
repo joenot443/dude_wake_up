@@ -75,7 +75,10 @@ public:
     canvas->end();
   }
 
-  ShaderType type() override { return ShaderTypeBlur; }
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override { return ShaderTypeBlur; }
 
   void drawSettings() override
   {

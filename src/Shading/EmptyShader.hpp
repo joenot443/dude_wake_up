@@ -41,6 +41,10 @@ public:
     shader.end();
     canvas->end();
   }
+  
+  int inputCount() override {
+    return 0;
+  }
 
   void clear() override {
     

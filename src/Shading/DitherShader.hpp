@@ -62,7 +62,10 @@ shader.load("shaders/Dither");
 
   void clear() override {}
 
-  ShaderType type() override { return ShaderTypeDither; }
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override { return ShaderTypeDither; }
 
   void drawSettings() override {
     

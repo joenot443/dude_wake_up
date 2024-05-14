@@ -65,17 +65,17 @@ void CommonViews::HSpacing(int n)
   }
 }
 
-void CommonViews::ShaderParameter(std::shared_ptr<Parameter> param,
+bool CommonViews::ShaderParameter(std::shared_ptr<Parameter> param,
                                   std::shared_ptr<Oscillator> osc)
 {
   xsSpacing();
   H4Title(param->name);
-  Slider(param->name, param->paramId, param);
+  bool ret = Slider(param->name, param->paramId, param);
   MidiSelector(param);
   ImGui::SameLine();
   AudioParameterSelector(param);
   if (osc == nullptr)
-    return;
+    return ret;
   ImGui::SameLine();
   FavoriteButton(param);
   ImGui::SameLine();
@@ -83,9 +83,21 @@ void CommonViews::ShaderParameter(std::shared_ptr<Parameter> param,
   sSpacing();
   if (!osc->enabled->boolValue)
   {
-    return;
+    return ret;
   }
   OscillatorWindow(osc, param);
+  return ret;
+}
+
+bool CommonViews::MiniSlider(std::shared_ptr<Parameter> param) {
+  ImGui::Text("%s", param->name.c_str());
+  ImGui::PushItemWidth(70.0);
+  return ImGui::SliderFloat(idString(param->paramId).c_str(), &param->value, param->min, param->max);
+}
+
+bool CommonViews::MiniVSlider(std::shared_ptr<Parameter> param) {
+  ImGui::Text("%s", param->name.c_str());
+  return ImGui::VSliderFloat(idString(param->paramId).c_str(), ImVec2(10.0, 30.0), &param->value, param->min, param->max);
 }
 
 void CommonViews::OscillatorWindow(std::shared_ptr<Oscillator> o, std::shared_ptr<Parameter> p)
@@ -123,7 +135,7 @@ void CommonViews::AudioParameterSelector(std::shared_ptr<Parameter> param)
   }
 
   // Otherwise, present a button to select an audio parameter
-  if (ImGui::Button(formatString("Audio Param##%s", param->name.c_str()).c_str()))
+  if (CommonViews::IconButton(ICON_MD_AUDIOTRACK, formatString("Audio Param##%s", param->name.c_str()).c_str()))
   {
     ImGui::OpenPopup(param->audioPopupId().c_str());
   }
@@ -243,12 +255,14 @@ bool CommonViews::Slider(std::string title, std::string id,
 void CommonViews::ShaderStageParameter(std::shared_ptr<FavoriteParameter> favorite, std::shared_ptr<Oscillator> osc) {
   auto param = favorite->parameter;
   ImGui::Columns(2, formatString("%s_param_columns", param->paramId.c_str()).c_str(), ImGuiColumnsFlags_NoResize | ImGuiColumnsFlags_NoBorder);
-  ImGui::SetColumnWidth(0, 70);
-  ImGui::SetColumnWidth(1, 130);
+  ImGui::SetColumnWidth(0, 65);
+  ImGui::SetColumnWidth(1, 135);
+  ImGui::PushStyleColor(ImGuiCol_SliderGrab, White90.Value);
   bool ret = ImGui::VSliderFloat(idString(param->paramId).c_str(), ImVec2(20, 200), &param->value, param->min, param->max, "");
   if (ret) {
     param->affirmValue();
   }
+  ImGui::PopStyleColor();
   ImGui::SameLine();
   ImGui::Text("%s", formatString("%0.2f", param->max).c_str());
   ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetContentRegionAvail().y - 20);
@@ -267,8 +281,18 @@ void CommonViews::ShaderStageParameter(std::shared_ptr<FavoriteParameter> favori
   }
   ImGui::SetCursorPosX(xPos);
   H4Title(favorite->settingsName);
-  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetContentRegionAvail().y / 2 - 25);
+  
+  // VALUE
+  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetContentRegionAvail().y - 125);
   H2Title(formatString("%0.2f", param->value));
+  
+  // OSCILLATOR
+  
+  if (osc->enabled->boolValue) {
+    OscillatorView::drawMini(osc, param);
+  }
+  
+  // BUTTONS
   ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetContentRegionAvail().y - 25);
   ResetButton(param->paramId, param);
   ImGui::SameLine();
@@ -630,6 +654,7 @@ bool CommonViews::LargeIconButton(const char *icon, std::string id)
 void CommonViews::OscillateButton(std::string id, std::shared_ptr<Oscillator> o,
                                   std::shared_ptr<Parameter> p)
 {
+  if (o == nullptr) { return; }
   ImGui::PushFont(FontService::getService()->icon);
   ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
 

@@ -70,7 +70,6 @@ enum ShaderType {
   ShaderTypeSlidingFrame,
   ShaderTypeStaticFrame,
   ShaderTypeGameboy,
-  ShaderTypeLumaFeedback,
   ShaderTypePaint,
   ShaderTypeTriple,
   ShaderTypeVertex,
@@ -91,6 +90,13 @@ enum ShaderType {
   ShaderTypeColorSwap,
   ShaderTypeGridRun,
   ShaderTypeColorStepper,
+  ShaderTypeMultiMix,
+  ShaderTypeRotate,
+  ShaderTypeSwitcher,
+  ShaderTypeOverlay,
+  ShaderTypePieSplit,
+  ShaderTypeFullHouse,
+  ShaderTypeBlend,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -106,13 +112,17 @@ static const ShaderType AvailableBasicShaderTypes[] = {
 };
 
 static const ShaderType AvailableMixShaderTypes[] = {
+  ShaderTypeBlend,
+  ShaderTypePieSplit,
+  ShaderTypeOverlay,
+  ShaderTypeSwitcher,
   ShaderTypeColorSwap,
   ShaderTypeMix,
   ShaderTypeMinMixer,
+  ShaderTypeMultiMix,
   ShaderTypeSlidingFrame,
   ShaderTypeStaticFrame,
   ShaderTypeFeedback,
-  ShaderTypeLumaFeedback,
 };
 
 static const ShaderType AvailableMaskShaderTypes[] = {
@@ -125,6 +135,7 @@ static const ShaderType AvailableMaskShaderTypes[] = {
 static const ShaderType AvailableTransformShaderTypes[] = {
   ShaderTypeSnowfall,
   ShaderTypeTransform,
+  ShaderTypeRotate,
   ShaderTypeBounce,
   ShaderTypeCirclePath,
   ShaderTypeWobble,
@@ -179,6 +190,20 @@ static std::vector<ShaderType> AllShaderTypes() {
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) { // ShaderNames
+    case ShaderTypeBlend:
+      return "Blend";
+    case ShaderTypeFullHouse:
+      return "FullHouse";
+    case ShaderTypePieSplit:
+      return "PieSplit";
+    case ShaderTypeOverlay:
+      return "Overlay";
+    case ShaderTypeSwitcher:
+      return "Switcher";
+    case ShaderTypeRotate:
+      return "Rotate";
+    case ShaderTypeMultiMix:
+      return "MultiMix";
     case ShaderTypeColorStepper:
       return "ColorStepper";
     case ShaderTypeGridRun:
@@ -219,8 +244,6 @@ static std::string shaderTypeName(ShaderType type) {
       return "Triple";
     case ShaderTypePaint:
       return "Paint";
-    case ShaderTypeLumaFeedback:
-      return "Luma Feedback";
     case ShaderTypeGameboy:
       return "Gameboy";
     case ShaderTypeStaticFrame:
@@ -343,7 +366,6 @@ static std::string shaderTypeName(ShaderType type) {
 static bool shaderTypeSupportsAux(ShaderType type) {
   if (type == ShaderTypeMix ||
       type == ShaderTypeFeedback ||
-      type == ShaderTypeLumaFeedback ||
       type == ShaderTypeSlidingFrame ||
       type == ShaderTypeStaticFrame ||
       type == ShaderTypeColorSwap || 
@@ -359,7 +381,7 @@ static bool shaderTypeSupportsMask(ShaderType type) {
 }
 
 static bool shaderTypeSupportsFeedback(ShaderType type) {
-  if (type == ShaderTypeFeedback || type == ShaderTypeLumaFeedback)
+  if (type == ShaderTypeFeedback)
   {return true;}
   return false;
 }

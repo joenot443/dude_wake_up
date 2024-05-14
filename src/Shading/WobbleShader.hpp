@@ -71,7 +71,10 @@ shader.load("shaders/Wobble");
     
   }
 
-  ShaderType type() override {
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override {
     return ShaderTypeWobble;
   }
   

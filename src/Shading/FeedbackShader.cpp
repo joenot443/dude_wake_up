@@ -25,21 +25,19 @@ void FeedbackShader::populateSource()
 {
   // Set to a safe default as a backup.
   feedbackSource = FeedbackSourceService::getService()->defaultFeedbackSource;
-
+  
+  // If our input slot is connected, we'll use that
+  if (hasInputAtSlot(InputSlotTwo)) {
+    feedbackSource = FeedbackSourceService::getService()->feedbackSourceForId(inputAtSlot(InputSlotTwo)->connId());
+    FeedbackSourceService::getService()->setConsumer(shaderId, feedbackSource);
+    return;
+  }
+  
   if (inputs.empty())
   {
     return;
   }
-
-  // If we have an Aux connection to Feedback from, use that by default.
-  // Don't draw the source selector in this case
-  //  if (auxConnected()) {
-  //    feedbackSource = FeedbackSourceService::getService()->feedbackSourceForId(aux()->connId());
-  //    FeedbackSourceService::getService()->setConsumer(shaderId, feedbackSource);
-  //    return;
-  //  }
-
-  //
+  
   switch (settings->sourceSelection->intValue)
   {
   case 0: // Origin
@@ -62,11 +60,6 @@ void FeedbackShader::populateSource()
     break;
   }
   FeedbackSourceService::getService()->setConsumer(shaderId, feedbackSource);
-
-  if (feedbackConnected())
-  {
-    feedbackSource->shadeFrame(feedback());
-  }
 }
 
 void FeedbackShader::drawPreview(ImVec2 pos, float scale)
@@ -102,6 +95,7 @@ void FeedbackShader::shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> 
   shader.setUniform1f("mainMix", settings->mainMix->value);
   shader.setUniform1i("priority", settings->priority->boolValue);
   shader.setUniform1f("feedbackMix", settings->feedbackMix->value);
+  shader.setUniform1i("blendMode", settings->blendMode->intValue);
   shader.setUniform1f("scale", settings->scale->value);
   shader.setUniform1f("rotate", settings->rotation->value);
   shader.setUniform1f("lumaKey", settings->keyValue->value);
@@ -109,19 +103,22 @@ void FeedbackShader::shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> 
   shader.setUniform2f("translate", settings->xPosition->value, settings->yPosition->value);
   shader.setUniform1f("scale", 2.0 - settings->scale->value);
 
-  // With feedback connected we need to flip our FBO to draw it
-  if (feedbackConnected())
-  {
-    ofPushMatrix();
-    ofScale(1, -1, 1);
-    ofTranslate(0, -frame->getHeight());
-    drawFbo(frame);
-    ofPopMatrix();
-  }
-  else
-  {
-    drawFbo(frame);
-  }
+  
+  drawFbo(frame);
+
+//  // With feedback connected we need to flip our FBO to draw it
+//  if (feedbackConnected())
+//  {
+//    ofPushMatrix();
+//    ofScale(1, -1, 1);
+//    ofTranslate(0, -frame->getHeight());
+//    drawFbo(frame);
+//    ofPopMatrix();
+//  }
+//  else
+//  {
+//    drawFbo(frame);
+//  }
 
   shader.end();
   canvas->end();
@@ -155,7 +152,8 @@ void FeedbackShader::drawSettings()
 
   ImGui::Checkbox(settings->lumaKeyEnabled->name.c_str(), &settings->lumaKeyEnabled->boolValue);
   ImGui::Checkbox(settings->priority->name.c_str(), &settings->priority->boolValue);
-  if (ImGui::Combo("Source", &settings->sourceSelection->intValue, "Origin\0Current\0Final\0"))
+  
+  if (!hasInputAtSlot(InputSlotTwo) && ImGui::Combo("Source", &settings->sourceSelection->intValue, "Origin\0Current\0Final\0"))
   {
     populateSource();
   }
@@ -186,7 +184,16 @@ void FeedbackShader::drawSettings()
     // Threshold
     CommonViews::ShaderParameter(settings->keyThreshold,
                                  settings->keyThresholdOscillator);
+  } else {
+    // Convert the strings to C strings
+    std::vector<const char *> blendModeNamesC;
+    for (auto &name : blendModeNames) {
+      blendModeNamesC.push_back(name.c_str());
+    }
+    ImGui::Combo("##BlendMode", &settings->blendMode->intValue, blendModeNamesC.data(), (int) blendModeNames.size());
   }
 }
+
+int FeedbackShader::inputCount() { return 2; }
 
 ShaderType FeedbackShader::type() { return ShaderTypeFeedback; }

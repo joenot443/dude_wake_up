@@ -90,6 +90,7 @@ void MainStageView::draw()
   // NodeLayout OR StageMode
   if (LayoutStateService::getService()->stageModeEnabled) {
     stageModeView.draw();
+    audioSourceBrowserView.draw();
   } else {
     NodeLayoutView::getInstance()->draw();
     audioSourceBrowserView.draw();
@@ -103,32 +104,37 @@ void MainStageView::drawMenu()
     // Save Config
     if (ImGui::BeginMenu("File"))
     {
-      if (ImGui::MenuItem("Save Config"))
+      if (ImGui::MenuItem("Save", "", false, ConfigService::getService()->isEditingWorkspace())) {
+        ConfigService::getService()->saveCurrentWorkspace();
+      }
+      
+      if (ImGui::MenuItem("Save Workspace As"))
       {
         // Present a file dialog to save the config file
         // Use a default name of "CURRENT_DATE_TIME.json"
         std::string defaultName =
-        ofGetTimestampString("%Y-%m-%d_%H-%M-%S.json");
+        ofGetTimestampString("Workspace-%m-%d-%Y.json");
         ofFileDialogResult result =
-        ofSystemSaveDialog(defaultName, "Save File");
+        ofSystemSaveDialog(defaultName, "Save Workspace");
         if (result.bSuccess)
         {
-          ConfigService::getService()->saveConfigFile(result.getPath());
+          ConfigService::getService()->saveWorkspace(std::make_shared<Workspace>(result.getName(), result.getPath()));
         }
       }
-      if (ImGui::MenuItem("Load Config"))
+      if (ImGui::MenuItem("Load Workspace"))
       {
         // Present a file dialog to load the config file
-        ofFileDialogResult result = ofSystemLoadDialog("Open File", false);
+        ofFileDialogResult result = ofSystemLoadDialog("Open Workspace", false);
         if (result.bSuccess)
         {
-          ConfigService::getService()->loadConfigFile(result.getPath());
+          ConfigService::getService()->loadWorkspace(std::make_shared<Workspace>(result.getName(), result.getPath()));
         }
       }
       if (ImGui::MenuItem("Reset Stage"))
       {
         ShaderChainerService::getService()->clear();
         VideoSourceService::getService()->clear();
+        ConfigService::getService()->closeWorkspace();
       }
       ImGui::EndMenu();
     }
@@ -149,14 +155,18 @@ void MainStageView::drawMenu()
       {
         LayoutStateService::getService()->midiEnabled = !LayoutStateService::getService()->midiEnabled;
       }
+      if (ImGui::MenuItem("Toggle Stage Mode", "V"))
+      {
+        LayoutStateService::getService()->stageModeEnabled = !LayoutStateService::getService()->stageModeEnabled;
+      }
       ImGui::EndMenu();
     }
     
-    if (ImGui::MenuItem("Save Default Config"))
+    if (ImGui::MenuItem("Save Default Workspace"))
     {
       ConfigService::getService()->saveDefaultConfigFile();
     }
-    if (ImGui::MenuItem("Load Default Config"))
+    if (ImGui::MenuItem("Load Default Workspace"))
     {
       ConfigService::getService()->loadDefaultConfigFile();
     }
@@ -172,12 +182,12 @@ void MainStageView::drawMenu()
       ImGui::OpenPopup(SubmitFeedbackView::popupId);
     }
     
-    //    static bool showingMenu = false;
-    //    if (ImGui::MenuItem("ImGui Demo") || showingMenu)
-    //    {
-    //      ImGui::ShowDemoWindow();
-    //      showingMenu = true;
-    //    }
+    static bool showingMenu = false;
+    if (ImGui::MenuItem("ImGui Demo") || showingMenu)
+    {
+      ImGui::ShowDemoWindow();
+      showingMenu = true;
+    }
     
     ImGui::EndMenuBar();
   }
@@ -214,5 +224,9 @@ void MainStageView::keyReleased(int key)
   
   if (key == 'c') {
     FeedbackSourceService::getService()->clearBuffers();
+  }
+  
+  if (key == 'v') {
+    LayoutStateService::getService()->stageModeEnabled = !LayoutStateService::getService()->stageModeEnabled;
   }
 }

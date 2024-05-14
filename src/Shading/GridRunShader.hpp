@@ -12,7 +12,7 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
-#include "ValueOscillator.hpp"
+#include "WaveformOscillator.hpp"
 #include "Parameter.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
@@ -21,15 +21,15 @@ struct GridRunSettings: public ShaderSettings {
   std::shared_ptr<Parameter> color;
   std::shared_ptr<Parameter> zoom;
   std::shared_ptr<Parameter> perspective;
-  std::shared_ptr<ValueOscillator> zoomOscillator;
-  std::shared_ptr<ValueOscillator> perspectiveOscillator;
-
+  std::shared_ptr<WaveformOscillator> zoomOscillator;
+  std::shared_ptr<WaveformOscillator> perspectiveOscillator;
+  
   GridRunSettings(std::string shaderId, json j, std::string name) :
   zoom(std::make_shared<Parameter>("Zoom", 0.1, -1.0, 1.0)),
   color(std::make_shared<Parameter>("Color", 0.0, -1.0, 1.0)),
-  perspective(std::make_shared<Parameter>("Perspective", 0.5, -5.0, 5.0)),
-  zoomOscillator(std::make_shared<ValueOscillator>(zoom)),
-  perspectiveOscillator(std::make_shared<ValueOscillator>(perspective)),
+  perspective(std::make_shared<Parameter>("Perspective", 0.75, -5.0, 5.0)),
+  zoomOscillator(std::make_shared<WaveformOscillator>(zoom)),
+  perspectiveOscillator(std::make_shared<WaveformOscillator>(perspective)),
   ShaderSettings(shaderId, j, name) {
     color->color = std::make_shared<std::array<float, 3>>(std::array<float, 3>({1.0f, 0.5f, 1.0f}));
     parameters = { zoom, perspective, color };
@@ -46,7 +46,7 @@ struct GridRunShader: Shader {
   void setup() override {
     shader.load("shaders/GridRun");
   }
-
+  
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
@@ -60,18 +60,22 @@ struct GridRunShader: Shader {
     shader.end();
     canvas->end();
   }
-
+  
   void clear() override {
     
   }
-
+  
+  int inputCount() override {
+    return 1;
+  }
+  
   ShaderType type() override {
     return ShaderTypeGridRun;
   }
-
+  
   void drawSettings() override {
     CommonViews::H3Title("GridRun");
-
+    
     CommonViews::ShaderColor(settings->color);
     CommonViews::ShaderParameter(settings->zoom, settings->zoomOscillator);
     CommonViews::ShaderParameter(settings->perspective, settings->perspectiveOscillator);

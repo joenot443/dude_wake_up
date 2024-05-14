@@ -89,6 +89,10 @@ shader.load("shaders/fuji");
 shader.load("shaders/fuji");
 #endif
   };
+  
+  int inputCount() override {
+    return 0;
+  }
 
   void drawSettings() override {
     

@@ -44,12 +44,13 @@ struct MinMixerShader: Shader {
     ofEnableAlphaBlending();
     canvas->begin();
     shader.begin();
-    if (auxConnected()) {
-      std::shared_ptr<ofFbo> tex2 = aux()->frame();
+    if (hasInputAtSlot(InputSlotTwo)) {
+      std::shared_ptr<ofFbo> tex2 = inputAtSlot(InputSlotTwo)->frame();
       shader.setUniformTexture("tex2", tex2->getTexture(), 8);
     } else {
       ofClear(0,0,0,255);
       ofClear(0,0,0,0);
+      shader.setUniformTexture("tex2", frame->getTexture(), 8);
     }
     
     shader.setUniformTexture("tex", frame->getTexture(), 4);
@@ -65,7 +66,10 @@ struct MinMixerShader: Shader {
     
   }
 
-  ShaderType type() override {
+  int inputCount() override {
+    return 2;
+  }
+ShaderType type() override {
     return ShaderTypeMinMixer;
   }
 

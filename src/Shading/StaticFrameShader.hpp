@@ -53,8 +53,8 @@ struct StaticFrameShader: Shader {
   void shade(std::shared_ptr<ofFbo> StaticFrame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
-    if (auxConnected()) {
-      std::shared_ptr<ofFbo> tex2 = aux()->frame();
+    if (hasInputAtSlot(InputSlotTwo)) {
+      std::shared_ptr<ofFbo> tex2 = inputAtSlot(InputSlotTwo)->frame();
       shader.setUniformTexture("tex2", tex2->getTexture(), 8);
     } else {
       shader.setUniformTexture("tex2", StaticFrame->getTexture(), 8);
@@ -76,7 +76,11 @@ struct StaticFrameShader: Shader {
     
   }
 
-  ShaderType type() override {
+  int inputCount() override {
+    return 2;
+  }
+  
+ShaderType type() override {
     return ShaderTypeStaticFrame;
   }
 

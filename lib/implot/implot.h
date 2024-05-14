@@ -708,7 +708,7 @@ IMPLOT_API void EndSubplots();
 // if (BeginPlot(...)) {                     1) begin a new plot
 //     SetupAxis(ImAxis_X1, "My X-Axis");    2) make Setup calls
 //     SetupAxis(ImAxis_Y1, "My Y-Axis");
-//     SetupLegend(ImPlotLocation_North);
+//     SetupLegend(aLocation_North);
 //     ...
 //     SetupFinish();                        3) [optional] explicitly finish setup
 //     PlotLine(...);                        4) plot items

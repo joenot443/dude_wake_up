@@ -66,6 +66,10 @@ shader.load("shaders/Fractal");
 shader.load("shaders/Fractal");
 #endif
   };
+  
+  int inputCount() override {
+    return 0;
+  }
 
   void drawSettings() override {
     

@@ -19,11 +19,11 @@
 #include <stdio.h>
 
 struct TileSettings : public ShaderSettings {
-	public:
+public:
   std::shared_ptr<Parameter> repeat;
   std::shared_ptr<Parameter> spacing;
   std::shared_ptr<Parameter> mirror;
-
+  
   std::shared_ptr<Oscillator> repeatOscillator;
   std::shared_ptr<Oscillator> spacingOscillator;
   
@@ -36,7 +36,7 @@ struct TileSettings : public ShaderSettings {
     parameters = {repeat, mirror, spacing};
     oscillators = {repeatOscillator, spacingOscillator};
     load(j);
-  registerParameters();
+    registerParameters();
   };
 };
 
@@ -45,16 +45,16 @@ public:
   ofShader shader;
   TileSettings *settings;
   TileShader(TileSettings *settings) : settings(settings), Shader(settings) {};
-
+  
   void setup() override {
-    #ifdef TESTING
-shader.load("shaders/Tile");
+#ifdef TESTING
+    shader.load("shaders/Tile");
 #endif
 #ifdef RELEASE
-shader.load("shaders/Tile");
+    shader.load("shaders/Tile");
 #endif
   }
-
+  
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
@@ -67,11 +67,15 @@ shader.load("shaders/Tile");
     shader.end();
     canvas->end();
   }
-
+  
+  int inputCount() override {
+    return 1;
+  }
+  
   ShaderType type() override {
     return ShaderType::ShaderTypeTile;
   }
-
+  
   void drawSettings() override {
     
     CommonViews::ShaderCheckbox(settings->mirror);

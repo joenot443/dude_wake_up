@@ -52,30 +52,6 @@ public:
   virtual void setup(){};
   virtual void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas){};
   virtual void clear(){};
-  
-  /// Feedback
-
-  /// Aux
-  std::shared_ptr<Connectable> aux();
-  virtual bool supportsAux() { return shaderTypeSupportsAux(type()); }
-  virtual bool auxConnected()
-  {
-    return hasInputForType(ConnectionTypeAux);
-  }
-  
-  virtual bool feedbackConnected()
-  {
-    return hasOutputForType(ConnectionTypeFeedback);
-  }
-
-  /// Mask
-  std::shared_ptr<Connectable> mask();
-  virtual bool supportsMask() { return shaderTypeSupportsMask(type()); }
-  virtual bool supportsFeedback() { return shaderTypeSupportsFeedback(type()); }
-  virtual bool maskConnected()
-  {
-    return hasInputForType(ConnectionTypeMask);
-  }
 
   // Feedback
   // The Feedback OUTPUT pin for shading feedback frames before injection

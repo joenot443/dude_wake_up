@@ -162,31 +162,11 @@ void NodeLayoutView::draw()
         ed::LinkId nextShaderLinkId = uniqueId++;
         
         auto shaderLink =
-        std::make_shared<ShaderLink>(nextShaderLinkId, nextNode, shaderNode, connection->id);
-        shaderLink->type = connection->linkType();
+        std::make_shared<ShaderLink>(nextShaderLinkId, nextNode, shaderNode, connection->inputSlot, connection->id);
         linksMap[nextShaderLinkId.Get()] = shaderLink;
         ed::PinId inputPinId = 0;
         ed::PinId outputPinId = shaderLink->output->outputId;
-        
-        switch (connection->type)
-        {
-          case ConnectionTypeShader:
-            inputPinId = shaderLink->input->inputId;
-            break;
-          case ConnectionTypeSource:
-            inputPinId = shaderLink->input->inputId;
-            break;
-          case ConnectionTypeAux:
-            inputPinId = shaderLink->input->auxId;
-            break;
-          case ConnectionTypeMask:
-            inputPinId = shaderLink->input->maskId;
-            break;
-          case ConnectionTypeFeedback:
-            outputPinId = shaderLink->output->feedbackId;
-            inputPinId = shaderLink->input->inputId;
-            break;
-        }
+        inputPinId = nextNode->inputIds[connection->inputSlot];
         
         ed::Link(nextShaderLinkId,
                  outputPinId,
@@ -292,12 +272,12 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
   CommonViews::sSpacing();
   
   // Input Pin
-  if (node->supportsInput())
-  {
-    ed::PinId inputPinId = node->inputId;
+  for (int i = 0; i < node->connectable->inputCount(); i++) {
+    InputSlot slot = static_cast<InputSlot>(i);
+    ed::PinId inputPinId = node->inputIds[slot];
     ed::BeginPin(inputPinId, ed::PinKind::Input);
     
-    auto icon = node->hasInputLink() ? ICON_MD_RADIO_BUTTON_ON : ICON_MD_RADIO_BUTTON_OFF;
+    auto icon = node->hasInputLinkAt(slot) ? ICON_MD_RADIO_BUTTON_ON : ICON_MD_RADIO_BUTTON_OFF;
     
     CommonViews::IconTitle(icon);
     
@@ -305,45 +285,6 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
     auto inPin = std::make_shared<Pin>(inputPinId, node, PinTypeInput);
     pinIdPinMap[inputPinId.Get()] = inPin;
     pinIdNodeMap[inputPinId.Get()] = node;
-  }
-  
-  // Aux Pin
-  if (node->supportsAux())
-  {
-    ed::PinId auxPinId = node->auxId;
-    
-    ed::BeginPin(auxPinId, ed::PinKind::Input);
-    auto icon = node->hasAuxLink() ? ICON_MD_RADIO_BUTTON_ON : ICON_MD_RADIO_BUTTON_OFF;
-    CommonViews::sSpacing();
-    CommonViews::IconTitle(icon);
-    ImGui::PushFont(FontService::getService()->sm);
-    ImGui::Text("(Aux)");
-    ImGui::PopFont();
-    ed::EndPin();
-    
-    auto auxPin = std::make_shared<Pin>(auxPinId, node, PinTypeAux);
-    
-    pinIdNodeMap[auxPinId.Get()] = node;
-    pinIdPinMap[auxPinId.Get()] = auxPin;
-  }
-  
-  // Mask Pin
-  if (node->supportsMask())
-  {
-    ed::PinId maskPinId = node->maskId;
-    ed::BeginPin(maskPinId, ed::PinKind::Input);
-    auto icon = node->hasMaskLink() ? ICON_MD_RADIO_BUTTON_ON : ICON_MD_RADIO_BUTTON_OFF;
-    CommonViews::sSpacing();
-    CommonViews::IconTitle(icon);
-    ImGui::PushFont(FontService::getService()->sm);
-    ImGui::Text("(Mask)");
-    ImGui::PopFont();
-    ed::EndPin();
-    
-    auto maskPin = std::make_shared<Pin>(maskPinId, node, PinTypeMask);
-    
-    pinIdNodeMap[maskPinId.Get()] = node;
-    pinIdPinMap[maskPinId.Get()] = maskPin;
   }
   
   // Save Button
@@ -393,12 +334,11 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
   }
   
   CommonViews::sSpacing();
-
+  
   // Node Title
   ImGui::PushFont(FontService::getService()->h3);
   ImGui::Text("%s", truncateString(formatString("%s", node->name.c_str()), 20).c_str());
   ImGui::PopFont();
-  node->supportsMask() ? CommonViews::Spacing(28) : CommonViews::mSpacing();
   ImGuiEx_NextColumn();
   
   // ----- THIRD COLUMN ------
@@ -441,7 +381,7 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
     ed::Resume();
   }
   
-  if (node->type == NodeTypeShader)
+  if (node->type == NodeTypeShader && ShaderChainerService::getService()->isTerminalShader(node->shader))
   {
     if (ParameterService::getService()->isShaderIdStage(node->shader->shaderId)) {
       if (CommonViews::IconButton(ICON_MD_STAR, node->idName())) {
@@ -452,21 +392,6 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
         ParameterService::getService()->toggleStageShaderId(node->shader->shaderId);
       }
     }
-  }
-  
-  // Feedback Pin
-  if (node->supportsFeedback())
-  {
-    ed::PinId feedbackPinId = node->feedbackId;
-    ed::BeginPin(feedbackPinId, ed::PinKind::Output);
-    
-    auto icon = node->hasFeedbackLink() ? ICON_MD_RADIO_BUTTON_ON : ICON_MD_RADIO_BUTTON_OFF;
-    CommonViews::IconTitle(icon);
-    
-    ed::EndPin();
-    auto feedbackPin = std::make_shared<Pin>(feedbackPinId, node, PinTypeFeedback);
-    pinIdPinMap[feedbackPinId.Get()] = feedbackPin;
-    pinIdNodeMap[feedbackPinId.Get()] = node;
   }
   
   ImGuiEx_EndColumn();
@@ -484,9 +409,8 @@ std::shared_ptr<Node> NodeLayoutView::nodeForShaderSourceId(std::string shaderSo
 std::shared_ptr<Node> NodeLayoutView::nodeForShaderSourceId(std::string shaderSourceId, NodeType nodeType, std::string name, std::shared_ptr<Connectable> connectable)
 {
   
-  bool supportsAux = nodeType == NodeTypeShader && ShaderChainerService::getService()->shaderForId(shaderSourceId)->supportsAux();
-  bool supportsMask = nodeType == NodeTypeShader && ShaderChainerService::getService()->shaderForId(shaderSourceId)->supportsMask();
-  bool supportsFeedback = nodeType == NodeTypeShader && ShaderChainerService::getService()->shaderForId(shaderSourceId)->supportsFeedback();
+  bool supportsAux = nodeType == NodeTypeShader && ShaderChainerService::getService()->shaderForId(shaderSourceId)->inputCount() > 1;
+  bool supportsMask = nodeType == NodeTypeShader && ShaderChainerService::getService()->shaderForId(shaderSourceId)->inputCount() > 2;
   
   
   std::shared_ptr<Node> node = idNodeMap[shaderSourceId];
@@ -502,10 +426,14 @@ std::shared_ptr<Node> NodeLayoutView::nodeForShaderSourceId(std::string shaderSo
   // We don't have a node, create one
   auto nodeId = nodeIdTicker++;
   auto outputId = nodeIdTicker++;
-  auto inputId = nodeType == NodeTypeShader ? nodeIdTicker++ : NullId;
-  auto auxId = supportsAux ? nodeIdTicker++ : NullId;
-  auto maskId = supportsMask ? nodeIdTicker++ : NullId;
-  auto feedbackId = supportsFeedback ? nodeIdTicker++ : NullId;
+  std::map<InputSlot, ed::PinId> inputIds;
+  
+  // Create 10 inputIds for each Node, even though most of them won't be used.
+  for (int i = 0; i < 10; i++) {
+    InputSlot slot = static_cast<InputSlot>(i);
+    inputIds[slot] = nodeIdTicker++;
+  }
+  
   auto origin = ImVec2(0, 0);
   if (nodeType == NodeTypeSource)
   {
@@ -516,10 +444,7 @@ std::shared_ptr<Node> NodeLayoutView::nodeForShaderSourceId(std::string shaderSo
     origin = ImVec2(ShaderChainerService::getService()->shaderForId(shaderSourceId)->settings->x->value, ShaderChainerService::getService()->shaderForId(shaderSourceId)->settings->y->value);
   }
   
-  node = std::make_shared<Node>(nodeId, outputId, inputId, name, nodeType, connectable);
-  node->auxId = auxId;
-  node->maskId = maskId;
-  node->feedbackId = feedbackId;
+  node = std::make_shared<Node>(nodeId, outputId, inputIds, name, nodeType, connectable);
   
   // If we're placing the node from a JSON, we have an origin.
   if (origin.x != 0.)
@@ -548,7 +473,7 @@ void NodeLayoutView::populateNodePositions()
 }
 
 bool NodeLayoutView::pointIsWithinNode(ImVec2 position, std::shared_ptr<Node> node) {
-	return position.x > node->position.x && position.x < node->position.x + 150 && position.y > node->position.y && position.y < node->position.y + 75;
+  return position.x > node->position.x && position.x < node->position.x + 150 && position.y > node->position.y && position.y < node->position.y + 75;
 }
 
 std::shared_ptr<Node> NodeLayoutView::nodeAtPosition(ImVec2 position) {
@@ -631,7 +556,7 @@ void NodeLayoutView::handleRightClick()
   if (ImGui::BeginPopup("Node"))
   {
     auto node = nodeIdNodeMap[contextMenuNodeId.Get()];
-    if (ImGui::MenuItem("Save Chain"))
+    if (ImGui::MenuItem("Save Strand"))
     {
       handleSaveNode(node);
     }
@@ -674,28 +599,28 @@ void NodeLayoutView::handleDeleteNode(std::shared_ptr<Node> node)
 
 void NodeLayoutView::handleSaveNode(std::shared_ptr<Node> node)
 {
-    Strand strand = ShaderChainerService::getService()->strandForConnectable(node->connectable);
-    
-    std::string defaultName =
-        ofGetTimestampString("%m-%d");
+  Strand strand = ShaderChainerService::getService()->strandForConnectable(node->connectable);
   
-    defaultName = formatString("%s_%s", strand.name.c_str(), defaultName.c_str());
-    std::string defaultJsonName = formatString("%s.json", defaultName.c_str());
-    
-    auto result = ofSystemSaveDialog(defaultJsonName, "Save Strand");
-    if (result.bSuccess)
+  std::string defaultName =
+  ofGetTimestampString("%m-%d");
+  
+  defaultName = formatString("%s_%s", strand.name.c_str(), defaultName.c_str());
+  std::string defaultJsonName = formatString("%s.json", defaultName.c_str());
+  
+  auto result = ofSystemSaveDialog(defaultJsonName, "Save Strand");
+  if (result.bSuccess)
+  {
+    // Trim extension from result.fileName
+    std::string fileName = result.fileName;
+    auto dotPos = fileName.find_last_of('.');
+    if (dotPos != std::string::npos)
     {
-      // Trim extension from result.fileName
-      std::string fileName = result.fileName;
-      auto dotPos = fileName.find_last_of('.');
-      if (dotPos != std::string::npos)
-      {
-        fileName = fileName.substr(0, dotPos);
-      }
-      strand.name = fileName;
-      std::string previewPath = StrandService::getService()->savePreview(defaultName, node->connectable);
-      ConfigService::getService()->saveStrandFile(strand, result.filePath, previewPath);
+      fileName = fileName.substr(0, dotPos);
     }
+    strand.name = fileName;
+    std::string previewPath = StrandService::getService()->savePreview(defaultName, node->connectable);
+    ConfigService::getService()->saveStrandFile(strand, result.filePath, previewPath);
+  }
 }
 
 void NodeLayoutView::handleDropZone()
@@ -730,7 +655,7 @@ void NodeLayoutView::handleDropZone()
         {
           auto availableWebcamSource = std::dynamic_pointer_cast<AvailableVideoSourceWebcam>(availableSource);
           source = VideoSourceService::getService()->addWebcamVideoSource(
-                                                                               availableWebcamSource->sourceName, availableWebcamSource->webcamId);
+                                                                          availableWebcamSource->sourceName, availableWebcamSource->webcamId);
           unplacedNodeIds.push_back(source->id);
           break;
         }
@@ -738,7 +663,7 @@ void NodeLayoutView::handleDropZone()
         {
           auto availableFileSource = std::dynamic_pointer_cast<AvailableVideoSourceFile>(availableSource);
           source = VideoSourceService::getService()->addFileVideoSource(
-                                                                             availableFileSource->sourceName, availableFileSource->path);
+                                                                        availableFileSource->sourceName, availableFileSource->path);
           unplacedNodeIds.push_back(source->id);
           break;
         }
@@ -749,7 +674,7 @@ void NodeLayoutView::handleDropZone()
         {
           auto availableFileSource = std::dynamic_pointer_cast<AvailableVideoSourceImage>(availableSource);
           source = VideoSourceService::getService()->addImageVideoSource(
-                                                                              availableFileSource->sourceName, availableFileSource->path);
+                                                                         availableFileSource->sourceName, availableFileSource->path);
           unplacedNodeIds.push_back(source->id);
           break;
         }
@@ -866,67 +791,34 @@ void NodeLayoutView::queryNewLinks()
     {
       std::shared_ptr<Node> sourceNode = pinIdNodeMap[outputPinId.Get()];
       std::shared_ptr<Node> destNode = pinIdNodeMap[inputPinId.Get()];
+      InputSlot inputSlot;
+      
+      if (sourceNode == nullptr && destNode == nullptr) { return; }
+      
+      // Get the InputSlot for this connection
+      for (auto [slot, inputId] : destNode->inputIds) {
+        if (inputId == inputPinId) inputSlot = slot;
+      }
+      
       
       // We have a Shader destination
       if (destNode->type == NodeTypeShader)
       {
         if (ed::AcceptNewItem())
         {
-          // Handle special cases (Feedback) first
-          std::shared_ptr<Pin> inputPin = pinIdPinMap[inputPinId.Get()];
-          
-          if (sourceNode->type == NodeTypeShader && pinIdPinMap[outputPinId.Get()]->pinType == PinTypeFeedback) {
-            ShaderChainerService::getService()->makeConnection(sourceNode->shader, destNode->shader, ConnectionTypeFeedback, true);
-            return;
-          }
-          
-          
           // VideoSource is our Source
           if (sourceNode->type == NodeTypeSource)
           {
             auto destPin = pinIdPinMap[inputPinId.Get()];
-            
-            // If our Dest Pin is an Aux Pin
-            if (destPin->pinType == PinTypeAux)
-            {
-              ShaderChainerService::getService()->makeConnection(sourceNode->source, destNode->shader, ConnectionTypeAux, true);
-            }
-            // If our Dest Pin is a Mask Pin
-            else if (destPin->pinType == PinTypeMask)
-            {
-              ShaderChainerService::getService()->makeConnection(sourceNode->source, destNode->shader, ConnectionTypeMask, true);
-            }
-            // If our Dest Pin is a standard Input Pin
-            else if (destPin->pinType == PinTypeInput)
-            {
-              ShaderChainerService::getService()->makeConnection(sourceNode->source, destNode->shader, ConnectionTypeSource, true);
-            }
+            ShaderChainerService::getService()->makeConnection(sourceNode->source, destNode->shader, ConnectionTypeSource, inputSlot, true);
           }
           
           // Shader is our Source
           if (sourceNode->type == NodeTypeShader)
           {
-            auto destPin = pinIdPinMap[inputPinId.Get()];
-            // If our Dest Pin is an Aux Pin
-            if (destPin->pinType == PinTypeAux)
-            {
-              ShaderChainerService::getService()->makeConnection(
-                                                                 sourceNode->shader, destNode->shader, ConnectionTypeAux, true);
-              
-              // If our Dest Pin is a Mask Pin
-            }
-            else if (destPin->pinType == PinTypeMask)
-            {
-              ShaderChainerService::getService()->makeConnection(
-                                                                 sourceNode->shader, destNode->shader, ConnectionTypeMask, true);
-              
-              // If our Dest Pin is standard Input Pin
-            }
-            else if (destPin->pinType == PinTypeInput)
-            {
-              ShaderChainerService::getService()->makeConnection(
-                                                                 sourceNode->shader, destNode->shader, ConnectionTypeShader, true);
-            }
+            ShaderChainerService::getService()->makeConnection(
+                                                               sourceNode->shader, destNode->shader,
+                                                               ConnectionTypeShader, inputSlot, true);
           }
         }
       }
@@ -936,10 +828,10 @@ void NodeLayoutView::queryNewLinks()
 
 void NodeLayoutView::drawUploadChainerWindow()
 {
-//  if (uploadChainer != nullptr && uploadChainer->name.length())
-//  {
-//    UploadChainerView::draw(uploadChainer);
-//  }
+  //  if (uploadChainer != nullptr && uploadChainer->name.length())
+  //  {
+  //    UploadChainerView::draw(uploadChainer);
+  //  }
 }
 
 void NodeLayoutView::drawNodeWindows()
@@ -958,7 +850,7 @@ void NodeLayoutView::drawNodeWindows()
     ImGui::Begin(node->idName().c_str(), 0, flags);
     node->drawSettings();
     ImGui::End();
-    }
+  }
   ImGui::SetCursorPos(cursor);
 }
 
@@ -993,7 +885,7 @@ void NodeLayoutView::drawPreviewWindow(std::shared_ptr<Node> node)
   pos.y = pos.y - 90 / sizeScale - 10;
   
   auto style = ImGui::GetStyle();
-
+  
   ImGui::SetCursorPos(pos);
   if (sizeScale > 5.0)
   {
@@ -1056,14 +948,6 @@ void NodeLayoutView::drawActionButtons()
   ImGui::SameLine();
   CommonViews::HSpacing(2);
   ImGui::SameLine();
-  // Draw the stage mode button
-  if (CommonViews::LargeIconButton(ICON_MD_VIEW_AGENDA, "stageMode"))
-  {
-    LayoutStateService::getService()->stageModeEnabled = true;
-  }
-  ImGui::SameLine();
-  CommonViews::HSpacing(2);
-  ImGui::SameLine();
   
   // Draw the zoom buttons
   if (CommonViews::LargeIconButton(ICON_MD_ZOOM_IN, "zoom_in"))
@@ -1080,6 +964,14 @@ void NodeLayoutView::drawActionButtons()
     ed::SetCurrentEditor(context);
     ed::ZoomInc(false);
     ed::SetCurrentEditor(nullptr);
+  }
+  ImGui::SameLine();
+  CommonViews::HSpacing(2);
+  ImGui::SameLine();
+  // Draw the stage mode button
+  if (CommonViews::LargeIconButton(ICON_MD_VIEW_AGENDA, "stageMode"))
+  {
+    LayoutStateService::getService()->stageModeEnabled = true;
   }
   
   ImGui::SetCursorPos(pos);

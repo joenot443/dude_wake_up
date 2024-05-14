@@ -12,21 +12,21 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
-#include "ValueOscillator.hpp"
+#include "WaveformOscillator.hpp"
 #include "Parameter.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct AlphaMixSettings: public ShaderSettings {
   std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<ValueOscillator> shaderValueOscillator;
+  std::shared_ptr<WaveformOscillator> shaderWaveformOscillator;
 
   AlphaMixSettings(std::string shaderId, json j, std::string name) :
   shaderValue(std::make_shared<Parameter>("shaderValue", 1.0  , -1.0, 2.0)),
-  shaderValueOscillator(std::make_shared<ValueOscillator>(shaderValue)),
+  shaderWaveformOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   ShaderSettings(shaderId, j, name)  {
     parameters = { shaderValue };
-    oscillators = { shaderValueOscillator };
+    oscillators = { shaderWaveformOscillator };
     load(j);
     registerParameters();
   };
@@ -56,14 +56,17 @@ struct AlphaMixShader: Shader {
     
   }
 
-  ShaderType type() override {
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override {
     return ShaderTypeAlphaMix;
   }
 
   void drawSettings() override {
     CommonViews::H3Title("AlphaMix");
 
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
+    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderWaveformOscillator);
   }
 };
 

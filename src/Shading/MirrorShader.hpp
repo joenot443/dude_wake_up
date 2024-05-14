@@ -72,7 +72,10 @@ shader.load("shaders/mirror");
     
   }
 
-  ShaderType type() override { return ShaderTypeMirror; }
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override { return ShaderTypeMirror; }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();

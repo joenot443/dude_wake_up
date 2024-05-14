@@ -38,7 +38,13 @@ struct CommonViews
   
   static void ShaderStageParameter(std::shared_ptr<FavoriteParameter> param, std::shared_ptr<Oscillator> osc);
   
-  static void ShaderParameter(std::shared_ptr<Parameter> param, std::shared_ptr<Oscillator> osc);
+  static bool ShaderParameter(std::shared_ptr<Parameter> param, std::shared_ptr<Oscillator> osc);
+  
+  static bool MiniSlider(std::shared_ptr<Parameter> param);
+  
+  static bool MiniVSlider(std::shared_ptr<Parameter> param);
+  
+  static bool Selector(std::shared_ptr<Parameter> param);
   
   static bool ShaderCheckbox(std::shared_ptr<Parameter> param, bool sameLine = false);
   
@@ -131,7 +137,17 @@ static ImVec2 getScaledCursorScreenLocation() {
 static ImVec2 getScaledContentRegionAvail() {
   int scale = dynamic_cast<ofAppGLFWWindow*>(ofGetWindowPtr())->getPixelScreenCoordScale();
   auto pos = ImGui::GetContentRegionAvail();
-  return ImVec2(pos.x * scale, pos.y * scale);
+  return ImVec2(pos.x / scale, pos.y / scale);
+}
+
+static ImVec2 scaleVector(ImVec2 vec) {
+  int scale = dynamic_cast<ofAppGLFWWindow*>(ofGetWindowPtr())->getPixelScreenCoordScale();
+  return scale * vec;
+}
+
+static float scaleFloat(float f) {
+  int scale = dynamic_cast<ofAppGLFWWindow*>(ofGetWindowPtr())->getPixelScreenCoordScale();
+  return scale * f;
 }
 
 #endif /* CommonViews_hpp */

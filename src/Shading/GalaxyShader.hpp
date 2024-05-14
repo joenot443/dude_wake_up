@@ -55,7 +55,10 @@ shader.load("shaders/Galaxy");
     
   }
 
-  ShaderType type() override {
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override {
     return ShaderTypeGalaxy;
   }
 

@@ -7,6 +7,13 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "BlendShader.hpp"
+#include "FullHouseShader.hpp"
+#include "PieSplitShader.hpp"
+#include "OverlayShader.hpp"
+#include "SwitcherShader.hpp"
+#include "RotateShader.hpp"
+#include "MultiMixShader.hpp"
 #include "ColorStepperShader.hpp"
 #include "GridRunShader.hpp"
 #include "ColorSwapShader.hpp"
@@ -27,7 +34,6 @@
 #include "VertexShader.hpp"
 #include "TripleShader.hpp"
 #include "PaintShader.hpp"
-#include "LumaFeedbackShader.hpp"
 #include "GameboyShader.hpp"
 #include "StaticFrameShader.hpp"
 #include "SlidingFrameShader.hpp"
@@ -169,6 +175,9 @@ void ShaderChainerService::processFrame()
   
   for (auto connection : sourceConnections)
   {
+    // No need to traverse non-Main connections (Aux, Feedback, etc.)
+    if (connection->inputSlot != InputSlotMain) continue;
+    
     std::shared_ptr<VideoSource> videoSource = std::dynamic_pointer_cast<VideoSource>(connection->start);
     std::shared_ptr<Shader> shader = std::dynamic_pointer_cast<Shader>(connection->end);
     shader->traverseFrame(videoSource->frame());
@@ -236,7 +245,7 @@ json ShaderChainerService::connectionsConfig()
   
   for (auto const &[key, val] : connectionMap)
   {
-    j[val->id] = val->serialize();
+    if (val != nullptr) j[val->id] = val->serialize();
   }
   
   return j;
@@ -306,6 +315,7 @@ void ShaderChainerService::loadConnectionsConfig(json j)
     ConnectionType type = val["type"];
     std::string startId = val["start"];
     std::string endId = val["end"];
+    InputSlot slot = val["slot"];
     
     std::shared_ptr<Connectable> start;
     std::shared_ptr<Connectable> end = shaderForId(endId);
@@ -316,12 +326,7 @@ void ShaderChainerService::loadConnectionsConfig(json j)
         start = VideoSourceService::getService()->videoSourceForId(startId);
         break;
       case ConnectionTypeShader:
-      case ConnectionTypeAux:
-      case ConnectionTypeMask:
         start = shaderForId(startId);
-        // We might be starting on a Source
-        if (start == nullptr)
-          start = VideoSourceService::getService()->videoSourceForId(startId);
     }
     
     if (start == nullptr || end == nullptr)
@@ -330,7 +335,7 @@ void ShaderChainerService::loadConnectionsConfig(json j)
       continue;
     }
     
-    makeConnection(start, end, type);
+    makeConnection(start, end, type, slot);
   }
 }
 
@@ -389,7 +394,7 @@ void ShaderChainerService::removeConnectable(std::shared_ptr<Connectable> connec
   // Remove the input Connections
   if (!connectable->inputs.empty())
   {
-    for (auto conn : connectable->inputs)
+    for (auto [key, conn] : connectable->inputs)
     {
       // Remove the Connection connecting [Parent] -> [Us]
       connectionIdsToRemove.push_back(conn->id);
@@ -418,12 +423,12 @@ void ShaderChainerService::removeConnectable(std::shared_ptr<Connectable> connec
 }
 
 void ShaderChainerService::copyConnections(std::shared_ptr<Connectable> source, std::shared_ptr<Connectable> dest) {
-  for (auto conn : source->inputs) {
-    makeConnection(conn->start, dest, conn->type, false, true);
+  for (auto [key, conn] : source->inputs) {
+    makeConnection(conn->start, dest, conn->type, conn->inputSlot, false, true);
   }
   
   for (auto conn : source->outputs) {
-    makeConnection(dest, conn->end, conn->type, false, true);
+    makeConnection(dest, conn->end, conn->type, conn->inputSlot, false, true);
   }
 }
 
@@ -453,11 +458,11 @@ Strand ShaderChainerService::strandForConnectable(std::shared_ptr<Connectable> c
     strand.connectables.push_back(current);
     
     // Explore all inputs and outputs of the current connectable
-    for (const auto& input : current->inputs) {
-      if (visitedConnectionIds.find(input->id) == visitedConnectionIds.end()) {
-        strand.connections.push_back(input);
-        visitedConnectionIds.insert(input->id);
-        explore(input->start);
+    for (const auto [key, conn] : current->inputs) {
+      if (visitedConnectionIds.find(conn->id) == visitedConnectionIds.end()) {
+        strand.connections.push_back(conn);
+        visitedConnectionIds.insert(conn->id);
+        explore(conn->start);
       }
     }
     
@@ -520,18 +525,19 @@ void ShaderChainerService::breakConnectionForConnectionId(std::string connection
 std::shared_ptr<Connection> ShaderChainerService::makeConnection(std::shared_ptr<Connectable> start,
                                                                  std::shared_ptr<Connectable> end,
                                                                  ConnectionType type,
+                                                                 InputSlot slot,
                                                                  bool shouldSaveConfig,
                                                                  bool copy)
 {
   // Only allow a single input for each type
-  if (end->hasInputForType(type) && !copy)
+  if (end->hasInputAtSlot(slot))
   {
     return nullptr;
   }
   
-  auto connection = std::make_shared<Connection>(start, end, type);
+  auto connection = std::make_shared<Connection>(start, end, type, slot);
   start->outputs.insert(connection);
-  end->inputs.insert(connection);
+  end->inputs[slot] = connection;
   connectionMap[connection->id] = connection;
   
   // Update the Connectable's FeedbackSource
@@ -546,6 +552,11 @@ std::shared_ptr<Connection> ShaderChainerService::makeConnection(std::shared_ptr
   if (VideoSourceService::getService()->hasOutputWindowForConnectable(start))
   {
     VideoSourceService::getService()->updateOutputWindow(start, end);
+  }
+  
+  if (ParameterService::getService()->isShaderIdStage(start->connId())) {
+    ParameterService::getService()->toggleStageShaderId(start->connId());
+    ParameterService::getService()->toggleStageShaderId(end->connId());
   }
   
   if (shouldSaveConfig)
@@ -563,6 +574,48 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeBlend: {
+      auto settings = new BlendSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<BlendShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeFullHouse: {
+      auto settings = new FullHouseSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<FullHouseShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypePieSplit: {
+      auto settings = new PieSplitSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<PieSplitShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeOverlay: {
+      auto settings = new OverlaySettings(shaderId, shaderJson);
+      auto shader = std::make_shared<OverlayShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeSwitcher: {
+      auto settings = new SwitcherSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<SwitcherShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeRotate: {
+      auto settings = new RotateSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<RotateShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeMultiMix: {
+      auto settings = new MultiMixSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<MultiMixShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeColorStepper: {
       auto settings = new ColorStepperSettings(shaderId, shaderJson);
       auto shader = std::make_shared<ColorStepperShader>(settings);
@@ -690,13 +743,6 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
     {
       auto settings = new PaintSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<PaintShader>(settings);
-      shader->setup();
-      return shader;
-    }
-    case ShaderTypeLumaFeedback:
-    {
-      auto settings = new LumaFeedbackSettings(shaderId, shaderJson, shaderTypeName(shaderType));
-      auto shader = std::make_shared<LumaFeedbackShader>(settings);
       shader->setup();
       return shader;
     }

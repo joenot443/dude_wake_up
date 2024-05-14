@@ -60,6 +60,10 @@ struct <%= name %>Shader: Shader {
     
   }
 
+  int inputCount() override {
+    return 1;
+  }
+
   ShaderType type() override {
     return ShaderType<%= name %>;
   }

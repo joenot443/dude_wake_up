@@ -12,22 +12,22 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
-#include "ValueOscillator.hpp"
+#include "WaveformOscillator.hpp"
 #include "Parameter.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct ColorStepperSettings: public ShaderSettings {
   std::shared_ptr<Parameter> speed;
-  std::shared_ptr<ValueOscillator> speedOscillator;
+  std::shared_ptr<WaveformOscillator> speedOscillator;
   std::shared_ptr<Parameter> smoothness;
-  std::shared_ptr<ValueOscillator> smoothnessOscillator;
+  std::shared_ptr<WaveformOscillator> smoothnessOscillator;
 
   ColorStepperSettings(std::string shaderId, json j) :
   speed(std::make_shared<Parameter>("Speed", 1.0, 0.1, 5.0)),
-  speedOscillator(std::make_shared<ValueOscillator>(speed)),
+  speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   smoothness(std::make_shared<Parameter>("Smoothness", 0.5, 0.0, 1.0)),
-  smoothnessOscillator(std::make_shared<ValueOscillator>(smoothness)),
+  smoothnessOscillator(std::make_shared<WaveformOscillator>(smoothness)),
   ShaderSettings(shaderId, j) {
     parameters = { speed };
     oscillators = { speedOscillator };
@@ -61,7 +61,10 @@ struct ColorStepperShader: Shader {
     
   }
 
-  ShaderType type() override {
+    int inputCount() override {
+    return 1;
+  }
+ShaderType type() override {
     return ShaderTypeColorStepper;
   }
 

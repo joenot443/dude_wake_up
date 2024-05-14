@@ -9,6 +9,7 @@ out vec4 outputColor;
 
 uniform float mainMix;
 uniform float feedbackMix;
+uniform int blendMode;
 uniform int fbType;
 uniform int priority;
 
@@ -22,6 +23,55 @@ uniform float lumaThresh;
 uniform vec3 hsb;
 uniform vec3 rescale;
 uniform vec3 invert;
+
+// Function to implement various blending modes
+vec4 blend(vec4 a, vec4 b, int mode) {
+  vec4 result;
+  if (mode == 0) { //Standard
+    // Empty feedback
+    if (a.a < 0.5) {
+      return b;
+    }
+
+    // Empty main
+    if (a.a < 0.0001) {
+      return vec4(b.rgb, min(0.99, 1.5 * feedbackMix * b.a));
+    }
+    
+    result = mix(a, b, mainMix);
+  }
+  else if (mode == 1) { // Multiply
+    result = a * b;
+  } else if (mode == 2) { // Screen
+    result = 1.0 - (1.0 - a) * (1.0 - b);
+  } else if (mode == 3) { // Darken
+    result = min(a, b);
+  } else if (mode == 4) { // Lighten
+    result = max(a, b);
+  } else if (mode == 5) { // Difference
+    result = abs(a - b);
+  } else if (mode == 6) { // Exclusion
+    result = a + b - 2.0 * a * b;
+  } else if (mode == 7) { // Overlay
+    result = a.r < 0.5 ? (2.0 * a * b) : (1.0 - 2.0 * (1.0 - a) * (1.0 - b));
+  } else if (mode == 8) { // Hard light
+    result = b.r < 0.5 ? (2.0 * a * b) : (1.0 - 2.0 * (1.0 - a) * (1.0 - b));
+  } else if (mode == 9) { // Soft light
+    result = b.r < 0.5 ? (2.0 * a * b + a * a * (1.0 - 2.0 * b)) : (sqrt(a) * (2.0 * b - 1.0) + (2.0 * a) * (1.0 - b));
+  } else if (mode == 10) { // Color dodge
+    result = a / (1.0 - b);
+  } else if (mode == 11) { // Linear dodge (Add)
+    result = a + b;
+  } else if (mode == 12) { // Burn
+    result = 1.0 - (1.0 - a) / b;
+  } else if (mode == 13) { // Linear burn
+    result = a + b - 1.0;
+  } else {
+    result = a; // Default fallback
+  }
+  result.a = 1.0; // Ensure the output is fully opaque
+  return result;
+}
 
 vec3 rgb2hsb(in vec3 c) {
   vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
@@ -127,7 +177,7 @@ void main() {
   if (lumaEnabled == 1) {
     outColor = mixLumaKey(mainColor, fbColor, lumaKey, lumaThresh);
   } else {
-    outColor = mixStandard(mainColor, fbColor);
+    outColor = blend(mainColor, fbColor, blendMode);
   }
 
   outputColor = outColor;

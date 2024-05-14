@@ -16,6 +16,7 @@
 #include <cpr/cpr.h>
 
 const static std::string API_URL = "http://165.227.44.1";
+//const static std::string API_URL = "localhost:6000";
 
 void LibraryService::setup()
 {
@@ -96,6 +97,8 @@ void LibraryService::fetchLibraryFiles()
       file.thumbnailFilename = library_file["thumbnailFilename"];
       file.thumbnailUrl = library_file["thumbnailUrl"];
       file.filename = library_file["filename"];
+      file.category = library_file["category"];
+      
       auto shared = std::make_shared<LibraryFile>(file);
       if (hasThumbnail(shared))
       {

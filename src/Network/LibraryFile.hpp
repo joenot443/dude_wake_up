@@ -20,6 +20,7 @@ struct LibraryFile
   std::string url;
   std::string thumbnailUrl;
   std::string thumbnailFilename;
+  std::string category;
   bool isDownloading = false;
   bool mediaDownloaded = false;
   bool thumbnailDownloaded = false;
@@ -40,11 +41,10 @@ struct LibraryFile
 
 class LibraryTileItem : public TileItem {
 public:
-  LibraryTileItem(std::string name, ImTextureID textureID, int index, std::shared_ptr<LibraryFile> libraryFile, std::function<void()> dragCallback) :
-  TileItem(name, textureID, index, dragCallback), libraryFile(libraryFile) {};
+  LibraryTileItem(std::string name, ImTextureID textureID, int index, std::shared_ptr<LibraryFile> libraryFile, std::function<void()> dragCallback, std::string category) :
+  TileItem(name, textureID, index, dragCallback, category), libraryFile(libraryFile) {};
   
   std::shared_ptr<LibraryFile> libraryFile;
-  
 };
 
 #endif /* LibraryFile_h */
