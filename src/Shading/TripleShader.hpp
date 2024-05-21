@@ -10,6 +10,7 @@
 
 #include "ofMain.h"
 #include "ShaderSettings.hpp"
+#include "BlendShader.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
 #include "WaveformOscillator.hpp"
@@ -32,6 +33,8 @@ struct TripleSettings : public ShaderSettings
   std::shared_ptr<Parameter> drawLeft;
   std::shared_ptr<Parameter> drawRight;
   std::shared_ptr<Parameter> drawCenter;
+  
+  std::shared_ptr<Parameter> blendMode;
 
   TripleSettings(std::string shaderId, json j, std::string name) : scale(std::make_shared<Parameter>("scale", 1.0, 0.0, 5.0)),
                                                  scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
@@ -43,9 +46,9 @@ struct TripleSettings : public ShaderSettings
                                                  drawLeft(std::make_shared<Parameter>("drawLeft", true)),
                                                  drawRight(std::make_shared<Parameter>("drawRight", true)),
                                                  drawCenter(std::make_shared<Parameter>("drawCenter", true)),
-                                                 ShaderSettings(shaderId, j, name)
+  blendMode(std::make_shared<Parameter>("Blend Mode", 0.0, 0.0, 13.0)),                                                 ShaderSettings(shaderId, j, name)
   {
-    parameters = {scale, xShift, yShift, drawOriginal, drawLeft, drawRight, drawCenter};
+    parameters = {scale, xShift, yShift, drawOriginal, drawLeft, drawRight, drawCenter, blendMode };
     oscillators = {scaleOscillator, xShiftOscillator, yShiftOscillator};
     load(j);
     registerParameters();
@@ -74,6 +77,7 @@ struct TripleShader : Shader
     shader.setUniform1f("xShift", settings->xShift->value);
     shader.setUniform1f("yShift", settings->yShift->value);
     shader.setUniform1i("drawLeft", settings->drawLeft->boolValue);
+    shader.setUniform1i("blendMode", settings->blendMode->intValue);
     shader.setUniform1i("drawRight", settings->drawRight->boolValue);
     shader.setUniform1i("drawCenter", settings->drawCenter->boolValue);
     shader.setUniform1f("time", ofGetElapsedTimef());
@@ -110,6 +114,7 @@ ShaderType type() override {
     CommonViews::ShaderCheckbox(settings->drawLeft);
     CommonViews::ShaderCheckbox(settings->drawCenter);
     CommonViews::ShaderCheckbox(settings->drawRight);
+    CommonViews::BlendModeSelector(settings->blendMode);
   }
 };
 

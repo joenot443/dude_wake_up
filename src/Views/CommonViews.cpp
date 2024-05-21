@@ -753,6 +753,47 @@ void CommonViews::FavoriteButton(std::shared_ptr<Parameter> param) {
   }
 }
 
+bool CommonViews::BlendModeSelector(std::shared_ptr<Parameter> blendMode, std::shared_ptr<Parameter> flip, std::shared_ptr<Parameter> alpha, std::shared_ptr<Oscillator> alphaOscillator, std::shared_ptr<Parameter> blendWithEmpty)
+{
+  static std::vector<std::string> BlendModeNames = {
+      "Multiply",
+      "Screen",
+      "Darken",
+      "Lighten",
+      "Difference",
+      "Exclusion",
+      "Overlay",
+      "Hard Light",
+      "Soft Light",
+      "Color Dodge",
+      "Linear Dodge",
+      "Burn",
+      "Linear Burn"
+  };
+  
+  // Draw a combo selector
+  ImGui::Text("Blend Mode");
+  ImGui::SameLine();
+  ImGui::PushItemWidth(200);
+  // Convert the strings to C strings
+  std::vector<const char *> blendModeNamesC;
+  for (auto &name : BlendModeNames) {
+    blendModeNamesC.push_back(name.c_str());
+  }
+  ImGui::Combo("##BlendMode", &blendMode->intValue, blendModeNamesC.data(), (int) BlendModeNames.size());
+  
+  if (flip != nullptr) {
+    CommonViews::ShaderCheckbox(flip);
+  }
+  
+  if (blendWithEmpty != nullptr) {
+    CommonViews::ShaderCheckbox(blendWithEmpty);
+  }
+  if (alpha != nullptr) {
+    CommonViews::ShaderParameter(alpha, alphaOscillator);
+  }
+}
+
 void CommonViews::HorizontallyAligned(float width, float alignment)
 {
   ImGuiStyle &style = ImGui::GetStyle();

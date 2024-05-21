@@ -43,21 +43,6 @@ struct BlendShader: Shader {
   BlendSettings *settings;
   BlendShader(BlendSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
-  std::vector<std::string> blendModeNames = {
-      "Multiply",
-      "Screen",
-      "Darken",
-      "Lighten",
-      "Difference",
-      "Exclusion",
-      "Overlay",
-      "Hard Light",
-      "Soft Light",
-      "Color Dodge",
-      "Linear Dodge",
-      "Burn",
-      "Linear Burn"
-  };  
   void setup() override {
     shader.load("shaders/Blend");
   }
@@ -106,22 +91,11 @@ struct BlendShader: Shader {
   void drawSettings() override {
     CommonViews::H3Title("Blend");
     drawSelector();
+    CommonViews::ShaderParameter(settings->alpha, settings->alphaOscillator);
   }
   
   void drawSelector() {
-    // Draw a combo selector
-    ImGui::Text("Blend Mode");
-    ImGui::SameLine();
-    ImGui::PushItemWidth(200);
-    // Convert the strings to C strings
-    std::vector<const char *> blendModeNamesC;
-    for (auto &name : blendModeNames) {
-      blendModeNamesC.push_back(name.c_str());
-    }
-    ImGui::Combo("##BlendMode", &settings->mode->intValue, blendModeNamesC.data(), (int) blendModeNames.size());
-    CommonViews::ShaderCheckbox(settings->blendWithEmpty);
-    CommonViews::ShaderCheckbox(settings->flip);
-    CommonViews::ShaderParameter(settings->alpha, settings->alphaOscillator);
+    CommonViews::BlendModeSelector(settings->mode, settings->flip, settings->blendWithEmpty);
   }
 };
 

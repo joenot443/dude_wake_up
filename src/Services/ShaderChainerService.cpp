@@ -7,6 +7,11 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "CoreShader.hpp"
+#include "VoronoiColumnsShader.hpp"
+#include "GodRayShader.hpp"
+#include "WarpspeedShader.hpp"
+#include "ReflectorShader.hpp"
 #include "BlendShader.hpp"
 #include "FullHouseShader.hpp"
 #include "PieSplitShader.hpp"
@@ -173,6 +178,8 @@ void ShaderChainerService::processFrame()
     }
   }
   
+  std::pair<int, std::shared_ptr<Shader>> maxPair = std::pair<int, std::shared_ptr<Shader>>(-1, nullptr);
+  
   for (auto connection : sourceConnections)
   {
     // No need to traverse non-Main connections (Aux, Feedback, etc.)
@@ -180,7 +187,7 @@ void ShaderChainerService::processFrame()
     
     std::shared_ptr<VideoSource> videoSource = std::dynamic_pointer_cast<VideoSource>(connection->start);
     std::shared_ptr<Shader> shader = std::dynamic_pointer_cast<Shader>(connection->end);
-    shader->traverseFrame(videoSource->frame());
+    shader->traverseFrame(videoSource->frame(), 0);
   }
 }
 
@@ -264,7 +271,6 @@ void ShaderChainerService::clear()
   // Clear the shaderChainerMap
   shaderIdShaderChainerMap.clear();
   videoSourceIdShaderChainerMap.clear();
-  stageModeShader = nullptr;
 }
 
 void ShaderChainerService::loadConfig(json data)
@@ -290,9 +296,11 @@ std::vector<std::string> ShaderChainerService::idsFromLoadingConfig(json j) {
     std::string shaderId = key;
     
     auto shader = shaderForType(shaderType, shaderId, val);
-    addShader(shader);
-    // Set the position of the Shader
     
+    if (shader == nullptr) continue;
+    addShader(shader);
+    
+    // Set the position of the Shader
     if (val["x"].is_number() && val["y"].is_number())
     {
       float x = val["x"];
@@ -574,6 +582,36 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeCore: {
+      auto settings = new CoreSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<CoreShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeVoronoiColumns: {
+      auto settings = new VoronoiColumnsSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<VoronoiColumnsShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeGodRay: {
+      auto settings = new GodRaySettings(shaderId, shaderJson);
+      auto shader = std::make_shared<GodRayShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeWarpspeed: {
+      auto settings = new WarpspeedSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<WarpspeedShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeReflector: {
+      auto settings = new ReflectorSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<ReflectorShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeBlend: {
       auto settings = new BlendSettings(shaderId, shaderJson);
       auto shader = std::make_shared<BlendShader>(settings);

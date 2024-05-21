@@ -19,7 +19,7 @@ void FeedbackSource::shadeFrame(std::shared_ptr<Connectable> conn) {
   
   std::shared_ptr<Shader> shader = std::dynamic_pointer_cast<Shader>(conn);
   
-  shader->traverseFrame(frameBuffer[startIndex]);
+  shader->traverseFrame(frameBuffer[startIndex], -INFINITY);
   
   // Get the final frame from that traversal chain
   

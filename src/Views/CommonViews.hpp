@@ -99,7 +99,8 @@ struct CommonViews
   static void PlaybackRangeSlider(std::string title, std::string id, std::shared_ptr<Parameter> param, std::shared_ptr<Parameter> param2, float duration, bool dirty = false);
   
   static bool SelectionRect(ImVec2* start_pos, ImVec2* end_pos, ImVec2 topLeft, ImVec2 bottomRight);
-
+  
+  static bool BlendModeSelector(std::shared_ptr<Parameter> param, std::shared_ptr<Parameter> flip = nullptr, std::shared_ptr<Parameter> alpha = nullptr, std::shared_ptr<Oscillator> alphaOscillator = nullptr, std::shared_ptr<Parameter> blendWithEmpty = nullptr);
   
   static bool ResetButton(std::string id, std::shared_ptr<Parameter> param);
   static void OscillateButton(std::string id, std::shared_ptr<Oscillator> o, std::shared_ptr<Parameter> param);
@@ -111,6 +112,11 @@ struct CommonViews
 static ImVec2 getScaledWindowSize() {
   int scale = dynamic_cast<ofAppGLFWWindow*>(ofGetWindowPtr())->getPixelScreenCoordScale();
   return ImVec2(ofGetWindowWidth() / scale, ofGetWindowHeight() / scale);
+}
+
+static ImVec2 getScaledScreenSize() {
+  int scale = dynamic_cast<ofAppGLFWWindow*>(ofGetWindowPtr())->getPixelScreenCoordScale();
+  return ImVec2(ofGetScreenWidth() / scale, ofGetScreenHeight() / scale);
 }
 
 static float getScaledWindowWidth() {

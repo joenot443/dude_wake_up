@@ -97,7 +97,7 @@ public:
   
   // Applies Shader to the current frame, writing to the lastFrame Fbo.
   // Calls traverseFrame() on Shaders in the next set.
-  void traverseFrame(std::shared_ptr<ofFbo> frame);
+  void traverseFrame(std::shared_ptr<ofFbo> frame, int depth);
   
   // Clears the lastFrame back to a 100% black
   void clearLastFrame();

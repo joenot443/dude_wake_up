@@ -635,7 +635,14 @@ void NodeLayoutView::handleDropZone()
       ShaderType shaderType = (ShaderType)n;
       auto shader = ShaderChainerService::getService()->makeShader(shaderType);
       auto canvasPos = ed::ScreenToCanvas(getScaledMouseLocation());
-      nodeDropLocation = std::make_unique<ImVec2>(canvasPos);
+      auto hovered = ed::GetHoveredNode();
+      if (hovered.Get() == 0) {
+        nodeDropLocation = std::make_unique<ImVec2>(canvasPos);
+      } else {
+        nodeDropLocation = std::make_unique<ImVec2>(ed::GetNodePosition(hovered) + ImVec2(400.0, 0.0));
+        auto startNode = nodeIdNodeMap[hovered.Get()];
+        ShaderChainerService::getService()->makeConnection(startNode->connectable, shader, startNode->type == NodeTypeShader ? ConnectionTypeShader : ConnectionTypeSource, InputSlotMain);
+      }
       unplacedNodeIds.push_back(shader->shaderId);
     }
     

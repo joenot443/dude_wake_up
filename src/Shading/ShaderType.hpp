@@ -97,6 +97,11 @@ enum ShaderType {
   ShaderTypePieSplit,
   ShaderTypeFullHouse,
   ShaderTypeBlend,
+  ShaderTypeReflector,
+  ShaderTypeWarpspeed,
+  ShaderTypeGodRay,
+  ShaderTypeVoronoiColumns,
+  ShaderTypeCore,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -105,7 +110,6 @@ static const ShaderType AvailableBasicShaderTypes[] = {
   ShaderTypeBlur,
   ShaderTypePixelate, 
   ShaderTypeMirror,
-  ShaderTypeGlitch,
   ShaderType16bit,
   ShaderTypePaint,
   ShaderTypeColorStepper
@@ -149,8 +153,10 @@ static const ShaderType AvailableTransformShaderTypes[] = {
 
 static const ShaderType AvailableFilterShaderTypes[] = {
   ShaderTypeCubify,
+  ShaderTypeGodRay,
   ShaderTypeCanny,
   ShaderTypeGameboy,
+  ShaderTypeGlitch,
   ShaderTypeRainbowRotator, // Generated
   ShaderTypeRGBShift, // Generated
   ShaderTypeAscii,
@@ -190,6 +196,16 @@ static std::vector<ShaderType> AllShaderTypes() {
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) { // ShaderNames
+    case ShaderTypeCore:
+      return "Core";
+    case ShaderTypeVoronoiColumns:
+      return "VoronoiColumns";
+    case ShaderTypeGodRay:
+      return "GodRay";
+    case ShaderTypeWarpspeed:
+      return "Warpspeed";
+    case ShaderTypeReflector:
+      return "Reflector";
     case ShaderTypeBlend:
       return "Blend";
     case ShaderTypeFullHouse:

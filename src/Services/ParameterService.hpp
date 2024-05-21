@@ -58,6 +58,9 @@ public:
   void toggleFavoriteShaderType(ShaderType type);
   
   std::set<std::string> stageShaderIds;
+  // If no stageShaderIds have been set otherwise, use the defaultStageShaderId
+  // which maps to the Shader with the most traversals (furthest along).
+  std::pair<std::string, int> defaultStageShaderIdDepth;
   void addStageShaderId(std::string shaderId);
   bool isShaderIdStage(std::string shaderId);
   void removeStageShaderId(std::string shaderId);

@@ -4,6 +4,10 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "CoreShader.hpp"
+#include "VoronoiColumnsShader.hpp"
+#include "WarpspeedShader.hpp"
+#include "ReflectorShader.hpp"
 #include "FullHouseShader.hpp"
 #include "GridRunShader.hpp"
 #include "GyroidsShader.hpp"
@@ -86,6 +90,10 @@ enum ShaderSourceType {
   ShaderSource_Gyroids, //source enum,
   ShaderSource_GridRun, //source enum,
   ShaderSource_FullHouse, //source enum,
+  ShaderSource_Reflector, //source enum,
+  ShaderSource_Warpspeed, //source enum,
+  ShaderSource_VoronoiColumns, //source enum,
+  ShaderSource_Core, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -124,11 +132,23 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_Gyroids, // Available
   ShaderSource_GridRun, // Available
   ShaderSource_FullHouse, // Available
+  ShaderSource_Reflector, // Available
+  ShaderSource_Warpspeed, // Available
+  ShaderSource_VoronoiColumns, // Available
+  ShaderSource_Core, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
 // shaderTypeForShaderSourceType
+  case ShaderSource_Core: //type enum
+    return ShaderTypeCore;
+  case ShaderSource_VoronoiColumns: //type enum
+    return ShaderTypeVoronoiColumns;
+  case ShaderSource_Warpspeed: //type enum
+    return ShaderTypeWarpspeed;
+  case ShaderSource_Reflector: //type enum
+    return ShaderTypeReflector;
   case ShaderSource_FullHouse: //type enum
     return ShaderTypeFullHouse;
   case ShaderSource_GridRun: //type enum
@@ -213,6 +233,7 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     case ShaderSource_audioWaveform:
     case ShaderSource_audioMountains:
     case ShaderSource_FrequencyVisualizer:
+    case ShaderSource_VoronoiColumns:
       return "Audio Reactive";
     
   // Simple
@@ -231,6 +252,8 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
   case ShaderSource_galaxy:
   case ShaderSource_fuji:
   case ShaderSource_Vertex:
+  case ShaderSource_Warpspeed:
+  case ShaderSource_Core:
     return "Scenic";
     
     
@@ -249,6 +272,7 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
   case ShaderSource_melter:
   case ShaderSource_plasma:
   case ShaderSource_fractal:
+      case ShaderSource_Reflector:
     return "Trippy";
   default:
     return "Unknown";
@@ -258,6 +282,14 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
 static std::string shaderSourceTypeName(ShaderSourceType nameType) {
   switch (nameType) {
   // ShaderNames
+  case ShaderSource_Core: // Name  
+    return "Core"; // Core
+  case ShaderSource_VoronoiColumns: // Name  
+    return "VoronoiColumns"; // VoronoiColumns
+  case ShaderSource_Warpspeed: // Name  
+    return "Warpspeed"; // Warpspeed
+  case ShaderSource_Reflector: // Name  
+    return "Reflector"; // Reflector
   case ShaderSource_FullHouse: // Name  
     return "FullHouse"; // FullHouse
   case ShaderSource_GridRun: // Name  
@@ -352,6 +384,30 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_Core: { // Settings
+      auto settings = new CoreSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<CoreShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_VoronoiColumns: { // Settings
+      auto settings = new VoronoiColumnsSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<VoronoiColumnsShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Warpspeed: { // Settings
+      auto settings = new WarpspeedSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<WarpspeedShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Reflector: { // Settings
+      auto settings = new ReflectorSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<ReflectorShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_FullHouse: { // Settings
       auto settings = new FullHouseSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<FullHouseShader>(settings);

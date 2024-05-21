@@ -41,7 +41,6 @@ private:
 
   observable::subject<void()> shaderChainerUpdateSubject;
 
-  std::shared_ptr<Shader> stageModeShader;
   
 public:
   static ShaderChainerService *service;

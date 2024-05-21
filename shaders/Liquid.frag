@@ -3,6 +3,7 @@
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
+uniform float intensity;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -31,8 +32,8 @@ void main() {
   uv *= 1.;
   float t = time * .8;
   float s = smoothstep(0., 1., uv.x);
-  uv.y += s * sin(t + uv.x * 5.) * .05;
-  uv.x += s * snoise(uv * (4.3 * (s / 3.7 + 1.2)) - vec2(t * 1.2, 0.));
+  uv.y += s * sin(t + uv.x * 5.) * (.05 * intensity);
+  uv.x += s * snoise(uv * (4.3 * (s / 3.7 + 1.2)) - vec2(t * 1.2, 0.)) * intensity;
   float tt = mod(t, 10.);
   outputColor = texture(tex, uv);
 }

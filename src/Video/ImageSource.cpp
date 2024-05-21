@@ -11,12 +11,10 @@
 void ImageSource::setup()
 {
   ofImage image;
-  fbo->allocate(settings->width->value, settings->height->value);
   image.load(path);
-  image.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
-  fbo->getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
+  fbo->allocate(image.getWidth(), image.getHeight());
   fbo->begin();
-  image.draw(0, 0, settings->width->value, settings->height->value);
+  image.draw(0, 0);
   fbo->end();
 }
 

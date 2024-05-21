@@ -1,6 +1,8 @@
 #include <errno.h>
 #include <sentry.h>
 
+#include "imgui.h"
+#include "CommonViews.hpp"
 #include "ofMain.h"
 #include "MainApp.h"
 #include "FontService.hpp"
@@ -88,10 +90,11 @@ int main( ){
   sentry_init(options);
 
   ofGLFWWindowSettings settings;
-  settings.setSize(windowSize.x, windowSize.y);
+  settings.setSize(1920, 1080);
   settings.setGLVersion(3, 2);
   auto window = ofCreateWindow(settings);
   auto app = shared_ptr<MainApp>(new MainApp(window));
+  ofSetWindowShape(ofGetScreenWidth(), ofGetScreenHeight());
   ofSetFrameRate(60);
   ofSetEscapeQuitsApp(false);
   ofRunApp(window, app);

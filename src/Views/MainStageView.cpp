@@ -56,7 +56,7 @@ void MainStageView::draw()
   
   float nodeLayoutWidth = (getScaledWindowWidth() * 4) / 5;
   float nodeLayoutHeight = getScaledWindowHeight() - LayoutStateService::getService()->audioSettingsViewHeight();
-  
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(15.0, 15.0));
   ImGui::Columns(2, "main_stage_view", false);
   ImGui::SetColumnWidth(0, getScaledWindowWidth() / 5);
   ImGui::SetColumnWidth(1, (getScaledWindowWidth() * 4) / 5);
@@ -68,17 +68,17 @@ void MainStageView::draw()
   // Sources
   auto browserSize = ImVec2(ImGui::GetWindowContentRegionMax().x / 5.,
                             (ImGui::GetWindowContentRegionMax().y - MenuBarHeight) / 3.);
-  ImGui::BeginChild("##sourceBrowser", browserSize);
+  ImGui::BeginChild("##sourceBrowser", browserSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
   CommonViews::H3Title("Sources");
   drawVideoSourceBrowser();
   ImGui::EndChild();
 
-  ImGui::BeginChild("##shaderBrowser", browserSize);
+  ImGui::BeginChild("##shaderBrowser", browserSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
   CommonViews::H3Title("Effects");
   drawShaderBrowser();
   ImGui::EndChild();
 
-  ImGui::BeginChild("##libraryBrowser", browserSize);
+  ImGui::BeginChild("##libraryBrowser", browserSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
   CommonViews::H3Title("Saved Strands");
   strandBrowserView.draw();
   ImGui::EndChild();
@@ -95,6 +95,8 @@ void MainStageView::draw()
     NodeLayoutView::getInstance()->draw();
     audioSourceBrowserView.draw();
   }
+  
+  ImGui::PopStyleVar();
 }
 
 void MainStageView::drawMenu()

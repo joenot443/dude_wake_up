@@ -18,6 +18,7 @@ static const std::string LibraryPathJsonKey = "libraryPath";
 static const std::string ColorHistoryJsonKey = "colorHistory";
 static const std::string MidiEnabledJsonKey = "midiEnabled";
 static const std::string StageModeEnabled = "stageModeEnabled";
+static const std::string ResolutionJsonKey = "resolution";
 
 class LayoutStateService: public ConfigurableService {
 public:

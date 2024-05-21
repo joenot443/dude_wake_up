@@ -12,10 +12,17 @@
 #include "FeedbackSourceService.hpp"
 #include "NodeLayoutView.hpp"
 
-void Shader::traverseFrame(std::shared_ptr<ofFbo> frame)
+void Shader::traverseFrame(std::shared_ptr<ofFbo> frame, int depth)
 {
   clearLastFrame();
   shade(frame, lastFrame);
+  // On our terminal nodes, check if we need to update out defaultStageShader
+  if (outputs.empty()) {
+    if (depth > ParameterService::getService()->defaultStageShaderIdDepth.second) {
+      ParameterService::getService()->defaultStageShaderIdDepth = std::pair<std::string, int>(shaderId, depth);
+    }
+  }
+  
   for (std::shared_ptr<Connection> connection : outputs)
   {
     // Only traverse the Main slot.
@@ -26,7 +33,7 @@ void Shader::traverseFrame(std::shared_ptr<ofFbo> frame)
     // If cast succeeded, traverse that shader's frame
     if (shader)
     {
-      shader->traverseFrame(lastFrame);
+      shader->traverseFrame(lastFrame, depth + 1);
     }
   }
 
