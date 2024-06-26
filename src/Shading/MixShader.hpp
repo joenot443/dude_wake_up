@@ -25,7 +25,7 @@ struct MixSettings : public ShaderSettings {
   std::shared_ptr<Oscillator> mixOscillator;
 
   MixSettings(std::string shaderId, json j, std::string name) :
-  mix(std::make_shared<Parameter>("mix", 0.5, 0.0, 1.0)),
+  mix(std::make_shared<Parameter>("Mix Amount", 0.5, 0.0, 1.0)),
   mixOscillator(std::make_shared<WaveformOscillator>(mix)),
   ShaderSettings(shaderId, j, name) {
     parameters = {mix};

@@ -118,7 +118,7 @@ public:
     ImGui::SetCursorPos(cursorPos);
     
     ImGui::Columns(2);
-    ImGui::SetColumnWidth(0, 280.0);
+    ImGui::SetColumnWidth(0, 256.0);
     CommonViews::AreaSlider(shaderId, settings->minX, settings->maxX, settings->minY, settings->maxY, settings->minXOscillator, settings->maxXOscillator, settings->minYOscillator, settings->maxYOscillator);
     ImGui::NextColumn();
     CommonViews::MiniSlider(settings->minX);

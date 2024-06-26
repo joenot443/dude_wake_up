@@ -49,6 +49,7 @@ void ShaderBrowserView::setup()
   auto filter = ShaderChainerService::getService()->availableFilterShaders;
   auto mask = ShaderChainerService::getService()->availableMaskShaders;
   auto favorites = ShaderChainerService::getService()->availableFavoriteShaders();
+  auto defaultFavorites = ShaderChainerService::getService()->availableDefaultFavoriteShaders;
   
   searchResultsTileBrowserView = TileBrowserView(searchTileItems);
   basicTileBrowserView = browserViewForShaders(basic);
@@ -57,6 +58,7 @@ void ShaderBrowserView::setup()
   filterTileBrowserView = browserViewForShaders(filter);
   maskTileBrowserView = browserViewForShaders(mask);
   favoritesTileBrowserView = browserViewForShaders(favorites);
+  defaultFavoritesTileBrowserView = browserViewForShaders(defaultFavorites);
 };
 
 void ShaderBrowserView::draw()
@@ -77,6 +79,9 @@ void ShaderBrowserView::draw()
   {
     if (ImGui::BeginTabItem("Favorites"))
     {
+      CommonViews::H4Title("Default Favorites");
+      defaultFavoritesTileBrowserView.draw();
+      CommonViews::H4Title("Your Favorites");
       favoritesTileBrowserView.draw();
       ImGui::EndTabItem();
     }

@@ -19,7 +19,7 @@
 
 struct OverlaySettings: public ShaderSettings {
   OverlaySettings(std::string shaderId, json j) :
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, "Overlay") {
     parameters = { };
     oscillators = { };
     load(j);

@@ -17,7 +17,7 @@
 #include <stdio.h>
 
 struct HalfToneSettings: public ShaderSettings {
-	public:
+public:
   std::shared_ptr<Parameter> speed;
   std::shared_ptr<Parameter> radius;
   
@@ -37,14 +37,15 @@ struct HalfToneSettings: public ShaderSettings {
 
 class HalfToneShader: public Shader {
 public:
-
+  
   HalfToneSettings *settings;
   HalfToneShader(HalfToneSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
+  
   void setup() override {
-    
+    shader.load("shaders/Crosshatch");
   }
-
+  
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
@@ -54,23 +55,23 @@ public:
     
     shader.setUniform1f("speed", settings->speed->value);
     shader.setUniform1f("radius", settings->radius->value);
-
+    
     frame->draw(0, 0);
     shader.end();
     canvas->end();
   }
-
+  
   void clear() override {
     
   }
-
-    int inputCount() override {
+  
+  int inputCount() override {
     return 1;
   }
-ShaderType type() override {
+  ShaderType type() override {
     return ShaderTypeHalfTone;
   }
-
+  
   void drawSettings() override {
     
     CommonViews::H3Title("HalfTone");

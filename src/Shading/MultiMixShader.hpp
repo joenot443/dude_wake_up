@@ -45,7 +45,7 @@ struct MultiMixSettings: public ShaderSettings {
   mix7(std::make_shared<Parameter>("Mix 8", 0.0, 0.0, 1.0)),
   mix8(std::make_shared<Parameter>("Mix 9", 0.0, 0.0, 1.0)),
   mix9(std::make_shared<Parameter>("Mix 10", 0.0, 0.0, 1.0)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, "MultiMix") {
     slotMixMap = { {InputSlotMain, mix0, }, {InputSlotTwo, mix1}, {InputSlotThree, mix2}, {InputSlotFour, mix3}, {InputSlotFive, mix4}, {InputSlotSix, mix5}, {InputSlotSeven, mix6}, {InputSlotEight, mix7}, {InputSlotNine, mix8} };
     parameters = { mix0, mix1, mix2, mix3, mix4, mix5, mix6, mix7, mix8, mix9 };
     oscillators = {};

@@ -26,7 +26,6 @@ private:
   ShaderType selectedShaderType;
   msa::BPMTapper bpmTapper;
   
-  
   VideoSourceBrowserView videoSourceBrowserView = VideoSourceBrowserView();
   ShaderBrowserView shaderBrowserView = ShaderBrowserView();
   AudioSourceBrowserView audioSourceBrowserView = AudioSourceBrowserView();

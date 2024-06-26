@@ -36,7 +36,6 @@ struct FujiSettings: public ShaderSettings {
   std::shared_ptr<Oscillator> speedOscillator;
 
   FujiSettings(std::string shaderId, json j, std::string name) :
-  enabled(std::make_shared<Parameter>("enabled", 0.0,  1.0, 0.0)),
   cloud1Y(std::make_shared<Parameter>("cloud1Y", 0.0,  -0.5, 0.5)),
   cloud1X(std::make_shared<Parameter>("cloud1X", 0.0,  0.0, 1.0)),
   cloud2Y(std::make_shared<Parameter>("cloud2Y", 0.0,  -0.5, 0.5)),

@@ -579,6 +579,17 @@ void ax::NodeEditor::NavigateToContent(float duration)
     s_Editor->NavigateTo(s_Editor->GetContentBounds(), true, duration);
 }
 
+void ax::NodeEditor::SuspendNavigation()
+{
+    s_Editor->SuspendNavigation();
+}
+
+void ax::NodeEditor::ResumeNavigation()
+{
+    s_Editor->ResumeNavigation();
+}
+
+
 void ax::NodeEditor::NavigateToSelection(bool zoomIn, float duration)
 {
     s_Editor->NavigateTo(s_Editor->GetSelectionBounds(), zoomIn, duration);

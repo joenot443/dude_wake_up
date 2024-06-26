@@ -11,6 +11,7 @@
 #include <stdio.h>
 
 #include "VideoSourceSettings.hpp"
+#include "ShaderType.hpp"
 #include "UUID.hpp"
 
 class Connection;
@@ -79,6 +80,8 @@ public:
 class Connectable : public std::enable_shared_from_this<Connectable>
 {
 public:
+  virtual ~Connectable() = default;
+
   std::map<InputSlot, std::shared_ptr<Connection>> inputs;
   std::set<std::shared_ptr<Connection>> outputs;
   
@@ -90,6 +93,8 @@ public:
   
   // The max number of inputs supported.
   virtual int inputCount() = 0;
+  
+  virtual void drawSettings() = 0;
     
   // The settings for the VideoSource itself, or the parent VideoSource,
   // or the defaultVideoSource if the Connectable has no VideoSource parent.

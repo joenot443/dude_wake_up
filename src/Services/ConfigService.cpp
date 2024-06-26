@@ -278,9 +278,24 @@ void ConfigService::saveDefaultConfigFile()
 }
 
 void ConfigService::saveCurrentWorkspace() {
-  if (currentWorkspace == nullptr) return;
+  // If we don't have a workspace, create a new one
+  if (currentWorkspace == nullptr) {
+    saveNewWorkspace();
+    return;
+  }
   
   saveConfigFile(currentWorkspace->path);
+}
+
+void ConfigService::saveNewWorkspace() {
+  // Present a file dialog to save the config file
+  // Use a default name of "CURRENT_DATE_TIME.json"
+  std::string defaultName = ofGetTimestampString("Workspace-%m-%d-%Y.json");
+  ofFileDialogResult result = ofSystemSaveDialog(defaultName, "Save Workspace");
+  if (result.bSuccess)
+  {
+    saveWorkspace(std::make_shared<Workspace>(result.getName(), result.getPath()));
+  }
 }
 
 void ConfigService::closeWorkspace() {
@@ -338,6 +353,15 @@ void ConfigService::saveWorkspace(std::shared_ptr<Workspace> workspace) {
 void ConfigService::loadWorkspace(std::shared_ptr<Workspace> workspace) {
   currentWorkspace = workspace;
   loadConfigFile(workspace->path);
+}
+
+void ConfigService::loadWorkspaceDialogue() {
+  // Present a file dialog to load the config file
+  ofFileDialogResult result = ofSystemLoadDialog("Open Workspace", false);
+  if (result.bSuccess)
+  {
+    loadWorkspace(std::make_shared<Workspace>(result.getName(), result.getPath()));
+  }
 }
 
 

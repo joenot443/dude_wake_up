@@ -21,7 +21,7 @@ struct VertexSettings: public ShaderSettings {
   std::shared_ptr<Parameter> color;
 
   VertexSettings(std::string shaderId, json j, std::string name) :
-  color(std::make_shared<Parameter>("color", 1.0  , -1.0, 2.0)),
+  color(std::make_shared<Parameter>("color", 1.0  , -1.0, 2.0, ParameterType_Color)),
   ShaderSettings(shaderId, j, name)  {
     parameters = { color };
     oscillators = { };

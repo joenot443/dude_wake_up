@@ -15,8 +15,9 @@
 void Shader::traverseFrame(std::shared_ptr<ofFbo> frame, int depth)
 {
   clearLastFrame();
+  activateParameters();
   shade(frame, lastFrame);
-  // On our terminal nodes, check if we need to update out defaultStageShader
+  // On our terminal nodes, check if we need to update our defaultStageShader
   if (outputs.empty()) {
     if (depth > ParameterService::getService()->defaultStageShaderIdDepth.second) {
       ParameterService::getService()->defaultStageShaderIdDepth = std::pair<std::string, int>(shaderId, depth);
@@ -84,3 +85,9 @@ json Shader::serialize()
 
   return j;
 };
+
+void Shader::activateParameters() {
+  for (std::shared_ptr<Parameter> param : settings->allParameters()) {
+    param->active = true;
+  }
+}

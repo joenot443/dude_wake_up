@@ -22,6 +22,7 @@ void FontService::addFontToGui(ofxImGui::Gui *gui) {
   h1 = gui->addFont("fonts/Roboto-Medium.ttf", 36);
   h2 = gui->addFont("fonts/Roboto-Medium.ttf", 24);
   h3 = gui->addFont("fonts/Roboto-Medium.ttf", 18);
+  h3b = gui->addFont("fonts/Roboto-Bold.ttf", 18);
   h4 = gui->addFont("fonts/Roboto-Bold.ttf", 16);
   sm = gui->addFont("fonts/Roboto-Regular.ttf", 12);
   b = gui->addFont("fonts/Roboto-Bold.ttf", 14);

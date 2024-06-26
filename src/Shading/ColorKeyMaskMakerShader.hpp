@@ -27,12 +27,12 @@ struct ColorKeyMaskMakerSettings: public ShaderSettings {
 
   ColorKeyMaskMakerSettings(std::string shaderId, json j, std::string name) :
   tolerance(std::make_shared<Parameter>("tolerance", 0.1, 0.0, 1.0)),
-  color(std::make_shared<Parameter>("color", 0.0)),
-  drawInput(std::make_shared<Parameter>("drawInput", 0.0, 0.0, 1.0)),
-  invert(std::make_shared<Parameter>("Invert", 0.0, 0.0, 1.0)),
+  color(std::make_shared<Parameter>("color", 0.0, ParameterType_Color)),
+  drawInput(std::make_shared<Parameter>("drawInput", 0.0, 0.0, 1.0, ParameterType_Bool)),
+  invert(std::make_shared<Parameter>("Invert", 0.0, 0.0, 1.0, ParameterType_Bool)),
   toleranceOscillator(std::make_shared<WaveformOscillator>(tolerance)),
   ShaderSettings(shaderId, j, name) {
-    parameters = { tolerance, color, invert };
+    parameters = { tolerance, color, invert, drawInput };
     oscillators = { toleranceOscillator };
     load(j);
     registerParameters();

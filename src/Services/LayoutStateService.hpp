@@ -19,6 +19,9 @@ static const std::string ColorHistoryJsonKey = "colorHistory";
 static const std::string MidiEnabledJsonKey = "midiEnabled";
 static const std::string StageModeEnabled = "stageModeEnabled";
 static const std::string ResolutionJsonKey = "resolution";
+static const std::string ShaderInfoEnabledJsonKey = "shaderInfoEnabled";
+static const std::string AllParametersInStageMode = "allParametersInStageMode";
+static const std::string HelpEnabledJsonKey = "helpEnabled";
 
 class LayoutStateService: public ConfigurableService {
 public:
@@ -30,8 +33,16 @@ public:
   
   bool stageModeEnabled = false;
   
+  bool shaderInfoEnabled = true;
+  
+  bool allParametersInStageModeEnabled = false;
+  
+  bool isEyeDroppingColor = false;
+  
+  bool helpEnabled = true;
+  
   std::string libraryPath = ConfigService::getService()->nottawaFolderFilePath();
-  std::vector<std::array<float, 3>> colorHistory = std::vector<std::array<float, 3>>(1, std::array<float, 3>{0.0f, 0.0f, 0.0f});
+  std::vector<std::array<float, 4>> colorHistory = std::vector<std::array<float, 4>>(1, std::array<float, 4>{0.0f, 0.0f, 0.0f, 0.0f});
   
   float audioSettingsViewHeight();
   
@@ -39,7 +50,9 @@ public:
   
   void updateLibraryPath(std::string path);
   
-  void pushColor(std::shared_ptr<std::array<float, 3>> color);
+  void pushColor(std::shared_ptr<std::array<float, 4>> color);
+  
+  bool shouldDrawShaderInfo();
   
   static LayoutStateService *service;
 

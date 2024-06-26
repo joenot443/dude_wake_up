@@ -17,7 +17,7 @@
 class MarkdownView {
 public:
   void setup();
-  void draw();
+  void draw(bool drawCloseButton = true);
   void update();
   
   std::string name;

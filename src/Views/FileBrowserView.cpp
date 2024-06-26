@@ -18,9 +18,14 @@
 
 void FileBrowserView::refresh()
 {
+  // TODO(joe) CHANGE AND FIX
+  return;
+  
   files.clear();
 
   currentDirectory.open(currentDirectory.getAbsolutePath());
+  if (!currentDirectory.isDirectory() || !currentDirectory.canRead()) { return; }
+  
   currentDirectory.sort();
 
   for (int i = 0; i < currentDirectory.size(); i++)

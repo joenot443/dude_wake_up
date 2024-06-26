@@ -3,6 +3,7 @@
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
+uniform float shapeDistance;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -13,7 +14,7 @@ void main() {
     outputColor = vec4(0.0); // Initialize the output color to zero
 
     for (float i = 0.0; i < 20.0; i++) {
-        float shapeDistance = abs(length(u * u) - i * 0.04) + 0.005;
+        float shapeDistance = abs(length(u * u) - i * shapeDistance * 0.1);
         vec3 color = (cos(i + vec3(0.0, 1.0, 2.0)) + 1.0);
         float animation = smoothstep(0.35, 0.4, abs(abs(mod(time, 2.0) - i * 0.1) - 1.0));
 

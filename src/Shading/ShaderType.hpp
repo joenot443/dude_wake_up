@@ -102,6 +102,13 @@ enum ShaderType {
   ShaderTypeGodRay,
   ShaderTypeVoronoiColumns,
   ShaderTypeCore,
+  ShaderTypeTwistedCubes,
+  ShaderTypeTwistedTrip,
+  ShaderTypeOldTV,
+  ShaderTypeOneBitDither,
+  ShaderTypeDirtyPlasma,
+  ShaderTypePixelPlay,
+  ShaderTypeTraceAudio,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -166,6 +173,10 @@ static const ShaderType AvailableFilterShaderTypes[] = {
   ShaderTypeHalfTone, // Generated
   ShaderTypeCrosshatch, // Generated
   ShaderTypeVHS,
+  ShaderTypeOldTV,
+  ShaderTypeOneBitDither,
+  ShaderTypePixelPlay,
+  ShaderTypeTraceAudio,
 };
 
 static std::vector<ShaderType> AllShaderTypes() {
@@ -196,6 +207,20 @@ static std::vector<ShaderType> AllShaderTypes() {
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) { // ShaderNames
+    case ShaderTypeTraceAudio:
+      return "TraceAudio";
+    case ShaderTypePixelPlay:
+      return "PixelPlay";
+    case ShaderTypeDirtyPlasma:
+      return "DirtyPlasma";
+    case ShaderTypeOneBitDither:
+      return "OneBitDither";
+    case ShaderTypeOldTV:
+      return "OldTV";
+    case ShaderTypeTwistedTrip:
+      return "TwistedTrip";
+    case ShaderTypeTwistedCubes:
+      return "TwistedCubes";
     case ShaderTypeCore:
       return "Core";
     case ShaderTypeVoronoiColumns:

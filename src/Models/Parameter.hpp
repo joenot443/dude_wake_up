@@ -17,10 +17,19 @@
 
 using json = nlohmann::json;
 
+typedef enum {
+  ParameterType_Standard,
+  ParameterType_Int,
+  ParameterType_Bool,
+  ParameterType_Color,
+  ParameterType_Hidden
+} ParameterType;
+
 struct Parameter : public std::enable_shared_from_this<Parameter>
 {
   std::string name = "";
   std::string ownerName = "";
+  std::string ownerSettingsId = "";
   std::string paramId;
   std::string midiDescriptor = "";
   float defaultValue = 0.0;
@@ -28,19 +37,31 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
   int intValue = 0;
   bool boolValue = false;
   bool favorited = false;
+  
+  // Whether the Parameter is within a connected Node
+  bool active = false;
+  
+  // Whether the Parameter should be hidden from Node view
+  bool hiddenFromNode = false;
+  
+  // The options associated with this Parameter when used in Int mode
+  std::vector<std::string> options = {};
+  
   // Another Parameter which is driving this one's value
   std::shared_ptr<Parameter> driver = nullptr;
   std::shared_ptr<Parameter> shift = nullptr;
   std::shared_ptr<Parameter> scale = nullptr;
+  
+  ParameterType type;
 
   // Color value contained by Parameter
-  std::shared_ptr<std::array<float, 3>> color = std::make_shared<std::array<float, 3>>(std::array<float, 3>({0.0f, 0.0f, 0.0f}));
+  std::shared_ptr<std::array<float, 4>> color = std::make_shared<std::array<float, 4>>(std::array<float, 4>({0.0f, 0.0f, 0.0f, 0.0f}));
 
   float min = 0.0;
   float max = 1.0;
   
-  void setColor(std::array<float, 3> newColor) {
-    color = std::make_shared<std::array<float, 3>>(newColor);
+  void setColor(std::array<float, 4> newColor) {
+    color = std::make_shared<std::array<float, 4>>(newColor);
   }
 
   json serialize()
@@ -134,6 +155,13 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
     boolValue = value > 0.0001;
   }
   
+  /// Sets the float and bool values of the Parameter to the int value.
+  void affirmIntValue()
+  {
+    value = static_cast<float>(intValue);
+    boolValue = value > 0.0001;
+  }
+  
   /// Drives the Parameter between its min and max by a float percent.
   void driveValue(float percent)
   {
@@ -182,8 +210,8 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
     return formatString("##%s_audio_popup", name.c_str());
   }
 
-  Parameter(std::string name, float value);
-  Parameter(std::string name, float value, float min, float max);
+  Parameter(std::string name, float value, ParameterType = ParameterType_Standard);
+  Parameter(std::string name, float value, float min, float max, ParameterType = ParameterType_Standard);
 
 private:
   Parameter(){};

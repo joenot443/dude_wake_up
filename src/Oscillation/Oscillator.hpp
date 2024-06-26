@@ -90,7 +90,7 @@ public:
   Oscillator(std::shared_ptr<Parameter> v) : value(v),
                                              name(v->name),
                                              settingsId(value->paramId),
-                                             enabled(std::make_shared<Parameter>("enabled", 0.0, 0.0, 1.0))
+                                             enabled(std::make_shared<Parameter>("enabled", 0.0, 0.0, 1.0, ParameterType_Hidden))
   {
     parameters = {enabled};
     data = ImVector<ImVec2>();

@@ -24,7 +24,7 @@ struct PieSplitSettings: public ShaderSettings {
   PieSplitSettings(std::string shaderId, json j) :
   shaderValue(std::make_shared<Parameter>("shaderValue", 1.0  , -1.0, 2.0)),
   shaderWaveformOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, "PieSplit") {
     parameters = { shaderValue };
     oscillators = { shaderWaveformOscillator };
     load(j);

@@ -78,6 +78,8 @@
 		02B280EB2915480E00B793D5 /* FileSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B280E529148A7500B793D5 /* FileSource.cpp */; };
 		02B280EC2915487200B793D5 /* VideoSourceService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B280E12914761E00B793D5 /* VideoSourceService.cpp */; };
 		02B280EF291564A100B793D5 /* ShaderChainerService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B280ED291564A100B793D5 /* ShaderChainerService.cpp */; };
+		02BD34CE2BFD3D8F007ED87E /* MultiSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02BD34CC2BFD3D8F007ED87E /* MultiSource.cpp */; };
+		02BD34D12BFFD384007ED87E /* ShaderInfoView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02BD34CF2BFFD384007ED87E /* ShaderInfoView.cpp */; };
 		02BE890629DCA12600C65C58 /* ShaderConfigSelectionView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02BE890429DCA12600C65C58 /* ShaderConfigSelectionView.cpp */; };
 		02BE890829DDDB4600C65C58 /* ShaderSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02BE890729DDDB4600C65C58 /* ShaderSource.cpp */; };
 		02BE890B29DEFBD700C65C58 /* ListBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02BE890929DEFBD700C65C58 /* ListBrowserView.cpp */; };
@@ -193,6 +195,7 @@
 		02E24F4729889D1C0066A05D /* Roboto-Bold.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 02E24F3729889D150066A05D /* Roboto-Bold.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		02E24F4829889D1C0066A05D /* Roboto-Thin.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 02E24F3829889D150066A05D /* Roboto-Thin.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		02E24F4929889D1C0066A05D /* Roboto-Black.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 02E24F3929889D150066A05D /* Roboto-Black.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		02E81F7E2C2086660009C073 /* HelpService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02E81F7C2C2086620009C073 /* HelpService.cpp */; };
 		02ED91042955EDFD002252CC /* AudioSourceBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02ED91022955EDFD002252CC /* AudioSourceBrowserView.cpp */; };
 		02ED91062955F179002252CC /* AudioSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02ED91052955F179002252CC /* AudioSource.cpp */; };
 		02F2A06829C4D8F30072CE86 /* TextEditorView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F2A06629C4D8F30072CE86 /* TextEditorView.cpp */; };
@@ -534,6 +537,10 @@
 		02B756952BE9B02300DE97FF /* FullHouseShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = FullHouseShader.hpp; path = Shading/FullHouseShader.hpp; sourceTree = "<group>"; };
 		02B756962BEA65BE00DE97FF /* Workspace.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = Workspace.hpp; path = Models/Workspace.hpp; sourceTree = "<group>"; };
 		02B756972BEBB62D00DE97FF /* BlendShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = BlendShader.hpp; path = Shading/BlendShader.hpp; sourceTree = "<group>"; };
+		02BD34CC2BFD3D8F007ED87E /* MultiSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MultiSource.cpp; sourceTree = "<group>"; };
+		02BD34CD2BFD3D8F007ED87E /* MultiSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MultiSource.hpp; sourceTree = "<group>"; };
+		02BD34CF2BFFD384007ED87E /* ShaderInfoView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ShaderInfoView.cpp; path = Views/ShaderInfoView.cpp; sourceTree = "<group>"; };
+		02BD34D02BFFD384007ED87E /* ShaderInfoView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = ShaderInfoView.hpp; path = Views/ShaderInfoView.hpp; sourceTree = "<group>"; };
 		02BE890329DC942900C65C58 /* AvailableShaderConfig.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = AvailableShaderConfig.hpp; path = Models/AvailableShaderConfig.hpp; sourceTree = "<group>"; };
 		02BE890429DCA12600C65C58 /* ShaderConfigSelectionView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ShaderConfigSelectionView.cpp; path = Views/ShaderConfigSelectionView.cpp; sourceTree = "<group>"; };
 		02BE890529DCA12600C65C58 /* ShaderConfigSelectionView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = ShaderConfigSelectionView.hpp; path = Views/ShaderConfigSelectionView.hpp; sourceTree = "<group>"; };
@@ -589,6 +596,9 @@
 		02E24F4C2988A75C0066A05D /* SliderShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = SliderShader.hpp; path = Shading/SliderShader.hpp; sourceTree = "<group>"; };
 		02E24F51298C03430066A05D /* ColorPassShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = ColorPassShader.hpp; path = Shading/ColorPassShader.hpp; sourceTree = "<group>"; };
 		02E24F54298C0DD20066A05D /* FishEyeShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = FishEyeShader.hpp; path = Shading/FishEyeShader.hpp; sourceTree = "<group>"; };
+		02E81F7C2C2086620009C073 /* HelpService.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = HelpService.cpp; path = src/HelpService.cpp; sourceTree = SOURCE_ROOT; };
+		02E81F7D2C2086620009C073 /* HelpService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = HelpService.hpp; path = src/HelpService.hpp; sourceTree = SOURCE_ROOT; };
+		02E81F7F2C2095D50009C073 /* markdown */ = {isa = PBXFileReference; lastKnownFileType = folder; path = markdown; sourceTree = "<group>"; };
 		02ED90F32954A0DF002252CC /* MirrorShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = MirrorShader.hpp; path = Shading/MirrorShader.hpp; sourceTree = "<group>"; };
 		02ED91022955EDFD002252CC /* AudioSourceBrowserView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AudioSourceBrowserView.cpp; path = Views/AudioSourceBrowserView.cpp; sourceTree = "<group>"; };
 		02ED91032955EDFD002252CC /* AudioSourceBrowserView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = AudioSourceBrowserView.hpp; path = Views/AudioSourceBrowserView.hpp; sourceTree = "<group>"; };
@@ -1230,6 +1240,8 @@
 				022D18F02A71C21000AEBC05 /* VideoRecorder.hpp */,
 				02DF59B52B7842B1005B772A /* IconSource.cpp */,
 				02DF59B62B7842B1005B772A /* IconSource.hpp */,
+				02BD34CC2BFD3D8F007ED87E /* MultiSource.cpp */,
+				02BD34CD2BFD3D8F007ED87E /* MultiSource.hpp */,
 			);
 			path = Video;
 			sourceTree = "<group>";
@@ -1382,6 +1394,8 @@
 		47E4E7757DB0771B0C4C58E1 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				02E81F7C2C2086620009C073 /* HelpService.cpp */,
+				02E81F7D2C2086620009C073 /* HelpService.hpp */,
 				029F41BE297B1CDD00B6DB77 /* Network */,
 				0240887328B1BB1400908222 /* macro_scope.hpp */,
 				D994AF12295A8568554AAB57 /* FontService.cpp */,
@@ -1539,6 +1553,8 @@
 				020B520C2BC8666200B88418 /* StageModeView.hpp */,
 				020B520E2BC8684600B88418 /* StageParameterView.cpp */,
 				020B520F2BC8684600B88418 /* StageParameterView.hpp */,
+				02BD34CF2BFFD384007ED87E /* ShaderInfoView.cpp */,
+				02BD34D02BFFD384007ED87E /* ShaderInfoView.hpp */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -1982,6 +1998,7 @@
 		E4B69B4A0A3A1720003C02F2 = {
 			isa = PBXGroup;
 			children = (
+				02E81F7F2C2095D50009C073 /* markdown */,
 				0295FF992B91652E0040B7E2 /* shaders */,
 				028E8E58299E72FE00B95C92 /* MaterialIcons-Regular.ttf */,
 				02E24F2929889D150066A05D /* fonts */,
@@ -2274,6 +2291,7 @@
 				02BE890B29DEFBD700C65C58 /* ListBrowserView.cpp in Sources */,
 				6764CEA4D206EE90B9BEE3D4 /* MainApp.cpp in Sources */,
 				02B22C2F293812800095AC89 /* OutputWindow.cpp in Sources */,
+				02BD34CE2BFD3D8F007ED87E /* MultiSource.cpp in Sources */,
 				029F41AE29770D9800B6DB77 /* AvailableShader.cpp in Sources */,
 				02B280EF291564A100B793D5 /* ShaderChainerService.cpp in Sources */,
 				5D5F66B1ACC05361D4592A52 /* main.cpp in Sources */,
@@ -2295,6 +2313,7 @@
 				029742E32B34D33400C4ECDB /* ImageTexture.cpp in Sources */,
 				023C633D2922EF5100A8BC9E /* MainStageView.cpp in Sources */,
 				3727B026D4D11026D33BEEA2 /* OscillationService.cpp in Sources */,
+				02E81F7E2C2086660009C073 /* HelpService.cpp in Sources */,
 				B0F01881AEC796CF3A25ECB3 /* imgui_impl_glfw.cpp in Sources */,
 				0204F60D2B8941680033970D /* StrandBrowserView.cpp in Sources */,
 				021AF00E2B61651800E1AD75 /* Pulser.cpp in Sources */,
@@ -2331,6 +2350,7 @@
 				020B520D2BC8666200B88418 /* StageModeView.cpp in Sources */,
 				026EA94A2A5EDA7500AA3E55 /* LibraryFile.cpp in Sources */,
 				DC62E5817CB03447F2ADFB85 /* ImHelpers.cpp in Sources */,
+				02BD34D12BFFD384007ED87E /* ShaderInfoView.cpp in Sources */,
 				021AF00A2B6164FA00E1AD75 /* ValueOscillator.cpp in Sources */,
 				028FA5B32956062B00FE6FE3 /* kiss_fft.c in Sources */,
 				028FA5B02956062B00FE6FE3 /* Gist.cpp in Sources */,

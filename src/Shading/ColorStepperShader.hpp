@@ -28,7 +28,7 @@ struct ColorStepperSettings: public ShaderSettings {
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   smoothness(std::make_shared<Parameter>("Smoothness", 0.5, 0.0, 1.0)),
   smoothnessOscillator(std::make_shared<WaveformOscillator>(smoothness)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, "ColorStepper") {
     parameters = { speed };
     oscillators = { speedOscillator };
     load(j);

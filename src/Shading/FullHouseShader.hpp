@@ -32,7 +32,7 @@ struct FullHouseSettings: public ShaderSettings {
   lengthOscillator(std::make_shared<WaveformOscillator>(length)),
   countOscillator(std::make_shared<WaveformOscillator>(count)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, "FullHouse") {
     parameters = { count, length, speed };
     oscillators = { countOscillator, lengthOscillator, speedOscillator };
     load(j);

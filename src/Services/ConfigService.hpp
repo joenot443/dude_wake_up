@@ -105,7 +105,9 @@ public:
   std::shared_ptr<Workspace> currentWorkspace;
   bool isEditingWorkspace();
   void saveCurrentWorkspace();
+  void saveNewWorkspace();
   void saveWorkspace(std::shared_ptr<Workspace> workspace);
+  void loadWorkspaceDialogue();
   void loadWorkspace(std::shared_ptr<Workspace> workspace);
   void closeWorkspace();
   

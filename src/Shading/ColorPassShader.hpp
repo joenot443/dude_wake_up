@@ -31,7 +31,10 @@ struct ColorPassSettings : public ShaderSettings {
         lowHueOsc(std::make_shared<WaveformOscillator>(lowHue)),
         highHueOsc(std::make_shared<WaveformOscillator>(highHue)),
         ShaderSettings(shaderId, j, name){
-
+          parameters = { lowHue, highHue };
+          oscillators = { lowHueOsc, highHueOsc };
+          load(j);
+          registerParameters();
         };
 };
 

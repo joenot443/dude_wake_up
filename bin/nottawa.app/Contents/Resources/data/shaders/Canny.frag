@@ -4,7 +4,10 @@
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
+uniform float minThresh;
+uniform float maxThresh;
 uniform vec4 backgroundColor;
+uniform vec4 edgeColor;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -16,7 +19,6 @@ float getAve(vec2 uv){
 
 // Detect edge.
 vec4 sobel(vec2 coord, vec2 dir){
-  vec4 mous = vec4(0.02, 0.02, 0.02, 0.02);
     vec2 uv = coord/dimensions.xy;
     vec2 texel = 1./dimensions.xy;
     float np = getAve(uv + (vec2(-1,+1) + dir ) * texel * tickness);
@@ -96,6 +98,6 @@ float cannyEdge(vec2 coord, float mn, float mx){
 
 void main(  ){
     vec4 mous = vec4(0.02, 0.02, 0.02, 0.02);
-    float edge = cannyEdge(coord, mous.x*5., mous.y*30.);
-    outputColor = mix(vec4(0,0,0,1), backgroundColor, 1.-edge);
+    float edge = cannyEdge(coord, minThresh, minThresh);
+    outputColor = mix(edgeColor, backgroundColor, 1.-edge);
 }

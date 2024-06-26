@@ -15,7 +15,7 @@
 #include "Fonts.hpp"
 #include "CommonViews.hpp"
 
-static const ImVec2 TileSize = ImVec2(80, 50);
+static const ImVec2 TileSize = ImVec2(90, 55);
 
 void TileBrowserView::setup(){};
 
@@ -54,7 +54,6 @@ void TileBrowserView::draw()
   sortTileItems();
   auto n = 0;
   auto size = ImGui::GetContentRegionAvail();
-
   std::string lastCategory = "";
   for (int idx = 0; idx < tileItems.size(); ++idx)
   {

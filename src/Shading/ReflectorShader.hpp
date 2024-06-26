@@ -27,13 +27,13 @@ struct ReflectorSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> polyWOscillator;
 
   ReflectorSettings(std::string shaderId, json j) :
-  polyU(std::make_shared<Parameter>("U", 0.0, 0.0, 2.0)),
-  polyV(std::make_shared<Parameter>("V", 0.0, 0.0, 2.0)),
-  polyW(std::make_shared<Parameter>("W", 0.0, 0.0, 2.0)),
+  polyU(std::make_shared<Parameter>("U", 0.0, 0.0, 1.0)),
+  polyV(std::make_shared<Parameter>("V", 0.001, 0.001, 1.0)),
+  polyW(std::make_shared<Parameter>("W", 0.0, 0.0, 1.0)),
   polyUOscillator(std::make_shared<WaveformOscillator>(polyU)),
   polyVOscillator(std::make_shared<WaveformOscillator>(polyV)),
   polyWOscillator(std::make_shared<WaveformOscillator>(polyW)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, "Reflector") {
     parameters = { polyU, polyV, polyW };
     oscillators = { polyUOscillator, polyVOscillator, polyWOscillator };
     load(j);

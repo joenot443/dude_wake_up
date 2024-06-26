@@ -26,6 +26,7 @@ struct Texture
     ofImage img;
     img.load(path);
     fbo.allocate(img.getWidth(), img.getHeight(), GL_RGBA);
+    fbo.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
     fbo.begin();
     img.draw(0, 0);
     fbo.end();

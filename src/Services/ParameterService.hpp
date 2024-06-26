@@ -38,6 +38,8 @@ public:
   
   void tickParameters();
   
+  std::vector<std::shared_ptr<Parameter>> allActiveParameters();
+  
   std::shared_ptr<FavoriteParameter> addFavoriteParameter(std::shared_ptr<Parameter> parameter);
   void removeFavoriteParameter(std::shared_ptr<Parameter> parameter);
   bool hasFavoriteParameterFor(std::shared_ptr<Parameter> parameter);
@@ -70,6 +72,7 @@ public:
   json config();
   
   ParameterService() {};
+  void setup();
   static ParameterService* getService() {
     if (!service) {
       service = new ParameterService;

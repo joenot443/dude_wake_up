@@ -74,21 +74,21 @@ static std::string formatTimeDuration(float seconds) {
     return ss.str();
 }
 
-static std::vector<std::string> mapColorsToStrings(const std::vector<std::array<float, 3>>& colors) {
+static std::vector<std::string> mapColorsToStrings(const std::vector<std::array<float, 4>>& colors) {
     std::vector<std::string> result;
     result.reserve(colors.size()); // Reserve memory for efficiency
 
     for (const auto& color : colors) {
         std::ostringstream oss;
-        oss << "R: " << color[0] << " G: " << color[1] << " B: " << color[2];
+        oss << "R: " << color[0] << " G: " << color[1] << " B: " << color[2] << " A: " << color[3];
         result.push_back(oss.str());
     }
 
     return result;
 }
 
-static std::string formatColor(std::array<float, 3> color) {
-  return formatString("R: %.2f G: %.2f B: %.2f", color[0], color[1], color[2]);
+static std::string formatColor(std::array<float, 4> color) {
+  return formatString("R: %.2f G: %.2f B: %.2f, A: %.2f", color[0], color[1], color[2], color[3]);
 }
 
 

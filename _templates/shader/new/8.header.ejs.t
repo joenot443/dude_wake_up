@@ -26,9 +26,9 @@ struct <%= name %>Settings: public ShaderSettings {
   std::shared_ptr<ValueOscillator> shaderValueOscillator;
 
   <%= name %>Settings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 1.0  , -1.0, 2.0)),
+  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
   shaderValueOscillator(std::make_shared<ValueOscillator>(shaderValue)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, "<%= name %>") {
     parameters = { shaderValue };
     oscillators = { shaderValueOscillator };
     load(j);
@@ -40,6 +40,7 @@ struct <%= name %>Shader: Shader {
   <%= name %>Settings *settings;
   <%= name %>Shader(<%= name %>Settings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
+  
   void setup() override {
     shader.load("shaders/<%= name %>");
   }
@@ -48,7 +49,7 @@ struct <%= name %>Shader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("color", settings->shaderValue->value);
+    shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
@@ -57,7 +58,7 @@ struct <%= name %>Shader: Shader {
   }
 
   void clear() override {
-    
+
   }
 
   int inputCount() override {

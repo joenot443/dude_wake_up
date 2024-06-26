@@ -20,7 +20,6 @@
 
 struct PlasmaSettings: public ShaderSettings {
 	public:
-  std::shared_ptr<Parameter> enabled;
   std::shared_ptr<Parameter> speed;
   std::shared_ptr<Parameter> color;
 
@@ -28,13 +27,12 @@ struct PlasmaSettings: public ShaderSettings {
   std::shared_ptr<Oscillator> colorOscillator;
 
   PlasmaSettings(std::string shaderId, json j, std::string name) :
-  enabled(std::make_shared<Parameter>("enabled", 0.0,  1.0, 0.0)),
   speed(std::make_shared<Parameter>("speed", 1.0,  0.0, 5.0)),
   color(std::make_shared<Parameter>("color", 1.0,  0.0, 1.0)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   colorOscillator(std::make_shared<WaveformOscillator>(color)),
   ShaderSettings(shaderId, j, name) {
-    parameters = {enabled, speed, color};
+    parameters = {speed, color};
     oscillators = {speedOscillator, colorOscillator};
     load(j);
     registerParameters();

@@ -18,15 +18,15 @@
 #include <stdio.h>
 
 struct CoreSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<ValueOscillator> shaderValueOscillator;
+  std::shared_ptr<Parameter> shapeDistance;
+  std::shared_ptr<ValueOscillator> shapeDistanceOscillator;
 
   CoreSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 1.0  , -1.0, 2.0)),
-  shaderValueOscillator(std::make_shared<ValueOscillator>(shaderValue)),
-  ShaderSettings(shaderId, j) {
-    parameters = { shaderValue };
-    oscillators = { shaderValueOscillator };
+  shapeDistance(std::make_shared<Parameter>("Shape Distance", 0.0, 0.0, 1.0)),
+  shapeDistanceOscillator(std::make_shared<ValueOscillator>(shapeDistance)),
+  ShaderSettings(shaderId, j, "Core") {
+    parameters = { shapeDistance };
+    oscillators = { shapeDistanceOscillator };
     load(j);
     registerParameters();
   };
@@ -44,7 +44,7 @@ struct CoreShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("color", settings->shaderValue->value);
+    shader.setUniform1f("shapeDistance", settings->shapeDistance->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
@@ -67,7 +67,7 @@ struct CoreShader: Shader {
   void drawSettings() override {
     CommonViews::H3Title("Core");
 
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
+    CommonViews::ShaderParameter(settings->shapeDistance, settings->shapeDistanceOscillator);
   }
 };
 

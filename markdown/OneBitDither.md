@@ -1,0 +1,3 @@
+# OneBitDither
+
+Information about OneBitDither

@@ -7,6 +7,13 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "TraceAudioShader.hpp"
+#include "PixelPlayShader.hpp"
+#include "DirtyPlasmaShader.hpp"
+#include "OneBitDitherShader.hpp"
+#include "OldTVShader.hpp"
+#include "TwistedTripShader.hpp"
+#include "TwistedCubesShader.hpp"
 #include "CoreShader.hpp"
 #include "VoronoiColumnsShader.hpp"
 #include "GodRayShader.hpp"
@@ -147,6 +154,11 @@ void ShaderChainerService::setup()
     availableShadersMap[shaderType] = shader;
     allAvailableShaders.push_back(shader);
   }
+  
+  for (auto const shaderType : { ShaderTypeMix, ShaderTypeBlend, ShaderTypeTransform, ShaderTypeRotate, ShaderTypeMirror, ShaderTypeHSB }) {
+    auto availableShader = availableShadersMap[shaderType];
+    availableDefaultFavoriteShaders.push_back(availableShader);
+  }
 }
 
 std::vector<std::shared_ptr<AvailableShader>> ShaderChainerService::availableFavoriteShaders() {
@@ -191,9 +203,14 @@ void ShaderChainerService::processFrame()
   }
 }
 
-void ShaderChainerService::selectShader(std::shared_ptr<Shader> shader)
+void ShaderChainerService::selectConnectable(std::shared_ptr<Connectable> connectable)
 {
-  selectedShader = shader;
+  selectedConnectable = connectable;
+}
+
+void ShaderChainerService::deselectConnectable()
+{
+  selectedConnectable = nullptr;
 }
 
 std::shared_ptr<Shader> ShaderChainerService::makeShader(ShaderType type)
@@ -207,6 +224,13 @@ std::shared_ptr<Shader> ShaderChainerService::makeShader(ShaderType type)
 bool ShaderChainerService::isTerminalShader(std::shared_ptr<Shader> shader)
 {
   return shader->outputs.empty();
+}
+
+bool ShaderChainerService::isShaderType(std::shared_ptr<Connectable> connectable, ShaderType shaderType) {
+  if (connectable->connectableType() != ConnectableTypeShader) return false;
+  
+  std::shared_ptr<Shader> shader = std::dynamic_pointer_cast<Shader>(connectable);
+  return shader->type() == shaderType;
 }
 
 std::shared_ptr<Shader> ShaderChainerService::terminalShader(std::shared_ptr<Shader> shader)
@@ -268,6 +292,7 @@ void ShaderChainerService::clear()
   }
   shadersMap.clear();
   connectionMap.clear();
+  selectedConnectable = nullptr;
   // Clear the shaderChainerMap
   shaderIdShaderChainerMap.clear();
   videoSourceIdShaderChainerMap.clear();
@@ -387,6 +412,10 @@ void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader, bool fro
   if (fromMap)
   {
     shadersMap.erase(shader->shaderId);
+  }
+  
+  if (selectedConnectable == shader) {
+    selectedConnectable = nullptr;
   }
   
   ParameterService::getService()->removeStageShaderId(shader->shaderId);
@@ -582,6 +611,48 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeTraceAudio: {
+      auto settings = new TraceAudioSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<TraceAudioShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypePixelPlay: {
+      auto settings = new PixelPlaySettings(shaderId, shaderJson);
+      auto shader = std::make_shared<PixelPlayShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeDirtyPlasma: {
+      auto settings = new DirtyPlasmaSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<DirtyPlasmaShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeOneBitDither: {
+      auto settings = new OneBitDitherSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<OneBitDitherShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeOldTV: {
+      auto settings = new OldTVSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<OldTVShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeTwistedTrip: {
+      auto settings = new TwistedTripSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<TwistedTripShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeTwistedCubes: {
+      auto settings = new TwistedCubesSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<TwistedCubesShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeCore: {
       auto settings = new CoreSettings(shaderId, shaderJson);
       auto shader = std::make_shared<CoreShader>(settings);

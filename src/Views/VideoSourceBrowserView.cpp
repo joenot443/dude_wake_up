@@ -54,6 +54,7 @@ void VideoSourceBrowserView::refreshSources()
 
     if (source->type == VideoSource_shader || 
         source->type == VideoSource_text ||
+        source->type == VideoSource_multi ||
         source->type == VideoSource_icon)
     {
       shaderItems.push_back(tileItem);
@@ -96,7 +97,7 @@ void VideoSourceBrowserView::drawLibraryHeader() {}
 
 void VideoSourceBrowserView::draw()
 {
-  if (ImGui::BeginTabBar("VideoSourceBrowser"))
+  if (ImGui::BeginTabBar("VideoSourceBrowser", ImGuiTabBarFlags_None))
   {
     if (ImGui::BeginTabItem("Generated"))
     {

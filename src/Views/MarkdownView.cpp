@@ -23,9 +23,9 @@ void MarkdownView::update() {
   
 }
 
-void MarkdownView::draw() {
+void MarkdownView::draw(bool drawCloseButton) {
   ImGui::Markdown(item->contents.c_str(), item->contents.length(), mdConfig);
-  if (ImGui::Button("Ok")) {
+  if (drawCloseButton && ImGui::Button("Ok")) {
     ImGui::CloseCurrentPopup();
   }
 }

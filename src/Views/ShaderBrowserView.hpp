@@ -28,6 +28,7 @@ public:
   std::vector<std::shared_ptr<TileItem>> searchTileItems = {};
 
   TileBrowserView searchResultsTileBrowserView = TileBrowserView({});
+  TileBrowserView defaultFavoritesTileBrowserView = TileBrowserView({});
   TileBrowserView favoritesTileBrowserView = TileBrowserView({});
   TileBrowserView filterTileBrowserView = TileBrowserView({});
   TileBrowserView mixTileBrowserView = TileBrowserView({});

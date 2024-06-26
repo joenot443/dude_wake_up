@@ -12,9 +12,10 @@
 #include <memory>
 #include "UUID.hpp"
 
-Parameter::Parameter(std::string name, float value) :
+Parameter::Parameter(std::string name, float value, ParameterType type) :
 name(name),
 defaultValue(value),
+type(type),
 value(value),
 min(0.0),
 max(1.0),
@@ -29,13 +30,16 @@ scale(NULL) {
 Parameter::Parameter(std::string name,
                      float value,
                      float min,
-                     float max) :
+                     float max,
+                     ParameterType type) :
 name(name),
+type(type),
 defaultValue(value),
 value(value),
 min(min),
 max(max),
 boolValue(value > 0.0001),
+intValue(static_cast<int>(value)),
 driver(NULL),
 shift(NULL),
 scale(NULL) {

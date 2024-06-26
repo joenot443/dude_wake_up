@@ -41,7 +41,7 @@ struct TextureMaskSettings: public ShaderSettings {
 
 struct TextureMaskShader: Shader {
   TextureMaskSettings *settings;
-    std::shared_ptr<Texture> texture;
+  std::shared_ptr<Texture> texture;
   TextureMaskShader(TextureMaskSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
@@ -49,7 +49,7 @@ struct TextureMaskShader: Shader {
     settings->textureOptions = TextureService::getService()->availableTextureNames();
     settings->textureOptions.insert(settings->textureOptions.begin(), "No Texture");
   }
-
+  
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
@@ -64,21 +64,22 @@ struct TextureMaskShader: Shader {
     shader.end();
     canvas->end();
   }
-
+  
   void clear() override {
     
   }
-
-    int inputCount() override {
+  
+  int inputCount() override {
     return 1;
   }
-ShaderType type() override {
+  
+  ShaderType type() override {
     return ShaderTypeTextureMask;
   }
-
+  
   void drawSettings() override {
     CommonViews::H3Title("TextureMask");
-
+    
     if (CommonViews::ShaderOption(settings->texture, settings->textureOptions))
     {
       if (settings->texture->value != 0) {

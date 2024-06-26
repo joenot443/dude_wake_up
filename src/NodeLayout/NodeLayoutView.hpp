@@ -40,6 +40,7 @@ public:
   void drawMetrics();
   void drawResolutionPopup();
   void drawUploadChainerWindow();
+  void drawHelp();
   
   void openSettingsWindow(std::shared_ptr<Shader> shader);
   void keyReleased(int key);
@@ -66,6 +67,7 @@ public:
   void drawPreviewWindow(std::shared_ptr<Node> node);
   void drawActionButtons();
   void clear();
+  void toggleCustomZoom();
   int nodeIdTicker = 1;
   
   // Handlers
@@ -92,11 +94,12 @@ public:
   void selectChainer(std::shared_ptr<Node> node);
 
   ed::EditorContext *context = nullptr;
+  ed::Config *config = nullptr;
   std::vector<std::string> unplacedNodeIds = {};
   std::unique_ptr<ImVec2> nodeDropLocation;
   std::unique_ptr<LibraryFile> pendingFile;
   
-  std::vector<std::shared_ptr<Node>> nodes;
+  std::set<std::shared_ptr<Node>> nodes = {};
   std::set<std::shared_ptr<Node>> previewWindowNodes = {};
   std::set<std::shared_ptr<Node>> terminalNodes = {};
   
@@ -108,6 +111,7 @@ public:
   // Misc.
   bool firstFrame = true;
   bool shouldDelete = false;
+  bool makingLink = false;
 
   // Maps the id of the Shader or the VideoSource to the Node
   std::map<std::string, std::shared_ptr<Node>> idNodeMap;

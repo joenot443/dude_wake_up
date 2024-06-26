@@ -26,12 +26,12 @@ struct GridRunSettings: public ShaderSettings {
   
   GridRunSettings(std::string shaderId, json j, std::string name) :
   zoom(std::make_shared<Parameter>("Zoom", 0.1, -1.0, 1.0)),
-  color(std::make_shared<Parameter>("Color", 0.0, -1.0, 1.0)),
+  color(std::make_shared<Parameter>("Color", 0.0, -1.0, 1.0, ParameterType_Color)),
   perspective(std::make_shared<Parameter>("Perspective", 0.75, -5.0, 5.0)),
   zoomOscillator(std::make_shared<WaveformOscillator>(zoom)),
   perspectiveOscillator(std::make_shared<WaveformOscillator>(perspective)),
   ShaderSettings(shaderId, j, name) {
-    color->color = std::make_shared<std::array<float, 3>>(std::array<float, 3>({1.0f, 0.5f, 1.0f}));
+    color->color = std::make_shared<std::array<float, 4>>(std::array<float, 4>({1.0f, 0.5f, 1.0f, 1.0f}));
     parameters = { zoom, perspective, color };
     oscillators = { zoomOscillator, perspectiveOscillator };
     load(j);

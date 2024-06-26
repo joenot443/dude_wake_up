@@ -3,6 +3,7 @@
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
+uniform float speed;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -68,7 +69,7 @@ vec2 hash22(vec2 p) {
     
     // Animated.
     p = fract(vec2(262144, 32768)*n);
-    return sin(p*6.2831853 + time);
+    return sin(p*6.2831853 + time * speed);
     
 }
 
@@ -214,7 +215,6 @@ int isoLine(vec3 n3, vec2 ip0, vec2 ip1, vec2 ip2, float isovalue, float i,
     
 }
 
-/*
 vec3 softLight(vec3 s, vec3 d){
 
     vec3 a = d - (1. - 2.*s)*d*(1. - d), b = d + (2.*s - 1.)*d*((16.*d - 12.)*d + 3.),
@@ -224,7 +224,6 @@ vec3 softLight(vec3 s, vec3 d){
           s.z<.5? a.z : d.z<.25? b.z : c.z);
   
 }
-*/
 
 vec3 simplexContour(vec2 p){
     
@@ -591,7 +590,7 @@ void main(  )
   vec2 uv = (coord - dimensions.xy*.5)/min(650., dimensions.y);
    
     // Position with some scrolling, and screen rotation to level the pattern.
-    vec2 p = rot2(3.14159/12.)*uv + vec2(.8660254, .5)*time/16.;
+    vec2 p = rot2(3.14159/12.)*uv + vec2(.8660254, .5)*time/16.*speed;
     
     // The simplex grid contour map... or whatever you wish to call it. :)
     vec3 col = simplexContour(p);

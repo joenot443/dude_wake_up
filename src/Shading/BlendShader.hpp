@@ -17,6 +17,22 @@
 #include "Shader.hpp"
 #include <stdio.h>
 
+static std::vector<std::string> BlendModeNames = {
+    "Multiply",
+    "Screen",
+    "Darken",
+    "Lighten",
+    "Difference",
+    "Exclusion",
+    "Overlay",
+    "Hard Light",
+    "Soft Light",
+    "Color Dodge",
+    "Linear Dodge",
+    "Burn",
+    "Linear Burn"
+};
+
 struct BlendSettings: public ShaderSettings {
   std::shared_ptr<Parameter> mode;
   std::shared_ptr<Parameter> blendWithEmpty;
@@ -26,12 +42,13 @@ struct BlendSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> alphaOscillator;
 
   BlendSettings(std::string shaderId, json j) :
-  mode(std::make_shared<Parameter>("Mode", 0.0, 0.0, 13.0)),
-  blendWithEmpty(std::make_shared<Parameter>("Blend With Empty", 0.0, 0.0, 1.0)),
-  flip(std::make_shared<Parameter>("Flip", 0.0, 0.0, 1.0)),
+  mode(std::make_shared<Parameter>("Mode", 6.0, 0.0, 13.0, ParameterType_Int)),
+  blendWithEmpty(std::make_shared<Parameter>("Blend With Empty", 0.0, 0.0, 1.0, ParameterType_Bool)),
+  flip(std::make_shared<Parameter>("Flip", 0.0, 0.0, 1.0, ParameterType_Bool)),
   alpha(std::make_shared<Parameter>("Alpha", 1.0, 0.0, 1.0)),
   alphaOscillator(std::make_shared<WaveformOscillator>(alpha)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, "Blend") {
+    mode->options = BlendModeNames;
     parameters = { mode, blendWithEmpty, flip, alpha };
     oscillators = { alphaOscillator };
     load(j);

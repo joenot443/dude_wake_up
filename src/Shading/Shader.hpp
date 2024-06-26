@@ -69,7 +69,7 @@ public:
 
   virtual ShaderType type() { return ShaderTypeNone; };
 
-  virtual void drawSettings(){};
+  void drawSettings() override {};
 
   virtual void drawPreview(ImVec2 pos, float scale)
   {
@@ -107,6 +107,9 @@ public:
   // Called after all the Shaders have been created.
   // Used to populate aux.
   void load(json j);
+  
+  // Sets the Shader's Parameters to be active.
+  void activateParameters();
 };
 
 #endif /* Shader_h */

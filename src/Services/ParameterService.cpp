@@ -9,6 +9,9 @@
 #include "ParameterService.hpp"
 #include "Console.hpp"
 
+void ParameterService::setup() {
+}
+
 
 void ParameterService::notifyFavoritesUpdate()
 {
@@ -18,6 +21,26 @@ void ParameterService::notifyFavoritesUpdate()
 void ParameterService::subscribeToFavoritesUpdates(std::function<void()> callback)
 {
   configUpdateSubject.subscribe(callback);
+}
+
+std::vector<std::shared_ptr<Parameter>> ParameterService::allActiveParameters() {
+  std::vector<std::shared_ptr<Parameter>> parameters;
+  for (auto const &[key, val] : parameterMap) {
+    std::shared_ptr<Parameter> param = val;
+    if (param->active && !param->hiddenFromNode) {
+      parameters.push_back(val);
+    }
+  }
+  
+  // Sort the parameters by settingsName, then by name
+  std::sort(parameters.begin(), parameters.end(), [](std::shared_ptr<Parameter> a, std::shared_ptr<Parameter> b) {
+    if (a->ownerSettingsId == b->ownerSettingsId) {
+      return a->name < b->name;
+    }
+    return a->ownerName < b->ownerName;
+  });
+  
+  return parameters;
 }
 
 std::shared_ptr<Parameter>
@@ -47,6 +70,7 @@ void ParameterService::registerParameter(std::shared_ptr<Parameter> parameter) {
 
 void ParameterService::tickParameters() {
   for (auto const &[key, shared_val] : parameterMap) {
+    shared_val->active = false;
     shared_val->tick();
   }
 }
@@ -81,7 +105,6 @@ std::shared_ptr<FavoriteParameter> ParameterService::addFavoriteParameter(std::s
   favoriteParameterMap[parameter->paramId] = std::make_shared<FavoriteParameter>(parameter);
   return favoriteParameterMap[parameter->paramId];
 }
-
 
 bool ParameterService::hasFavoriteParameterFor(std::shared_ptr<Parameter> parameter) {
   if (parameter == nullptr) {

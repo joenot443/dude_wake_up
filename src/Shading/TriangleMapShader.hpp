@@ -18,9 +18,18 @@
 
 struct TriangleMapSettings: public ShaderSettings {
 	public:
+  // Speed Param
+  std::shared_ptr<Parameter> speed;
+  // Oscillator
+  std::shared_ptr<Oscillator> speedOscillator;
   TriangleMapSettings(std::string shaderId, json j, std::string name) :
+  speed(std::make_shared<Parameter>("Speed", 1.0, 0., 5.0)),
+  speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   ShaderSettings(shaderId, j, name) {
-    
+    parameters = {speed};
+    oscillators = {speedOscillator};
+    load(j);
+    registerParameters();
   };
 };
 
@@ -44,6 +53,7 @@ shader.load("shaders/TriangleMap");
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("speed", settings->speed->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
     shader.end();
@@ -63,6 +73,7 @@ ShaderType type() override {
 
   void drawSettings() override {
     CommonViews::H3Title("TriangleMap");
+    CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
   }
 };
 

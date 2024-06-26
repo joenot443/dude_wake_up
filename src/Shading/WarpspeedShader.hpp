@@ -24,7 +24,7 @@ struct WarpspeedSettings: public ShaderSettings {
   WarpspeedSettings(std::string shaderId, json j) :
   speed(std::make_shared<Parameter>("speed", 1.0, 0.0, 5.0)),
   speedOscillator(std::make_shared<ValueOscillator>(speed)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, "Warpspeed") {
     parameters = { speed };
     oscillators = { speedOscillator };
     load(j);

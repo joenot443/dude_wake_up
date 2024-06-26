@@ -7,6 +7,7 @@
 
 #include "imgui.h"
 #include "LayoutStateService.hpp"
+#include "ShaderChainerService.hpp"
 #include "AudioSourceService.hpp"
 #include "ConfigService.hpp"
 
@@ -17,6 +18,9 @@ json LayoutStateService::config() {
   j[ColorHistoryJsonKey] = colorHistory;
   j[MidiEnabledJsonKey] = midiEnabled;
   j[StageModeEnabled] = stageModeEnabled;
+  j[ShaderInfoEnabledJsonKey] = shaderInfoEnabled;
+  j[AllParametersInStageMode] = allParametersInStageModeEnabled;
+  j[HelpEnabledJsonKey] = helpEnabled;
   return j;
 }
 
@@ -24,7 +28,11 @@ void LayoutStateService::loadConfig(json j) {
   showAudioSettings = j[ShowAudioSettingsJsonKey];
   libraryPath = j[LibraryPathJsonKey];
   midiEnabled = j[MidiEnabledJsonKey];
-  std::vector<std::array<float, 3>> colors = j[ColorHistoryJsonKey];
+  stageModeEnabled = j[StageModeEnabled];
+  shaderInfoEnabled = j[ShaderInfoEnabledJsonKey];
+  allParametersInStageModeEnabled = j[AllParametersInStageMode];
+  helpEnabled = j[HelpEnabledJsonKey];
+  std::vector<std::array<float, 4>> colors = j[ColorHistoryJsonKey];
   colorHistory = colors;
 }
 
@@ -33,7 +41,7 @@ void LayoutStateService::updateLibraryPath(std::string path) {
   ConfigService::getService()->saveDefaultConfigFile();
 }
 
-void LayoutStateService::pushColor(std::shared_ptr<std::array<float, 3>> color) {
+void LayoutStateService::pushColor(std::shared_ptr<std::array<float, 4>> color) {
   colorHistory.push_back(*color);
 }
 
@@ -53,4 +61,8 @@ float LayoutStateService::audioSettingsViewHeight() {
 
 ofRectangle LayoutStateService::canvasRect() {
   return ofRectangle(getScaledWindowWidth() / 5, 0, getScaledWindowWidth() * (4/5), getScaledWindowHeight() - audioSettingsViewHeight());
+}
+
+bool LayoutStateService::shouldDrawShaderInfo() {
+  return ShaderChainerService::getService()->selectedConnectable != nullptr && shaderInfoEnabled && !stageModeEnabled;
 }

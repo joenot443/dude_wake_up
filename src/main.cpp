@@ -19,6 +19,7 @@
 #include "TextureService.hpp"
 #include "ShaderChainerService.hpp"
 #include "LayoutStateService.hpp"
+#include "HelpService.hpp"
 #include "StrandService.hpp"
 #include "ParameterService.hpp"
 #include "IconService.hpp"
@@ -48,6 +49,7 @@ AudioSourceService *AudioSourceService::service = 0;
 LayoutStateService *LayoutStateService::service = 0;
 MarkdownService *MarkdownService::service = 0;
 LibraryService *LibraryService::service = 0;
+HelpService *HelpService::service = 0;
 MainApp *MainApp::app = 0;
 
 void setupDirectories() {

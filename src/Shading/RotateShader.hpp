@@ -32,7 +32,7 @@ struct RotateSettings: public ShaderSettings {
   rotateOscillator(std::make_shared<WaveformOscillator>(rotate)),
   scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
   autoRotateOscillator(std::make_shared<WaveformOscillator>(autoRotate)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, "Rotate") {
     parameters = {rotate, scale, autoRotate};
     oscillators = {rotateOscillator, scaleOscillator, autoRotateOscillator};
     load(j);
@@ -65,11 +65,11 @@ struct RotateShader: Shader {
     // Apply rotation
     ofRotateDeg(rotate);
     
-    // Move the origin back to the top-left corner before drawing
-    ofTranslate(-frame->getWidth() / 2, -frame->getHeight() / 2);
-    
     // Set the scale
     ofScale(settings->scale->value, settings->scale->value);
+    
+    // Move the origin back to the top-left corner before drawing
+    ofTranslate(-frame->getWidth() / 2, -frame->getHeight() / 2);
 
     // Draw the frame at origin (which has been adjusted to the center)
     frame->draw(0, 0);

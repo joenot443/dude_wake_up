@@ -49,6 +49,7 @@ void MainApp::setup()
   mainStageView->setup();
   LibraryService::getService()->backgroundFetchLibraryFiles();
   StrandService::getService()->setup();
+  ParameterService::getService()->setup();
 }
 
 void MainApp::update()

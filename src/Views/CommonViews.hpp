@@ -36,7 +36,15 @@ struct CommonViews
   
   static void IconTitle(const char *icon);
   
-  static void ShaderStageParameter(std::shared_ptr<FavoriteParameter> param, std::shared_ptr<Oscillator> osc);
+  static void ImageNamed(std::string filename, double width, double height);
+  
+  static void ColorShaderStageParameter(std::shared_ptr<Parameter> param);
+  
+  static void CheckboxShaderStageParameter(std::shared_ptr<Parameter> param);
+  
+  static void IntShaderStageParameter(std::shared_ptr<Parameter> param);
+  
+  static void ShaderStageParameter(std::shared_ptr<Parameter> param, std::shared_ptr<Oscillator> osc);
   
   static bool ShaderParameter(std::shared_ptr<Parameter> param, std::shared_ptr<Oscillator> osc);
   
@@ -44,7 +52,7 @@ struct CommonViews
   
   static bool MiniVSlider(std::shared_ptr<Parameter> param);
   
-  static bool Selector(std::shared_ptr<Parameter> param);
+  static bool Selector(std::shared_ptr<Parameter> param, std::vector<std::string> options);
   
   static bool ShaderCheckbox(std::shared_ptr<Parameter> param, bool sameLine = false);
   
@@ -62,13 +70,15 @@ struct CommonViews
   
   static void MidiSelector(std::shared_ptr<Parameter> videoParam);
   
-  static void H1Title(std::string title);
+  static void H1Title(std::string title, bool padding = true);
   
-  static void H2Title(std::string title);
+  static void H2Title(std::string title, bool padding = true);
   
-  static void H3Title(std::string title);
+  static void H3Title(std::string title, bool padding = true);
   
-  static void H4Title(std::string title);
+	static void H3BTitle(std::string title, bool padding = true);
+  
+  static void H4Title(std::string title, bool padding = true);
   
   static void ResolutionSelector(std::shared_ptr<VideoSource> source);
   

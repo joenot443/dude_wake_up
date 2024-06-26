@@ -6,6 +6,7 @@
 //
 
 #include <sentry.h>
+#include "ShaderInfoView.hpp"
 #include "CommonStrings.hpp"
 #include "MainStageView.hpp"
 #include "ConfigService.hpp"
@@ -51,15 +52,19 @@ void MainStageView::update()
 void MainStageView::draw()
 {
   // Draw a table with 2 columns, sized | 1/5 |   4/5   |
-  float width = ImGui::GetWindowContentRegionMax().x;
-  float height = ImGui::GetWindowContentRegionMax().y;
   
-  float nodeLayoutWidth = (getScaledWindowWidth() * 4) / 5;
+  float nodeLayoutWidth = LayoutStateService::getService()->shouldDrawShaderInfo() ?  (getScaledWindowWidth() * 3) / 5 : (getScaledWindowWidth() * 4) / 5;
   float nodeLayoutHeight = getScaledWindowHeight() - LayoutStateService::getService()->audioSettingsViewHeight();
-  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(15.0, 15.0));
-  ImGui::Columns(2, "main_stage_view", false);
+  
+//  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(15.0, 15.0));
+  int columnCount = LayoutStateService::getService()->shouldDrawShaderInfo() ? 3 : 2;
+  ImGui::Columns(columnCount, "main_stage_view", false);
   ImGui::SetColumnWidth(0, getScaledWindowWidth() / 5);
-  ImGui::SetColumnWidth(1, (getScaledWindowWidth() * 4) / 5);
+  ImGui::SetColumnWidth(1, nodeLayoutWidth);
+  if (LayoutStateService::getService()->shouldDrawShaderInfo()) {
+    ImGui::SetColumnWidth(2, getScaledWindowWidth() / 5);
+  }
+  
   
   // | Sources |  Node Layout
   // | Effects |        ''
@@ -68,6 +73,7 @@ void MainStageView::draw()
   // Sources
   auto browserSize = ImVec2(ImGui::GetWindowContentRegionMax().x / 5.,
                             (ImGui::GetWindowContentRegionMax().y - MenuBarHeight) / 3.);
+//  ImGui::PopStyleVar();
   ImGui::BeginChild("##sourceBrowser", browserSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
   CommonViews::H3Title("Sources");
   drawVideoSourceBrowser();
@@ -96,7 +102,16 @@ void MainStageView::draw()
     audioSourceBrowserView.draw();
   }
   
-  ImGui::PopStyleVar();
+  
+  // Shader Info
+  if (LayoutStateService::getService()->shouldDrawShaderInfo()) {
+    auto shaderInfoPaneSize = ImVec2(ImGui::GetWindowContentRegionMax().x / 5.,(ImGui::GetWindowContentRegionMax().y - MenuBarHeight));
+    
+    ImGui::NextColumn();
+    ImGui::BeginChild("##shaderInfo", shaderInfoPaneSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
+    ShaderInfoView::draw();
+    ImGui::EndChild();
+  }
 }
 
 void MainStageView::drawMenu()
@@ -106,33 +121,19 @@ void MainStageView::drawMenu()
     // Save Config
     if (ImGui::BeginMenu("File"))
     {
-      if (ImGui::MenuItem("Save", "", false, ConfigService::getService()->isEditingWorkspace())) {
+      if (ImGui::MenuItem("Save", "Cmd+S", false, ConfigService::getService()->isEditingWorkspace())) {
         ConfigService::getService()->saveCurrentWorkspace();
       }
       
-      if (ImGui::MenuItem("Save Workspace As"))
+      if (ImGui::MenuItem("Save Workspace As", "Cmd+Shift+S"))
       {
-        // Present a file dialog to save the config file
-        // Use a default name of "CURRENT_DATE_TIME.json"
-        std::string defaultName =
-        ofGetTimestampString("Workspace-%m-%d-%Y.json");
-        ofFileDialogResult result =
-        ofSystemSaveDialog(defaultName, "Save Workspace");
-        if (result.bSuccess)
-        {
-          ConfigService::getService()->saveWorkspace(std::make_shared<Workspace>(result.getName(), result.getPath()));
-        }
+        ConfigService::getService()->saveNewWorkspace();
       }
-      if (ImGui::MenuItem("Load Workspace"))
+      if (ImGui::MenuItem("Load Workspace", "Cmd+O"))
       {
-        // Present a file dialog to load the config file
-        ofFileDialogResult result = ofSystemLoadDialog("Open Workspace", false);
-        if (result.bSuccess)
-        {
-          ConfigService::getService()->loadWorkspace(std::make_shared<Workspace>(result.getName(), result.getPath()));
-        }
+        ConfigService::getService()->loadWorkspaceDialogue();
       }
-      if (ImGui::MenuItem("Reset Stage"))
+      if (ImGui::MenuItem("New Workspace", "Cmd+N"))
       {
         ShaderChainerService::getService()->clear();
         VideoSourceService::getService()->clear();
@@ -141,9 +142,9 @@ void MainStageView::drawMenu()
       ImGui::EndMenu();
     }
     
-    if (ImGui::BeginMenu("Effects"))
+    if (ImGui::BeginMenu("Edit"))
     {
-      if (ImGui::MenuItem("Clear Feedback Buffers (C)"))
+      if (ImGui::MenuItem("Clear Feedback Buffers", "Cmd+K"))
       {
         FeedbackSourceService::getService()->clearBuffers();
       }
@@ -157,9 +158,13 @@ void MainStageView::drawMenu()
       {
         LayoutStateService::getService()->midiEnabled = !LayoutStateService::getService()->midiEnabled;
       }
-      if (ImGui::MenuItem("Toggle Stage Mode", "V"))
+      if (ImGui::MenuItem("Toggle Stage Mode", "Cmd+B"))
       {
         LayoutStateService::getService()->stageModeEnabled = !LayoutStateService::getService()->stageModeEnabled;
+      }
+      if (ImGui::MenuItem("Toggle Shader Info View", "Cmd+T"))
+      {
+        LayoutStateService::getService()->shaderInfoEnabled = !LayoutStateService::getService()->shaderInfoEnabled;
       }
       ImGui::EndMenu();
     }
@@ -216,6 +221,7 @@ void MainStageView::drawShaderBrowser() { shaderBrowserView.draw(); }
 
 void MainStageView::keyReleased(int key)
 {
+  
   NodeLayoutView::getInstance()->keyReleased(key);
   
   // If Space is pressed, tap the bpmTapper
@@ -224,11 +230,38 @@ void MainStageView::keyReleased(int key)
     bpmTapper.tap();
   }
   
-  if (key == 'c') {
-    FeedbackSourceService::getService()->clearBuffers();
-  }
+  // Cmd Based Key Binds
   
-  if (key == 'v') {
-    LayoutStateService::getService()->stageModeEnabled = !LayoutStateService::getService()->stageModeEnabled;
+  if (ofGetKeyPressed(OF_KEY_SUPER)) {
+    // Save Workspace
+    if (key == 's') {
+      ConfigService::getService()->saveCurrentWorkspace();
+    }
+    // Load Workspace
+    if (key == 'o') {
+      ConfigService::getService()->loadWorkspaceDialogue();
+    }
+    
+    // New Workspace
+    if (key == 'n') {
+      ShaderChainerService::getService()->clear();
+      VideoSourceService::getService()->clear();
+      ConfigService::getService()->closeWorkspace();
+    }
+    
+    // Clear buffers
+    if (key == 'k') {
+      FeedbackSourceService::getService()->clearBuffers();
+    }
+    
+    // Enable Stage mode
+    if (key == 'b') {
+      LayoutStateService::getService()->stageModeEnabled = !LayoutStateService::getService()->stageModeEnabled;
+    }
+    
+    // Enable Shader Info pane
+    if (key == 't') {
+      LayoutStateService::getService()->shaderInfoEnabled = !LayoutStateService::getService()->shaderInfoEnabled;
+    }
   }
 }

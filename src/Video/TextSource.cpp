@@ -60,7 +60,6 @@ void TextSource::saveFrame() {
   // Draw the text
   ofSetColor(displayText->color);
   font.drawString(displayText->text, xPos, settings->height->intValue - yPos);
-
   fbo->end();
 }
 

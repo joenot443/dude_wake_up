@@ -67,7 +67,7 @@ public:
   void updateShaders();
   void processFrame();
   
-  std::shared_ptr<Shader> selectedShader;
+  std::shared_ptr<Connectable> selectedConnectable;
 
   // Removes all ShaderChainers and Shaders
   void reset();
@@ -81,11 +81,14 @@ public:
   // Returns true if the passed Shader is the terminal node in a Chainer.
   bool isTerminalShader(std::shared_ptr<Shader> shader);
   
+  bool isShaderType(std::shared_ptr<Connectable> connectable, ShaderType shaderType);
+  
   // Traverses the shader's outputs to find the most terminal.
   std::shared_ptr<Shader> terminalShader(std::shared_ptr<Shader> shader);
 
 
-  void selectShader(std::shared_ptr<Shader> shader);
+  void selectConnectable(std::shared_ptr<Connectable> connectable);
+  void deselectConnectable();
   void addShader(std::shared_ptr<Shader> shader);
   std::shared_ptr<Shader> makeShader(ShaderType type);
   void removeShader(std::shared_ptr<Shader> shader, bool fromMap = true);
@@ -125,6 +128,7 @@ public:
   std::vector<std::shared_ptr<AvailableShader>> availableTransformShaders;
   std::vector<std::shared_ptr<AvailableShader>> availableFilterShaders;
   std::vector<std::shared_ptr<AvailableShader>> availableMaskShaders;
+  std::vector<std::shared_ptr<AvailableShader>> availableDefaultFavoriteShaders;
   std::vector<std::shared_ptr<AvailableShader>> availableFavoriteShaders();
   std::map<ShaderType, std::shared_ptr<AvailableShader>> availableShadersMap;
 

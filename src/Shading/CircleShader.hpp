@@ -18,7 +18,7 @@
 struct CircleSettings: public ShaderSettings {
 	public:
   CircleSettings(std::string shaderId, json j, std::string name) :
-  ShaderSettings(shaderId, 0) {
+  ShaderSettings(shaderId, 0, "Circle") {
     
   };
 };

@@ -6,27 +6,7 @@
 	<dict>
 		<key>Resources/NodeLayout.json</key>
 		<data>
-		ta+o3BZayFrS1gpZdCtbdN4XG18=
-		</data>
-		<key>Resources/data/Audio Mountains -&gt; Mirror.jpg</key>
-		<data>
-		OUfy0Yx1FqKo/e5vzY+I+daNyFY=
-		</data>
-		<key>Resources/data/Audio Mountains -&gt; Mirror.png</key>
-		<data>
-		wLpMFtkNHXepqV5mggKYTZ820vk=
-		</data>
-		<key>Resources/data/Audio Waveform -&gt; Glitch -&gt; Mirror.png</key>
-		<data>
-		n/GHgxbu7cq+HhR82j5WWtbrqsQ=
-		</data>
-		<key>Resources/data/Basic Text -&gt; Mix -&gt; Clouds.png</key>
-		<data>
-		oxTeps2C1FDt89c5w6d0FvNaBBI=
-		</data>
-		<key>Resources/data/Clouds -&gt; 16bit.jpg</key>
-		<data>
-		5Wf/Y+c3mmV/VQu/Ams4ciAqJyE=
+		VK0EMToku6vyYJ8evYukn6ma2zA=
 		</data>
 		<key>Resources/data/MaterialIcons-Regular.ttf</key>
 		<data>
@@ -202,11 +182,27 @@
 		</data>
 		<key>Resources/data/images/.DS_Store</key>
 		<data>
-		9z8zjgcT2qXfyPCzEK/MDbWSzEk=
+		XldxI+ptQmfVf9JQ9RRdBd8dlF8=
 		</data>
 		<key>Resources/data/images/basic/star.png</key>
 		<data>
 		BUUpFezHZQxeK1UvJpvW1l7/zCQ=
+		</data>
+		<key>Resources/data/images/icons/.DS_Store</key>
+		<data>
+		3y++sUAKzaCQmjLBz2v0kvESHgc=
+		</data>
+		<key>Resources/data/images/icons/arrow.png</key>
+		<data>
+		Wn+RmeG31OIU7/A7vmTtq129UBk=
+		</data>
+		<key>Resources/data/images/icons/left-arrow.png</key>
+		<data>
+		Wn+RmeG31OIU7/A7vmTtq129UBk=
+		</data>
+		<key>Resources/data/images/icons/right-arrow.png</key>
+		<data>
+		Kd+/kIQxSP6tdChzBT7lNyBInCA=
 		</data>
 		<key>Resources/data/images/stylized/.DS_Store</key>
 		<data>
@@ -1116,6 +1112,10 @@
 		<data>
 		nqw9U8ay+MfDrzPjuinZk49+POM=
 		</data>
+		<key>Resources/data/markdown/DirtyPlasma.md</key>
+		<data>
+		PhAB9HvdcqQ5Ny4lPfvTDWA4sLE=
+		</data>
 		<key>Resources/data/markdown/Disco.md</key>
 		<data>
 		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
@@ -1264,6 +1264,14 @@
 		<data>
 		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
 		</data>
+		<key>Resources/data/markdown/OldTV.md</key>
+		<data>
+		uVoc9hW7tZdfAXkkCVvQQmh8MHw=
+		</data>
+		<key>Resources/data/markdown/OneBitDither.md</key>
+		<data>
+		9kykB1JxsL25tzOUGZvYKx74Dn8=
+		</data>
 		<key>Resources/data/markdown/Overlay.md</key>
 		<data>
 		r/yJKOpMKEjW48oNwx8M22VDwpM=
@@ -1275,6 +1283,10 @@
 		<key>Resources/data/markdown/PieSplit.md</key>
 		<data>
 		a+5CMaJ74AeOnFj/pLDgOku9AvU=
+		</data>
+		<key>Resources/data/markdown/PixelPlay.md</key>
+		<data>
+		BXCsBqzcGSG3UG9qzgBqlfMFPIY=
 		</data>
 		<key>Resources/data/markdown/Pixelate.md</key>
 		<data>
@@ -1368,6 +1380,10 @@
 		<data>
 		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
 		</data>
+		<key>Resources/data/markdown/TraceAudio.md</key>
+		<data>
+		ZBJxHOUUhE7gHQlWbakMpTy/x5A=
+		</data>
 		<key>Resources/data/markdown/Transform.md</key>
 		<data>
 		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
@@ -1379,6 +1395,14 @@
 		<key>Resources/data/markdown/Triple.md</key>
 		<data>
 		LBpovs9SLRkKHx+BRZOzum5DiTI=
+		</data>
+		<key>Resources/data/markdown/TwistedCubes.md</key>
+		<data>
+		CIWYasPxJqjkOfWykQjo+z2rFTk=
+		</data>
+		<key>Resources/data/markdown/TwistedTrip.md</key>
+		<data>
+		6EzkgunNoEO7Z9Lf+3e/Mq5ZiN0=
 		</data>
 		<key>Resources/data/markdown/VHS.md</key>
 		<data>
@@ -1407,6 +1431,30 @@
 		<key>Resources/data/markdown/Wobble.md</key>
 		<data>
 		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
+		</data>
+		<key>Resources/data/markdown/connection.md</key>
+		<data>
+		VAz5bJA1UsFcHiYckc+5boxyRyk=
+		</data>
+		<key>Resources/data/markdown/connection2.md</key>
+		<data>
+		Qlg5X3ZqS2E1hBdOTIvwTgMzdws=
+		</data>
+		<key>Resources/data/markdown/effect.md</key>
+		<data>
+		kZkTVZn10nJE4NyRwITxWjDQpRs=
+		</data>
+		<key>Resources/data/markdown/effect2.md</key>
+		<data>
+		sgqDoV5zqczKaSs5ugvIGWdWPkE=
+		</data>
+		<key>Resources/data/markdown/source.md</key>
+		<data>
+		/fLAq4vfB13Nq03AFnHqZrC5gbs=
+		</data>
+		<key>Resources/data/markdown/source2.md</key>
+		<data>
+		F79HzfiFe46twkAAO6Nak0waWa0=
 		</data>
 		<key>Resources/data/shaders/.DS_Store</key>
 		<data>
@@ -1494,11 +1542,11 @@
 		</data>
 		<key>Resources/data/shaders/Canny.frag</key>
 		<data>
-		JgFKicXzDLVBwX+hgaSs+UEscSc=
+		wU8Cc2mm6ytXJN8+UHz4aCmZAuY=
 		</data>
 		<key>Resources/data/shaders/Canny.vert</key>
 		<data>
-		M0lC/95lwJABvm2Z7lQmY14j0Wo=
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
 		<key>Resources/data/shaders/Circle.frag</key>
 		<data>
@@ -1566,7 +1614,7 @@
 		</data>
 		<key>Resources/data/shaders/Core.frag</key>
 		<data>
-		z4Qampr+IxOQxE6m1WtZs5qjpks=
+		bMNc3UDbNS7BKHjHKqVJcmmBz1A=
 		</data>
 		<key>Resources/data/shaders/Core.vert</key>
 		<data>
@@ -1604,6 +1652,14 @@
 		<data>
 		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
+		<key>Resources/data/shaders/DirtyPlasma.frag</key>
+		<data>
+		89FRiunyZA7D4Zs0qpPYUQHQFsM=
+		</data>
+		<key>Resources/data/shaders/DirtyPlasma.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
+		</data>
 		<key>Resources/data/shaders/Disco.frag</key>
 		<data>
 		PR+w6BXjfGxx2HWxO/iAWO+Tfzk=
@@ -1622,11 +1678,11 @@
 		</data>
 		<key>Resources/data/shaders/DoubleSwirl.frag</key>
 		<data>
-		Gk3Gn+7R549b2CbLhoQCPHDGQ0g=
+		CINcPtMOKNuDluLFfNw5kBwx1ek=
 		</data>
 		<key>Resources/data/shaders/DoubleSwirl.vert</key>
 		<data>
-		AR9O76InoDYkAEjUMQQrXllb/Ks=
+		UH6Nv1a84o4RuCn3g68yL+FEmqg=
 		</data>
 		<key>Resources/data/shaders/Empty.frag</key>
 		<data>
@@ -1646,7 +1702,7 @@
 		</data>
 		<key>Resources/data/shaders/FishEye.frag</key>
 		<data>
-		iSQI9gJnWA/ZE8t4ebGLIaRc4ic=
+		sSw824dmj4QTLI9Vuc2MgCSGljU=
 		</data>
 		<key>Resources/data/shaders/FishEye.vert</key>
 		<data>
@@ -1864,6 +1920,22 @@
 		<data>
 		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
+		<key>Resources/data/shaders/OldTV.frag</key>
+		<data>
+		r9yZWwC7aUUg5jGMvFtxG0NsEQo=
+		</data>
+		<key>Resources/data/shaders/OldTV.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
+		</data>
+		<key>Resources/data/shaders/OneBitDither.frag</key>
+		<data>
+		apyt6Ktz7PRbwGhwAb4AzsKJNf0=
+		</data>
+		<key>Resources/data/shaders/OneBitDither.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
+		</data>
 		<key>Resources/data/shaders/Overlay.frag</key>
 		<data>
 		LC282hiHV3xdskk6vq9/tXzXUDY=
@@ -1895,6 +1967,14 @@
 		<key>Resources/data/shaders/Pixel.vert</key>
 		<data>
 		iPjQy1KxPZK4jEXWaqGmuFJyaQQ=
+		</data>
+		<key>Resources/data/shaders/PixelPlay.frag</key>
+		<data>
+		hUqEVhNIOd+vWXWo8eaKwq3AXrs=
+		</data>
+		<key>Resources/data/shaders/PixelPlay.vert</key>
+		<data>
+		M0lC/95lwJABvm2Z7lQmY14j0Wo=
 		</data>
 		<key>Resources/data/shaders/Plasma.frag</key>
 		<data>
@@ -2080,9 +2160,17 @@
 		<data>
 		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
+		<key>Resources/data/shaders/TraceAudio.frag</key>
+		<data>
+		+9jmqZFST3XZGT8jvy5Jqa3yH9g=
+		</data>
+		<key>Resources/data/shaders/TraceAudio.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
+		</data>
 		<key>Resources/data/shaders/TriangleMap.frag</key>
 		<data>
-		/rbho+uRtgZHj+UrJDfBPptI3ic=
+		5R9zB5AE/qx3sTX/gkmQ8fSE7FE=
 		</data>
 		<key>Resources/data/shaders/TriangleMap.vert</key>
 		<data>
@@ -2095,6 +2183,22 @@
 		<key>Resources/data/shaders/Triple.vert</key>
 		<data>
 		LmKZSod38L8m+PC3SDXe0JJmQuE=
+		</data>
+		<key>Resources/data/shaders/TwistedCubes.frag</key>
+		<data>
+		z1L+f+eBlW6KD5BRjhyPuCJnBag=
+		</data>
+		<key>Resources/data/shaders/TwistedCubes.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
+		</data>
+		<key>Resources/data/shaders/TwistedTrip.frag</key>
+		<data>
+		PnA0yjuTddtqdFVKEUD/0p2Eo8U=
+		</data>
+		<key>Resources/data/shaders/TwistedTrip.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
 		<key>Resources/data/shaders/VHS.frag</key>
 		<data>
@@ -3227,15 +3331,6 @@
 	</dict>
 	<key>files2</key>
 	<dict>
-		<key>Frameworks/libcpr.1.9.6.dylib</key>
-		<dict>
-			<key>cdhash</key>
-			<data>
-			3uFEIKVKYQjDAxCZ5B7loKnbzPo=
-			</data>
-			<key>requirement</key>
-			<string>identifier "libcpr.1" and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: Joe Crozier (7HTR557REQ)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
-		</dict>
 		<key>Frameworks/libcpr.1.dylib</key>
 		<dict>
 			<key>cdhash</key>
@@ -3267,42 +3362,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			Kmc9DtDt069FFhzySOYcFS+o8KLIBlYzC0rp68G4Cz0=
-			</data>
-		</dict>
-		<key>Resources/data/Audio Mountains -&gt; Mirror.jpg</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			1fvDDXmb2Ik58HsIPbRaWqVx3qCNzelyrWKjwuDz4r4=
-			</data>
-		</dict>
-		<key>Resources/data/Audio Mountains -&gt; Mirror.png</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			Keax0UhwTrpA+ctNXKJKWI9qb2SV6g2xcz/nuKcWpS0=
-			</data>
-		</dict>
-		<key>Resources/data/Audio Waveform -&gt; Glitch -&gt; Mirror.png</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			WemsNyHB1ywZu0wdgqlGYUBRfRr0rngi+Mg6WFRlZaU=
-			</data>
-		</dict>
-		<key>Resources/data/Basic Text -&gt; Mix -&gt; Clouds.png</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			cVl2PRDw9qSJOYvaGDslnqfaMqzBvymO6leSZCbu1Oo=
-			</data>
-		</dict>
-		<key>Resources/data/Clouds -&gt; 16bit.jpg</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			yAu7K8Socj6jmgSc15N+9At6Hg97UqKlrRyMjhE6Zhw=
+			T1jISZaeXGo1ex1rXS/AjweYrkr49y5LqdX4xpg3yO4=
 			</data>
 		</dict>
 		<key>Resources/data/MaterialIcons-Regular.ttf</key>
@@ -3597,6 +3657,27 @@
 			<key>hash2</key>
 			<data>
 			mPqYuLx89IV5s44Tdgu6bjU97NCdqHGyuoMOiga9OLI=
+			</data>
+		</dict>
+		<key>Resources/data/images/icons/arrow.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			SteY1qHoInRUstLlFQxfq0jbZZUeD5ltPSsqL7Lg8tQ=
+			</data>
+		</dict>
+		<key>Resources/data/images/icons/left-arrow.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			SteY1qHoInRUstLlFQxfq0jbZZUeD5ltPSsqL7Lg8tQ=
+			</data>
+		</dict>
+		<key>Resources/data/images/icons/right-arrow.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			zZVhr5TLM3krufZjpHP3nJ2Tk6gW9Ra5v5hX/PcyQMc=
 			</data>
 		</dict>
 		<key>Resources/data/images/stylized/1.png</key>
@@ -5174,6 +5255,13 @@
 			2WvvSEZMwy+ZcZ0lge1/WhlcqK2D2rw7JYpSLuDYvuc=
 			</data>
 		</dict>
+		<key>Resources/data/markdown/DirtyPlasma.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			SpAetmY9EiKEXr89JK1yRtwj0P+Zyxa/GE74pVuwYQo=
+			</data>
+		</dict>
 		<key>Resources/data/markdown/Disco.md</key>
 		<dict>
 			<key>hash2</key>
@@ -5433,6 +5521,20 @@
 			47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=
 			</data>
 		</dict>
+		<key>Resources/data/markdown/OldTV.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			2W/S4/ycrhloO1vXuBXjTVF/P3LfZSN1H4FXUmDfJ6w=
+			</data>
+		</dict>
+		<key>Resources/data/markdown/OneBitDither.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			le/xPSeotM2Hf+vWduZAkJfGSMzH5FozJkk5scELf/Q=
+			</data>
+		</dict>
 		<key>Resources/data/markdown/Overlay.md</key>
 		<dict>
 			<key>hash2</key>
@@ -5452,6 +5554,13 @@
 			<key>hash2</key>
 			<data>
 			3+SpPYC8aOAemtoFKbdGTb8ybytuZ3kwXdW5sEBsRtg=
+			</data>
+		</dict>
+		<key>Resources/data/markdown/PixelPlay.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			PjqyEyHDwkXzsIrnEw8Grab/elmxdSQyr+p0drJSFYM=
 			</data>
 		</dict>
 		<key>Resources/data/markdown/Pixelate.md</key>
@@ -5615,6 +5724,13 @@
 			47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=
 			</data>
 		</dict>
+		<key>Resources/data/markdown/TraceAudio.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			jsRDI6qLvl87B57hwCks2hdrg3+SXcm0kcW5bqyt6Vc=
+			</data>
+		</dict>
 		<key>Resources/data/markdown/Transform.md</key>
 		<dict>
 			<key>hash2</key>
@@ -5634,6 +5750,20 @@
 			<key>hash2</key>
 			<data>
 			0zw+kf4BlAO7jOxFhF/2s35knkIxIdw8TKHEIo0iJzA=
+			</data>
+		</dict>
+		<key>Resources/data/markdown/TwistedCubes.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			kxpJuii8MjFG5rJ0fSMUdgHd2elBjREJkdCF+E2CKpw=
+			</data>
+		</dict>
+		<key>Resources/data/markdown/TwistedTrip.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			TtoWdIih+nuNPion+7rau7yoTCIdcsVVsjh+S0yyN04=
 			</data>
 		</dict>
 		<key>Resources/data/markdown/VHS.md</key>
@@ -5683,6 +5813,48 @@
 			<key>hash2</key>
 			<data>
 			47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=
+			</data>
+		</dict>
+		<key>Resources/data/markdown/connection.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			H26fTYIVNY1JJw35uOkNGwnS7CJThjItAWVg5LnFC18=
+			</data>
+		</dict>
+		<key>Resources/data/markdown/connection2.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			bZyT92FRzDmYP1EJ9pMYCrH47/JSo7uksjFQWXjGWRE=
+			</data>
+		</dict>
+		<key>Resources/data/markdown/effect.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			gnz/loA7IbbcjqJKnR29rljf0BvMc1Sz9aaqaFX9dAs=
+			</data>
+		</dict>
+		<key>Resources/data/markdown/effect2.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			6zR36o1Wz2ty8pKdOKFmWdj3DGT6k2oZIQEU983y3LY=
+			</data>
+		</dict>
+		<key>Resources/data/markdown/source.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			m2oHDEbkhijqDA5ct5np9m21RZbQzSFjJeqOT3gPed0=
+			</data>
+		</dict>
+		<key>Resources/data/markdown/source2.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			gJMXGvxXxCWsSwnbrW5ZD2gxbwmpQy75c+8Boahy/w8=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/16bit.frag</key>
@@ -5829,14 +6001,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			XqErO5BmCIZHI19+L3AsVty5awmmzP+kUBoPNhfcUKg=
+			vsO6ql3jmbnrRpf//5mskQbcPUWMYFWuamILOdG2pvY=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Canny.vert</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			EzjQ626e/6hJOUBNVvWDMzY8Fa2sZ9KFntQe4SUcr9c=
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Circle.frag</key>
@@ -5955,7 +6127,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			F6I/lyftf8/qIn+1KqhDRovUz0akWSz3cexOLD7g0OE=
+			K1dOuvDIYBiO/bsn+3x8+jD3LSTfHPruL7m1GoCw9fg=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Core.vert</key>
@@ -6021,6 +6193,20 @@
 			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
 			</data>
 		</dict>
+		<key>Resources/data/shaders/DirtyPlasma.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			mT5co9yUepLYqbqzPLnYEpcwLsnGDbERfsXKnSel22M=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/DirtyPlasma.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			</data>
+		</dict>
 		<key>Resources/data/shaders/Disco.frag</key>
 		<dict>
 			<key>hash2</key>
@@ -6053,14 +6239,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			toMGIPXlEwSkPL5vSrMlhYX3ykzyFQZd60waOSVnwoo=
+			yIZxZoKrnugfIbYNtP4o6IU3YQWiKsjJ+m9yvngMKCc=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/DoubleSwirl.vert</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			Q7heaPfyf7JvEiVuIj0fp9zDG2MQPt3LBQfDgnK+FpE=
+			LLghjil5iqxwsV7rNH8bYSBOso93AvMBEnfss+mZS6A=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Empty.frag</key>
@@ -6095,7 +6281,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			Son68TcwS9RAR64jSbsVJp0Z67jQQo+Ju0m/LkJwV34=
+			UiqPeLygS8poyaHLBs0Sj9yjMUFE0nJ3Tdqdtdy/p0E=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/FishEye.vert</key>
@@ -6476,6 +6662,34 @@
 			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
 			</data>
 		</dict>
+		<key>Resources/data/shaders/OldTV.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			D/Hq2ItmWwhvtVUyevSELYYkM/+MYgxy7i1bsn3rD3M=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/OldTV.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/OneBitDither.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			txf291wNLBIY0wGj03WsZBYrppQGrYqbJA1kh2vzkCo=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/OneBitDither.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			</data>
+		</dict>
 		<key>Resources/data/shaders/Overlay.frag</key>
 		<dict>
 			<key>hash2</key>
@@ -6530,6 +6744,20 @@
 			<key>hash2</key>
 			<data>
 			tV17ed3beDuupeubA0Hj5yV9QPtS5zShrt9JT9b6roI=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/PixelPlay.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			/y1h7uh+6btLCruE3JJvBn63dQwBSBosDW8p7GDws8c=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/PixelPlay.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			EzjQ626e/6hJOUBNVvWDMzY8Fa2sZ9KFntQe4SUcr9c=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Plasma.frag</key>
@@ -6854,11 +7082,25 @@
 			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
 			</data>
 		</dict>
+		<key>Resources/data/shaders/TraceAudio.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			oSq1+Rur3qoG1rlNITeINybSrmwhxgy5l/4I3GdNZAw=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/TraceAudio.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			</data>
+		</dict>
 		<key>Resources/data/shaders/TriangleMap.frag</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			T5Nqs3E48P3AKNnOhlSZAppx1OH5lP09BxRhHR5ZhBs=
+			H8TsB5t+SfRiPcrZWQxwCUpw26LrG4Z1ABRbx2j03Lw=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/TriangleMap.vert</key>
@@ -6880,6 +7122,34 @@
 			<key>hash2</key>
 			<data>
 			THKh4wpHjD5hURY9tYx15ApgUKqbW1JBRnpJCzPQzw4=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/TwistedCubes.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			k/VXnJlKUV801RzR2MewLHcwR7ucSspR+0coMikglnM=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/TwistedCubes.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/TwistedTrip.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			e8cda3YYvhUdRxrGpGyjveCh7yE2d0rbD2o4tfOHVEY=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/TwistedTrip.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/VHS.frag</key>

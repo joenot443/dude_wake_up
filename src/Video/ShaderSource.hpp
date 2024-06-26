@@ -4,6 +4,10 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "PixelPlayShader.hpp"
+#include "DirtyPlasmaShader.hpp"
+#include "TwistedTripShader.hpp"
+#include "TwistedCubesShader.hpp"
 #include "CoreShader.hpp"
 #include "VoronoiColumnsShader.hpp"
 #include "WarpspeedShader.hpp"
@@ -94,6 +98,9 @@ enum ShaderSourceType {
   ShaderSource_Warpspeed, //source enum,
   ShaderSource_VoronoiColumns, //source enum,
   ShaderSource_Core, //source enum,
+  ShaderSource_TwistedCubes, //source enum,
+  ShaderSource_TwistedTrip, //source enum,
+  ShaderSource_DirtyPlasma, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -136,11 +143,20 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_Warpspeed, // Available
   ShaderSource_VoronoiColumns, // Available
   ShaderSource_Core, // Available
+  ShaderSource_TwistedCubes, // Available
+  ShaderSource_TwistedTrip, // Available
+  ShaderSource_DirtyPlasma, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
 // shaderTypeForShaderSourceType
+  case ShaderSource_DirtyPlasma: //type enum
+    return ShaderTypeDirtyPlasma;
+  case ShaderSource_TwistedTrip: //type enum
+    return ShaderTypeTwistedTrip;
+  case ShaderSource_TwistedCubes: //type enum
+    return ShaderTypeTwistedCubes;
   case ShaderSource_Core: //type enum
     return ShaderTypeCore;
   case ShaderSource_VoronoiColumns: //type enum
@@ -271,8 +287,10 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
   case ShaderSource_rings:
   case ShaderSource_melter:
   case ShaderSource_plasma:
+  case ShaderSource_TwistedCubes:
   case ShaderSource_fractal:
-      case ShaderSource_Reflector:
+  case ShaderSource_Reflector:
+    case ShaderSource_TwistedTrip:
     return "Trippy";
   default:
     return "Unknown";
@@ -281,7 +299,12 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
 
 static std::string shaderSourceTypeName(ShaderSourceType nameType) {
   switch (nameType) {
-  // ShaderNames
+  case ShaderSource_DirtyPlasma: // Name  
+    return "DirtyPlasma"; // DirtyPlasma
+  case ShaderSource_TwistedTrip: // Name  
+    return "TwistedTrip"; // TwistedTrip
+  case ShaderSource_TwistedCubes: // Name  
+    return "TwistedCubes"; // TwistedCubes
   case ShaderSource_Core: // Name  
     return "Core"; // Core
   case ShaderSource_VoronoiColumns: // Name  
@@ -384,6 +407,24 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_DirtyPlasma: { // Settings
+      auto settings = new DirtyPlasmaSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<DirtyPlasmaShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_TwistedTrip: { // Settings
+      auto settings = new TwistedTripSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<TwistedTripShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_TwistedCubes: { // Settings
+      auto settings = new TwistedCubesSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<TwistedCubesShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_Core: { // Settings
       auto settings = new CoreSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<CoreShader>(settings);
@@ -658,6 +699,7 @@ public:
     canvas->end();
     
     shader->shade(fbo, canvas);
+    shader->activateParameters();
     
     if (settings->maskEnabled->boolValue == true) {
       fbo->begin();

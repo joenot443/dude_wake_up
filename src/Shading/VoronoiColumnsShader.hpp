@@ -24,7 +24,7 @@ struct VoronoiColumnsSettings: public ShaderSettings {
   VoronoiColumnsSettings(std::string shaderId, json j) :
   shaderValue(std::make_shared<Parameter>("shaderValue", 1.0  , -1.0, 2.0)),
   shaderValueOscillator(std::make_shared<ValueOscillator>(shaderValue)),
-  ShaderSettings(shaderId, j) {
+  ShaderSettings(shaderId, j, "VoronoiColumns") {
     parameters = { shaderValue };
     oscillators = { shaderValueOscillator };
     load(j);

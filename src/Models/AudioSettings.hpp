@@ -200,7 +200,34 @@ struct AudioAnalysis {
 
       return averages;
   }
+
+
+float gammaAtBeat(float pct) {
+    // Use a gamma distribution function
+    // Constants A, alpha, and beta can be adjusted to change the shape of the pulse
+    const float A = 1.0f;    // Amplitude
+    const float alpha = 2.0f; // Shape parameter
+    const float beta = 1.0f;  // Rate parameter
+    
+    // Ensure pct is in the range [0, 1]
+    if (pct < 0.0f) pct = 0.0f;
+    if (pct > 1.0f) pct = 1.0f;
+
+    // Calculate the gamma distribution value at pct
+    // Since pct is between 0 and 1, we need to scale it appropriately
+    float t = pct; // In this case, we can use pct directly as t
+    
+    // Gamma distribution function y(t) = A * t^(alpha - 1) * exp(-beta * t)
+    float value = A * std::pow(t, alpha - 1) * std::exp(-beta * t);
+
+    return value;
+}
+
   
+  double gammapdf(double value, double alpha, double beta) {
+    return 0.0;
+  }
+
   void updateBeat(float pct) {
     if (bpmEnabled) {
       if (pct < 0 || pct > 1) {

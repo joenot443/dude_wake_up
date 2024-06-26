@@ -27,6 +27,7 @@ enum VideoSourceType {
   VideoSource_shader,
   VideoSource_text,
   VideoSource_library,
+  VideoSource_multi,
   VideoSource_empty
 };
 
@@ -58,7 +59,7 @@ public:
     }
   }
   virtual void saveFrame(){};
-  virtual void drawSettings(){};
+  void drawSettings() override {};
   virtual json serialize() { return 0; };
   int inputCount() override { return 0; };
   

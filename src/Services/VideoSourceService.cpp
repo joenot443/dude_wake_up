@@ -241,6 +241,15 @@ std::shared_ptr<VideoSource> VideoSourceService::addIconVideoSource(std::string 
   return videoSource;
 }
 
+// Adds a multi video source to the map
+std::shared_ptr<MultiSource> VideoSourceService::addMultiVideoSource(std::string name, ImVec2 origin, std::string id, json j)
+{
+  std::shared_ptr<MultiSource> videoSource = std::make_shared<MultiSource>(id, "Multi");
+  videoSource->origin = origin;
+  addVideoSource(videoSource, id, j);
+  return videoSource;
+}
+
 
 // Adds a Shader video source to the map
 std::shared_ptr<VideoSource> VideoSourceService::addShaderVideoSource(ShaderSourceType type, ImVec2 origin, std::string id, json j)
@@ -335,10 +344,10 @@ json VideoSourceService::config()
     {
       continue;
     }
-    if (NodeLayoutView::getInstance()->nodeForShaderSourceId(source->id) == nullptr)
-    {
-      continue;
-    }
+//    if (NodeLayoutView::getInstance()->nodeForShaderSourceId(source->id) == nullptr)
+//    {
+//      continue;
+//    }
     container[source->id] = source->serialize();
   }
 

@@ -35,15 +35,15 @@ struct MirrorSettings : public ShaderSettings {
 
   MirrorSettings(std::string shaderId, json j, std::string name)
       : shaderId(shaderId),
-        lockXY(std::make_shared<Parameter>("lockXY", 0.0, 1.0, 1.0)),
+        lockXY(std::make_shared<Parameter>("lockXY", 0.0, 1.0, 1.0, ParameterType_Bool)),
         xOffset(
             std::make_shared<Parameter>("xOffset", 0.15, 0.01, 1.0)),
         yOffset(
             std::make_shared<Parameter>("yOffset", 0.15, 0.01, 1.0)),
         mirrorXEnabled(std::make_shared<Parameter>("mirrorXEnabled",
-                                                   1.0, 1.0, 0.0)),
+                                                   1.0, 1.0, 0.0, ParameterType_Bool)),
         mirrorYEnabled(std::make_shared<Parameter>("mirrorYEnabled",
-                                                   1.0, 1.0, 0.0)),
+                                                   1.0, 1.0, 0.0, ParameterType_Bool)),
         xOffsetOscillator(std::make_shared<WaveformOscillator>(xOffset)),
         yOffsetOscillator(std::make_shared<WaveformOscillator>(yOffset)),
         ShaderSettings(shaderId, j, name) {

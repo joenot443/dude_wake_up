@@ -16,6 +16,7 @@
 #include "JSONSerializable.hpp"
 #include "ParameterService.hpp"
 #include "json.hpp"
+#include "UUID.hpp"
 #include <string>
 
 using json = nlohmann::json;
@@ -26,16 +27,19 @@ public:
   std::vector<std::shared_ptr<Parameter>> parameters = {};
   std::string name;
   
-  Settings() : name("None") {};
+  std::string settingsId;
   
-  Settings(std::string name) : name(name) {};
+  Settings() : name("None"), settingsId(UUID::generateUUID()) {};
+  
+  Settings(std::string name) : name(name), settingsId(UUID::generateUUID()) {};
   
   virtual void registerParameters() {
     std::vector<std::shared_ptr<Parameter>> params = allParameters();
     for (auto param : params) {
       if (param == nullptr) continue;
-      param->ownerName = name;
       ParameterService::getService()->registerParameter(param);
+      param->ownerName = name;
+      param->ownerSettingsId = settingsId;
     }
     
     for (auto osc : oscillators) {

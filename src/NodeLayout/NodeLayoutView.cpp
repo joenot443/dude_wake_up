@@ -8,7 +8,9 @@
 #include "NodeLayoutView.hpp"
 #include "FontService.hpp"
 #include "ImGuiExtensions.hpp"
+#include "HelpService.hpp"
 #include "LibraryService.hpp"
+#include "MarkdownView.hpp"
 #include "Fonts.hpp"
 #include "UploadChainerView.h"
 #include "LayoutStateService.hpp"
@@ -26,23 +28,26 @@
 
 static const float ImGuiWindowTitleBarHeight = 70.0f;
 static const float NodeWidth = 100.0f;
+static const float NodeSettingsWidth = 350.0f;
 
 namespace ed = ax::NodeEditor;
 
 void NodeLayoutView::setup()
 {
-  ed::Config config;
-  config.SettingsFile = "NodeLayout.json";
+  nodes.clear();
+  idNodeMap.clear();
+  previewWindowNodes.clear();
+  config = new ed::Config;
+  config->SettingsFile = "NodeLayout.json";
   ImVector<float> zooms = ImVector<float>();
-  zooms.push_back(1.0f);
-  //  config.CustomZoomLevels = zooms;
+//  zooms.push_back(1.0f);
+//  config->CustomZoomLevels = zooms;
   
-  context = ed::CreateEditor(&config);
+  context = ed::CreateEditor(config);
   ofAddListener(LibraryService::getService()->downloadNotification, this, &NodeLayoutView::haveDownloadedAvailableLibraryFile);
 }
 
 void NodeLayoutView::update() {}
-
 void ImGuiEx_BeginColumn() { ImGui::BeginGroup(); }
 
 void ImGuiEx_NextColumn()
@@ -92,13 +97,20 @@ void NodeLayoutView::draw()
   ed::PushStyleColor(ax::NodeEditor::StyleColor_Bg, ImVec4(0, 0, 0, 0));
   ed::PushStyleColor(ax::NodeEditor::StyleColor_Grid, ImVec4(0, 0, 0, 0));
   
-  bool show = LayoutStateService::getService()->showAudioSettings;
+  bool showAudio = LayoutStateService::getService()->showAudioSettings;
   
-  float width = (ImGui::GetWindowContentRegionMax().x * 4) / 5;
-  float height = ImGui::GetWindowContentRegionMax().y - LayoutStateService::getService()->audioSettingsViewHeight() - ImGuiWindowTitleBarHeight;
+  float width = (ImGui::GetWindowContentRegionMax().x * 4.0) / 5;
+  float height = ImGui::GetWindowContentRegionMax().y - LayoutStateService::getService()->audioSettingsViewHeight() - 56.0f;
   
   ed::Begin("My Editor", ImVec2(width, height));
   ed::NavigateToContent();
+  
+  // Disable navigation if Tutorial is enabled
+//  if (LayoutStateService::getService()->helpEnabled) {
+//    ed::SuspendNavigation();
+//  } else {
+//    ed::ResumeNavigation();
+//  }
   
   ed::PushStyleVar(ed::StyleVar_ScrollDuration, 0.1f);
   ed::PushStyleVar(ax::NodeEditor::StyleVar_NodeRounding, 0.0);
@@ -107,6 +119,7 @@ void NodeLayoutView::draw()
   int uniqueId = 1;
   int linkUniqueId = 1000;
   int sourceUniqueId = 10000;
+  makingLink = false;
   linksMap.clear();
   nodeIdNodeMap.clear();
   pinIdPinMap.clear();
@@ -120,7 +133,7 @@ void NodeLayoutView::draw()
     shaderNode->shader = shader;
     drawNode(shaderNode);
     
-    nodes.push_back(shaderNode);
+    nodes.insert(shaderNode);
     
     // Check if this is the terminal node, in which case, we'll add it to the preview nodes.
     if (ShaderChainerService::getService()->isTerminalShader(shaderNode->shader) &&
@@ -144,7 +157,7 @@ void NodeLayoutView::draw()
     // Always draw a Preview for our Source
     terminalNodes.insert(sourceNode);
     
-    nodes.push_back(sourceNode);
+    nodes.insert(sourceNode);
   }
   
   // Loop over ShaderNodes and draw links
@@ -192,7 +205,7 @@ void NodeLayoutView::draw()
     }
   }
   
-  // Delete the selected Shader
+  // Selects or deletes shaders which are selected
   
   ed::GetSelectedNodes(selectedNodesIds.data(), (int)selectedNodesIds.size());
   for (auto selectedNodeId : selectedNodesIds)
@@ -209,8 +222,12 @@ void NodeLayoutView::draw()
       if (shouldDelete)
         handleDeleteNode(node);
       else
-        ShaderChainerService::getService()->selectShader(node->shader);
+        ShaderChainerService::getService()->selectConnectable(node->connectable);
     }
+  }
+  
+  if (selectedNodesIds.empty()) {
+    ShaderChainerService::getService()->deselectConnectable();
   }
   
   if (ed::BeginCreate())
@@ -244,6 +261,8 @@ void NodeLayoutView::draw()
   handleDropZone();
   
   drawPreviewWindows();
+  
+  drawHelp();
   
   ed::SetCurrentEditor(nullptr);
   
@@ -636,10 +655,13 @@ void NodeLayoutView::handleDropZone()
       auto shader = ShaderChainerService::getService()->makeShader(shaderType);
       auto canvasPos = ed::ScreenToCanvas(getScaledMouseLocation());
       auto hovered = ed::GetHoveredNode();
+      
+      
       if (hovered.Get() == 0) {
         nodeDropLocation = std::make_unique<ImVec2>(canvasPos);
       } else {
-        nodeDropLocation = std::make_unique<ImVec2>(ed::GetNodePosition(hovered) + ImVec2(400.0, 0.0));
+        // Dropped on an existing Shader
+        nodeDropLocation = std::make_unique<ImVec2>(ed::GetNodePosition(hovered) + ImVec2(150.0, 0.0));
         auto startNode = nodeIdNodeMap[hovered.Get()];
         ShaderChainerService::getService()->makeConnection(startNode->connectable, shader, startNode->type == NodeTypeShader ? ConnectionTypeShader : ConnectionTypeSource, InputSlotMain);
       }
@@ -722,16 +744,27 @@ void NodeLayoutView::handleDropZone()
           {
             LibraryService::getService()->downloadFutures.push_back(std::async(std::launch::async, &LibraryService::downloadFile, LibraryService::getService(), availableLibrarySource->libraryFile));
           }
-          
           break;
         }
+        case VideoSource_multi:
+          source = VideoSourceService::getService()->addMultiVideoSource(availableSource->sourceName);
+          unplacedNodeIds.push_back(source->id);
+          break;
         case VideoSource_empty:
           break;
       }
       
       auto within = nodeAtPosition(ed::ScreenToCanvas(getScaledMouseLocation()));
       if (within != nullptr && within->type == NodeTypeSource && source != nullptr) {
-        ShaderChainerService::getService()->copyConnections(within->source, source);
+        // Remove the pending source from unplaced
+        unplacedNodeIds.pop_back();
+        
+        std::shared_ptr<MultiSource> multiSource = VideoSourceService::getService()->addMultiVideoSource(within->name);
+        multiSource->addSource(source);
+        multiSource->addSource(within->source);
+        unplacedNodeIds.push_back(multiSource->id);
+        
+        ShaderChainerService::getService()->copyConnections(within->source, multiSource);
         VideoSourceService::getService()->removeVideoSource(within->source->id);
       }
       
@@ -790,7 +823,6 @@ void NodeLayoutView::queryNewLinks()
 {
   ed::PinId inputPinId, outputPinId;
   std::vector<ed::NodeId> selectedNodesIds;
-  
   // Attempt to create a link with the passed input/output
   if (ed::QueryNewLink(&outputPinId, &inputPinId))
   {
@@ -854,6 +886,7 @@ void NodeLayoutView::drawNodeWindows()
     pos.x = pos.x + ed::GetNodeSize(node->id).x / ed::GetCurrentZoom() + 20;
     auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize;
     ImGui::SetNextWindowPos(pos);
+    ImGui::SetNextWindowSizeConstraints(ImVec2(NodeSettingsWidth, 0.0), ImVec2(NodeSettingsWidth, 9999999.0));
     ImGui::Begin(node->idName().c_str(), 0, flags);
     node->drawSettings();
     ImGui::End();
@@ -932,9 +965,23 @@ void NodeLayoutView::drawResolutionPopup()
 void NodeLayoutView::drawActionButtons()
 {
   auto pos = ImGui::GetCursorPos();
+  int buttonCount = 4;
   
   // Set the cursor to the bottom right of the window
-  ImGui::SetCursorPos(ImVec2(getScaledWindowWidth() - 250.0, getScaledWindowHeight() - LayoutStateService::getService()->audioSettingsViewHeight() - 100.0));
+  float shaderInfoPaneWidth = LayoutStateService::getService()->shouldDrawShaderInfo() ? getScaledWindowWidth() / 5 : 0;
+  
+  ImGui::SetCursorPos(ImVec2(getScaledWindowWidth() - 50.0 * buttonCount - shaderInfoPaneWidth, getScaledWindowHeight() - LayoutStateService::getService()->audioSettingsViewHeight() - 100.0));
+  
+  auto helpIcon = LayoutStateService::getService()->helpEnabled ?  ICON_MD_HELP_OUTLINE : ICON_MD_HELP;
+  // Draw the help button
+  if (CommonViews::LargeIconButton(helpIcon, "help"))
+  {
+    LayoutStateService::getService()->helpEnabled = !LayoutStateService::getService()->helpEnabled;
+  }
+  
+  ImGui::SameLine();
+  CommonViews::HSpacing(2);
+  ImGui::SameLine();
   
   // Draw the reset button
   if (CommonViews::LargeIconButton(ICON_MD_RECYCLING, "reset"))
@@ -954,26 +1001,26 @@ void NodeLayoutView::drawActionButtons()
   }
   ImGui::SameLine();
   CommonViews::HSpacing(2);
-  ImGui::SameLine();
-  
-  // Draw the zoom buttons
-  if (CommonViews::LargeIconButton(ICON_MD_ZOOM_IN, "zoom_in"))
-  {
-    ed::SetCurrentEditor(context);
-    ed::ZoomInc(true);
-    ed::SetCurrentEditor(nullptr);
-  }
-  ImGui::SameLine();
-  CommonViews::HSpacing(2);
-  ImGui::SameLine();
-  if (CommonViews::LargeIconButton(ICON_MD_ZOOM_OUT, "zoom_out"))
-  {
-    ed::SetCurrentEditor(context);
-    ed::ZoomInc(false);
-    ed::SetCurrentEditor(nullptr);
-  }
-  ImGui::SameLine();
-  CommonViews::HSpacing(2);
+  //  ImGui::SameLine();
+  //
+  //  // Draw the zoom buttons
+  //  if (CommonViews::LargeIconButton(ICON_MD_ZOOM_IN, "zoom_in"))
+  //  {
+  //    ed::SetCurrentEditor(context);
+  //    ed::ZoomInc(true);
+  //    ed::SetCurrentEditor(nullptr);
+  //  }
+  //  ImGui::SameLine();
+  //  CommonViews::HSpacing(2);
+  //  ImGui::SameLine();
+  //  if (CommonViews::LargeIconButton(ICON_MD_ZOOM_OUT, "zoom_out"))
+  //  {
+  //    ed::SetCurrentEditor(context);
+  //    ed::ZoomInc(false);
+  //    ed::SetCurrentEditor(nullptr);
+  //  }
+  //  ImGui::SameLine();
+  //  CommonViews::HSpacing(2);
   ImGui::SameLine();
   // Draw the stage mode button
   if (CommonViews::LargeIconButton(ICON_MD_VIEW_AGENDA, "stageMode"))
@@ -1006,4 +1053,237 @@ void NodeLayoutView::drawMetrics()
   
   ed::SetCurrentEditor(context);
   ed::ShowMetrics();
+}
+
+
+void NodeLayoutView::drawHelp()
+{
+  if (!LayoutStateService::getService()->helpEnabled) return;
+  
+  ImVec2 cursorPos = ImGui::GetCursorPos();
+  
+  if (!HelpService::getService()->placedSource())
+  {
+    bool hasPayload = ImGui::GetDragDropPayload();
+    ImGui::SetCursorPos(ImVec2(getScaledWindowWidth() / 5 + 20.0, 150.0));
+    if (hasPayload) {
+      HelpService::getService()->drawSource2View();
+    }
+    else {
+      HelpService::getService()->drawSourceView();
+      ImGui::NewLine();
+    }
+    
+    // Reset our cursor and return without drawing additional help
+    ImGui::SetCursorPos(cursorPos);
+    return;
+  }
+  
+  if (!HelpService::getService()->placedEffect())
+  {
+    bool hasPayload = ImGui::GetDragDropPayload();
+    ImGui::SetCursorPos(ImVec2(getScaledWindowWidth() / 5 + 20.0, getScaledWindowHeight() / 3.0 + 30.0));
+    if (hasPayload) {
+      HelpService::getService()->drawEffect2View();
+    } else {
+      HelpService::getService()->drawEffectView();
+      ImGui::NewLine();
+    }
+    // Reset our cursor and return without drawing additional help
+    ImGui::SetCursorPos(cursorPos);
+    return;
+  }
+  
+  if (!HelpService::getService()->madeConnection())
+  {
+    if (!ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
+      std::shared_ptr<VideoSource> source = VideoSourceService::getService()->videoSources().front();
+      if (source == nullptr) {
+        ImGui::SetCursorPos(cursorPos);
+        return;
+      };
+      std::shared_ptr<Node> node = idNodeMap[source->id];
+      if (node == nullptr) {
+        ImGui::SetCursorPos(cursorPos);
+        return;
+      };
+      HelpService::getService()->drawConnectionView(ed::CanvasToScreen(node->position), ed::GetNodeSize(node->id), ed::GetCurrentZoom());
+    } else {
+      std::shared_ptr<Shader> shader = ShaderChainerService::getService()->shaders().front();
+      if (shader == nullptr) {
+        ImGui::SetCursorPos(cursorPos);
+        return;
+      };
+      
+      std::shared_ptr<Node> node = idNodeMap[shader->shaderId];
+      HelpService::getService()->drawConnection2View(ed::CanvasToScreen(node->position), ed::GetNodeSize(node->id), ed::GetCurrentZoom());
+    }
+    
+    // Reset our cursor and return without drawing additional help
+    ImGui::SetCursorPos(cursorPos);
+    return;
+  }
+  
+  if (!HelpService::getService()->placedSecondSource())
+  {
+    bool hasPayload = ImGui::GetDragDropPayload();
+    ImGui::SetCursorPos(ImVec2(getScaledWindowWidth() / 5 + 20.0, 150.0));
+    if (hasPayload) {
+      HelpService::getService()->drawSecondSource2View();
+    }
+    else {
+      HelpService::getService()->drawSecondSourceView();
+      ImGui::NewLine();
+    }
+    
+    // Reset our cursor and return without drawing additional help
+    ImGui::SetCursorPos(cursorPos);
+    return;
+  }
+  
+  if (!HelpService::getService()->placedMixEffect())
+  {
+    bool hasPayload = ImGui::GetDragDropPayload();
+    ImGui::SetCursorPos(ImVec2(getScaledWindowWidth() / 5 + 20.0, getScaledWindowHeight() / 3.0 + 30.0));
+    
+    // Check if our payload is a Mix shader
+    auto payload = ImGui::GetDragDropPayload();
+    bool isShader = payload && payload->IsDataType("NewShader");
+    bool isMix = false;
+    if (isShader) {
+      int n = *(const int *)payload->Data;
+      ShaderType shaderType = (ShaderType)n;
+      isMix = shaderType == ShaderTypeMix;
+    }
+    
+    if (hasPayload && isMix) {
+      HelpService::getService()->drawMixEffect2View();
+    } else if (hasPayload && !isMix) {
+      HelpService::getService()->drawWrongEffectView();
+    } else {
+      HelpService::getService()->drawMixEffectView();
+      ImGui::NewLine();
+    }
+    // Reset our cursor and return without drawing additional help
+    ImGui::SetCursorPos(cursorPos);
+    return;
+  }
+  
+  // Making a connection to our Mix shader
+  if (!HelpService::getService()->madeFirstMixConnection()) {
+    if (!ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
+      
+      // Get a terminal node
+      std::shared_ptr<Node> terminalNode;
+      for (auto node : terminalNodes) {
+        if (node->type == NodeTypeShader && !ShaderChainerService::getService()->isShaderType(node->connectable, ShaderTypeMix)) {
+          terminalNode = node;
+          break;
+        }
+      }
+      if (terminalNode == nullptr) {
+        // Reset our cursor and return without drawing additional help
+        ImGui::SetCursorPos(cursorPos);
+        return;
+      }
+      
+      HelpService::getService()->drawMixConnectionView(ed::CanvasToScreen(terminalNode->position), ed::GetNodeSize(terminalNode->id), ed::GetCurrentZoom());
+    } else {
+      // Get a Mix node
+      std::shared_ptr<Node> mixNode;
+      for (auto node : nodes) {
+        if (ShaderChainerService::getService()->isShaderType(node->connectable, ShaderTypeMix)) {
+          mixNode = node;
+        };
+      }
+      
+      HelpService::getService()->drawMixConnection2View(ed::CanvasToScreen(mixNode->position), ed::GetNodeSize(mixNode->id), ed::GetCurrentZoom());
+    }
+    
+    // Reset our cursor and return without drawing additional help
+    ImGui::SetCursorPos(cursorPos);
+    return;
+  }
+  
+  // Making a second connection to our Mix shader
+  if (!HelpService::getService()->madeSecondMixConnection()) {
+    if (!ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
+      
+      // Get a terminal node
+      std::shared_ptr<Node> terminalNode;
+      for (auto node : terminalNodes) {
+        if (!ShaderChainerService::getService()->isShaderType(node->connectable, ShaderTypeMix) && node->connectable->outputs.size() == 0) {
+          terminalNode = node;
+          break;
+        }
+      }
+      
+      if (terminalNode == nullptr) {
+        ImGui::SetCursorPos(cursorPos);
+        return;
+      }
+      
+      HelpService::getService()->drawSecondMixConnectionView(ed::CanvasToScreen(terminalNode->position), ed::GetNodeSize(terminalNode->id), ed::GetCurrentZoom());
+    } else {
+      // Get a Mix node
+      std::shared_ptr<Node> mixNode;
+      for (auto node : nodes) {
+        if (ShaderChainerService::getService()->isShaderType(node->connectable, ShaderTypeMix)) {
+          mixNode = node;
+        };
+      }
+      
+      HelpService::getService()->drawSecondMixConnection2View(ed::CanvasToScreen(mixNode->position), ed::GetNodeSize(mixNode->id), ed::GetCurrentZoom());
+    }
+    
+    // Reset our cursor and return without drawing additional help
+    ImGui::SetCursorPos(cursorPos);
+    return;
+  }
+  
+  // Open the ShaderInfo pane
+  if (!HelpService::getService()->openedShaderInfo()) {
+    // Get a Mix node
+    std::shared_ptr<Node> mixNode;
+    for (auto node : nodes) {
+      if (ShaderChainerService::getService()->isShaderType(node->connectable, ShaderTypeMix)) {
+        mixNode = node;
+      };
+    }
+    
+    if (mixNode == nullptr) {
+      ImGui::SetCursorPos(cursorPos);
+      return;
+    }
+    
+    HelpService::getService()->drawOpenShaderInfoView(ed::CanvasToScreen(mixNode->position), ed::GetNodeSize(mixNode->id), ed::GetCurrentZoom());
+    
+    // Reset our cursor and return without drawing additional help
+    ImGui::SetCursorPos(cursorPos);
+    return;
+  }
+  
+  if (!HelpService::getService()->editedMixParameter()) {
+    HelpService::getService()->drawEditParametersShaderInfoPane();
+    
+    // Reset our cursor and return without drawing additional help
+    ImGui::SetCursorPos(cursorPos);
+    return;
+  }
+  
+  if (!HelpService::getService()->openedStageMode()) {
+    HelpService::getService()->drawOpenStageView();
+    
+    // Reset our cursor and return without drawing additional help
+    ImGui::SetCursorPos(cursorPos);
+    return;
+  }
+  
+  if (!HelpService::getService()->openedStageMode()) {
+    HelpService::getService()->drawOpenStageView();
+    
+    // Reset our cursor and return without drawing additional help
+    ImGui::SetCursorPos(cursorPos);
+    return;
+  }
 }

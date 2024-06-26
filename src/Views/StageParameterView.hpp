@@ -18,7 +18,7 @@ static const ImVec2 StageParameterViewSize = ImVec2(200,200);
 class StageParameterView {
 private:
 public:
-  static void draw(std::shared_ptr<FavoriteParameter> favoriteParameter);
+  static void draw(std::shared_ptr<Parameter> param);
 };
 
 
