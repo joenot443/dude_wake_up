@@ -9,9 +9,10 @@
 #include "Console.hpp"
 #include "CommonViews.hpp"
 #include "NodeLayoutView.hpp"
+#include "LayoutStateService.hpp"
 
 void TextSource::setup() {
-  fbo->allocate(settings->width->value, settings->height->value, GL_RGBA);
+  fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y, GL_RGBA);
   font.load(displayText->font.path(), displayText->fontSize);
   fontPath = displayText->font.path();
 }
@@ -34,6 +35,7 @@ void TextSource::saveFrame() {
     font.load(displayText->font.path(), displayText->fontSize);
     shouldClear = true;
   }
+  
   
   // Clear if our text has changed
   if (displayText->text != lastText) {
@@ -59,6 +61,7 @@ void TextSource::saveFrame() {
 
   // Draw the text
   ofSetColor(displayText->color);
+  bool anti = font.isAntiAliased();
   font.drawString(displayText->text, xPos, settings->height->intValue - yPos);
   fbo->end();
 }

@@ -25,8 +25,8 @@ struct ColorSwapSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> blendOscillator;
   
   ColorSwapSettings(std::string shaderId, json j, std::string name) :
-  mainRGB(std::make_shared<Parameter>("Main RGB", 0.0, 0.0, 2.0)),
-  auxRGB(std::make_shared<Parameter>("Aux RGB", 0.0, 0.0, 2.0)),
+  mainRGB(std::make_shared<Parameter>("Main RGB", 0.0, 0.0, 2.0, ParameterType_Int)),
+  auxRGB(std::make_shared<Parameter>("Aux RGB", 0.0, 0.0, 2.0, ParameterType_Int)),
   blend(std::make_shared<Parameter>("Blend", 0.5, 0.0, 1.0)),
   blendOscillator(std::make_shared<WaveformOscillator>(blend)),
   ShaderSettings(shaderId, j, name) {

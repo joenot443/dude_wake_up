@@ -1,9 +1,11 @@
+
 // clang-format off
 
 #ifndef ShaderSource_hpp
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "IsoFractShader.hpp"
 #include "PixelPlayShader.hpp"
 #include "DirtyPlasmaShader.hpp"
 #include "TwistedTripShader.hpp"
@@ -51,7 +53,6 @@
 #include "Shader.hpp"
 #include "UUID.hpp"
 #include "ShaderType.hpp"
-
 #include "VideoSource.hpp"
 #include <stdio.h>
 
@@ -101,6 +102,7 @@ enum ShaderSourceType {
   ShaderSource_TwistedCubes, //source enum,
   ShaderSource_TwistedTrip, //source enum,
   ShaderSource_DirtyPlasma, //source enum,
+  ShaderSource_IsoFract, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -146,11 +148,14 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_TwistedCubes, // Available
   ShaderSource_TwistedTrip, // Available
   ShaderSource_DirtyPlasma, // Available
+  ShaderSource_IsoFract, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
 // shaderTypeForShaderSourceType
+  case ShaderSource_IsoFract: //type enum
+    return ShaderTypeIsoFract;
   case ShaderSource_DirtyPlasma: //type enum
     return ShaderTypeDirtyPlasma;
   case ShaderSource_TwistedTrip: //type enum
@@ -274,6 +279,7 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     
     
   // Trippy
+    case ShaderSource_IsoFract:
   case ShaderSource_SwirlingSoul: // Name
   case ShaderSource_Hilbert: // Name
   case ShaderSource_Warp: // Name
@@ -298,8 +304,10 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
 };
 
 static std::string shaderSourceTypeName(ShaderSourceType nameType) {
-  switch (nameType) {
-  case ShaderSource_DirtyPlasma: // Name  
+  switch (nameType) { // ShaderNames
+  case ShaderSource_IsoFract: // Name
+    return "IsoFract"; // IsoFract
+  case ShaderSource_DirtyPlasma: // Name
     return "DirtyPlasma"; // DirtyPlasma
   case ShaderSource_TwistedTrip: // Name  
     return "TwistedTrip"; // TwistedTrip
@@ -407,6 +415,12 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_IsoFract: { // Settings
+      auto settings = new IsoFractSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<IsoFractShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_DirtyPlasma: { // Settings
       auto settings = new DirtyPlasmaSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<DirtyPlasmaShader>(settings);
@@ -669,23 +683,7 @@ public:
     }
   }
 
-  void setup() override {
-    shader->setup();
-    fbo->allocate(settings->width->value, settings->height->value, GL_RGBA);
-    fbo->begin();
-    ofSetColor(0, 0, 0, 255);
-    ofDrawRectangle(0, 0, fbo->getWidth(), fbo->getHeight());
-    fbo->end();
-
-    canvas->allocate(settings->width->value, settings->height->value, GL_RGBA);
-    canvas->begin();
-    ofSetColor(0, 0, 0, 255);
-    ofDrawRectangle(0, 0, fbo->getWidth(), fbo->getHeight());
-    canvas->end();
-    
-    maskShader.load("shaders/ColorKeyMaskMaker");
-
-  };
+  void setup() override;
 
   void saveFrame() override {
     // If our width or height has changed, setup again

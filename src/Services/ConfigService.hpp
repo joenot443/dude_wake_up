@@ -97,6 +97,7 @@ public:
   // File Paths
   std::string nottawaFolderFilePath();
   std::string libraryFolderFilePath();
+  std::string templatesFolderFilePath();
   std::string relativeFilePathWithinNottawaFolder(std::string filePath);
 
   json jsonFromParameters(std::vector<Parameter *> parameters);
@@ -107,7 +108,7 @@ public:
   void saveCurrentWorkspace();
   void saveNewWorkspace();
   void saveWorkspace(std::shared_ptr<Workspace> workspace);
-  void loadWorkspaceDialogue();
+  bool loadWorkspaceDialogue();
   void loadWorkspace(std::shared_ptr<Workspace> workspace);
   void closeWorkspace();
   

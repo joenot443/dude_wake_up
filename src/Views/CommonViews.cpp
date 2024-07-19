@@ -358,7 +358,7 @@ void CommonViews::ShaderStageParameter(std::shared_ptr<Parameter> param, std::sh
   auto xPos = ImGui::GetCursorPosX();
   ImGui::SameLine();
   ImGui::SetCursorPos(ImVec2(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - 25, yPos));
-  if (LayoutStateService::getService()->allParametersInStageModeEnabled && IconButton(ICON_MD_CLOSE, formatString("%s_close_button", param->paramId.c_str()).c_str())) {
+  if (!LayoutStateService::getService()->allParametersInStageModeEnabled && IconButton(ICON_MD_CLOSE, formatString("%s_close_button", param->paramId.c_str()).c_str())) {
     ParameterService::getService()->removeFavoriteParameter(param);
   }
   ImGui::SetCursorPosX(xPos);
@@ -467,7 +467,6 @@ bool CommonViews::MultiSlider(std::string title, std::string id, std::shared_ptr
                                  param1->min, param1->max, param2->min, param2->max, 1.0);
   ImGui::NextColumn();
   ImGui::Text("X Translate");
-  ImGui::SameLine();
   CommonViews::ResetButton("##xMultiSliderReset", param1);
   ImGui::SameLine();
   MidiSelector(param1);
@@ -479,7 +478,6 @@ bool CommonViews::MultiSlider(std::string title, std::string id, std::shared_ptr
   CommonViews::OscillateButton(formatString("##xOscillator_%s", id.c_str()).c_str(), param1Oscillator, param1);
   CommonViews::Slider(param1->name, param1->paramId, param1);
   ImGui::Text("Y Translate");
-  ImGui::SameLine();
   CommonViews::ResetButton("##yMultiSliderReset", param2);
   ImGui::SameLine();
   MidiSelector(param2);
@@ -488,7 +486,7 @@ bool CommonViews::MultiSlider(std::string title, std::string id, std::shared_ptr
   ImGui::SameLine();
   FavoriteButton(param2);
   ImGui::SameLine();
-  CommonViews::OscillateButton(formatString("##xOscillator_%s", id.c_str()).c_str(), param2Oscillator, param2);
+  CommonViews::OscillateButton(formatString("##yOscillator_%s", id.c_str()).c_str(), param2Oscillator, param2);
   CommonViews::Slider(param2->name, param2->paramId, param2);
   if (param1Oscillator->enabled->boolValue)
   {

@@ -1,0 +1,320 @@
+{
+    "configType": "strand",
+    "connections": {
+        "2a6f4c65-5cd0-df39-b608-69b5d894a821": {
+            "end": "0b81c230-3f43-e621-618f-b672d12ab87c",
+            "id": "2a6f4c65-5cd0-df39-b608-69b5d894a821",
+            "start": "b6e6bc26-d59a-a527-48ac-fff1b3897c3d",
+            "type": 1
+        },
+        "6f3bff1b-a82a-2663-5604-3e03a77e5382": {
+            "end": "b30e3b55-ef64-f3b4-3bf2-db869653c4ad",
+            "id": "6f3bff1b-a82a-2663-5604-3e03a77e5382",
+            "start": "3f0fc533-627f-7188-5cb9-8425849af1eb",
+            "type": 2
+        },
+        "93cd8a9b-4801-59f4-d277-4a1cdf0f7964": {
+            "end": "b30e3b55-ef64-f3b4-3bf2-db869653c4ad",
+            "id": "93cd8a9b-4801-59f4-d277-4a1cdf0f7964",
+            "start": "0b81c230-3f43-e621-618f-b672d12ab87c",
+            "type": 0
+        },
+        "a7531a1a-2d90-9f43-2c9e-cbf3e4e32280": {
+            "end": "8f28d4f8-eefe-f5d4-0dd7-2c93be8da879",
+            "id": "a7531a1a-2d90-9f43-2c9e-cbf3e4e32280",
+            "start": "cbb6d689-61ba-c0ee-cf6d-caf824207132",
+            "type": 1
+        },
+        "dda59c57-cb74-4160-8e15-bb6ab37a443a": {
+            "end": "3f0fc533-627f-7188-5cb9-8425849af1eb",
+            "id": "dda59c57-cb74-4160-8e15-bb6ab37a443a",
+            "start": "8f28d4f8-eefe-f5d4-0dd7-2c93be8da879",
+            "type": 0
+        }
+    },
+    "parameters": {
+        "favoriteParameters": [],
+        "favoriteShaders": [
+            1,
+            6,
+            7,
+            9,
+            11,
+            14,
+            42,
+            43
+        ]
+    },
+    "preview": "/Users/jcrozier/nottawa/Swirling Soul->Kaleidoscope->Disco_03-12.png",
+    "shaders": {
+        "0b81c230-3f43-e621-618f-b672d12ab87c": {
+            "Frame Shift": {
+                "boolValue": true,
+                "favorited": false,
+                "intValue": 0,
+                "midiDescriptor": "",
+                "name": "Frame Shift",
+                "paramId": "Frame Shift-06a4a2b3",
+                "value": 0.25
+            },
+            "Rotation": {
+                "boolValue": true,
+                "favorited": false,
+                "intValue": 1,
+                "midiDescriptor": "",
+                "name": "Rotation",
+                "paramId": "Rotation-cc94220b",
+                "value": 1.0
+            },
+            "Sides": {
+                "boolValue": true,
+                "favorited": false,
+                "intValue": 4,
+                "midiDescriptor": "",
+                "name": "Sides",
+                "paramId": "Sides-90e1c50d",
+                "value": 4.0
+            },
+            "amp": {
+                "boolValue": true,
+                "favorited": false,
+                "intValue": 1,
+                "midiDescriptor": "",
+                "name": "amp",
+                "paramId": "amp-0f1fcb62",
+                "value": 1.0
+            },
+            "freq": {
+                "boolValue": true,
+                "favorited": false,
+                "intValue": 0,
+                "midiDescriptor": "",
+                "name": "freq",
+                "paramId": "freq-48d04e51",
+                "value": 0.5
+            },
+            "shaderId": "0b81c230-3f43-e621-618f-b672d12ab87c",
+            "shaderType": 9,
+            "shift": {
+                "boolValue": true,
+                "favorited": false,
+                "intValue": 2,
+                "midiDescriptor": "",
+                "name": "shift",
+                "paramId": "shift-a8025d66",
+                "value": 2.6415927410125732
+            },
+            "x": -7802.0,
+            "y": 4894.0
+        },
+        "3f0fc533-627f-7188-5cb9-8425849af1eb": {
+            "Frame Shift": {
+                "boolValue": false,
+                "favorited": false,
+                "intValue": 0,
+                "midiDescriptor": "",
+                "name": "Frame Shift",
+                "paramId": "Frame Shift-0dfbe498",
+                "value": 0.0
+            },
+            "Rotation": {
+                "boolValue": true,
+                "favorited": false,
+                "intValue": 1,
+                "midiDescriptor": "",
+                "name": "Rotation",
+                "paramId": "Rotation-b5c3b945",
+                "value": 1.0
+            },
+            "Sides": {
+                "boolValue": true,
+                "favorited": false,
+                "intValue": 6,
+                "midiDescriptor": "",
+                "name": "Sides",
+                "paramId": "Sides-9a83e311",
+                "value": 6.0
+            },
+            "amp": {
+                "boolValue": true,
+                "favorited": false,
+                "intValue": 1,
+                "midiDescriptor": "",
+                "name": "amp",
+                "paramId": "amp-3fdbe73f",
+                "value": 1.0
+            },
+            "freq": {
+                "boolValue": true,
+                "favorited": false,
+                "intValue": 0,
+                "midiDescriptor": "",
+                "name": "freq",
+                "paramId": "freq-a57b7866",
+                "value": 0.5
+            },
+            "shaderId": "3f0fc533-627f-7188-5cb9-8425849af1eb",
+            "shaderType": 9,
+            "shift": {
+                "boolValue": true,
+                "favorited": false,
+                "intValue": 2,
+                "midiDescriptor": "",
+                "name": "shift",
+                "paramId": "shift-5350edb7",
+                "value": 2.6415927410125732
+            },
+            "x": -7776.0,
+            "y": 5182.0
+        },
+        "8f28d4f8-eefe-f5d4-0dd7-2c93be8da879": {
+            "cubeSize": {
+                "boolValue": true,
+                "favorited": false,
+                "intValue": 1,
+                "midiDescriptor": "",
+                "name": "cubeSize",
+                "paramId": "cubeSize-0923b6f6",
+                "value": 1.0
+            },
+            "enabled": {
+                "boolValue": false,
+                "favorited": false,
+                "intValue": 0,
+                "midiDescriptor": "",
+                "name": "enabled",
+                "paramId": "enabled-a704cdc6",
+                "value": 0.0
+            },
+            "shaderId": "8f28d4f8-eefe-f5d4-0dd7-2c93be8da879",
+            "shaderType": 72,
+            "x": -7929.0,
+            "y": 5326.0
+        },
+        "b30e3b55-ef64-f3b4-3bf2-db869653c4ad": {
+            "amp": {
+                "boolValue": true,
+                "favorited": false,
+                "intValue": 1,
+                "midiDescriptor": "",
+                "name": "amp",
+                "paramId": "amp-40e5037b",
+                "value": 1.0
+            },
+            "freq": {
+                "boolValue": true,
+                "favorited": false,
+                "intValue": 0,
+                "midiDescriptor": "",
+                "name": "freq",
+                "paramId": "freq-83e10bd1",
+                "value": 0.5
+            },
+            "mix": {
+                "boolValue": true,
+                "favorited": false,
+                "intValue": 0,
+                "midiDescriptor": "",
+                "name": "mix",
+                "paramId": "mix-ecd218d1",
+                "value": 0.5
+            },
+            "shaderId": "b30e3b55-ef64-f3b4-3bf2-db869653c4ad",
+            "shaderType": 11,
+            "shift": {
+                "boolValue": true,
+                "favorited": false,
+                "intValue": 0,
+                "midiDescriptor": "",
+                "name": "shift",
+                "paramId": "shift-dc09ae65",
+                "value": 0.5
+            },
+            "x": -7557.0,
+            "y": 4963.0
+        }
+    },
+    "sources": {
+        "b6e6bc26-d59a-a527-48ac-fff1b3897c3d": {
+            "id": "b6e6bc26-d59a-a527-48ac-fff1b3897c3d",
+            "shader": {
+                "centerX": {
+                    "boolValue": false,
+                    "favorited": false,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "centerX",
+                    "paramId": "centerX-407a67c6",
+                    "value": 0.0
+                },
+                "centerY": {
+                    "boolValue": false,
+                    "favorited": false,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "centerY",
+                    "paramId": "centerY-bd70b730",
+                    "value": 0.0
+                },
+                "enabled": {
+                    "boolValue": false,
+                    "favorited": false,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "enabled",
+                    "paramId": "enabled-8d1f031f",
+                    "value": 0.0
+                },
+                "x": {
+                    "boolValue": false,
+                    "favorited": false,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "x",
+                    "paramId": "x-688924d2",
+                    "value": 0.0
+                },
+                "y": {
+                    "boolValue": false,
+                    "favorited": false,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "y",
+                    "paramId": "y-379513c2",
+                    "value": 0.0
+                }
+            },
+            "shaderSourceType": 32,
+            "videoSourceType": 5,
+            "x": -8231.0,
+            "y": 5022.0
+        },
+        "cbb6d689-61ba-c0ee-cf6d-caf824207132": {
+            "id": "cbb6d689-61ba-c0ee-cf6d-caf824207132",
+            "shader": {
+                "x": {
+                    "boolValue": false,
+                    "favorited": false,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "x",
+                    "paramId": "x-fc69a7dd",
+                    "value": 0.0
+                },
+                "y": {
+                    "boolValue": false,
+                    "favorited": false,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "y",
+                    "paramId": "y-a440e04d",
+                    "value": 0.0
+                }
+            },
+            "shaderSourceType": 8,
+            "videoSourceType": 5,
+            "x": -8195.0,
+            "y": 5326.0
+        }
+    }
+}

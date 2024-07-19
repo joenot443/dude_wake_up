@@ -7,6 +7,8 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "IsoFractShader.hpp"
+#include "SwirlShader.hpp"
 #include "TraceAudioShader.hpp"
 #include "PixelPlayShader.hpp"
 #include "DirtyPlasmaShader.hpp"
@@ -105,6 +107,7 @@
 #include "VanGoghShader.hpp"
 #include "VideoSourceService.hpp"
 #include "WobbleShader.hpp"
+#include "LayoutStateService.hpp"
 
 void ShaderChainerService::setup()
 {
@@ -223,7 +226,9 @@ std::shared_ptr<Shader> ShaderChainerService::makeShader(ShaderType type)
 // Returns true if the passed Shader is the terminal node in a Chainer.
 bool ShaderChainerService::isTerminalShader(std::shared_ptr<Shader> shader)
 {
-  return shader->outputs.empty();
+  // True if we have no outputs or if the only output is an Aux
+  
+  return shader->outputs.empty() || (shader->outputs.size() == 1 && shader->outputs.count(OutputSlotAux) == 1);
 }
 
 bool ShaderChainerService::isShaderType(std::shared_ptr<Connectable> connectable, ShaderType shaderType) {
@@ -242,9 +247,10 @@ std::shared_ptr<Shader> ShaderChainerService::terminalShader(std::shared_ptr<Sha
   
   for (auto conn : shader->outputs)
   {
-    if (conn->end->connectableType() == ConnectableTypeShader)
+    std::shared_ptr<Connectable> end = conn.second->end;
+    if (end->connectableType() == ConnectableTypeShader)
     {
-      auto nextShader = std::dynamic_pointer_cast<Shader>(conn->end);
+      auto nextShader = std::dynamic_pointer_cast<Shader>(end);
       return terminalShader(nextShader);
     }
   }
@@ -348,7 +354,8 @@ void ShaderChainerService::loadConnectionsConfig(json j)
     ConnectionType type = val["type"];
     std::string startId = val["start"];
     std::string endId = val["end"];
-    InputSlot slot = val["slot"];
+    InputSlot inputSlot = val["inputSlot"];
+    OutputSlot outputSlot = val["outputSlot"];
     
     std::shared_ptr<Connectable> start;
     std::shared_ptr<Connectable> end = shaderForId(endId);
@@ -368,7 +375,7 @@ void ShaderChainerService::loadConnectionsConfig(json j)
       continue;
     }
     
-    makeConnection(start, end, type, slot);
+    makeConnection(start, end, type, outputSlot, inputSlot);
   }
 }
 
@@ -388,7 +395,15 @@ void ShaderChainerService::addShader(std::shared_ptr<Shader> shader)
   
   FeedbackSourceService::getService()->registerFeedbackSource(feedbackSource);
   shader->feedbackDestination = feedbackSource;
+  shader->allocateLastFrame();
   shadersMap[shader->shaderId] = shader;
+  
+  // Subscribe the Shader's setup() to resolution updates
+  LayoutStateService::getService()->subscribeToResolutionUpdates([shader]() {
+    shader->allocateLastFrame();
+    shader->setup();
+  });
+  
   ConfigService::getService()->saveDefaultConfigFile();
 }
 
@@ -431,7 +446,7 @@ void ShaderChainerService::removeConnectable(std::shared_ptr<Connectable> connec
   // Remove the input Connections
   if (!connectable->inputs.empty())
   {
-    for (auto [key, conn] : connectable->inputs)
+    for (auto [slot, conn] : connectable->inputs)
     {
       // Remove the Connection connecting [Parent] -> [Us]
       connectionIdsToRemove.push_back(conn->id);
@@ -441,7 +456,7 @@ void ShaderChainerService::removeConnectable(std::shared_ptr<Connectable> connec
   // Remove the output Connections
   if (!connectable->outputs.empty())
   {
-    for (auto conn : connectable->outputs)
+    for (auto [slot, conn] : connectable->outputs)
     {
       connectionIdsToRemove.push_back(conn->id);
     }
@@ -460,12 +475,12 @@ void ShaderChainerService::removeConnectable(std::shared_ptr<Connectable> connec
 }
 
 void ShaderChainerService::copyConnections(std::shared_ptr<Connectable> source, std::shared_ptr<Connectable> dest) {
-  for (auto [key, conn] : source->inputs) {
-    makeConnection(conn->start, dest, conn->type, conn->inputSlot, false, true);
+  for (auto [slot, conn] : source->inputs) {
+    makeConnection(conn->start, dest, conn->type, conn->outputSlot, conn->inputSlot, false, true);
   }
   
-  for (auto conn : source->outputs) {
-    makeConnection(dest, conn->end, conn->type, conn->inputSlot, false, true);
+  for (auto [slot, conn] : source->outputs) {
+    makeConnection(dest, conn->end, conn->type, conn->outputSlot, conn->inputSlot, false, true);
   }
 }
 
@@ -503,11 +518,11 @@ Strand ShaderChainerService::strandForConnectable(std::shared_ptr<Connectable> c
       }
     }
     
-    for (const auto& output : current->outputs) {
-      if (visitedConnectionIds.find(output->id) == visitedConnectionIds.end()) {
-        strand.connections.push_back(output);
-        visitedConnectionIds.insert(output->id);
-        explore(output->end);
+    for (const auto [key, conn] : current->outputs) {
+      if (visitedConnectionIds.find(conn->id) == visitedConnectionIds.end()) {
+        strand.connections.push_back(conn);
+        visitedConnectionIds.insert(conn->id);
+        explore(conn->end);
       }
     }
   };
@@ -562,19 +577,20 @@ void ShaderChainerService::breakConnectionForConnectionId(std::string connection
 std::shared_ptr<Connection> ShaderChainerService::makeConnection(std::shared_ptr<Connectable> start,
                                                                  std::shared_ptr<Connectable> end,
                                                                  ConnectionType type,
-                                                                 InputSlot slot,
+                                                                 OutputSlot outputSlot,
+                                                                 InputSlot inputSlot,
                                                                  bool shouldSaveConfig,
                                                                  bool copy)
 {
   // Only allow a single input for each type
-  if (end->hasInputAtSlot(slot))
+  if (end->hasInputAtSlot(inputSlot))
   {
     return nullptr;
   }
   
-  auto connection = std::make_shared<Connection>(start, end, type, slot);
-  start->outputs.insert(connection);
-  end->inputs[slot] = connection;
+  auto connection = std::make_shared<Connection>(start, end, type, outputSlot, inputSlot);
+  start->outputs[outputSlot] = connection;
+  end->inputs[inputSlot] = connection;
   connectionMap[connection->id] = connection;
   
   // Update the Connectable's FeedbackSource
@@ -611,6 +627,18 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeIsoFract: {
+      auto settings = new IsoFractSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<IsoFractShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeSwirl: {
+      auto settings = new SwirlSettings(shaderId, shaderJson, shaderTypeName(shaderType));
+      auto shader = std::make_shared<SwirlShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeTraceAudio: {
       auto settings = new TraceAudioSettings(shaderId, shaderJson);
       auto shader = std::make_shared<TraceAudioShader>(settings);

@@ -29,13 +29,12 @@ class Shader: public Connectable
 public:
   
   Shader(ShaderSettings *settings)
-      : settings(std::unique_ptr<ShaderSettings>(settings)),
-        shaderId(settings->shaderId),
+  : settings(std::unique_ptr<ShaderSettings>(settings)),
+  shaderId(settings->shaderId),
   creationTime(ofGetUnixTime()),
   lastFrame(std::make_shared<ofFbo>())
   {
     color = colorFromName(settings->name);
-    lastFrame->allocate(1280, 720, GL_RGBA);
   };
   
   ofShader shader;
@@ -44,28 +43,32 @@ public:
   ImColor color;
   
   std::string shaderId;
-
+  
   std::shared_ptr<ofFbo> lastFrame;
-
+  
   unsigned int creationTime;
-
+  
   virtual void setup(){};
   virtual void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas){};
   virtual void clear(){};
-
+  
   // Feedback
   // The Feedback OUTPUT pin for shading feedback frames before injection
   std::shared_ptr<Connectable> feedback();
-
+  
   // The FeedbackSource which this Shader will write to.
   // When this Shader's next is set to a FeedbackShader, this Shader
   // will act as a FeedbackSource.
   std::shared_ptr<FeedbackSource> feedbackDestination;
-
+  
+  void allocateLastFrame();
+  
   virtual std::string name() { return shaderTypeName(type()); };
   virtual bool enabled() { return true; };
   virtual bool hasFrameBuffer() { return false; };
   void saveFrame(ofFbo *frame){};
+  
+  virtual std::shared_ptr<Parameter> audioReactiveParameter() { return nullptr; }
 
   virtual ShaderType type() { return ShaderTypeNone; };
 

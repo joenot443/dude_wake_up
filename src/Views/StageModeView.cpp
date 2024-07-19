@@ -80,7 +80,9 @@ void StageModeView::draw() {
     ParameterService::getService()->removeStageShaderId(shaderId);
   }
   
-  if (ParameterService::getService()->stageShaderIds.size() == 0) {
+  // If we haven't specified output Shaders for StageMode but we DO have shaders active
+  if (ParameterService::getService()->stageShaderIds.size() == 0 &&
+      ShaderChainerService::getService()->shaders().size() != 0) {
     auto shader = ShaderChainerService::getService()->shaderForId(ParameterService::getService()->defaultStageShaderIdDepth.first);
     if (shader == nullptr) {
       ParameterService::getService()->defaultStageShaderIdDepth = std::pair<std::string, int>("", -1);
@@ -165,7 +167,7 @@ void StageModeView::drawActionButtons()
   ImGui::SetCursorScreenPos(ImVec2(getScaledWindowWidth() - 82.0, getScaledWindowHeight() - LayoutStateService::getService()->audioSettingsViewHeight() - 100.0));
   
   // Draw the node mode button
-  if (CommonViews::LargeIconButton(ICON_MD_NETWORK_CELL, "stageModeDisable"))
+  if (CommonViews::LargeIconButton(ICON_MD_HUB, "stageModeDisable"))
   {
     LayoutStateService::getService()->stageModeEnabled = false;
   }

@@ -109,6 +109,8 @@ enum ShaderType {
   ShaderTypeDirtyPlasma,
   ShaderTypePixelPlay,
   ShaderTypeTraceAudio,
+  ShaderTypeSwirl,
+  ShaderTypeIsoFract,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -156,6 +158,7 @@ static const ShaderType AvailableTransformShaderTypes[] = {
   ShaderTypeKaleidoscope,
   ShaderTypeSlider, // Generated
   ShaderTypeLiquid,
+  ShaderTypeSwirl,
 };
 
 static const ShaderType AvailableFilterShaderTypes[] = {
@@ -207,6 +210,10 @@ static std::vector<ShaderType> AllShaderTypes() {
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) { // ShaderNames
+    case ShaderTypeIsoFract:
+      return "IsoFract";
+    case ShaderTypeSwirl:
+      return "Swirl";
     case ShaderTypeTraceAudio:
       return "TraceAudio";
     case ShaderTypePixelPlay:

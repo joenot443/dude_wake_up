@@ -9,7 +9,11 @@
 #define Connection_hpp
 
 #include <stdio.h>
-
+#include <memory>
+#include <map>
+#include <set>
+#include <vector>
+#include <string>
 #include "VideoSourceSettings.hpp"
 #include "ShaderType.hpp"
 #include "UUID.hpp"
@@ -45,7 +49,8 @@ enum InputSlot
   InputSlotNine
 };
 
-static const InputSlot AllInputSlots[] = {   InputSlotMain,
+static const InputSlot AllInputSlots[] = {
+  InputSlotMain,
   InputSlotTwo,
   InputSlotThree,
   InputSlotFour,
@@ -53,9 +58,38 @@ static const InputSlot AllInputSlots[] = {   InputSlotMain,
   InputSlotSix,
   InputSlotSeven,
   InputSlotEight,
-  InputSlotNine };
+  InputSlotNine
+};
 
-class Connection : std::enable_shared_from_this<Connectable>
+// 0-9
+enum OutputSlot
+{
+  OutputSlotMain,
+  OutputSlotTwo,
+  OutputSlotThree,
+  OutputSlotFour,
+  OutputSlotFive,
+  OutputSlotSix,
+  OutputSlotSeven,
+  OutputSlotEight,
+  OutputSlotNine,
+  OutputSlotNone,
+  OutputSlotAux
+};
+
+static const OutputSlot StandardOutputSlots[] = {
+  OutputSlotMain,
+  OutputSlotTwo,
+  OutputSlotThree,
+  OutputSlotFour,
+  OutputSlotFive,
+  OutputSlotSix,
+  OutputSlotSeven,
+  OutputSlotEight,
+  OutputSlotNine,
+};
+
+class Connection : public std::enable_shared_from_this<Connection>
 {
 public:
   std::string id;
@@ -66,12 +100,14 @@ public:
   
   ConnectionType type;
   InputSlot inputSlot;
+  OutputSlot outputSlot;
   
   Connection(std::shared_ptr<Connectable> start,
              std::shared_ptr<Connectable> end,
              ConnectionType type,
+             OutputSlot outputSlot,
              InputSlot inputSlot)
-  : start(start), end(end), type(type), id(UUID::generateUUID()), inputSlot(inputSlot)
+  : start(start), end(end), type(type), id(UUID::generateUUID()), inputSlot(inputSlot), outputSlot(outputSlot)
   {}
   
   json serialize();
@@ -83,7 +119,7 @@ public:
   virtual ~Connectable() = default;
 
   std::map<InputSlot, std::shared_ptr<Connection>> inputs;
-  std::set<std::shared_ptr<Connection>> outputs;
+  std::map<OutputSlot, std::shared_ptr<Connection>> outputs;
   
   // Either a Shader::shaderId or a VideoSource::id
   virtual std::string connId() = 0;
@@ -115,9 +151,14 @@ public:
     return inputs.find(slot) != inputs.end();
   }
   
+  bool hasOutputAtSlot(OutputSlot slot)
+  {
+    return outputs.find(slot) != outputs.end();
+  }
+
   bool hasOutputForType(ConnectionType type)
   {
-    for (auto const output : outputs)
+    for (auto const& [key, output] : outputs)
     {
       if (output->type == type)
         return true;
@@ -125,16 +166,44 @@ public:
     return false;
   }
   
+  std::vector<OutputSlot> populatedOutputSlots()
+  {
+    std::vector<OutputSlot> slots;
+    
+    for (OutputSlot slot : StandardOutputSlots) {
+      if (outputs.find(slot) != outputs.end()) {
+        slots.push_back(slot);
+      }
+    }
+    
+    return slots;
+  }
+  
+  OutputSlot nextAvailableOutputSlot()
+  {
+    for (OutputSlot slot : StandardOutputSlots) {
+      if (outputs.find(slot) == outputs.end()) {
+        return slot;
+      }
+    }
+    return OutputSlotNone;
+  }
+  
   std::shared_ptr<Connectable> inputAtSlot(InputSlot slot)
   {
     return inputs.at(slot)->start;
+  }
+
+  std::shared_ptr<Connectable> outputAtSlot(OutputSlot slot)
+  {
+    return outputs.at(slot)->end;
   }
   
   // Returns the furthest descendent of the Connectable
   std::shared_ptr<Connectable> terminalDescendent() {
     if (outputs.empty()) return shared_from_this();
     
-    return outputs.begin()->get()->end->terminalDescendent();
+    return outputs.begin()->second->end->terminalDescendent();
   }
   
   std::shared_ptr<Connectable> parentOfType(ConnectableType type)
@@ -197,24 +266,23 @@ public:
   
   std::shared_ptr<Connectable> outputForType(ConnectionType type)
   {
-    for (auto outputConnection : outputs)
+    for (auto const& [key, output] : outputs)
     {
-      if (outputConnection->type == type)
-        return outputConnection->end;
+      if (output->type == type)
+        return output->end;
     }
     return nullptr;
   }
   
-  
   std::shared_ptr<Connection> connectionFor(std::shared_ptr<Connectable> conn)
   {
-    for (auto const [key, connection] : inputs)
+    for (auto const& [key, connection] : inputs)
     {
       if (connection->start == conn)
         return connection;
     }
     
-    for (auto const connection : outputs)
+    for (auto const& [key, connection] : outputs)
     {
       if (connection->end == conn)
         return connection;
@@ -224,19 +292,32 @@ public:
   std::vector<std::string> removeInputConnections(ConnectionType type)
   {
     std::vector<std::string> idsToRemove;
-    for (auto [key, connection] : inputs)
+    for (auto const& [key, connection] : inputs)
     {
       if (connection->type == type)
       {
         idsToRemove.push_back(connection->id);
       }
     }
+    return idsToRemove;
   }
-  
+
+  std::vector<std::string> removeOutputConnections(ConnectionType type)
+  {
+    std::vector<std::string> idsToRemove;
+    for (auto const& [key, connection] : outputs)
+    {
+      if (connection->type == type)
+      {
+        idsToRemove.push_back(connection->id);
+      }
+    }
+    return idsToRemove;
+  }
   
   // Returns the first parent's current frame
   std::shared_ptr<ofFbo> parentFrame() {
-    for (auto [key, connection] : inputs) {
+    for (auto const& [key, connection] : inputs) {
       return connection->start->frame();
     }
     return nullptr;
@@ -247,13 +328,20 @@ public:
     if (!conn)
       return; // Don't proceed if the connection is null
     
-    // Remove the connection from the 'outputs' set of the starting Connectable
+    // Remove the connection from the 'outputs' map of the starting Connectable
     if (conn->start)
     {
-      conn->start->outputs.erase(conn);
+      auto it = conn->start->outputs.begin();
+      while (it != conn->start->outputs.end()) {
+        if (conn == it->second) {
+          it = conn->start->outputs.erase(it);
+        } else {
+          ++it;
+        }
+      }
     }
     
-    // Remove the connection from the 'inputs' set of the ending Connectable
+    // Remove the connection from the 'inputs' map of the ending Connectable
     if (conn->end)
     {
       auto it = conn->end->inputs.begin();

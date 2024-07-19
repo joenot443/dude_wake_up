@@ -19,7 +19,7 @@ void FontService::addFontToGui(ofxImGui::Gui *gui) {
   static const ImWchar icon_ranges[] = { ICON_MIN_MD, ICON_MAX_16_MD, 0 };
   static const ImWchar audio_icon_range[] = {ICON_MIN_FAD, ICON_MAX_FAD, 0};
 
-  h1 = gui->addFont("fonts/Roboto-Medium.ttf", 36);
+  h1 = gui->addFont("fonts/Roboto-Medium.ttf", 72);
   h2 = gui->addFont("fonts/Roboto-Medium.ttf", 24);
   h3 = gui->addFont("fonts/Roboto-Medium.ttf", 18);
   h3b = gui->addFont("fonts/Roboto-Bold.ttf", 18);

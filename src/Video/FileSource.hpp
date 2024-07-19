@@ -17,10 +17,10 @@ public:
   FileSource(std::string id, std::string name, std::string path)
       : VideoSource(id, name, VideoSource_file),
         path(path),
-        volume(std::make_shared<Parameter>("volume", 0.5, 0.0, 1.0)),
-        sliderPosition(std::make_shared<Parameter>("position", 0.0, 0.0, 1.0)),
-        mute(std::make_shared<Parameter>("mute", 0.0, 0.0, 1.0)),
-        boomerang(std::make_shared<Parameter>("Boomerang", 0.0, 0.0, 1.0)),
+        volume(std::make_shared<Parameter>("Volume", 0.5, 0.0, 1.0)),
+        sliderPosition(std::make_shared<Parameter>("Position", 0.0, 0.0, 1.0)),
+        mute(std::make_shared<Parameter>("Mute", 0.0, 0.0, 1.0)),
+        boomerang(std::make_shared<Parameter>("Boomerang", ParameterType_Bool)),
         position(0.0),
         start(0.0),
         end(1.0){};

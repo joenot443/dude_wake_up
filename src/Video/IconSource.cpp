@@ -9,6 +9,7 @@
 #include "IconService.hpp"
 #include "TextureService.hpp"
 #include "NodeLayoutView.hpp"
+#include "LayoutStateService.hpp"
 #include "CommonViews.hpp"
 
 void IconSource::setup()
@@ -21,10 +22,10 @@ void IconSource::setup()
 
 void IconSource::drawSource()
 {
-  fbo->allocate(settings->width->value, settings->height->value);
+  fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   fbo->getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
   fbo->begin();
-  imageTexture->fbo->draw(0, 0, settings->width->value, settings->height->value);
+  imageTexture->fbo->draw(0, 0, LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   fbo->end();
 }
 

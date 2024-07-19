@@ -6,11 +6,14 @@
 //
 
 #include "AudioSourceService.hpp"
+#include "LayoutStateService.hpp"
 #include "ConfigService.hpp"
 #include "UUID.hpp"
 
 void AudioSourceService::setup() {
   ofSoundStream().printDeviceList();
+  
+  link.enable(true);
 
   // Get every input audio device
   auto devices = ofSoundStream().getDeviceList();
@@ -35,12 +38,6 @@ void AudioSourceService::setup() {
   }
 }
 
-void AudioSourceService::processAudioSource() {
-  if (selectedAudioSource) {
-    selectedAudioSource->update();
-  }
-}
-
 std::vector<std::shared_ptr<AudioSource>> AudioSourceService::audioSources() {
   std::vector<std::shared_ptr<AudioSource>> audioSources;
   for (auto const &[key, val] : audioSourceMap) {
@@ -56,6 +53,17 @@ AudioSourceService::audioSourceForId(std::string id) {
     return nullptr;
   }
   return audioSourceMap[id];
+}
+
+void AudioSourceService::update() {
+  if (LayoutStateService::getService()->abletonLinkEnabled) {
+    selectedAudioSource->audioAnalysis.bpmEnabled = true;
+    selectedAudioSource->audioAnalysis.bpm->setValue(link.captureAppSessionState().tempo());
+    
+    double beatCount = link.captureAppSessionState().beatAtTime(link.clock().micros(), 4.);    
+    // Only use the fractional component of the beatCount
+    selectedAudioSource->audioAnalysis.updateBeat(beatCount - floor(beatCount));
+  }
 }
 
 std::shared_ptr<AudioSource>

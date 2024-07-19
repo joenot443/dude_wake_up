@@ -56,11 +56,15 @@ void setupDirectories() {
   ofSetDataPathRoot("../Resources/data/");
   auto homeDir = ofFilePath::getUserHomeDir();
   auto libraryPath = ofFilePath::join(homeDir, "/nottawa");
+  auto sentryPath = ofFilePath::join(homeDir, "/nottawa/sentry");
   auto shadersPath = ofFilePath::join(libraryPath, "/shaders");
   auto videosPath = ofFilePath::join(libraryPath, "/videos");
   
   if (!ofDirectory::doesDirectoryExist(libraryPath)) {
     ofDirectory::createDirectory(libraryPath);
+  }
+  if (!ofDirectory::doesDirectoryExist(sentryPath)) {
+    ofDirectory::createDirectory(sentryPath);
   }
   if (!ofDirectory::doesDirectoryExist(shadersPath)) {
     ofDirectory::createDirectory(shadersPath);
@@ -80,16 +84,17 @@ int main( ){
   setupDirectories();
   auto homeDir = ofFilePath::getUserHomeDir();
   auto libraryPath = ofFilePath::join(homeDir, "/nottawa");
+  auto sentryPath = ofFilePath::join(homeDir, "/nottawa/sentry");
   
   sentry_options_t *options = sentry_options_new();
   sentry_options_set_dsn(options, "https://ce0071f5f4c84c6f99f58a6a7d97c5a1@o4505431303847936.ingest.sentry.io/4505431305486336");
-  sentry_options_set_database_path(options, libraryPath.c_str());
+  sentry_options_set_database_path(options, sentryPath.c_str());
   auto crashpadDirectory = ofFilePath::join(ofFilePath::getCurrentExeDir(), "../../../crashpad_handler");
   log(crashpadDirectory);
   sentry_options_set_handler_path(options, crashpadDirectory.c_str());
   sentry_options_set_release(options, "nottawa@0.1");
   sentry_options_set_debug(options, 1);
-  sentry_init(options);
+//  sentry_init(options);
 
   ofGLFWWindowSettings settings;
   settings.setSize(1920, 1080);

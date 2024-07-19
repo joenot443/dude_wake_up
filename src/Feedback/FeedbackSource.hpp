@@ -71,6 +71,16 @@ struct FeedbackSource {
     return fbo->getTexture();
   }
   
+  std::shared_ptr<ofFbo> getFbo(int index) {
+    if (!beingConsumed()) {
+      log("Getting Feedback frame for a source not being consumed");
+    }
+    
+    int destIndex = (startIndex + index) % FrameBufferCount;
+    auto fbo = frameBuffer.at(destIndex);
+    return fbo;
+  }
+  
   void clearFrameBuffer() {
     setup();
   }

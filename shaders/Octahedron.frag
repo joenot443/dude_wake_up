@@ -3,6 +3,7 @@
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
+uniform int enableBackground;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -88,6 +89,9 @@ void main()
     float dif = clamp( dot(nor,vec3(0.7,0.6,0.4)), 0.0, 1.0 );
     float amb = 0.5 + 0.5*dot(nor,vec3(0.0,0.8,0.6));
     col = vec3(0.2,0.3,0.4)*amb + vec3(0.8,0.7,0.5)*dif;
+  } else if (enableBackground == 0) {
+    outputColor = vec4(0.0);
+    return;
   }
   
   // gamma

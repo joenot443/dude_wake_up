@@ -58,7 +58,7 @@ struct CubifyShader: Shader {
     
   }
 
-    int inputCount() override {
+  int inputCount() override {
     return 1;
   }
 ShaderType type() override {

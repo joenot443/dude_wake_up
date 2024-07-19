@@ -3,6 +3,9 @@
 uniform sampler2D tex;
 uniform float time;
 uniform vec2 dimensions;
+uniform float alpha;
+uniform float beta;
+uniform float speed;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -51,14 +54,14 @@ vec3 spectral_colour(float l) // RGB <0,1> <- lambda l <400,700> [nm]
   return vec3(r, g, b);
 }
 
-vec3 spectral_palette(float x) { return spectral_colour(x * 300.0 + 400.0); }
+vec3 spectral_palette(float x) { return spectral_colour(x * 300.0 * alpha + beta*400.0); }
 
 void main() {
   vec2 p = (2.0 * coord.xy - dimensions.xy) / max(dimensions.x, dimensions.y);
   for (int i = 1; i < 50; i++) {
     p = p +
-        vec2(0.6 / float(i) * sin(float(i) * p.y + time + 0.3 * float(i)) + 1.0,
-             0.6 / float(i) * sin(float(i) * p.x + time + 0.3 * float(i + 10)) -
+        vec2(0.6 / float(i) * sin(float(i) * p.y + time * speed + 0.3 * float(i)) + 1.0,
+             0.6 / float(i) * sin(float(i) * p.x + time * speed + 0.3 * float(i + 10)) -
                  1.4);
   }
   vec3 col = spectral_palette(p.x - 48.5);

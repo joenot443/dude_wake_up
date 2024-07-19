@@ -23,6 +23,7 @@
 #include "implot.h"
 #include "ofMain.h"
 #include "ofxImGui.h"
+#include "Strings.hpp"
 #include <stdio.h>
 
 void MainApp::setup()
@@ -46,10 +47,11 @@ void MainApp::setup()
   VideoSourceService::getService();
   MarkdownService::getService();
   ConfigService::getService()->loadDefaultConfigFile();
+  StrandService::getService()->setup();
   mainStageView->setup();
   LibraryService::getService()->backgroundFetchLibraryFiles();
-  StrandService::getService()->setup();
   ParameterService::getService()->setup();
+  StringManager::loadStrings();
 }
 
 void MainApp::update()
@@ -61,6 +63,7 @@ void MainApp::update()
   VideoSourceService::getService()->updateVideoSources();
   ShaderChainerService::getService()->processFrame();
   ConfigService::getService()->checkAndSaveDefaultConfigFile();
+  AudioSourceService::getService()->update();
   mainStageView->update();
 }
 

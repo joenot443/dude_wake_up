@@ -11,6 +11,7 @@
 #include "AudioSource.hpp"
 #include "ConfigurableService.hpp"
 #include "Parameter.hpp"
+#include "Link.hpp"
 #include <stdio.h>
 
 class AudioSourceService : public ConfigurableService {
@@ -22,8 +23,10 @@ public:
   static AudioSourceService *service;
   std::shared_ptr<AudioSource> defaultAudioSource;
   std::shared_ptr<AudioSource> selectedAudioSource;
+  ableton::Link link;
 
-  AudioSourceService(){};
+  AudioSourceService() : link(120.0) {};
+  
   static AudioSourceService *getService() {
     if (!service) {
       service = new AudioSourceService;
@@ -32,8 +35,9 @@ public:
     return service;
   }
   void setup();
-  void processAudioSource();
   void selectAudioSource(std::shared_ptr<AudioSource> source);
+  
+  void update();
 
   std::vector<std::shared_ptr<AudioSource>> audioSources();
   std::shared_ptr<AudioSource> audioSourceForId(std::string id);

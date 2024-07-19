@@ -11,10 +11,11 @@
 #include "VideoSourceService.hpp"
 #include "FeedbackSourceService.hpp"
 #include "NodeLayoutView.hpp"
+#include "LayoutStateService.hpp"
 
 void Shader::traverseFrame(std::shared_ptr<ofFbo> frame, int depth)
 {
-  clearLastFrame();
+//  clearLastFrame();
   activateParameters();
   shade(frame, lastFrame);
   // On our terminal nodes, check if we need to update our defaultStageShader
@@ -24,10 +25,11 @@ void Shader::traverseFrame(std::shared_ptr<ofFbo> frame, int depth)
     }
   }
   
-  for (std::shared_ptr<Connection> connection : outputs)
+  for (auto [slot, connection] : outputs)
   {
-    // Only traverse the Main slot.
+    // Only traverse the Main slots.
     if (connection->inputSlot != InputSlotMain) { continue; }
+    if (connection->outputSlot != OutputSlotMain) { continue; }
     
     // Attempt to cast the connectable to a shader
     std::shared_ptr<Shader> shader = std::dynamic_pointer_cast<Shader>(connection->end);
@@ -90,4 +92,8 @@ void Shader::activateParameters() {
   for (std::shared_ptr<Parameter> param : settings->allParameters()) {
     param->active = true;
   }
+}
+
+void Shader::allocateLastFrame() {
+  lastFrame->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y, GL_RGBA);
 }

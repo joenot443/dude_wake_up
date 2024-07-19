@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include "ShaderSource.hpp"
 #include "NodeLayoutView.hpp"
+#include "LayoutStateService.hpp"
 
 json ShaderSource::serialize()
 {
@@ -27,3 +28,21 @@ json ShaderSource::serialize()
 
   return j;
 }
+
+void ShaderSource::setup() {
+  shader->setup();
+  fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y, GL_RGBA);
+  fbo->begin();
+  ofSetColor(0, 0, 0, 255);
+  ofDrawRectangle(0, 0, fbo->getWidth(), fbo->getHeight());
+  fbo->end();
+
+  canvas->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y, GL_RGBA);
+  canvas->begin();
+  ofSetColor(0, 0, 0, 255);
+  ofDrawRectangle(0, 0, fbo->getWidth(), fbo->getHeight());
+  canvas->end();
+  
+  maskShader.load("shaders/ColorKeyMaskMaker");
+
+};

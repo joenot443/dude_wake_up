@@ -21,6 +21,10 @@ class StrandService : public ConfigurableService
 {
 private:
   std::map<std::string, std::shared_ptr<AvailableStrand>> strandMap;
+  std::map<std::string, std::shared_ptr<AvailableStrand>> templateMap;
+  
+  std::set<std::string> strandNames;
+  
   observable::subject<void()> strandsUpdatedSubject;
 
 public:
@@ -38,11 +42,16 @@ public:
 
   void setup();
   
+  void populate();
+  
+  void populateMapFromFolder(std::map<std::string, std::shared_ptr<AvailableStrand>> *map, std::string folder);
+  
   // Notifications
   void notifyStrandsUpdated();
   void subscribeToStrandsUpdated(std::function<void()> callback);
 
   std::vector<std::shared_ptr<AvailableStrand>> availableStrands();
+  std::vector<std::shared_ptr<AvailableStrand>> availableTemplateStrands();
   std::shared_ptr<AvailableStrand> availableStrandForId(std::string id);
   
   void addStrand(std::shared_ptr<AvailableStrand> strand);

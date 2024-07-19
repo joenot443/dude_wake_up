@@ -30,7 +30,7 @@ public:
   TileSettings(std::string shaderId, json j, std::string name) :
   repeat(std::make_shared<Parameter>("repeat", 4.0, 1.0, 10.0)),
   spacing(std::make_shared<Parameter>("spacing", 5.0, 0.0, 50.0)),
-  mirror(std::make_shared<Parameter>("mirror", 0.0, 0.0, 1.0)),
+  mirror(std::make_shared<Parameter>("mirror", ParameterType_Bool)),
   repeatOscillator(std::make_shared<WaveformOscillator>(repeat)),
   ShaderSettings(shaderId, j, name) {
     parameters = {repeat, mirror, spacing};

@@ -187,6 +187,10 @@ void FileBrowserView::draw()
   {
     refresh();
   }
+  
+  ImGui::SameLine();
+  
+  ImGui::Text("%s", currentDirectory.getAbsolutePath().c_str());
 
   listBrowserView.draw();
 }

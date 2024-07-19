@@ -7,10 +7,11 @@
 
 #include "MultiSource.hpp"
 #include "NodeLayoutView.hpp"
+#include "LayoutStateService.hpp"
 
 void MultiSource::setup()
 {
-  fbo->allocate(settings->width->value, settings->height->value);
+  fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   fbo->begin();
   fbo->end();
 }

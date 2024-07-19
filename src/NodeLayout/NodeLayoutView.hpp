@@ -84,6 +84,7 @@ public:
   void handleDroppedSource(std::shared_ptr<VideoSource> source);
   std::shared_ptr<Node> nodeAtPosition(ImVec2 position);
   bool pointIsWithinNode(ImVec2 position, std::shared_ptr<Node> node);
+  void loadStrand(std::shared_ptr<AvailableStrand> availableStrand);
 
   // Notifications
   void haveDownloadedAvailableLibraryFile(LibraryFile &file);

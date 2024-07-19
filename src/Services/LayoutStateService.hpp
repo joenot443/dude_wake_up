@@ -22,6 +22,11 @@ static const std::string ResolutionJsonKey = "resolution";
 static const std::string ShaderInfoEnabledJsonKey = "shaderInfoEnabled";
 static const std::string AllParametersInStageMode = "allParametersInStageMode";
 static const std::string HelpEnabledJsonKey = "helpEnabled";
+static const std::string WelcomeScreenEnabledJsonKey = "welcomeScreenEnabled";
+static const std::string AbletonLinkEnabledJsonKey = "abletonBPMEnabled";
+
+static const std::vector<std::string> ResolutionOptions = {"240p", "360p", "480p", "720p", "1080p", "1440p", "4k"};
+
 
 class LayoutStateService: public ConfigurableService {
 public:
@@ -37,9 +42,24 @@ public:
   
   bool allParametersInStageModeEnabled = false;
   
+  bool helpEnabled = true;
+  
+  bool welcomeScreenEnabled = true;
+  
+  bool abletonLinkEnabled = false;
+  
+  int resolutionSetting = 3;
+  
+  ImVec2 resolution = ImVec2(1280.0, 720.0);
+  observable::subject<void()> resolutionUpdateSubject;
+
+  // Ephemeral
+  
   bool isEyeDroppingColor = false;
   
-  bool helpEnabled = true;
+  bool isEditingText = false;
+  
+  bool showWelcomeScreen = true;
   
   std::string libraryPath = ConfigService::getService()->nottawaFolderFilePath();
   std::vector<std::array<float, 4>> colorHistory = std::vector<std::array<float, 4>>(1, std::array<float, 4>{0.0f, 0.0f, 0.0f, 0.0f});
@@ -53,6 +73,10 @@ public:
   void pushColor(std::shared_ptr<std::array<float, 4>> color);
   
   bool shouldDrawShaderInfo();
+  
+  void updateResolutionSettings(int index);
+  
+  void subscribeToResolutionUpdates(std::function<void()> callback);
   
   static LayoutStateService *service;
 

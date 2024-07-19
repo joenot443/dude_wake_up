@@ -38,6 +38,7 @@ void MainStageView::setup()
   videoSourceBrowserView.setup();
   audioSourceBrowserView.setup();
   stageModeView.setup();
+  welcomeScreenView.setup();
 }
 
 void MainStageView::update()
@@ -47,6 +48,7 @@ void MainStageView::update()
   shaderBrowserView.update();
   stageModeView.update();
   NodeLayoutView::getInstance()->update();
+  welcomeScreenView.update();
 }
 
 void MainStageView::draw()
@@ -112,13 +114,19 @@ void MainStageView::draw()
     ShaderInfoView::draw();
     ImGui::EndChild();
   }
+  
+  // Welcome Screen
+  
+  if (LayoutStateService::getService()->showWelcomeScreen) {
+    welcomeScreenView.draw();
+  }
 }
 
 void MainStageView::drawMenu()
 {
   if (ImGui::BeginMenuBar())
   {
-    // Save Config
+    /// #File Menu
     if (ImGui::BeginMenu("File"))
     {
       if (ImGui::MenuItem("Save", "Cmd+S", false, ConfigService::getService()->isEditingWorkspace())) {
@@ -142,6 +150,8 @@ void MainStageView::drawMenu()
       ImGui::EndMenu();
     }
     
+    /// #Edit Menu
+    
     if (ImGui::BeginMenu("Edit"))
     {
       if (ImGui::MenuItem("Clear Feedback Buffers", "Cmd+K"))
@@ -150,6 +160,25 @@ void MainStageView::drawMenu()
       }
       ImGui::EndMenu();
     }
+    
+    /// #Output Menu
+    
+    if (ImGui::BeginMenu("Resolution"))
+    {
+      std::vector<std::string> resolutions = ResolutionOptions;
+      int i = 0;
+      for (std::string option : resolutions) {
+        bool selected =  LayoutStateService::getService()->resolutionSetting == i;
+        if (ImGui::MenuItem(option.c_str(), "", &selected)) {
+          LayoutStateService::getService()->updateResolutionSettings(i);
+        }
+        i++;
+      }
+      ImGui::EndMenu();
+    }
+     
+    
+    /// #View Menu
     
     if (ImGui::BeginMenu("View"))
     {
@@ -165,6 +194,10 @@ void MainStageView::drawMenu()
       if (ImGui::MenuItem("Toggle Shader Info View", "Cmd+T"))
       {
         LayoutStateService::getService()->shaderInfoEnabled = !LayoutStateService::getService()->shaderInfoEnabled;
+      }
+      if (ImGui::MenuItem("Launch Welcome Screen"))
+      {
+        LayoutStateService::getService()->showWelcomeScreen = true;
       }
       ImGui::EndMenu();
     }
@@ -265,3 +298,4 @@ void MainStageView::keyReleased(int key)
     }
   }
 }
+

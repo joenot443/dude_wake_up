@@ -8,6 +8,7 @@
 #include "FileSource.hpp"
 #include "NodeLayoutView.hpp"
 #include "Fonts.hpp"
+#include "LayoutStateService.hpp"
 
 void FileSource::setup()
 {
@@ -20,7 +21,7 @@ void FileSource::setup()
   player.setSpeed(1.0);
   player.setLoopState(OF_LOOP_NORMAL);
 //	updateSettings();
-  fbo->allocate(settings->width->value, settings->height->value);
+  fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   sliderPosition->value = settings->start->value;
   position = start;
   maskShader.load("shaders/ColorKeyMaskMaker");

@@ -50,6 +50,11 @@ std::string ConfigService::relativeFilePathWithinNottawaFolder(std::string fileP
   return ofFilePath::join(nottawaFolderFilePath(), filePath);
 }
 
+std::string ConfigService::templatesFolderFilePath()
+{
+  return "templates";
+}
+
 json jsonFromParameters(std::vector<Parameter *> parameters)
 {
   json j;
@@ -139,7 +144,7 @@ std::vector<AvailableShaderConfig> ConfigService::availableConfigsForShaderType(
     bool isJson = ofIsStringInString(file.getFileName(), ".json");
     if (!isJson)
       continue;
-    ;
+    
     configs.push_back(AvailableShaderConfig(file.getFileName(), file.getAbsolutePath()));
   }
   return configs;
@@ -355,13 +360,14 @@ void ConfigService::loadWorkspace(std::shared_ptr<Workspace> workspace) {
   loadConfigFile(workspace->path);
 }
 
-void ConfigService::loadWorkspaceDialogue() {
+bool ConfigService::loadWorkspaceDialogue() {
   // Present a file dialog to load the config file
   ofFileDialogResult result = ofSystemLoadDialog("Open Workspace", false);
   if (result.bSuccess)
   {
     loadWorkspace(std::make_shared<Workspace>(result.getName(), result.getPath()));
   }
+  return result.bSuccess;
 }
 
 

@@ -207,7 +207,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "420"
             endingLineNumber = "420"
-            landmarkName = "VideoSourceService::idsFromLoadingConfig(j)"
+            landmarkName = "VideoSourceService::loadConfig(data)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -285,8 +285,8 @@
             filePath = "src/Apps/MainApp.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "98"
-            endingLineNumber = "98"
+            startingLineNumber = "99"
+            endingLineNumber = "99"
             landmarkName = "MainApp::dragEvent(dragInfo)"
             landmarkType = "7">
          </BreakpointContent>
@@ -303,8 +303,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "271"
             endingLineNumber = "271"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            landmarkName = "VideoSourceService::addShaderVideoSource(type, origin, id, j)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -319,8 +319,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "258"
             endingLineNumber = "258"
-            landmarkName = "VideoSourceService::addShaderVideoSource(type, origin, id, j)"
-            landmarkType = "7">
+            landmarkName = "unknown"
+            landmarkType = "0">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -383,8 +383,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "254"
             endingLineNumber = "254"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            landmarkName = "VideoSourceService::addMultiVideoSource(name, origin, id, j)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -595,22 +595,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "6444C95E-9FA1-40FD-B821-FCBF560535D6"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "src/Shading/Shader.cpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "37"
-            endingLineNumber = "37"
-            landmarkName = "Shader::traverseFrame(frame, depth)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "35A4048F-30CF-436B-825A-4CFE7F354C0E"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -618,8 +602,8 @@
             filePath = "src/Shading/MirrorShader.hpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "82"
-            endingLineNumber = "82"
+            startingLineNumber = "80"
+            endingLineNumber = "80"
             landmarkName = "shade(frame, canvas)"
             landmarkType = "7">
          </BreakpointContent>
@@ -634,8 +618,8 @@
             filePath = "src/Video/ShaderSource.hpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "451"
-            endingLineNumber = "451"
+            startingLineNumber = "453"
+            endingLineNumber = "453"
             landmarkName = "addShader(addType)"
             landmarkType = "7">
          </BreakpointContent>
@@ -666,8 +650,8 @@
             filePath = "src/Video/ShaderSource.hpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "470"
-            endingLineNumber = "470"
+            startingLineNumber = "472"
+            endingLineNumber = "472"
             landmarkName = "addShader(addType)"
             landmarkType = "7">
          </BreakpointContent>
@@ -829,22 +813,6 @@
                   offsetFromSymbolStart = "166">
                </Location>
             </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "A4350144-1311-4A77-8F79-5C49A496565B"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../../../libs/openFrameworks/utils/ofMatrixStack.cpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "319"
-            endingLineNumber = "319"
-            landmarkName = "ofMatrixStack::clearStacks()"
-            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1015,10 +983,10 @@
             filePath = "src/Shading/Shader.hpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "77"
-            endingLineNumber = "77"
-            landmarkName = "drawPreview(pos, scale)"
-            landmarkType = "7">
+            startingLineNumber = "79"
+            endingLineNumber = "79"
+            landmarkName = "Shader"
+            landmarkType = "3">
             <Locations>
                <Location
                   uuid = "34BB9745-5598-4E02-BD7E-9BF7A3F54E79 - f4d8a1e754da4f4f"
@@ -1192,8 +1160,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "434"
             endingLineNumber = "434"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            landmarkName = "VideoSourceService::idsFromLoadingConfig(j)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1464,8 +1432,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "122"
             endingLineNumber = "122"
-            landmarkName = "VideoSourceService::addVideoSource(videoSource, id, j)"
-            landmarkType = "7">
+            landmarkName = "unknown"
+            landmarkType = "0">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1732,8 +1700,8 @@
             filePath = "src/Views/OscillatorView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "116"
-            endingLineNumber = "116"
+            startingLineNumber = "118"
+            endingLineNumber = "118"
             landmarkName = "OscillatorView::draw(oscillator, value)"
             landmarkType = "7">
          </BreakpointContent>
@@ -2077,22 +2045,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "DDC60B0F-37B5-4776-9C13-049C8ECC5075"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "src/Oscillation/Pulser.hpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "30"
-            endingLineNumber = "30"
-            landmarkName = "next(value)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "EF400376-8EFA-47D8-8F15-DB067F04A6C8"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -2100,8 +2052,8 @@
             filePath = "src/Views/OscillatorView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "86"
-            endingLineNumber = "86"
+            startingLineNumber = "88"
+            endingLineNumber = "88"
             landmarkName = "OscillatorView::draw(subjects)"
             landmarkType = "7">
             <Locations>
@@ -2180,8 +2132,8 @@
             filePath = "src/Views/AudioSourceBrowserView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "117"
-            endingLineNumber = "117"
+            startingLineNumber = "114"
+            endingLineNumber = "114"
             landmarkName = "AudioSourceBrowserView::drawSelectedAudioSource()"
             landmarkType = "7">
          </BreakpointContent>
@@ -2276,8 +2228,8 @@
             filePath = "src/Feedback/FeedbackSource.hpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "90"
-            endingLineNumber = "90"
+            startingLineNumber = "100"
+            endingLineNumber = "100"
             landmarkName = "pushFrame(fbo)"
             landmarkType = "7">
          </BreakpointContent>
@@ -2405,8 +2357,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "83"
             endingLineNumber = "83"
-            landmarkName = "drawSettings()"
-            landmarkType = "7">
+            landmarkName = "LumaMaskMakerSettings"
+            landmarkType = "14">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -2502,38 +2454,6 @@
             startingLineNumber = "159"
             endingLineNumber = "159"
             landmarkName = "VideoSourceService::videoSources()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "21D7DA29-A1BE-4EAB-B8D3-EA499322A75F"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "src/Shading/Connection.hpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "211"
-            endingLineNumber = "211"
-            landmarkName = "connectionFor(conn)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "6758B141-1CD6-4FA5-A4B0-8FBC2C7F5008"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "src/Shading/Connection.hpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "226"
-            endingLineNumber = "226"
-            landmarkName = "removeInputConnections(type)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -2641,8 +2561,8 @@
             filePath = "src/Shading/Shader.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "44"
-            endingLineNumber = "44"
+            startingLineNumber = "45"
+            endingLineNumber = "45"
             landmarkName = "Shader::traverseFrame(frame, depth)"
             landmarkType = "7">
          </BreakpointContent>
@@ -2689,8 +2609,8 @@
             filePath = "src/Shading/FeedbackShader.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "97"
-            endingLineNumber = "97"
+            startingLineNumber = "116"
+            endingLineNumber = "116"
             landmarkName = "FeedbackShader::shade(frame, canvas)"
             landmarkType = "7">
          </BreakpointContent>
@@ -3201,7 +3121,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "370"
             endingLineNumber = "370"
-            landmarkName = "ConfigService::loadStrandFile(path)"
+            landmarkName = "ConfigService::loadWorkspaceDialogue()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -3215,9 +3135,9 @@
             filePath = "src/Services/ShaderChainerService.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "573"
-            endingLineNumber = "573"
-            landmarkName = "ShaderChainerService::makeConnection(start, end, type, slot, shouldSaveConfig, copy)"
+            startingLineNumber = "577"
+            endingLineNumber = "577"
+            landmarkName = "ShaderChainerService::makeConnection(start, end, type, outputSlot, inputSlot, shouldSaveConfig, copy)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -3225,7 +3145,7 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "6F4E5257-1E7D-4371-A8DC-343A2C7E2840"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../../libs/openFrameworks/graphics/ofImage.cpp"
@@ -3406,8 +3326,8 @@
             filePath = "src/Models/AudioSettings.hpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "163"
-            endingLineNumber = "163"
+            startingLineNumber = "162"
+            endingLineNumber = "162"
             landmarkName = "analyzeFrame(gist)"
             landmarkType = "7">
          </BreakpointContent>
@@ -3852,8 +3772,8 @@
             filePath = "src/Views/AudioSourceBrowserView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "30"
-            endingLineNumber = "30"
+            startingLineNumber = "29"
+            endingLineNumber = "29"
             landmarkName = "AudioSourceBrowserView::draw()"
             landmarkType = "7">
          </BreakpointContent>
@@ -3926,14 +3846,14 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "DB865FD8-1A57-45D7-AA8A-BE0489C02183"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "src/Models/AudioSettings.hpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "247"
-            endingLineNumber = "247"
+            startingLineNumber = "246"
+            endingLineNumber = "246"
             landmarkName = "updateBeat(pct)"
             landmarkType = "7">
             <Locations>
@@ -3997,6 +3917,21 @@
                   endingLineNumber = "247"
                   offsetFromSymbolStart = "183">
                </Location>
+               <Location
+                  uuid = "DB865FD8-1A57-45D7-AA8A-BE0489C02183 - 16173e9362aab118"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AudioAnalysis::updateBeat(float)"
+                  moduleName = "nottawa"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up/src/Models/AudioSettings.hpp"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "246"
+                  endingLineNumber = "246"
+                  offsetFromSymbolStart = "183">
+               </Location>
             </Locations>
          </BreakpointContent>
       </BreakpointProxy>
@@ -4010,8 +3945,8 @@
             filePath = "src/Services/LayoutStateService.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "59"
-            endingLineNumber = "59"
+            startingLineNumber = "63"
+            endingLineNumber = "63"
             landmarkName = "LayoutStateService::audioSettingsViewHeight()"
             landmarkType = "7">
          </BreakpointContent>
@@ -4026,10 +3961,10 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "816"
-            endingLineNumber = "816"
-            landmarkName = "NodeLayoutView::handleUnplacedDownloadedLibraryFile()"
-            landmarkType = "7">
+            startingLineNumber = "850"
+            endingLineNumber = "850"
+            landmarkName = "unknown"
+            landmarkType = "0">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -4090,8 +4025,8 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "500"
-            endingLineNumber = "500"
+            startingLineNumber = "534"
+            endingLineNumber = "534"
             landmarkName = "NodeLayoutView::nodeAtPosition(position)"
             landmarkType = "7">
          </BreakpointContent>
@@ -4106,9 +4041,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "801"
-            endingLineNumber = "801"
-            landmarkName = "NodeLayoutView::handleDroppedSource(source)"
+            startingLineNumber = "835"
+            endingLineNumber = "835"
+            landmarkName = "NodeLayoutView::loadStrand(availableStrand)"
             landmarkType = "7">
             <Locations>
                <Location
@@ -4184,8 +4119,8 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "762"
-            endingLineNumber = "762"
+            startingLineNumber = "796"
+            endingLineNumber = "796"
             landmarkName = "NodeLayoutView::handleDropZone()"
             landmarkType = "7">
          </BreakpointContent>
@@ -4200,8 +4135,8 @@
             filePath = "src/Services/ShaderChainerService.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "448"
-            endingLineNumber = "448"
+            startingLineNumber = "452"
+            endingLineNumber = "452"
             landmarkName = "ShaderChainerService::removeConnectable(connectable)"
             landmarkType = "7">
             <Locations>
@@ -4355,8 +4290,8 @@
             filePath = "src/Services/ShaderChainerService.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "456"
-            endingLineNumber = "456"
+            startingLineNumber = "460"
+            endingLineNumber = "460"
             landmarkName = "ShaderChainerService::removeConnectable(connectable)"
             landmarkType = "7">
          </BreakpointContent>
@@ -4531,25 +4466,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "294"
-            endingLineNumber = "294"
+            startingLineNumber = "299"
+            endingLineNumber = "299"
             landmarkName = "NodeLayoutView::drawNode(node)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "DF29A12B-C98F-458B-8FD0-D34922FF53ED"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "src/NodeLayout/NodeLayoutView.cpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "174"
-            endingLineNumber = "174"
-            landmarkName = "NodeLayoutView::draw()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -4802,8 +4721,8 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "831"
-            endingLineNumber = "831"
+            startingLineNumber = "865"
+            endingLineNumber = "865"
             landmarkName = "NodeLayoutView::queryNewLinks()"
             landmarkType = "7">
          </BreakpointContent>
@@ -4818,9 +4737,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "824"
-            endingLineNumber = "824"
-            landmarkName = "NodeLayoutView::queryNewLinks()"
+            startingLineNumber = "858"
+            endingLineNumber = "858"
+            landmarkName = "NodeLayoutView::handleUnplacedDownloadedLibraryFile()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -4834,8 +4753,8 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "838"
-            endingLineNumber = "838"
+            startingLineNumber = "872"
+            endingLineNumber = "872"
             landmarkName = "NodeLayoutView::queryNewLinks()"
             landmarkType = "7">
             <Locations>
@@ -4882,8 +4801,8 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "184"
-            endingLineNumber = "184"
+            startingLineNumber = "189"
+            endingLineNumber = "189"
             landmarkName = "NodeLayoutView::draw()"
             landmarkType = "7">
          </BreakpointContent>
@@ -5058,8 +4977,8 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1026"
-            endingLineNumber = "1026"
+            startingLineNumber = "1065"
+            endingLineNumber = "1065"
             landmarkName = "NodeLayoutView::drawActionButtons()"
             landmarkType = "7">
          </BreakpointContent>
@@ -5186,8 +5105,8 @@
             filePath = "src/Views/OscillatorView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "141"
-            endingLineNumber = "141"
+            startingLineNumber = "143"
+            endingLineNumber = "143"
             landmarkName = "OscillatorView::drawMini(oscillator, value)"
             landmarkType = "7">
             <Locations>
@@ -5234,8 +5153,8 @@
             filePath = "src/Views/OscillatorView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "165"
-            endingLineNumber = "165"
+            startingLineNumber = "167"
+            endingLineNumber = "167"
             landmarkName = "OscillatorView::drawMini(oscillator, value)"
             landmarkType = "7">
          </BreakpointContent>
@@ -5250,8 +5169,8 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "661"
-            endingLineNumber = "661"
+            startingLineNumber = "695"
+            endingLineNumber = "695"
             landmarkName = "NodeLayoutView::handleDropZone()"
             landmarkType = "7">
             <Locations>
@@ -5412,7 +5331,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "207"
             endingLineNumber = "207"
-            landmarkName = "ShaderChainerService::selectConnectable(connectable)"
+            landmarkName = "ShaderChainerService::processFrame()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -5922,8 +5841,8 @@
             filePath = "src/Shading/Shader.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "91"
-            endingLineNumber = "91"
+            startingLineNumber = "92"
+            endingLineNumber = "92"
             landmarkName = "Shader::activateParameters()"
             landmarkType = "7">
          </BreakpointContent>
@@ -5954,8 +5873,8 @@
             filePath = "src/Shading/Shader.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "90"
-            endingLineNumber = "90"
+            startingLineNumber = "91"
+            endingLineNumber = "91"
             landmarkName = "Shader::activateParameters()"
             landmarkType = "7">
             <Locations>
@@ -6052,15 +5971,15 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "623"
             endingLineNumber = "623"
-            landmarkName = "CommonViews::ShaderColor(param)"
-            landmarkType = "7">
+            landmarkName = "unknown"
+            landmarkType = "0">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "3D45F8AC-1728-4342-BBA7-EC6EFA05DB4E"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "src/Views/CommonViews.cpp"
@@ -6100,6 +6019,21 @@
                   startingLineNumber = "621"
                   endingLineNumber = "621"
                   offsetFromSymbolStart = "1945">
+               </Location>
+               <Location
+                  uuid = "3D45F8AC-1728-4342-BBA7-EC6EFA05DB4E - 3d29cafd2df6a61b"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "CommonViews::ShaderColor(std::__1::shared_ptr&lt;Parameter&gt;)"
+                  moduleName = "nottawa"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up/src/Views/CommonViews.cpp"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "621"
+                  endingLineNumber = "621"
+                  offsetFromSymbolStart = "2137">
                </Location>
             </Locations>
          </BreakpointContent>
@@ -6146,8 +6080,8 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "278"
-            endingLineNumber = "278"
+            startingLineNumber = "283"
+            endingLineNumber = "283"
             landmarkName = "NodeLayoutView::drawNode(node)"
             landmarkType = "7">
          </BreakpointContent>
@@ -6225,8 +6159,8 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "456"
-            endingLineNumber = "456"
+            startingLineNumber = "490"
+            endingLineNumber = "490"
             landmarkName = "NodeLayoutView::nodeForShaderSourceId(shaderSourceId, nodeType, name, connectable)"
             landmarkType = "7">
             <Locations>
@@ -6382,8 +6316,8 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1146"
-            endingLineNumber = "1146"
+            startingLineNumber = "1185"
+            endingLineNumber = "1185"
             landmarkName = "NodeLayoutView::drawHelp()"
             landmarkType = "7">
          </BreakpointContent>
@@ -6492,8 +6426,8 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1180"
-            endingLineNumber = "1180"
+            startingLineNumber = "1219"
+            endingLineNumber = "1219"
             landmarkName = "NodeLayoutView::drawHelp()"
             landmarkType = "7">
             <Locations>
@@ -6540,8 +6474,8 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1210"
-            endingLineNumber = "1210"
+            startingLineNumber = "1249"
+            endingLineNumber = "1249"
             landmarkName = "NodeLayoutView::drawHelp()"
             landmarkType = "7">
             <Locations>
@@ -6652,8 +6586,8 @@
             filePath = "src/Services/ShaderChainerService.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "233"
-            endingLineNumber = "233"
+            startingLineNumber = "235"
+            endingLineNumber = "235"
             landmarkName = "ShaderChainerService::isShaderType(connectable, shaderType)"
             landmarkType = "7">
          </BreakpointContent>
@@ -6668,8 +6602,8 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1226"
-            endingLineNumber = "1226"
+            startingLineNumber = "1265"
+            endingLineNumber = "1265"
             landmarkName = "NodeLayoutView::drawHelp()"
             landmarkType = "7">
          </BreakpointContent>
@@ -6684,8 +6618,8 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1216"
-            endingLineNumber = "1216"
+            startingLineNumber = "1255"
+            endingLineNumber = "1255"
             landmarkName = "NodeLayoutView::drawHelp()"
             landmarkType = "7">
             <Locations>
@@ -6742,14 +6676,14 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "D917D79B-8D65-4B81-9422-ECDBD7498A07"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "src/Services/ShaderChainerService.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "367"
-            endingLineNumber = "367"
+            startingLineNumber = "371"
+            endingLineNumber = "371"
             landmarkName = "ShaderChainerService::loadConnectionsConfig(j)"
             landmarkType = "7">
          </BreakpointContent>
@@ -6757,56 +6691,8 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "51B3FAB9-7DF9-4D07-9D69-BA3DCA63E283"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "src/Views/StageModeView.cpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "62"
-            endingLineNumber = "62"
-            landmarkName = "StageModeView::draw()"
-            landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "51B3FAB9-7DF9-4D07-9D69-BA3DCA63E283 - 225cda8b54fc53c0"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "StageModeView::draw()"
-                  moduleName = "nottawa"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up/src/Views/StageModeView.cpp"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "61"
-                  endingLineNumber = "61"
-                  offsetFromSymbolStart = "658">
-               </Location>
-               <Location
-                  uuid = "51B3FAB9-7DF9-4D07-9D69-BA3DCA63E283 - 225cda8b54fc5c02"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "StageModeView::draw()"
-                  moduleName = "nottawa"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up/src/Views/StageModeView.cpp"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "63"
-                  endingLineNumber = "63"
-                  offsetFromSymbolStart = "668">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "88F3D489-40F1-4899-BB33-B6FE94CEA40D"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "src/Services/VideoSourceService.cpp"
@@ -6847,7 +6733,278 @@
                   endingLineNumber = "358"
                   offsetFromSymbolStart = "621">
                </Location>
+               <Location
+                  uuid = "88F3D489-40F1-4899-BB33-B6FE94CEA40D - b7799b98479055a6"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "VideoSourceService::config()"
+                  moduleName = "nottawa"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up/src/Services/VideoSourceService.cpp"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "358"
+                  endingLineNumber = "358"
+                  offsetFromSymbolStart = "433">
+               </Location>
             </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "F4A9DE4C-70E2-4773-ACB9-B6E98998446D"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/Services/AudioSourceService.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "65"
+            endingLineNumber = "65"
+            landmarkName = "AudioSourceService::update()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "91C66CFB-25BD-4E2F-A5D6-4195BA7F4EF1"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/Models/AudioSettings.hpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "207"
+            endingLineNumber = "207"
+            landmarkName = "gammaAtBeat(pct)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "73C54D65-0960-4997-A94E-3E7A3AAFF6FA"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/Models/AudioSettings.hpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "241"
+            endingLineNumber = "241"
+            landmarkName = "updateBeat(pct)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "2386C309-43B1-4F83-835A-B81216D9FA9F"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/Oscillation/Pulser.hpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "28"
+            endingLineNumber = "28"
+            landmarkName = "next(value)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "8ABBEA8D-A099-49E0-BE3E-443B9320858D"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/Views/CommonViews.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "151"
+            endingLineNumber = "151"
+            landmarkName = "CommonViews::AudioParameterSelector(param)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "CDB0BD5A-E2FA-4911-8878-CD8F0A54EE01"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/Services/ConfigService.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "496"
+            endingLineNumber = "496"
+            landmarkName = "ConfigService::loadConfigFile(path)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "39784FFE-C29E-49BC-97D7-69F85710F57F"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/Shading/FeedbackShader.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "91"
+            endingLineNumber = "91"
+            landmarkName = "FeedbackShader::feedbackTexture()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "1EFC389C-ECAF-4F98-8049-8A8D31C4099E"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/Shading/FeedbackShader.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "107"
+            endingLineNumber = "107"
+            landmarkName = "FeedbackShader::shade(frame, canvas)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "B4944226-88D7-46EB-A6D2-F74C527A3ABD"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/NodeLayout/NodeLayoutView.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "174"
+            endingLineNumber = "174"
+            landmarkName = "NodeLayoutView::draw()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "C9F8B03E-142B-4817-9D8C-2501E24B45A2"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/Services/ShaderChainerService.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "585"
+            endingLineNumber = "585"
+            landmarkName = "ShaderChainerService::makeConnection(start, end, type, outputSlot, inputSlot, shouldSaveConfig, copy)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "5F8569D9-8ECC-4881-AB31-7DB43D3B5EFD"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/NodeLayout/NodeLayoutView.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "420"
+            endingLineNumber = "420"
+            landmarkName = "NodeLayoutView::drawNode(node)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "F7C2A3C4-EB86-464B-B3C6-0CC024095EFD"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/Shading/Connection.hpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "175"
+            endingLineNumber = "175"
+            landmarkName = "populatedOutputSlots()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "EA2DA393-8D2C-41DB-81C5-7F40531A7479"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/Shading/Connection.hpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "186"
+            endingLineNumber = "186"
+            landmarkName = "nextAvailableOutputSlot()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "E7B4A7B8-7782-44EE-975A-0F095FD0F167"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/NodeLayout/NodeLayoutView.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "424"
+            endingLineNumber = "424"
+            landmarkName = "NodeLayoutView::drawNode(node)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "BE82BED1-2ED2-4C0A-ABC8-429A5D8210D3"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/Services/VideoSourceService.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "24"
+            endingLineNumber = "24"
+            landmarkName = "VideoSourceService::setup()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "4988317C-464B-4C31-ADA7-DC389A14FB22"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/IsoFractShader.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "23"
+            endingLineNumber = "23"
+            landmarkName = "IsoFractShader::shade(frame, canvas)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

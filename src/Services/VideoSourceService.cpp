@@ -15,6 +15,7 @@
 #include "IconSource.hpp"
 #include "ImageSource.hpp"
 #include "ShaderChainerService.hpp"
+#include "LayoutStateService.hpp"
 #include "FileSource.hpp"
 
 void VideoSourceService::setup()
@@ -128,6 +129,11 @@ void VideoSourceService::addVideoSource(std::shared_ptr<VideoSource> videoSource
     videoSource->load(j);
   }
   videoSource->setup();
+  // Subscribe the Shader's setup() to resolution updates
+  LayoutStateService::getService()->subscribeToResolutionUpdates([videoSource]() {
+    videoSource->setup();
+  });
+  
 }
 
 // Remove a video source from the map

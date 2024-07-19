@@ -1,5 +1,5 @@
 //
-//  Strings.h
+//  Strings.hpp
 //  dude_wake_up
 //
 //  Created by Joe Crozier on 2022-05-27.
@@ -19,6 +19,15 @@
 #include <string>
 #include <iomanip>
 #include <sstream>
+#include "json.hpp"
+
+class StringManager {
+public:
+    static void loadStrings();
+    static std::string get(const std::string& key);
+private:
+    static nlohmann::json stringJson;
+};
 
 
 template<typename ... Args>

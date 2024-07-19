@@ -40,8 +40,11 @@ public:
   std::shared_ptr<Parameter> yPosition;
   std::shared_ptr<Oscillator> yPositionOscillator;
   
-  std::shared_ptr<Parameter> mainMix;
-  std::shared_ptr<Oscillator> mainMixOscillator;
+  std::shared_ptr<Parameter> mainAlpha;
+  std::shared_ptr<Oscillator> mainAlphaOscillator;
+  
+  std::shared_ptr<Parameter> feedbackAlpha;
+  std::shared_ptr<Oscillator> feedbackAlphaOscillator;
   
   std::shared_ptr<Parameter> feedbackMix;
   std::shared_ptr<Oscillator> feedbackMixOscillator;
@@ -61,11 +64,13 @@ public:
   std::shared_ptr<Parameter> sourceSelection;
   
   FeedbackSettings(std::string shaderId, json j, std::string name) : index(index),
-  priority(std::make_shared<Parameter>("priority", 0.0, 0.0, 1.0)),
-  blendMode(std::make_shared<Parameter>("Blend Mode", 0.0, 0.0, 15.0)),
-  mainMix(std::make_shared<Parameter>("Main Mix", 0.5, 0.0, 1.0)),
-  mainMixOscillator(std::make_shared<WaveformOscillator>(mainMix)),
-  feedbackMix(std::make_shared<Parameter>("Feedback Mix", 0.95, 0.0, 1.0)),
+  priority(std::make_shared<Parameter>("Main Takes Priority", 0.0, 0.0, 1.0)),
+  blendMode(std::make_shared<Parameter>("Blend Mode", 0.0, 0.0, 15.0, ParameterType_Int)),
+  mainAlpha(std::make_shared<Parameter>("Main Alpha", 1.0, 0.0, 1.0)),
+  mainAlphaOscillator(std::make_shared<WaveformOscillator>(mainAlpha)),
+  feedbackAlpha(std::make_shared<Parameter>("Feedback Alpha", 1.0, 0.0, 1.0)),
+  feedbackAlphaOscillator(std::make_shared<WaveformOscillator>(feedbackAlpha)),
+  feedbackMix(std::make_shared<Parameter>("Feedback Mix", 0.6, 0.0, 1.0)),
   feedbackMixOscillator(std::make_shared<WaveformOscillator>(feedbackMix)),
   rotation(std::make_shared<Parameter>("Rotation", 0.0, 0.0, TWO_PI)),
   rotationOscillator(std::make_shared<WaveformOscillator>(rotation)),
@@ -87,8 +92,8 @@ public:
   shaderId(shaderId),
   ShaderSettings(shaderId, j, name)
   {
-    parameters = {mainMix, feedbackMix, keyValue, keyThreshold, delayAmount, lumaKeyEnabled, xPosition, yPosition, scale, sourceSelection, blendMode};
-    oscillators = {mainMixOscillator, feedbackMixOscillator, keyValueOscillator, keyThresholdOscillator, delayAmountOscillator, xPositionOscillator, yPositionOscillator, scaleOscillator};
+    parameters = {mainAlpha, feedbackMix, feedbackAlpha, keyValue, keyThreshold, delayAmount, lumaKeyEnabled, xPosition, yPosition, scale, sourceSelection, blendMode};
+    oscillators = {mainAlphaOscillator, feedbackMixOscillator, feedbackAlphaOscillator, keyValueOscillator, keyThresholdOscillator, delayAmountOscillator, xPositionOscillator, yPositionOscillator, scaleOscillator};
     
     load(j);
     registerParameters();
@@ -131,6 +136,7 @@ struct FeedbackShader : Shader
   void shade();
   void clearFrameBuffer();
   void populateSource();
+  ofTexture feedbackTexture();
   void drawFbo(std::shared_ptr<ofFbo> fbo);
   void drawFeedbackSourceSelector();
   int frameIndex();

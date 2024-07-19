@@ -8,6 +8,7 @@
 #include "ofMain.h"
 #include "ofxImGui.h"
 #include "DisplayText.hpp"
+#include "LayoutStateService.hpp"
 #include "ImGuiExtensions.hpp"
 #include "CommonViews.hpp"
 #include "TextEditorView.hpp"
@@ -39,6 +40,7 @@ void TextEditorView::draw() {
   if (ImGui::InputTextMultiline("##TextValue", buf, sizeof(buf), ImVec2(150., 100.))) {
     displayText->text = buf;
   }
+  LayoutStateService::getService()->isEditingText = ImGui::IsItemActive();
   
   ImVec4 color(displayText->color.r / 255.0f, displayText->color.g / 255.0f, displayText->color.b / 255.0f, 1.0f);
   

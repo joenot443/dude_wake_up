@@ -210,7 +210,7 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
     return formatString("##%s_audio_popup", name.c_str());
   }
 
-  Parameter(std::string name, float value, ParameterType = ParameterType_Standard);
+  Parameter(std::string name, float value = 0.0, ParameterType = ParameterType_Standard);
   Parameter(std::string name, float value, float min, float max, ParameterType = ParameterType_Standard);
 
 private:

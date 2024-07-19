@@ -41,7 +41,8 @@ struct Strand {
       
       // Visit all outputs (children) of the current connectable
       for (const auto& output : current->outputs) {
-        visit(output->end);
+        std::shared_ptr<Connectable> end = output.second->end;
+        visit(end);
       }
     };
     

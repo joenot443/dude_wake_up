@@ -22,7 +22,6 @@ void AudioSourceBrowserView::setup() {}
 
 void AudioSourceBrowserView::update() {
   tapper.update();
-  AudioSourceService::getService()->selectedAudioSource->audioAnalysis.updateBeat(tapper.beatPerc());
 }
 
 void AudioSourceBrowserView::draw() {
@@ -87,9 +86,7 @@ void AudioSourceBrowserView::drawStartAnalysisButton() {
 void AudioSourceBrowserView::drawSelectedAudioSource() {
   auto source = AudioSourceService::getService()->selectedAudioSource;
   if (source && source->active) {
-    CommonViews::H3Title("Audio");
     if (ImGui::BeginTable("##audioAnalysis", 4)) {
-      
       // Loudness
       ImGui::TableNextColumn();
       ImGui::Text("Loudness");
@@ -124,58 +121,74 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
       ImGui::TableNextColumn();
       
       // Beats
-      ImGui::Text("BPM Tracker");
+      if (LayoutStateService::getService()->abletonLinkEnabled) {
+        ImGui::Text("%s", formatString("Ableton Tempo: %f", AudioSourceService::getService()->link.captureAppSessionState().tempo()).c_str());
+      } else {
+        ImGui::Text("BPM Tracker");
+      }
       ImGui::SameLine();
-      if (ImGui::BeginPopupModal("##Energy", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
+      if (ImGui::BeginPopupModal("##BPMTrackerInfo", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
         MarkdownView("BPM Tracker").draw();
         ImGui::EndPopup();
       }
+      
       if (CommonViews::IconButton(ICON_MD_INFO, "BPM Tracker")) {
         ImGui::OpenPopup("##BPM Tracker");
       }
-      
-      static float lastTapTime = ofGetCurrentTime().seconds;
-      if (ImGui::Button("Tap for BPM")) {
-        if (ofGetCurrentTime().seconds - lastTapTime > 5.0f) {
-          tapper.startFresh();
-        } else {
-          tapper.tap();
-        }
-        lastTapTime = ofGetCurrentTime().seconds;
-      }
-      
       ImGui::SameLine();
-      
-      if (ImGui::Button("Beat Start")) {
-        float bpm = tapper.bpm();
-        tapper.startFresh();
-        tapper.setBpm(bpm);
-        source->audioAnalysis.bpmEnabled = true;
-      }
-      
-      ImGui::SameLine();
-      
-      if (ImGui::Button("Reset")) {
-        tapper.startFresh();
-      }
-      
-      ImGui::SameLine();
-      const char* buttonText = source->audioAnalysis.bpmEnabled ? "Stop" : "Start";
-      if (ImGui::Button(buttonText)) {
-        source->audioAnalysis.bpmEnabled = !source->audioAnalysis.bpmEnabled;
-      }
-      
-      if (CommonViews::Slider("BPM", "##bpm", source->audioAnalysis.bpm)) {
-        tapper.setBpm(source->audioAnalysis.bpm->value);
-      } else {
-        source->audioAnalysis.bpm->value = tapper.bpm();
-      }
+      ImGui::Checkbox("Ableton Link?", &LayoutStateService::getService()->abletonLinkEnabled);
       
       // Only draw graph if we're enabled
       if (source->audioAnalysis.bpmEnabled) {
         source->audioAnalysis.beatPulseOscillator->enabled = true;
         OscillatorView::draw(dynamic_pointer_cast<Oscillator>( source->audioAnalysis.beatPulseOscillator), source->audioAnalysis.beatPulse);
+      } else {
+        ImGui::NewLine();
       }
+      
+      // Draw BPM controls
+      if (!LayoutStateService::getService()->abletonLinkEnabled) {
+        ImGui::SameLine();
+
+        if (ImGui::BeginChild("##BPMControls", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionMax().y))) {
+          
+          static float lastTapTime = ofGetCurrentTime().seconds;
+          if (ImGui::Button("Tap for BPM")) {
+            if (ofGetCurrentTime().seconds - lastTapTime > 5.0f) {
+              tapper.startFresh();
+            } else {
+              tapper.tap();
+            }
+            lastTapTime = ofGetCurrentTime().seconds;
+          }
+          
+          
+          if (ImGui::Button("Beat Start")) {
+            float bpm = tapper.bpm();
+            tapper.startFresh();
+            tapper.setBpm(bpm);
+            source->audioAnalysis.bpmEnabled = true;
+          }
+                    
+          if (ImGui::Button("Reset")) {
+            tapper.startFresh();
+          }
+          
+          const char* buttonText = source->audioAnalysis.bpmEnabled ? "Stop" : "Start";
+          if (ImGui::Button(buttonText)) {
+            source->audioAnalysis.bpmEnabled = !source->audioAnalysis.bpmEnabled;
+          }
+          
+          if (CommonViews::Slider("BPM", "##bpm", source->audioAnalysis.bpm)) {
+            tapper.setBpm(source->audioAnalysis.bpm->value);
+          } else {
+            source->audioAnalysis.bpm->value = tapper.bpm();
+          }
+        }
+        ImGui::EndChild();
+      }
+      
+  
       
       ImGui::TableNextColumn();
       

@@ -28,7 +28,7 @@ struct KaleidoscopeSettings : public ShaderSettings {
   std::shared_ptr<Oscillator> rotationOscillator;
 
   KaleidoscopeSettings(std::string shaderId, json j, std::string name) :
-  sides(std::make_shared<Parameter>("Sides", 4.0,  1.0, 10.0)),
+  sides(std::make_shared<Parameter>("Sides", 4.0,  1.0, 10.0, ParameterType_Int)),
   shift(std::make_shared<Parameter>("Frame Shift", 0.25,  0.0, 1.0)),
   rotation(std::make_shared<Parameter>("Rotation", 1.0,  1.0, TWO_PI)),
   sidesOscillator(std::make_shared<WaveformOscillator>(sides)),

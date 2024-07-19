@@ -7,8 +7,10 @@ uniform sampler2D overlayTexture;
 in vec2 coord;
 out vec4 outputColor;
 
-uniform float mainMix;
-uniform float feedbackMix;
+uniform float mainAlpha;
+uniform float fbMix;
+uniform float fbAlpha;
+
 uniform int blendMode;
 uniform int fbType;
 uniform int priority;
@@ -24,22 +26,36 @@ uniform vec3 hsb;
 uniform vec3 rescale;
 uniform vec3 invert;
 
+
+/*
+ 
+ mainAlpha: Alpha for mainTexture
+ fbAlpha: Alpha for fbTexture
+ fbMix: Mix for the fb/main
+ 
+ */
+
 // Function to implement various blending modes
 vec4 blend(vec4 a, vec4 b, int mode) {
   vec4 result;
-  if (mode == 0) { //Standard
-    // Empty feedback
-    if (a.a < 0.5) {
-      return b;
-    }
+  if (mode == 0) { // Standard
 
     // Empty main
-    if (a.a < 0.0001) {
-      return vec4(b.rgb, min(0.99, 1.5 * feedbackMix * b.a));
+    if (a.a < 0.05) {
+      return vec4(b.rgb, max(b.a - 0.4 * (1.0 - fbAlpha), 0.0));
     }
     
-    result = mix(a, b, mainMix);
+    // Empty feedback
+    if (b.a < 0.05) {
+      return vec4(a.rgb, mainAlpha);
+    }
+    
+    vec4 main = vec4(a.rgb, mainAlpha);
+    vec4 fb = vec4(b.rgb, fbAlpha);
+    
+    return mix(main, fb, fbMix);
   }
+  
   else if (mode == 1) { // Multiply
     result = a * b;
   } else if (mode == 2) { // Screen
@@ -89,23 +105,6 @@ vec3 hsb2rgb(in vec3 c) {
   return c.z * mix(vec3(1.0), rgb, c.y);
 }
 
-vec4 mixStandard(in vec4 mainColor, in vec4 fbColor) {
-  vec4 overlayColor = fbColor;
-
-  // Empty feedback
-  if (fbColor.a < 0.5) {
-    return mainColor;
-  }
-
-  // Empty main
-  if (mainColor.a < 0.0001) {
-    return vec4(overlayColor.rgb,
-                min(0.99, 1.5 * feedbackMix * overlayColor.a));
-  }
-
-  return mix(mainColor, overlayColor, mainMix);
-}
-
 vec4 mixLumaKey(in vec4 mainColor, in vec4 fbColor, in float key,
                 in float thresh) {
   vec3 mainColorHsb = rgb2hsb(mainColor.rgb);
@@ -120,10 +119,10 @@ vec4 mixLumaKey(in vec4 mainColor, in vec4 fbColor, in float key,
 
   // Check if we're within bounds
   if (fbLuma > lower && fbLuma < upper) {
-    return mix(mainColor, fbColor, feedbackMix);
+    return mix(mainColor, fbColor, fbMix);
   }
 
-  return mainColor;
+  return vec4(0.0);
 }
 
 vec2 rotate2D(in vec2 pos, in float a) {
@@ -153,6 +152,7 @@ void main() {
   }
 
   vec4 mainColor = texture(mainTexture, coord);
+  
   // If the resultant position is outside the frame, fbColor should be empty
   vec2 fbCoord = uv - translate;
   vec4 fbColor = vec4(0.0);
@@ -175,10 +175,10 @@ void main() {
   }
 
   if (lumaEnabled == 1) {
-    outColor = mixLumaKey(mainColor, fbColor, lumaKey, lumaThresh);
-  } else {
-    outColor = blend(mainColor, fbColor, blendMode);
+    fbColor = mixLumaKey(mainColor, fbColor, lumaKey, lumaThresh);
   }
+  
+  outColor = blend(mainColor, fbColor, blendMode);
 
   outputColor = outColor;
 }

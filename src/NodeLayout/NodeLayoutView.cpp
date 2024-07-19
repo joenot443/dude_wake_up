@@ -169,16 +169,21 @@ void NodeLayoutView::draw()
     // Create Links for every Output. [Can go to Mask, Aux, etc.]
     if (!shaderNode->connectable->outputs.empty())
     {
-      for (auto connection : shaderNode->connectable->outputs)
+      for (auto pair : shaderNode->connectable->outputs)
       {
+        auto slot = pair.first;
+        auto connection = pair.second;
         std::shared_ptr<Node> nextNode = idNodeMap[connection->end->connId()];
+        std::shared_ptr<Node> startNode = idNodeMap[connection->start->connId()];
+
         ed::LinkId nextShaderLinkId = uniqueId++;
         
         auto shaderLink =
-        std::make_shared<ShaderLink>(nextShaderLinkId, nextNode, shaderNode, connection->inputSlot, connection->id);
+        std::make_shared<ShaderLink>(nextShaderLinkId, nextNode, shaderNode, connection->outputSlot, connection->inputSlot, connection->id);
         linksMap[nextShaderLinkId.Get()] = shaderLink;
         ed::PinId inputPinId = 0;
-        ed::PinId outputPinId = shaderLink->output->outputId;
+        ed::PinId outputPinId = 0;
+        outputPinId = startNode->outputIds[connection->outputSlot];
         inputPinId = nextNode->inputIds[connection->inputSlot];
         
         ed::Link(nextShaderLinkId,
@@ -358,6 +363,25 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
   ImGui::PushFont(FontService::getService()->h3);
   ImGui::Text("%s", truncateString(formatString("%s", node->name.c_str()), 20).c_str());
   ImGui::PopFont();
+  
+  CommonViews::sSpacing();
+  
+  // Draw Aux pin if Feedback
+  if (node->type == NodeTypeShader && node->shader->type() == ShaderTypeFeedback) {
+    // Get secondary Output Pin
+    ed::PinId outputPinId = node->outputIds[OutputSlotAux];
+    
+    // Output Pin
+    ed::BeginPin(outputPinId, ed::PinKind::Output);
+    auto icon = node->hasOutputLinkAt(OutputSlotAux) ? ICON_MD_PLAY_CIRCLE_FILLED : ICON_MD_PLAY_CIRCLE_OUTLINE;
+    CommonViews::IconTitle(icon);
+    ed::EndPin();
+    auto outPin = std::make_shared<Pin>(outputPinId, node, PinTypeOutput);
+    pinIdPinMap[outputPinId.Get()] = outPin;
+    pinIdNodeMap[outputPinId.Get()] = node;
+  }
+  
+  
   ImGuiEx_NextColumn();
   
   // ----- THIRD COLUMN ------
@@ -379,26 +403,29 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
   
   CommonViews::sSpacing();
   
-  ed::PinId outputPinId = node->outputId;
+  // Draw an Output Pin for each OutputSlot which is populated
+  ImVec2 cursorPos = ImGui::GetCursorPos();
   
-  // Output Pin
-  ed::BeginPin(outputPinId, ed::PinKind::Output);
-  auto icon = node->hasOutputLink() ? ICON_MD_PLAY_CIRCLE_FILLED : ICON_MD_PLAY_CIRCLE_OUTLINE;
-  CommonViews::IconTitle(icon);
-  ed::EndPin();
-  auto outPin = std::make_shared<Pin>(outputPinId, node, PinTypeOutput);
-  pinIdPinMap[outputPinId.Get()] = outPin;
-  pinIdNodeMap[outputPinId.Get()] = node;
-  
-  // Resolution Selector (if Source)
-  CommonViews::sSpacing();
-  if (node->type == NodeTypeSource && CommonViews::IconButton(ICON_MD_MONITOR, node->idName()))
-  {
-    resolutionPopupNode = node;
-    ed::Suspend();
-    resolutionPopupLocation = ImGui::GetMousePos();
-    ed::Resume();
+  std::vector<OutputSlot> slotsToDraw = node->connectable->populatedOutputSlots();
+  // On top, draw an Output Pin for the next available Slot
+  OutputSlot nextSlot = node->connectable->nextAvailableOutputSlot();
+  if (nextSlot != OutputSlotNone) {
+    slotsToDraw.push_back(nextSlot);
   }
+  
+  for (OutputSlot slot : slotsToDraw) {
+    ed::PinId outputPinId = node->outputIds[slot];
+    ImGui::SetCursorPos(cursorPos);
+    // Draw an Output Pin for each OutputSlot which is linked
+    ed::BeginPin(outputPinId, ed::PinKind::Output);
+    auto icon = node->hasOutputLinkAt(slot) ? ICON_MD_PLAY_CIRCLE_FILLED : ICON_MD_PLAY_CIRCLE_OUTLINE;
+    CommonViews::IconTitle(icon);
+    ed::EndPin();
+    auto outPin = std::make_shared<Pin>(outputPinId, node, PinTypeOutput);
+    pinIdPinMap[outputPinId.Get()] = outPin;
+    pinIdNodeMap[outputPinId.Get()] = node;
+  }
+  
   
   if (node->type == NodeTypeShader && ShaderChainerService::getService()->isTerminalShader(node->shader))
   {
@@ -446,9 +473,16 @@ std::shared_ptr<Node> NodeLayoutView::nodeForShaderSourceId(std::string shaderSo
   auto nodeId = nodeIdTicker++;
   auto outputId = nodeIdTicker++;
   std::map<InputSlot, ed::PinId> inputIds;
+  std::map<OutputSlot, ed::PinId> outputIds;
+  
+  // Create 10 outputIds for each Node, even though most of them won't be used.
+  for (int i = 0; i < 11; i++) {
+    OutputSlot slot = static_cast<OutputSlot>(i);
+    outputIds[slot] = nodeIdTicker++;
+  }
   
   // Create 10 inputIds for each Node, even though most of them won't be used.
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < 11; i++) {
     InputSlot slot = static_cast<InputSlot>(i);
     inputIds[slot] = nodeIdTicker++;
   }
@@ -463,7 +497,7 @@ std::shared_ptr<Node> NodeLayoutView::nodeForShaderSourceId(std::string shaderSo
     origin = ImVec2(ShaderChainerService::getService()->shaderForId(shaderSourceId)->settings->x->value, ShaderChainerService::getService()->shaderForId(shaderSourceId)->settings->y->value);
   }
   
-  node = std::make_shared<Node>(nodeId, outputId, inputIds, name, nodeType, connectable);
+  node = std::make_shared<Node>(nodeId, outputIds, inputIds, name, nodeType, connectable);
   
   // If we're placing the node from a JSON, we have an origin.
   if (origin.x != 0.)
@@ -477,7 +511,8 @@ std::shared_ptr<Node> NodeLayoutView::nodeForShaderSourceId(std::string shaderSo
 
 void NodeLayoutView::keyReleased(int key)
 {
-  if (key == OF_KEY_BACKSPACE)
+  if (key == OF_KEY_BACKSPACE
+      && !LayoutStateService::getService()->isEditingText)
   {
     shouldDelete = true;
   }
@@ -663,7 +698,7 @@ void NodeLayoutView::handleDropZone()
         // Dropped on an existing Shader
         nodeDropLocation = std::make_unique<ImVec2>(ed::GetNodePosition(hovered) + ImVec2(150.0, 0.0));
         auto startNode = nodeIdNodeMap[hovered.Get()];
-        ShaderChainerService::getService()->makeConnection(startNode->connectable, shader, startNode->type == NodeTypeShader ? ConnectionTypeShader : ConnectionTypeSource, InputSlotMain);
+        ShaderChainerService::getService()->makeConnection(startNode->connectable, shader, startNode->type == NodeTypeShader ? ConnectionTypeShader : ConnectionTypeSource, OutputSlotMain, InputSlotMain);
       }
       unplacedNodeIds.push_back(shader->shaderId);
     }
@@ -781,17 +816,24 @@ void NodeLayoutView::handleDropZone()
       
       if (availableStrand != nullptr)
       {
-        std::vector<std::string> ids = ConfigService::getService()->loadStrandFile(availableStrand->path);
-        if (ids.size() != 0) {
-          auto canvasPos = ed::ScreenToCanvas(getScaledMouseLocation());
-          nodeDropLocation = std::make_unique<ImVec2>(canvasPos);
-          // Add all the node IDs generated in loading the Strand
-          unplacedNodeIds.insert(unplacedNodeIds.end(), ids.begin(), ids.end());
-        }
+        loadStrand(availableStrand);
       }
     }
     
     ImGui::EndDragDropTarget();
+  }
+}
+
+void NodeLayoutView::loadStrand(std::shared_ptr<AvailableStrand> availableStrand)
+{
+  std::vector<std::string> ids = ConfigService::getService()->loadStrandFile(availableStrand->path);
+  
+  
+  if (ids.size() != 0) {
+    auto canvasPos = ed::ScreenToCanvas(getScaledMouseLocation());
+    nodeDropLocation = std::make_unique<ImVec2>(canvasPos);
+    // Add all the node IDs generated in loading the Strand
+    unplacedNodeIds.insert(unplacedNodeIds.end(), ids.begin(), ids.end());
   }
 }
 
@@ -831,12 +873,18 @@ void NodeLayoutView::queryNewLinks()
       std::shared_ptr<Node> sourceNode = pinIdNodeMap[outputPinId.Get()];
       std::shared_ptr<Node> destNode = pinIdNodeMap[inputPinId.Get()];
       InputSlot inputSlot;
+      OutputSlot outputSlot;
       
       if (sourceNode == nullptr && destNode == nullptr) { return; }
       
       // Get the InputSlot for this connection
       for (auto [slot, inputId] : destNode->inputIds) {
         if (inputId == inputPinId) inputSlot = slot;
+      }
+      
+      // Get the OutputSlot for this connection
+      for (auto [slot, outputId] : sourceNode->outputIds) {
+        if (outputId == outputPinId) outputSlot = slot;
       }
       
       
@@ -848,8 +896,7 @@ void NodeLayoutView::queryNewLinks()
           // VideoSource is our Source
           if (sourceNode->type == NodeTypeSource)
           {
-            auto destPin = pinIdPinMap[inputPinId.Get()];
-            ShaderChainerService::getService()->makeConnection(sourceNode->source, destNode->shader, ConnectionTypeSource, inputSlot, true);
+            ShaderChainerService::getService()->makeConnection(sourceNode->source, destNode->shader, ConnectionTypeSource, outputSlot, inputSlot, true);
           }
           
           // Shader is our Source
@@ -857,7 +904,7 @@ void NodeLayoutView::queryNewLinks()
           {
             ShaderChainerService::getService()->makeConnection(
                                                                sourceNode->shader, destNode->shader,
-                                                               ConnectionTypeShader, inputSlot, true);
+                                                               ConnectionTypeShader, outputSlot, inputSlot, true);
           }
         }
       }
@@ -984,7 +1031,7 @@ void NodeLayoutView::drawActionButtons()
   ImGui::SameLine();
   
   // Draw the reset button
-  if (CommonViews::LargeIconButton(ICON_MD_RECYCLING, "reset"))
+  if (CommonViews::LargeIconButton(ICON_MD_RESTART_ALT, "reset"))
   {
     clear();
   }
@@ -1023,7 +1070,7 @@ void NodeLayoutView::drawActionButtons()
   //  CommonViews::HSpacing(2);
   ImGui::SameLine();
   // Draw the stage mode button
-  if (CommonViews::LargeIconButton(ICON_MD_VIEW_AGENDA, "stageMode"))
+  if (CommonViews::LargeIconButton(ICON_MD_GRID_VIEW, "stageMode"))
   {
     LayoutStateService::getService()->stageModeEnabled = true;
   }

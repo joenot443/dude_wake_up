@@ -15,6 +15,7 @@
 #include "VideoSource.hpp"
 #include "VideoSourceBrowserView.hpp"
 #include "SubmitFeedbackView.hpp"
+#include "WelcomeScreenView.hpp"
 #include "StrandBrowserView.hpp"
 #include "StageModeView.hpp"
 #include "ofMain.h"
@@ -33,6 +34,7 @@ private:
   OscillatorView oscillatorView = OscillatorView();
   SubmitFeedbackView submitFeedbackView = SubmitFeedbackView();
   StageModeView stageModeView = StageModeView();
+  WelcomeScreenView welcomeScreenView = WelcomeScreenView();
   
   void drawMenu();
   void drawMasks();

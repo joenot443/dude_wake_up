@@ -103,7 +103,8 @@ public:
   makeConnection(std::shared_ptr<Connectable> start,
            std::shared_ptr<Connectable> end,
            ConnectionType type,
-           InputSlot slot,
+           OutputSlot outputSlot,
+           InputSlot inputSlot,
            bool shouldSaveConfig = false,
            bool copy = false);
   

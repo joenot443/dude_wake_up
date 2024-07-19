@@ -16,18 +16,18 @@ to: src/Shading/<%= name %>Shader.hpp
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
-#include "ValueOscillator.hpp"
+#include "WaveformOscillator.hpp"
 #include "Parameter.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct <%= name %>Settings: public ShaderSettings {
   std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<ValueOscillator> shaderValueOscillator;
+  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
 
   <%= name %>Settings(std::string shaderId, json j) :
   shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<ValueOscillator>(shaderValue)),
+  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   ShaderSettings(shaderId, j, "<%= name %>") {
     parameters = { shaderValue };
     oscillators = { shaderValueOscillator };

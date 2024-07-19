@@ -29,8 +29,8 @@ struct LumaMaskMakerSettings: public ShaderSettings {
   LumaMaskMakerSettings(std::string shaderId, json j, std::string name) :
   upper(std::make_shared<Parameter>("upper", 1.0, 0.0, 1.0)),
   lower(std::make_shared<Parameter>("lower", 0.5, 0.0, 1.0)),
-  flip(std::make_shared<Parameter>("invert", 0.0, 0.0, 1.0)),
-  drawInput(std::make_shared<Parameter>("drawInput", 0.0, 0.0, 1.0)),
+  flip(std::make_shared<Parameter>("invert", ParameterType_Bool)),
+  drawInput(std::make_shared<Parameter>("drawInput", ParameterType_Bool)),
   upperOscillator(std::make_shared<WaveformOscillator>(upper)),
   lowerOscillator(std::make_shared<WaveformOscillator>(lower)),
   ShaderSettings(shaderId, 0, "LumaMaskMaker") {

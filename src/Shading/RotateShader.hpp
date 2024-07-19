@@ -28,7 +28,7 @@ struct RotateSettings: public ShaderSettings {
   RotateSettings(std::string shaderId, json j) :
   rotate(std::make_shared<Parameter>("Rotate", 0.0, 0.0, 360.0)),
   scale(std::make_shared<Parameter>("Scale", 1.0, 0.0, 5.0)),
-  autoRotate(std::make_shared<Parameter>("Auto-Rotate", 0.0, 0.0, 2.0)),
+  autoRotate(std::make_shared<Parameter>("Auto-Rotate", 0.0, 0.0, 2.0, ParameterType_Bool)),
   rotateOscillator(std::make_shared<WaveformOscillator>(rotate)),
   scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
   autoRotateOscillator(std::make_shared<WaveformOscillator>(autoRotate)),

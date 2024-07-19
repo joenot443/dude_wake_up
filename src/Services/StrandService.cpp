@@ -20,12 +20,24 @@ std::vector<std::shared_ptr<AvailableStrand>> StrandService::availableStrands()
   return strands;
 }
 
+std::vector<std::shared_ptr<AvailableStrand>> StrandService::availableTemplateStrands()
+{
+  std::vector<std::shared_ptr<AvailableStrand>> strands;
+  for (auto const &[key, val] : templateMap)
+  {
+    strands.push_back(val);
+  }
+  return strands;
+}
+
 void StrandService::setup() {
   // Save default Config when a Strand is updated
   strandsUpdatedSubject.subscribe([this]()
   {
     ConfigService::getService()->saveDefaultConfigFile();
   });
+  
+  populate();
 }
 
 void StrandService::notifyStrandsUpdated()
@@ -119,5 +131,73 @@ void StrandService::loadConfig(json j)
     
     auto strand = std::make_shared<AvailableStrand>(val["name"], path, imagePath, id);
     addStrand(strand);
+  }
+}
+
+// Adds all strands in the nottawa folder to the strandMap
+void StrandService::populate()
+{
+  std::string nottawaFolder = ConfigService::getService()->nottawaFolderFilePath();
+  std::string templatesFolder = ConfigService::getService()->templatesFolderFilePath();
+  
+  populateMapFromFolder(&templateMap, templatesFolder);
+  populateMapFromFolder(&strandMap, nottawaFolder);
+}
+
+void StrandService::populateMapFromFolder(std::map<std::string, std::shared_ptr<AvailableStrand>> *map, std::string folder) {
+  
+  ofDirectory directory;
+  directory.open(folder);
+  directory.listDir();
+  directory.sort();
+  
+  for (int i = 0; i < directory.size(); i++)
+  {
+    auto file = directory.getFile(i);
+    bool isDirectory = file.isDirectory();
+    if (isDirectory)
+      continue;
+    bool isJson = ofIsStringInString(file.getFileName(), ".json");
+    if (!isJson)
+      continue;
+    
+    nlohmann::json json;
+    std::fstream fileStream;
+    std::string path = file.path();
+    fileStream.open(path, std::ios::in);
+    if (fileStream.is_open())
+    {
+      try
+      {
+        // Make sure the file isn't empty
+        if (fileStream.peek() == std::ifstream::traits_type::eof())
+        {
+          log("JSON file for %s is empty.", path.c_str());
+          return 0;
+        }
+        fileStream >> json;
+      }
+      catch (int code)
+      {
+        log("Could not load JSON file for %s.", path.c_str());
+        return;
+      }
+    }
+    
+    
+    if (json[ConfigTypeKey] != ConfigTypeStrand && json[ConfigTypeKey] != ConfigTypeFull)
+    {
+      continue;
+    }
+    std::string imagePath = json["preview"];
+    
+    auto strand = std::make_shared<AvailableStrand>(file.getFileName(), file.getAbsolutePath(), imagePath, UUID::generateUUID());
+    if (strandNames.count(strand->name) != 0) {
+      log("Adding Strand %s which already exists", strand->name.c_str());
+      continue;
+    }
+    strandNames.insert(strand->name);
+    (*map)[strand->id] = strand;
+    notifyStrandsUpdated();
   }
 }

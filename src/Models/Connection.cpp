@@ -14,6 +14,7 @@ json Connection::serialize() {
   j["start"] = start->connId();
   j["end"] = end->connId();
   j["type"] = type;
-  j["slot"] = inputSlot;
+  j["inputSlot"] = inputSlot;
+  j["outputSlot"] = outputSlot;
   return j;
 }

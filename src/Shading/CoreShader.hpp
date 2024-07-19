@@ -22,7 +22,7 @@ struct CoreSettings: public ShaderSettings {
   std::shared_ptr<ValueOscillator> shapeDistanceOscillator;
 
   CoreSettings(std::string shaderId, json j) :
-  shapeDistance(std::make_shared<Parameter>("Shape Distance", 0.0, 0.0, 1.0)),
+  shapeDistance(std::make_shared<Parameter>("Shape Distance", 0.5, 0.0, 1.0)),
   shapeDistanceOscillator(std::make_shared<ValueOscillator>(shapeDistance)),
   ShaderSettings(shaderId, j, "Core") {
     parameters = { shapeDistance };

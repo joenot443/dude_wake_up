@@ -20,14 +20,14 @@
 struct TwistedCubesSettings: public ShaderSettings {
   std::shared_ptr<Parameter> spacing;
   std::shared_ptr<Parameter> shape;
-  std::shared_ptr<ValueOscillator> spacingOscillator;
-  std::shared_ptr<ValueOscillator> shapeOscillator;
+  std::shared_ptr<WaveformOscillator> spacingOscillator;
+  std::shared_ptr<WaveformOscillator> shapeOscillator;
 
   TwistedCubesSettings(std::string shaderId, json j) :
   spacing(std::make_shared<Parameter>("spacing", 0.25, 0.01, 0.5)),
   shape(std::make_shared<Parameter>("shape", 1.0, 0.01, 5.0)),
-  shapeOscillator(std::make_shared<ValueOscillator>(shape)),
-  spacingOscillator(std::make_shared<ValueOscillator>(spacing)),
+  shapeOscillator(std::make_shared<WaveformOscillator>(shape)),
+  spacingOscillator(std::make_shared<WaveformOscillator>(spacing)),
   ShaderSettings(shaderId, j, "TwistedCubes") {
     parameters = { spacing, shape };
     oscillators = { spacingOscillator, shapeOscillator };

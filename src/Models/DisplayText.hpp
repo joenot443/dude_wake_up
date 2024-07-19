@@ -10,6 +10,7 @@
 #include "Parameter.hpp"
 #include "WaveformOscillator.hpp"
 #include "ConfigService.hpp"
+#include "Settings.hpp"
 #include "UUID.hpp"
 #include "Strings.hpp"
 
@@ -24,7 +25,8 @@ struct Font {
 };
 
 
-struct DisplayText {
+class DisplayText: public Settings {
+public:
   std::string text = "Sample text";
   std::string id;
   ofColor color = ofColor::white;
@@ -36,14 +38,18 @@ struct DisplayText {
   
   std::shared_ptr<Oscillator> xPositionOscillator;
   std::shared_ptr<Oscillator> yPositionOscillator;
-public:
+  
   DisplayText() : font(Font("")),
   id(UUID::generateUUID()),
   xPosition(std::make_shared<Parameter>("xPosition", 0.1, 0.0, 1.0)),
   yPosition(std::make_shared<Parameter>("yPosition", 0.1, 0.0, 1.0)),
   xPositionOscillator(std::make_shared<WaveformOscillator>(xPosition)),
   yPositionOscillator(std::make_shared<WaveformOscillator>(yPosition))
-  {};
+  {
+    oscillators = {xPositionOscillator, yPositionOscillator};
+    parameters = {xPosition, yPosition};
+    registerParameters();
+  };
 };
 
 #endif /* DisplayText_h */

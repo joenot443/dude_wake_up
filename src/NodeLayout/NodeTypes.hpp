@@ -35,7 +35,7 @@ enum PinType
 struct Node
 {
   ed::NodeId id;
-  ed::PinId outputId;
+  std::map<OutputSlot, ed::PinId> outputIds;
   std::map<InputSlot, ed::PinId> inputIds;
   std::string name;
   NodeType type;
@@ -55,10 +55,16 @@ struct Node
     return connectable->hasInputAtSlot(slot);
   }
 
-  bool hasOutputLink()
+  bool hasMainOutputLink()
   {
-    return !connectable->outputs.empty();
+    return connectable->outputs.find(OutputSlotMain) != connectable->outputs.end();
   }
+  
+  bool hasOutputLinkAt(OutputSlot slot)
+  {
+    return connectable->hasOutputAtSlot(slot);
+  }
+  
   // Draws the settings from the underlying Shader or VideoSource
   void drawSettings()
   {
@@ -109,8 +115,8 @@ struct Node
     }
   }
 
-  Node(ed::NodeId id, ed::PinId outputId, std::map<InputSlot, ed::PinId> inputIds, std::string name, NodeType type, std::shared_ptr<Connectable> conn)
-      : id(id), outputId(outputId), inputIds(inputIds), type(type), name(name), position(ImVec2(0, 0)), connectable(conn) {}
+  Node(ed::NodeId id, std::map<OutputSlot, ed::PinId> outputIds, std::map<InputSlot, ed::PinId> inputIds, std::string name, NodeType type, std::shared_ptr<Connectable> conn)
+      : id(id), outputIds(outputIds), inputIds(inputIds), type(type), name(name), position(ImVec2(0, 0)), connectable(conn) {}
 };
 
 struct Pin
@@ -129,11 +135,13 @@ struct ShaderLink
   std::shared_ptr<Node> input;
   std::shared_ptr<Node> output;
   InputSlot inputSlot;
+  OutputSlot outputSlot;
   std::string connectionId;
 
   ShaderLink(ed::LinkId id, std::shared_ptr<Node> inputNode,
-             std::shared_ptr<Node> outputNode, InputSlot inputSlot, std::string connectionId)
-      : id(id), output(outputNode), input(inputNode), inputSlot(inputSlot), connectionId(connectionId) {}
+             std::shared_ptr<Node> outputNode, OutputSlot outputSlot, InputSlot inputSlot, std::string connectionId)
+      : id(id), output(outputNode), input(inputNode), inputSlot(inputSlot),
+  outputSlot(outputSlot), connectionId(connectionId) {}
 };
 
 #endif /* NodeTypes_h */

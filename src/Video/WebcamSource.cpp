@@ -8,14 +8,16 @@
 #include "WebcamSource.hpp"
 #include "NodeLayoutView.hpp"
 #include "CommonViews.hpp"
+#include "LayoutStateService.hpp"
 
 void WebcamSource::setup() {
   grabber.close();
   grabber.setDeviceID(settings->deviceId->intValue);
   grabber.setDesiredFrameRate(30);
   grabber.setPixelFormat(OF_PIXELS_RGBA);
-  grabber.setup(settings->width->value, settings->height->value);
-  fbo->allocate(settings->width->value, settings->height->value);
+  
+  grabber.setup(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
+  fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   maskShader.load("shaders/ColorKeyMaskMaker");
 
   // Collect the device names
@@ -39,7 +41,7 @@ void WebcamSource::saveFrame() {
       maskShader.begin();
       maskShader.setUniformTexture("tex", grabber.getTexture(), 0);
       maskShader.setUniform1f("time", ofGetElapsedTimef());
-      maskShader.setUniform2f("dimensions", fbo->getWidth(), fbo->getHeight());
+      maskShader.setUniform2f("dimensions", LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
       maskShader.setUniform1i("drawTex", 1);
       maskShader.setUniform4f("chromaKey",
                               settings->maskColor->color->data()[0],
@@ -50,7 +52,7 @@ void WebcamSource::saveFrame() {
       ofClear(0, 0, 0, 255);
       ofClear(0, 0, 0, 0);
 
-      grabber.draw(0, 0, fbo->getWidth(), fbo->getHeight());
+      grabber.draw(0, 0, LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
       maskShader.end();
       fbo->end();
     }
@@ -58,7 +60,7 @@ void WebcamSource::saveFrame() {
     {
       fbo->begin();
       ofClear(0, 0, 0, 255);
-      grabber.draw(0, 0, fbo->getWidth(), fbo->getHeight());
+      grabber.draw(0, 0, LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
       fbo->end();
     }
   }

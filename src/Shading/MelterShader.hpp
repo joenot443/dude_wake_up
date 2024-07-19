@@ -20,8 +20,23 @@
 struct MeltSettings : public ShaderSettings {
 	public:
   std::string shaderId;
+  std::shared_ptr<Parameter> alpha;
+  std::shared_ptr<WaveformOscillator> alphaOscillator;
+  
+  std::shared_ptr<Parameter> beta;
+  std::shared_ptr<WaveformOscillator> betaOscillator;
+  
+  std::shared_ptr<Parameter> speed;
+  std::shared_ptr<WaveformOscillator> speedOscillator;
+
 
   MeltSettings(std::string shaderId, json j, std::string name) : shaderId(shaderId),
+  alpha(std::make_shared<Parameter>("Alpha", 1.0, 0.0, 2.0)),
+  alphaOscillator(std::make_shared<WaveformOscillator>(alpha)),
+  beta(std::make_shared<Parameter>("Beta", 1.0, 0.0, 2.0)),
+  betaOscillator(std::make_shared<WaveformOscillator>(beta)),
+  speed(std::make_shared<Parameter>("Speed", 1.0, 0.0, 5.0)),
+  speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   ShaderSettings(shaderId, j, name) {
     load(j);
   registerParameters();
@@ -56,6 +71,9 @@ shader.load("shaders/Melt");
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("alpha", settings->alpha->value);
+    shader.setUniform1f("beta", settings->beta->value);
+    shader.setUniform1f("speed", settings->speed->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
     shader.end();
@@ -64,7 +82,10 @@ shader.load("shaders/Melt");
 
   void drawSettings() override {
     
-    ImGui::Text("Melt");
+    CommonViews::H3Title("Melt");
+    CommonViews::ShaderParameter(settings->alpha, settings->alphaOscillator);
+    CommonViews::ShaderParameter(settings->beta, settings->betaOscillator);
+    CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
   }
 };
 #endif /* MelterShader_h */
