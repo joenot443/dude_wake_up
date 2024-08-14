@@ -35,6 +35,7 @@ struct RotateSettings: public ShaderSettings {
   ShaderSettings(shaderId, j, "Rotate") {
     parameters = {rotate, scale, autoRotate};
     oscillators = {rotateOscillator, scaleOscillator, autoRotateOscillator};
+    audioReactiveParameter = rotate;
     load(j);
     registerParameters();
   };

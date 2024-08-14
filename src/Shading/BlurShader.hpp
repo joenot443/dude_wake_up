@@ -14,6 +14,7 @@
 #include "Math.hpp"
 #include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
+#include "CommonViews.hpp"
 #include "ofxImGui.h"
 #include <stdio.h>
 
@@ -28,14 +29,15 @@ public:
 
   BlurSettings(std::string shaderId, json j, std::string name)
       : mix(std::make_shared<Parameter>("blur_mix", 0.5, 0.0, 1.0)),
-        radius(std::make_shared<Parameter>("blur_radius", 1.0, 0.0,
-                                           100.0)),
+        radius(std::make_shared<Parameter>("Amount", 0.01, 0.0,
+                                           50.0)),
         mixOscillator(std::make_shared<WaveformOscillator>(mix)),
         radiusOscillator(std::make_shared<WaveformOscillator>(radius)),
         shaderId(shaderId), ShaderSettings(shaderId, j, name)
   {
     parameters = {mix, radius};
     oscillators = {mixOscillator, radiusOscillator};
+    audioReactiveParameter = radius;
     load(j);
     registerParameters();
   }
@@ -69,7 +71,8 @@ public:
     
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
-    shader.setUniform1f("size", settings->radius->value);
+    shader.setUniform1f("radius", settings->radius->value);
+    shader.setUniform1f("time", ofGetElapsedTimef());
     frame->draw(0, 0);
     shader.end();
     canvas->end();

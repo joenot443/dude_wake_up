@@ -21,7 +21,7 @@
 void AudioSourceBrowserView::setup() {}
 
 void AudioSourceBrowserView::update() {
-  tapper.update();
+  AudioSourceService::getService()->tapper.update();
 }
 
 void AudioSourceBrowserView::draw() {
@@ -99,25 +99,25 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
         ImGui::OpenPopup("##Loudness");
       }
       ImGui::SameLine();
-      CommonViews::ShaderCheckbox(source->audioAnalysis.enableRmsPulse, true);
+//      CommonViews::ShaderCheckbox(source->audioAnalysis.enableRmsPulse, true);
       OscillatorParam original = OscillatorParam (std::static_pointer_cast<Oscillator>(source->audioAnalysis.rmsOscillator), source->audioAnalysis.rms);
       std::vector<OscillatorParam> subjects = {original};
       
       // Add the pulser if enabled
-      if (source->audioAnalysis.enableRmsPulse->boolValue) {
-        OscillatorParam pulse = OscillatorParam(source->audioAnalysis.rmsAnalysisParam.pulseOscillator, source->audioAnalysis.rmsAnalysisParam.pulse);
-        OscillatorParam threshold = OscillatorParam( source->audioAnalysis.rmsAnalysisParam.thresholdOscillator, source->audioAnalysis.rmsAnalysisParam.pulseThreshold);
-        subjects.push_back(pulse);
-        subjects.push_back(threshold);
-      }
+//      if (source->audioAnalysis.enableRmsPulse->boolValue) {
+//        OscillatorParam pulse = OscillatorParam(source->audioAnalysis.rmsAnalysisParam.pulseOscillator, source->audioAnalysis.rmsAnalysisParam.pulse);
+//        OscillatorParam threshold = OscillatorParam( source->audioAnalysis.rmsAnalysisParam.thresholdOscillator, source->audioAnalysis.rmsAnalysisParam.pulseThreshold);
+//        subjects.push_back(pulse);
+//        subjects.push_back(threshold);
+//      }
       
       OscillatorView::draw(subjects);
       
-      if (source->audioAnalysis.enableRmsPulse->boolValue) {
-        CommonViews::Slider("Threshold", "##threshold", source->audioAnalysis.rmsAnalysisParam.pulseThreshold);
-        CommonViews::Slider("Length", "##length", source->audioAnalysis.rmsAnalysisParam.pulseLength);
-      }
-      
+//      if (source->audioAnalysis.enableRmsPulse->boolValue) {
+//        CommonViews::Slider("Threshold", "##threshold", source->audioAnalysis.rmsAnalysisParam.pulseThreshold);
+//        CommonViews::Slider("Length", "##length", source->audioAnalysis.rmsAnalysisParam.pulseLength);
+//      }
+//      
       ImGui::TableNextColumn();
       
       // Beats
@@ -155,23 +155,23 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
           static float lastTapTime = ofGetCurrentTime().seconds;
           if (ImGui::Button("Tap for BPM")) {
             if (ofGetCurrentTime().seconds - lastTapTime > 5.0f) {
-              tapper.startFresh();
+              AudioSourceService::getService()->tapper.startFresh();
             } else {
-              tapper.tap();
+              AudioSourceService::getService()->tapper.tap();
             }
             lastTapTime = ofGetCurrentTime().seconds;
           }
           
           
           if (ImGui::Button("Beat Start")) {
-            float bpm = tapper.bpm();
-            tapper.startFresh();
-            tapper.setBpm(bpm);
+            float bpm = AudioSourceService::getService()->tapper.bpm();
+            AudioSourceService::getService()->tapper.startFresh();
+            AudioSourceService::getService()->tapper.setBpm(bpm);
             source->audioAnalysis.bpmEnabled = true;
           }
                     
           if (ImGui::Button("Reset")) {
-            tapper.startFresh();
+            AudioSourceService::getService()->tapper.startFresh();
           }
           
           const char* buttonText = source->audioAnalysis.bpmEnabled ? "Stop" : "Start";
@@ -180,9 +180,7 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
           }
           
           if (CommonViews::Slider("BPM", "##bpm", source->audioAnalysis.bpm)) {
-            tapper.setBpm(source->audioAnalysis.bpm->value);
-          } else {
-            source->audioAnalysis.bpm->value = tapper.bpm();
+            AudioSourceService::getService()->tapper.setBpm(source->audioAnalysis.bpm->value);
           }
         }
         ImGui::EndChild();
@@ -229,6 +227,6 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
 }
 
 void AudioSourceBrowserView::keyReleased(int key) {
-  tapper.tap();
+  AudioSourceService::getService()->tapper.tap();
 }
 

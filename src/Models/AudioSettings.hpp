@@ -19,18 +19,18 @@
 #include "PulseOscillator.hpp"
 #include "ValueOscillator.hpp"
 #include "Vectors.hpp"
-//#include <boost/accumulators/accumulators.hpp>
-//#include <boost/accumulators/framework/accumulator_set.hpp>
-//#include <boost/accumulators/framework/extractor.hpp>
-//#include <boost/accumulators/statistics/rolling_count.hpp>
-//#include <boost/accumulators/statistics/rolling_mean.hpp>
-//#include <boost/accumulators/statistics/max.hpp>
-//#include <boost/accumulators/statistics/min.hpp>
-//#include <boost/accumulators/statistics/rolling_sum.hpp>
-//#include <boost/accumulators/statistics/rolling_window.hpp>
-//#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/framework/accumulator_set.hpp>
+#include <boost/accumulators/framework/extractor.hpp>
+#include <boost/accumulators/statistics/rolling_count.hpp>
+#include <boost/accumulators/statistics/rolling_mean.hpp>
+#include <boost/accumulators/statistics/max.hpp>
+#include <boost/accumulators/statistics/min.hpp>
+#include <boost/accumulators/statistics/rolling_sum.hpp>
+#include <boost/accumulators/statistics/rolling_window.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
 
-//using namespace boost::accumulators;
+using namespace boost::accumulators;
 
 struct AudioAnalysisParameter {
   float windowMin = 0.0;
@@ -51,12 +51,12 @@ struct AudioAnalysisParameter {
   std::shared_ptr<ValueOscillator> pulseOscillator;
   std::shared_ptr<ValueOscillator> thresholdOscillator;
   
-//  accumulator_set<double, stats<tag::rolling_mean > > valueAcc;
-//  accumulator_set<double, stats<tag::max, tag::min>> minMaxAcc;
+  accumulator_set<double, stats<tag::rolling_mean > > valueAcc;
+  accumulator_set<double, stats<tag::max, tag::min>> minMaxAcc;
 
   AudioAnalysisParameter(std::shared_ptr<Parameter> param) :
-//  valueAcc(tag::rolling_window::window_size = 2),
-//  minMaxAcc(tag::rolling_window::window_size = 800),
+  valueAcc(tag::rolling_window::window_size = 2),
+  minMaxAcc(tag::rolling_window::window_size = 800),
   pulseLength(std::make_shared<Parameter>("pulseLength", 0.8, 0.0, 1.0)),
   pulseThreshold(std::make_shared<Parameter>("pulseThreshold", 0.6, 0.0, 1.0)),
   pulse(std::make_shared<Parameter>("autoPulse", 0.0, 0.0, 1.0)),
@@ -69,16 +69,16 @@ struct AudioAnalysisParameter {
 
   void tick(float val) {
     value = val;
-//    valueAcc(val);
-//    minMaxAcc(val);
-//    windowMin = boost::accumulators::min(minMaxAcc);
-//    windowMax = boost::accumulators::max(minMaxAcc);
+    valueAcc(val);
+    minMaxAcc(val);
+    windowMin = boost::accumulators::min(minMaxAcc);
+    windowMax = boost::accumulators::max(minMaxAcc);
     
-//    rollingMean = rolling_mean(valueAcc);
+    rollingMean = rolling_mean(valueAcc);
     rollingMeanRelation = relationToRange(rollingMean);
     
     param->value = rollingMeanRelation;
-    pulse->value = pulser.next(rollingMeanRelation);
+    pulse->value = rollingMeanRelation;
   }
 
   float relationToRange(float v) {
@@ -98,9 +98,6 @@ struct AudioAnalysis {
   std::shared_ptr<Parameter> beatOscillatorSelection;
   std::shared_ptr<Parameter> bpm;
   std::shared_ptr<Parameter> frequencyRelease;
-  
-  // Enable pulsers
-  std::shared_ptr<Parameter> enableRmsPulse;
 
   std::shared_ptr<ValueOscillator> rmsOscillator;
   std::shared_ptr<PulseOscillator> beatPulseOscillator;
@@ -134,7 +131,6 @@ struct AudioAnalysis {
         beatPulse(std::make_shared<Parameter>("BPM", 0.0, 0.0, 1.0)),
         bpm(std::make_shared<Parameter>("bpm", 60.0, 0.0, 300.0)),
         frequencyRelease(std::make_shared<Parameter>("Frequency Release", 0.95, 0.5, 1.0)),
-        enableRmsPulse(std::make_shared<Parameter>("Pulser", 0.0, 0.0, 1.0)),
         rmsOscillator(std::make_shared<ValueOscillator>(rms)),
         beatPulseOscillator(std::make_shared<PulseOscillator>(beatPulse)),
         highsOscillator(std::make_shared<ValueOscillator>(highs)),
@@ -145,12 +141,12 @@ struct AudioAnalysis {
         midsAnalysisParam(AudioAnalysisParameter(mids)),
         lowsAnalysisParam(AudioAnalysisParameter(lows)),
   			// TODO: Readd/fix Pulser
-        parameters({rms, beatPulse, highs, mids, lows, enableRmsPulse}),
+        parameters({beatPulse, rms, highs, mids, lows}),
         analysisParameters({&rmsAnalysisParam, &lowsAnalysisParam, &midsAnalysisParam, &highsAnalysisParam}){};
 
   void analyzeFrame(Gist<float> *gist) {
-    magnitudeSpectrum =
-        Vectors::normalize(Vectors::sqrt(gist->getMagnitudeSpectrum()));
+    magnitudeSpectrum = gist->getMagnitudeSpectrum();
+//        Vectors::normalize(Vectors::sqrt(gist->getMagnitudeSpectrum()));
     melFrequencySpectrum =
         Vectors::normalize(Vectors::sqrt(gist->getMelFrequencySpectrum()));
     smoothSpectrum = Vectors::release(magnitudeSpectrum, smoothSpectrum, frequencyRelease->value);

@@ -9,7 +9,6 @@
 #include "ConfigService.hpp"
 #include "StrandService.hpp"
 #include "ParameterService.hpp"
-#include "ShaderChainer.hpp"
 #include "ShaderChainerService.hpp"
 #include "TransformShader.hpp"
 #include "UUID.hpp"

@@ -35,7 +35,8 @@ struct RGBShiftSettings: public ShaderSettings {
     parameters = {speed, amount};
     oscillators = {speedOscillator, amountOscillator};
     load(j);
-  registerParameters();
+    audioReactiveParameter = amount;
+	  registerParameters();
   };
   
 };

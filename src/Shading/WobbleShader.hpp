@@ -32,7 +32,9 @@ struct WobbleSettings: public ShaderSettings {
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   amountOscillator(std::make_shared<WaveformOscillator>(amount)),
   ShaderSettings(shaderId, j, name) {
-    
+    parameters = {speed, amount};
+    oscillators = {speedOscillator, amountOscillator};
+    registerParameters();
   };
 };
 

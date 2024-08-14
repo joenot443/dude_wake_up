@@ -26,7 +26,7 @@ static const std::string WelcomeScreenEnabledJsonKey = "welcomeScreenEnabled";
 static const std::string AbletonLinkEnabledJsonKey = "abletonBPMEnabled";
 
 static const std::vector<std::string> ResolutionOptions = {"240p", "360p", "480p", "720p", "1080p", "1440p", "4k"};
-
+static const float MenuBarHeight = 50.0f;
 
 class LayoutStateService: public ConfigurableService {
 public:
@@ -40,7 +40,7 @@ public:
   
   bool shaderInfoEnabled = true;
   
-  bool allParametersInStageModeEnabled = false;
+  bool allParametersInStageModeEnabled = true;
   
   bool helpEnabled = true;
   
@@ -65,6 +65,10 @@ public:
   std::vector<std::array<float, 4>> colorHistory = std::vector<std::array<float, 4>>(1, std::array<float, 4>{0.0f, 0.0f, 0.0f, 0.0f});
   
   float audioSettingsViewHeight();
+  
+  ImVec2 nodeLayoutSize();
+  
+  ImVec2 browserSize();
   
   ofRectangle canvasRect();
   

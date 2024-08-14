@@ -18,7 +18,16 @@
 
 struct RainbowRotatorSettings: public ShaderSettings {
 	public:
+  std::shared_ptr<Parameter> frequency;
+  std::shared_ptr<WaveformOscillator> frequencyOscillator;
+  std::shared_ptr<Parameter> height;
+  std::shared_ptr<WaveformOscillator> heightOscillator;
+  
   RainbowRotatorSettings(std::string shaderId, json j, std::string name) :
+  frequency(std::make_shared<Parameter>("frequency", 1.0, 0.0, 5.0)),
+  frequencyOscillator(std::make_shared<WaveformOscillator>(frequency)),
+  height(std::make_shared<Parameter>("height", 1.0, 0.0, 2.0)),
+  heightOscillator(std::make_shared<WaveformOscillator>(height)),
   ShaderSettings(shaderId, j, name) {
     
   };
@@ -45,6 +54,8 @@ shader.load("shaders/RainbowRotator");
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
+    shader.setUniform1f("frequency", settings->frequency->value);
+    shader.setUniform1f("height", settings->height->value);
     frame->draw(0, 0);
     shader.end();
     canvas->end();
@@ -62,6 +73,8 @@ ShaderType type() override {
   }
 
   void drawSettings() override {
+    CommonViews::ShaderParameter(settings->height, settings->heightOscillator);
+    CommonViews::ShaderParameter(settings->frequency, settings->frequencyOscillator);
   }
 };
 

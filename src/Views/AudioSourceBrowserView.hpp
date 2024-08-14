@@ -8,7 +8,6 @@
 #ifndef AudioSourceBrowserView_hpp
 #define AudioSourceBrowserView_hpp
 
-#include "MSABPMTapper.h"
 #include "AudioSource.hpp"
 #include "ofMain.h"
 #include <stdio.h>
@@ -19,9 +18,6 @@ public:
   void update();
   void draw();
   void keyReleased(int key);
-
-  msa::BPMTapper tapper;
-
   
 private:
   void drawAudioSourceSelector();

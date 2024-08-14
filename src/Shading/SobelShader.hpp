@@ -17,11 +17,19 @@
 #include <stdio.h>
 
 struct SobelSettings : public ShaderSettings {
-	public:
+public:
+  std::shared_ptr<Parameter> tolerance;
+  std::shared_ptr<WaveformOscillator> toleranceOscillator;
+  
   SobelSettings(std::string shaderId, json j, std::string name)
-      : ShaderSettings(shaderId, j, name){
-
-        };
+  :   tolerance(std::make_shared<Parameter>("Tolerance", 1.0, 0.0, 5.0)),
+  toleranceOscillator(std::make_shared<WaveformOscillator>(tolerance)),
+  ShaderSettings(shaderId, j, name){
+    parameters = {tolerance};
+    oscillators = {toleranceOscillator};
+    audioReactiveParameter = tolerance;
+    registerParameters();
+  };
 };
 
 struct SobelShader : Shader {
@@ -30,33 +38,36 @@ struct SobelShader : Shader {
   ofShader shader;
   void setup() override {
 #ifdef TESTING
-shader.load("shaders/Sobel");
+    shader.load("shaders/Sobel");
 #endif
 #ifdef RELEASE
-shader.load("shaders/Sobel");
-#endif    
+    shader.load("shaders/Sobel");
+#endif
   }
-
+  
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("tolerance", settings->tolerance->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
     shader.end();
     canvas->end();
   }
-
+  
   void clear() override {}
-
-    int inputCount() override {
+  
+  int inputCount() override {
     return 1;
   }
-ShaderType type() override { return ShaderTypeSobel; }
-
+  ShaderType type() override { return ShaderTypeSobel; }
+  
   void drawSettings() override {
-     CommonViews::H3Title("Sobel"); }
+    CommonViews::H3Title("Sobel");
+    CommonViews::ShaderParameter(settings->tolerance, settings->toleranceOscillator);
+  }
 };
 
 #endif /* SobelShader_hpp */

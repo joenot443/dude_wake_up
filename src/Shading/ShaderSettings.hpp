@@ -29,6 +29,9 @@ public:
   std::shared_ptr<Parameter> x;
   std::shared_ptr<Parameter> y;
   
+  // Audio
+  std::shared_ptr<Parameter> audioReactiveParameter;
+  
   ShaderSettings(std::string shaderId, json j, std::string name) :
   Settings(name),
   shaderId(shaderId),

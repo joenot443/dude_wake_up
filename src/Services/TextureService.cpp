@@ -28,17 +28,20 @@ void TextureService::populateTextures()
   // Sort by name
   std::sort(textures.begin(), textures.end(), [](std::shared_ptr<Texture> a, std::shared_ptr<Texture> b)
             { return a->name < b->name; });
-
+  populated = true;
   this->textures = textures;
 }
 
 std::vector<std::shared_ptr<Texture>> TextureService::availableTextures()
 {
+  if (!populated) populateTextures();
   return textures;
 }
 
 std::vector<std::string> TextureService::availableTextureNames()
 {
+  if (!populated) populateTextures();
+
   std::vector<std::string> names;
   for (auto texture : textures)
   {

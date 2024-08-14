@@ -32,7 +32,7 @@ void StageModeView::draw() {
   ImVec2 stageSize = ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y - LayoutStateService::getService()->audioSettingsViewHeight() - ImGuiWindowTitleBarHeight);
   float topY = ImGui::GetCursorPosY();
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10.0, 10.0));
-  ImGui::BeginChild("stage_mode_child", stageSize, true, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar);
+  ImGui::BeginChild("stage_mode_child", stageSize, true, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 //  ImGui::Columns(2, "stage_mode_view", false);
   
   float stageParamHeight = LayoutStateService::getService()->helpEnabled ? stageSize.y / 2.0 : stageSize.y;
@@ -89,6 +89,10 @@ void StageModeView::draw() {
     } else {
       drawOutput(shader);
     }
+  }
+  
+  if (LayoutStateService::getService()->helpEnabled) {
+    HelpService::getService()->drawStageModeActionButtonsHelp();
   }
   
   drawActionButtons();

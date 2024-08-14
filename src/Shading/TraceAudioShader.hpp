@@ -12,6 +12,7 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
+#include "AudioSourceService.hpp"
 #include "ValueOscillator.hpp"
 #include "Parameter.hpp"
 #include "Shader.hpp"

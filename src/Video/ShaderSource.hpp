@@ -5,11 +5,18 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "GlitchAudioShader.hpp"
+#include "ChromeGrillShader.hpp"
+#include "FibersShader.hpp"
+#include "MistShader.hpp"
+#include "WelcomeRingsShader.hpp"
+#include "MotionBlurTextureShader.hpp"
 #include "IsoFractShader.hpp"
 #include "PixelPlayShader.hpp"
 #include "DirtyPlasmaShader.hpp"
 #include "TwistedTripShader.hpp"
 #include "TwistedCubesShader.hpp"
+#include "LayoutStateService.hpp"
 #include "CoreShader.hpp"
 #include "VoronoiColumnsShader.hpp"
 #include "WarpspeedShader.hpp"
@@ -103,6 +110,12 @@ enum ShaderSourceType {
   ShaderSource_TwistedTrip, //source enum,
   ShaderSource_DirtyPlasma, //source enum,
   ShaderSource_IsoFract, //source enum,
+  ShaderSource_MotionBlurTexture, //source enum,
+  ShaderSource_WelcomeRings, //source enum,
+  ShaderSource_Mist, //source enum,
+  ShaderSource_Fibers, //source enum,
+  ShaderSource_ChromeGrill, //source enum,
+  ShaderSource_GlitchAudio, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -134,7 +147,6 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_SolidColor, // Available
   ShaderSource_Vertex, // Available
   ShaderSource_Limbo, // Available
-  ShaderSource_AudioCircle, // Available
   ShaderSource_SmokeRing, // Available
   ShaderSource_DoubleSwirl, // Available
   ShaderSource_SwirlingSoul, // Available
@@ -143,17 +155,34 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_FullHouse, // Available
   ShaderSource_Reflector, // Available
   ShaderSource_Warpspeed, // Available
-  ShaderSource_VoronoiColumns, // Available
   ShaderSource_Core, // Available
   ShaderSource_TwistedCubes, // Available
   ShaderSource_TwistedTrip, // Available
   ShaderSource_DirtyPlasma, // Available
   ShaderSource_IsoFract, // Available
+  ShaderSource_MotionBlurTexture, // Available
+  ShaderSource_WelcomeRings, // Available
+  ShaderSource_Mist, // Available
+  ShaderSource_Fibers, // Available
+  ShaderSource_ChromeGrill, // Available
+  ShaderSource_GlitchAudio, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
 // shaderTypeForShaderSourceType
+  case ShaderSource_GlitchAudio: //type enum
+    return ShaderTypeGlitchAudio;
+  case ShaderSource_ChromeGrill: //type enum
+    return ShaderTypeChromeGrill;
+  case ShaderSource_Fibers: //type enum
+    return ShaderTypeFibers;
+  case ShaderSource_Mist: //type enum
+    return ShaderTypeMist;
+  case ShaderSource_WelcomeRings: //type enum
+    return ShaderTypeWelcomeRings;
+  case ShaderSource_MotionBlurTexture: //type enum
+    return ShaderTypeMotionBlurTexture;
   case ShaderSource_IsoFract: //type enum
     return ShaderTypeIsoFract;
   case ShaderSource_DirtyPlasma: //type enum
@@ -277,9 +306,10 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
   case ShaderSource_Core:
     return "Scenic";
     
+  // Glitchy
     
   // Trippy
-    case ShaderSource_IsoFract:
+  case ShaderSource_IsoFract:
   case ShaderSource_SwirlingSoul: // Name
   case ShaderSource_Hilbert: // Name
   case ShaderSource_Warp: // Name
@@ -297,7 +327,7 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
   case ShaderSource_fractal:
   case ShaderSource_Reflector:
     case ShaderSource_TwistedTrip:
-    return "Trippy";
+    return "Psychedelic";
   default:
     return "Unknown";
   }
@@ -305,6 +335,18 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
 
 static std::string shaderSourceTypeName(ShaderSourceType nameType) {
   switch (nameType) { // ShaderNames
+  case ShaderSource_GlitchAudio: // Name  
+    return "GlitchAudio"; // GlitchAudio
+  case ShaderSource_ChromeGrill: // Name  
+    return "ChromeGrill"; // ChromeGrill
+  case ShaderSource_Fibers: // Name  
+    return "Fibers"; // Fibers
+  case ShaderSource_Mist: // Name  
+    return "Mist"; // Mist
+  case ShaderSource_WelcomeRings: // Name  
+    return "WelcomeRings"; // WelcomeRings
+  case ShaderSource_MotionBlurTexture: // Name  
+    return "MotionBlurTexture"; // MotionBlurTexture
   case ShaderSource_IsoFract: // Name
     return "IsoFract"; // IsoFract
   case ShaderSource_DirtyPlasma: // Name
@@ -415,6 +457,42 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_GlitchAudio: { // Settings
+      auto settings = new GlitchAudioSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<GlitchAudioShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_ChromeGrill: { // Settings
+      auto settings = new ChromeGrillSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<ChromeGrillShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Fibers: { // Settings
+      auto settings = new FibersSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<FibersShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Mist: { // Settings
+      auto settings = new MistSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<MistShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_WelcomeRings: { // Settings
+      auto settings = new WelcomeRingsSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<WelcomeRingsShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_MotionBlurTexture: { // Settings
+      auto settings = new MotionBlurTextureSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<MotionBlurTextureShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_IsoFract: { // Settings
       auto settings = new IsoFractSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<IsoFractShader>(settings);
@@ -687,8 +765,8 @@ public:
 
   void saveFrame() override {
     // If our width or height has changed, setup again
-    if (fbo->getWidth() != settings->width->value ||
-        fbo->getHeight() != settings->height->value) {
+    if (fbo->getWidth() != LayoutStateService::getService()->resolution.x ||
+        fbo->getHeight() != LayoutStateService::getService()->resolution.y) {
       setup();
     }
     

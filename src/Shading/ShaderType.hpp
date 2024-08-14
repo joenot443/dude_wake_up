@@ -111,6 +111,17 @@ enum ShaderType {
   ShaderTypeTraceAudio,
   ShaderTypeSwirl,
   ShaderTypeIsoFract,
+  ShaderTypeOnOff,
+  ShaderTypeMotionBlurTexture,
+  ShaderTypeGlitchDigital,
+  ShaderTypeGlitchRGB,
+  ShaderTypeWelcomeRings,
+  ShaderTypeMist,
+  ShaderTypeFibers,
+  ShaderTypeChromeGrill,
+  ShaderTypeGlitchAudio,
+  ShaderTypeDoubleBlur,
+  ShaderTypeOutline,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -121,7 +132,10 @@ static const ShaderType AvailableBasicShaderTypes[] = {
   ShaderTypeMirror,
   ShaderType16bit,
   ShaderTypePaint,
-  ShaderTypeColorStepper
+  ShaderTypeColorStepper,
+  ShaderTypeDoubleBlur,
+  ShaderTypeOnOff,
+  ShaderTypeOutline
 };
 
 static const ShaderType AvailableMixShaderTypes[] = {
@@ -143,6 +157,14 @@ static const ShaderType AvailableMaskShaderTypes[] = {
   ShaderTypeTextureMask,
   ShaderTypeLumaMaskMaker,
   ShaderTypeColorKeyMaskMaker
+};
+
+static const ShaderType AvailableGlitchShaderTypes[] = {
+  ShaderTypeGlitch,
+  ShaderTypeGlitchRGB,
+  ShaderTypePixelPlay,
+  ShaderTypeGlitchDigital,
+  ShaderTypeGlitchAudio
 };
 
 static const ShaderType AvailableTransformShaderTypes[] = {
@@ -178,7 +200,6 @@ static const ShaderType AvailableFilterShaderTypes[] = {
   ShaderTypeVHS,
   ShaderTypeOldTV,
   ShaderTypeOneBitDither,
-  ShaderTypePixelPlay,
   ShaderTypeTraceAudio,
 };
 
@@ -210,6 +231,28 @@ static std::vector<ShaderType> AllShaderTypes() {
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) { // ShaderNames
+    case ShaderTypeOutline:
+      return "Outline";
+    case ShaderTypeDoubleBlur:
+      return "DoubleBlur";
+    case ShaderTypeGlitchAudio:
+      return "GlitchAudio";
+    case ShaderTypeChromeGrill:
+      return "ChromeGrill";
+    case ShaderTypeFibers:
+      return "Fibers";
+    case ShaderTypeMist:
+      return "Mist";
+    case ShaderTypeWelcomeRings:
+      return "WelcomeRings";
+    case ShaderTypeGlitchRGB:
+      return "GlitchRGB";
+    case ShaderTypeGlitchDigital:
+      return "GlitchDigital";
+    case ShaderTypeMotionBlurTexture:
+      return "MotionBlurTexture";
+    case ShaderTypeOnOff:
+      return "OnOff";
     case ShaderTypeIsoFract:
       return "IsoFract";
     case ShaderTypeSwirl:

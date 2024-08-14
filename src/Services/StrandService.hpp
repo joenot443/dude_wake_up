@@ -40,6 +40,8 @@ public:
     return service;
   }
 
+  bool running = false;
+  
   void setup();
   
   void populate();

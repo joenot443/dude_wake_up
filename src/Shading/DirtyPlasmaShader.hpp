@@ -22,10 +22,14 @@
 struct DirtyPlasmaSettings: public ShaderSettings {
   std::shared_ptr<Parameter> texture;
   std::vector<std::string> textureOptions;
-
+  
+  // Speed Parameter
+  std::shared_ptr<Parameter> speed;
+  std::shared_ptr<WaveformOscillator> speedOscillator;
   
   DirtyPlasmaSettings(std::string shaderId, json j) :
   texture(std::make_shared<Parameter>("texture", 0.0, 0.0, 1000.0)),
+  speed(std::make_shared<Parameter>("speed", 1.0, 0.0, 2.0)),
   ShaderSettings(shaderId, j, "DirtyPlasma") {
     parameters = { texture };
     oscillators = { };
@@ -53,6 +57,7 @@ struct DirtyPlasmaShader: Shader {
       shader.setUniformTexture("tex", texture->fbo.getTexture(), 4);
     }
     shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("speed", settings->speed->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
     shader.end();
@@ -81,6 +86,7 @@ struct DirtyPlasmaShader: Shader {
         texture = nullptr;
       }
     }
+    CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
   }
 };
 

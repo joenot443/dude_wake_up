@@ -133,7 +133,12 @@ void MidiService::driveParameter(std::string paramId, ofxMidiMessage &msg) {
     log("Failed to get Parameter for MIDI message %s");
     return;
   }
-  param->driveValue(msg.value / 127.0);
+  if (param->type == ParameterType_Bool) {
+    param->toggleValue();
+  } else {
+    param->driveValue(msg.value / 127.0);
+  }
+  
 }
 
 std::string MidiService::descriptorFrom(ofxMidiMessage &msg) {

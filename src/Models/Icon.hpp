@@ -23,15 +23,7 @@ struct Icon
     setup();
   }
 
-  void setup()
-  {
-    ofImage img;
-    img.load(previewPath);
-    fbo.allocate(100, 100, GL_RGBA);
-    fbo.begin();
-    img.draw(0, 0, 100, 100);
-    fbo.end();
-  }
+  void setup();
 };
 
 #endif /* Icon_h */

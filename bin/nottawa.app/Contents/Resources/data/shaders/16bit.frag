@@ -2,6 +2,7 @@
 
 uniform sampler2D tex;
 uniform vec2 dimensions;
+uniform float pixelFactor;
 uniform float time;
 in vec2 coord;
 out vec4 outputColor;
@@ -18,10 +19,10 @@ const mat4 ditherTable = mat4(
 );
 
 
-void main(  )
+void main()
 {
     // Reduce pixels
-    vec2 size = PIXEL_FACTOR * dimensions.xy/dimensions.x;
+    vec2 size = pixelFactor * dimensions.xy/dimensions.x;
     vec2 coor = floor( coord/dimensions.xy * size) ;
     vec2 uv = coor / size;
                 

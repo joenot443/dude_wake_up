@@ -8,6 +8,7 @@
 #include "FileSource.hpp"
 #include "NodeLayoutView.hpp"
 #include "Fonts.hpp"
+#include "CommonViews.hpp"
 #include "LayoutStateService.hpp"
 
 void FileSource::setup()
@@ -18,7 +19,6 @@ void FileSource::setup()
   player.setPosition(start);
   player.play();
   player.setVolume(0.5);
-  player.setSpeed(1.0);
   player.setLoopState(OF_LOOP_NORMAL);
 //	updateSettings();
   fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
@@ -35,6 +35,15 @@ void FileSource::updateSettings()
 
 void FileSource::saveFrame()
 {
+  // If our width or height has changed, setup again
+  if (fbo->getWidth() != LayoutStateService::getService()->resolution.x ||
+      fbo->getHeight() != LayoutStateService::getService()->resolution.y) {
+    setup();
+  }
+  
+  if (player.getSpeed() != speed->value) {
+    player.setSpeed(speed->value);
+  }
   player.setLoopState(boomerang->boolValue ? OF_LOOP_PALINDROME : OF_LOOP_NORMAL);
   player.update();
   updatePlaybackPosition();
@@ -146,6 +155,7 @@ void FileSource::drawSettings()
   }
   
   CommonViews::ShaderCheckbox(boomerang);
+  CommonViews::ShaderParameter(speed, nullptr);
   drawMaskSettings();
 }
 
@@ -163,7 +173,7 @@ void FileSource::updatePlaybackPosition()
     return;
   }
   
-  if (player.getPosition() < start ) {
+  if (player.getPosition() < start) {
     player.setSpeed(1.0);
     player.setPosition(start);
     position = start;

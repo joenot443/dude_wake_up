@@ -9,22 +9,26 @@
 #define VideoRecorder_hpp
 
 #include <stdio.h>
-#include "ShaderChainerService.hpp"
-//#include "ofxVideoRecorder.h"
+#include "ofxVideoRecorder.h"
+
+struct VideoRecordingSettings {
+  std::string filePath;
+  int outputWindow = 0;
+  VideoRecordingSettings();
+};
 
 struct VideoRecorder
 {
 public:
-  void setup(std::shared_ptr<ShaderChainer> target);
+  void setup();
   void startRecording();
   void stopRecording();
   void save();
   
   bool isRecording();
 
-  std::shared_ptr<ShaderChainer> shaderChainer;
   
-//  ofxVideoRecorder recorder;
+  ofxVideoRecorder recorder;
 };
 
 #endif /* VideoRecorder_hpp */

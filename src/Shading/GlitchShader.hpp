@@ -27,6 +27,7 @@ struct GlitchSettings: public ShaderSettings {
   ShaderSettings(shaderId, j, name) {
     parameters = {amount};
     oscillators = {amountOscillator};
+    audioReactiveParameter = amount;
   };
 };
 

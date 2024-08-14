@@ -7,6 +7,17 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "OutlineShader.hpp"
+#include "DoubleBlurShader.hpp"
+#include "GlitchAudioShader.hpp"
+#include "ChromeGrillShader.hpp"
+#include "FibersShader.hpp"
+#include "MistShader.hpp"
+#include "WelcomeRingsShader.hpp"
+#include "GlitchRGBShader.hpp"
+#include "GlitchDigitalShader.hpp"
+#include "MotionBlurTextureShader.hpp"
+#include "OnOffShader.hpp"
 #include "IsoFractShader.hpp"
 #include "SwirlShader.hpp"
 #include "TraceAudioShader.hpp"
@@ -158,6 +169,15 @@ void ShaderChainerService::setup()
     allAvailableShaders.push_back(shader);
   }
   
+  for (auto const shaderType : AvailableGlitchShaderTypes)
+  {
+    auto shader = std::make_shared<AvailableShader>(shaderType,
+                                                    shaderTypeName(shaderType));
+    availableGlitchShaders.push_back(shader);
+    availableShadersMap[shaderType] = shader;
+    allAvailableShaders.push_back(shader);
+  }
+  
   for (auto const shaderType : { ShaderTypeMix, ShaderTypeBlend, ShaderTypeTransform, ShaderTypeRotate, ShaderTypeMirror, ShaderTypeHSB }) {
     auto availableShader = availableShadersMap[shaderType];
     availableDefaultFavoriteShaders.push_back(availableShader);
@@ -185,12 +205,21 @@ void ShaderChainerService::processFrame()
 {
   // Collect the `Connections` from connectionMap with a type of ConnectionTypeSource
   std::vector<std::shared_ptr<Connection>> sourceConnections;
+  std::vector<std::string> toErase = {};
   for (auto &connectionPair : connectionMap)
   {
+    if (connectionPair.second == nullptr) {
+      toErase.push_back(connectionPair.first);
+      continue;
+    }
     if (connectionPair.second->type == ConnectionTypeSource)
     {
       sourceConnections.push_back(connectionPair.second);
     }
+  }
+  
+  for (auto id : toErase) {
+    connectionMap.erase(id);
   }
   
   std::pair<int, std::shared_ptr<Shader>> maxPair = std::pair<int, std::shared_ptr<Shader>>(-1, nullptr);
@@ -202,6 +231,10 @@ void ShaderChainerService::processFrame()
     
     std::shared_ptr<VideoSource> videoSource = std::dynamic_pointer_cast<VideoSource>(connection->start);
     std::shared_ptr<Shader> shader = std::dynamic_pointer_cast<Shader>(connection->end);
+    
+    // No need to traverse if the video's not active
+    if (!videoSource->active) continue;
+    
     shader->traverseFrame(videoSource->frame(), 0);
   }
 }
@@ -270,7 +303,10 @@ json ShaderChainerService::config()
   
   for (auto const &[key, val] : shadersMap)
   {
-    j[val->shaderId] = val->serialize();
+    json res = val->serialize();
+    if (res.is_object()) {
+      j[val->shaderId] = res;
+    }
   }
   
   return j;
@@ -299,9 +335,6 @@ void ShaderChainerService::clear()
   shadersMap.clear();
   connectionMap.clear();
   selectedConnectable = nullptr;
-  // Clear the shaderChainerMap
-  shaderIdShaderChainerMap.clear();
-  videoSourceIdShaderChainerMap.clear();
 }
 
 void ShaderChainerService::loadConfig(json data)
@@ -471,7 +504,35 @@ void ShaderChainerService::removeConnectable(std::shared_ptr<Connectable> connec
   {
     connectionMap.erase(connId);
   }
+  
   ConfigService::getService()->saveDefaultConfigFile();
+}
+
+void ShaderChainerService::insert(std::shared_ptr<Connectable> start, std::shared_ptr<Connectable> connectable, OutputSlot slot) {
+  // Check if the current Connectable has an output at the specified slot
+  if (!start->hasOutputAtSlot(slot))
+  {
+      throw std::invalid_argument("No existing connection at the specified slot to insert into.");
+  }
+
+  // Get the original connection at the specified slot
+  auto originalConnection = start->outputs.at(slot);
+  auto originalEnd = originalConnection->end;
+
+  // Remove the original connection from the current Connectable's outputs
+  start->outputs.erase(slot);
+  connectionMap.erase(originalConnection->id);
+
+  // Create a new connection from the current Connectable to the new Connectable
+  auto newConnection = makeConnection(start, connectable, start->connectableType() == ConnectableTypeShader ? ConnectionTypeShader : ConnectionTypeSource, OutputSlotMain, InputSlotMain);
+  
+  start->outputs[slot] = newConnection;
+  connectable->inputs[InputSlotMain] = newConnection;
+  
+  // Create a new connection from the new Connectable to the original end Connectable
+  auto continuationConnection = std::make_shared<Connection>(connectable, originalEnd, originalConnection->type, OutputSlotMain, originalConnection->inputSlot);
+  connectable->outputs[OutputSlotMain] = continuationConnection;
+  originalEnd->inputs[originalConnection->inputSlot] = continuationConnection;
 }
 
 void ShaderChainerService::copyConnections(std::shared_ptr<Connectable> source, std::shared_ptr<Connectable> dest) {
@@ -570,6 +631,7 @@ void ShaderChainerService::breakConnectionForConnectionId(std::string connection
     return;
   }
   connection->start->removeConnection(connection);
+  connection->end->removeConnection(connection);
   connectionMap.erase(connectionId);
   ConfigService::getService()->saveDefaultConfigFile();
 }
@@ -627,6 +689,72 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeOutline: {
+      auto settings = new OutlineSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<OutlineShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeDoubleBlur: {
+      auto settings = new DoubleBlurSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<DoubleBlurShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeGlitchAudio: {
+      auto settings = new GlitchAudioSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<GlitchAudioShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeChromeGrill: {
+      auto settings = new ChromeGrillSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<ChromeGrillShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeFibers: {
+      auto settings = new FibersSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<FibersShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeMist: {
+      auto settings = new MistSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<MistShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeWelcomeRings: {
+      auto settings = new WelcomeRingsSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<WelcomeRingsShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeGlitchRGB: {
+      auto settings = new GlitchRGBSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<GlitchRGBShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeGlitchDigital: {
+      auto settings = new GlitchDigitalSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<GlitchDigitalShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeMotionBlurTexture: {
+      auto settings = new MotionBlurTextureSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<MotionBlurTextureShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeOnOff: {
+      auto settings = new OnOffSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<OnOffShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeIsoFract: {
       auto settings = new IsoFractSettings(shaderId, shaderJson);
       auto shader = std::make_shared<IsoFractShader>(settings);

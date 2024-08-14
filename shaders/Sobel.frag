@@ -3,6 +3,7 @@
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
+uniform float tolerance;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -12,8 +13,8 @@ void main() {
 
   /*** Sobel kernels ***/
   // Note: GLSL's mat3 is COLUMN-major ->  mat3[col][row]
-  mat3 sobelX = mat3(-1.0, -2.0, -1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 1.0);
-  mat3 sobelY = mat3(-1.0, 0.0, 1.0, -2.0, 0.0, 2.0, -1.0, 0.0, 1.0);
+  mat3 sobelX = mat3(-1.0, -2.0, -1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 1.0) * tolerance;
+  mat3 sobelY = mat3(-1.0, 0.0, 1.0, -2.0, 0.0, 2.0, -1.0, 0.0, 1.0) * tolerance;
 
   float sumX = 0.0; // x-axis change
   float sumY = 0.0; // y-axis change

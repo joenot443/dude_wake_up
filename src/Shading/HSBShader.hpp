@@ -40,7 +40,8 @@ struct HSBSettings: public ShaderSettings {
     parameters = {hue, saturation, brightness};
     oscillators = {hueOscillator, saturationOscillator, brightnessOscillator};
     load(j);
-  registerParameters();
+  	registerParameters();
+    audioReactiveParameter = hue;
   }
 };
 

@@ -1,18 +1,18 @@
+////
+////  UploadChainerView.h
+////  dude_wake_up
+////
+////  Created by Joe Crozier on 3/20/23.
+////
 //
-//  UploadChainerView.h
-//  dude_wake_up
+//#ifndef UploadChainerView_h
+//#define UploadChainerView_h
 //
-//  Created by Joe Crozier on 3/20/23.
+//#include <stdio.h>
+//#include "ShaderChainer.hpp"
 //
-
-#ifndef UploadChainerView_h
-#define UploadChainerView_h
-
-#include <stdio.h>
-#include "ShaderChainer.hpp"
-
-struct UploadChainerView {
-  static void draw(std::shared_ptr<ShaderChainer> shaderChainer);
-};
-
-#endif /* UploadChainerView_h */
+//struct UploadChainerView {
+//  static void draw(std::shared_ptr<ShaderChainer> shaderChainer);
+//};
+//
+//#endif /* UploadChainerView_h */

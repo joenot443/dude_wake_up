@@ -77,7 +77,9 @@ int FeedbackShader::frameIndex()
 ofTexture FeedbackShader::feedbackTexture()
 {
   // Return typical feedback frame if auxillary isn't connected
-  if (!hasOutputAtSlot(OutputSlotAux)) return feedbackSource->getFrame(frameIndex());
+  if (!hasOutputAtSlot(OutputSlotAux)) {
+    return feedbackSource->getFrame(frameIndex());
+  }
   
   // First shader in the feedback aux chain
   std::shared_ptr<Shader> auxShader = std::dynamic_pointer_cast<Shader>(outputAtSlot(OutputSlotAux));
@@ -91,10 +93,19 @@ ofTexture FeedbackShader::feedbackTexture()
   return terminalAuxShader->lastFrame->getTexture();
 }
 
+void FeedbackShader::clearFrameIfNeeded() {
+  if (settings->shouldClearFeedbackBuffer->boolValue) {
+    clearFrameBuffer();
+    settings->shouldClearFeedbackBuffer->toggleValue();
+  }
+}
+
 void FeedbackShader::shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas)
 {
   // Set the textures
   populateSource();
+  
+  clearFrameIfNeeded();
   // Shade the auxillary connection, if available.
   ofTexture fbTex = feedbackTexture();
   
@@ -184,10 +195,7 @@ void FeedbackShader::drawSettings()
   ImGui::SameLine();
   CommonViews::HSpacing(3);
   
-  if (ImGui::Button(formatString("Clear Feedback Buffer##%s", settings->shaderId.c_str()).c_str()))
-  {
-    clearFrameBuffer();
-  }
+  CommonViews::ShaderCheckbox(settings->shouldClearFeedbackBuffer);
   // Delay Amount
   CommonViews::ShaderParameter(settings->delayAmount,
                                settings->delayAmountOscillator);

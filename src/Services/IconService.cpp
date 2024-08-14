@@ -10,6 +10,7 @@
 
 void IconService::setup()
 {
+  solidColorShader->load("shaders/SolidColor");
   populateIcons();
 }
 

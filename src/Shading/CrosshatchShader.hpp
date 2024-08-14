@@ -17,16 +17,25 @@
 #include <stdio.h>
 
 struct CrosshatchSettings: public ShaderSettings {
+  std::shared_ptr<Parameter> mix;
+  std::shared_ptr<Oscillator> mixOscillator;
+  
 	public:
   CrosshatchSettings(std::string shaderId, json j, std::string name) :
+  mix(std::make_shared<Parameter>("Amount", 1.0, 0.0, 10.0)),
+  mixOscillator(std::make_shared<WaveformOscillator>(mix)),
   ShaderSettings(shaderId, j, name) {
-    
+    parameters = { mix };
+    oscillators = { mixOscillator };
+    audioReactiveParameter = mix;
+    registerParameters();
   };
 };
 
 struct CrosshatchShader: Shader {
   CrosshatchSettings *settings;
-  CrosshatchShader(CrosshatchSettings *settings) : settings(settings), Shader(settings) {};
+  CrosshatchShader(CrosshatchSettings *settings) : settings(settings), Shader(settings) {
+  };
   ofShader shader;
   void setup() override {
     #ifdef TESTING
@@ -44,6 +53,7 @@ shader.load("shaders/Crosshatch");
     ofClear(0,0,0,0);
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("amount", settings->mix->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
     shader.end();
@@ -64,7 +74,7 @@ ShaderType type() override {
   void drawSettings() override {
     
     CommonViews::H3Title("Crosshatch");
-
+    CommonViews::ShaderParameter(settings->mix, settings->mixOscillator);
   }
 };
 

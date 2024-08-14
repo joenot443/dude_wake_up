@@ -4,6 +4,7 @@ uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
 uniform float speed;
+uniform float scale;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -230,7 +231,7 @@ vec3 simplexContour(vec2 p){
     
     
     // Scaling constant.
-    const float gSc = 8.;
+    float gSc = 8. * scale;
     p *= gSc;
     
     
@@ -604,6 +605,4 @@ void main(  )
     
     // Rough gamma correction.
     outputColor = vec4(sqrt(max(col, 0.)), 1);
-    
-    
 }

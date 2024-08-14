@@ -53,8 +53,9 @@ struct TextureMaskShader: Shader {
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
+    shader.setUniformTexture("tex", frame->getTexture(), 4);
     if (texture != nullptr) {
-      shader.setUniformTexture("tex", texture->fbo.getTexture(), 4);
+      shader.setUniformTexture("tex2", texture->fbo.getTexture(), 4);
     }
     shader.setUniformTexture("maskTex", frame->getTexture(), 12);
     shader.setUniform1f("time", ofGetElapsedTimef());

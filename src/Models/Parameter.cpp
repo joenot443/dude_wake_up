@@ -12,6 +12,22 @@
 #include <memory>
 #include "UUID.hpp"
 
+Parameter::Parameter(std::string name, ParameterType type) :
+name(name),
+defaultValue(0.0),
+type(type),
+value(0.0),
+min(0.0),
+max(1.0),
+intValue(0),
+boolValue(false),
+driver(NULL),
+shift(NULL),
+scale(NULL) {
+  paramId = UUID::generateParamId(name);
+};
+
+
 Parameter::Parameter(std::string name, float value, ParameterType type) :
 name(name),
 defaultValue(value),
@@ -50,7 +66,7 @@ scale(NULL) {
 
 void Parameter::tick() {
   if (driver != nullptr && paramId.length() > 5) {
-    setValue(driver->value * scale->value + shift->value);
+    scaleAudioValue(driver->value);
   }
 }
 

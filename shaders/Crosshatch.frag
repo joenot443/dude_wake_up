@@ -21,6 +21,7 @@ uniform sampler2D tex;
 uniform sampler2D rand;
 uniform float time;
 uniform vec2 dimensions;
+uniform float amount;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -114,7 +115,7 @@ void main(  )
       vec4 rh = pow(getRand(uvh+1003.123*time*FLICKER+vec2(sin(uvh.y),0)),vec4(1.));
       hatch += 1.-smoothstep(.5,1.5,(rh.x)+br)-.3*abs(r.z);
       hatch2 = max(hatch2, 1.-smoothstep(.5,1.5,(rh.x)+br)-.3*abs(r.z));
-      sum+=1.;
+      sum+=1.*amount;
       if( float(i)>(1.-br)*float(hnum) && i>=2 ) break;
     }
     

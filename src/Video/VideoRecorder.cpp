@@ -6,16 +6,16 @@
 //
 
 #include "VideoRecorder.hpp"
+#include "ConfigService.hpp"
 
+void VideoRecorder::setup() {
+  recorder.setVideoCodec("mpeg4");
 
-
-void VideoRecorder::setup(std::shared_ptr<ShaderChainer> target) {
-  shaderChainer = target;
-//  recorder.setVideoCodec("mpeg4");
+  recorder.setFfmpegLocation(ofFilePath::getAbsolutePath("ffmpeg"));
 }
 
 void VideoRecorder::startRecording() {
-  
+//  recorder.setup(<#string fname#>, <#int w#>, <#int h#>, <#float fps#>)
 }
 
 void VideoRecorder::stopRecording() {
@@ -26,3 +26,6 @@ void VideoRecorder::stopRecording() {
 bool VideoRecorder::isRecording() {
     
 }
+
+VideoRecordingSettings::VideoRecordingSettings() : filePath(ConfigService::getService()->libraryFolderFilePath() + "output.mp4") {};
+		

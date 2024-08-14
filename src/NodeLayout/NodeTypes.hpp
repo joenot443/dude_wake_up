@@ -10,6 +10,8 @@
 
 #include "Shader.hpp"
 #include "Connection.hpp"
+#include "ShaderConfigSelectionView.hpp"
+#include "CommonViews.hpp"
 #include "Colors.hpp"
 #include "ShaderChainerService.hpp"
 #include "VideoSource.hpp"

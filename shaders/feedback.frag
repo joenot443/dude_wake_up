@@ -42,7 +42,7 @@ vec4 blend(vec4 a, vec4 b, int mode) {
 
     // Empty main
     if (a.a < 0.05) {
-      return vec4(b.rgb, max(b.a - 0.4 * (1.0 - fbAlpha), 0.0));
+      return vec4(b.rgb, fbAlpha * 0.95);
     }
     
     // Empty feedback

@@ -13,7 +13,6 @@
 #include "Strand.hpp"
 #include "Shader.hpp"
 #include "AvailableStrand.hpp"
-#include "ShaderChainer.hpp"
 #include "Connection.hpp"
 #include "observable.hpp"
 #include <stdio.h>
@@ -31,13 +30,7 @@ private:
   // Maps a connectionId to a Connection
   std::map<std::string, std::shared_ptr<Connection>> connectionMap;
 
-  // Maps a Shader to its parent ShaderChainer
-  std::map<std::string, std::shared_ptr<ShaderChainer>>
-      shaderIdShaderChainerMap;
 
-  // Maps a VideoSource to a vector of ShaderChainers associated with that VideoSource
-  std::map<std::string, std::vector<std::shared_ptr<ShaderChainer>>>
-      videoSourceIdShaderChainerMap;
 
   observable::subject<void()> shaderChainerUpdateSubject;
 
@@ -98,6 +91,8 @@ public:
   // Break the connection from a Shader to the Input of another
   void breakConnectionForConnectionId(std::string connectionId);
   
+  void insert(std::shared_ptr<Connectable> start, std::shared_ptr<Connectable> connectable, OutputSlot slot);
+
   
   std::shared_ptr<Connection>
   makeConnection(std::shared_ptr<Connectable> start,
@@ -130,6 +125,7 @@ public:
   std::vector<std::shared_ptr<AvailableShader>> availableFilterShaders;
   std::vector<std::shared_ptr<AvailableShader>> availableMaskShaders;
   std::vector<std::shared_ptr<AvailableShader>> availableDefaultFavoriteShaders;
+  std::vector<std::shared_ptr<AvailableShader>> availableGlitchShaders;
   std::vector<std::shared_ptr<AvailableShader>> availableFavoriteShaders();
   std::map<ShaderType, std::shared_ptr<AvailableShader>> availableShadersMap;
 

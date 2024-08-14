@@ -9,6 +9,7 @@
 #define AudioSourceService_hpp
 
 #include "AudioSource.hpp"
+#include "MSABPMTapper.h"
 #include "ConfigurableService.hpp"
 #include "Parameter.hpp"
 #include "Link.hpp"
@@ -39,6 +40,8 @@ public:
   
   void update();
 
+  msa::BPMTapper tapper;
+  
   std::vector<std::shared_ptr<AudioSource>> audioSources();
   std::shared_ptr<AudioSource> audioSourceForId(std::string id);
   std::shared_ptr<AudioSource> audioSourceForParamId(std::string paramId);

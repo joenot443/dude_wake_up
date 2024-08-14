@@ -27,7 +27,6 @@ struct AudioSource {
   Gist<float> gist = Gist<float>(512, 44100);
   
   json serialize() { return 0; };
-  bool enabled = false;
   
   void load(json j){};
   

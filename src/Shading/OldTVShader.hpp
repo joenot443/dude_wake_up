@@ -18,15 +18,10 @@
 #include <stdio.h>
 
 struct OldTVSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<ValueOscillator> shaderValueOscillator;
-
   OldTVSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 1.0  , -1.0, 2.0)),
-  shaderValueOscillator(std::make_shared<ValueOscillator>(shaderValue)),
   ShaderSettings(shaderId, j, "OldTV") {
-    parameters = { shaderValue };
-    oscillators = { shaderValueOscillator };
+    parameters = { };
+    oscillators = { };
     load(j);
     registerParameters();
   };
@@ -44,7 +39,6 @@ struct OldTVShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("color", settings->shaderValue->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
@@ -66,8 +60,6 @@ struct OldTVShader: Shader {
 
   void drawSettings() override {
     CommonViews::H3Title("OldTV");
-
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
   }
 };
 

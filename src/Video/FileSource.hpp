@@ -15,22 +15,24 @@ class FileSource : public VideoSource
 {
 public:
   FileSource(std::string id, std::string name, std::string path)
-      : VideoSource(id, name, VideoSource_file),
-        path(path),
-        volume(std::make_shared<Parameter>("Volume", 0.5, 0.0, 1.0)),
-        sliderPosition(std::make_shared<Parameter>("Position", 0.0, 0.0, 1.0)),
-        mute(std::make_shared<Parameter>("Mute", 0.0, 0.0, 1.0)),
-        boomerang(std::make_shared<Parameter>("Boomerang", ParameterType_Bool)),
-        position(0.0),
-        start(0.0),
-        end(1.0){};
-
+  : VideoSource(id, name, VideoSource_file),
+  path(path),
+  volume(std::make_shared<Parameter>("Volume", 0.5, 0.0, 1.0)),
+  sliderPosition(std::make_shared<Parameter>("Position", 0.0, 0.0, 1.0)),
+  mute(std::make_shared<Parameter>("Mute", 0.0, 0.0, 1.0)),
+  speed(std::make_shared<Parameter>("Speed", 1.0, 0.0, 2.0)),
+  boomerang(std::make_shared<Parameter>("Boomerang", ParameterType_Bool)),
+  position(0.0),
+  start(0.0),
+  end(1.0){};
+  
   std::string path;
   ofVideoPlayer player;
   ofShader maskShader;
   std::shared_ptr<Parameter> volume;
   std::shared_ptr<Parameter> sliderPosition;
   std::shared_ptr<Parameter> boomerang;
+  std::shared_ptr<Parameter> speed;
   std::shared_ptr<Parameter> mute;
   void setup() override;
   void updateSettings();

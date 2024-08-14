@@ -31,6 +31,7 @@ public:
   TileBrowserView defaultFavoritesTileBrowserView = TileBrowserView({});
   TileBrowserView favoritesTileBrowserView = TileBrowserView({});
   TileBrowserView filterTileBrowserView = TileBrowserView({});
+  TileBrowserView glitchTileBrowserView = TileBrowserView({});
   TileBrowserView mixTileBrowserView = TileBrowserView({});
   TileBrowserView basicTileBrowserView = TileBrowserView({});
   TileBrowserView transformTileBrowserView = TileBrowserView({});

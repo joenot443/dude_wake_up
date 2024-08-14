@@ -17,7 +17,7 @@ json ShaderSource::serialize()
   j["shaderSourceType"] = shaderSourceType;
   j["id"] = id;
   auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);
-  if (node)
+  if (node != nullptr)
   {
     j["x"] = node->position.x;
     j["y"] = node->position.y;

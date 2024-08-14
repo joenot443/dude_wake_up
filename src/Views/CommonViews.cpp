@@ -23,7 +23,6 @@
 #include "ofMain.h"
 #include "OscillatorView.hpp"
 #include "Strings.hpp"
-#include "TextureBrowserView.hpp"
 #include "imgui.h"
 #include <imgui_node_editor.h>
 #include <imgui_node_editor_internal.h>
@@ -152,8 +151,6 @@ void CommonViews::AudioParameterSelector(std::shared_ptr<Parameter> param)
       }
     }
     ImGui::EndPopup();
-    
-    
   }
 }
 
@@ -193,6 +190,10 @@ bool CommonViews::ShaderCheckbox(std::shared_ptr<Parameter> param, bool sameLine
     ret = true;
     param->setValue(static_cast<float>(param->boolValue));
   }
+  ImGui::SameLine();
+  CommonViews::MidiSelector(param);
+  ImGui::SameLine();
+  CommonViews::FavoriteButton(param);
   if (!sameLine) sSpacing();
   return ret;
 }
@@ -278,6 +279,11 @@ void CommonViews::ColorShaderStageParameter(std::shared_ptr<Parameter> param) {
   H4Title(param->ownerName);
   //  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetContentRegionAvail().y / 2.0);
   ImGui::ColorEdit4(idString(param->paramId).c_str(), param->color->data());
+  // BUTTONS
+  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetContentRegionAvail().y - 25);
+  ResetButton(param->paramId, param);
+  ImGui::SameLine();
+  FavoriteButton(param);
 }
 
 void CommonViews::CheckboxShaderStageParameter(std::shared_ptr<Parameter> param) {
@@ -285,6 +291,11 @@ void CommonViews::CheckboxShaderStageParameter(std::shared_ptr<Parameter> param)
   H4Title(param->ownerName);
   ImGui::SetCursorPos(ImVec2(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x / 2.0, ImGui::GetCursorPosY() + ImGui::GetContentRegionAvail().y / 2.0));
   CommonViews::ShaderCheckbox(param);
+  // BUTTONS
+  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetContentRegionAvail().y - 25);
+  ResetButton(param->paramId, param);
+  ImGui::SameLine();
+  FavoriteButton(param);
 }
 
 void CommonViews::IntShaderStageParameter(std::shared_ptr<Parameter> param) {
@@ -330,6 +341,8 @@ void CommonViews::IntShaderStageParameter(std::shared_ptr<Parameter> param) {
   // BUTTONS
   ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetContentRegionAvail().y - 25);
   ResetButton(param->paramId, param);
+  ImGui::SameLine();
+  FavoriteButton(param);
   return ret;
 }
 
@@ -343,6 +356,22 @@ void CommonViews::ShaderStageParameter(std::shared_ptr<Parameter> param, std::sh
   bool ret = ImGui::VSliderFloat(idString(param->paramId).c_str(), ImVec2(20, ImGui::GetContentRegionAvail().y - 10), &param->value, param->min, param->max, "");
   if (ret) {
     param->affirmValue();
+  }
+  ImGui::SetItemUsingMouseWheel();
+  if (ImGui::IsItemHovered()) {
+    
+    float wheel = ImGui::GetIO().MouseWheel;
+    if (wheel)
+    {
+      if(ImGui::IsItemActive())
+      {
+        ImGui::ClearActiveID();
+      }
+      else
+      {
+        param->value += wheel * 0.3;
+      }
+    }
   }
   ImGui::PopStyleColor();
   ImGui::SameLine();
@@ -379,6 +408,8 @@ void CommonViews::ShaderStageParameter(std::shared_ptr<Parameter> param, std::sh
   ResetButton(param->paramId, param);
   ImGui::SameLine();
   OscillateButton(param->paramId, osc, param);
+  ImGui::SameLine();
+  FavoriteButton(param);
   ImGui::Columns(1, formatString("%s_param_columns", param->paramId.c_str()).c_str());
   return ret;
 }
@@ -709,7 +740,8 @@ bool CommonViews::ShaderOption(std::shared_ptr<Parameter> param, std::vector<std
   
   int currentItem = static_cast<int>(param->value); // Assuming param->value holds the index of the current selected option
   if (ImGui::Combo(param->name.c_str(), &currentItem, items.data(), items.size())) {
-    param->setValue(static_cast<float>(currentItem));
+    param->intValue = currentItem;
+    param->affirmIntValue();
     return true;
   }
   return false;

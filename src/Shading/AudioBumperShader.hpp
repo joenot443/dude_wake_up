@@ -18,16 +18,26 @@
 #include <stdio.h>
 
 struct AudioBumperSettings : public ShaderSettings {
-	public:
+  std::shared_ptr<Parameter> minColor;
+  std::shared_ptr<Parameter> maxColor;
+  
+public:
   AudioBumperSettings(std::string shaderId, json j, std::string name)
-  : ShaderSettings(shaderId, j, name){
-    
+  :
+  minColor(std::make_shared<Parameter>("Minimum Color", ParameterType_Color)),
+  maxColor(std::make_shared<Parameter>("Maximum Color", ParameterType_Color)),
+  ShaderSettings(shaderId, j, name){
+    minColor->color = std::make_shared<std::array<float, 4>>(std::array<float, 4>({1.0f, 0.5f, 1.0f, 1.0f}));
+    maxColor->color = std::make_shared<std::array<float, 4>>(std::array<float, 4>({0.5f, 1.0f, 1.0f, 1.0f}));
+    parameters = { minColor, maxColor };
+    registerParameters();
+    load(j);
   };
 };
 
 class AudioBumperShader : public Shader {
 public:
-
+  
   AudioBumperSettings *settings;
   AudioBumperShader(AudioBumperSettings *settings)
   : settings(settings), Shader(settings){};
@@ -50,6 +60,8 @@ public:
     if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() > 0)
       shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0],
                            256);
+    shader.setUniform3f("minColor", settings->minColor->color->data()[0], settings->minColor->color->data()[1], settings->minColor->color->data()[2]);
+    shader.setUniform3f("maxColor", settings->maxColor->color->data()[0], settings->maxColor->color->data()[1], settings->maxColor->color->data()[2]);
     // Flip the frame vertically
     ofPushMatrix();
     ofTranslate(0, frame->getHeight());
@@ -62,13 +74,15 @@ public:
   
   void clear() override {}
   
-    int inputCount() override {
+  int inputCount() override {
     return 1;
   }
-ShaderType type() override { return ShaderTypeAudioBumper; }
+  ShaderType type() override { return ShaderTypeAudioBumper; }
   
   void drawSettings() override {
     CommonViews::H3Title("AudioBumper");
+    CommonViews::ShaderColor(settings->minColor);
+    CommonViews::ShaderColor(settings->maxColor);
   }
 };
 

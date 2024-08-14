@@ -15,7 +15,7 @@
 #include "Fonts.hpp"
 #include "CommonViews.hpp"
 
-static const ImVec2 TileSize = ImVec2(90, 55);
+static const ImVec2 TileSize = ImVec2(88, 55);
 
 void TileBrowserView::setup(){};
 

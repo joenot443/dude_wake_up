@@ -22,14 +22,13 @@ void main()
   
   // Mirror if enabled
   if (mirrorXEnabled == 1) {
-    col.x = (abs(coord.x - z01) + offset.x);
+    col.x = (abs(coord.x - z01) + offset.x/2.0);
   }
   
   if (mirrorYEnabled == 1) {
-    col.y = (abs(coord.y - z02) + offset.y);
+    col.y = (abs(coord.y - z02) + offset.y/2.0);
   }
   
   // Output to screen
   outputColor = texture(tex, col);
-  
 }

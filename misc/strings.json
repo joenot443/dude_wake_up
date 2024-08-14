@@ -38,8 +38,10 @@
     "clear_canvas_instruction": "- Clears the canvas, deleting all nodes and connections",
     "camera_view_instruction": "- Moves the camera so all the nodes are in view",
     "stage_mode_instruction": "- Switches to Stage Mode",
-    "press_now_instruction": " - Press this now!",
+    "press_now_instruction": "- Press this now!",
     "stage_mode_title": "Stage Mode",
     "stage_mode_subtitle": "This is another way of visualizing your project.",
-    "stage_mode_description": "Each square above represents a different Parameter. Parameters are colored by the Node they're a part of."
+    "stage_mode_description": "Each square above represents a different Parameter. Parameters are colored by the Node they're a part of. \n The output on the right comes from the end of a chain, you can change it by pressing the ⭑ on any node.",
+    "stage_mode_action_toggle": "- Toggles between Stage Mode and Edit Mode",
+    "stage_mode_action_favorite": "- When enabled, only Parameters marked with a heart will be included in Stage Mode"
 }

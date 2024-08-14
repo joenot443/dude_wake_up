@@ -3,15 +3,14 @@
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
+uniform float frequency;
+uniform float height;
 in vec2 coord;
 out vec4 outputColor;
 
 
 #define twopi 6.28319
 #define SMOOTH_HSV;
-
-const float huefreq = 0.5; // Frequency in Hz of the hue change over time, if =1., it will get thrugh the whole spectrum within one second
-const float hueyfac = 0.2; // Horizontal frequency. Factor of the image heights that will be covered by the full spectrum
 
 //HSV functions from iq (https://www.shadertoy.com/view/MsS3Wc)
 #ifdef SMOOTH_HSV
@@ -48,7 +47,7 @@ void main()
 {
   vec2 uv = coord;
   vec3 ccol = texture(tex, uv).rgb;
-  float hued = mod(time*huefreq, 1.) + uv.y*hueyfac;
+  float hued = mod(time*frequency, 1.) + uv.y*height;
   vec3 hsv = rgb2hsv(ccol);
   ccol = hsv2rgb(vec3(hsv.x+hued, hsv.y, hsv.z));
   

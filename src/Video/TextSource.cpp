@@ -19,7 +19,7 @@ void TextSource::setup() {
 
 void TextSource::saveFrame() {
   // Changed resolution
-  if (static_cast<int>(fbo->getWidth()) != settings->width->intValue) {
+  if (static_cast<int>(fbo->getWidth()) != LayoutStateService::getService()->resolution.x) {
     setup();
   }
 

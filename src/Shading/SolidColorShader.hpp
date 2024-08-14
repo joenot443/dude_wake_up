@@ -35,7 +35,7 @@ struct SolidColorSettings: public ShaderSettings {
   alphaOscillator(std::make_shared<WaveformOscillator>(alpha)),
   mixOscillator(std::make_shared<WaveformOscillator>(mix)),
   ShaderSettings(shaderId, j, name) {
-    parameters = { color };
+    parameters = { color, colorTransparentPixels };
     load(j);
     registerParameters();
   };

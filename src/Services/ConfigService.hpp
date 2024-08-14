@@ -13,7 +13,6 @@
 #include "AvailableStrand.hpp"
 #include "Strand.hpp"
 #include "AvailableShaderConfig.hpp"
-#include "ShaderChainer.hpp"
 #include "observable.hpp"
 #include "ShaderType.hpp"
 #include "Workspace.hpp"
@@ -31,6 +30,7 @@ static const std::string PreviewPathJsonKey = "preview";
 static const std::string LayoutJsonKey = "layout";
 static const std::string ParametersJsonKey = "parameters";
 static const std::string StrandsJsonKey = "strands";
+static const std::string AudioJsonKey = "audio";
 
 static const std::string ConfigTypeKey = "configType";
 static const std::string ConfigTypeFull = "full";
@@ -98,6 +98,7 @@ public:
   std::string nottawaFolderFilePath();
   std::string libraryFolderFilePath();
   std::string templatesFolderFilePath();
+  std::string strandsFolderFilePath();
   std::string relativeFilePathWithinNottawaFolder(std::string filePath);
 
   json jsonFromParameters(std::vector<Parameter *> parameters);
@@ -111,6 +112,8 @@ public:
   bool loadWorkspaceDialogue();
   void loadWorkspace(std::shared_ptr<Workspace> workspace);
   void closeWorkspace();
+  
+  static std::string appSupportFilePath();
   
   bool isLoading;
   

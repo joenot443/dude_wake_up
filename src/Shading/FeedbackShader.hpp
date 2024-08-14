@@ -63,8 +63,10 @@ public:
   
   std::shared_ptr<Parameter> sourceSelection;
   
+  std::shared_ptr<Parameter> shouldClearFeedbackBuffer;
+  
   FeedbackSettings(std::string shaderId, json j, std::string name) : index(index),
-  priority(std::make_shared<Parameter>("Main Takes Priority", 0.0, 0.0, 1.0)),
+  priority(std::make_shared<Parameter>("Main Takes Priority", ParameterType_Bool)),
   blendMode(std::make_shared<Parameter>("Blend Mode", 0.0, 0.0, 15.0, ParameterType_Int)),
   mainAlpha(std::make_shared<Parameter>("Main Alpha", 1.0, 0.0, 1.0)),
   mainAlphaOscillator(std::make_shared<WaveformOscillator>(mainAlpha)),
@@ -89,10 +91,11 @@ public:
   scale(std::make_shared<Parameter>("Scale", 1.0, 0.0, 2.0)),
   scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
   sourceSelection(std::make_shared<Parameter>("source", 1.0, 0.0, 3.0)),
+  shouldClearFeedbackBuffer(std::make_shared<Parameter>("Clear Feedback Buffer", ParameterType_Bool)),
   shaderId(shaderId),
   ShaderSettings(shaderId, j, name)
   {
-    parameters = {mainAlpha, feedbackMix, feedbackAlpha, keyValue, keyThreshold, delayAmount, lumaKeyEnabled, xPosition, yPosition, scale, sourceSelection, blendMode};
+    parameters = {mainAlpha, feedbackMix, feedbackAlpha, keyValue, keyThreshold, delayAmount, lumaKeyEnabled, xPosition, yPosition, scale, sourceSelection, blendMode, priority, rotation, shouldClearFeedbackBuffer};
     oscillators = {mainAlphaOscillator, feedbackMixOscillator, feedbackAlphaOscillator, keyValueOscillator, keyThresholdOscillator, delayAmountOscillator, xPositionOscillator, yPositionOscillator, scaleOscillator};
     
     load(j);
@@ -139,6 +142,7 @@ struct FeedbackShader : Shader
   ofTexture feedbackTexture();
   void drawFbo(std::shared_ptr<ofFbo> fbo);
   void drawFeedbackSourceSelector();
+  void clearFrameIfNeeded();
   int frameIndex();
   int inputCount() override;
   

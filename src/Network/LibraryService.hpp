@@ -12,7 +12,6 @@
 #include "ofMain.h"
 #include "Feedback.hpp"
 #include "LibraryFile.hpp"
-#include "ShaderChainer.hpp"
 #include "observable.hpp"
 #include <future>
 
@@ -46,8 +45,6 @@ public:
   void didFetchLibraryFiles();
   
   void repopulateVideoSourcesFromMainThread();
-  
-  void uploadChainer(const std::string &name, const std::string &author, const std::shared_ptr<ShaderChainer> shaderChainer, std::function<void()> success_callback, std::function<void(const std::string &)> error_callback);
 
   void submitFeedback(Feedback feedback, std::function<void()> success_callback, std::function<void(const std::string &)> error_callback);
 

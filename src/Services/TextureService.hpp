@@ -19,6 +19,7 @@ private:
 public:
   void setup();
   void populateTextures();
+  bool populated;
   std::vector<std::shared_ptr<Texture>> availableTextures();
   std::vector<std::string> availableTextureNames();
   std::shared_ptr<Texture> defaultTexture();
@@ -31,7 +32,6 @@ public:
   static TextureService *getService() {
     if (!service) {
       service = new TextureService;
-      service->setup();
     }
     return service;
   }

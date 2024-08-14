@@ -4,6 +4,8 @@ uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
 uniform float displaceFactor;
+uniform float amount;
+uniform int drawEmpty;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -58,6 +60,11 @@ void main() {
   // Normalized pixel coordinates (from 0 to 1)
   vec2 uv = coord;
   
+  if (texture(tex, uv).a < 0.01) {
+    outputColor = vec4(0.0);
+    return;
+  }
+  
   // Pixelation factor (higher values for more pixelation)
   float pixelationFactor = sin(time) + sin(time / 8.0) * 256.0;
   
@@ -75,5 +82,5 @@ void main() {
   
   vec4 datamosh = texture(tex, datamoshUV);
   vec4 newColor = vec4(datamosh.rgb + colorVariation(datamosh.rg, time), 1.0);
-  outputColor = newColor;
+  outputColor = mix(newColor, texture(tex, uv), amount);
 }

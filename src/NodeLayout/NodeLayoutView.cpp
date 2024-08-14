@@ -12,6 +12,7 @@
 #include "LibraryService.hpp"
 #include "MarkdownView.hpp"
 #include "Fonts.hpp"
+#include "VideoRecorder.hpp"
 #include "UploadChainerView.h"
 #include "LayoutStateService.hpp"
 #include "ShaderChainerService.hpp"
@@ -40,8 +41,8 @@ void NodeLayoutView::setup()
   config = new ed::Config;
   config->SettingsFile = "NodeLayout.json";
   ImVector<float> zooms = ImVector<float>();
-//  zooms.push_back(1.0f);
-//  config->CustomZoomLevels = zooms;
+  //  zooms.push_back(1.0f);
+  //  config->CustomZoomLevels = zooms;
   
   context = ed::CreateEditor(config);
   ofAddListener(LibraryService::getService()->downloadNotification, this, &NodeLayoutView::haveDownloadedAvailableLibraryFile);
@@ -106,11 +107,11 @@ void NodeLayoutView::draw()
   ed::NavigateToContent();
   
   // Disable navigation if Tutorial is enabled
-//  if (LayoutStateService::getService()->helpEnabled) {
-//    ed::SuspendNavigation();
-//  } else {
-//    ed::ResumeNavigation();
-//  }
+  //  if (LayoutStateService::getService()->helpEnabled) {
+  //    ed::SuspendNavigation();
+  //  } else {
+  //    ed::ResumeNavigation();
+  //  }
   
   ed::PushStyleVar(ed::StyleVar_ScrollDuration, 0.1f);
   ed::PushStyleVar(ax::NodeEditor::StyleVar_NodeRounding, 0.0);
@@ -175,7 +176,7 @@ void NodeLayoutView::draw()
         auto connection = pair.second;
         std::shared_ptr<Node> nextNode = idNodeMap[connection->end->connId()];
         std::shared_ptr<Node> startNode = idNodeMap[connection->start->connId()];
-
+        
         ed::LinkId nextShaderLinkId = uniqueId++;
         
         auto shaderLink =
@@ -272,6 +273,8 @@ void NodeLayoutView::draw()
   ed::SetCurrentEditor(nullptr);
   
   drawActionButtons();
+  
+  drawSaveDialog();
   
   //  drawMetrics();
   
@@ -381,6 +384,48 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
     pinIdNodeMap[outputPinId.Get()] = node;
   }
   
+  // Draw an Audio Reactivity button if we have one
+  else if (node->type == NodeTypeShader && node->shader->settings->audioReactiveParameter != nullptr) {
+    
+    
+    // Draw the disable button if we're already driving
+    if (node->shader->settings->audioReactiveParameter->driver != nullptr) {
+      
+      if (CommonViews::IconButton(ICON_MD_MUSIC_OFF, formatString("##disableAudio%s", node->shader->shaderId.c_str()))) {
+        node->shader->settings->audioReactiveParameter->removeDriver();
+      }
+    }
+    // Otherwise drive the default audio driver button
+    else if (CommonViews::IconButton(ICON_MD_MUSIC_NOTE, formatString("##enableAudio%s", node->shader->shaderId.c_str()))) {
+      
+      // Prefer to use the BPM param, use RMS is BPM isn't enabled
+      auto analysisParameters = AudioSourceService::getService()->selectedAudioSource->audioAnalysis.parameters;
+      auto bpmEnabled = AudioSourceService::getService()->selectedAudioSource->audioAnalysis.bpmEnabled;
+      
+      std::shared_ptr<Parameter> updateParameter = nullptr;
+      
+      for (auto param : analysisParameters) {
+        if (bpmEnabled && param->name == "BPM") {
+          updateParameter = param;
+          break;
+        } else if (!bpmEnabled && param->name == "Loudness") {
+          updateParameter = param;
+          break;
+        }
+      }
+      
+      if (updateParameter == nullptr) return;
+      
+      // Successfully assigned driver, begin Audio Analysis if it's not runnig
+      if (AudioSourceService::getService()->selectedAudioSource != nullptr &&
+          !AudioSourceService::getService()->selectedAudioSource->active) {
+        AudioSourceService::getService()->selectedAudioSource->toggle();
+      }
+      node->shader->settings->audioReactiveParameter->addDriver(updateParameter);
+    }
+  }
+  
+  
   
   ImGuiEx_NextColumn();
   
@@ -426,7 +471,9 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
     pinIdNodeMap[outputPinId.Get()] = node;
   }
   
+  CommonViews::sSpacing();
   
+  // Draw Star for selecting Stage Shader
   if (node->type == NodeTypeShader && ShaderChainerService::getService()->isTerminalShader(node->shader))
   {
     if (ParameterService::getService()->isShaderIdStage(node->shader->shaderId)) {
@@ -437,6 +484,14 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
       if (CommonViews::IconButton(ICON_MD_STAR_OUTLINE, node->idName())) {
         ParameterService::getService()->toggleStageShaderId(node->shader->shaderId);
       }
+    }
+  }
+  
+  else if (node->type == NodeTypeSource)
+  {
+    auto icon = node->source->active ? ICON_MD_PAUSE : ICON_MD_PLAY_ARROW;
+    if (CommonViews::IconButton(icon, formatString("##%splayPause", node->source->id.c_str()))) {
+      node->source->active = !node->source->active;
     }
   }
   
@@ -655,26 +710,18 @@ void NodeLayoutView::handleSaveNode(std::shared_ptr<Node> node)
 {
   Strand strand = ShaderChainerService::getService()->strandForConnectable(node->connectable);
   
-  std::string defaultName =
-  ofGetTimestampString("%m-%d");
-  
+  // Generate default filename
+  std::string defaultName = ofGetTimestampString("%m-%d");
   defaultName = formatString("%s_%s", strand.name.c_str(), defaultName.c_str());
   std::string defaultJsonName = formatString("%s.json", defaultName.c_str());
   
-  auto result = ofSystemSaveDialog(defaultJsonName, "Save Strand");
-  if (result.bSuccess)
-  {
-    // Trim extension from result.fileName
-    std::string fileName = result.fileName;
-    auto dotPos = fileName.find_last_of('.');
-    if (dotPos != std::string::npos)
-    {
-      fileName = fileName.substr(0, dotPos);
-    }
-    strand.name = fileName;
-    std::string previewPath = StrandService::getService()->savePreview(defaultName, node->connectable);
-    ConfigService::getService()->saveStrandFile(strand, result.filePath, previewPath);
-  }
+  // Copy the default name into the char array
+  std::strncpy(saveFileName, defaultJsonName.c_str(), sizeof(saveFileName) - 1);
+  saveFileName[sizeof(saveFileName) - 1] = '\0'; // Ensure null termination
+  
+  // Show the ImGui save dialog popup
+  showSaveDialog = true;
+  nodeToSave = node;
 }
 
 void NodeLayoutView::handleDropZone()
@@ -698,7 +745,16 @@ void NodeLayoutView::handleDropZone()
         // Dropped on an existing Shader
         nodeDropLocation = std::make_unique<ImVec2>(ed::GetNodePosition(hovered) + ImVec2(150.0, 0.0));
         auto startNode = nodeIdNodeMap[hovered.Get()];
-        ShaderChainerService::getService()->makeConnection(startNode->connectable, shader, startNode->type == NodeTypeShader ? ConnectionTypeShader : ConnectionTypeSource, OutputSlotMain, InputSlotMain);
+        // Check if the existing Shader was already connected to a next node
+        std::shared_ptr<Connectable> next = nullptr;
+        if (startNode->connectable->hasOutputAtSlot(OutputSlotMain)) {
+          auto conn = startNode->connectable->connectionAtSlot(OutputSlotMain);
+          ShaderChainerService::getService()->insert(startNode->connectable, shader, OutputSlotMain);
+          ShaderChainerService::getService()->breakConnectionForConnectionId(conn->id);
+        } else {
+          ShaderChainerService::getService()->makeConnection(startNode->connectable, shader, startNode->type == NodeTypeShader ? ConnectionTypeShader : ConnectionTypeSource, OutputSlotMain, InputSlotMain);
+        }
+        
       }
       unplacedNodeIds.push_back(shader->shaderId);
     }
@@ -1015,7 +1071,7 @@ void NodeLayoutView::drawActionButtons()
   int buttonCount = 4;
   
   // Set the cursor to the bottom right of the window
-  float shaderInfoPaneWidth = LayoutStateService::getService()->shouldDrawShaderInfo() ? getScaledWindowWidth() / 5 : 0;
+  float shaderInfoPaneWidth = LayoutStateService::getService()->shouldDrawShaderInfo() ? LayoutStateService::getService()->browserSize().x : 0;
   
   ImGui::SetCursorPos(ImVec2(getScaledWindowWidth() - 50.0 * buttonCount - shaderInfoPaneWidth, getScaledWindowHeight() - LayoutStateService::getService()->audioSettingsViewHeight() - 100.0));
   
@@ -1031,7 +1087,7 @@ void NodeLayoutView::drawActionButtons()
   ImGui::SameLine();
   
   // Draw the reset button
-  if (CommonViews::LargeIconButton(ICON_MD_RESTART_ALT, "reset"))
+  if (CommonViews::LargeIconButton(ICON_MD_DELETE_FOREVER, "reset"))
   {
     clear();
   }
@@ -1094,14 +1150,63 @@ void NodeLayoutView::clear() {
 
 void NodeLayoutView::drawMetrics()
 {
-  // Set the cursor to the bottom right of the window
+  // Set the cursor to the bottom left of the node layout
   auto cursorPos = ImGui::GetCursorPos();
-  ImGui::SetCursorPos(ImVec2(getScaledWindowWidth() / 5, getScaledWindowHeight() - 100));
+  ImGui::SetCursorPos(ImVec2(LayoutStateService::getService()->browserSize().x, getScaledWindowHeight() - 100));
   
   ed::SetCurrentEditor(context);
   ed::ShowMetrics();
 }
 
+void NodeLayoutView::drawSaveDialog() {
+  if (showSaveDialog)
+  {
+    ImGui::OpenPopup("Save Strand");
+    
+    if (ImGui::BeginPopupModal("Save Strand", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+      ImGui::Text("Enter the filename:");
+      ImGui::InputText("##saveFileName", saveFileName, IM_ARRAYSIZE(saveFileName));
+      
+      if (ImGui::Button("Save", ImVec2(120, 0)))
+      {
+        // Close the popup
+        ImGui::CloseCurrentPopup();
+        showSaveDialog = false;
+        
+        // Proceed with saving the strand
+        saveStrand();
+      }
+      
+      ImGui::SameLine();
+      if (ImGui::Button("Cancel", ImVec2(120, 0)))
+      {
+        ImGui::CloseCurrentPopup();
+        showSaveDialog = false;
+      }
+      
+      ImGui::EndPopup();
+    }
+  }
+}
+
+void NodeLayoutView::saveStrand()
+{
+	  Strand strand = ShaderChainerService::getService()->strandForConnectable(nodeToSave->connectable);
+
+    // Trim extension from saveFileName if needed
+    std::string fileName(saveFileName);
+    auto dotPos = fileName.find_last_of('.');
+    if (dotPos != std::string::npos)
+    {
+        fileName = fileName.substr(0, dotPos);
+    }
+    strand.name = fileName;
+    
+    // Use the fileName for saving operations
+    std::string previewPath = StrandService::getService()->savePreview(fileName, nodeToSave->connectable);
+    ConfigService::getService()->saveStrandFile(strand, ConfigService::getService()->strandsFolderFilePath() + fileName + ".json", previewPath);
+}
 
 void NodeLayoutView::drawHelp()
 {
@@ -1112,7 +1217,7 @@ void NodeLayoutView::drawHelp()
   if (!HelpService::getService()->placedSource())
   {
     bool hasPayload = ImGui::GetDragDropPayload();
-    ImGui::SetCursorPos(ImVec2(getScaledWindowWidth() / 5 + 20.0, 150.0));
+    ImGui::SetCursorPos(ImVec2(LayoutStateService::getService()->browserSize().x + 20.0, 150.0));
     if (hasPayload) {
       HelpService::getService()->drawSource2View();
     }
@@ -1129,7 +1234,7 @@ void NodeLayoutView::drawHelp()
   if (!HelpService::getService()->placedEffect())
   {
     bool hasPayload = ImGui::GetDragDropPayload();
-    ImGui::SetCursorPos(ImVec2(getScaledWindowWidth() / 5 + 20.0, getScaledWindowHeight() / 3.0 + 30.0));
+    ImGui::SetCursorPos(ImVec2(LayoutStateService::getService()->browserSize().x + 20.0, getScaledWindowHeight() / 3.0 + 30.0));
     if (hasPayload) {
       HelpService::getService()->drawEffect2View();
     } else {
@@ -1174,7 +1279,7 @@ void NodeLayoutView::drawHelp()
   if (!HelpService::getService()->placedSecondSource())
   {
     bool hasPayload = ImGui::GetDragDropPayload();
-    ImGui::SetCursorPos(ImVec2(getScaledWindowWidth() / 5 + 20.0, 150.0));
+    ImGui::SetCursorPos(ImVec2(LayoutStateService::getService()->browserSize().x + 20.0, 150.0));
     if (hasPayload) {
       HelpService::getService()->drawSecondSource2View();
     }
@@ -1191,7 +1296,7 @@ void NodeLayoutView::drawHelp()
   if (!HelpService::getService()->placedMixEffect())
   {
     bool hasPayload = ImGui::GetDragDropPayload();
-    ImGui::SetCursorPos(ImVec2(getScaledWindowWidth() / 5 + 20.0, getScaledWindowHeight() / 3.0 + 30.0));
+    ImGui::SetCursorPos(ImVec2(LayoutStateService::getService()->browserSize().x + 20.0, getScaledWindowHeight() / 3.0 + 30.0));
     
     // Check if our payload is a Mix shader
     auto payload = ImGui::GetDragDropPayload();
@@ -1319,7 +1424,7 @@ void NodeLayoutView::drawHelp()
   }
   
   if (!HelpService::getService()->openedStageMode()) {
-    HelpService::getService()->drawOpenStageView();
+    HelpService::getService()->drawActionButtons();
     
     // Reset our cursor and return without drawing additional help
     ImGui::SetCursorPos(cursorPos);
@@ -1327,7 +1432,7 @@ void NodeLayoutView::drawHelp()
   }
   
   if (!HelpService::getService()->openedStageMode()) {
-    HelpService::getService()->drawOpenStageView();
+    HelpService::getService()->drawActionButtons();
     
     // Reset our cursor and return without drawing additional help
     ImGui::SetCursorPos(cursorPos);

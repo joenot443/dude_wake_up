@@ -20,10 +20,16 @@
 struct CoreSettings: public ShaderSettings {
   std::shared_ptr<Parameter> shapeDistance;
   std::shared_ptr<ValueOscillator> shapeDistanceOscillator;
+  
+  //Speed
+  std::shared_ptr<Parameter> speed;
+  std::shared_ptr<ValueOscillator> speedOscillator;
 
   CoreSettings(std::string shaderId, json j) :
   shapeDistance(std::make_shared<Parameter>("Shape Distance", 0.5, 0.0, 1.0)),
   shapeDistanceOscillator(std::make_shared<ValueOscillator>(shapeDistance)),
+  speed(std::make_shared<Parameter>("Speed", 0.5, 0.0, 1.0)),
+  speedOscillator(std::make_shared<ValueOscillator>(speed)),
   ShaderSettings(shaderId, j, "Core") {
     parameters = { shapeDistance };
     oscillators = { shapeDistanceOscillator };
@@ -45,6 +51,7 @@ struct CoreShader: Shader {
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("shapeDistance", settings->shapeDistance->value);
+    shader.setUniform1f("speed", settings->speed->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
@@ -68,6 +75,7 @@ struct CoreShader: Shader {
     CommonViews::H3Title("Core");
 
     CommonViews::ShaderParameter(settings->shapeDistance, settings->shapeDistanceOscillator);
+    CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
   }
 };
 

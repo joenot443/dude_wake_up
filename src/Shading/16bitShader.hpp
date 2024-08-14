@@ -19,15 +19,16 @@
 
 struct SixteenBitSettings : public ShaderSettings
 {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderWaveformOscillator;
+  std::shared_ptr<Parameter> pixelFactor;
+  std::shared_ptr<WaveformOscillator> pixelFactorOscillator;
 
-  SixteenBitSettings(std::string shaderId, json j, std::string name) : shaderValue(std::make_shared<Parameter>("shaderValue", 1.0, -1.0, 2.0)),
-                                                     shaderWaveformOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
+  SixteenBitSettings(std::string shaderId, json j, std::string name) : pixelFactor(std::make_shared<Parameter>("pixelFactor", 150.0, 100.0, 400.0)),
+                                                     pixelFactorOscillator(std::make_shared<WaveformOscillator>(pixelFactor)),
                                                      ShaderSettings(shaderId, j, name)
   {
-    parameters = {shaderValue};
-    oscillators = {shaderWaveformOscillator};
+    parameters = {pixelFactor};
+    oscillators = {pixelFactorOscillator};
+    audioReactiveParameter = pixelFactor;
     load(j);
     registerParameters();
   };
@@ -49,7 +50,7 @@ public:
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("color", settings->shaderValue->value);
+    shader.setUniform1f("pixelFactor", settings->pixelFactor->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
@@ -72,7 +73,7 @@ ShaderType type() override {
   {
     CommonViews::H3Title("16bit");
 
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderWaveformOscillator);
+    CommonViews::ShaderParameter(settings->pixelFactor, settings->pixelFactorOscillator);
   }
 };
 

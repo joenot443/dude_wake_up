@@ -34,10 +34,12 @@ void StrandService::setup() {
   // Save default Config when a Strand is updated
   strandsUpdatedSubject.subscribe([this]()
   {
-    ConfigService::getService()->saveDefaultConfigFile();
+    if (running)
+    	ConfigService::getService()->saveDefaultConfigFile();
   });
   
   populate();
+  running = true;
 }
 
 void StrandService::notifyStrandsUpdated()
@@ -189,7 +191,12 @@ void StrandService::populateMapFromFolder(std::map<std::string, std::shared_ptr<
     {
       continue;
     }
-    std::string imagePath = json["preview"];
+    std::string imagePath;
+    if (json.contains("preview")) {
+      imagePath = json["preview"];
+    } else {
+      imagePath = "";
+    }
     
     auto strand = std::make_shared<AvailableStrand>(file.getFileName(), file.getAbsolutePath(), imagePath, UUID::generateUUID());
     if (strandNames.count(strand->name) != 0) {

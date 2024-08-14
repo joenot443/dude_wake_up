@@ -199,6 +199,11 @@ public:
     return outputs.at(slot)->end;
   }
   
+  std::shared_ptr<Connection> connectionAtSlot(OutputSlot slot)
+  {
+    return outputs.at(slot);
+  }
+  
   // Returns the furthest descendent of the Connectable
   std::shared_ptr<Connectable> terminalDescendent() {
     if (outputs.empty()) return shared_from_this();

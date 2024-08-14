@@ -66,10 +66,12 @@ public:
   void drawEditParametersShaderInfoPane();
   
   // Open the Stage view
-  void drawOpenStageView();
+  void drawActionButtons();
   
   // Help in Stage Mode
   void drawStageModeHelp();
+  
+  void drawStageModeActionButtonsHelp();
 
   void drawRightArrowView();
   void drawLeftArrowView();

@@ -43,6 +43,9 @@ public:
   std::shared_ptr<ofFbo> fbo;
   std::shared_ptr<FeedbackSource> feedbackDestination;
   
+  // Whether the source is generating new frames
+  bool active = true;
+  
   // Layout
   ImVec2 origin;
   

@@ -24,6 +24,8 @@
 
 using json = nlohmann::json;
 
+static const bool AllowShaderMonitoring = true;
+
 class Shader: public Connectable
 {
 public:
@@ -32,6 +34,7 @@ public:
   : settings(std::unique_ptr<ShaderSettings>(settings)),
   shaderId(settings->shaderId),
   creationTime(ofGetUnixTime()),
+  lastModified(ofGetUnixTime()),
   lastFrame(std::make_shared<ofFbo>())
   {
     color = colorFromName(settings->name);
@@ -45,6 +48,9 @@ public:
   std::string shaderId;
   
   std::shared_ptr<ofFbo> lastFrame;
+  
+  // Timestamp for the last time the Shader file was modified
+  unsigned int lastModified;
   
   unsigned int creationTime;
   
@@ -68,7 +74,10 @@ public:
   virtual bool hasFrameBuffer() { return false; };
   void saveFrame(ofFbo *frame){};
   
-  virtual std::shared_ptr<Parameter> audioReactiveParameter() { return nullptr; }
+  void checkForFileChanges();
+  
+  void enableAudioAutoReactivity(std::shared_ptr<Parameter> audioParam);
+  void disableAudioAutoReactivity();
 
   virtual ShaderType type() { return ShaderTypeNone; };
 

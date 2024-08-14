@@ -39,15 +39,17 @@ struct AvailableStrand : public JSONSerializable
   void generatePreview() {
     // Load the image from the imagePath and draw it to the fbo
     ofImage image;
-    image.load(imagePath);
     fbo->allocate(426, 240);
-    fbo->begin();
-    if (image.getWidth() > 0 && image.getHeight() > 0) {
-      image.draw(0, 0, 426, 240);
+
+    if (image.load(imagePath)) {
+      fbo->begin();
+      if (image.getWidth() > 0 && image.getHeight() > 0) {
+        image.draw(0, 0, 426, 240);
+      }
+      ofSetColor(0, 0, 0, 128);
+      ofDrawRectangle(0, 0, 426, 240);
+      fbo->end();
     }
-    ofSetColor(0, 0, 0, 128);
-    ofDrawRectangle(0, 0, 426, 240);
-    fbo->end();
   }
 };
 

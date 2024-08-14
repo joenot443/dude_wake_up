@@ -2,6 +2,7 @@
 #define TransformShader_hpp
 
 #include "ofMain.h"
+#include "Fonts.hpp"
 #include "ShaderConfigSelectionView.hpp"
 #include "ImGuiExtensions.hpp"
 #include "Shader.hpp"
@@ -50,6 +51,7 @@ public:
     parameters = {minX, maxX, minY, maxY, scale, translateX, translateY};
     oscillators = {minXOscillator, maxXOscillator, minYOscillator, maxYOscillator, translateXOscillator, translateYOscillator, scaleOscillator};
     load(j);
+    audioReactiveParameter = scale;
     registerParameters();
   }
 };
@@ -110,6 +112,14 @@ public:
   
   void drawSettings() override {
     CommonViews::H4Title("Crop");
+    ImGui::SameLine();
+    CommonViews::HSpacing(5);
+    if (CommonViews::IconButton(ICON_MD_UNDO, idString(settings->minX->paramId).c_str())) {
+      settings->minX->resetValue();
+      settings->maxX->resetValue();
+      settings->minY->resetValue();
+      settings->maxY->resetValue();
+    }
     auto frame = parentFrame();
     auto cursorPos = ImGui::GetCursorPos();
     if (frame != nullptr) {

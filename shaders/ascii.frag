@@ -2,6 +2,7 @@
 
 uniform sampler2D tex;
 in vec2 coord;
+uniform float size;
 uniform vec2 dimensions;
 out vec4 outputColor;
 
@@ -42,7 +43,7 @@ void main() {
   if (gray > 0.7) n = 13199452; // @
   if (gray > 0.8) n = 11512810; // #
   
-  vec2 p = mod(fullCoord/4.0, 2.0) - vec2(1.0);
+  vec2 p = mod(fullCoord/ (4.0 * size), 2.0) - vec2(1.0);
   
   col = col*character(n, p);
   

@@ -103,7 +103,9 @@ void VideoSourceService::updateVideoSources()
 {
   for (auto const &x : videoSourceMap)
   {
-
+    // If inactive, don't save the next frame
+    if (!x.second->active) continue;
+    
     x.second->saveFrame();
     x.second->saveFeedbackFrame();
   }

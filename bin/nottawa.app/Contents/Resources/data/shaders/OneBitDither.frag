@@ -3,6 +3,7 @@
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
+uniform float scale;
 uniform vec3 lightColor;
 uniform vec3 darkColor;
 in vec2 coord;
@@ -11,7 +12,7 @@ out vec4 outputColor;
 void main(  )
 {
     // Set resolution scale factor by increasing exponent 0.5 is being raised to
-    float resScaleExp = 1.0;
+    float resScaleExp = 1.0 * scale;
     float ditherResScale = pow(0.5,resScaleExp);
     
     // Map coords to lower res

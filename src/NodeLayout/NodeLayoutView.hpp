@@ -11,6 +11,7 @@
 #include "NodeTypes.hpp"
 #include "imgui.h"
 #include "VideoRecorder.hpp"
+#include "LibraryFile.hpp"
 #include "Shader.hpp"
 #include "VideoSource.hpp"
 #include "Shader.hpp"
@@ -41,6 +42,7 @@ public:
   void drawResolutionPopup();
   void drawUploadChainerWindow();
   void drawHelp();
+  void drawSaveDialog();
   
   void openSettingsWindow(std::shared_ptr<Shader> shader);
   void keyReleased(int key);
@@ -84,7 +86,10 @@ public:
   void handleDroppedSource(std::shared_ptr<VideoSource> source);
   std::shared_ptr<Node> nodeAtPosition(ImVec2 position);
   bool pointIsWithinNode(ImVec2 position, std::shared_ptr<Node> node);
+  
+  // Saving
   void loadStrand(std::shared_ptr<AvailableStrand> availableStrand);
+  void saveStrand();
 
   // Notifications
   void haveDownloadedAvailableLibraryFile(LibraryFile &file);
@@ -113,7 +118,12 @@ public:
   bool firstFrame = true;
   bool shouldDelete = false;
   bool makingLink = false;
-
+  
+  // Saving Strands
+  bool showSaveDialog = false;
+  char saveFileName[256] = "";
+  std::shared_ptr<Node> nodeToSave;
+  
   // Maps the id of the Shader or the VideoSource to the Node
   std::map<std::string, std::shared_ptr<Node>> idNodeMap;
   

@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include "Shader.hpp"
+#include "Console.hpp"
 #include "ShaderChainerService.hpp"
 #include "VideoSourceService.hpp"
 #include "FeedbackSourceService.hpp"
@@ -15,7 +16,8 @@
 
 void Shader::traverseFrame(std::shared_ptr<ofFbo> frame, int depth)
 {
-//  clearLastFrame();
+  clearLastFrame();
+  checkForFileChanges();
   activateParameters();
   shade(frame, lastFrame);
   // On our terminal nodes, check if we need to update our defaultStageShader
@@ -83,6 +85,8 @@ json Shader::serialize()
     settings->y->value = NodeLayoutView::getInstance()->nodeForShaderSourceId(shaderId)->position.y;
     j["x"] = settings->x->value;
     j["y"] = settings->y->value;
+  } else {
+    return 0;
   }
 
   return j;
@@ -96,4 +100,40 @@ void Shader::activateParameters() {
 
 void Shader::allocateLastFrame() {
   lastFrame->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y, GL_RGBA);
+}
+
+void Shader::enableAudioAutoReactivity(std::shared_ptr<Parameter> audioParam) {
+  if (settings->audioReactiveParameter == nullptr) return;
+  
+  settings->audioReactiveParameter->addDriver(audioParam);
+}
+
+void Shader::disableAudioAutoReactivity() {
+  settings->audioReactiveParameter->removeDriver();
+}
+
+void Shader::checkForFileChanges() {
+  if (AllowShaderMonitoring != true) return;
+  std::string shaderName = name();
+  // Remove any spaces from the name
+  shaderName.erase(std::remove(shaderName.begin(), shaderName.end(), ' '));
+  
+  auto path = "shaders/" + shaderName + ".frag";
+  
+  auto shaderFile = ofFile(path);
+  
+  if (!shaderFile.exists()) {
+//    log("Shader doesn't exist - " + name());
+    return;
+  }
+  
+  // Check when the file was last modified
+  unsigned int time = std::filesystem::last_write_time(shaderFile);
+  
+  if (time > lastModified) {
+    lastModified = time;
+    shader.unload();
+    shader.load("shaders/" + shaderName);
+    log("Reloaded Shader for - " + shaderName);
+  }
 }

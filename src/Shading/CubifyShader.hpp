@@ -22,12 +22,13 @@ struct CubifySettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> cubeSizeOscillator;
 
   CubifySettings(std::string shaderId, json j, std::string name) :
-  cubeSize(std::make_shared<Parameter>("cubeSize", 1.0, 0.0, 10.0)),
+  cubeSize(std::make_shared<Parameter>("Cube Size", 1.0, 0.0, 10.0)),
   cubeSizeOscillator(std::make_shared<WaveformOscillator>(cubeSize)),
   ShaderSettings(shaderId, j, name)  {
     parameters = { cubeSize };
     oscillators = { cubeSizeOscillator };
     load(j);
+    audioReactiveParameter = cubeSize;
     registerParameters();
   };
 };

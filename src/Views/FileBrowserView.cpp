@@ -168,17 +168,9 @@ void FileBrowserView::draw()
 
   if (ImGui::Button("Show in Finder"))
   {
-#if defined(_WIN32)
-    // Windows
-    std::string command = "explorer " + currentDirectory.getAbsolutePath();
-    system(command.c_str());
-#elif defined(__APPLE__)
     // macOS
     std::string command = "open " + currentDirectory.getAbsolutePath();
     system(command.c_str());
-#else
-    ofLogError("ofApp::openFolder") << "This function is not implemented for this platform.";
-#endif
   }
 
   ImGui::SameLine();

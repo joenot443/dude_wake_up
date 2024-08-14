@@ -28,7 +28,6 @@
 #include "implot.h"
 
 static const ImVec2 ShaderButtonSize = ImVec2(90, 30);
-static const float MenuBarHeight = 50.0f;
 
 void MainStageView::setup()
 {
@@ -53,18 +52,18 @@ void MainStageView::update()
 
 void MainStageView::draw()
 {
-  // Draw a table with 2 columns, sized | 1/5 |   4/5   |
+  // Draw a table with 2 or columns, sized | 1/5 |   4/5   | 1/5 |
+  ImVec2 nodeLayoutSize = LayoutStateService::getService()->nodeLayoutSize();
   
-  float nodeLayoutWidth = LayoutStateService::getService()->shouldDrawShaderInfo() ?  (getScaledWindowWidth() * 3) / 5 : (getScaledWindowWidth() * 4) / 5;
-  float nodeLayoutHeight = getScaledWindowHeight() - LayoutStateService::getService()->audioSettingsViewHeight();
+  ImVec2 browserSize = LayoutStateService::getService()->browserSize();
   
 //  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(15.0, 15.0));
   int columnCount = LayoutStateService::getService()->shouldDrawShaderInfo() ? 3 : 2;
   ImGui::Columns(columnCount, "main_stage_view", false);
-  ImGui::SetColumnWidth(0, getScaledWindowWidth() / 5);
-  ImGui::SetColumnWidth(1, nodeLayoutWidth);
+  ImGui::SetColumnWidth(0, browserSize.x);
+  ImGui::SetColumnWidth(1, nodeLayoutSize.x);
   if (LayoutStateService::getService()->shouldDrawShaderInfo()) {
-    ImGui::SetColumnWidth(2, getScaledWindowWidth() / 5);
+    ImGui::SetColumnWidth(2, browserSize.x);
   }
   
   
@@ -73,8 +72,7 @@ void MainStageView::draw()
   // | Library |       Audio
   
   // Sources
-  auto browserSize = ImVec2(ImGui::GetWindowContentRegionMax().x / 5.,
-                            (ImGui::GetWindowContentRegionMax().y - MenuBarHeight) / 3.);
+
 //  ImGui::PopStyleVar();
   ImGui::BeginChild("##sourceBrowser", browserSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
   CommonViews::H3Title("Sources");

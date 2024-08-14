@@ -10,6 +10,7 @@
 #include "ShaderChainerService.hpp"
 #include "AudioSourceService.hpp"
 #include "ConfigService.hpp"
+#include "CommonViews.hpp"
 
 json LayoutStateService::config() {
   json j;
@@ -67,7 +68,7 @@ float LayoutStateService::audioSettingsViewHeight() {
 }
 
 ofRectangle LayoutStateService::canvasRect() {
-  return ofRectangle(getScaledWindowWidth() / 5, 0, getScaledWindowWidth() * (4/5), getScaledWindowHeight() - audioSettingsViewHeight());
+  return ofRectangle(LayoutStateService::getService()->browserSize().x, 0, getScaledWindowWidth() * (4/5), getScaledWindowHeight() - audioSettingsViewHeight());
 }
 
 bool LayoutStateService::shouldDrawShaderInfo() {
@@ -102,4 +103,15 @@ void LayoutStateService::updateResolutionSettings(int i) {
 
 void LayoutStateService::subscribeToResolutionUpdates(std::function<void ()> callback) {
   resolutionUpdateSubject.subscribe(callback);
+}
+
+ImVec2 LayoutStateService::nodeLayoutSize() {
+  return ImVec2(shouldDrawShaderInfo() ?  getScaledWindowWidth() - browserSize().x*2 :
+                getScaledWindowWidth() - browserSize().x,
+                getScaledWindowHeight() - audioSettingsViewHeight());
+}
+
+ImVec2 LayoutStateService::browserSize() {
+  float width = fmax(getScaledWindowWidth() / 5., 360.0);
+  return ImVec2(width, (ImGui::GetWindowContentRegionMax().y - MenuBarHeight) / 3.);
 }

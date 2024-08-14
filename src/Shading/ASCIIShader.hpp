@@ -13,19 +13,26 @@
 #include "ofxImGui.h"
 #include "ShaderConfigSelectionView.hpp"
 #include "Shader.hpp"
+#include "CommonViews.hpp"
 #include <stdio.h>
 
 // Ascii
 
 struct AsciiSettings: public ShaderSettings  {
   
+  std::shared_ptr<Parameter> size;
+  std::shared_ptr<WaveformOscillator> sizeOscillator;
+  
   AsciiSettings(std::string shaderId, json j, std::string name) :
+  size(std::make_shared<Parameter>("Size", 1.0, 0.0, 5.0)),
+  sizeOscillator(std::make_shared<WaveformOscillator>(size)),
   ShaderSettings(shaderId, j, name)
   {
-    parameters = {};
-    oscillators = {};
+    parameters = {size};
+    oscillators = {sizeOscillator};
+    audioReactiveParameter = size;
     load(j);
-  registerParameters();
+    registerParameters();
   }
 };
 
@@ -37,18 +44,19 @@ public:
   AsciiShader(AsciiSettings *settings) : settings(settings), Shader(settings) {};
   
   void setup() override {
-    #ifdef TESTING
-shader.load("shaders/Ascii");
+#ifdef TESTING
+    shader.load("shaders/Ascii");
 #endif
 #ifdef RELEASE
-shader.load("shaders/Ascii");
+    shader.load("shaders/Ascii");
 #endif
   }
   
-    int inputCount() override {
+  int inputCount() override {
     return 1;
   }
-ShaderType type() override {
+  
+  ShaderType type() override {
     return ShaderTypeAscii;
   }
   
@@ -60,6 +68,7 @@ ShaderType type() override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
+    shader.setUniform1f("size", settings->size->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     
     frame->draw(0, 0);
@@ -68,7 +77,7 @@ ShaderType type() override {
   }
   
   void drawSettings() override {
-    
+    CommonViews::ShaderParameter(settings->size, settings->sizeOscillator);
   }
 };
 

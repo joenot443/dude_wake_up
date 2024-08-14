@@ -8,6 +8,7 @@
 #include "ShaderBrowserView.hpp"
 #include "FontService.hpp"
 #include "ShaderChainerService.hpp"
+#include "CommonViews.hpp"
 
 std::shared_ptr<TileItem> tileItemForShader(std::shared_ptr<AvailableShader> shader) {
   // Create a closure which will be called when the tile is clicked
@@ -50,6 +51,7 @@ void ShaderBrowserView::setup()
   auto mask = ShaderChainerService::getService()->availableMaskShaders;
   auto favorites = ShaderChainerService::getService()->availableFavoriteShaders();
   auto defaultFavorites = ShaderChainerService::getService()->availableDefaultFavoriteShaders;
+  auto glitch = ShaderChainerService::getService()->availableGlitchShaders;
   
   searchResultsTileBrowserView = TileBrowserView(searchTileItems);
   basicTileBrowserView = browserViewForShaders(basic);
@@ -59,6 +61,7 @@ void ShaderBrowserView::setup()
   maskTileBrowserView = browserViewForShaders(mask);
   favoritesTileBrowserView = browserViewForShaders(favorites);
   defaultFavoritesTileBrowserView = browserViewForShaders(defaultFavorites);
+  glitchTileBrowserView = browserViewForShaders(glitch);
 };
 
 void ShaderBrowserView::draw()
@@ -93,6 +96,11 @@ void ShaderBrowserView::draw()
     if (ImGui::BeginTabItem("Filter"))
     {
       filterTileBrowserView.draw();
+      ImGui::EndTabItem();
+    }
+    if (ImGui::BeginTabItem("Glitch"))
+    {
+      glitchTileBrowserView.draw();
       ImGui::EndTabItem();
     }
     if (ImGui::BeginTabItem("Transform"))

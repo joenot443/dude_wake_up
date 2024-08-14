@@ -88,8 +88,14 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
   void addDriver(std::shared_ptr<Parameter> dr)
   {
     driver = dr;
-    shift = std::make_shared<Parameter>("shift", 1.0, -5.0, 5.0);
+    shift = std::make_shared<Parameter>("shift", 0.5, -1.0, 1.0);
     scale = std::make_shared<Parameter>("scale", 0.5, 0.0, 5.0);
+  }
+  
+  void removeDriver() {
+    driver = nullptr;
+    shift = nullptr;
+    scale = nullptr;
   }
 
   void load(json j)
@@ -155,6 +161,7 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
     boolValue = value > 0.0001;
   }
   
+  
   /// Sets the float and bool values of the Parameter to the int value.
   void affirmIntValue()
   {
@@ -162,11 +169,25 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
     boolValue = value > 0.0001;
   }
   
+  /// Toggles the bool value of the Parameter and updates the float and int values accordingle
+  void toggleValue()
+  {
+    boolValue = !boolValue;
+    value = boolValue ? 1.0 : 0.0;
+    intValue = boolValue ? 1 : 0;
+  }
+  
   /// Drives the Parameter between its min and max by a float percent.
   void driveValue(float percent)
   {
     float range = max - min;
     setValue(percent * range + min);
+  }
+  
+  void scaleAudioValue(float percent)
+  {
+    float range = max - min;
+    setValue(fmax(min, fmin(percent * range * scale->value + shift->value * range, max)));
   }
 
   /// Returns 1 if our boolValue is true, otherwise the normal float value
@@ -189,7 +210,7 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
   {
     if (boolValue)
     {
-      return 1;
+      return intValue;
     }
 
     if (intValue != 0)
@@ -209,7 +230,8 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
   {
     return formatString("##%s_audio_popup", name.c_str());
   }
-
+	
+  Parameter(std::string name, ParameterType type);
   Parameter(std::string name, float value = 0.0, ParameterType = ParameterType_Standard);
   Parameter(std::string name, float value, float min, float max, ParameterType = ParameterType_Standard);
 

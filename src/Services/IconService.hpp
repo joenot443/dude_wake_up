@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include "Icon.hpp"
+#include "ofMain.h"
 
 class IconService
 {
@@ -23,9 +24,10 @@ public:
   std::vector<std::string> availableIconNames();
   std::shared_ptr<Icon> defaultIcon();
   std::shared_ptr<Icon> iconWithName(std::string name);
+  std::shared_ptr<ofShader> solidColorShader;
   
   static IconService *service;
-  IconService(){};
+  IconService() : solidColorShader(std::make_shared<ofShader>()) {};
   
   
   static IconService *getService() {

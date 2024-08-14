@@ -30,6 +30,7 @@ struct MixSettings : public ShaderSettings {
   ShaderSettings(shaderId, j, name) {
     parameters = {mix};
     oscillators = {mixOscillator};
+    audioReactiveParameter = mix;
     load(j);
   registerParameters();
   };

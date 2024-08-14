@@ -1,3 +1,5 @@
+# define JSON_DIAGNOSTICS 1
+
 #include <errno.h>
 #include <sentry.h>
 
@@ -23,6 +25,7 @@
 #include "StrandService.hpp"
 #include "ParameterService.hpp"
 #include "IconService.hpp"
+
 
 const static ofVec2f windowSize = ofVec2f(2400, 1600);
 
@@ -54,11 +57,12 @@ MainApp *MainApp::app = 0;
 
 void setupDirectories() {
   ofSetDataPathRoot("../Resources/data/");
-  auto homeDir = ofFilePath::getUserHomeDir();
-  auto libraryPath = ofFilePath::join(homeDir, "/nottawa");
-  auto sentryPath = ofFilePath::join(homeDir, "/nottawa/sentry");
+  auto appSupportPath = ConfigService::appSupportFilePath();
+  auto libraryPath = ofFilePath::join(appSupportPath, "/nottawa");
+  auto sentryPath = ofFilePath::join(libraryPath, "/sentry");
   auto shadersPath = ofFilePath::join(libraryPath, "/shaders");
   auto videosPath = ofFilePath::join(libraryPath, "/videos");
+  auto strandsPath = ofFilePath::join(libraryPath, "/strands");
   
   if (!ofDirectory::doesDirectoryExist(libraryPath)) {
     ofDirectory::createDirectory(libraryPath);
@@ -71,6 +75,9 @@ void setupDirectories() {
   }
   if (!ofDirectory::doesDirectoryExist(videosPath)) {
     ofDirectory::createDirectory(videosPath);
+  }
+  if (!ofDirectory::doesDirectoryExist(strandsPath)) {
+    ofDirectory::createDirectory(strandsPath);
   }
   
   for (auto dir : ConfigService::getService()->shaderConfigFoldersPaths()) {

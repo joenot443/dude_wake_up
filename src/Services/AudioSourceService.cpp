@@ -29,7 +29,7 @@ void AudioSourceService::setup() {
     audioSource->device = device;
     audioSource->deviceId = device.deviceID;
     audioSource->name = device.name;
-    audioSourceMap[audioSource->id] = audioSource;
+    audioSourceMap[audioSource->deviceId] = audioSource;
     
     if (device.isDefaultInput) {
       defaultAudioSource = audioSource;
@@ -63,6 +63,9 @@ void AudioSourceService::update() {
     double beatCount = link.captureAppSessionState().beatAtTime(link.clock().micros(), 4.);    
     // Only use the fractional component of the beatCount
     selectedAudioSource->audioAnalysis.updateBeat(beatCount - floor(beatCount));
+  } else {
+    selectedAudioSource->audioAnalysis.bpm->value = AudioSourceService::getService()->tapper.bpm();
+    selectedAudioSource->audioAnalysis.updateBeat(tapper.beatPerc());
   }
 }
 
@@ -87,19 +90,23 @@ void AudioSourceService::removeParamMapping(std::string paramId) {
 
 json AudioSourceService::config() {
   json j;
-  for (auto const &[key, val] : audioSourceMap) {
-    j[key] = val->serialize();
+  
+  if (selectedAudioSource != nullptr) {
+    j["deviceId"] = selectedAudioSource->deviceId;
+    j["active"] = selectedAudioSource->active;
   }
+  
   return j;
 }
 
 void AudioSourceService::loadConfig(json j) {
-  for (auto const &[key, val] : j.items()) {
-    if (audioSourceMap.count(key) == 0) {
-      log("Tried to load AudioSource %s, but it doesn't exist", key.c_str());
-      continue;
+  if (j.contains("deviceId")) {
+    std::string deviceId = j["deviceId"];
+    if (audioSourceMap.count(deviceId) != 0) {
+      selectedAudioSource = audioSourceMap[deviceId];
+      selectedAudioSource->active = j["active"];
+      selectedAudioSource->toggle();
     }
-    audioSourceMap[key]->load(val);
   }
 }
 
