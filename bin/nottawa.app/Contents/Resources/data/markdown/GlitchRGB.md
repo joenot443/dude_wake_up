@@ -1,0 +1,3 @@
+# GlitchRGB
+
+Information about GlitchRGB

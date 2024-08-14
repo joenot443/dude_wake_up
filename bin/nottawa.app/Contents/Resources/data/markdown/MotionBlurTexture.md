@@ -1,0 +1,3 @@
+# MotionBlurTexture
+
+Information about MotionBlurTexture
