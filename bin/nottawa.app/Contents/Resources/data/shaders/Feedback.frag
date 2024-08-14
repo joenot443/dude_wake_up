@@ -38,19 +38,11 @@ uniform vec3 invert;
 // Function to implement various blending modes
 vec4 blend(vec4 a, vec4 b, int mode) {
   vec4 result;
-  return vec4(1.0, 1.0, 0.0, 1.0);
-
   if (mode == 0) { // Standard
 
     // Empty main
     if (a.a < 0.05) {
-      // Check if feedback is empty
-      if (b.a < 0.05 || (b.r < 0.05 && b.g < 0.05 && b.b < 0.05)) {
-        return vec4(0.0);
-        
-      } else {
-        return vec4(b.rgb, fbAlpha * 0.95);
-      }
+      return vec4(b.rgb, fbAlpha * 0.95);
     }
     
     // Empty feedback
@@ -186,7 +178,7 @@ void main() {
     fbColor = mixLumaKey(mainColor, fbColor, lumaKey, lumaThresh);
   }
   
-  outColor = blend(mainColor, fbColor, 0);
+  outColor = blend(mainColor, fbColor, blendMode);
 
   outputColor = outColor;
 }

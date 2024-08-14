@@ -7,6 +7,7 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "StarsShader.hpp"
 #include "OutlineShader.hpp"
 #include "DoubleBlurShader.hpp"
 #include "GlitchAudioShader.hpp"
@@ -689,6 +690,12 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeStars: {
+      auto settings = new StarsSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<StarsShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeOutline: {
       auto settings = new OutlineSettings(shaderId, shaderJson);
       auto shader = std::make_shared<OutlineShader>(settings);

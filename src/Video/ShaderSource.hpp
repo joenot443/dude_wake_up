@@ -5,6 +5,7 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "StarsShader.hpp"
 #include "GlitchAudioShader.hpp"
 #include "ChromeGrillShader.hpp"
 #include "FibersShader.hpp"
@@ -116,6 +117,7 @@ enum ShaderSourceType {
   ShaderSource_Fibers, //source enum,
   ShaderSource_ChromeGrill, //source enum,
   ShaderSource_GlitchAudio, //source enum,
+  ShaderSource_Stars, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -166,11 +168,14 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_Fibers, // Available
   ShaderSource_ChromeGrill, // Available
   ShaderSource_GlitchAudio, // Available
+  ShaderSource_Stars, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
 // shaderTypeForShaderSourceType
+  case ShaderSource_Stars: //type enum
+    return ShaderTypeStars;
   case ShaderSource_GlitchAudio: //type enum
     return ShaderTypeGlitchAudio;
   case ShaderSource_ChromeGrill: //type enum
@@ -335,6 +340,8 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
 
 static std::string shaderSourceTypeName(ShaderSourceType nameType) {
   switch (nameType) { // ShaderNames
+  case ShaderSource_Stars: // Name  
+    return "Stars"; // Stars
   case ShaderSource_GlitchAudio: // Name  
     return "GlitchAudio"; // GlitchAudio
   case ShaderSource_ChromeGrill: // Name  
@@ -457,6 +464,12 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_Stars: { // Settings
+      auto settings = new StarsSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<StarsShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_GlitchAudio: { // Settings
       auto settings = new GlitchAudioSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<GlitchAudioShader>(settings);

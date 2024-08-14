@@ -1396,6 +1396,10 @@
 		<data>
 		cgzrzQCIjPQq8aYLhSUEHxZtM7c=
 		</data>
+		<key>Resources/data/markdown/Stars.md</key>
+		<data>
+		LVICLJPtWDjf2hrbeWiAhgemRRI=
+		</data>
 		<key>Resources/data/markdown/Swirl.md</key>
 		<data>
 		aM29LoqKDb7GglLlMogotLc2//o=
@@ -2243,6 +2247,14 @@
 		<key>Resources/data/shaders/SolidColor.vert</key>
 		<data>
 		M0lC/95lwJABvm2Z7lQmY14j0Wo=
+		</data>
+		<key>Resources/data/shaders/Stars.frag</key>
+		<data>
+		M8Y+moAf621KYJc9DG/AZVUYSMg=
+		</data>
+		<key>Resources/data/shaders/Stars.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
 		<key>Resources/data/shaders/StaticFrame.frag</key>
 		<data>
@@ -5900,6 +5912,13 @@
 			+10VZ3hYliQo7y9FtE8WX/XNIxyv5nc4DHcr+V2SdwA=
 			</data>
 		</dict>
+		<key>Resources/data/markdown/Stars.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			mQlP+r4b5bxcnnqOa0vORHSQTpTGGDwKCt81/fth2as=
+			</data>
+		</dict>
 		<key>Resources/data/markdown/Swirl.md</key>
 		<dict>
 			<key>hash2</key>
@@ -7368,6 +7387,20 @@
 			<key>hash2</key>
 			<data>
 			EzjQ626e/6hJOUBNVvWDMzY8Fa2sZ9KFntQe4SUcr9c=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/Stars.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			tSN+g1tqfE2NWvR/W9wsiwTHN1On0Nw0yrH9H2UBMp4=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/Stars.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/StaticFrame.frag</key>
