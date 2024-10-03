@@ -3,6 +3,7 @@
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float v_time;
+uniform float color;
 in vec2 coord;
 out vec4 outputColor;
 

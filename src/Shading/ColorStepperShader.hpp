@@ -39,7 +39,7 @@ struct ColorStepperSettings: public ShaderSettings {
 struct ColorStepperShader: Shader {
   ColorStepperSettings *settings;
   ColorStepperShader(ColorStepperSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/ColorStepper");
   }

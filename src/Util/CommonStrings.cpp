@@ -8,5 +8,5 @@
 #include <stdio.h>
 #include "CommonStrings.hpp"
 
-const std::string CommonStrings::EnableMidi = "Enable MIDI Connectivity";
-const std::string CommonStrings::DisableMidi = "Disable MIDI Connectivity";
+const std::string CommonStrings::EnableMidi = "Midi Connectivity Enabled";
+const std::string CommonStrings::EnableOutputWindowUpdatesAutomatically = "Output Window Updates Automatically";

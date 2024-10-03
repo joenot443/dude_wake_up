@@ -15,32 +15,33 @@
 
 using json = nlohmann::json;
 
-struct AudioSource {
+enum AudioSourceType {
+  AudioSourceType_Microphone,
+  AudioSourceType_File
+};
+
+class AudioSource {
+public:
   std::string id;
-  std::string deviceId;
   std::string name;
   bool active = false;
-  ofSoundDevice device;
-  ofSoundStream stream;
   AudioAnalysis audioAnalysis;
-  
   Gist<float> gist = Gist<float>(512, 44100);
   
-  json serialize() { return 0; };
+  virtual ~AudioSource() = default;
   
-  void load(json j){};
+  virtual json serialize() { return json(); }
   
-  void setup();
-  void toggle();
-  void disable();
+  virtual void load(json j) {}
   
-  void update();
+  virtual AudioSourceType type() = 0;
   
-  void audioIn(ofSoundBuffer &soundBuffer);
-  
-  void processFrame(std::vector<float> frame);
-  
-  void debugGist();
+  virtual void setup() = 0;
+  virtual void toggle();
+  virtual void disable() = 0;
+  virtual void audioIn(ofSoundBuffer &soundBuffer);
+  virtual void processFrame(const std::vector<float>& frame);
+  virtual void debugGist();
 };
 
 #endif /* AudioSource_h */

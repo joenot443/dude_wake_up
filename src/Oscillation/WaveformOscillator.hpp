@@ -33,6 +33,8 @@ struct WaveformOscillator: public Oscillator {
     type = Oscillator_waveform;
     parameters = {amplitude, frequency, shift};
   }
+  
+  WaveformOscillator(std::shared_ptr<Parameter> param, float amplitude, float shift, float frequency);
 };
 
 #endif /* WaveformOscillator_hpp */

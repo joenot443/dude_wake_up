@@ -40,7 +40,7 @@ struct CannySettings: public ShaderSettings {
 struct CannyShader: Shader {
   CannySettings *settings;
   CannyShader(CannySettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   
   void setup() override {
     shader.load("shaders/Canny");

@@ -6,6 +6,7 @@
 //
 
 #include "TileBrowserView.hpp"
+#include "LibraryService.hpp"
 #include "ofxImGui.h"
 #include "Strings.hpp"
 #include "FontService.hpp"
@@ -86,9 +87,19 @@ void TileBrowserView::draw()
       
       
       // Push a smaller font size
-      ImGui::PushFont(FontService::getService()->p);
-      ImGui::Button(truncateString(tile->name, 10).c_str(), TileSize);
-      ImGui::PopFont();
+      if (tile->name.size() > 10)
+      {
+        // Push a smaller font size
+        ImGui::PushFont(FontService::getService()->sm);
+        ImGui::Button(tile->name.c_str(), TileSize);
+        ImGui::PopFont();
+      }
+      else
+      {
+        ImGui::PushFont(FontService::getService()->p);
+        ImGui::Button(tile->name.c_str(), TileSize);
+        ImGui::PopFont();
+      }
       
       tile->dragCallback();
       
@@ -138,7 +149,7 @@ void TileBrowserView::draw()
         ImGui::SetCursorPosX(xPos);
         auto libraryTileItem = std::dynamic_pointer_cast<LibraryTileItem>(tile);
         auto file = libraryTileItem->libraryFile;
-        if (file->isMediaDownloaded())
+        if (LibraryService::getService()->libraryFileIdDownloadedMap[file->id])
         {
           CommonViews::IconTitle(ICON_MD_SAVE);
         }

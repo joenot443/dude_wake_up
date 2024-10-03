@@ -42,7 +42,7 @@ public:
 
 class TileShader : public Shader {
 public:
-  ofShader shader;
+
   TileSettings *settings;
   TileShader(TileSettings *settings) : settings(settings), Shader(settings) {};
   

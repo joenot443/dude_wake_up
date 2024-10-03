@@ -112,7 +112,7 @@ public:
 struct FeedbackShader : Shader
 {
   FeedbackSettings *settings;
-  ofShader shader;
+
   ofFbo fboFeedback;
   std::shared_ptr<FeedbackSource> feedbackSource;
   

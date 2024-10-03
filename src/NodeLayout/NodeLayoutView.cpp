@@ -205,7 +205,7 @@ void NodeLayoutView::draw()
   {
     // Remove the Shader link
     std::shared_ptr<ShaderLink> link = linksMap[selectedLinkId.Get()];
-    if (shouldDelete && link != nullptr)
+    if (canDelete() && link != nullptr)
     {
       ShaderChainerService::getService()->breakConnectionForConnectionId(link->connectionId);
     }
@@ -225,7 +225,7 @@ void NodeLayoutView::draw()
     
     if (node->id == selectedNodeId)
     {
-      if (shouldDelete)
+      if (canDelete())
         handleDeleteNode(node);
       else
         ShaderChainerService::getService()->selectConnectable(node->connectable);
@@ -615,6 +615,11 @@ void NodeLayoutView::handleUnplacedNodes()
   if (unplacedNodeIds.size() == 0) return;
   
   auto node = idNodeMap[unplacedNodeIds[unplacedNodeIds.size() - 1]];
+  if (fileDropInProgress) {
+    nodeDropLocation = std::make_unique<ImVec2>(ed::ScreenToCanvas(*nodeDropLocation.get()));
+    fileDropInProgress = false;
+  }
+  
   ImVec2 offset = *nodeDropLocation.get() - node->savedPosition();
   
   for (auto id : unplacedNodeIds)
@@ -824,17 +829,8 @@ void NodeLayoutView::handleDropZone()
           auto availableLibrarySource = std::dynamic_pointer_cast<AvailableVideoSourceLibrary>(availableSource);
           auto file = availableLibrarySource->libraryFile;
           
-          if (file->isMediaDownloaded())
-          {
-            auto source = VideoSourceService::getService()->addFileVideoSource(
-                                                                               file->name, file->videoPath());
-            unplacedNodeIds.push_back(source->id);
-            break;
-          }
-          else
-          {
-            LibraryService::getService()->downloadFutures.push_back(std::async(std::launch::async, &LibraryService::downloadFile, LibraryService::getService(), availableLibrarySource->libraryFile));
-          }
+          auto source = VideoSourceService::getService()->addLibraryVideoSource(file);
+          unplacedNodeIds.push_back(source->id);
           break;
         }
         case VideoSource_multi:
@@ -901,20 +897,23 @@ void NodeLayoutView::handleDroppedSource(std::shared_ptr<VideoSource> source)
 
 void NodeLayoutView::haveDownloadedAvailableLibraryFile(LibraryFile &file)
 {
-  pendingFile = std::make_unique<LibraryFile>(file);
+  pendingFiles.push_back(std::make_unique<LibraryFile>(file));
 }
 
 void NodeLayoutView::handleUnplacedDownloadedLibraryFile()
 {
-  if (pendingFile == nullptr)
+  if (pendingFiles.size() == 0)
   {
     return;
   }
   
-  auto source = VideoSourceService::getService()->addFileVideoSource(
-                                                                     pendingFile->name, pendingFile->videoPath());
-  unplacedNodeIds.push_back(source->id);
-  pendingFile = nullptr;
+  for (std::shared_ptr<LibraryFile> pendingFile : pendingFiles) {
+    
+    auto source = VideoSourceService::getService()->addFileVideoSource(pendingFile->name, pendingFile->videoPath());
+    unplacedNodeIds.push_back(source->id);
+  }
+  
+  pendingFiles.clear();
 }
 
 void NodeLayoutView::queryNewLinks()
@@ -966,6 +965,10 @@ void NodeLayoutView::queryNewLinks()
       }
     }
   }
+}
+
+bool NodeLayoutView::canDelete() {
+  return shouldDelete && !ImGui::IsAnyItemActive();
 }
 
 void NodeLayoutView::drawUploadChainerWindow()

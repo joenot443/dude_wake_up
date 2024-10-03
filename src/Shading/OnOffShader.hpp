@@ -32,7 +32,7 @@ struct OnOffSettings: public ShaderSettings {
 struct OnOffShader: Shader {
   OnOffSettings *settings;
   OnOffShader(OnOffSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   
   void setup() override {
   }

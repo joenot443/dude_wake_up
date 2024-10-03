@@ -74,9 +74,5 @@ static ImColor colorScaledBy(ImColor color, float scale) {
   return ImColor(color.Value.x * scale, color.Value.y * scale, color.Value.z * scale, color.Value.w * scale);
 }
 
-static ImColor colorForIndex(int index) {
-  
-}
-
 
 #endif /* Colors_h */

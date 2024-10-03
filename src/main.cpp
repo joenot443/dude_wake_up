@@ -22,6 +22,7 @@
 #include "ShaderChainerService.hpp"
 #include "LayoutStateService.hpp"
 #include "HelpService.hpp"
+#include "BookmarkService.hpp"
 #include "StrandService.hpp"
 #include "ParameterService.hpp"
 #include "IconService.hpp"
@@ -36,6 +37,7 @@ using json = nlohmann::json;
 const char* SubmitFeedbackView::popupId = "Submit Feedback";
 
 NodeLayoutView *NodeLayoutView::instance = 0;
+BookmarkService *BookmarkService::service = 0;
 StrandService *StrandService::service = 0;
 FontService *FontService::service = 0;
 TextureService *TextureService::service = 0;

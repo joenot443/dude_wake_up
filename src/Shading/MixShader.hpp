@@ -39,7 +39,7 @@ struct MixSettings : public ShaderSettings {
 class MixShader : public Shader {
 public:
 
-  ofShader shader;
+
   MixSettings *settings;
 
   MixShader(MixSettings *settings) : settings(settings), Shader(settings) {};

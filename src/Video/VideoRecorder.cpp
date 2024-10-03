@@ -24,7 +24,7 @@ void VideoRecorder::stopRecording() {
 
 
 bool VideoRecorder::isRecording() {
-    
+  return false;
 }
 
 VideoRecordingSettings::VideoRecordingSettings() : filePath(ConfigService::getService()->libraryFolderFilePath() + "output.mp4") {};

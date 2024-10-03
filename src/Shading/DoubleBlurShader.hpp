@@ -18,15 +18,15 @@
 #include <stdio.h>
 
 struct DoubleBlurSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
+  std::shared_ptr<Parameter> amount;
+  std::shared_ptr<WaveformOscillator> amountOscillator;
   
   DoubleBlurSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
+  amount(std::make_shared<Parameter>("amount", 0.5, 0.0, 100.0)),
+  amountOscillator(std::make_shared<WaveformOscillator>(amount)),
   ShaderSettings(shaderId, j, "DoubleBlur") {
-    parameters = { shaderValue };
-    oscillators = { shaderValueOscillator };
+    parameters = { amount };
+    oscillators = { amountOscillator };
     load(j);
     registerParameters();
   };
@@ -49,7 +49,7 @@ struct DoubleBlurShader: Shader {
     tempFbo.begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
+    shader.setUniform1f("amount", settings->amount->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1i("direction", 0); // Horizontal direction
@@ -61,7 +61,7 @@ struct DoubleBlurShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", tempFbo.getTexture(), 4);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
+    shader.setUniform1f("amount", settings->amount->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", tempFbo.getWidth(), tempFbo.getHeight());
     shader.setUniform1i("direction", 1); // Vertical direction
@@ -86,7 +86,7 @@ struct DoubleBlurShader: Shader {
   void drawSettings() override {
     CommonViews::H3Title("DoubleBlur");
     
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
+    CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
   }
 };
 

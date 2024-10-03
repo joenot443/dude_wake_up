@@ -7,7 +7,18 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
-#include "StarsShader.hpp"
+#include "PerplexionShader.hpp"
+#include "ColorWheelShader.hpp"
+#include "DiscoAudioShader.hpp"
+#include "FlickerAudioShader.hpp"
+#include "FractalAudioShader.hpp"
+#include "StarryPlanesShader.hpp"
+#include "UnknownPleasuresShader.hpp"
+#include "SpaceRingsShader.hpp"
+#include "CloudyShapesShader.hpp"
+#include "AudioBlocksShader.hpp"
+#include "FloatingSparksShader.hpp"
+#include "CosmosShader.hpp"
 #include "OutlineShader.hpp"
 #include "DoubleBlurShader.hpp"
 #include "GlitchAudioShader.hpp"
@@ -625,15 +636,23 @@ std::vector<std::shared_ptr<Connection>> ShaderChainerService::connections()
 
 void ShaderChainerService::breakConnectionForConnectionId(std::string connectionId)
 {
-  std::shared_ptr<Connection> connection = connectionMap[connectionId];
+  auto it = connectionMap.find(connectionId);
+  if (it == connectionMap.end())
+  {
+    log("Connection %s not found", connectionId.c_str());
+    return;
+  }
+
+  std::shared_ptr<Connection> connection = it->second;
   if (connection == nullptr)
   {
     log("Removing null Connection");
+    connectionMap.erase(it);
     return;
   }
   connection->start->removeConnection(connection);
   connection->end->removeConnection(connection);
-  connectionMap.erase(connectionId);
+  connectionMap.erase(it);
   ConfigService::getService()->saveDefaultConfigFile();
 }
 
@@ -665,7 +684,7 @@ std::shared_ptr<Connection> ShaderChainerService::makeConnection(std::shared_ptr
   }
   
   // Update the OutputWindow, if necessary
-  if (VideoSourceService::getService()->hasOutputWindowForConnectable(start))
+  if (VideoSourceService::getService()->hasOutputWindowForConnectable(start) && LayoutStateService::getService()->outputWindowUpdatesAutomatically)
   {
     VideoSourceService::getService()->updateOutputWindow(start, end);
   }
@@ -690,9 +709,75 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
-    case ShaderTypeStars: {
-      auto settings = new StarsSettings(shaderId, shaderJson);
-      auto shader = std::make_shared<StarsShader>(settings);
+    case ShaderTypePerplexion: {
+      auto settings = new PerplexionSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<PerplexionShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeColorWheel: {
+      auto settings = new ColorWheelSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<ColorWheelShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeDiscoAudio: {
+      auto settings = new DiscoAudioSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<DiscoAudioShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeFlickerAudio: {
+      auto settings = new FlickerAudioSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<FlickerAudioShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeFractalAudio: {
+      auto settings = new FractalAudioSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<FractalAudioShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeStarryPlanes: {
+      auto settings = new StarryPlanesSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<StarryPlanesShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeUnknownPleasures: {
+      auto settings = new UnknownPleasuresSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<UnknownPleasuresShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeSpaceRings: {
+      auto settings = new SpaceRingsSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<SpaceRingsShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeCloudyShapes: {
+      auto settings = new CloudyShapesSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<CloudyShapesShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeAudioBlocks: {
+      auto settings = new AudioBlocksSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AudioBlocksShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeFloatingSparks: {
+      auto settings = new FloatingSparksSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<FloatingSparksShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeCosmos: {
+      auto settings = new CosmosSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<CosmosShader>(settings);
       shader->setup();
       return shader;
     }

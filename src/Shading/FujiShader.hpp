@@ -59,7 +59,7 @@ class FujiShader: public Shader {
 public:
 
   private:
-  ofShader shader;
+
 
 public:
   FujiShader(FujiSettings *settings) :

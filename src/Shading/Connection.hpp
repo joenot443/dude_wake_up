@@ -292,6 +292,8 @@ public:
       if (connection->end == conn)
         return connection;
     }
+    
+    return nullptr;
   }
   
   std::vector<std::string> removeInputConnections(ConnectionType type)

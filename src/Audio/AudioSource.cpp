@@ -11,76 +11,37 @@
 #include "Gist.h"
 #include <stdio.h>
 
-void AudioSource::setup()
-{
-  ofSoundStreamSettings settings = ofSoundStreamSettings();
-  settings.setInDevice(device);
-  settings.sampleRate = 44100;
-  settings.numInputChannels = 1;
-  settings.numOutputChannels = 0;
-  settings.bufferSize = 512;
-  settings.inCallback = [this](ofSoundBuffer &soundBuffer)
-  {
-    this->audioIn(soundBuffer);
-  };
-  gist.setAudioFrameSize(512);
-  gist.setSamplingFrequency(44100);
-  active = true;
-  stream.setup(settings);
-}
-
-void AudioSource::update() {}
-
-void AudioSource::toggle()
-{
+void AudioSource::toggle() {
   if (active)
     disable();
   else
     setup();
 }
 
-void AudioSource::disable()
-{
-  active = false;
-  stream.stop();
-  stream.close();
-}
-
-void AudioSource::audioIn(ofSoundBuffer &soundBuffer)
-{
-  float avg = 0.0;
-  for (int i = 0; i < soundBuffer.size() / 2; i++)
-  {
-    float leftSample = soundBuffer[i * 2] * 0.5;
-    float rightSample = soundBuffer[i * 2 + 1] * 0.5;
-    avg += abs(leftSample) + abs(rightSample);
+void AudioSource::audioIn(ofSoundBuffer &soundBuffer) {
+  float avg = 0.0f;
+  for (size_t i = 0; i < soundBuffer.getNumFrames(); i++) {
+    for (size_t c = 0; c < soundBuffer.getNumChannels(); c++) {
+      avg += abs(soundBuffer.getSample(i, c));
+    }
   }
-  avg = avg / static_cast<float>(soundBuffer.size());
+  avg /= static_cast<float>(soundBuffer.getNumFrames() * soundBuffer.getNumChannels());
   
   // If we have mostly silence, return
-  if (abs(avg) < 0.001)
-  {
+  if (abs(avg) < 0.001f) {
     return;
   }
   
-  auto buffer = soundBuffer.getBuffer();
+  auto& buffer = soundBuffer.getBuffer();
   processFrame(buffer);
   debugGist();
 }
 
-void AudioSource::processFrame(std::vector<float> frame)
-{
+void AudioSource::processFrame(const std::vector<float>& frame) {
   gist.processAudioFrame(frame);
   audioAnalysis.analyzeFrame(&gist);
 }
 
-void AudioSource::debugGist()
-{
-  //    cout<<"============"<<endl;
-  //    cout<<"rms: \t" << gist.rootMeanSquare() << std::endl;
-  //    cout<<"pitch: \t" << gist.pitch() << std::endl;
-  //    cout<<"csd: \t" << gist.complexSpectralDifference() << std::endl;
-  //    cout<<"zcr: \t" << gist.zeroCrossingRate() << std::endl;
-  //    cout<<"specDiff: \t" << gist.spectralDifference() << std::endl;
-  //    cout<<"============"<<endl;
+void AudioSource::debugGist() {
+  // Implement debugging logic here if needed
 }

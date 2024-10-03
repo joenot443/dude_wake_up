@@ -14,8 +14,8 @@
 class FileSource : public VideoSource
 {
 public:
-  FileSource(std::string id, std::string name, std::string path)
-  : VideoSource(id, name, VideoSource_file),
+  FileSource(std::string id, std::string name, std::string path, VideoSourceType type = VideoSource_file)
+  : VideoSource(id, name, type),
   path(path),
   volume(std::make_shared<Parameter>("Volume", 0.5, 0.0, 1.0)),
   sliderPosition(std::make_shared<Parameter>("Position", 0.0, 0.0, 1.0)),

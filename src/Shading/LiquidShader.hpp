@@ -38,7 +38,7 @@ public:
 
   LiquidSettings *settings;
   LiquidShader(LiquidSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
 #ifdef TESTING
     shader.load("shaders/Liquid");
@@ -50,6 +50,10 @@ public:
   
   int inputCount() override {
     return 1;
+  }
+  
+  ShaderType type() override {
+    return ShaderTypeLiquid;
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {

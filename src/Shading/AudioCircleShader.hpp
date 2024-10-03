@@ -38,7 +38,7 @@ struct AudioCircleShader : Shader
 {
   AudioCircleSettings *settings;
   AudioCircleShader(AudioCircleSettings *settings) : settings(settings), Shader(settings){};
-  ofShader shader;
+
   void setup() override
   {
     shader.load("shaders/AudioCircle");

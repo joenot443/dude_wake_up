@@ -12,7 +12,7 @@
 
 struct CommonStrings {
   static const std::string EnableMidi;
-  static const std::string DisableMidi;
+  static const std::string EnableOutputWindowUpdatesAutomatically;
 };
 
 #endif /* CommonStrings_h */

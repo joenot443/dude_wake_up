@@ -43,7 +43,7 @@ struct FullHouseSettings: public ShaderSettings {
 struct FullHouseShader: Shader {
   FullHouseSettings *settings;
   FullHouseShader(FullHouseSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   std::vector<glm::vec2> noiseSeeds;
   void setup() override {
     shader.load("shaders/FullHouse");

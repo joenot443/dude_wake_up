@@ -5,6 +5,8 @@
 //  Created by Joe Crozier on 11/3/22.
 //
 
+#include <CoreFoundation/CoreFoundation.h>
+#include <Security/SecItem.h>
 #include "VideoSourceService.hpp"
 #include "UUID.hpp"
 #include "NodeLayoutView.hpp"
@@ -15,6 +17,7 @@
 #include "IconSource.hpp"
 #include "ImageSource.hpp"
 #include "ShaderChainerService.hpp"
+#include "BookmarkService.hpp"
 #include "LayoutStateService.hpp"
 #include "FileSource.hpp"
 
@@ -55,7 +58,7 @@ void VideoSourceService::populateAvailableVideoSources()
   for (auto const &file : LibraryService::getService()->libraryFiles)
   {
     // Create an AvailableLibraryVideoSource for each LibraryFile
-    auto fileSource = std::make_shared<AvailableVideoSourceLibrary>(file->name, file);
+    auto fileSource = std::make_shared<AvailableVideoSourceLibrary>(file.second->name, file.second);
     fileSource->generatePreview();
     availableSourceMap[fileSource->availableVideoSourceId] = fileSource;
   }
@@ -234,9 +237,79 @@ std::shared_ptr<VideoSource> VideoSourceService::addWebcamVideoSource(std::strin
 // Adds a file video source to the map
 std::shared_ptr<VideoSource> VideoSourceService::addFileVideoSource(std::string name, std::string path, ImVec2 origin, std::string id, json j)
 {
-  std::shared_ptr<VideoSource> videoSource = std::make_shared<FileSource>(id, name, path);
+  // Get the bookmark service instance
+  BookmarkService* bookmarkService = BookmarkService::getService();
+  std::shared_ptr<VideoSource> videoSource = nullptr;
+
+  // Check if bookmark exists for the given path
+  if (!bookmarkService->hasBookmarkForPath(path)) {
+      // No bookmark exists, create one
+      bookmarkService->saveBookmarkForPath(path);
+      
+      // Check again if bookmark was successfully saved
+      if (!bookmarkService->hasBookmarkForPath(path)) {
+          log("Failed to create bookmark for path: %s", path.c_str());
+          return nullptr;  // Return early on error
+      }
+  }
+
+  // Load the bookmark data
+  CFDataRef bookmarkData = bookmarkService->loadBookmarkForPath(path);
+  if (!bookmarkData) {
+      log("Failed to load bookmark for path: %s", path.c_str());
+      return nullptr;  // Return early on error
+  }
+
+  // Resolve the bookmark to get the file URL
+  Boolean isStale = false;
+  CFErrorRef error = nullptr;
+  CFURLRef fileURL = CFURLCreateByResolvingBookmarkData(
+      kCFAllocatorDefault,        // Allocator
+      bookmarkData,               // Bookmark data
+      kCFURLBookmarkResolutionWithSecurityScope,  // Options (or 0 if no security scope needed)
+      nullptr,                    // relativeToURL (can be nullptr)
+      nullptr,                    // resourcePropertiesToInclude (can be nullptr)
+      &isStale,                   // isStale flag
+      &error                      // CFErrorRef for error reporting
+  );
+
+  // Check if fileURL is resolved successfully
+  if (!fileURL) {
+      log("Failed to resolve bookmark data for path: %s", path.c_str());
+      if (error) {
+          CFStringRef errorDesc = CFErrorCopyDescription(error);
+          char buffer[256];
+          CFStringGetCString(errorDesc, buffer, sizeof(buffer), kCFStringEncodingUTF8);
+          log("Bookmark Resolution Error", buffer);
+          CFRelease(errorDesc);
+          CFRelease(error);  // Release error reference
+      }
+      CFRelease(bookmarkData);  // Release bookmarkData before returning
+      return nullptr;
+  }
+
+  // Start accessing the security-scoped resource
+  Boolean success = CFURLStartAccessingSecurityScopedResource(fileURL);
+  if (!success) {
+      log("Failed to access security-scoped resource for URL: %s", path.c_str());
+      CFRelease(fileURL);     // Release fileURL
+      CFRelease(bookmarkData); // Release bookmarkData
+      return nullptr;  // Return early on error
+  }
+
+  // At this point, we have successfully resolved the bookmark and accessed the resource
+  videoSource = std::make_shared<FileSource>(id, name, path);
   videoSource->origin = origin;
+  // Add the video source to the map (assuming addVideoSource takes care of this)
   addVideoSource(videoSource, id, j);
+
+  // Stop accessing the security-scoped resource when done
+  CFURLStopAccessingSecurityScopedResource(fileURL);
+
+  // Release CF objects
+  CFRelease(fileURL);
+  CFRelease(bookmarkData);
+
   return videoSource;
 }
 
@@ -293,6 +366,15 @@ std::shared_ptr<VideoSource> VideoSourceService::addTextVideoSource(std::string 
   auto textSource = TextSource(id, name, displayText);
   textSource.load(j);
   std::shared_ptr<VideoSource> videoSource = std::make_shared<TextSource>(textSource);
+  videoSource->origin = origin;
+  addVideoSource(videoSource, id, j);
+  return videoSource;
+}
+
+// Adds a Library video source to the map
+std::shared_ptr<VideoSource> VideoSourceService::addLibraryVideoSource(std::shared_ptr<LibraryFile> libraryFile, ImVec2 origin, std::string id, json j)
+{
+  std::shared_ptr<VideoSource> videoSource = std::make_shared<LibrarySource>(id, libraryFile);
   videoSource->origin = origin;
   addVideoSource(videoSource, id, j);
   return videoSource;
@@ -379,6 +461,8 @@ void VideoSourceService::appendConfig(json j)
 
   switch (type)
   {
+  case VideoSource_empty:
+      break;
   case VideoSource_file:
     addFileVideoSource(j["sourceName"], j["path"], position, sourceId, j);
     return;
@@ -395,12 +479,13 @@ void VideoSourceService::appendConfig(json j)
     return;
   case VideoSource_text:
     addTextVideoSource(j["sourceName"], position, sourceId, j);
-      return;
-    case VideoSource_icon:
+    return;
+  case VideoSource_icon:
     addIconVideoSource(j["sourceName"], position, sourceId, j);
-      return;
-  case VideoSource_empty:
-    break;
+    return;
+  case VideoSource_library:
+    std::shared_ptr<LibraryFile> libraryFile = LibraryService::getService()->libraryFileForId(j["libraryFileId"]);
+    addLibraryVideoSource(libraryFile, position, sourceId, j);
   }
 }
 

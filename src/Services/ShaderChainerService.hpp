@@ -30,8 +30,6 @@ private:
   // Maps a connectionId to a Connection
   std::map<std::string, std::shared_ptr<Connection>> connectionMap;
 
-
-
   observable::subject<void()> shaderChainerUpdateSubject;
 
   

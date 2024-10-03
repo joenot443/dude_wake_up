@@ -47,8 +47,6 @@ public:
   void update();
   void draw();
   void keyReleased(int key);
-  
-  NodeLayoutView nodeLayoutView;
 };
 
 #endif /* MainStageView_hpp */

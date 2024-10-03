@@ -37,6 +37,11 @@
 		024D169C28A046DF00DA807C /* ConfigService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024D169A28A046DF00DA807C /* ConfigService.cpp */; };
 		02542F112A4C6931005D3C72 /* SubmitFeedbackView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02542F0F2A4C6931005D3C72 /* SubmitFeedbackView.cpp */; };
 		02542F132A4C6FEB005D3C72 /* libsentry.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 02542F122A4C6FEB005D3C72 /* libsentry.dylib */; };
+		02543DA12C98770200513FEF /* BookmarkService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02543D9F2C98770200513FEF /* BookmarkService.cpp */; };
+		02543DA52C9DAF3300513FEF /* LibrarySource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02543DA32C9DAF3300513FEF /* LibrarySource.cpp */; };
+		02543DA82C9F57CD00513FEF /* MicrophoneAudioSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02543DA62C9F57CD00513FEF /* MicrophoneAudioSource.cpp */; };
+		02543DAB2C9F57D600513FEF /* FileAudioSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02543DA92C9F57D600513FEF /* FileAudioSource.cpp */; };
+		02543DAE2C9F59B300513FEF /* ofxAudioFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02543DAC2C9F59B100513FEF /* ofxAudioFile.cpp */; };
 		025AD49E291A9E3200F78F46 /* FileBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 025AD49C291A9E3200F78F46 /* FileBrowserView.cpp */; };
 		026EA94A2A5EDA7500AA3E55 /* LibraryFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 026EA9492A5ED9F800AA3E55 /* LibraryFile.cpp */; };
 		026ED08C2C52AC5F00810E44 /* ofxVideoRecorder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 026ED08A2C52AC5F00810E44 /* ofxVideoRecorder.cpp */; };
@@ -79,6 +84,8 @@
 		02B280EC2915487200B793D5 /* VideoSourceService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B280E12914761E00B793D5 /* VideoSourceService.cpp */; };
 		02B280EF291564A100B793D5 /* ShaderChainerService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B280ED291564A100B793D5 /* ShaderChainerService.cpp */; };
 		02B6272E2C5BD73D00D9D550 /* Icon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B6272D2C5BD73D00D9D550 /* Icon.cpp */; };
+		02BB95002CAD8C4900CF5311 /* libcpr.1.9.7.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 02BB94FF2CAD8C4900CF5311 /* libcpr.1.9.7.dylib */; };
+		02BB95012CAD8CA200CF5311 /* libcpr.1.9.7.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 02BB94FF2CAD8C4900CF5311 /* libcpr.1.9.7.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		02BD34CE2BFD3D8F007ED87E /* MultiSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02BD34CC2BFD3D8F007ED87E /* MultiSource.cpp */; };
 		02BD34D12BFFD384007ED87E /* ShaderInfoView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02BD34CF2BFFD384007ED87E /* ShaderInfoView.cpp */; };
 		02BE890629DCA12600C65C58 /* ShaderConfigSelectionView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02BE890429DCA12600C65C58 /* ShaderConfigSelectionView.cpp */; };
@@ -250,6 +257,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				02BB95012CAD8CA200CF5311 /* libcpr.1.9.7.dylib in Embed Libraries */,
 				0216D3522B80753200D792AA /* libcpr.1.dylib in Embed Libraries */,
 				0216D3532B80753200D792AA /* libsentry.dylib in Embed Libraries */,
 			);
@@ -322,7 +330,6 @@
 		022D18EC2A71BDBD00AEBC05 /* 16bitShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = 16bitShader.hpp; path = Shading/16bitShader.hpp; sourceTree = "<group>"; };
 		022D18EF2A71C21000AEBC05 /* VideoRecorder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = VideoRecorder.cpp; sourceTree = "<group>"; };
 		022D18F02A71C21000AEBC05 /* VideoRecorder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = VideoRecorder.hpp; sourceTree = "<group>"; };
-		022D18F62A78533A00AEBC05 /* libPocoData.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libPocoData.a; path = "../../../../Downloads/vcpkg/installed/arm64-osx/lib/libPocoData.a"; sourceTree = "<group>"; };
 		0230657129534CA500489A9F /* Fonts.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Fonts.hpp; path = Util/Fonts.hpp; sourceTree = "<group>"; };
 		0230657329534CA500489A9F /* JSONSerializable.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = JSONSerializable.hpp; path = Util/JSONSerializable.hpp; sourceTree = "<group>"; };
 		0230657429534CA500489A9F /* UUID.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = UUID.hpp; path = Util/UUID.hpp; sourceTree = "<group>"; };
@@ -361,6 +368,11 @@
 		023C6347292A8DC700A8BC9E /* imgui_stdlib.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_stdlib.cpp; path = lib/imgui_stdlib.cpp; sourceTree = "<group>"; };
 		023C6348292A8DC700A8BC9E /* imgui_stdlib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = imgui_stdlib.h; path = lib/imgui_stdlib.h; sourceTree = "<group>"; };
 		023C634B292BC55A00A8BC9E /* ShaderSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ShaderSource.hpp; sourceTree = "<group>"; };
+		023FA4682CAD9F88009512C3 /* dude_wake_up_tests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = dude_wake_up_tests; sourceTree = BUILT_PRODUCTS_DIR; };
+		023FA4692CADA123009512C3 /* boost_filesystem.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = boost_filesystem.a; path = ../../../libs/boost/lib/osx/boost_filesystem.a; sourceTree = "<group>"; };
+		023FA46A2CADA123009512C3 /* boost_system.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = boost_system.a; path = ../../../libs/boost/lib/osx/boost_system.a; sourceTree = "<group>"; };
+		023FA46D2CADA8A3009512C3 /* boost */ = {isa = PBXFileReference; lastKnownFileType = folder; name = boost; path = ../../../libs/boost; sourceTree = "<group>"; };
+		023FA46F2CADBCE2009512C3 /* openFrameworks */ = {isa = PBXFileReference; lastKnownFileType = folder; name = openFrameworks; path = ../../../libs/openFrameworks; sourceTree = "<group>"; };
 		0240887328B1BB1400908222 /* macro_scope.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = macro_scope.hpp; sourceTree = "<group>"; };
 		0243CDD82B8658490065D5EF /* Strand.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = Strand.hpp; path = Models/Strand.hpp; sourceTree = "<group>"; };
 		024D1687289DFD8400DA807C /* FeedbackShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FeedbackShader.cpp; path = Shading/FeedbackShader.cpp; sourceTree = "<group>"; };
@@ -376,9 +388,24 @@
 		02542F0F2A4C6931005D3C72 /* SubmitFeedbackView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SubmitFeedbackView.cpp; path = Views/SubmitFeedbackView.cpp; sourceTree = "<group>"; };
 		02542F102A4C6931005D3C72 /* SubmitFeedbackView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SubmitFeedbackView.hpp; path = Views/SubmitFeedbackView.hpp; sourceTree = "<group>"; };
 		02542F122A4C6FEB005D3C72 /* libsentry.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsentry.dylib; path = "lib/sentry-native/xcodebuild/Debug/libsentry.dylib"; sourceTree = "<group>"; };
+		02543D9F2C98770200513FEF /* BookmarkService.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BookmarkService.cpp; path = Services/BookmarkService.cpp; sourceTree = "<group>"; };
+		02543DA02C98770200513FEF /* BookmarkService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = BookmarkService.hpp; path = Services/BookmarkService.hpp; sourceTree = "<group>"; };
+		02543DA22C9C5C3000513FEF /* PerplexionShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = PerplexionShader.hpp; path = Shading/PerplexionShader.hpp; sourceTree = "<group>"; };
+		02543DA32C9DAF3300513FEF /* LibrarySource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LibrarySource.cpp; sourceTree = "<group>"; };
+		02543DA42C9DAF3300513FEF /* LibrarySource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LibrarySource.hpp; sourceTree = "<group>"; };
+		02543DA62C9F57CD00513FEF /* MicrophoneAudioSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MicrophoneAudioSource.cpp; path = Audio/MicrophoneAudioSource.cpp; sourceTree = "<group>"; };
+		02543DA72C9F57CD00513FEF /* MicrophoneAudioSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = MicrophoneAudioSource.hpp; path = Audio/MicrophoneAudioSource.hpp; sourceTree = "<group>"; };
+		02543DA92C9F57D600513FEF /* FileAudioSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FileAudioSource.cpp; path = Audio/FileAudioSource.cpp; sourceTree = "<group>"; };
+		02543DAA2C9F57D600513FEF /* FileAudioSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = FileAudioSource.hpp; path = Audio/FileAudioSource.hpp; sourceTree = "<group>"; };
+		02543DAC2C9F59B100513FEF /* ofxAudioFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxAudioFile.cpp; sourceTree = "<group>"; };
+		02543DAD2C9F59B300513FEF /* ofxAudioFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxAudioFile.h; sourceTree = "<group>"; };
+		02543DB32C9F5B0D00513FEF /* dr_mp3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dr_mp3.h; sourceTree = "<group>"; };
+		02543DB42C9F5B0D00513FEF /* dr_flac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dr_flac.h; sourceTree = "<group>"; };
+		02543DB52C9F5B0E00513FEF /* dr_wav.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dr_wav.h; sourceTree = "<group>"; };
+		02543DB62C9F5B0E00513FEF /* stb_vorbis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stb_vorbis.h; sourceTree = "<group>"; };
+		02543DB72CA1BB1000513FEF /* AudioTrack.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = AudioTrack.hpp; path = Models/AudioTrack.hpp; sourceTree = "<group>"; };
 		025AD49C291A9E3200F78F46 /* FileBrowserView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FileBrowserView.cpp; path = Views/FileBrowserView.cpp; sourceTree = "<group>"; };
 		025AD49D291A9E3200F78F46 /* FileBrowserView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = FileBrowserView.hpp; path = Views/FileBrowserView.hpp; sourceTree = "<group>"; };
-		026EA9442A5AF25200AA3E55 /* libcpr.1.9.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcpr.1.9.6.dylib; path = ../../../../../../usr/local/lib/libcpr.1.9.6.dylib; sourceTree = "<group>"; };
 		026EA9492A5ED9F800AA3E55 /* LibraryFile.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LibraryFile.cpp; sourceTree = "<group>"; };
 		026ED08A2C52AC5F00810E44 /* ofxVideoRecorder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxVideoRecorder.cpp; sourceTree = "<group>"; };
 		026ED08B2C52AC5F00810E44 /* ofxVideoRecorder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxVideoRecorder.h; sourceTree = "<group>"; };
@@ -448,7 +475,6 @@
 		028FA5E8295D062600FE6FE3 /* AudioBumperShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = AudioBumperShader.hpp; path = Shading/AudioBumperShader.hpp; sourceTree = "<group>"; };
 		028FA5E9295D0FB200FE6FE3 /* AudioMountainsShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = AudioMountainsShader.hpp; path = Shading/AudioMountainsShader.hpp; sourceTree = "<group>"; };
 		0295030E2AA3985200ED05F9 /* SobelShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SobelShader.hpp; path = Shading/SobelShader.hpp; sourceTree = "<group>"; };
-		0295FF962B915F9A0040B7E2 /* libcpr.1.9.7.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcpr.1.9.7.dylib; path = "../../../../cpr-1.9.7/lib/libcpr.1.9.7.dylib"; sourceTree = "<group>"; };
 		0295FF992B91652E0040B7E2 /* shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; path = shaders; sourceTree = "<group>"; };
 		029742E02B34D1FB00C4ECDB /* GameboyShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = GameboyShader.hpp; path = Shading/GameboyShader.hpp; sourceTree = "<group>"; };
 		029742E12B34D33400C4ECDB /* ImageTexture.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ImageTexture.cpp; path = Shading/ImageTexture.cpp; sourceTree = "<group>"; };
@@ -547,6 +573,7 @@
 		02B756952BE9B02300DE97FF /* FullHouseShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = FullHouseShader.hpp; path = Shading/FullHouseShader.hpp; sourceTree = "<group>"; };
 		02B756962BEA65BE00DE97FF /* Workspace.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = Workspace.hpp; path = Models/Workspace.hpp; sourceTree = "<group>"; };
 		02B756972BEBB62D00DE97FF /* BlendShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = BlendShader.hpp; path = Shading/BlendShader.hpp; sourceTree = "<group>"; };
+		02BB94FF2CAD8C4900CF5311 /* libcpr.1.9.7.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libcpr.1.9.7.dylib; sourceTree = "<group>"; };
 		02BD34CC2BFD3D8F007ED87E /* MultiSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MultiSource.cpp; sourceTree = "<group>"; };
 		02BD34CD2BFD3D8F007ED87E /* MultiSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MultiSource.hpp; sourceTree = "<group>"; };
 		02BD34CF2BFFD384007ED87E /* ShaderInfoView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ShaderInfoView.cpp; path = Views/ShaderInfoView.cpp; sourceTree = "<group>"; };
@@ -587,7 +614,7 @@
 		02D9A7B62B7FC32F001F22C5 /* ParameterTileBrowserView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ParameterTileBrowserView.cpp; path = Views/ParameterTileBrowserView.cpp; sourceTree = "<group>"; };
 		02D9A7BD2B8037C4001F22C5 /* Icon.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = Icon.hpp; path = Models/Icon.hpp; sourceTree = "<group>"; };
 		02D9D73F2933E6CE00DDBE47 /* KaleidoscopeShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = KaleidoscopeShader.hpp; path = Shading/KaleidoscopeShader.hpp; sourceTree = "<group>"; };
-		02DDED8829EF08E90040382F /* dude_wake_up_tests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = dude_wake_up_tests; sourceTree = BUILT_PRODUCTS_DIR; };
+		02DDD7662CADC530001257C5 /* RollingMean.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = RollingMean.hpp; path = Util/RollingMean.hpp; sourceTree = "<group>"; };
 		02DDED8A29EF08E90040382F /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		02DDED9129EF092B0040382F /* ShaderChainerServiceTests.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ShaderChainerServiceTests.hpp; sourceTree = "<group>"; };
 		02DDEDFF29F184280040382F /* LumaMaskMakerShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = LumaMaskMakerShader.hpp; path = Shading/LumaMaskMakerShader.hpp; sourceTree = "<group>"; };
@@ -917,6 +944,7 @@
 				02FAEA3D2B3DDFD900CA20F6 /* libfftw3.a in Frameworks */,
 				02542F132A4C6FEB005D3C72 /* libsentry.dylib in Frameworks */,
 				631702104AFC104323A9EB79 /* CoreMIDI.framework in Frameworks */,
+				02BB95002CAD8C4900CF5311 /* libcpr.1.9.7.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -926,6 +954,12 @@
 		021026F4289412660060F282 /* libs */ = {
 			isa = PBXGroup;
 			children = (
+				023FA46F2CADBCE2009512C3 /* openFrameworks */,
+				023FA46D2CADA8A3009512C3 /* boost */,
+				02543DB42C9F5B0D00513FEF /* dr_flac.h */,
+				02543DB32C9F5B0D00513FEF /* dr_mp3.h */,
+				02543DB52C9F5B0E00513FEF /* dr_wav.h */,
+				02543DB62C9F5B0E00513FEF /* stb_vorbis.h */,
 				02BED6682C46E88300E75054 /* Link.hpp */,
 				02B16F3929674AF30043CA74 /* imgui-node-editor */,
 				028FA5D6295B1ACE00FE6FE3 /* implot */,
@@ -941,6 +975,8 @@
 				02E7FBCA2C516BC400460E44 /* json.hpp */,
 				026ED08A2C52AC5F00810E44 /* ofxVideoRecorder.cpp */,
 				026ED08B2C52AC5F00810E44 /* ofxVideoRecorder.h */,
+				02543DAC2C9F59B100513FEF /* ofxAudioFile.cpp */,
+				02543DAD2C9F59B300513FEF /* ofxAudioFile.h */,
 			);
 			name = libs;
 			sourceTree = "<group>";
@@ -950,6 +986,10 @@
 			children = (
 				0230658A29534EAD00489A9F /* AudioSource.hpp */,
 				02ED91052955F179002252CC /* AudioSource.cpp */,
+				02543DA62C9F57CD00513FEF /* MicrophoneAudioSource.cpp */,
+				02543DA72C9F57CD00513FEF /* MicrophoneAudioSource.hpp */,
+				02543DA92C9F57D600513FEF /* FileAudioSource.cpp */,
+				02543DAA2C9F57D600513FEF /* FileAudioSource.hpp */,
 			);
 			name = Audio;
 			sourceTree = "<group>";
@@ -1069,12 +1109,12 @@
 		02A0C4892A4B0C4500974602 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				023FA4692CADA123009512C3 /* boost_filesystem.a */,
+				023FA46A2CADA123009512C3 /* boost_system.a */,
 				026ED0912C5929AB00810E44 /* libcpr.1.10.5.dylib */,
-				0295FF962B915F9A0040B7E2 /* libcpr.1.9.7.dylib */,
+				02BB94FF2CAD8C4900CF5311 /* libcpr.1.9.7.dylib */,
 				0216D34D2B8073E100D792AA /* libcpr.1.dylib */,
 				02FAEA3B2B3DDDAC00CA20F6 /* libfftw3.a */,
-				022D18F62A78533A00AEBC05 /* libPocoData.a */,
-				026EA9442A5AF25200AA3E55 /* libcpr.1.9.6.dylib */,
 				02542F122A4C6FEB005D3C72 /* libsentry.dylib */,
 			);
 			name = Frameworks;
@@ -1255,6 +1295,8 @@
 				02DF59B62B7842B1005B772A /* IconSource.hpp */,
 				02BD34CC2BFD3D8F007ED87E /* MultiSource.cpp */,
 				02BD34CD2BFD3D8F007ED87E /* MultiSource.hpp */,
+				02543DA32C9DAF3300513FEF /* LibrarySource.cpp */,
+				02543DA42C9DAF3300513FEF /* LibrarySource.hpp */,
 			);
 			path = Video;
 			sourceTree = "<group>";
@@ -1315,6 +1357,7 @@
 				023380D32BD05B710060A697 /* GyroidsShader.hpp */,
 				023380CD2BD05B700060A697 /* ImageTexture.cpp */,
 				023380D52BD05B710060A697 /* ImageTexture.hpp */,
+				02543DA22C9C5C3000513FEF /* PerplexionShader.hpp */,
 				023380D22BD05B710060A697 /* ShaderType.hpp */,
 				023380C82BD05B700060A697 /* SmokeRingShader.hpp */,
 				023380C72BD05B700060A697 /* SwirlingSoulShader.hpp */,
@@ -1444,6 +1487,8 @@
 				02D9A7B22B7D73F7001F22C5 /* TextureService.hpp */,
 				0204F6092B89178F0033970D /* StrandService.cpp */,
 				0204F6082B89178F0033970D /* StrandService.hpp */,
+				02543D9F2C98770200513FEF /* BookmarkService.cpp */,
+				02543DA02C98770200513FEF /* BookmarkService.hpp */,
 			);
 			name = Services;
 			sourceTree = "<group>";
@@ -1469,6 +1514,7 @@
 				029F87B62BC76A7F0059B1DA /* Connection.cpp */,
 				02E111822AF14CDB00DA6EB2 /* MarkdownItem.hpp */,
 				8E6F93F1321B6CED25B7BE23 /* AudioSettings.hpp */,
+				02DDD7662CADC530001257C5 /* RollingMean.hpp */,
 				54DD623E99AFF042FF1E59E7 /* Parameter.cpp */,
 				19F3D4684311CC8582634E63 /* Parameter.hpp */,
 				02F4083E298FEBF9000632FC /* AvailableStrand.hpp */,
@@ -1481,6 +1527,7 @@
 				020B520A2BC85D6F00B88418 /* FavoriteParameter.hpp */,
 				02D49C152B993AF100F48242 /* FavoriteParameter.cpp */,
 				02B756962BEA65BE00DE97FF /* Workspace.hpp */,
+				02543DB72CA1BB1000513FEF /* AudioTrack.hpp */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -2027,9 +2074,9 @@
 				BB4B014C10F69532006C3DED /* addons */,
 				6948EE371B920CB800B5AC1A /* local_addons */,
 				E4B69B5B0A3A1756003C02F2 /* nottawa.app */,
-				02DDED8829EF08E90040382F /* dude_wake_up_tests */,
 				02DDED8929EF08E90040382F /* dude_wake_up_tests */,
 				02A0C4892A4B0C4500974602 /* Frameworks */,
+				023FA4682CAD9F88009512C3 /* dude_wake_up_tests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -2070,16 +2117,16 @@
 			);
 			name = dude_wake_up_tests;
 			productName = dude_wake_up_tests;
-			productReference = 02DDED8829EF08E90040382F /* dude_wake_up_tests */;
+			productReference = 023FA4682CAD9F88009512C3 /* dude_wake_up_tests */;
 			productType = "com.apple.product-type.tool";
 		};
 		E4B69B5A0A3A1756003C02F2 /* dude_wake_up */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = E4B69B5F0A3A1757003C02F2 /* Build configuration list for PBXNativeTarget "dude_wake_up" */;
 			buildPhases = (
+				E4B69B590A3A1756003C02F2 /* Frameworks */,
 				E42962A92163ECCD00A6A9E2 /* ShellScript */,
 				E4B69B580A3A1756003C02F2 /* Sources */,
-				E4B69B590A3A1756003C02F2 /* Frameworks */,
 				E4B6FFFD0C3F9AB9008CF71C /* Run Script */,
 				E4C2427710CC5ABF004149E2 /* Copy Files */,
 				8466F1851C04CA0E00918B1C /* ShellScript */,
@@ -2191,7 +2238,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "mkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n# Copy default icon file into App/Resources\nrsync -aved \"$ICON_FILE\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n# Copy libfmod and change install directory for fmod to run\nrsync -aved \"$OF_PATH/libs/fmod/lib/osx/libfmod.dylib\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/\";\n# Not needed as we now call install_name_tool -id @loader_path/../Frameworks/libfmod.dylib libfmod.dylib on the dylib directly which prevents the need for calling every post build - keeping here for reference and possible legacy usage \n# install_name_tool -change @rpath/libfmod.dylib @executable_path/../Frameworks/libfmod.dylib \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/MacOS/$PRODUCT_NAME\";\n\nrsync -aved \"$NOTTAWA_DIR/lib/sentry-native/xcodebuild/Debug/libsentry.dylib\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/\";\n\necho \"$GCC_PREPROCESSOR_DEFINITIONS\";\nNOTTAWA_DIR=\"/Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up\"\nalias \n\n# Copy the shaders folder into Resources/data\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/\"\n\nrsync -av --progress \"$NOTTAWA_DIR/images/\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/images\"\n\n\ncp -R \"$NOTTAWA_DIR/shaders/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/shaders\"\n\n# Copy the markdown folder into Resources/data\ncp -R \"$NOTTAWA_DIR/markdown/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/markdown\"\n\n# Copy the fonts folder into Resources/data\ncp -R \"$NOTTAWA_DIR/fonts/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/fonts\"\n\n# Copy the misc folder into Resources/data\ncp -R \"$NOTTAWA_DIR/misc/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/misc\"\n";
+			shellScript = "mkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n# Copy default icon file into App/Resources\nrsync -aved \"$ICON_FILE\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n# Copy libfmod and change install directory for fmod to run\nrsync -aved \"$OF_PATH/libs/fmod/lib/osx/libfmod.dylib\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/\";\n# Not needed as we now call install_name_tool -id @loader_path/../Frameworks/libfmod.dylib libfmod.dylib on the dylib directly which prevents the need for calling every post build - keeping here for reference and possible legacy usage \n# install_name_tool -change @rpath/libfmod.dylib @executable_path/../Frameworks/libfmod.dylib \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/MacOS/$PRODUCT_NAME\";\n\nrsync -aved \"$NOTTAWA_DIR/lib/sentry-native/xcodebuild/Debug/libsentry.dylib\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/\";\n\necho \"$GCC_PREPROCESSOR_DEFINITIONS\";\nNOTTAWA_DIR=\"/Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up\"\nalias \n\n# Copy the shaders folder into Resources/data\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/\"\n\nrsync -av --progress \"$NOTTAWA_DIR/images/\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/images\"\n\n\ncp -R \"$NOTTAWA_DIR/shaders/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/shaders\"\n\n# Copy the markdown folder into Resources/data\ncp -R \"$NOTTAWA_DIR/markdown/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/markdown\"\n\n# Copy the fonts folder into Resources/data\ncp -R \"$NOTTAWA_DIR/fonts/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/fonts\"\n\n# Copy the misc folder into Resources/data\ncp -R \"$NOTTAWA_DIR/misc/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/misc\"\n\n# Copy the audio folder into Resources/data\ncp -R \"$NOTTAWA_DIR/audio/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/audio\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -2342,6 +2389,7 @@
 				E984796BE84AA4315636B6E7 /* imgui_demo.cpp in Sources */,
 				00413C35AAE31B483D7538AB /* imgui_draw.cpp in Sources */,
 				024D1689289DFD8400DA807C /* FeedbackShader.cpp in Sources */,
+				02543DAE2C9F59B300513FEF /* ofxAudioFile.cpp in Sources */,
 				DAE67500A7BFCE7D22EEE423 /* imgui_tables.cpp in Sources */,
 				0090B479605B26E7C387B02D /* imgui_widgets.cpp in Sources */,
 				028FA5AF2956062B00FE6FE3 /* MFCC.cpp in Sources */,
@@ -2363,6 +2411,7 @@
 				02F2A06A29C4F2A00072CE86 /* TextSource.cpp in Sources */,
 				029F87B72BC76A7F0059B1DA /* Connection.cpp in Sources */,
 				020B520D2BC8666200B88418 /* StageModeView.cpp in Sources */,
+				02543DA52C9DAF3300513FEF /* LibrarySource.cpp in Sources */,
 				026EA94A2A5EDA7500AA3E55 /* LibraryFile.cpp in Sources */,
 				DC62E5817CB03447F2ADFB85 /* ImHelpers.cpp in Sources */,
 				02BD34D12BFFD384007ED87E /* ShaderInfoView.cpp in Sources */,
@@ -2376,6 +2425,7 @@
 				028E8E6029A6A0B800B95C92 /* MarkdownService.cpp in Sources */,
 				02B280EA2915480600B793D5 /* WebcamSource.cpp in Sources */,
 				028FA5DE295B1ACE00FE6FE3 /* implot_demo.cpp in Sources */,
+				02543DA82C9F57CD00513FEF /* MicrophoneAudioSource.cpp in Sources */,
 				026ED08F2C52C63800810E44 /* VideoRecordingView.cpp in Sources */,
 				02BED6612C46BE4200E75054 /* StrandBrowserView.cpp in Sources */,
 				025AD49E291A9E3200F78F46 /* FileBrowserView.cpp in Sources */,
@@ -2392,7 +2442,9 @@
 				02BED65B2C46BCE900E75054 /* Strings.cpp in Sources */,
 				881AF887EC2124F4105DE9E1 /* ofxMidiClock.cpp in Sources */,
 				024D1690289ED64700DA807C /* OnsetDetectionFunction.cpp in Sources */,
+				02543DA12C98770200513FEF /* BookmarkService.cpp in Sources */,
 				021AF00B2B6164FA00E1AD75 /* WaveformOscillator.cpp in Sources */,
+				02543DAB2C9F57D600513FEF /* FileAudioSource.cpp in Sources */,
 				021AF0092B6164FA00E1AD75 /* PulseOscillator.cpp in Sources */,
 				02F2A06829C4D8F30072CE86 /* TextEditorView.cpp in Sources */,
 				0BFC9C20FD7E3C8D5873AA97 /* ofxMidiIn.cpp in Sources */,
@@ -2806,7 +2858,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
 				CC = "";
-				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CODE_SIGN_ENTITLEMENTS = dude_wake_up.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -2878,10 +2930,15 @@
 					"$(PROJECT_DIR)/frameworks",
 					"/Users/jcrozier/Downloads/cpr-1.9.7/lib",
 					/opt/local/lib,
+					"$(PROJECT_DIR)",
 				);
 				LINK_PLATFORM_MACOSX = 1;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
+				OTHER_CPLUSPLUSFLAGS = (
+					"-D__MACOSX_CORE__",
+					"-lboost_thread",
+				);
 				OTHER_LDFLAGS = (
 					"$(OF_CORE_LIBS)",
 					"$(OF_CORE_FRAMEWORKS)",
@@ -2889,6 +2946,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.joecrozier.nottawa;
 				PRODUCT_NAME = nottawa;
+				SDKROOT = macosx;
 				STRIP_INSTALLED_PRODUCT = NO;
 				WRAPPER_EXTENSION = app;
 				baseConfigurationReference = E4EB6923138AFD0F00A09F29;
@@ -3019,7 +3077,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
 				CC = "";
-				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CODE_SIGN_ENTITLEMENTS = dude_wake_up.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
@@ -3075,7 +3133,6 @@
 					"lib/sentry-native/include/**",
 					"lib/observable/**",
 					"lib/ableton/**",
-					/usr/local/include/cpr,
 				);
 				ICON = "$(ICON_NAME_DEBUG)";
 				ICON_FILE = "$(ICON_FILE_PATH)$(ICON)";
@@ -3097,10 +3154,15 @@
 					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/Debug",
 					"$(PROJECT_DIR)/frameworks",
 					/opt/local/lib,
+					"$(PROJECT_DIR)",
 				);
 				LINK_PLATFORM_MACOSX = 1;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
+				OTHER_CPLUSPLUSFLAGS = (
+					"-D__MACOSX_CORE__",
+					"-lboost_thread",
+				);
 				OTHER_LDFLAGS = (
 					"$(OF_CORE_LIBS)",
 					"$(OF_CORE_FRAMEWORKS)",
@@ -3109,6 +3171,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.joecrozier.nottawa;
 				PRODUCT_NAME = nottawa;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = macosx;
 				STRIP_INSTALLED_PRODUCT = NO;
 				WRAPPER_EXTENSION = app;
 			};
@@ -3120,7 +3183,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
 				CC = "";
-				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CODE_SIGN_ENTITLEMENTS = dude_wake_up.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Distribution";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
@@ -3188,10 +3251,15 @@
 					"/Users/jcrozier/Downloads/vcpkg/installed/arm64-osx/lib",
 					"$(PROJECT_DIR)/frameworks",
 					/opt/local/lib,
+					"$(PROJECT_DIR)",
 				);
 				LINK_PLATFORM_MACOSX = 1;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
+				OTHER_CPLUSPLUSFLAGS = (
+					"-D__MACOSX_CORE__",
+					"-lboost_thread",
+				);
 				OTHER_LDFLAGS = (
 					"$(OF_CORE_LIBS)",
 					"$(OF_CORE_FRAMEWORKS)",
@@ -3199,6 +3267,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.joecrozier.nottawa;
 				PRODUCT_NAME = nottawa;
+				SDKROOT = macosx;
 				STRIP_INSTALLED_PRODUCT = NO;
 				WRAPPER_EXTENSION = app;
 				baseConfigurationReference = E4EB6923138AFD0F00A09F29;

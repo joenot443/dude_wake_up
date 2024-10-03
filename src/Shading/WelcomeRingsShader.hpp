@@ -38,7 +38,6 @@ struct WelcomeRingsSettings: public ShaderSettings {
 struct WelcomeRingsShader: Shader {
   WelcomeRingsSettings *settings;
   WelcomeRingsShader(WelcomeRingsSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   
   void setup() override {
     shader.load("shaders/WelcomeRings");

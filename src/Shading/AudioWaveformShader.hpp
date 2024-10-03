@@ -40,7 +40,7 @@ public:
   Shader(settings) {};
 
 
-  ofShader shader;
+
   void setup() override {
     #ifdef TESTING
 shader.load("shaders/AudioWaveform");

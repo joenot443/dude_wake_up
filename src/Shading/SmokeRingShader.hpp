@@ -42,7 +42,7 @@ struct SmokeRingShader : Shader
 {
   SmokeRingSettings *settings;
   SmokeRingShader(SmokeRingSettings *settings) : settings(settings), Shader(settings){};
-  ofShader shader;
+
   void setup() override
   {
     shader.load("shaders/SmokeRing");

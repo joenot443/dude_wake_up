@@ -343,7 +343,7 @@ void CommonViews::IntShaderStageParameter(std::shared_ptr<Parameter> param) {
   ResetButton(param->paramId, param);
   ImGui::SameLine();
   FavoriteButton(param);
-  return ret;
+
 }
 
 
@@ -411,7 +411,6 @@ void CommonViews::ShaderStageParameter(std::shared_ptr<Parameter> param, std::sh
   ImGui::SameLine();
   FavoriteButton(param);
   ImGui::Columns(1, formatString("%s_param_columns", param->paramId.c_str()).c_str());
-  return ret;
 }
 
 bool CommonViews::AreaSlider(std::string id,
@@ -485,7 +484,7 @@ bool CommonViews::SelectionRect(ImVec2 *start_pos, ImVec2 *end_pos, ImVec2 topLe
   return ImGui::IsMouseReleased(ImGuiMouseButton_Left);
 }
 
-bool CommonViews::MultiSlider(std::string title, std::string id, std::shared_ptr<Parameter> param1, std::shared_ptr<Parameter> param2,
+void CommonViews::MultiSlider(std::string title, std::string id, std::shared_ptr<Parameter> param1, std::shared_ptr<Parameter> param2,
                               std::shared_ptr<Oscillator> param1Oscillator,
                               std::shared_ptr<Oscillator> param2Oscillator) {
   ImGui::PushItemWidth(400);
@@ -726,11 +725,13 @@ bool CommonViews::ResetButton(std::string id,
   return hit;
 }
 
-bool CommonViews::ShaderOption(std::shared_ptr<Parameter> param, std::vector<std::string> options) {
-  if (options.empty()) return; // Early exit if no options provided
+bool CommonViews::ShaderOption(std::shared_ptr<Parameter> param, std::vector<std::string> options, bool drawTitle) {
+  if (options.empty()) return false;
   
-  ImGui::Text("%s", param->name.c_str()); // Display the name of the parameter
-  ImGui::SameLine(0, 20); // Align next item on the same line with spacing
+  if (drawTitle) {
+    ImGui::Text("%s", param->name.c_str());
+    ImGui::SameLine(0, 20);
+  }
   
   // Convert vector of std::string to vector of const char* for ImGui::Combo
   std::vector<const char*> items;
@@ -739,17 +740,20 @@ bool CommonViews::ShaderOption(std::shared_ptr<Parameter> param, std::vector<std
   }
   
   int currentItem = static_cast<int>(param->value); // Assuming param->value holds the index of the current selected option
-  if (ImGui::Combo(param->name.c_str(), &currentItem, items.data(), items.size())) {
+  ImGui::PushID(param->paramId.c_str());
+  if (ImGui::Combo("", &currentItem, items.data(), items.size())) {
     param->intValue = currentItem;
     param->affirmIntValue();
+    ImGui::PopID();
     return true;
   }
+  ImGui::PopID();
   return false;
 }
 
 bool CommonViews::InvisibleIconButton(std::string id)
 {
-  ImGui::InvisibleButton(id.c_str(), ImVec2(16., 16.));
+  return ImGui::InvisibleButton(id.c_str(), ImVec2(16., 16.));
 }
 
 
@@ -890,7 +894,7 @@ void CommonViews::FavoriteButton(std::shared_ptr<Parameter> param) {
   }
 }
 
-bool CommonViews::BlendModeSelector(std::shared_ptr<Parameter> blendMode, std::shared_ptr<Parameter> flip, std::shared_ptr<Parameter> alpha, std::shared_ptr<Oscillator> alphaOscillator, std::shared_ptr<Parameter> blendWithEmpty)
+void CommonViews::BlendModeSelector(std::shared_ptr<Parameter> blendMode, std::shared_ptr<Parameter> flip, std::shared_ptr<Parameter> alpha, std::shared_ptr<Oscillator> alphaOscillator, std::shared_ptr<Parameter> blendWithEmpty)
 {
   static std::vector<std::string> BlendModeNames = {
     "Multiply",

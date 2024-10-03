@@ -26,7 +26,7 @@ struct CircleSettings: public ShaderSettings {
 struct CircleShader: public Shader {
   CircleSettings *settings;
   CircleShader(CircleSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
 #ifdef TESTING
 shader.load("shaders/Circle");

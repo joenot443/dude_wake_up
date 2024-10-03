@@ -35,7 +35,7 @@ struct AlphaMixSettings: public ShaderSettings {
 struct AlphaMixShader: Shader {
   AlphaMixSettings *settings;
   AlphaMixShader(AlphaMixSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/AlphaMix");
   }

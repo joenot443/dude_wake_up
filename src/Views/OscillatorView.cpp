@@ -34,7 +34,7 @@ void OscillatorView::draw(std::vector<std::tuple<std::shared_ptr<Oscillator>, st
   
   OscillatorType type = oscillator->type;
   
-  if (oscillator.get()->type == Oscillator_waveform)
+  if (type == Oscillator_waveform)
   {
     WaveformOscillator *waveformOscillator = (WaveformOscillator *)oscillator.get();
     ImVector<ImVec2> data = waveformOscillator->data;

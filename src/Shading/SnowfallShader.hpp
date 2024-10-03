@@ -52,7 +52,7 @@ struct Flake {
 struct SnowfallShader: Shader {
   SnowfallSettings *settings;
   std::vector<Flake> flakes;
-  ofShader shader;
+
   int flakesCount;
   
   SnowfallShader(SnowfallSettings *settings) : settings(settings), Shader(settings) {

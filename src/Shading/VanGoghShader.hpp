@@ -29,7 +29,7 @@ public:
 
   VanGoghSettings *settings;
   VanGoghShader(VanGoghSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     #ifdef TESTING
 shader.load("shaders/VanGogh");

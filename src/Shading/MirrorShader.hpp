@@ -53,7 +53,7 @@ public:
 class MirrorShader : public Shader {
 public:
   
-  ofShader shader;
+
   MirrorSettings *settings;
   MirrorShader(MirrorSettings *settings)
   : settings(settings), Shader(settings){};

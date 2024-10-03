@@ -48,7 +48,7 @@ struct HSBSettings: public ShaderSettings {
 class HSBShader: public Shader {
 public:
 
-  ofShader shader;
+
 public:
   HSBShader(HSBSettings *settings) : Shader(settings), settings(settings) {};
   

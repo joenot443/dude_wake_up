@@ -60,7 +60,7 @@ struct CommonViews
   
   static void ShaderIntParameter(std::shared_ptr<Parameter> param);
   
-  static bool ShaderOption(std::shared_ptr<Parameter> param, std::vector<std::string> options);
+  static bool ShaderOption(std::shared_ptr<Parameter> param, std::vector<std::string> options, bool drawTitle = true);
   
   static bool TextureFieldAndBrowser(std::shared_ptr<Parameter> param);
   
@@ -92,7 +92,7 @@ struct CommonViews
   
   static bool Slider(std::string title, std::string id, std::shared_ptr<Parameter> param);
   
-  static bool MultiSlider(std::string title, std::string id, std::shared_ptr<Parameter> param1, std::shared_ptr<Parameter> param2,
+  static void MultiSlider(std::string title, std::string id, std::shared_ptr<Parameter> param1, std::shared_ptr<Parameter> param2,
                           std::shared_ptr<Oscillator> param1Oscillator,
                           std::shared_ptr<Oscillator> param2Oscillator);
   
@@ -110,7 +110,7 @@ struct CommonViews
   
   static bool SelectionRect(ImVec2* start_pos, ImVec2* end_pos, ImVec2 topLeft, ImVec2 bottomRight);
   
-  static bool BlendModeSelector(std::shared_ptr<Parameter> param, std::shared_ptr<Parameter> flip = nullptr, std::shared_ptr<Parameter> alpha = nullptr, std::shared_ptr<Oscillator> alphaOscillator = nullptr, std::shared_ptr<Parameter> blendWithEmpty = nullptr);
+  static void BlendModeSelector(std::shared_ptr<Parameter> param, std::shared_ptr<Parameter> flip = nullptr, std::shared_ptr<Parameter> alpha = nullptr, std::shared_ptr<Oscillator> alphaOscillator = nullptr, std::shared_ptr<Parameter> blendWithEmpty = nullptr);
   
   static bool ResetButton(std::string id, std::shared_ptr<Parameter> param);
   static void OscillateButton(std::string id, std::shared_ptr<Oscillator> o, std::shared_ptr<Parameter> param);

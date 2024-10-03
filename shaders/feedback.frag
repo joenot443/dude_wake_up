@@ -26,7 +26,6 @@ uniform vec3 hsb;
 uniform vec3 rescale;
 uniform vec3 invert;
 
-
 /*
  
  mainAlpha: Alpha for mainTexture
@@ -39,23 +38,8 @@ uniform vec3 invert;
 vec4 blend(vec4 a, vec4 b, int mode) {
   vec4 result;
   if (mode == 0) { // Standard
-
-    // Empty main
-    if (a.a < 0.05) {
-      return vec4(b.rgb, fbAlpha * 0.95);
-    }
-    
-    // Empty feedback
-    if (b.a < 0.05) {
-      return vec4(a.rgb, mainAlpha);
-    }
-    
-    vec4 main = vec4(a.rgb, mainAlpha);
-    vec4 fb = vec4(b.rgb, fbAlpha);
-    
-    return mix(main, fb, fbMix);
+    return mix(a, b, fbMix);
   }
-  
   else if (mode == 1) { // Multiply
     result = a * b;
   } else if (mode == 2) { // Screen
@@ -178,7 +162,23 @@ void main() {
     fbColor = mixLumaKey(mainColor, fbColor, lumaKey, lumaThresh);
   }
   
-  outColor = blend(mainColor, fbColor, blendMode);
+  // Empty main
+  if (mainColor.a < 0.05) {
+    outColor = vec4(fbColor.rgb, fbColor.a * fbAlpha);
+  }
+  // Empty alpha
+  else if (fbColor.a < 0.05) {
+    outColor = vec4(mainColor.rgb, mainColor.a * mainAlpha);
+  }
+  // Blend normally
+  else {
+    outColor = blend(mainColor, fbColor, blendMode);
+  }
+  
+  // Check for black
+  if (outColor.r < 0.05 && outColor.g < 0.05 && outColor.b < 0.05) {
+    outColor = vec4(0.0);
+  }
 
   outputColor = outColor;
 }

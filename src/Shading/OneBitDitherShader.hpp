@@ -32,7 +32,8 @@ struct OneBitDitherSettings: public ShaderSettings {
   ShaderSettings(shaderId, j, "OneBitDither") {
     lightColor->setColor({0.5, 0.8, 0.65, 1.0});
     darkColor->setColor({0.2, 0.3, 0.4, 1.0});
-    parameters = { lightColor, darkColor };
+    parameters = { scale, lightColor, darkColor };
+    audioReactiveParameter = scale;
     load(j);
     registerParameters();
   };

@@ -37,7 +37,7 @@ struct DoubleSwirlShader : Shader
 {
   DoubleSwirlSettings *settings;
   DoubleSwirlShader(DoubleSwirlSettings *settings) : settings(settings), Shader(settings){};
-  ofShader shader;
+
   void setup() override
   {
     shader.load("shaders/DoubleSwirl");

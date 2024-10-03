@@ -45,7 +45,7 @@ struct KaleidoscopeSettings : public ShaderSettings {
 class KaleidoscopeShader : public Shader {
 public:
 
-  ofShader shader;
+
   KaleidoscopeSettings *settings;
   KaleidoscopeShader(KaleidoscopeSettings *settings) : settings(settings), Shader(settings) {};
 

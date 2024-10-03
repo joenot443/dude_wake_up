@@ -7,14 +7,51 @@
 
 #include "AudioSourceService.hpp"
 #include "LayoutStateService.hpp"
+#include "FileAudioSource.hpp"
+#include "MicrophoneAudioSource.hpp"
 #include "ConfigService.hpp"
 #include "UUID.hpp"
 
 void AudioSourceService::setup() {
-  ofSoundStream().printDeviceList();
-  
-  link.enable(true);
+  populateTracks();
+  populateSources();
+}
 
+void AudioSourceService::affirmSampleAudioTrack() {
+  selectedSampleTrack = sampleTracks[selectedSampleTrackParam->intValue];
+  
+  // Load the track into the Source
+  if (selectedAudioSource->type() == AudioSourceType_File) {
+    std::shared_ptr<FileAudioSource> source = std::dynamic_pointer_cast<FileAudioSource>(selectedAudioSource);
+    source->loadFile(selectedSampleTrack);
+  }
+}
+
+std::shared_ptr<AudioTrack> AudioSourceService::defaultSampleAudioTrack() {
+  return sampleTracks.front();
+}
+
+void AudioSourceService::populateTracks() {
+  std::vector<std::shared_ptr<AudioTrack>> audioTracks;
+
+  ofDirectory dir(ofToDataPath("audio/"));
+  dir.listDir();
+  for (int i = 0; i < dir.size(); i++)
+  {
+    std::string path = dir.getPath(i);
+    std::string name = dir.getName(i);
+    audioTracks.push_back(std::make_shared<AudioTrack>(name, path));
+  }
+  // Sort by name
+  std::sort(audioTracks.begin(), audioTracks.end(), [](std::shared_ptr<AudioTrack> a, std::shared_ptr<AudioTrack> b)
+            { return a->name < b->name; });
+  sampleTracks = audioTracks;
+  selectedSampleTrack = audioTracks.front();
+}
+
+void AudioSourceService::populateSources() {
+  link.enable(true);
+  
   // Get every input audio device
   auto devices = ofSoundStream().getDeviceList();
   // Create an AudioSource for each input audio device
@@ -23,8 +60,8 @@ void AudioSourceService::setup() {
     if (device.inputChannels == 0) {
       continue;
     }
-
-    auto audioSource = std::make_shared<AudioSource>();
+    
+    auto audioSource = std::make_shared<MicrophoneAudioSource>();
     audioSource->id = UUID::generateUUID();
     audioSource->device = device;
     audioSource->deviceId = device.deviceID;
@@ -36,6 +73,12 @@ void AudioSourceService::setup() {
       selectedAudioSource = defaultAudioSource;
     }
   }
+  
+  auto fileAudioSource = std::make_shared<FileAudioSource>();
+  fileAudioSource->id = UUID::generateUUID();
+  fileAudioSource->name = "Sample Track";
+  fileAudioSource->track = defaultSampleAudioTrack();
+  audioSourceMap[fileAudioSource->id] = fileAudioSource;
 }
 
 std::vector<std::shared_ptr<AudioSource>> AudioSourceService::audioSources() {
@@ -60,7 +103,7 @@ void AudioSourceService::update() {
     selectedAudioSource->audioAnalysis.bpmEnabled = true;
     selectedAudioSource->audioAnalysis.bpm->setValue(link.captureAppSessionState().tempo());
     
-    double beatCount = link.captureAppSessionState().beatAtTime(link.clock().micros(), 4.);    
+    double beatCount = link.captureAppSessionState().beatAtTime(link.clock().micros(), 4.);
     // Only use the fractional component of the beatCount
     selectedAudioSource->audioAnalysis.updateBeat(beatCount - floor(beatCount));
   } else {
@@ -90,10 +133,10 @@ void AudioSourceService::removeParamMapping(std::string paramId) {
 
 json AudioSourceService::config() {
   json j;
-  
-  if (selectedAudioSource != nullptr) {
-    j["deviceId"] = selectedAudioSource->deviceId;
-    j["active"] = selectedAudioSource->active;
+  std::shared_ptr<MicrophoneAudioSource> audioSource = std::dynamic_pointer_cast<MicrophoneAudioSource>(selectedAudioSource);
+  if (audioSource != nullptr) {
+    j["deviceId"] = audioSource->deviceId;
+    j["active"] = audioSource->active;
   }
   
   return j;
@@ -111,7 +154,7 @@ void AudioSourceService::loadConfig(json j) {
 }
 
 void AudioSourceService::selectAudioSource(
-    std::shared_ptr<AudioSource> source) {
+                                           std::shared_ptr<AudioSource> source) {
   if (selectedAudioSource) { selectedAudioSource->disable(); }
   
   selectedAudioSource = source;

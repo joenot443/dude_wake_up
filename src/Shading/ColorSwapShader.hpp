@@ -40,7 +40,7 @@ struct ColorSwapSettings: public ShaderSettings {
 struct ColorSwapShader: Shader {
   ColorSwapSettings *settings;
   ColorSwapShader(ColorSwapSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/ColorSwap");
   }

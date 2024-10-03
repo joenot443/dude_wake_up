@@ -38,7 +38,7 @@ class WarpShader: public Shader {
 public:
   WarpSettings *settings;
   WarpShader(WarpSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/Warp");
   }

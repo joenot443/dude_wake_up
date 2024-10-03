@@ -51,7 +51,7 @@
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.video</string>
 	<key>LSMinimumSystemVersion</key>
-	<string>13.0</string>
+	<string>14.0</string>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs to access the camera</string>
 	<key>NSHighResolutionCapable</key>

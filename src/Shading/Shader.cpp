@@ -14,6 +14,7 @@
 #include "NodeLayoutView.hpp"
 #include "LayoutStateService.hpp"
 
+
 void Shader::traverseFrame(std::shared_ptr<ofFbo> frame, int depth)
 {
   clearLastFrame();
@@ -123,16 +124,19 @@ void Shader::checkForFileChanges() {
   auto shaderFile = ofFile(path);
   
   if (!shaderFile.exists()) {
-//    log("Shader doesn't exist - " + name());
+    log("Shader doesn't exist - " + name());
     return;
   }
   
   // Check when the file was last modified
-  unsigned int time = std::filesystem::last_write_time(shaderFile);
+  auto time = std::filesystem::last_write_time(shaderFile);
   
-  if (time > lastModified) {
-    lastModified = time;
+  if (time.time_since_epoch().count() > lastModified) {
+    lastModified = time.time_since_epoch().count();
     shader.unload();
+    // Print the contents of the shader file
+    log("Shader file contents - " + shaderFile.readToBuffer().getText());
+    
     shader.load("shaders/" + shaderName);
     log("Reloaded Shader for - " + shaderName);
   }

@@ -45,7 +45,7 @@ public:
 
   LumaMaskMakerSettings *settings;
   LumaMaskMakerShader(LumaMaskMakerSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/LumaMaskMaker");
   }

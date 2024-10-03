@@ -122,7 +122,18 @@ enum ShaderType {
   ShaderTypeGlitchAudio,
   ShaderTypeDoubleBlur,
   ShaderTypeOutline,
-  ShaderTypeStars,
+  ShaderTypeCosmos,
+  ShaderTypeFloatingSparks,
+  ShaderTypeAudioBlocks,
+  ShaderTypeCloudyShapes,
+  ShaderTypeSpaceRings,
+  ShaderTypeUnknownPleasures,
+  ShaderTypeStarryPlanes,
+  ShaderTypeFractalAudio,
+  ShaderTypeFlickerAudio,
+  ShaderTypeDiscoAudio,
+  ShaderTypeColorWheel,
+  ShaderTypePerplexion,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -232,8 +243,30 @@ static std::vector<ShaderType> AllShaderTypes() {
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) { // ShaderNames
-    case ShaderTypeStars:
-      return "Stars";
+    case ShaderTypePerplexion:
+      return "Perplexion";
+    case ShaderTypeColorWheel:
+      return "ColorWheel";
+    case ShaderTypeDiscoAudio:
+      return "DiscoAudio";
+    case ShaderTypeFlickerAudio:
+      return "FlickerAudio";
+    case ShaderTypeFractalAudio:
+      return "FractalAudio";
+    case ShaderTypeStarryPlanes:
+      return "StarryPlanes";
+    case ShaderTypeUnknownPleasures:
+      return "UnknownPleasures";
+    case ShaderTypeSpaceRings:
+      return "SpaceRings";
+    case ShaderTypeCloudyShapes:
+      return "CloudyShapes";
+    case ShaderTypeAudioBlocks:
+      return "AudioBlocks";
+    case ShaderTypeFloatingSparks:
+      return "FloatingSparks";
+    case ShaderTypeCosmos:
+      return "Cosmos";
     case ShaderTypeOutline:
       return "Outline";
     case ShaderTypeDoubleBlur:

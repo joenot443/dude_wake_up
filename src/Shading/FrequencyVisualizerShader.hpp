@@ -37,7 +37,7 @@ struct FrequencyVisualizerShader : Shader
 {
   FrequencyVisualizerSettings *settings;
   FrequencyVisualizerShader(FrequencyVisualizerSettings *settings) : settings(settings), Shader(settings){};
-  ofShader shader;
+
   void setup() override
   {
     shader.load("shaders/FrequencyVisualizer");

@@ -44,7 +44,7 @@ struct RotateSettings: public ShaderSettings {
 struct RotateShader: Shader {
   RotateSettings *settings;
   RotateShader(RotateSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/Rotate");
   }

@@ -35,7 +35,7 @@ struct PieSplitSettings: public ShaderSettings {
 struct PieSplitShader: Shader {
   PieSplitSettings *settings;
   PieSplitShader(PieSplitSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   std::set<InputSlot> activeInputs;
 
   void setup() override {

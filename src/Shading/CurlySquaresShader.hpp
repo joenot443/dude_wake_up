@@ -47,7 +47,7 @@ class CurlySquaresShader: public Shader {
 public:
   CurlySquaresSettings *settings;
   CurlySquaresShader(CurlySquaresSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/CurlySquares");
   }

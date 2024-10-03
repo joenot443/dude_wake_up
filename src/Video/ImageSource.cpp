@@ -7,12 +7,13 @@
 
 #include "ImageSource.hpp"
 #include "NodeLayoutView.hpp"
+#include "LayoutStateService.hpp"
 
 void ImageSource::setup()
 {
   ofImage image;
   image.load(path);
-  fbo->allocate(image.getWidth(), image.getHeight());
+  fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   fbo->begin();
   image.draw(0, 0);
   fbo->end();

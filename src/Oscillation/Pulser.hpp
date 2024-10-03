@@ -38,7 +38,7 @@ public:
     pulsePct = isPulsing ? delta / (double) duration->value : 0.0;
 
     if (delta < 0.0) {
-      return;
+      return 0.0f;
     }
     
     if (isPulsing) {

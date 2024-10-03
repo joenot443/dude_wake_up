@@ -94,7 +94,8 @@ public:
   // Notifications
   void haveDownloadedAvailableLibraryFile(LibraryFile &file);
   
-  // Layout
+  // Deletion
+  bool canDelete();
   
   // Selection
   void selectChainer(std::shared_ptr<Node> node);
@@ -103,7 +104,7 @@ public:
   ed::Config *config = nullptr;
   std::vector<std::string> unplacedNodeIds = {};
   std::unique_ptr<ImVec2> nodeDropLocation;
-  std::unique_ptr<LibraryFile> pendingFile;
+  std::vector<std::shared_ptr<LibraryFile>> pendingFiles;
   
   std::set<std::shared_ptr<Node>> nodes = {};
   std::set<std::shared_ptr<Node>> previewWindowNodes = {};
@@ -118,6 +119,7 @@ public:
   bool firstFrame = true;
   bool shouldDelete = false;
   bool makingLink = false;
+  bool fileDropInProgress = false;
   
   // Saving Strands
   bool showSaveDialog = false;

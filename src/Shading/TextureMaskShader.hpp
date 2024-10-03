@@ -43,7 +43,7 @@ struct TextureMaskShader: Shader {
   TextureMaskSettings *settings;
   std::shared_ptr<Texture> texture;
   TextureMaskShader(TextureMaskSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/Mask");
     settings->textureOptions = TextureService::getService()->availableTextureNames();

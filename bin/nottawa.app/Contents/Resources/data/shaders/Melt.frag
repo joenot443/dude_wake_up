@@ -6,6 +6,7 @@ uniform vec2 dimensions;
 uniform float alpha;
 uniform float beta;
 uniform float speed;
+uniform float smoothness;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -60,8 +61,8 @@ void main() {
   vec2 p = (2.0 * coord.xy - dimensions.xy) / max(dimensions.x, dimensions.y);
   for (int i = 1; i < 50; i++) {
     p = p +
-        vec2(0.6 / float(i) * sin(float(i) * p.y + time * speed + 0.3 * float(i)) + 1.0,
-             0.6 / float(i) * sin(float(i) * p.x + time * speed + 0.3 * float(i + 10)) -
+        vec2(smoothness / float(i) * sin(float(i) * p.y + time * speed + 0.3 * float(i)) + 1.0,
+             smoothness / float(i) * sin(float(i) * p.x + time * speed + 0.3 * float(i + 10)) -
                  1.4);
   }
   vec3 col = spectral_palette(p.x - 48.5);

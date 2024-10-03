@@ -47,7 +47,7 @@ class BlurShader : public Shader
 {
 public:
   BlurSettings *settings;
-  ofShader shader;
+
 
 public:
   BlurShader(BlurSettings *settings) : Shader(settings), settings(settings) {}

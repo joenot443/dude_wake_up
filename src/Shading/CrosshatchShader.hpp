@@ -36,7 +36,7 @@ struct CrosshatchShader: Shader {
   CrosshatchSettings *settings;
   CrosshatchShader(CrosshatchSettings *settings) : settings(settings), Shader(settings) {
   };
-  ofShader shader;
+
   void setup() override {
     #ifdef TESTING
 shader.load("shaders/Crosshatch");

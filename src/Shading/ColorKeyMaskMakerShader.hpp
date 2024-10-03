@@ -43,7 +43,7 @@ class ColorKeyMaskMakerShader: public Shader {
 public:
   ColorKeyMaskMakerSettings *settings;
   ColorKeyMaskMakerShader(ColorKeyMaskMakerSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/ColorKeyMaskMaker");
   }

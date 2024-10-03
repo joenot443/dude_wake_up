@@ -35,7 +35,7 @@ struct MinMixerSettings: public ShaderSettings {
 struct MinMixerShader: Shader {
   MinMixerSettings *settings;
   MinMixerShader(MinMixerSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/MinMixer");
   }

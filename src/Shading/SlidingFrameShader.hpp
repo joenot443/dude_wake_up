@@ -46,7 +46,7 @@ struct SlidingFrameSettings: public ShaderSettings {
 struct SlidingFrameShader: Shader {
   SlidingFrameSettings *settings;
   SlidingFrameShader(SlidingFrameSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/SlidingFrame");
   }

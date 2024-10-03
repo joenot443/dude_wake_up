@@ -31,7 +31,7 @@ class DancingSquaresShader: public Shader {
 public:
   DancingSquaresSettings *settings;
   DancingSquaresShader(DancingSquaresSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/DancingSquares");
   }

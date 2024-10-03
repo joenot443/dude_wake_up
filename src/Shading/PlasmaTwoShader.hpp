@@ -41,7 +41,7 @@ class PlasmaTwoShader : public Shader
 public:
   PlasmaTwoSettings *settings;
   PlasmaTwoShader(PlasmaTwoSettings *settings) : settings(settings), Shader(settings){};
-  ofShader shader;
+
   void setup() override
   {
     shader.load("shaders/PlasmaTwo");

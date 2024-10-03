@@ -51,7 +51,7 @@ struct IsoFractSettings: public ShaderSettings {
 struct IsoFractShader: Shader {
   IsoFractSettings *settings;
   IsoFractShader(IsoFractSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   
   void setup() override {
     shader.load("shaders/IsoFract");

@@ -36,7 +36,7 @@ public:
 
   GlitchSettings *settings;
   GlitchShader(GlitchSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     #ifdef TESTING
 shader.load("shaders/Glitch");

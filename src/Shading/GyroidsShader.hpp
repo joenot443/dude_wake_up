@@ -31,7 +31,7 @@ struct GyroidsSettings: public ShaderSettings {
 struct GyroidsShader: Shader {
   GyroidsSettings *settings;
   GyroidsShader(GyroidsSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/Gyroids");
   }

@@ -19,12 +19,14 @@ json LayoutStateService::config() {
   j[ColorHistoryJsonKey] = colorHistory;
   j[MidiEnabledJsonKey] = midiEnabled;
 //  j[StageModeEnabled] = stageModeEnabled;
+  
   j[ShaderInfoEnabledJsonKey] = shaderInfoEnabled;
   j[AllParametersInStageMode] = allParametersInStageModeEnabled;
   j[HelpEnabledJsonKey] = helpEnabled;
   j[WelcomeScreenEnabledJsonKey] = welcomeScreenEnabled;
   j[ResolutionJsonKey] = resolutionSetting;
   j[AbletonLinkEnabledJsonKey] = abletonLinkEnabled;
+  j[OutputWindowUpdatesAutomaticallyJsonKey] = outputWindowUpdatesAutomatically;
   return j;
 }
 
@@ -34,6 +36,7 @@ void LayoutStateService::loadConfig(json j) {
   midiEnabled = j[MidiEnabledJsonKey];
 //  stageModeEnabled = j[StageModeEnabled];
   shaderInfoEnabled = j[ShaderInfoEnabledJsonKey];
+  outputWindowUpdatesAutomatically = j[OutputWindowUpdatesAutomaticallyJsonKey];
   allParametersInStageModeEnabled = j[AllParametersInStageMode];
   helpEnabled = j[HelpEnabledJsonKey];
   welcomeScreenEnabled = j[WelcomeScreenEnabledJsonKey];
@@ -112,6 +115,6 @@ ImVec2 LayoutStateService::nodeLayoutSize() {
 }
 
 ImVec2 LayoutStateService::browserSize() {
-  float width = fmax(getScaledWindowWidth() / 5., 360.0);
+  float width = fmax(getScaledWindowWidth() / 5., 321.0);
   return ImVec2(width, (ImGui::GetWindowContentRegionMax().y - MenuBarHeight) / 3.);
 }

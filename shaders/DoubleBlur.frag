@@ -3,6 +3,7 @@
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
+uniform float amount;
 uniform int direction; // 0 for horizontal, 1 for vertical
 in vec2 coord;
 out vec4 outputColor;
@@ -15,7 +16,7 @@ void main() {
         tex_offset = vec2(0.0, 1.0 / dimensions.y); // vertical offset based on texture height
     }
 
-    float blurRadius = 1.0; // you can adjust this or pass it as a uniform
+    float blurRadius = amount; // you can adjust this or pass it as a uniform
 
     vec3 result = texture(tex, coord).rgb * 0.227027;
     result += texture(tex, coord + tex_offset * blurRadius).rgb * 0.1945946;

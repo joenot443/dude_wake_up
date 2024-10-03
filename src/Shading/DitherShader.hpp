@@ -37,7 +37,7 @@ public:
   DitherSettings *settings;
   DitherShader(DitherSettings *settings)
       : settings(settings), Shader(settings){};
-  ofShader shader;
+
   void setup() override {
 #ifdef TESTING
 shader.load("shaders/Dither");

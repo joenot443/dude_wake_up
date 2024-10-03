@@ -33,7 +33,7 @@ struct PaintShader: Shader {
   ofFbo lastFrame;
   bool shouldClear;
   PaintShader(PaintSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/Paint");
     shouldClear = true;

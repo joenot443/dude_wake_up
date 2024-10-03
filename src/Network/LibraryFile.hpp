@@ -9,8 +9,11 @@
 #define LibraryFile_h
 #include <stdio.h>
 #include <string>
+#include "json.hpp"
 #include "ofMain.h"
 #include "TileBrowserView.hpp"
+
+using json = nlohmann::json;
 
 struct LibraryFile
 {
@@ -22,20 +25,32 @@ struct LibraryFile
   std::string thumbnailFilename;
   std::string category;
   bool isDownloading = false;
-  bool mediaDownloaded = false;
-  bool thumbnailDownloaded = false;
   float progress = 0.0;
   
   std::string thumbnailPath();
   
   std::string videoPath();
   
-  bool isMediaDownloaded() {
-    return ofFile::doesFileExist(videoPath());
+  json serialize() {
+    json j;
+    j["id"] = id;
+    j["name"] = name;
+    j["filename"] = filename;
+    j["url"] = url;
+    j["thumbnailUrl"] = thumbnailUrl;
+    j["thumbnailFilename"] = thumbnailFilename;
+    j["category"] = category;
+    return j;
   }
   
-  bool isThumbnailDownloaded() {
-    return ofFile::doesFileExist(thumbnailPath());
+  void load(json j) {
+    id = j["id"];
+    name = j["name"];
+    filename = j["filename"];
+    url = j["url"];
+    thumbnailUrl = j["thumbnailUrl"];
+    thumbnailFilename = j["thumbnailFilename"];
+    category = j["category"];
   }
 };
 

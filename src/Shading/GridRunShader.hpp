@@ -42,7 +42,7 @@ struct GridRunSettings: public ShaderSettings {
 struct GridRunShader: Shader {
   GridRunSettings *settings;
   GridRunShader(GridRunSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/GridRun");
   }

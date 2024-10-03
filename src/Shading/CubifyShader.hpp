@@ -36,7 +36,7 @@ struct CubifySettings: public ShaderSettings {
 struct CubifyShader: Shader {
   CubifySettings *settings;
   CubifyShader(CubifySettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/Cubify");
   }

@@ -30,7 +30,7 @@ struct OverlaySettings: public ShaderSettings {
 struct OverlayShader: Shader {
   OverlaySettings *settings;
   OverlayShader(OverlaySettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
   }
 

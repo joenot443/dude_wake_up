@@ -41,7 +41,7 @@ struct PlasmaSettings: public ShaderSettings {
 
 class PlasmaShader : public Shader {
 private:
-  ofShader shader;
+
 
 public:
  PlasmaShader(PlasmaSettings* settings) :

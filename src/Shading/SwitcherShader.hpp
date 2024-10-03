@@ -40,7 +40,7 @@ struct SwitcherSettings : public ShaderSettings {
 struct SwitcherShader : Shader {
   SwitcherSettings* settings;
   std::vector<std::shared_ptr<Connectable>> activeInputs = {};
-  ofShader shader;
+
   double lastSwitchTime;
   bool isPlaying;
   float transitionProgress;

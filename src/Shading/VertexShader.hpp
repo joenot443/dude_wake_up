@@ -33,7 +33,7 @@ struct VertexSettings: public ShaderSettings {
 struct VertexShader: Shader {
   VertexSettings *settings;
   VertexShader(VertexSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/Vertex");
   }

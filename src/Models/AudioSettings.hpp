@@ -19,18 +19,7 @@
 #include "PulseOscillator.hpp"
 #include "ValueOscillator.hpp"
 #include "Vectors.hpp"
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/framework/accumulator_set.hpp>
-#include <boost/accumulators/framework/extractor.hpp>
-#include <boost/accumulators/statistics/rolling_count.hpp>
-#include <boost/accumulators/statistics/rolling_mean.hpp>
-#include <boost/accumulators/statistics/max.hpp>
-#include <boost/accumulators/statistics/min.hpp>
-#include <boost/accumulators/statistics/rolling_sum.hpp>
-#include <boost/accumulators/statistics/rolling_window.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-
-using namespace boost::accumulators;
+#include "RollingMean.hpp" // Include the new RollingMean class
 
 struct AudioAnalysisParameter {
   float windowMin = 0.0;
@@ -51,12 +40,12 @@ struct AudioAnalysisParameter {
   std::shared_ptr<ValueOscillator> pulseOscillator;
   std::shared_ptr<ValueOscillator> thresholdOscillator;
   
-  accumulator_set<double, stats<tag::rolling_mean > > valueAcc;
-  accumulator_set<double, stats<tag::max, tag::min>> minMaxAcc;
+  RollingMean valueAcc;   // Use RollingMean instead of Boost Accumulator
+  std::deque<double> minMaxValues;  // Store values to manually track min and max
+  size_t minMaxWindowSize = 800;
 
   AudioAnalysisParameter(std::shared_ptr<Parameter> param) :
-  valueAcc(tag::rolling_window::window_size = 2),
-  minMaxAcc(tag::rolling_window::window_size = 800),
+  valueAcc(2),   // Rolling window size for mean
   pulseLength(std::make_shared<Parameter>("pulseLength", 0.8, 0.0, 1.0)),
   pulseThreshold(std::make_shared<Parameter>("pulseThreshold", 0.6, 0.0, 1.0)),
   pulse(std::make_shared<Parameter>("autoPulse", 0.0, 0.0, 1.0)),
@@ -69,12 +58,19 @@ struct AudioAnalysisParameter {
 
   void tick(float val) {
     value = val;
-    valueAcc(val);
-    minMaxAcc(val);
-    windowMin = boost::accumulators::min(minMaxAcc);
-    windowMax = boost::accumulators::max(minMaxAcc);
+    valueAcc.add(val);  // Add value to RollingMean accumulator
+
+    // Update the min/max deque
+    minMaxValues.push_back(val);
+    if (minMaxValues.size() > minMaxWindowSize) {
+        minMaxValues.pop_front();
+    }
+
+    // Calculate min and max manually
+    windowMin = *std::min_element(minMaxValues.begin(), minMaxValues.end());
+    windowMax = *std::max_element(minMaxValues.begin(), minMaxValues.end());
     
-    rollingMean = rolling_mean(valueAcc);
+    rollingMean = valueAcc.mean();  // Get rolling mean
     rollingMeanRelation = relationToRange(rollingMean);
     
     param->value = rollingMeanRelation;
@@ -83,7 +79,7 @@ struct AudioAnalysisParameter {
 
   float relationToRange(float v) {
     float range = windowMax - windowMin;
-    return v / range;
+    return (range == 0.0) ? 0.0 : v / range;  // Handle division by zero
   }
 };
 
@@ -98,6 +94,7 @@ struct AudioAnalysis {
   std::shared_ptr<Parameter> beatOscillatorSelection;
   std::shared_ptr<Parameter> bpm;
   std::shared_ptr<Parameter> frequencyRelease;
+  std::shared_ptr<Parameter> frequencyScale;
 
   std::shared_ptr<ValueOscillator> rmsOscillator;
   std::shared_ptr<PulseOscillator> beatPulseOscillator;
@@ -130,7 +127,8 @@ struct AudioAnalysis {
         lows(std::make_shared<Parameter>("Lows", 0.0, 0.0, 1.0)),
         beatPulse(std::make_shared<Parameter>("BPM", 0.0, 0.0, 1.0)),
         bpm(std::make_shared<Parameter>("bpm", 60.0, 0.0, 300.0)),
-        frequencyRelease(std::make_shared<Parameter>("Frequency Release", 0.95, 0.5, 1.0)),
+        frequencyRelease(std::make_shared<Parameter>("Frequency Release", 0.95, 0.0, 1.0)),
+        frequencyScale(std::make_shared<Parameter>("Frequency Scale", 1.0, 0.0, 5.0)),
         rmsOscillator(std::make_shared<ValueOscillator>(rms)),
         beatPulseOscillator(std::make_shared<PulseOscillator>(beatPulse)),
         highsOscillator(std::make_shared<ValueOscillator>(highs)),
@@ -150,17 +148,16 @@ struct AudioAnalysis {
     melFrequencySpectrum =
         Vectors::normalize(Vectors::sqrt(gist->getMelFrequencySpectrum()));
     smoothSpectrum = Vectors::release(magnitudeSpectrum, smoothSpectrum, frequencyRelease->value);
+    smoothSpectrum = Vectors::scalarMultiply(smoothSpectrum, frequencyScale->value);
     smoothMelSpectrum =
         Vectors::release(melFrequencySpectrum, smoothMelSpectrum, frequencyRelease->value);
-    
-    std::vector<float> highsMidsLows = splitAndAverage(smoothMelSpectrum, 3);
-    if (highsMidsLows.size() == 3) {
-      highsAnalysisParam.tick(highsMidsLows[2]);
-      midsAnalysisParam.tick(highsMidsLows[1]);
-      lowsAnalysisParam.tick(highsMidsLows[0]);
-    }
+    smoothMelSpectrum = Vectors::scalarMultiply(smoothMelSpectrum, frequencyScale->value);
     
     rmsAnalysisParam.tick(gist->rootMeanSquare());
+    std::vector<float> buckets = splitAndAverage(magnitudeSpectrum, 3);
+    lows->setValue(buckets[0]);
+    mids->setValue(buckets[1]);
+    highs->setValue(buckets[2]);
   }
   
 
@@ -227,7 +224,7 @@ float gammaAtBeat(float pct) {
     if (bpmEnabled) {
       if (pct < 0 || pct > 1) {
           // Handle out of range input
-          return 0.0f;
+          return;
       }
       if (pct > 0.95) {
         pct = 1.0f;

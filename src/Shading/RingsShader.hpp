@@ -42,7 +42,7 @@ public:
 
   RingsSettings *settings;
   RingsShader(RingsSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     #ifdef TESTING
 shader.load("shaders/Rings");

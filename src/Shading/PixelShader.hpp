@@ -42,7 +42,7 @@ public:
   PixelSettings *settings;
   PixelShader(PixelSettings *settings) : settings(settings), Shader(settings){};
   
-  ofShader shader;
+
   
   void setup() override {
 #ifdef TESTING

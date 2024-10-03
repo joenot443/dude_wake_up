@@ -49,7 +49,7 @@ struct GameboyShader: Shader {
   GameboyShader(GameboySettings *settings) : 
   settings(settings),
   Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/Gameboy");
     settings->textureOptions = TextureService::getService()->availableTextureNames();

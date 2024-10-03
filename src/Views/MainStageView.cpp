@@ -57,7 +57,7 @@ void MainStageView::draw()
   
   ImVec2 browserSize = LayoutStateService::getService()->browserSize();
   
-//  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(15.0, 15.0));
+  //  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(15.0, 15.0));
   int columnCount = LayoutStateService::getService()->shouldDrawShaderInfo() ? 3 : 2;
   ImGui::Columns(columnCount, "main_stage_view", false);
   ImGui::SetColumnWidth(0, browserSize.x);
@@ -72,23 +72,23 @@ void MainStageView::draw()
   // | Library |       Audio
   
   // Sources
-
-//  ImGui::PopStyleVar();
+  
+  //  ImGui::PopStyleVar();
   ImGui::BeginChild("##sourceBrowser", browserSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
   CommonViews::H3Title("Sources");
   drawVideoSourceBrowser();
   ImGui::EndChild();
-
+  
   ImGui::BeginChild("##shaderBrowser", browserSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
   CommonViews::H3Title("Effects");
   drawShaderBrowser();
   ImGui::EndChild();
-
+  
   ImGui::BeginChild("##libraryBrowser", browserSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
   CommonViews::H3Title("Saved Strands");
   strandBrowserView.draw();
   ImGui::EndChild();
-
+  
   drawMenu();
   
   ImGui::NextColumn();
@@ -161,30 +161,44 @@ void MainStageView::drawMenu()
     
     /// #Output Menu
     
-    if (ImGui::BeginMenu("Resolution"))
+    if (ImGui::BeginMenu("Display"))
     {
-      std::vector<std::string> resolutions = ResolutionOptions;
-      int i = 0;
-      for (std::string option : resolutions) {
-        bool selected =  LayoutStateService::getService()->resolutionSetting == i;
-        if (ImGui::MenuItem(option.c_str(), "", &selected)) {
-          LayoutStateService::getService()->updateResolutionSettings(i);
+      bool enabled = LayoutStateService::getService()->outputWindowUpdatesAutomatically;
+      std::string title = CommonStrings::EnableOutputWindowUpdatesAutomatically;
+      
+      if (ImGui::MenuItem(title.c_str(), nullptr, &enabled))
+      {
+        LayoutStateService::getService()->outputWindowUpdatesAutomatically = enabled;
+      }
+      
+      if (ImGui::BeginMenu("Resolution"))
+      {
+        std::vector<std::string> resolutions = ResolutionOptions;
+        int i = 0;
+        for (const std::string& option : resolutions) {
+          bool selected = LayoutStateService::getService()->resolutionSetting == i;
+          if (ImGui::MenuItem(option.c_str(), "", &selected)) {
+            LayoutStateService::getService()->updateResolutionSettings(i);
+          }
+          i++;
         }
-        i++;
+        ImGui::EndMenu();
       }
       ImGui::EndMenu();
     }
-     
     
     /// #View Menu
     
     if (ImGui::BeginMenu("View"))
     {
-      std::string title = LayoutStateService::getService()->midiEnabled ? CommonStrings::DisableMidi : CommonStrings::EnableMidi;
-      if (ImGui::MenuItem(title.c_str()))
+      bool midiEnabled = LayoutStateService::getService()->midiEnabled;
+      std::string title = CommonStrings::EnableMidi;
+      
+      if (ImGui::MenuItem(title.c_str(), nullptr, &midiEnabled))
       {
-        LayoutStateService::getService()->midiEnabled = !LayoutStateService::getService()->midiEnabled;
+        LayoutStateService::getService()->midiEnabled = midiEnabled;
       }
+      
       if (ImGui::MenuItem("Toggle Stage Mode", "Cmd+B"))
       {
         LayoutStateService::getService()->stageModeEnabled = !LayoutStateService::getService()->stageModeEnabled;

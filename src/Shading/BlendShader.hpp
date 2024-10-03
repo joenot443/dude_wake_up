@@ -59,7 +59,7 @@ struct BlendSettings: public ShaderSettings {
 struct BlendShader: Shader {
   BlendSettings *settings;
   BlendShader(BlendSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/Blend");
   }

@@ -14,6 +14,7 @@
 #include "ConfigurableService.hpp"
 
 static const std::string ShowAudioSettingsJsonKey = "showAudioSettings";
+static const std::string OutputWindowUpdatesAutomaticallyJsonKey = "putputWindowUpdatesAutomatically";
 static const std::string LibraryPathJsonKey = "libraryPath";
 static const std::string ColorHistoryJsonKey = "colorHistory";
 static const std::string MidiEnabledJsonKey = "midiEnabled";
@@ -47,6 +48,8 @@ public:
   bool welcomeScreenEnabled = true;
   
   bool abletonLinkEnabled = false;
+  
+  bool outputWindowUpdatesAutomatically = true;
   
   int resolutionSetting = 3;
   

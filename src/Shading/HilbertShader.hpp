@@ -36,7 +36,7 @@ struct HilbertSettings: public ShaderSettings {
 struct HilbertShader: Shader {
   HilbertSettings *settings;
   HilbertShader(HilbertSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/Empty");
   }

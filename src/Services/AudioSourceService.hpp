@@ -11,6 +11,7 @@
 #include "AudioSource.hpp"
 #include "MSABPMTapper.h"
 #include "ConfigurableService.hpp"
+#include "AudioTrack.hpp"
 #include "Parameter.hpp"
 #include "Link.hpp"
 #include <stdio.h>
@@ -24,9 +25,11 @@ public:
   static AudioSourceService *service;
   std::shared_ptr<AudioSource> defaultAudioSource;
   std::shared_ptr<AudioSource> selectedAudioSource;
+  std::shared_ptr<AudioTrack> selectedSampleTrack;
+  std::shared_ptr<Parameter> selectedSampleTrackParam;
   ableton::Link link;
 
-  AudioSourceService() : link(120.0) {};
+  AudioSourceService() : link(120.0), selectedSampleTrackParam(std::make_shared<Parameter>("Sample Track", ParameterType_Int)) {};
   
   static AudioSourceService *getService() {
     if (!service) {
@@ -36,13 +39,18 @@ public:
     return service;
   }
   void setup();
+  void populateTracks();
+  void populateSources();
   void selectAudioSource(std::shared_ptr<AudioSource> source);
+  void affirmSampleAudioTrack();
   
   void update();
 
   msa::BPMTapper tapper;
-  
+  std::vector<std::shared_ptr<AudioTrack>> sampleTracks;
+
   std::vector<std::shared_ptr<AudioSource>> audioSources();
+  std::shared_ptr<AudioTrack> defaultSampleAudioTrack();
   std::shared_ptr<AudioSource> audioSourceForId(std::string id);
   std::shared_ptr<AudioSource> audioSourceForParamId(std::string paramId);
 

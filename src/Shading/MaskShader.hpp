@@ -18,13 +18,16 @@
 struct MaskSettings : public ShaderSettings
 {
   std::shared_ptr<Parameter> blend;
+  std::shared_ptr<Parameter> swap; // Add swap parameter
   std::shared_ptr<Oscillator> blendOscillator;
   
-  MaskSettings(std::string shaderId, json j, std::string name) : blend(std::make_shared<Parameter>("Blend", 1.0, 0.0, 1.0)),
-                                               blendOscillator(std::make_shared<WaveformOscillator>(blend)),
-                                               ShaderSettings(shaderId, j, name)
+  MaskSettings(std::string shaderId, json j, std::string name) 
+    : blend(std::make_shared<Parameter>("Blend", 1.0, 0.0, 1.0)),
+      swap(std::make_shared<Parameter>("Swap", false, ParameterType_Bool)), // Initialize swap parameter
+      blendOscillator(std::make_shared<WaveformOscillator>(blend)),
+      ShaderSettings(shaderId, j, name)
   {
-    parameters = {blend};
+    parameters = {blend, swap}; // Add swap to parameters
     oscillators = {blendOscillator};
     load(j);
     registerParameters();
@@ -35,7 +38,8 @@ struct MaskShader : Shader
 {
   MaskSettings *settings;
   MaskShader(MaskSettings *settings) : settings(settings), Shader(settings){};
-  ofShader shader;
+
+  bool swap;
 
   void setup() override
   {
@@ -49,11 +53,19 @@ struct MaskShader : Shader
     // Clear the frame
     ofClear(0,0,0, 255);
     ofClear(0,0,0, 0);
-    shader.setUniformTexture("tex", frame->getTexture(), 4);
 
-    if (hasInputAtSlot(InputSlotTwo))
-    {
-      shader.setUniformTexture("maskTex", inputAtSlot(InputSlotTwo)->frame()->getTexture(), 12);
+    if (settings->swap->boolValue) {
+      shader.setUniformTexture("maskTex", frame->getTexture(), 4);
+      if (hasInputAtSlot(InputSlotTwo))
+      {
+        shader.setUniformTexture("tex", inputAtSlot(InputSlotTwo)->frame()->getTexture(), 12);
+      }
+    } else {
+      shader.setUniformTexture("tex", frame->getTexture(), 4);
+      if (hasInputAtSlot(InputSlotTwo))
+      {
+        shader.setUniformTexture("maskTex", inputAtSlot(InputSlotTwo)->frame()->getTexture(), 12);
+      }
     }
 
     shader.setUniform1f("time", ofGetElapsedTimef());
@@ -80,6 +92,7 @@ struct MaskShader : Shader
   {
     CommonViews::H3Title("Mask");
     CommonViews::ShaderParameter(settings->blend, settings->blendOscillator);
+    CommonViews::ShaderCheckbox(settings->swap); // Add swap to settings view
   }
 };
 

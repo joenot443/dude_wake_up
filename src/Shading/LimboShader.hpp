@@ -35,7 +35,7 @@ struct LimboSettings: public ShaderSettings {
 struct LimboShader: Shader {
   LimboSettings *settings;
   LimboShader(LimboSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/Limbo");
   }

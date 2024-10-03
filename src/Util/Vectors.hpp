@@ -12,6 +12,16 @@
 #include <vector>
 
 struct Vectors {
+  
+  static std::vector<float> vectorFilled(int length, float item)
+  {
+    std::vector<float> vec;
+    for (int i = 0; i < length; i++) {
+      vec.push_back(item);
+    }
+    return vec;
+  }
+  
   static std::vector<float> normalize(std::vector<float> vec) {
     std::vector<float> out = {};
     // Get the max value
@@ -36,6 +46,14 @@ struct Vectors {
       out.push_back(std::sqrt(vec[i]));
     }
     return out;
+  }
+  
+  static std::vector<float> scalarMultiply(std::vector<float> vec, float scalar) {
+      std::vector<float> out = {};
+      for (int i = 0; i < vec.size(); i++) {
+        out.push_back(vec[i] * scalar);
+      }
+      return out;
   }
 
   static std::vector<float> release(std::vector<float> vec,

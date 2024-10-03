@@ -46,7 +46,7 @@ public:
 
   SolidColorSettings *settings;
   SolidColorShader(SolidColorSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/SolidColor");
   }

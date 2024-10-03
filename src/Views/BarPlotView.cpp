@@ -27,7 +27,10 @@ void BarPlotView::draw(std::vector<float> yData, std::string id) {
 
   max = max * 1.2;
   
-  if (max < 0.01) { return; }
+  if (max < 0.01) {
+    ImGui::BeginChildFrame(123, ImVec2(200,200));
+    ImGui::EndChildFrame();
+  }
   
   // Draw the plot
   if (ImPlot::BeginPlot(formatString("##%s", id.c_str()).c_str(),

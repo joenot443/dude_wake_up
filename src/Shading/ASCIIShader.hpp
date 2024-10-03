@@ -39,7 +39,7 @@ struct AsciiSettings: public ShaderSettings  {
 
 class AsciiShader: public Shader {
 public:
-  ofShader shader;
+
   AsciiSettings *settings;
   AsciiShader(AsciiSettings *settings) : settings(settings), Shader(settings) {};
   

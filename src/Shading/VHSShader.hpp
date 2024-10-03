@@ -32,7 +32,7 @@ struct VHSShader: Shader {
   std::shared_ptr<ofFbo> tempCanvas;
   
   VHSShader(VHSSettings *settings) : settings(settings), Shader(settings), tempCanvas(std::make_shared<ofFbo>()) {};
-  ofShader shader;
+
   ofShader shaderTwo;
   void setup() override {
     

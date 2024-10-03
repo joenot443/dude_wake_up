@@ -2212,7 +2212,7 @@ ed::Link* ed::EditorContext::FindLinkAt(const ImVec2& p)
 }
 
 bool ed::EditorContext::ZoomInc(bool in) {
-  m_NavigateAction.ZoomInc(in);
+  return m_NavigateAction.ZoomInc(in);
 }
 
 ImU32 ed::EditorContext::GetColor(StyleColor colorIndex) const

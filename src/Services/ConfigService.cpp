@@ -454,7 +454,7 @@ void ConfigService::loadConfigFile(std::string path)
       if (fileStream.peek() == std::ifstream::traits_type::eof())
       {
         log("JSON file for %s is empty.", path.c_str());
-        return 0;
+        return;
       }
       fileStream >> data;
     }

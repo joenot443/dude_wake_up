@@ -13,6 +13,7 @@
 #include "AudioSourceService.hpp"
 #include "FontService.hpp"
 #include "OscillatorView.hpp"
+#include "FileAudioSource.hpp"
 #include "BarPlotView.hpp"
 #include "LayoutStateService.hpp"
 #include "Strings.hpp"
@@ -22,6 +23,7 @@ void AudioSourceBrowserView::setup() {}
 
 void AudioSourceBrowserView::update() {
   AudioSourceService::getService()->tapper.update();
+  updatePlaybackPosition();
 }
 
 void AudioSourceBrowserView::draw() {
@@ -38,6 +40,7 @@ void AudioSourceBrowserView::draw() {
     drawStartAnalysisButton();
     ImGui::SameLine();
     drawAudioSourceSelector();
+    drawSampleTrack();
     drawSelectedAudioSource();
     ImGui::EndChild();
   } else {
@@ -45,32 +48,90 @@ void AudioSourceBrowserView::draw() {
   }
 }
 
+void AudioSourceBrowserView::drawSampleTrack() {
+  if (AudioSourceService::getService()->selectedAudioSource->type() != AudioSourceType_File) return;
+  std::shared_ptr<FileAudioSource> source = std::dynamic_pointer_cast<FileAudioSource>( AudioSourceService::getService()->selectedAudioSource);
+  std::vector<std::string> options;
+  for (auto track : AudioSourceService::getService()->sampleTracks) {
+    options.push_back(track->name);
+  }
+  ImGui::SameLine();
+  ImGui::PushItemWidth(150.0);
+  if (CommonViews::ShaderOption(AudioSourceService::getService()->selectedSampleTrackParam, options, false)) {
+    AudioSourceService::getService()->affirmSampleAudioTrack();
+  }
+  ImGui::PopItemWidth();
+  ImGui::SameLine();
+  CommonViews::PlaybackSlider(samplePlaybackSliderPosition, source->getTotalDuration());
+  auto playPauseIcon = source->isPaused ? ICON_MD_PLAY_ARROW : ICON_MD_PAUSE;
+  ImGui::SameLine();
+  if (CommonViews::IconButton(playPauseIcon, "Play/Pause")) {
+    if (source->isPaused) {
+      source->resumePlayback();
+    } else {
+      source->pausePlayback();
+    }
+  }
+}
+
+void AudioSourceBrowserView::updatePlaybackPosition() {
+  if (AudioSourceService::getService()->selectedAudioSource->type() != AudioSourceType_File) return;
+  
+  std::shared_ptr<FileAudioSource> source = std::dynamic_pointer_cast<FileAudioSource>( AudioSourceService::getService()->selectedAudioSource);
+  
+  samplePlaybackSliderPosition->value = source->getPlaybackPosition();
+  
+  if (((float) fabs(samplePlaybackSliderPosition->value - source->getPlaybackPosition()) > 0.001)) {
+    source->setPlaybackPosition(samplePlaybackSliderPosition->value);
+  }
+}
+
 // Draw a list of audio sources as items in a ListBox
 void AudioSourceBrowserView::drawAudioSourceSelector() {
-  auto sources = AudioSourceService::getService()->audioSources();
-  
-  std::vector<std::string> names = {};
-  //allocate space for pointers
-  char** out = new char*[sources.size()];
+  // Keep persistent storage for names and char* pointers
+  static std::vector<std::string> names;
+  static std::vector<char*> out;
   static int selection = -1;
   
-  for(int i = 0; i < sources.size(); ++i){
-    string s = sources[i]->name;
-    if (s == AudioSourceService::getService()->selectedAudioSource->name) {
-      selection = i;
+  auto sources = AudioSourceService::getService()->audioSources();
+  
+  // Resize vectors only when the number of sources changes
+  if (names.size() != sources.size()) {
+    names.resize(sources.size());
+    out.resize(sources.size());
+    
+    for (int i = 0; i < sources.size(); ++i) {
+      names[i] = sources[i]->name;
+      
+      // Allocate memory for char* only once
+      if (out[i] == nullptr) {
+        out[i] = new char[names[i].size() + 1];
+      }
+      
+      // Copy the string to the char* buffer
+      strcpy(out[i], names[i].c_str());
+      
+      if (names[i] == AudioSourceService::getService()->selectedAudioSource->name) {
+        selection = i;
+      }
     }
-    //allocate space for c string (note +1 for extra space)
-    char* s_cstr = new char[s.size()+1];
-    //copy data to prevent mutation of original vector
-    strcpy(s_cstr, s.c_str());
-    //put pointer in the output
-    out[i] = s_cstr;
+  } else {
+    // Update selection if needed
+    for (int i = 0; i < sources.size(); ++i) {
+      if (names[i] == AudioSourceService::getService()->selectedAudioSource->name) {
+        selection = i;
+        break;
+      }
+    }
   }
+  
   ImGui::SetNextItemWidth(200.0);
   ImGui::PushFont(FontService::getService()->h4);
-  if (ImGui::Combo(AudioSourceService::getService()->selectedAudioSource->name.c_str(), &selection, out, sources.size())) {
+  ImGui::PushID("##AudioSourceSelector");
+  if (ImGui::Combo("", &selection, out.data(), sources.size())) {
     AudioSourceService::getService()->selectAudioSource(sources[selection]);
   }
+  ImGui::PopID();
   ImGui::PopFont();
 }
 
@@ -98,26 +159,11 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
       if (CommonViews::IconButton(ICON_MD_INFO, "Loudness")) {
         ImGui::OpenPopup("##Loudness");
       }
-      ImGui::SameLine();
-//      CommonViews::ShaderCheckbox(source->audioAnalysis.enableRmsPulse, true);
       OscillatorParam original = OscillatorParam (std::static_pointer_cast<Oscillator>(source->audioAnalysis.rmsOscillator), source->audioAnalysis.rms);
       std::vector<OscillatorParam> subjects = {original};
       
-      // Add the pulser if enabled
-//      if (source->audioAnalysis.enableRmsPulse->boolValue) {
-//        OscillatorParam pulse = OscillatorParam(source->audioAnalysis.rmsAnalysisParam.pulseOscillator, source->audioAnalysis.rmsAnalysisParam.pulse);
-//        OscillatorParam threshold = OscillatorParam( source->audioAnalysis.rmsAnalysisParam.thresholdOscillator, source->audioAnalysis.rmsAnalysisParam.pulseThreshold);
-//        subjects.push_back(pulse);
-//        subjects.push_back(threshold);
-//      }
-      
       OscillatorView::draw(subjects);
       
-//      if (source->audioAnalysis.enableRmsPulse->boolValue) {
-//        CommonViews::Slider("Threshold", "##threshold", source->audioAnalysis.rmsAnalysisParam.pulseThreshold);
-//        CommonViews::Slider("Length", "##length", source->audioAnalysis.rmsAnalysisParam.pulseLength);
-//      }
-//      
       ImGui::TableNextColumn();
       
       // Beats
@@ -149,7 +195,7 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
       // Draw BPM controls
       if (!LayoutStateService::getService()->abletonLinkEnabled) {
         ImGui::SameLine();
-
+        
         if (ImGui::BeginChild("##BPMControls", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionMax().y))) {
           
           static float lastTapTime = ofGetCurrentTime().seconds;
@@ -169,7 +215,7 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
             AudioSourceService::getService()->tapper.setBpm(bpm);
             source->audioAnalysis.bpmEnabled = true;
           }
-                    
+          
           if (ImGui::Button("Reset")) {
             AudioSourceService::getService()->tapper.startFresh();
           }
@@ -186,7 +232,7 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
         ImGui::EndChild();
       }
       
-  
+      
       
       ImGui::TableNextColumn();
       
@@ -220,7 +266,10 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
       }
       BarPlotView::draw(source->audioAnalysis.smoothMelSpectrum, "mel");
       ImGui::SameLine();
-      CommonViews::Slider("Release", "##frequencyRelease", source->audioAnalysis.frequencyRelease);
+      ImGui::BeginChild("##FrequencyMods");
+      CommonViews::MiniSlider(source->audioAnalysis.frequencyRelease);
+      CommonViews::MiniSlider(source->audioAnalysis.frequencyScale);
+      ImGui::EndChild();
       ImGui::EndTable();
     }
   }

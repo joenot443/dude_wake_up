@@ -218,14 +218,12 @@ void FeedbackShader::drawSettings()
     // Threshold
     CommonViews::ShaderParameter(settings->keyThreshold,
                                  settings->keyThresholdOscillator);
-  } else {
-    // Convert the strings to C strings
-    std::vector<const char *> blendModeNamesC;
-    for (auto &name : blendModeNames) {
-      blendModeNamesC.push_back(name.c_str());
-    }
-    ImGui::Combo("##BlendMode", &settings->blendMode->intValue, blendModeNamesC.data(), (int) blendModeNames.size());
   }
+  std::vector<const char *> blendModeNamesC;
+  for (auto &name : blendModeNames) {
+    blendModeNamesC.push_back(name.c_str());
+  }
+  ImGui::Combo("##BlendMode", &settings->blendMode->intValue, blendModeNamesC.data(), (int) blendModeNames.size());
 }
 
 int FeedbackShader::inputCount() { return 2; }

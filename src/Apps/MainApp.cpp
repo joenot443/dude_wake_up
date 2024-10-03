@@ -1,5 +1,6 @@
 #include "MainApp.h"
 #include "AudioSourceService.hpp"
+#include "BookmarkService.hpp"
 #include "MSABPMTapper.h"
 #include "FileSource.hpp"
 #include "FontService.hpp"
@@ -37,6 +38,7 @@ void MainApp::setup()
   MidiService::getService();
   AudioSourceService::getService();
   TextureService::getService();
+  BookmarkService::getService();
   StrandService::getService();
   LayoutStateService::getService();
   gui.setup();
@@ -81,10 +83,11 @@ void MainApp::drawMainStage()
   ImGui::SetNextWindowSize(getScaledWindowSize());
   ImGui::SetNextWindowPos(ImVec2(0, 0));
   ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove |
-                                 ImGuiWindowFlags_NoTitleBar |
-                                 ImGuiWindowFlags_MenuBar |
-                                 ImGuiWindowFlags_NoBringToFrontOnFocus;
-
+  ImGuiWindowFlags_NoTitleBar |
+  ImGuiWindowFlags_MenuBar |
+  ImGuiWindowFlags_NoBringToFrontOnFocus |
+  ImGuiWindowFlags_NoScrollbar;
+  
   ImGui::Begin("Main Stage", NULL, windowFlags);
   ImGui::PushFont(FontService::getService()->p);
   mainStageView->draw();
@@ -102,7 +105,7 @@ void MainApp::dragEvent(ofDragInfo dragInfo)
     ConfigService::getService()->loadStrandFile(dragInfo.files[0]);
     return;
   }
-
+  
   // Check if the file is a video file
   if (ofIsStringInString(dragInfo.files[0], ".mp4") ||
       ofIsStringInString(dragInfo.files[0], ".mov") ||
@@ -113,14 +116,13 @@ void MainApp::dragEvent(ofDragInfo dragInfo)
   {
     // Create a new VideoSource for the file
     auto fileName = ofFilePath::getFileName(dragInfo.files[0]);
-
-    auto videoSource = std::make_shared<FileSource>(
-        UUID::generateUUID(), fileName, dragInfo.files[0]);
-    VideoSourceService::getService()->addVideoSource(videoSource, videoSource->id);
-    mainStageView->nodeLayoutView.handleDroppedSource(videoSource);
+    
+    auto videoSource = VideoSourceService::getService()->addFileVideoSource(fileName, dragInfo.files[0]);
+    NodeLayoutView::getInstance()->fileDropInProgress = true;
+    NodeLayoutView::getInstance()->handleDroppedSource(videoSource);
     return;
   }
-
+  
   // Check if the file is a video file
   if (ofIsStringInString(dragInfo.files[0], ".png") ||
       ofIsStringInString(dragInfo.files[0], ".jpg") ||
@@ -130,28 +132,28 @@ void MainApp::dragEvent(ofDragInfo dragInfo)
     // Create a new VideoSource for the file
     auto fileName = ofFilePath::getFileName(dragInfo.files[0]);
     auto videoSource = VideoSourceService::getService()->addImageVideoSource(fileName, dragInfo.files[0]);
-    mainStageView->nodeLayoutView.handleDroppedSource(videoSource);
+    NodeLayoutView::getInstance()->handleDroppedSource(videoSource);
   }
 }
 
 void MainApp::executeOnMainThread(const std::function<void()>& task) {
-    std::lock_guard<std::mutex> lock(mainThreadTasksMutex);
-    mainThreadTasks.push(task);
+  std::lock_guard<std::mutex> lock(mainThreadTasksMutex);
+  mainThreadTasks.push(task);
 }
 
 void MainApp::runMainThreadTasks() {
-    std::queue<std::function<void()>> tasksToRun;
-    
-    {
-        std::lock_guard<std::mutex> lock(mainThreadTasksMutex);
-        std::swap(tasksToRun, mainThreadTasks);
-    }
-
-    while (!tasksToRun.empty()) {
-        auto task = tasksToRun.front();
-        tasksToRun.pop();
-        task();
-    }
+  std::queue<std::function<void()>> tasksToRun;
+  
+  {
+    std::lock_guard<std::mutex> lock(mainThreadTasksMutex);
+    std::swap(tasksToRun, mainThreadTasks);
+  }
+  
+  while (!tasksToRun.empty()) {
+    auto task = tasksToRun.front();
+    tasksToRun.pop();
+    task();
+  }
 }
 
 void MainApp::resetState() {}

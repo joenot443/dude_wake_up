@@ -99,7 +99,7 @@ void ParameterService::clear() {
 std::shared_ptr<FavoriteParameter> ParameterService::addFavoriteParameter(std::shared_ptr<Parameter> parameter) {
   if (parameter == nullptr) {
     log("Attempting to add null parameter");
-    return;
+    return nullptr;
   }
   parameter->favorited = true;
   favoriteParameterMap[parameter->paramId] = std::make_shared<FavoriteParameter>(parameter);

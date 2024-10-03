@@ -38,7 +38,7 @@ class FractalShader: public Shader {
 public:
 
   private:
-  ofShader shader;
+
 
 public:
   FractalShader(FractalSettings *settings) :

@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include "VideoSource.hpp"
+#include "LibrarySource.hpp"
 #include "MultiSource.hpp"
 #include "ShaderSource.hpp"
 #include "TextSource.hpp"
@@ -76,6 +77,8 @@ public:
   void addVideoSource(std::shared_ptr<VideoSource> videoSource, std::string id, json j = 0);
   void populateAvailableVideoSources();
   void addAvailableVideoSources(std::vector<std::shared_ptr<AvailableVideoSource>> sources);
+
+  
   std::shared_ptr<VideoSource> videoSourceForId(std::string id);
 
   std::shared_ptr<VideoSource> addImageVideoSource(std::string name, std::string path, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
@@ -86,7 +89,8 @@ public:
   std::shared_ptr<VideoSource> addFileVideoSource(std::string name, std::string path, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
   std::shared_ptr<VideoSource> addTextVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
   std::shared_ptr<VideoSource> addIconVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
-
+  std::shared_ptr<VideoSource> addLibraryVideoSource(std::shared_ptr<LibraryFile> libraryFile, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
+  
   // Output Windows
 
   std::map<std::string, std::shared_ptr<OutputWindow>> outputWindows;

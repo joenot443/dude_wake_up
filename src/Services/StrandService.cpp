@@ -82,13 +82,13 @@ std::string StrandService::savePreview(std::string name, std::shared_ptr<Connect
   // fbo to a .jpg file.
   auto terminal = connectable->terminalDescendent();
   if (terminal == nullptr) {
-    return;
+    return "";
   }
   
   ofTexture tex = terminal->frame()->getTexture();
   ofPixels pixels;
   tex.readToPixels(pixels);
-  std::string fileName = strandPreviewPath(name);
+  std::filesystem::path fileName = strandPreviewPath(name);
   ofSaveImage(pixels, fileName);
   return fileName;
 }
@@ -175,7 +175,7 @@ void StrandService::populateMapFromFolder(std::map<std::string, std::shared_ptr<
         if (fileStream.peek() == std::ifstream::traits_type::eof())
         {
           log("JSON file for %s is empty.", path.c_str());
-          return 0;
+          return;
         }
         fileStream >> json;
       }

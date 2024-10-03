@@ -37,7 +37,7 @@ struct CloudSettings : public ShaderSettings {
 
 class CloudShader: public Shader {
   private:
-  ofShader shader;
+
 
   public:
   CloudSettings *settings;

@@ -48,7 +48,7 @@ void FeedbackSource::setup() {
   // Add FrameBufferCount ofFbo to frameBuffer
   for (int i = 0; i < FrameBufferCount; i++) {
     std::shared_ptr<ofFbo> fbo = std::make_shared<ofFbo>();
-    fbo->allocate(sourceSettings->width->intValue, sourceSettings->height->intValue, GL_RGBA);
+    fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y, GL_RGBA);
     fbo->begin();
     ofSetColor(0, 0, 0, 0);
     ofDrawRectangle(0, 0, fbo->getWidth(), fbo->getHeight());

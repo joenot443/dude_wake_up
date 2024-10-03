@@ -39,7 +39,7 @@ class SixteenBitShader : public Shader
 public: 
   SixteenBitSettings *settings;
   SixteenBitShader(SixteenBitSettings *settings) : settings(settings), Shader(settings){};
-  ofShader shader;
+
   void setup() override
   {
     shader.load("shaders/16bit");

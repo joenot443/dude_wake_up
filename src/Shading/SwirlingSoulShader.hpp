@@ -44,7 +44,7 @@ struct SwirlingSoulSettings: public ShaderSettings {
 struct SwirlingSoulShader: Shader {
   SwirlingSoulSettings *settings;
   SwirlingSoulShader(SwirlingSoulSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   void setup() override {
     shader.load("shaders/SwirlingSoul");
   }

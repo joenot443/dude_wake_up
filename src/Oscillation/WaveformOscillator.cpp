@@ -10,6 +10,15 @@
 
 const float OscillatorDampen = 0.3;
 
+// New constructor implementation
+WaveformOscillator::WaveformOscillator(std::shared_ptr<Parameter> param, float amplitude, float shift, float frequency)
+  : Oscillator(param)
+{
+  this->amplitude = std::make_shared<Parameter>("amplitude", amplitude, 0.0, 1.0);
+  this->shift = std::make_shared<Parameter>("shift", shift, -1.0, 1.0);
+  this->frequency = std::make_shared<Parameter>("frequency", frequency, 0.0, 10.0);
+}
+
 void WaveformOscillator::tick()
 {
   if (!enabled->boolValue)

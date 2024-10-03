@@ -56,6 +56,7 @@ bool HelpService::madeSecondMixConnection() {
       return connection->end->inputs.size() > 1;
     }
   }
+  return false;
 }
 
 bool HelpService::openedShaderInfo() {
@@ -70,6 +71,7 @@ bool HelpService::editedMixParameter() {
       return abs(mixShader->settings->mix->value - mixShader->settings->mix->defaultValue) > 0.1;
     }
   }
+  return false;
 }
 
 bool HelpService::openedStageMode() {

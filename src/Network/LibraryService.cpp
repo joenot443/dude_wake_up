@@ -100,15 +100,12 @@ void LibraryService::fetchLibraryFiles()
       file.category = library_file["category"];
       
       auto shared = std::make_shared<LibraryFile>(file);
-      if (hasThumbnail(shared))
-      {
-        file.thumbnailDownloaded = true;
-      }
-      if (hasMedia(shared))
-      {
-        file.mediaDownloaded = true;
-      }
-      libraryFiles.push_back(shared);
+
+      
+      libraryFileIdDownloadedMap[file.id] = hasMediaOnDisk(shared);
+      libraryFiles[file.id] = shared;
+      
+      
     }
     didFetchLibraryFiles();
   }
@@ -118,12 +115,12 @@ void LibraryService::fetchLibraryFiles()
   }
 }
 
-bool LibraryService::hasThumbnail(std::shared_ptr<LibraryFile> file)
+bool LibraryService::hasThumbnailOnDisk(std::shared_ptr<LibraryFile> file)
 {
   return ofFile::doesFileExist(file->thumbnailPath());
 }
 
-bool LibraryService::hasMedia(std::shared_ptr<LibraryFile> file)
+bool LibraryService::hasMediaOnDisk(std::shared_ptr<LibraryFile> file)
 {
   return ofFile::doesFileExist(file->videoPath());
 }
@@ -141,9 +138,6 @@ void LibraryService::downloadThumbnail(std::shared_ptr<LibraryFile> file)
     std::ofstream file_stream(path, std::ios::binary);
     file_stream.write(res.text.data(), res.text.size());
     file_stream.close();
-    log("Successfully downloaded thumbnail");
-    file->thumbnailDownloaded = true;
-//    ofNotifyEvent(thumbnailNotification, this);
   }
   else
   {
@@ -155,10 +149,10 @@ void LibraryService::downloadAllThumbnails()
 {
   for (const auto &file : libraryFiles)
   {
-    if (hasThumbnail(file))
+    if (hasThumbnailOnDisk(file.second))
       continue;
 
-    downloadFutures.push_back(std::async(std::launch::async, &LibraryService::downloadThumbnail, this, file));
+    downloadFutures.push_back(std::async(std::launch::async, &LibraryService::downloadThumbnail, this, file.second));
   }
 }
 
@@ -171,7 +165,7 @@ void LibraryService::submitFeedback(Feedback feedback, std::function<void()> suc
       formatFeedback(feedback).c_str()));
 }
 
-void LibraryService::downloadFile(std::shared_ptr<LibraryFile> file)
+void LibraryService::downloadFile(std::shared_ptr<LibraryFile> file, std::function<void()> callback)
 {
   // Send GET request with a progress callback
   cpr::Response res =
@@ -199,13 +193,27 @@ void LibraryService::downloadFile(std::shared_ptr<LibraryFile> file)
     std::ofstream file_stream(path, std::ios::binary);
     file_stream.write(res.text.data(), res.text.size());
     file_stream.close();
+    libraryFileIdDownloadedMap[file->id] = true;
     log("Successfully downloaded file");
-    file->mediaDownloaded = true;
     file->isDownloading = false;
-    ofNotifyEvent(downloadNotification, *file.get(), this);
+    if (callback) {
+      callback();
+    }
   }
   else
   {
     std::cout << "Error: Failed to download file" << std::endl;
   }
+}
+
+std::shared_ptr<LibraryFile> LibraryService::libraryFileForId(std::string id)
+{
+  if (libraryFiles.empty())
+  {
+    return nullptr;
+  }
+  if (libraryFiles.count(id) != 0) {
+    return libraryFiles[id];
+  }
+  return nullptr;
 }

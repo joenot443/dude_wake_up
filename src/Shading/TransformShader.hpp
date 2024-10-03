@@ -23,13 +23,13 @@ public:
   std::shared_ptr<Parameter> translateY;
   
   std::shared_ptr<Parameter> scale;
-  std::shared_ptr<Oscillator> minXOscillator;
-  std::shared_ptr<Oscillator> maxXOscillator;
-  std::shared_ptr<Oscillator> minYOscillator;
-  std::shared_ptr<Oscillator> maxYOscillator;
-  std::shared_ptr<Oscillator> translateXOscillator;
-  std::shared_ptr<Oscillator> translateYOscillator;
-  std::shared_ptr<Oscillator> scaleOscillator;
+  std::shared_ptr<WaveformOscillator> minXOscillator;
+  std::shared_ptr<WaveformOscillator> maxXOscillator;
+  std::shared_ptr<WaveformOscillator> minYOscillator;
+  std::shared_ptr<WaveformOscillator> maxYOscillator;
+  std::shared_ptr<WaveformOscillator> translateXOscillator;
+  std::shared_ptr<WaveformOscillator> translateYOscillator;
+  std::shared_ptr<WaveformOscillator> scaleOscillator;
 
   
   TransformSettings(std::string shaderId, json j, std::string name)
@@ -46,7 +46,7 @@ public:
   maxYOscillator(std::make_shared<WaveformOscillator>(maxY)),
   translateXOscillator(std::make_shared<WaveformOscillator>(translateX)),
   translateYOscillator(std::make_shared<WaveformOscillator>(translateY)),
-  scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
+  scaleOscillator(std::make_shared<WaveformOscillator>(scale, 1.0, 0.0, 5.0)),
   ShaderSettings(shaderId, j, name) {
     parameters = {minX, maxX, minY, maxY, scale, translateX, translateY};
     oscillators = {minXOscillator, maxXOscillator, minYOscillator, maxYOscillator, translateXOscillator, translateYOscillator, scaleOscillator};
@@ -58,7 +58,7 @@ public:
 
 struct TransformShader : public Shader {
 public:
-  ofShader shader;
+
   TransformSettings *settings;
   float autoRotateAmount;
   

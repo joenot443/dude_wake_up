@@ -50,15 +50,19 @@ public:
 
   void downloadThumbnail(std::shared_ptr<LibraryFile> file);
   void downloadAllThumbnails();
-  void downloadFile(std::shared_ptr<LibraryFile> file);
+  void downloadFile(std::shared_ptr<LibraryFile> file, std::function<void()>);
+  
+  std::shared_ptr<LibraryFile> libraryFileForId(std::string id);
 
-  bool hasThumbnail(std::shared_ptr<LibraryFile> file);
+  bool hasThumbnailOnDisk(std::shared_ptr<LibraryFile> file);
 
-  bool hasMedia(std::shared_ptr<LibraryFile> file);
+  bool hasMediaOnDisk(std::shared_ptr<LibraryFile> file);
 
   observable::subject<void()> libraryThumbnailUpdateSubject;
 
-  std::vector<std::shared_ptr<LibraryFile>> libraryFiles;
+  std::map<std::string, std::shared_ptr<LibraryFile>> libraryFiles;
+  
+  std::map<std::string, bool> libraryFileIdDownloadedMap;
 
   std::vector<std::future<void>> downloadFutures;
 

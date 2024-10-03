@@ -57,7 +57,7 @@ struct MultiMixSettings: public ShaderSettings {
 struct MultiMixShader: Shader {
   MultiMixSettings *settings;
   MultiMixShader(MultiMixSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
+
   // Bool array of active inputs
   std::set<InputSlot> activeInputs;
   int lastFrameInputCount = 0;

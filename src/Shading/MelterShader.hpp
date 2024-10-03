@@ -28,6 +28,9 @@ struct MeltSettings : public ShaderSettings {
   
   std::shared_ptr<Parameter> speed;
   std::shared_ptr<WaveformOscillator> speedOscillator;
+  
+  std::shared_ptr<Parameter> smoothness;
+  std::shared_ptr<WaveformOscillator> smoothnessOscillator;
 
 
   MeltSettings(std::string shaderId, json j, std::string name) : shaderId(shaderId),
@@ -37,6 +40,8 @@ struct MeltSettings : public ShaderSettings {
   betaOscillator(std::make_shared<WaveformOscillator>(beta)),
   speed(std::make_shared<Parameter>("Speed", 1.0, 0.0, 5.0)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
+  smoothness(std::make_shared<Parameter>("Smoothness", 0.6, 0.0, 1.0)),
+  smoothnessOscillator(std::make_shared<WaveformOscillator>(smoothness)),
   ShaderSettings(shaderId, j, name) {
     load(j);
   registerParameters();
@@ -47,7 +52,7 @@ class MeltShader : public Shader {
 public:
 
   private:
-  ofShader shader;
+
 
   public:
   MeltSettings *settings;
@@ -74,6 +79,7 @@ shader.load("shaders/Melt");
     shader.setUniform1f("alpha", settings->alpha->value);
     shader.setUniform1f("beta", settings->beta->value);
     shader.setUniform1f("speed", settings->speed->value);
+    shader.setUniform1f("smoothness", 1.0f - settings->smoothness->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
     shader.end();
@@ -86,6 +92,7 @@ shader.load("shaders/Melt");
     CommonViews::ShaderParameter(settings->alpha, settings->alphaOscillator);
     CommonViews::ShaderParameter(settings->beta, settings->betaOscillator);
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
+    CommonViews::ShaderParameter(settings->smoothness, settings->smoothnessOscillator);
   }
 };
 #endif /* MelterShader_h */
