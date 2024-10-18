@@ -53,7 +53,7 @@ public:
   BlurShader(BlurSettings *settings) : Shader(settings), settings(settings) {}
   void setup() override
   {
-#ifdef TESTING
+#ifdef DEBUG
     shader.load("shaders/blur");
 #endif
 #ifdef RELEASE

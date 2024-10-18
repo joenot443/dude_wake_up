@@ -10,6 +10,7 @@
 //   Written by Michal Cichon
 //------------------------------------------------------------------------------
 # include "imgui_node_editor_internal.h"
+#include "Console.hpp"
 # include <cstdio> // snprintf
 # include <string>
 # include <fstream>
@@ -40,35 +41,11 @@ namespace ax {
 namespace NodeEditor {
 namespace Detail {
 
-# define DECLARE_KEY_TESTER(Key)                                                                    \
-    DECLARE_HAS_NESTED(Key, Key)                                                                    \
-    struct KeyTester_ ## Key                                                                        \
-    {                                                                                               \
-        template <typename T>                                                                       \
-        static int Get(typename std::enable_if<has_nested_ ## Key<ImGuiKey_>::value, T>::type*)     \
-        {                                                                                           \
-            return ImGui::GetKeyIndex(T::Key);                                                      \
-        }                                                                                           \
-                                                                                                    \
-        template <typename T>                                                                       \
-        static int Get(typename std::enable_if<!has_nested_ ## Key<ImGuiKey_>::value, T>::type*)    \
-        {                                                                                           \
-            return -1;                                                                              \
-        }                                                                                           \
-    }
-
-DECLARE_KEY_TESTER(ImGuiKey_F);
-DECLARE_KEY_TESTER(ImGuiKey_D);
-
-static inline int GetKeyIndexForF()
-{
-    return KeyTester_ImGuiKey_F::Get<ImGuiKey_>(nullptr);
-}
-
-static inline int GetKeyIndexForD()
-{
-    return KeyTester_ImGuiKey_D::Get<ImGuiKey_>(nullptr);
-}
+# if !defined(IMGUI_VERSION_NUM)
+#     error IMGUI_VERSION_NUM is not defined, please update Dear ImGui copy to at least 1.89 (August 2022)
+# elif IMGUI_VERSION_NUM < 18900
+#     error Please update Dear ImGui copy to at least 1.89 (August 2022)
+# endif
 
 } // namespace Detail
 } // namespace NodeEditor
@@ -117,11 +94,7 @@ static const float c_SelectionFadeOutDuration   = 0.15f; // seconds
 static const auto  c_MaxMoveOverEdgeSpeed       = 10.0f;
 static const auto  c_MaxMoveOverEdgeDistance    = 300.0f;
 
-#if IMGUI_VERSION_NUM > 18101
 static const auto  c_AllRoundCornersFlags = ImDrawFlags_RoundCornersAll;
-#else
-static const auto  c_AllRoundCornersFlags = 15;
-#endif
 
 
 //------------------------------------------------------------------------------
@@ -202,34 +175,34 @@ static void ImDrawListSplitter_Grow(ImDrawList* draw_list, ImDrawListSplitter* s
 
 static void ImDrawList_ChannelsGrow(ImDrawList* draw_list, int channels_count)
 {
-	ImDrawListSplitter_Grow(draw_list, &draw_list->_Splitter, channels_count);
+    ImDrawListSplitter_Grow(draw_list, &draw_list->_Splitter, channels_count);
 }
 
 static void ImDrawListSplitter_SwapChannels(ImDrawListSplitter* splitter, int left, int right)
 {
-	IM_ASSERT(left < splitter->_Count && right < splitter->_Count);
-	if (left == right)
-		return;
+    IM_ASSERT(left < splitter->_Count && right < splitter->_Count);
+    if (left == right)
+        return;
 
-	auto currentChannel = splitter->_Current;
+    auto currentChannel = splitter->_Current;
 
-	auto* leftCmdBuffer  = &splitter->_Channels[left]._CmdBuffer;
-	auto* leftIdxBuffer  = &splitter->_Channels[left]._IdxBuffer;
-	auto* rightCmdBuffer = &splitter->_Channels[right]._CmdBuffer;
-	auto* rightIdxBuffer = &splitter->_Channels[right]._IdxBuffer;
+    auto* leftCmdBuffer  = &splitter->_Channels[left]._CmdBuffer;
+    auto* leftIdxBuffer  = &splitter->_Channels[left]._IdxBuffer;
+    auto* rightCmdBuffer = &splitter->_Channels[right]._CmdBuffer;
+    auto* rightIdxBuffer = &splitter->_Channels[right]._IdxBuffer;
 
-	leftCmdBuffer->swap(*rightCmdBuffer);
-	leftIdxBuffer->swap(*rightIdxBuffer);
+    leftCmdBuffer->swap(*rightCmdBuffer);
+    leftIdxBuffer->swap(*rightIdxBuffer);
 
-	if (currentChannel == left)
-		splitter->_Current = right;
-	else if (currentChannel == right)
-		splitter->_Current = left;
+    if (currentChannel == left)
+        splitter->_Current = right;
+    else if (currentChannel == right)
+        splitter->_Current = left;
 }
 
 static void ImDrawList_SwapChannels(ImDrawList* drawList, int left, int right)
 {
-	ImDrawListSplitter_SwapChannels(&drawList->_Splitter, left, right);
+    ImDrawListSplitter_SwapChannels(&drawList->_Splitter, left, right);
 }
 
 static void ImDrawList_SwapSplitter(ImDrawList* drawList, ImDrawListSplitter& splitter)
@@ -688,7 +661,7 @@ void ed::Node::Draw(ImDrawList* drawList, DrawFlags flags)
 
         drawList->ChannelsSetCurrent(m_Channel + c_NodeBaseChannel);
 
-        DrawBorder(drawList, borderColor, editorStyle.SelectedNodeBorderWidth);
+        DrawBorder(drawList, borderColor, editorStyle.SelectedNodeBorderWidth, editorStyle.SelectedNodeBorderOffset);
     }
     else if (!IsGroup(this) && (flags & Hovered))
     {
@@ -697,16 +670,18 @@ void ed::Node::Draw(ImDrawList* drawList, DrawFlags flags)
 
         drawList->ChannelsSetCurrent(m_Channel + c_NodeBaseChannel);
 
-        DrawBorder(drawList, borderColor, editorStyle.HoveredNodeBorderWidth);
+        DrawBorder(drawList, borderColor, editorStyle.HoveredNodeBorderWidth, editorStyle.HoverNodeBorderOffset);
     }
 }
 
-void ed::Node::DrawBorder(ImDrawList* drawList, ImU32 color, float thickness)
+void ed::Node::DrawBorder(ImDrawList* drawList, ImU32 color, float thickness, float offset)
 {
     if (thickness > 0.0f)
     {
-        drawList->AddRect(m_Bounds.Min, m_Bounds.Max,
-            color, m_Rounding, c_AllRoundCornersFlags, thickness);
+        const ImVec2 extraOffset = ImVec2(offset, offset);
+
+        drawList->AddRect(m_Bounds.Min - extraOffset, m_Bounds.Max + extraOffset,
+            color, ImMax(0.0f, m_Rounding + offset), c_AllRoundCornersFlags, thickness);
     }
 }
 
@@ -1123,9 +1098,9 @@ void ed::EditorContext::Begin(const char* id, const ImVec2& size)
 
     if (!m_IsInitialized)
     {
-        // Cycle canvas so it has a change to setup its size before settings are loaded
-        m_Canvas.Begin(id, canvasSize);
-        m_Canvas.End();
+        // Cycle canvas, so it has a chance to initialize its size before settings are loaded
+        if (m_Canvas.Begin(id, canvasSize))
+            m_Canvas.End();
 
         LoadSettings();
         m_IsInitialized = true;
@@ -1194,7 +1169,7 @@ void ed::EditorContext::Begin(const char* id, const ImVec2& size)
         auto centerY            = (previousVisibleRect.Max.y + previousVisibleRect.Min.y) * 0.5f;
         auto currentVisibleRect = m_Canvas.ViewRect();
         auto currentAspectRatio = currentVisibleRect.GetHeight() ? (currentVisibleRect.GetWidth() / currentVisibleRect.GetHeight()) : 0.0f;
-        auto width              = previousVisibleRect.GetHeight();
+        auto width              = previousVisibleRect.GetWidth();
         auto height             = previousVisibleRect.GetHeight();
 
         if (m_Config.CanvasSizeMode == ax::NodeEditor::CanvasSizeMode::FitVerticalView)
@@ -1304,6 +1279,11 @@ void ed::EditorContext::End()
     if (!isSelecting)
     {
         auto hoveredObject = control.HotObject;
+//      log("%s", hoveredObject);
+      if (hoveredObject != NULL) {
+//        log("%s", hoveredObject->AsPin());
+      }
+      
         if (auto dragAction = m_CurrentAction ? m_CurrentAction->AsDrag() : nullptr)
             hoveredObject = dragAction->m_DraggedObject;
         if (auto sizeAction = m_CurrentAction ? m_CurrentAction->AsSize() : nullptr)
@@ -1951,7 +1931,8 @@ void ed::EditorContext::Suspend(SuspendFlags flags)
     IM_ASSERT(m_DrawList != nullptr && "Suspend was called outiside of Begin/End.");
     auto lastChannel = m_DrawList->_Splitter._Current;
     m_DrawList->ChannelsSetCurrent(m_ExternalChannel);
-    m_Canvas.Suspend();
+    if (m_IsCanvasVisible)
+        m_Canvas.Suspend();
     m_DrawList->ChannelsSetCurrent(lastChannel);
     if ((flags & SuspendFlags::KeepSplitter) != SuspendFlags::KeepSplitter)
         ImDrawList_SwapSplitter(m_DrawList, m_Splitter);
@@ -1964,13 +1945,14 @@ void ed::EditorContext::Resume(SuspendFlags flags)
         ImDrawList_SwapSplitter(m_DrawList, m_Splitter);
     auto lastChannel = m_DrawList->_Splitter._Current;
     m_DrawList->ChannelsSetCurrent(m_ExternalChannel);
-    m_Canvas.Resume();
+    if (m_IsCanvasVisible)
+        m_Canvas.Resume();
     m_DrawList->ChannelsSetCurrent(lastChannel);
 }
 
 bool ed::EditorContext::IsSuspended()
 {
-	return m_Canvas.IsSuspended();
+    return m_Canvas.IsSuspended();
 }
 
 bool ed::EditorContext::IsFocused()
@@ -2211,10 +2193,6 @@ ed::Link* ed::EditorContext::FindLinkAt(const ImVec2& p)
     return nullptr;
 }
 
-bool ed::EditorContext::ZoomInc(bool in) {
-  return m_NavigateAction.ZoomInc(in);
-}
-
 ImU32 ed::EditorContext::GetColor(StyleColor colorIndex) const
 {
     return ImColor(m_Style.Colors[colorIndex]);
@@ -2399,16 +2377,26 @@ ed::Control ed::EditorContext::BuildControl(bool allowOffscreen)
     // Check input interactions over area.
     auto checkInteractionsInArea = [this, &emitInteractiveArea, &hotObject, &activeObject, &clickedObject, &doubleClickedObject](ObjectId id, const ImRect& rect, Object* object)
     {
-        if (emitInteractiveArea(id, rect) >= 0)
-            clickedObject = object;
-        if (!doubleClickedObject && ImGui::IsMouseDoubleClicked(m_Config.DragButtonIndex) && ImGui::IsItemHovered())
-            doubleClickedObject = object;
+      if (object->AsPin() != NULL) {
+//        log("Pin: %s", object->AsPin());
+      }
+      
+      
+      
+      if (emitInteractiveArea(id, rect) >= 0)
+          clickedObject = object;
+      if (!doubleClickedObject && ImGui::IsMouseDoubleClicked(m_Config.DragButtonIndex) && ImGui::IsItemHovered())
+          doubleClickedObject = object;
 
-        if (!hotObject && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
-            hotObject = object;
+      if (!hotObject && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem | ImGuiHoveredFlags_AllowWhenOverlappedByItem)) {
+        hotObject = object;
+      }
+            
 
-        if (ImGui::IsItemActive())
-            activeObject = object;
+      if (ImGui::IsItemActive()) {
+        activeObject = object;
+//        log("Active: %s", activeObject->ID().type().c_str());
+      }
     };
 
     // Process live nodes and pins.
@@ -2547,10 +2535,14 @@ ed::Control ed::EditorContext::BuildControl(bool allowOffscreen)
 
     m_IsHovered = ImGui::IsItemHovered(ImGuiHoveredFlags_RectOnly);
     m_IsHoveredWithoutOverlapp = ImGui::IsItemHovered();
+//  log("Is Hovered: %d \t IsHoveredWithoutOverLap: %d", m_IsHovered, m_IsHoveredWithoutOverlapp);
     if (!allowOffscreen && !m_IsHovered)
         return Control();
 
-# if IMGUI_VERSION_NUM >= 17909
+# if IMGUI_VERSION_NUM >= 18836
+    if (m_IsHoveredWithoutOverlapp)
+        ImGui::SetItemKeyOwner(ImGuiKey_MouseWheelY);
+# else
     if (m_IsHoveredWithoutOverlapp)
         ImGui::SetItemUsingMouseWheel();
 # endif
@@ -2559,7 +2551,7 @@ ed::Control ed::EditorContext::BuildControl(bool allowOffscreen)
         isBackgroundHot, isBackgroundActive, backgroundClickButonIndex, backgroundDoubleClickButtonIndex);
 }
 
-void ed::EditorContext::ShowMetrics()
+void ed::EditorContext::ShowMetrics(const Control& control)
 {
     auto& io = ImGui::GetIO();
 
@@ -2570,6 +2562,26 @@ void ed::EditorContext::ShowMetrics()
         else if (object->AsPin())   return "Pin";
         else if (object->AsLink())  return "Link";
         else return "";
+    };
+
+    auto getHotObjectName = [&control, &getObjectName]()
+    {
+        if (control.HotObject)
+            return getObjectName(control.HotObject);
+        else if (control.BackgroundHot)
+            return "Background";
+        else
+            return "<unknown>";
+    };
+
+    auto getActiveObjectName = [&control, &getObjectName]()
+    {
+        if (control.ActiveObject)
+            return getObjectName(control.ActiveObject);
+        else if (control.BackgroundActive)
+            return "Background";
+        else
+            return "<unknown>";
     };
 
     auto liveNodeCount  = CountLiveNodes();
@@ -2583,6 +2595,10 @@ void ed::EditorContext::ShowMetrics()
 
     ImGui::SetCursorScreenPos(canvasRect.Min + ImVec2(5, 5));
     ImGui::BeginGroup();
+    ImGui::Text("Is Focused: %s", m_IsFocused ? "true" : "false");
+    ImGui::Text("Is Hovered: %s", m_IsHovered ? "true" : "false");
+    ImGui::Text("Is Hovered (without overlapp): %s", m_IsHoveredWithoutOverlapp ? "true" : "false");
+    ImGui::Text("Accept Input: %s", CanAcceptUserInput() ? "true" : "false");
     ImGui::Text("View Position: { x=%g y=%g }", viewRect.Min.x, viewRect.Min.y);
     ImGui::Text("View Size: { w=%g h=%g }", viewRect.GetWidth(), viewRect.GetHeight());
     ImGui::Text("Canvas Size: { w=%g h=%g }", canvasRect.GetWidth(), canvasRect.GetHeight());
@@ -2590,6 +2606,20 @@ void ed::EditorContext::ShowMetrics()
     ImGui::Text("Live Nodes: %d", liveNodeCount);
     ImGui::Text("Live Pins: %d", livePinCount);
     ImGui::Text("Live Links: %d", liveLinkCount);
+    ImGui::Text("Hot Object: %s (%p)", getHotObjectName(), control.HotObject ? control.HotObject->ID().AsPointer() : nullptr);
+    if (auto node = control.HotObject ? control.HotObject->AsNode() : nullptr)
+    {
+        ImGui::SameLine();
+        ImGui::Text("{ x=%g y=%g w=%g h=%g }", node->m_Bounds.Min.x, node->m_Bounds.Min.y, node->m_Bounds.GetWidth(), node->m_Bounds.GetHeight());
+    }
+    ImGui::Text("Active Object: %s (%p)", getActiveObjectName(), control.ActiveObject ? control.ActiveObject->ID().AsPointer() : nullptr);
+    if (auto node = control.ActiveObject ? control.ActiveObject->AsNode() : nullptr)
+    {
+        ImGui::SameLine();
+        ImGui::Text("{ x=%g y=%g w=%g h=%g }", node->m_Bounds.Min.x, node->m_Bounds.Min.y, node->m_Bounds.GetWidth(), node->m_Bounds.GetHeight());
+    }
+    ImGui::Text("Action: %s", m_CurrentAction ? m_CurrentAction->GetName() : "<none>");
+    ImGui::Text("Action Is Dragging: %s", m_CurrentAction && m_CurrentAction->IsDragging() ? "Yes" : "No");
     m_NavigateAction.ShowMetrics();
     m_SizeAction.ShowMetrics();
     m_DragAction.ShowMetrics();
@@ -3280,7 +3310,7 @@ ed::EditorAction::AcceptResult ed::NavigateAction::Accept(const Control& control
 
     auto& io = ImGui::GetIO();
 
-    if (Editor->CanAcceptUserInput() && ImGui::IsKeyPressed(GetKeyIndexForF()) && Editor->AreShortcutsEnabled())
+    if (Editor->CanAcceptUserInput() && ImGui::IsKeyPressed(ImGuiKey_F) && Editor->AreShortcutsEnabled())
     {
         const auto zoomMode = io.KeyShift ? NavigateAction::ZoomMode::WithMargin : NavigateAction::ZoomMode::None;
 
@@ -3378,33 +3408,6 @@ bool ed::NavigateAction::Process(const Control& control)
     return m_IsActive;
 }
 
-bool ed::NavigateAction::ZoomInc(bool up) {
-  auto savedScroll = m_Scroll;
-  auto savedZoom   = m_Zoom;
-
-  m_Animation.Finish();
-
-  auto newZoom  = MatchZoom(up ? 1 : -1, m_Zoom);
-  
-//  auto origin = m_Canvas.ToLocal(m_Canvas)
-  
-  auto origin = m_VisibleRect.GetTL();
-  auto newSize = m_Canvas.CalcViewRect(ImGuiEx::CanvasView(GetViewRect().GetTL(), newZoom));
-  ImGui::LogText("Test");
-  
-  if (up) {
-    origin -= newSize.GetSize() / 2 * newZoom;
-  } else {
-    origin += newSize.GetSize() / 2 * newZoom;
-  }
-
-  auto targetRect = m_Canvas.CalcViewRect(ImGuiEx::CanvasView(-origin, newZoom));
-
-  NavigateTo(targetRect, 0.45, NavigationReason::MouseZoom);
-
-  return true;
-}
-
 bool ed::NavigateAction::HandleZoom(const Control& control)
 {
     IM_UNUSED(control);
@@ -3414,7 +3417,7 @@ bool ed::NavigateAction::HandleZoom(const Control& control)
 
     auto& io = ImGui::GetIO();
 
-    if (!io.MouseWheel || (!allowOffscreen && !Editor->IsHoveredWithoutOverlapp()))
+    if (!io.MouseWheel || (!allowOffscreen && !Editor->IsHoveredWithoutOverlapp()))// && !ImGui::IsAnyItemActive())
         return false;
 
     auto savedScroll = m_Scroll;
@@ -3423,8 +3426,7 @@ bool ed::NavigateAction::HandleZoom(const Control& control)
     m_Animation.Finish();
 
     auto mousePos = io.MousePos;
-    auto steps    = (int)io.MouseWheel;
-    auto newZoom  = MatchZoom(steps, m_ZoomLevels[steps < 0 ? 0 : m_ZoomLevelCount - 1]);
+    auto newZoom  = GetNextZoom(io.MouseWheel);
 
     auto oldView   = GetView();
     m_Zoom = newZoom;
@@ -3598,6 +3600,32 @@ void ed::NavigateAction::SetViewRect(const ImRect& rect)
 ImRect ed::NavigateAction::GetViewRect() const
 {
     return m_Canvas.CalcViewRect(GetView());
+}
+
+float ed::NavigateAction::GetNextZoom(float steps)
+{
+    if (this->Editor->GetConfig().EnableSmoothZoom)
+    {
+        return MatchSmoothZoom(steps);
+    }
+    else
+    {
+        auto fixedSteps = (int)steps;
+        return MatchZoom(fixedSteps, m_ZoomLevels[fixedSteps < 0 ? 0 : m_ZoomLevelCount - 1]);
+    }
+}
+
+float ed::NavigateAction::MatchSmoothZoom(float steps)
+{
+    const auto power = Editor->GetConfig().SmoothZoomPower;
+
+    const auto newZoom = m_Zoom * powf(power, steps);
+    if (newZoom < m_ZoomLevels[0])
+        return m_ZoomLevels[0];
+    else if (newZoom > m_ZoomLevels[m_ZoomLevelCount - 1])
+        return m_ZoomLevels[m_ZoomLevelCount - 1];
+    else
+        return newZoom;
 }
 
 float ed::NavigateAction::MatchZoom(int steps, float fallbackZoom)
@@ -4340,15 +4368,15 @@ ed::EditorAction::AcceptResult ed::ShortcutAction::Accept(const Control& control
     Action candidateAction = None;
 
     auto& io = ImGui::GetIO();
-    if (io.KeyCtrl && !io.KeyShift && !io.KeyAlt && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_X)))
+    if (io.KeyCtrl && !io.KeyShift && !io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_X))
         candidateAction = Cut;
-    if (io.KeyCtrl && !io.KeyShift && !io.KeyAlt && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_C)))
+    if (io.KeyCtrl && !io.KeyShift && !io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_C))
         candidateAction = Copy;
-    if (io.KeyCtrl && !io.KeyShift && !io.KeyAlt && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_V)))
+    if (io.KeyCtrl && !io.KeyShift && !io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_V))
         candidateAction = Paste;
-    if (io.KeyCtrl && !io.KeyShift && !io.KeyAlt && ImGui::IsKeyPressed(GetKeyIndexForD()))
+    if (io.KeyCtrl && !io.KeyShift && !io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_D))
         candidateAction = Duplicate;
-    if (!io.KeyCtrl && !io.KeyShift && !io.KeyAlt && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Space)))
+    if (!io.KeyCtrl && !io.KeyShift && !io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_Space))
         candidateAction = CreateNode;
 
     if (candidateAction != None)
@@ -4685,14 +4713,14 @@ bool ed::CreateItemAction::Begin()
 {
     IM_ASSERT(false == m_InActive);
 
+    if (m_NextStage == None)
+        return false;
+
     m_InActive        = true;
     m_CurrentStage    = m_NextStage;
     m_UserAction      = Unknown;
     m_LinkColor       = IM_COL32_WHITE;
     m_LinkThickness   = 1.0f;
-
-    if (m_CurrentStage == None)
-        return false;
 
     m_LastChannel = Editor->GetDrawList()->_Splitter._Current;
 
@@ -4701,7 +4729,7 @@ bool ed::CreateItemAction::Begin()
 
 void ed::CreateItemAction::End()
 {
-    IM_ASSERT(m_InActive);
+    IM_ASSERT(m_InActive && "Please call End() only when Begin() was successful");
 
     if (m_IsInGlobalSpace)
     {
@@ -4902,7 +4930,7 @@ ed::EditorAction::AcceptResult ed::DeleteItemsAction::Accept(const Control& cont
         return False;
 
     auto& io = ImGui::GetIO();
-    if (Editor->CanAcceptUserInput() && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)) && Editor->AreShortcutsEnabled())
+    if (Editor->CanAcceptUserInput() && ImGui::IsKeyPressed(ImGuiKey_Delete) && Editor->AreShortcutsEnabled())
     {
         auto& selection = Editor->GetSelectedObjects();
         if (!selection.empty())
@@ -5353,10 +5381,10 @@ void ed::NodeBuilder::EndPin()
     }
 
     // #debug: Draw pin bounds
-    //Editor->GetDrawList()->AddRect(m_CurrentPin->m_Bounds.Min, m_CurrentPin->m_Bounds.Max, IM_COL32(255, 255, 0, 255));
+//    Editor->GetDrawList()->AddRect(m_CurrentPin->m_Bounds.Min, m_CurrentPin->m_Bounds.Max, IM_COL32(255, 255, 0, 255));
 
     // #debug: Draw pin pivot rectangle
-    //Editor->GetDrawList()->AddRect(m_CurrentPin->m_Pivot.Min, m_CurrentPin->m_Pivot.Max, IM_COL32(255, 0, 255, 255));
+//    Editor->GetDrawList()->AddRect(m_CurrentPin->m_Pivot.Min, m_CurrentPin->m_Pivot.Max, IM_COL32(255, 0, 255, 255));
 
     m_CurrentPin = nullptr;
 }
@@ -5676,6 +5704,8 @@ float* ed::Style::GetVarFloatAddr(StyleVar idx)
         case StyleVar_GroupBorderWidth:         return &GroupBorderWidth;
         case StyleVar_HighlightConnectedLinks:  return &HighlightConnectedLinks;
         case StyleVar_SnapLinkToPinDir:         return &SnapLinkToPinDir;
+        case StyleVar_HoveredNodeBorderOffset:  return &HoverNodeBorderOffset;
+        case StyleVar_SelectedNodeBorderOffset: return &SelectedNodeBorderOffset;
         default:                                return nullptr;
     }
 }

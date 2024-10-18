@@ -47,7 +47,7 @@ public:
   TileShader(TileSettings *settings) : settings(settings), Shader(settings) {};
   
   void setup() override {
-#ifdef TESTING
+#ifdef DEBUG
     shader.load("shaders/Tile");
 #endif
 #ifdef RELEASE

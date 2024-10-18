@@ -112,7 +112,7 @@ struct BlendShader: Shader {
   }
   
   void drawSelector() {
-    CommonViews::BlendModeSelector(settings->mode, settings->flip, settings->blendWithEmpty);
+    CommonViews::BlendModeSelector(settings->mode, settings->flip);
   }
 };
 

@@ -23,6 +23,7 @@ void IconSource::setup()
 void IconSource::drawSource()
 {
   fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
+  optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   fbo->getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
   fbo->begin();
   imageTexture->fbo->draw(0, 0, LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);

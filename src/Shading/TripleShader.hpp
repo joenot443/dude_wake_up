@@ -42,11 +42,11 @@ struct TripleSettings : public ShaderSettings
                                                  xShiftOscillator(std::make_shared<WaveformOscillator>(xShift)),
                                                  yShift(std::make_shared<Parameter>("yShift", 0.0, -2.0, 2.0)),
                                                  yShiftOscillator(std::make_shared<WaveformOscillator>(yShift)),
-                                                 drawOriginal(std::make_shared<Parameter>("drawOriginal", ParameterType_Bool)),
-                                                 drawLeft(std::make_shared<Parameter>("drawLeft", ParameterType_Bool)),
-                                                 drawRight(std::make_shared<Parameter>("drawRight", ParameterType_Bool)),
+                                                 drawOriginal(std::make_shared<Parameter>("drawOriginal", 1.0, ParameterType_Bool)),
+                                                 drawLeft(std::make_shared<Parameter>("drawLeft", 1.0, ParameterType_Bool)),
+                                                 drawRight(std::make_shared<Parameter>("drawRight", 1.0, ParameterType_Bool)),
                                                  drawCenter(std::make_shared<Parameter>("drawCenter", ParameterType_Bool)),
-  blendMode(std::make_shared<Parameter>("Blend Mode", 0.0, 0.0, 13.0)),                                                 ShaderSettings(shaderId, j, name)
+  blendMode(std::make_shared<Parameter>("Blend Mode", 1.0, 0.0, 13.0)),                                                 ShaderSettings(shaderId, j, name)
   {
     parameters = {scale, xShift, yShift, drawOriginal, drawLeft, drawRight, drawCenter, blendMode };
     oscillators = {scaleOscillator, xShiftOscillator, yShiftOscillator};

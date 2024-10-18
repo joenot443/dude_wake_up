@@ -44,7 +44,7 @@ public:
   AsciiShader(AsciiSettings *settings) : settings(settings), Shader(settings) {};
   
   void setup() override {
-#ifdef TESTING
+#ifdef DEBUG
     shader.load("shaders/Ascii");
 #endif
 #ifdef RELEASE

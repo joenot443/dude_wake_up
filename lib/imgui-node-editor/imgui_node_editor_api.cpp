@@ -93,14 +93,6 @@ ax::NodeEditor::EditorContext* ax::NodeEditor::GetCurrentEditor()
     return reinterpret_cast<ax::NodeEditor::EditorContext*>(s_Editor);
 }
 
-bool ax::NodeEditor::ZoomInc(bool in) {
-  return s_Editor->ZoomInc(in);
-}
-
-void ax::NodeEditor::ShowMetrics() {
-  return s_Editor->ShowMetrics();
-}
-
 ax::NodeEditor::Style& ax::NodeEditor::GetStyle()
 {
     return s_Editor->GetStyle();
@@ -578,17 +570,6 @@ void ax::NodeEditor::NavigateToContent(float duration)
 {
     s_Editor->NavigateTo(s_Editor->GetContentBounds(), true, duration);
 }
-
-void ax::NodeEditor::SuspendNavigation()
-{
-    s_Editor->SuspendNavigation();
-}
-
-void ax::NodeEditor::ResumeNavigation()
-{
-    s_Editor->ResumeNavigation();
-}
-
 
 void ax::NodeEditor::NavigateToSelection(bool zoomIn, float duration)
 {

@@ -1,9 +1,11 @@
 # define JSON_DIAGNOSTICS 1
+# define IMGUI_DEFINE_MATH_OPERATORS 1
 
 #include <errno.h>
 #include <sentry.h>
 
 #include "imgui.h"
+#include "imgui_internal.h"
 #include "CommonViews.hpp"
 #include "ofMain.h"
 #include "MainApp.h"
@@ -59,12 +61,14 @@ MainApp *MainApp::app = 0;
 
 void setupDirectories() {
   ofSetDataPathRoot("../Resources/data/");
+  
   auto appSupportPath = ConfigService::appSupportFilePath();
-  auto libraryPath = ofFilePath::join(appSupportPath, "/nottawa");
-  auto sentryPath = ofFilePath::join(libraryPath, "/sentry");
-  auto shadersPath = ofFilePath::join(libraryPath, "/shaders");
-  auto videosPath = ofFilePath::join(libraryPath, "/videos");
-  auto strandsPath = ofFilePath::join(libraryPath, "/strands");
+  auto libraryPath = appSupportPath + "/nottawa";
+  auto sentryPath = libraryPath + "/sentry";
+  auto shadersPath = libraryPath + "/shaders";
+  auto videosPath = libraryPath + "/videos";
+  auto strandsPath = libraryPath + "/strands";
+  auto exportPath = libraryPath + "/exports";
   
   if (!ofDirectory::doesDirectoryExist(libraryPath)) {
     ofDirectory::createDirectory(libraryPath);
@@ -80,6 +84,9 @@ void setupDirectories() {
   }
   if (!ofDirectory::doesDirectoryExist(strandsPath)) {
     ofDirectory::createDirectory(strandsPath);
+  }
+  if (!ofDirectory::doesDirectoryExist(exportPath)) {
+    ofDirectory::createDirectory(exportPath);
   }
   
   for (auto dir : ConfigService::getService()->shaderConfigFoldersPaths()) {

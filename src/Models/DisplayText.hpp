@@ -18,7 +18,7 @@ struct Font {
   std::string name = "";
   
   std::string path() {
-    return formatString("fonts/editor/%s", name.c_str());
+    return formatString("fonts/editor/%s.ttf", name.c_str());
   }
   
   Font(std::string name) : name(name) {};

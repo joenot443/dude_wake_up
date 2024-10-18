@@ -39,7 +39,6 @@ struct <%= name %>Settings: public ShaderSettings {
 struct <%= name %>Shader: Shader {
   <%= name %>Settings *settings;
   <%= name %>Shader(<%= name %>Settings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   
   void setup() override {
     shader.load("shaders/<%= name %>");

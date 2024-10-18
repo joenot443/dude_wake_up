@@ -14,6 +14,7 @@ void ImageSource::setup()
   ofImage image;
   image.load(path);
   fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
+  optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   fbo->begin();
   image.draw(0, 0);
   fbo->end();

@@ -45,7 +45,7 @@ public:
 
   
   void setup() override {
-#ifdef TESTING
+#ifdef DEBUG
     shader.load("shaders/Pixel");
 #endif
 #ifdef RELEASE

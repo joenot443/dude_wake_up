@@ -44,7 +44,7 @@ public:
   RingsShader(RingsSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    #ifdef TESTING
+    #ifdef DEBUG
 shader.load("shaders/Rings");
 #endif
 #ifdef RELEASE
@@ -54,7 +54,7 @@ shader.load("shaders/Rings");
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
-    shader.begin();
+    shader.begin(); 
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("time", ofGetElapsedTimef());

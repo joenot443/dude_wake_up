@@ -27,8 +27,8 @@ std::vector<std::shared_ptr<AvailableStrandTileItem>> StrandBrowserView::tileIte
         ImGui::EndDragDropSource();
       }
     };
-    
-    items.push_back(std::make_shared<AvailableStrandTileItem>(availableStrand, GetImTextureID(availableStrand->fbo->getTexture()), n, dragCallback));
+    ImTextureID textureId = (ImTextureID)(uint64_t) availableStrand->fbo->getTexture().texData.textureID;
+    items.push_back(std::make_shared<AvailableStrandTileItem>(availableStrand, textureId, n, dragCallback));
     n++;
   }
   return items;

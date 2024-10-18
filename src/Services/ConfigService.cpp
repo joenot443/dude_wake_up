@@ -38,7 +38,12 @@ void ConfigService::subscribeToConfigUpdates(std::function<void()> callback)
 
 std::string ConfigService::nottawaFolderFilePath()
 {
-  return ofFilePath::join(appSupportFilePath(), "/nottawa");
+  return appSupportFilePath() + "/nottawa";
+}
+
+std::string ConfigService::exportsFolderFilePath()
+{
+  return relativeFilePathWithinNottawaFolder("/exports");
 }
 
 std::string ConfigService::libraryFolderFilePath()
@@ -53,7 +58,7 @@ std::string ConfigService::strandsFolderFilePath()
 
 std::string ConfigService::relativeFilePathWithinNottawaFolder(std::string filePath)
 {
-  return ofFilePath::join(nottawaFolderFilePath(), filePath);
+  return nottawaFolderFilePath() + filePath;
 }
 
 std::string ConfigService::appSupportFilePath() {
@@ -84,7 +89,7 @@ json jsonFromParameters(std::vector<Parameter *> parameters)
 
 std::string ConfigService::shaderConfigFolderForType(ShaderType type)
 {
-  return ofFilePath::join(nottawaFolderFilePath(), formatString("/shaders/%s", shaderTypeName(type).c_str()));
+  return nottawaFolderFilePath() + formatString("/shaders/%s", shaderTypeName(type).c_str());
 }
 
 std::vector<std::string> ConfigService::shaderConfigFoldersPaths()
@@ -146,7 +151,8 @@ std::vector<AvailableShaderConfig> ConfigService::availableConfigsForShaderType(
 {
   ofDirectory directory;
   // Open the subdirectory for that ShaderType
-  directory.open(shaderConfigFolderForType(type));
+  auto path = shaderConfigFolderForType(type);
+  directory.open(path);
   directory.listDir();
   directory.sort();
   std::vector<AvailableShaderConfig> configs = {};

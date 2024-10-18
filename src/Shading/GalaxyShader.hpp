@@ -31,7 +31,7 @@ public:
   GalaxyShader(GalaxySettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    #ifdef TESTING
+    #ifdef DEBUG
 shader.load("shaders/Galaxy");
 #endif
 #ifdef RELEASE

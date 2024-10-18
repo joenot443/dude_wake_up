@@ -14,6 +14,7 @@
 #include "TextEditorView.hpp"
 #include "UUID.hpp"
 #include "dear_widgets.h"
+#include "Strings.hpp"
 #include "ConfigService.hpp"
 
 TextEditorView::TextEditorView(std::shared_ptr<DisplayText> displayText)
@@ -21,9 +22,8 @@ TextEditorView::TextEditorView(std::shared_ptr<DisplayText> displayText)
   ofDirectory fontsDir = ofDirectory("fonts/editor");
   fontsDir.listDir();
   
-  
   for (auto& file : fontsDir.getFiles()) {
-    fonts.push_back(Font(file.getFileName()));
+    fonts.push_back(Font(removeFileExtension(file.getFileName())));
   }
   displayText->font = fonts[selectedFontIndex];
   font.load(displayText->font.path(), displayText->fontSize);
@@ -65,7 +65,7 @@ void TextEditorView::draw() {
   
   // Font selection
   CommonViews::sSpacing();
-  ImGui::Text("Fonts");
+  ImGui::Text("Font");
   ImGui::SameLine();
   if (ImGui::BeginCombo("##FontsValue", fonts[selectedFontIndex].name.c_str())) {
     for (int i = 0; i < fonts.size(); ++i) {

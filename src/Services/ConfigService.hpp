@@ -97,6 +97,7 @@ public:
   // File Paths
   std::string nottawaFolderFilePath();
   std::string libraryFolderFilePath();
+  std::string exportsFolderFilePath();
   std::string templatesFolderFilePath();
   std::string strandsFolderFilePath();
   std::string relativeFilePathWithinNottawaFolder(std::string filePath);

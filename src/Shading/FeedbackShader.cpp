@@ -65,7 +65,7 @@ void FeedbackShader::populateSource()
 void FeedbackShader::drawPreview(ImVec2 pos, float scale)
 {
   ImTextureID texID = (ImTextureID)(uintptr_t)lastFrame->getTexture().getTextureData().textureID;
-  ImGui::Image(texID, ImVec2(160 / scale, 90 / scale));
+  ImGui::Image(texID, ImVec2(160*4.0 / scale, 90*4.0 / scale));
 }
 
 int FeedbackShader::frameIndex()

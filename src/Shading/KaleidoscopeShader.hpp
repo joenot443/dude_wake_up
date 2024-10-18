@@ -50,7 +50,7 @@ public:
   KaleidoscopeShader(KaleidoscopeSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    #ifdef TESTING
+    #ifdef DEBUG
 shader.load("shaders/kaleidoscope");
 #endif
 #ifdef RELEASE

@@ -40,7 +40,7 @@ public:
   RainbowRotatorShader(RainbowRotatorSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    #ifdef TESTING
+    #ifdef DEBUG
 shader.load("shaders/RainbowRotator");
 #endif
 #ifdef RELEASE

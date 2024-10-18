@@ -7,9 +7,10 @@
 
 #include "HelpService.hpp"
 #include "Fonts.hpp"
+#include "FontService.hpp"
 #include "ShaderChainerService.hpp"
 #include "VideoSourceService.hpp"
-#include "MixShader.hpp"
+#include "BlendShader.hpp"
 #include "LayoutStateService.hpp"
 #include "CommonViews.hpp"
 #include "imgui.h"
@@ -33,26 +34,26 @@ bool HelpService::placedSecondSource() {
   return VideoSourceService::getService()->videoSources().size() > 1;
 }
 
-bool HelpService::placedMixEffect() {
+bool HelpService::placedBlendEffect() {
   auto shaders = ShaderChainerService::getService()->shaders();
   for (auto shader : shaders) {
-    if (shader->type() == ShaderTypeMix) return true;
+    if (shader->type() == ShaderTypeBlend) return true;
   }
   return false;
 }
 
-bool HelpService::madeFirstMixConnection() {
+bool HelpService::madeFirstBlendConnection() {
   auto connections = ShaderChainerService::getService()->connections();
   for (auto connection : connections) {
-    if (ShaderChainerService::getService()->isShaderType(connection->end, ShaderTypeMix)) return true;
+    if (ShaderChainerService::getService()->isShaderType(connection->end, ShaderTypeBlend)) return true;
   }
   return false;
 }
 
-bool HelpService::madeSecondMixConnection() {
+bool HelpService::madeSecondBlendConnection() {
   auto connections = ShaderChainerService::getService()->connections();
   for (auto connection : connections) {
-    if (ShaderChainerService::getService()->isShaderType(connection->end, ShaderTypeMix)) {
+    if (ShaderChainerService::getService()->isShaderType(connection->end, ShaderTypeBlend)) {
       return connection->end->inputs.size() > 1;
     }
   }
@@ -63,12 +64,15 @@ bool HelpService::openedShaderInfo() {
   return LayoutStateService::getService()->shouldDrawShaderInfo();
 }
 
-bool HelpService::editedMixParameter() {
+bool HelpService::editedBlendParameter() {
   auto shaders = ShaderChainerService::getService()->shaders();
   for (auto shader : shaders) {
-    if (shader->type() == ShaderTypeMix) {
-      std::shared_ptr<MixShader> mixShader = std::dynamic_pointer_cast<MixShader>(shader);
-      return abs(mixShader->settings->mix->value - mixShader->settings->mix->defaultValue) > 0.1;
+    if (shader->type() == ShaderTypeBlend) {
+      std::shared_ptr<BlendShader> blendShader = std::dynamic_pointer_cast<BlendShader>(shader);
+      
+      // Check if Mode and Alpha have been changed
+      return blendShader->settings->mode->intValue != (int) blendShader->settings->mode->defaultValue  &&
+      abs(blendShader->settings->alpha->value - blendShader->settings->alpha->defaultValue) > 0.01;
     }
   }
   return false;
@@ -77,7 +81,7 @@ bool HelpService::editedMixParameter() {
 bool HelpService::openedStageMode() {
   bool stageMode = LayoutStateService::getService()->stageModeEnabled;
   if (stageMode) {
-    LayoutStateService::getService()->helpEnabled = false;
+    hasOpenedStageMode = true;
   }
   return stageMode;
 }
@@ -173,19 +177,19 @@ void HelpService::drawSecondSource2View() {
   drawRightArrowView();
 }
 
-void HelpService::drawMixEffectView() {
+void HelpService::drawBlendEffectView() {
   float x = ImGui::GetCursorPosX();
-  CommonViews::H2Title(StringManager::get("add_mix_effect_title"), false);
+  CommonViews::H2Title(StringManager::get("add_blend_effect_title"), false);
   ImGui::SetCursorPosX(x);
-  CommonViews::H3Title(StringManager::get("drag_mix_effect_instruction"), false);
+  CommonViews::H3Title(StringManager::get("drag_blend_effect_instruction"), false);
   CommonViews::mSpacing();
   ImGui::SetCursorPosX(x);
   drawLeftArrowView();
 }
 
-void HelpService::drawMixEffect2View() {
+void HelpService::drawBlendEffect2View() {
   float x = ImGui::GetCursorPosX();
-  CommonViews::H2Title(StringManager::get("drop_mix_effect_title"), false);
+  CommonViews::H2Title(StringManager::get("drop_blend_effect_title"), false);
   CommonViews::mSpacing();
   ImGui::SetCursorPosX(x + ImGui::GetWindowSize().x / 3.0);
   drawRightArrowView();
@@ -196,10 +200,10 @@ void HelpService::drawWrongEffectView() {
   CommonViews::H2Title(StringManager::get("wrong_effect_title"), false);
 }
 
-void HelpService::drawMixConnectionView(ImVec2 nodePosition, ImVec2 nodeSize, float scale) {
-  ImGui::SetCursorPos(ImVec2(nodePosition.x, nodePosition.y - 90 / scale - 100.0));
+void HelpService::drawBlendConnectionView(ImVec2 nodePosition, ImVec2 nodeSize, float scale) {
+  ImGui::SetCursorPos(ImVec2(nodePosition.x, nodePosition.y + 400 / scale));
   float x = ImGui::GetCursorPosX();
-  CommonViews::H2Title(StringManager::get("connect_mix_effect_title"), false);
+  CommonViews::H2Title(StringManager::get("connect_blend_effect_title"), false);
   ImGui::SetCursorPosX(x);
   CommonViews::H3Title(StringManager::get("combine_nodes_instruction"), false);
   CommonViews::mSpacing();
@@ -207,20 +211,20 @@ void HelpService::drawMixConnectionView(ImVec2 nodePosition, ImVec2 nodeSize, fl
   drawLeftArrowView();
 }
 
-void HelpService::drawMixConnection2View(ImVec2 nodePosition, ImVec2 nodeSize, float scale) {
-  ImGui::SetCursorPos(ImVec2(nodePosition.x, nodePosition.y - 50.0));
+void HelpService::drawBlendConnection2View(ImVec2 nodePosition, ImVec2 nodeSize, float scale) {
+  ImGui::SetCursorPos(ImVec2(nodePosition.x, nodePosition.y + 400 / scale));
   float x = ImGui::GetCursorPosX();
-  CommonViews::H2Title(StringManager::get("complete_mix_connection_title"), false);
+  CommonViews::H2Title(StringManager::get("complete_blend_connection_title"), false);
   ImGui::SetCursorPosX(x);
-  CommonViews::H3Title(StringManager::get("connect_to_mix_instruction"), false);
+  CommonViews::H3Title(StringManager::get("connect_to_blend_instruction"), false);
   ImGui::SetCursorPos(ImVec2(nodePosition.x - ArrowWidth - 10.0, nodePosition.y + (nodeSize.y / scale / 2.0) - ArrowHeight / 2.0));
   drawRightArrowView();
 }
 
-void HelpService::drawSecondMixConnectionView(ImVec2 nodePosition, ImVec2 nodeSize, float scale) {
-  ImGui::SetCursorPos(ImVec2(nodePosition.x, nodePosition.y - 90 / scale - 100.0));
+void HelpService::drawSecondBlendConnectionView(ImVec2 nodePosition, ImVec2 nodeSize, float scale) {
+  ImGui::SetCursorPos(ImVec2(nodePosition.x, nodePosition.y + 400 / scale));
   float x = ImGui::GetCursorPosX();
-  CommonViews::H2Title(StringManager::get("add_second_mix_connection_title"), false);
+  CommonViews::H2Title(StringManager::get("add_second_blend_connection_title"), false);
   ImGui::SetCursorPosX(x);
   CommonViews::H3Title(StringManager::get("second_connection_instruction"), false);
   CommonViews::mSpacing();
@@ -228,13 +232,14 @@ void HelpService::drawSecondMixConnectionView(ImVec2 nodePosition, ImVec2 nodeSi
   drawLeftArrowView();
 }
 
-void HelpService::drawSecondMixConnection2View(ImVec2 nodePosition, ImVec2 nodeSize, float scale) {
+void HelpService::drawSecondBlendConnection2View(ImVec2 nodePosition, ImVec2 nodeSize, float scale) {
   ImGui::SetCursorPos(ImVec2(nodePosition.x, nodePosition.y + nodeSize.y / scale + 10.0));
   float x = ImGui::GetCursorPosX();
   CommonViews::H2Title(StringManager::get("complete_second_connection_title"), false);
   ImGui::SetCursorPosX(x);
   CommonViews::H3Title(StringManager::get("drop_connection_instruction"), false);
-  ImGui::SetCursorPos(ImVec2(nodePosition.x - ArrowWidth - 10.0, nodePosition.y + (nodeSize.y / scale / 2.0) + (10.0 / scale) - ArrowHeight / 2.0));
+  ImGui::SetCursorPos(ImVec2(nodePosition.x - ArrowWidth - 10.0,
+                             nodePosition.y + (nodeSize.y / scale / 2.0) + (10.0 / scale) - ArrowHeight / 2.0));
   drawRightArrowView();
 }
 
@@ -243,7 +248,7 @@ void HelpService::drawOpenShaderInfoView(ImVec2 nodePosition, ImVec2 nodeSize, f
   float x = ImGui::GetCursorPosX();
   CommonViews::H2Title(StringManager::get("open_shader_info_title"), false);
   ImGui::SetCursorPosX(x);
-  CommonViews::H3Title(StringManager::get("click_mix_instruction"), false);
+  CommonViews::H3Title(StringManager::get("click_blend_instruction"), false);
 }
 
 void HelpService::drawEditParametersShaderInfoPane() {
@@ -265,11 +270,14 @@ void HelpService::drawActionButtons() {
   float shaderInfoPaneWidth = LayoutStateService::getService()->shouldDrawShaderInfo() ? LayoutStateService::getService()->browserSize().x : 0;
   ImGui::SetCursorPos(ImVec2(ImGui::GetWindowWidth() - shaderInfoPaneWidth - 400.0, ImGui::GetWindowHeight() - 400.0));
   float x = ImGui::GetCursorPosX();
+  CommonViews::H2Title(StringManager::get("action_buttons_title"), false);
+  CommonViews::mSpacing();
+  ImGui::SetCursorPosX(x);
   CommonViews::LargeIconButton(ICON_MD_HELP_OUTLINE, "helpExample"); ImGui::SameLine();
   CommonViews::H3Title(StringManager::get("help_toggle_instruction"), false);
   CommonViews::mSpacing();
   ImGui::SetCursorPosX(x);
-  CommonViews::LargeIconButton(ICON_MD_RECYCLING, "resetExample"); ImGui::SameLine();
+  CommonViews::LargeIconButton(ICON_MD_DELETE_FOREVER, "resetExample"); ImGui::SameLine();
   CommonViews::H3Title(StringManager::get("clear_canvas_instruction"), false);
   CommonViews::mSpacing();
   ImGui::SetCursorPosX(x);
@@ -307,4 +315,29 @@ void HelpService::drawStageModeActionButtonsHelp() {
   ImGui::SameLine();
   CommonViews::H3Title(StringManager::get("stage_mode_action_favorite"), false);
   ImGui::EndChild();
+}
+
+void HelpService::drawCompletionPopup() {
+  ImGui::SetNextWindowSize(ImVec2(ImGui::GetWindowSize().x / 4.0, ImGui::GetWindowSize().y / 3.0));
+  if (ImGui::BeginPopupModal("CompletionPopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration)) {
+    CommonViews::H2Title(StringManager::get("completion_title"), false);
+    CommonViews::mSpacing();
+    CommonViews::H3Title(StringManager::get("completion_description"), false);
+    CommonViews::mSpacing();
+    CommonViews::H3Title(StringManager::get("completion_description_2"), false);
+    CommonViews::mSpacing();
+    CommonViews::H3Title(StringManager::get("completion_description_3"), false);
+    CommonViews::mSpacing();
+    CommonViews::H3BTitle(StringManager::get("completion_description_4"), false);
+    
+    ImGui::PushFont(FontService::getService()->h2);
+    ImGui::SetNextItemWidth(60.0);
+    ImGui::SetCursorPosX(ImGui::GetContentRegionAvail().x / 2.0 - 30.0);
+    if (ImGui::Button("Okay!")) {
+      completed = true;
+    }
+    ImGui::PopFont();
+    ImGui::EndPopup();
+  }
+  ImGui::OpenPopup("CompletionPopup");
 }

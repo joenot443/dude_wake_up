@@ -47,7 +47,7 @@ class CloudShader: public Shader {
   Shader(settings) {};
 
   void setup() override {
-    #ifdef TESTING
+    #ifdef DEBUG
 shader.load("shaders/clouds");
 #endif
 #ifdef RELEASE

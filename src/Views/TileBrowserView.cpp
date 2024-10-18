@@ -62,8 +62,11 @@ void TileBrowserView::draw()
     auto tile = tileItems[idx];
     
     if (lastCategory != tile->category) {
-      if (idx != 0) CommonViews::Spacing(20);
-      CommonViews::H4Title(tile->category);
+      if (idx != 0) ImGui::NewLine();
+      // Add 8.0 of vertical padding
+      ImGui::PushFont(FontService::getService()->h4);
+      CommonViews::PaddedText(tile->category, ImVec2(2.0, 8.0));
+      ImGui::PopFont();
       lastCategory = tile->category;
     }
     
@@ -79,27 +82,18 @@ void TileBrowserView::draw()
       ImGui::Image(tile->textureID, TileSize);
       ImGui::SameLine();
       
-      ImGui::GetWindowDrawList()->AddRectFilled(startPos, ImGui::GetCursorPos(), IM_COL32(0, 0, 0, 128));
+      ImGui::GetWindowDrawList()->AddRectFilled(startPos, ImGui::GetCursorPos(), IM_COL32(0, 0, 0, 178));
       
       endXPos = ImGui::GetCursorPosX();
       
       ImGui::SetCursorPosX(xPos);
       
-      
-      // Push a smaller font size
-      if (tile->name.size() > 10)
-      {
-        // Push a smaller font size
-        ImGui::PushFont(FontService::getService()->sm);
-        ImGui::Button(tile->name.c_str(), TileSize);
-        ImGui::PopFont();
-      }
-      else
-      {
-        ImGui::PushFont(FontService::getService()->p);
-        ImGui::Button(tile->name.c_str(), TileSize);
-        ImGui::PopFont();
-      }
+      ImGui::PushFont(FontService::getService()->p);
+      // Set the font color to white
+      ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0, 1.0, 1.0, 0.6));
+      ImGui::Button(tile->name.c_str(), TileSize);
+      ImGui::PopStyleColor();
+      ImGui::PopFont();
       
       tile->dragCallback();
       

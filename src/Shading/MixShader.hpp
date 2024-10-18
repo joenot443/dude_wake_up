@@ -45,7 +45,7 @@ public:
   MixShader(MixSettings *settings) : settings(settings), Shader(settings) {};
   
   void setup() override {
-    #ifdef TESTING
+    #ifdef DEBUG
 shader.load("shaders/Mix");
 #endif
 #ifdef RELEASE

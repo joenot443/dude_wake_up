@@ -75,17 +75,17 @@ void MainStageView::draw()
   
   //  ImGui::PopStyleVar();
   ImGui::BeginChild("##sourceBrowser", browserSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
-  CommonViews::H3Title("Sources");
+  //  CommonViews::H3Title("Sources");
   drawVideoSourceBrowser();
   ImGui::EndChild();
   
   ImGui::BeginChild("##shaderBrowser", browserSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
-  CommonViews::H3Title("Effects");
+  //  CommonViews::H3Title("Effects");
   drawShaderBrowser();
   ImGui::EndChild();
   
   ImGui::BeginChild("##libraryBrowser", browserSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
-  CommonViews::H3Title("Saved Strands");
+  //  CommonViews::H3Title("Saved Strands");
   strandBrowserView.draw();
   ImGui::EndChild();
   
@@ -115,9 +115,9 @@ void MainStageView::draw()
   
   // Welcome Screen
   
-  if (LayoutStateService::getService()->showWelcomeScreen) {
-    welcomeScreenView.draw();
-  }
+//  if (LayoutStateService::getService()->showWelcomeScreen) {
+//    welcomeScreenView.draw();
+//  }
 }
 
 void MainStageView::drawMenu()
@@ -184,6 +184,12 @@ void MainStageView::drawMenu()
         }
         ImGui::EndMenu();
       }
+      
+      if (ImGui::MenuItem("Portrait Mode", nullptr, &LayoutStateService::getService()->portrait))
+      {
+        LayoutStateService::getService()->togglePortraitSetting();
+      }
+      
       ImGui::EndMenu();
     }
     
@@ -235,11 +241,13 @@ void MainStageView::drawMenu()
     }
     
     static bool showingMenu = false;
+#ifndef RELEASE
     if (ImGui::MenuItem("ImGui Demo") || showingMenu)
     {
       ImGui::ShowDemoWindow();
       showingMenu = true;
     }
+#endif
     
     ImGui::EndMenuBar();
   }

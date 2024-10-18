@@ -46,7 +46,8 @@ enum InputSlot
   InputSlotSix,
   InputSlotSeven,
   InputSlotEight,
-  InputSlotNine
+  InputSlotNine,
+  InputSlotNone,
 };
 
 static const InputSlot AllInputSlots[] = {
@@ -131,6 +132,8 @@ public:
   virtual int inputCount() = 0;
   
   virtual void drawSettings() = 0;
+  
+  virtual void drawOptionalSettings() = 0;
     
   // The settings for the VideoSource itself, or the parent VideoSource,
   // or the defaultVideoSource if the Connectable has no VideoSource parent.

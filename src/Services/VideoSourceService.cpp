@@ -20,6 +20,8 @@
 #include "BookmarkService.hpp"
 #include "LayoutStateService.hpp"
 #include "FileSource.hpp"
+#include <cstdlib>
+
 
 void VideoSourceService::setup()
 {
@@ -29,32 +31,28 @@ void VideoSourceService::setup()
 
 void VideoSourceService::populateAvailableVideoSources()
 {
-#ifdef TESTING
-  // Return early while testing. We don't test AvailableVideoSources for now.
-  return;
-#endif
   availableSourceMap.clear();
-
+  
   // Add an AvailableVideoSource for each Webcam and each ShaderType
   for (auto const &x : ofVideoGrabber().listDevices())
   {
     auto webcamSource = std::make_shared<AvailableVideoSourceWebcam>(x.deviceName, x.id);
     availableSourceMap[webcamSource->availableVideoSourceId] = webcamSource;
   }
-
+  
   for (auto const &x : AvailableShaderSourceTypes)
   {
     auto shaderSource = std::make_shared<AvailableVideoSourceShader>(shaderSourceTypeName(x), shaderSourceTypeCategory(x), x);
     shaderSource->generatePreview();
     availableSourceMap[shaderSource->availableVideoSourceId] = shaderSource;
   }
-
+  
   auto textSource = std::make_shared<AvailableVideoSourceText>("Basic Text");
   availableSourceMap[textSource->availableVideoSourceId] = textSource;
   
   auto iconSource = std::make_shared<AvailableVideoSourceIcon>("Icon");
   availableSourceMap[iconSource->availableVideoSourceId] = iconSource;
-
+  
   for (auto const &file : LibraryService::getService()->libraryFiles)
   {
     // Create an AvailableLibraryVideoSource for each LibraryFile
@@ -62,7 +60,7 @@ void VideoSourceService::populateAvailableVideoSources()
     fileSource->generatePreview();
     availableSourceMap[fileSource->availableVideoSourceId] = fileSource;
   }
-
+  
   availableVideoSourceUpdateSubject.notify();
 }
 
@@ -85,9 +83,9 @@ std::shared_ptr<ofFbo> VideoSourceService::previewFbo()
   std::shared_ptr<ofFbo> blankFbo = std::make_shared<ofFbo>();
   fbo->allocate(426, 240);
   blankFbo->allocate(426, 240);
-
+  
   auto shader = ShaderChainerService::getService()->shaderForType(
-      ShaderTypeOctahedron, UUID::generateUUID(), 0);
+                                                                  ShaderTypeOctahedron, UUID::generateUUID(), 0);
   shader->setup();
   shader->shade(blankFbo, fbo);
   return fbo;
@@ -110,6 +108,7 @@ void VideoSourceService::updateVideoSources()
     if (!x.second->active) continue;
     
     x.second->saveFrame();
+    x.second->applyOptionalShaders();
     x.second->saveFeedbackFrame();
   }
 }
@@ -134,6 +133,7 @@ void VideoSourceService::addVideoSource(std::shared_ptr<VideoSource> videoSource
     videoSource->load(j);
   }
   videoSource->setup();
+  videoSource->generateOptionalShaders();
   // Subscribe the Shader's setup() to resolution updates
   LayoutStateService::getService()->subscribeToResolutionUpdates([videoSource]() {
     videoSource->setup();
@@ -226,10 +226,10 @@ std::shared_ptr<VideoSource> VideoSourceService::addWebcamVideoSource(std::strin
   std::shared_ptr<WebcamSource> videoSource = std::make_shared<WebcamSource>(id, name);
   videoSource->origin = origin;
   videoSource->settings->deviceId->intValue = deviceId;
-//  if (j["settings"].is_object()) {
-//    videoSource->settings->load(j["settings"]);
-//  }
-
+  //  if (j["settings"].is_object()) {
+  //    videoSource->settings->load(j["settings"]);
+  //  }
+  
   addVideoSource(videoSource, id, j);
   return videoSource;
 }
@@ -240,76 +240,76 @@ std::shared_ptr<VideoSource> VideoSourceService::addFileVideoSource(std::string 
   // Get the bookmark service instance
   BookmarkService* bookmarkService = BookmarkService::getService();
   std::shared_ptr<VideoSource> videoSource = nullptr;
-
+  
   // Check if bookmark exists for the given path
   if (!bookmarkService->hasBookmarkForPath(path)) {
-      // No bookmark exists, create one
-      bookmarkService->saveBookmarkForPath(path);
-      
-      // Check again if bookmark was successfully saved
-      if (!bookmarkService->hasBookmarkForPath(path)) {
-          log("Failed to create bookmark for path: %s", path.c_str());
-          return nullptr;  // Return early on error
-      }
+    // No bookmark exists, create one
+    bookmarkService->saveBookmarkForPath(path);
+    
+    // Check again if bookmark was successfully saved
+    if (!bookmarkService->hasBookmarkForPath(path)) {
+      log("Failed to create bookmark for path: %s", path.c_str());
+      return nullptr;  // Return early on error
+    }
   }
-
+  
   // Load the bookmark data
   CFDataRef bookmarkData = bookmarkService->loadBookmarkForPath(path);
   if (!bookmarkData) {
-      log("Failed to load bookmark for path: %s", path.c_str());
-      return nullptr;  // Return early on error
+    log("Failed to load bookmark for path: %s", path.c_str());
+    return nullptr;  // Return early on error
   }
-
+  
   // Resolve the bookmark to get the file URL
   Boolean isStale = false;
   CFErrorRef error = nullptr;
   CFURLRef fileURL = CFURLCreateByResolvingBookmarkData(
-      kCFAllocatorDefault,        // Allocator
-      bookmarkData,               // Bookmark data
-      kCFURLBookmarkResolutionWithSecurityScope,  // Options (or 0 if no security scope needed)
-      nullptr,                    // relativeToURL (can be nullptr)
-      nullptr,                    // resourcePropertiesToInclude (can be nullptr)
-      &isStale,                   // isStale flag
-      &error                      // CFErrorRef for error reporting
-  );
-
+                                                        kCFAllocatorDefault,        // Allocator
+                                                        bookmarkData,               // Bookmark data
+                                                        kCFURLBookmarkResolutionWithSecurityScope,  // Options (or 0 if no security scope needed)
+                                                        nullptr,                    // relativeToURL (can be nullptr)
+                                                        nullptr,                    // resourcePropertiesToInclude (can be nullptr)
+                                                        &isStale,                   // isStale flag
+                                                        &error                      // CFErrorRef for error reporting
+                                                        );
+  
   // Check if fileURL is resolved successfully
   if (!fileURL) {
-      log("Failed to resolve bookmark data for path: %s", path.c_str());
-      if (error) {
-          CFStringRef errorDesc = CFErrorCopyDescription(error);
-          char buffer[256];
-          CFStringGetCString(errorDesc, buffer, sizeof(buffer), kCFStringEncodingUTF8);
-          log("Bookmark Resolution Error", buffer);
-          CFRelease(errorDesc);
-          CFRelease(error);  // Release error reference
-      }
-      CFRelease(bookmarkData);  // Release bookmarkData before returning
-      return nullptr;
+    log("Failed to resolve bookmark data for path: %s", path.c_str());
+    if (error) {
+      CFStringRef errorDesc = CFErrorCopyDescription(error);
+      char buffer[256];
+      CFStringGetCString(errorDesc, buffer, sizeof(buffer), kCFStringEncodingUTF8);
+      log("Bookmark Resolution Error", buffer);
+      CFRelease(errorDesc);
+      CFRelease(error);  // Release error reference
+    }
+    CFRelease(bookmarkData);  // Release bookmarkData before returning
+    return nullptr;
   }
-
+  
   // Start accessing the security-scoped resource
   Boolean success = CFURLStartAccessingSecurityScopedResource(fileURL);
   if (!success) {
-      log("Failed to access security-scoped resource for URL: %s", path.c_str());
-      CFRelease(fileURL);     // Release fileURL
-      CFRelease(bookmarkData); // Release bookmarkData
-      return nullptr;  // Return early on error
+    log("Failed to access security-scoped resource for URL: %s", path.c_str());
+    CFRelease(fileURL);     // Release fileURL
+    CFRelease(bookmarkData); // Release bookmarkData
+    return nullptr;  // Return early on error
   }
-
+  
   // At this point, we have successfully resolved the bookmark and accessed the resource
   videoSource = std::make_shared<FileSource>(id, name, path);
   videoSource->origin = origin;
   // Add the video source to the map (assuming addVideoSource takes care of this)
   addVideoSource(videoSource, id, j);
-
+  
   // Stop accessing the security-scoped resource when done
   CFURLStopAccessingSecurityScopedResource(fileURL);
-
+  
   // Release CF objects
   CFRelease(fileURL);
   CFRelease(bookmarkData);
-
+  
   return videoSource;
 }
 
@@ -343,7 +343,7 @@ std::shared_ptr<VideoSource> VideoSourceService::addShaderVideoSource(ShaderSour
     shaderSource->shader->settings->registerParameters();
   }
   auto videoSource = std::dynamic_pointer_cast<VideoSource>(shaderSource);
-
+  
   videoSource->origin = origin;
   addVideoSource(videoSource, id, j);
   return videoSource;
@@ -392,19 +392,21 @@ void VideoSourceService::addOutputWindow(std::shared_ptr<Connectable> connectabl
   auto streamWindow = ofCreateWindow(settings);
   ofRunApp(streamWindow, outputWindow);
   outputWindows[connectable->connId()] = outputWindow;
+  lastOutputWindow = outputWindow;
 }
 
 void VideoSourceService::updateOutputWindow(std::shared_ptr<Connectable> oldConnectable, std::shared_ptr<Connectable> newConnectable)
 {
   if (outputWindows.count(oldConnectable->connId()) == 0)
     return;
-
+  
   std::shared_ptr<OutputWindow> outputWindow = outputWindows[oldConnectable->connId()];
   outputWindow->fbo = newConnectable->frame();
   outputWindow->connectable = newConnectable;
   outputWindows.erase(oldConnectable->connId());
-
+  
   outputWindows[newConnectable->connId()] = outputWindow;
+  lastOutputWindow = outputWindow;
 }
 
 bool VideoSourceService::hasOutputWindowForConnectable(std::shared_ptr<Connectable> connectable)
@@ -421,7 +423,7 @@ json VideoSourceService::config()
 {
   auto sources = videoSources();
   json container;
-
+  
   for (auto source : sources)
   {
     // Don't serialize Chainer video sources, they'll be added in the ShaderChainerService
@@ -434,58 +436,58 @@ json VideoSourceService::config()
     {
       continue;
     }
-//    if (NodeLayoutView::getInstance()->nodeForShaderSourceId(source->id) == nullptr)
-//    {
-//      continue;
-//    }
+    //    if (NodeLayoutView::getInstance()->nodeForShaderSourceId(source->id) == nullptr)
+    //    {
+    //      continue;
+    //    }
     container[source->id] = source->serialize();
   }
-
+  
   // Check if the container is an object and log its value count
   int size = container.size();
   if (container.is_object() && container.size() == 0)
   {
     ofLogNotice() << "VideoSourceService::config() container has " << container.size() << " values";
   }
-
+  
   return container;
 }
 
 void VideoSourceService::appendConfig(json j)
 {
   std::map<std::string, json> sourcesMap = j;
-
+  
   VideoSourceType type = j["videoSourceType"];
   std::string sourceId = j["id"];
   ImVec2 position = ImVec2(j["x"], j["y"]);
-
+  
   switch (type)
   {
-  case VideoSource_empty:
+    case VideoSource_empty:
       break;
-  case VideoSource_file:
-    addFileVideoSource(j["sourceName"], j["path"], position, sourceId, j);
-    return;
-  case VideoSource_webcam:
-    addWebcamVideoSource(j["sourceName"], 0, position, sourceId, j);
-    return;
-  case VideoSource_shader:
-    addShaderVideoSource(j["shaderSourceType"], position, sourceId, j);
-    return;
-  case VideoSource_chainer:
-    return;
-  case VideoSource_image:
-    addImageVideoSource(j["sourceName"], j["path"], position, sourceId, j);
-    return;
-  case VideoSource_text:
-    addTextVideoSource(j["sourceName"], position, sourceId, j);
-    return;
-  case VideoSource_icon:
-    addIconVideoSource(j["sourceName"], position, sourceId, j);
-    return;
-  case VideoSource_library:
-    std::shared_ptr<LibraryFile> libraryFile = LibraryService::getService()->libraryFileForId(j["libraryFileId"]);
-    addLibraryVideoSource(libraryFile, position, sourceId, j);
+    case VideoSource_file:
+      addFileVideoSource(j["sourceName"], j["path"], position, sourceId, j);
+      return;
+    case VideoSource_webcam:
+      addWebcamVideoSource(j["sourceName"], 0, position, sourceId, j);
+      return;
+    case VideoSource_shader:
+      addShaderVideoSource(j["shaderSourceType"], position, sourceId, j);
+      return;
+    case VideoSource_chainer:
+      return;
+    case VideoSource_image:
+      addImageVideoSource(j["sourceName"], j["path"], position, sourceId, j);
+      return;
+    case VideoSource_text:
+      addTextVideoSource(j["sourceName"], position, sourceId, j);
+      return;
+    case VideoSource_icon:
+      addIconVideoSource(j["sourceName"], position, sourceId, j);
+      return;
+    case VideoSource_library:
+      std::shared_ptr<LibraryFile> libraryFile = LibraryService::getService()->libraryFileForId(j["libraryFileId"]);
+      addLibraryVideoSource(libraryFile, position, sourceId, j);
   }
 }
 
@@ -499,7 +501,7 @@ void VideoSourceService::clear()
     FeedbackSourceService::getService()->removeFeedbackSource(key);
     it = videoSourceMap.erase(it);
   }
-
+  
   videoSourceMap.clear();
   outputWindows.clear();
 }
@@ -514,7 +516,7 @@ std::vector<std::string> VideoSourceService::idsFromLoadingConfig(json j)
 {
   std::map<std::string, json> sourceMap = j;
   std::vector<std::string> ids;
-
+  
   for (auto pair : sourceMap)
   {
     std::map<std::string, json> source = pair.second;
@@ -532,4 +534,35 @@ std::shared_ptr<VideoSource> VideoSourceService::videoSourceForId(std::string id
     return videoSourceMap[id];
   }
   return nullptr;
+}
+
+void VideoSourceService::captureOutputWindowScreenshot()
+{
+  if (lastOutputWindow == nullptr) return;
+  
+  std::shared_ptr<ofFbo> fbo = lastOutputWindow->fbo;
+  
+  // Create an ofImage to store the pixels
+  ofImage image;
+  
+  // Allocate the image with the dimensions of the FBO
+  image.allocate(fbo->getWidth(), fbo->getHeight(), OF_IMAGE_COLOR);
+  
+  // Bind the FBO and read its pixels
+  fbo->bind();
+  fbo->readToPixels(image.getPixels());
+  fbo->unbind();
+  
+  // Construct the full file path for the screenshot
+  std::string filePath = ConfigService::getService()->exportsFolderFilePath() + "/nottawa_" + ofGetTimestampString() + ".jpg";
+  
+  // Save the image to the specified file path
+  if (ofSaveImage(image.getPixels(), filePath)) {
+    ofLog() << "Screenshot saved to " << filePath;
+    
+    std::string command = "open " + ConfigService::getService()->exportsFolderFilePath();
+    std::system(command.c_str());
+  } else {
+    ofLog() << "Failed";
+  }
 }

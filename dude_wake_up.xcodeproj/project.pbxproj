@@ -46,6 +46,7 @@
 		026EA94A2A5EDA7500AA3E55 /* LibraryFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 026EA9492A5ED9F800AA3E55 /* LibraryFile.cpp */; };
 		026ED08C2C52AC5F00810E44 /* ofxVideoRecorder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 026ED08A2C52AC5F00810E44 /* ofxVideoRecorder.cpp */; };
 		026ED08F2C52C63800810E44 /* VideoRecordingView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 026ED08D2C52C63800810E44 /* VideoRecordingView.cpp */; };
+		027637D92CBFFFE60072073F /* OptionalShadersHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 027637D72CBFFFE60072073F /* OptionalShadersHelper.cpp */; };
 		028BAE9A29684984003E7DF8 /* NodeLayoutView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028BAE9929684984003E7DF8 /* NodeLayoutView.cpp */; };
 		028E8E59299E72FE00B95C92 /* MaterialIcons-Regular.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 028E8E58299E72FE00B95C92 /* MaterialIcons-Regular.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		028E8E5D29A697FD00B95C92 /* MarkdownView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028E8E5B29A697FD00B95C92 /* MarkdownView.cpp */; };
@@ -100,6 +101,7 @@
 		02CC58A129AF914E006A50F2 /* ImageSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02CC589F29AF914E006A50F2 /* ImageSource.cpp */; };
 		02D49C162B993B1E00F48242 /* FavoriteParameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02D49C152B993AF100F48242 /* FavoriteParameter.cpp */; };
 		02D49C192B9A48A000F48242 /* CommonStrings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02D49C182B9A488300F48242 /* CommonStrings.cpp */; };
+		02D63BC22CBB0785009CA010 /* imgui_impl_glfw_context_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02D63BC12CBB0785009CA010 /* imgui_impl_glfw_context_support.cpp */; };
 		02D9A7B32B7D73F7001F22C5 /* TextureService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02D9A7B12B7D73F7001F22C5 /* TextureService.cpp */; };
 		02D9A7B72B7FC32F001F22C5 /* ParameterTileBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02D9A7B62B7FC32F001F22C5 /* ParameterTileBrowserView.cpp */; };
 		02DDED8B29EF08E90040382F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02DDED8A29EF08E90040382F /* main.cpp */; };
@@ -413,6 +415,8 @@
 		026ED08E2C52C63800810E44 /* VideoRecordingView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = VideoRecordingView.hpp; path = Views/VideoRecordingView.hpp; sourceTree = "<group>"; };
 		026ED0902C58356C00810E44 /* strings.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = strings.json; path = misc/strings.json; sourceTree = "<group>"; };
 		026ED0912C5929AB00810E44 /* libcpr.1.10.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcpr.1.10.5.dylib; path = ../../../../../../opt/local/lib/libcpr.1.10.5.dylib; sourceTree = "<group>"; };
+		027637D72CBFFFE60072073F /* OptionalShadersHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptionalShadersHelper.cpp; path = Shading/OptionalShadersHelper.cpp; sourceTree = "<group>"; };
+		027637D82CBFFFE60072073F /* OptionalShadersHelper.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = OptionalShadersHelper.hpp; path = Shading/OptionalShadersHelper.hpp; sourceTree = "<group>"; };
 		027C3DA5292D4B53005EE417 /* FractalShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = FractalShader.hpp; path = Shading/FractalShader.hpp; sourceTree = "<group>"; };
 		027C3DA7292D5A60005EE417 /* FujiShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = FujiShader.hpp; path = Shading/FujiShader.hpp; sourceTree = "<group>"; };
 		027FBC602BBEED3000057207 /* ColorSwapShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ColorSwapShader.hpp; path = Shading/ColorSwapShader.hpp; sourceTree = "<group>"; };
@@ -606,6 +610,9 @@
 		02D49C152B993AF100F48242 /* FavoriteParameter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FavoriteParameter.cpp; path = Models/FavoriteParameter.cpp; sourceTree = "<group>"; };
 		02D49C172B9A477000F48242 /* CommonStrings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = CommonStrings.hpp; path = Util/CommonStrings.hpp; sourceTree = "<group>"; };
 		02D49C182B9A488300F48242 /* CommonStrings.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = CommonStrings.cpp; path = Util/CommonStrings.cpp; sourceTree = "<group>"; };
+		02D63BBD2CB8852F009CA010 /* SimplePathShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SimplePathShader.hpp; path = Shading/SimplePathShader.hpp; sourceTree = "<group>"; };
+		02D63BBE2CBB0630009CA010 /* backends */ = {isa = PBXFileReference; lastKnownFileType = folder; name = backends; path = ../../../addons/ofxImGui/libs/imgui/backends; sourceTree = "<group>"; };
+		02D63BC12CBB0785009CA010 /* imgui_impl_glfw_context_support.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_impl_glfw_context_support.cpp; path = ../../../addons/ofxImGui/libs/imgui/backends/imgui_impl_glfw_context_support.cpp; sourceTree = "<group>"; };
 		02D9A7B02B7C05D5001F22C5 /* SnowfallShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SnowfallShader.hpp; path = Shading/SnowfallShader.hpp; sourceTree = "<group>"; };
 		02D9A7B12B7D73F7001F22C5 /* TextureService.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TextureService.cpp; path = Services/TextureService.cpp; sourceTree = "<group>"; };
 		02D9A7B22B7D73F7001F22C5 /* TextureService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = TextureService.hpp; path = Services/TextureService.hpp; sourceTree = "<group>"; };
@@ -999,6 +1006,8 @@
 			children = (
 				02FABA912A9EB0C6009D69B5 /* Shaders */,
 				0230657B29534CB500489A9F /* Shader.hpp */,
+				027637D72CBFFFE60072073F /* OptionalShadersHelper.cpp */,
+				027637D82CBFFFE60072073F /* OptionalShadersHelper.hpp */,
 				0230657929534CB500489A9F /* ShaderType.hpp */,
 				024D1688289DFD8400DA807C /* FeedbackShader.hpp */,
 				024D1687289DFD8400DA807C /* FeedbackShader.cpp */,
@@ -1336,6 +1345,7 @@
 		02FABA912A9EB0C6009D69B5 /* Shaders */ = {
 			isa = PBXGroup;
 			children = (
+				02D63BBD2CB8852F009CA010 /* SimplePathShader.hpp */,
 				029F6BE02C6BEA5A007E7081 /* WelcomeRingsShader.hpp */,
 				02E7FBC92C51502000460E44 /* OnOffShader.hpp */,
 				02210BD52C50370B00883117 /* PixelPlayShader.hpp */,
@@ -1751,6 +1761,7 @@
 		BB4B014C10F69532006C3DED /* addons */ = {
 			isa = PBXGroup;
 			children = (
+				02D63BBE2CBB0630009CA010 /* backends */,
 				768C3255AF2F3E1A78DC4DF4 /* ofxImGui */,
 				2413C01760B1811BED0F502D /* ofxMidi */,
 			);
@@ -2059,6 +2070,7 @@
 		E4B69B4A0A3A1720003C02F2 = {
 			isa = PBXGroup;
 			children = (
+				02D63BC12CBB0785009CA010 /* imgui_impl_glfw_context_support.cpp */,
 				02B6272C2C59812E00D9D550 /* dude_wake_up.entitlements */,
 				02E81F7F2C2095D50009C073 /* markdown */,
 				0295FF992B91652E0040B7E2 /* shaders */,
@@ -2340,6 +2352,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				02D63BC22CBB0785009CA010 /* imgui_impl_glfw_context_support.cpp in Sources */,
 				02B280E02913FE8200B793D5 /* FeedbackSourceService.cpp in Sources */,
 				9021CA48E18FB8B26215F64C /* Parameter.cpp in Sources */,
 				029F41BC297B047500B6DB77 /* LibraryService.cpp in Sources */,
@@ -2361,6 +2374,7 @@
 				12C04C963F830B6A09F5FC7D /* ModulationService.cpp in Sources */,
 				02542F112A4C6931005D3C72 /* SubmitFeedbackView.cpp in Sources */,
 				02BED6642C46BE5C00E75054 /* StrandBrowserWindow.cpp in Sources */,
+				027637D92CBFFFE60072073F /* OptionalShadersHelper.cpp in Sources */,
 				5B59AD739BB713EF08A9F24B /* FontService.cpp in Sources */,
 				02D49C192B9A48A000F48242 /* CommonStrings.cpp in Sources */,
 				A2D1312F4F8A1C62A7D5FE20 /* MidiService.cpp in Sources */,
@@ -2882,7 +2896,7 @@
 				HEADER_SEARCH_PATHS = (
 					"$(OF_CORE_HEADERS)",
 					src,
-					src,
+					src/Shading,
 					src/Apps,
 					src/Models,
 					src/Services,
@@ -2903,10 +2917,16 @@
 					../../../addons/ofxMidi/src,
 					../../../addons/ofxMidi/src/desktop,
 					../../../addons/ofxMidi/src/ios,
-					"lib/**",
+					lib,
 					/usr/local/include,
-					src/Shading,
-					lib/gist/src,
+					"lib/gist/src/**",
+					lib/implot,
+					"lib/imgui-node-editor/external/**",
+					"lib/imgui-node-editor",
+					"lib/sentry-native/include/**",
+					"lib/observable/**",
+					"lib/ableton/**",
+					src/Network,
 				);
 				ICON = "$(ICON_NAME_RELEASE)";
 				ICON_FILE = "$(ICON_FILE_PATH)$(ICON)";
@@ -2926,9 +2946,7 @@
 					"lib/sentry-native/install/**",
 					"$(PROJECT_DIR)/lib/sentry-native/install/lib",
 					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/Debug",
-					"/Users/jcrozier/Downloads/vcpkg/installed/arm64-osx/lib",
 					"$(PROJECT_DIR)/frameworks",
-					"/Users/jcrozier/Downloads/cpr-1.9.7/lib",
 					/opt/local/lib,
 					"$(PROJECT_DIR)",
 				);
@@ -3096,10 +3114,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = NONE;
 				GCC_PREPROCESSOR_DEFINITIONS = "LINK_PLATFORM_MACOSX=1";
-				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = (
-					"RELEASE=1",
-					LINK_PLATFORM_MACOSX,
-				);
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = LINK_PLATFORM_MACOSX;
 				HEADER_SEARCH_PATHS = (
 					"$(OF_CORE_HEADERS)",
 					src,
@@ -3133,6 +3148,7 @@
 					"lib/sentry-native/include/**",
 					"lib/observable/**",
 					"lib/ableton/**",
+					src/Network,
 				);
 				ICON = "$(ICON_NAME_DEBUG)";
 				ICON_FILE = "$(ICON_FILE_PATH)$(ICON)";
@@ -3200,11 +3216,14 @@
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = NONE;
-				GCC_PREPROCESSOR_DEFINITIONS = "LINK_PLATFORM_MACOSX=1";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"LINK_PLATFORM_MACOSX=1",
+					"RELEASE=1",
+				);
 				HEADER_SEARCH_PATHS = (
 					"$(OF_CORE_HEADERS)",
 					src,
-					src,
+					src/Shading,
 					src/Apps,
 					src/Models,
 					src/Services,
@@ -3225,10 +3244,16 @@
 					../../../addons/ofxMidi/src,
 					../../../addons/ofxMidi/src/desktop,
 					../../../addons/ofxMidi/src/ios,
-					"lib/**",
+					lib,
 					/usr/local/include,
-					src/Shading,
-					lib/gist/src,
+					"lib/gist/src/**",
+					lib/implot,
+					"lib/imgui-node-editor/external/**",
+					"lib/imgui-node-editor",
+					"lib/sentry-native/include/**",
+					"lib/observable/**",
+					"lib/ableton/**",
+					src/Network,
 				);
 				ICON = "$(ICON_NAME_RELEASE)";
 				ICON_FILE = "$(ICON_FILE_PATH)$(ICON)";
@@ -3248,7 +3273,6 @@
 					"lib/sentry-native/install/**",
 					"$(PROJECT_DIR)/lib/sentry-native/install/lib",
 					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/Debug",
-					"/Users/jcrozier/Downloads/vcpkg/installed/arm64-osx/lib",
 					"$(PROJECT_DIR)/frameworks",
 					/opt/local/lib,
 					"$(PROJECT_DIR)",

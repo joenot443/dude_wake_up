@@ -37,7 +37,7 @@ struct SobelShader : Shader {
   SobelShader(SobelSettings *settings) : settings(settings), Shader(settings){};
 
   void setup() override {
-#ifdef TESTING
+#ifdef DEBUG
     shader.load("shaders/Sobel");
 #endif
 #ifdef RELEASE

@@ -30,6 +30,8 @@ void StageModeView::update() {
 
 void StageModeView::draw() {
   ImVec2 stageSize = ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y - LayoutStateService::getService()->audioSettingsViewHeight() - ImGuiWindowTitleBarHeight);
+  HelpService::getService()->hasOpenedStageMode = true;
+  
   float topY = ImGui::GetCursorPosY();
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10.0, 10.0));
   ImGui::BeginChild("stage_mode_child", stageSize, true, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);

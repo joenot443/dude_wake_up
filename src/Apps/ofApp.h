@@ -18,7 +18,7 @@ public:
   ofApp() : v(0) {}
   
   void setup() {
-    gui.setup(nullptr, false, ImGuiConfigFlags_ViewportsEnable);
+    gui.setup(nullptr, false, ImGuiConfigFlags_ViewportsEnable | ImGuiConfigFlags_NoMouseCursorChange);
   }
   void draw() {
     gui.begin();

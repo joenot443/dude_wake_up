@@ -21,7 +21,8 @@ void StrandTileView::draw(std::shared_ptr<AvailableStrand> strand) {
   
   ImGui::SetCursorPos(origin);
   ImVec2 startPos = ImGui::GetCursorPos();
-  ImGui::Image(GetImTextureID(strand->fbo->getTexture()), size);
+  auto textureId = (ImTextureID)(uintptr_t) strand->fbo->getTexture().texData.textureID;
+  ImGui::Image(textureId, size);
   ImGui::SetCursorPos(ImVec2(startPos.x + 5.0, startPos.y));
   ImGui::SetCursorPosY(ImGui::GetContentRegionAvail().y / 2.0);
   CommonViews::H4Title(strand->name, false);

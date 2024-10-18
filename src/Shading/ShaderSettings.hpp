@@ -32,11 +32,18 @@ public:
   // Audio
   std::shared_ptr<Parameter> audioReactiveParameter;
   
+  // Optional Parameters
+  std::shared_ptr<Parameter> backgroundColor;
+  std::shared_ptr<Parameter> backgroundColorEnabled;
+  
   ShaderSettings(std::string shaderId, json j, std::string name) :
   Settings(name),
   shaderId(shaderId),
   x(std::make_shared<Parameter>("x", 0.0, 0.0, 10000.0)),
-  y(std::make_shared<Parameter>("y", 0.0, 0.0, 10000.0))
+  y(std::make_shared<Parameter>("y", 0.0, 0.0, 10000.0)),
+  audioReactiveParameter(nullptr),
+  backgroundColor(std::make_shared<Parameter>("Background Color", 0.0, 0.0, 1.0)),
+  backgroundColorEnabled(std::make_shared<Parameter>("Background Color Enabled", ParameterType_Bool))
   {
     x->hiddenFromNode = true;
     y->hiddenFromNode = true;

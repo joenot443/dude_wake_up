@@ -94,10 +94,12 @@ public:
   // Output Windows
 
   std::map<std::string, std::shared_ptr<OutputWindow>> outputWindows;
+  std::shared_ptr<OutputWindow> lastOutputWindow;
   void closeOutputWindow(std::shared_ptr<OutputWindow> window);
   void addOutputWindow(std::shared_ptr<Connectable> connectable);
   void updateOutputWindow(std::shared_ptr<Connectable> oldConnectable, std::shared_ptr<Connectable> newConnectable);
   bool hasOutputWindowForConnectable(std::shared_ptr<Connectable> connectable);
+  void captureOutputWindowScreenshot();
   
   void clear();
   json config() override;

@@ -18,6 +18,8 @@ void ShaderInfoView::draw() {
   CommonViews::H3Title("Settings");
   ImGui::Separator();
   selectedShader->drawSettings();
+  ImGui::Separator();
+  selectedShader->drawOptionalSettings();
 }
 
 void ShaderInfoView::drawPreview() {

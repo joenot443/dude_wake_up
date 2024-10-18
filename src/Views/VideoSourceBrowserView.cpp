@@ -49,7 +49,7 @@ void VideoSourceBrowserView::refreshSources()
         ImGui::EndDragDropSource();
       }
     };
-    auto textureId = GetImTextureID(*source->preview.get());
+    ImTextureID textureId = (ImTextureID)(uint64_t) source->preview->texData.textureID;
     auto tileItem = std::make_shared<TileItem>(source->sourceName, textureId, 0, dragCallback, source->category);
 
     if (source->type == VideoSource_shader || 

@@ -962,7 +962,7 @@ bool RangeSliderFloat(const char* label, float* v1, float* v2, float v_min, floa
     return false;
   }
   
-  const bool hovered = ItemHoverable(frame_bb, id);
+  const bool hovered = ItemHoverable(frame_bb, id, 0);
   if (hovered)
     SetHoveredID(id);
   

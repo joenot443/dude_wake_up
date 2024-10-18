@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include "Shader.hpp"
+#include "LayoutStateService.hpp"
 #include "Console.hpp"
 #include "ShaderChainerService.hpp"
 #include "VideoSourceService.hpp"
@@ -21,6 +22,8 @@ void Shader::traverseFrame(std::shared_ptr<ofFbo> frame, int depth)
   checkForFileChanges();
   activateParameters();
   shade(frame, lastFrame);
+//  applyOptionalShaders();
+  
   // On our terminal nodes, check if we need to update our defaultStageShader
   if (outputs.empty()) {
     if (depth > ParameterService::getService()->defaultStageShaderIdDepth.second) {
@@ -99,8 +102,10 @@ void Shader::activateParameters() {
   }
 }
 
-void Shader::allocateLastFrame() {
+void Shader::allocateFrames() {
   lastFrame->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y, GL_RGBA);
+  
+  optionalFrame->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y, GL_RGBA);
 }
 
 void Shader::enableAudioAutoReactivity(std::shared_ptr<Parameter> audioParam) {
@@ -114,7 +119,8 @@ void Shader::disableAudioAutoReactivity() {
 }
 
 void Shader::checkForFileChanges() {
-  if (AllowShaderMonitoring != true) return;
+  if (!AllowShaderMonitoring) return;
+  
   std::string shaderName = name();
   // Remove any spaces from the name
   shaderName.erase(std::remove(shaderName.begin(), shaderName.end(), ' '));
@@ -124,15 +130,16 @@ void Shader::checkForFileChanges() {
   auto shaderFile = ofFile(path);
   
   if (!shaderFile.exists()) {
-    log("Shader doesn't exist - " + name());
+//    log("Shader doesn't exist - " + name());
     return;
   }
   
   // Check when the file was last modified
   auto time = std::filesystem::last_write_time(shaderFile);
+  auto timeSinceEpoch = std::chrono::duration_cast<std::chrono::seconds>(time.time_since_epoch()).count();
   
-  if (time.time_since_epoch().count() > lastModified) {
-    lastModified = time.time_since_epoch().count();
+  if (timeSinceEpoch > lastModified) {
+    lastModified = timeSinceEpoch;
     shader.unload();
     // Print the contents of the shader file
     log("Shader file contents - " + shaderFile.readToBuffer().getText());
@@ -140,4 +147,52 @@ void Shader::checkForFileChanges() {
     shader.load("shaders/" + shaderName);
     log("Reloaded Shader for - " + shaderName);
   }
+}
+
+void Shader::drawOptionalSettings() {
+  if (ImGui::CollapsingHeader("Extra Settings", ImGuiTreeNodeFlags_CollapsingHeader))
+  {
+    for (auto shader : optionalShaders) {
+      if (ImGui::CollapsingHeader(shader->name().c_str())) {
+        shader->optionallyEnabled = true;
+        shader->drawSettings();
+      } else {
+        shader->optionallyEnabled = false;
+      }
+    }
+  }
+}
+
+void Shader::applyOptionalShaders() {
+  for (auto shader: optionalShaders) {
+    if (!shader->optionallyEnabled) continue;
+    
+    shader->shade(lastFrame, optionalFrame);
+    populateLastFrame();
+  }
+}
+
+void Shader::drawPreview(ImVec2 pos, float scale)
+{
+  ImTextureID texID = (ImTextureID)(uintptr_t)lastFrame->getTexture().getTextureData().textureID;
+  ImGui::Image(texID, LayoutStateService::getService()->previewSize(scale));
+}
+
+void Shader::generateOptionalShaders() {
+  if (isOptional) return;
+  
+  std::vector<ShaderType> optionalShaderTypes = {ShaderTypeHSB, ShaderTypeBackground, ShaderTypeTransform, ShaderTypeRotate, ShaderTypeDoubleBlur, ShaderTypeMirror};
+  
+  for (ShaderType type : optionalShaderTypes) {
+    std::shared_ptr<Shader> newShader = ShaderChainerService::getService()->shaderForType(type, UUID::generateUUID(), 0);
+    newShader->isOptional = true;
+    optionalShaders.push_back(newShader);
+  }
+}
+
+void Shader::populateLastFrame() {
+  lastFrame->begin();
+  ofClear(0,0,0,0);
+  optionalFrame->draw(0, 0, lastFrame->getWidth(), lastFrame->getHeight());
+  lastFrame->end();
 }

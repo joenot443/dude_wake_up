@@ -13,6 +13,7 @@
 
 void TextSource::setup() {
   fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y, GL_RGBA);
+  optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y, GL_RGBA);
   font.load(displayText->font.path(), displayText->fontSize);
   fontPath = displayText->font.path();
 }

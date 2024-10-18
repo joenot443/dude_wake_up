@@ -7,6 +7,7 @@
 
 #include "imgui.h"
 #include "LayoutStateService.hpp"
+#include "NodeLayoutView.hpp"
 #include "ShaderChainerService.hpp"
 #include "AudioSourceService.hpp"
 #include "ConfigService.hpp"
@@ -18,8 +19,8 @@ json LayoutStateService::config() {
   j[LibraryPathJsonKey] = libraryPath;
   j[ColorHistoryJsonKey] = colorHistory;
   j[MidiEnabledJsonKey] = midiEnabled;
-//  j[StageModeEnabled] = stageModeEnabled;
-  
+  j[StageModeEnabled] = stageModeEnabled;
+  j[PortraitJsonKey] = portrait;
   j[ShaderInfoEnabledJsonKey] = shaderInfoEnabled;
   j[AllParametersInStageMode] = allParametersInStageModeEnabled;
   j[HelpEnabledJsonKey] = helpEnabled;
@@ -36,6 +37,7 @@ void LayoutStateService::loadConfig(json j) {
   midiEnabled = j[MidiEnabledJsonKey];
 //  stageModeEnabled = j[StageModeEnabled];
   shaderInfoEnabled = j[ShaderInfoEnabledJsonKey];
+  portrait = j[PortraitJsonKey];
   outputWindowUpdatesAutomatically = j[OutputWindowUpdatesAutomaticallyJsonKey];
   allParametersInStageModeEnabled = j[AllParametersInStageMode];
   helpEnabled = j[HelpEnabledJsonKey];
@@ -67,7 +69,7 @@ float LayoutStateService::audioSettingsViewHeight() {
     return 0.0;
   }
   float scale = static_cast<float>(dynamic_cast<ofAppGLFWWindow*>(ofGetWindowPtr())->getPixelScreenCoordScale());
-  return AudioSourceService::getService()->selectedAudioSource->active ? 250.0 : 40.0;
+  return AudioSourceService::getService()->selectedAudioSource->active ? 250.0 : 50.0;
 }
 
 ofRectangle LayoutStateService::canvasRect() {
@@ -104,6 +106,10 @@ void LayoutStateService::updateResolutionSettings(int i) {
   resolutionUpdateSubject.notify();
 }
 
+void LayoutStateService::togglePortraitSetting() {
+  resolutionUpdateSubject.notify();
+}
+
 void LayoutStateService::subscribeToResolutionUpdates(std::function<void ()> callback) {
   resolutionUpdateSubject.subscribe(callback);
 }
@@ -117,4 +123,9 @@ ImVec2 LayoutStateService::nodeLayoutSize() {
 ImVec2 LayoutStateService::browserSize() {
   float width = fmax(getScaledWindowWidth() / 5., 321.0);
   return ImVec2(width, (ImGui::GetWindowContentRegionMax().y - MenuBarHeight) / 3.);
+}
+
+ImVec2 LayoutStateService::previewSize(float scale) {
+  bool portrait = LayoutStateService::getService()->portrait;
+  return portrait ? ImVec2(90 * 4.0 /scale, 160 * 4.0 /scale) : ImVec2(160 * 4.0 /scale, 90 * 4.0 /scale);
 }

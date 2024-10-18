@@ -46,6 +46,7 @@ public:
   float start;
   float end;
   
+  bool direction = true;
   bool playbackRangeDirty();
   void validateSettings();
   void applyRanges();

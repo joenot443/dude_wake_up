@@ -15,12 +15,14 @@
 
 
 //------------------------------------------------------------------------------
+# ifndef IMGUI_DEFINE_MATH_OPERATORS
+#     define IMGUI_DEFINE_MATH_OPERATORS
+# endif
 # include "imgui_node_editor.h"
 
 
 //------------------------------------------------------------------------------
 # include <imgui.h>
-# define IMGUI_DEFINE_MATH_OPERATORS
 # include <imgui_internal.h>
 # include "imgui_extra_math.h"
 # include "imgui_bezier_math.h"
@@ -168,11 +170,25 @@ struct ObjectId final: Details::SafePointerType<ObjectId>
     bool IsPinId()    const { return m_Type == ObjectType::Pin;    }
     bool IsNodeId()   const { return m_Type == ObjectType::Node;   }
     bool IsLinkId()   const { return m_Type == ObjectType::Link;   }
-
+  
+  
+  std::string type() {
+    if (IsPinId()) {
+      return "Pin";
+    } else if (IsNodeId()) {
+      return "Node";
+    } else if (IsLinkId()) {
+      return "Link";
+    } else {
+      return "None";
+    }
+  }
+  
+  ObjectType m_Type;
     ObjectType Type() const { return m_Type; }
 
 private:
-    ObjectType m_Type;
+
 };
 
 struct EditorContext;
@@ -433,7 +449,7 @@ struct Node final: Object
     virtual bool IsSelectable() override { return true; }
 
     virtual void Draw(ImDrawList* drawList, DrawFlags flags = None) override final;
-    void DrawBorder(ImDrawList* drawList, ImU32 color, float thickness = 1.0f);
+    void DrawBorder(ImDrawList* drawList, ImU32 color, float thickness = 1.0f, float offset = 0.0f);
 
     void GetGroupedNodes(std::vector<Node*>& result, bool append = false);
 
@@ -852,10 +868,6 @@ struct NavigateAction final: EditorAction
     bool MoveOverEdge(const ImVec2& canvasSize);
     void StopMoveOverEdge();
     bool IsMovingOverEdge() const { return m_MovingOverEdge; }
-  
-    bool ZoomTo(float zoom);
-  bool ZoomInc(bool dir);
-  
     ImVec2 GetMoveScreenOffset() const { return m_MoveScreenOffset; }
 
     void SetWindow(ImVec2 position, ImVec2 size);
@@ -888,6 +900,8 @@ private:
 
     void NavigateTo(const ImRect& target, float duration = -1.0f, NavigationReason reason = NavigationReason::Unknown);
 
+    float GetNextZoom(float steps);
+    float MatchSmoothZoom(float steps);
     float MatchZoom(int steps, float fallbackZoom);
     int MatchZoomIndex(int direction);
 
@@ -1188,7 +1202,7 @@ struct NodeBuilder
 
     ImRect m_GroupBounds;
     bool   m_IsGroup;
-
+	
     ImDrawListSplitter m_Splitter;
     ImDrawListSplitter m_PinSplitter;
 
@@ -1365,8 +1379,6 @@ struct EditorContext
     void Suspend(SuspendFlags flags = SuspendFlags::None);
     void Resume(SuspendFlags flags = SuspendFlags::None);
     bool IsSuspended();
-  
-    bool ZoomInc(bool in);
 
     bool IsFocused();
     bool IsHovered() const;
@@ -1438,20 +1450,12 @@ struct EditorContext
         auto zoomMode = zoomIn ? NavigateAction::ZoomMode::WithMargin : NavigateAction::ZoomMode::None;
         m_NavigateAction.NavigateTo(bounds, zoomMode, duration);
     }
-  
-  inline void SuspendNavigation()
-  {
-    m_NavigateAction.m_IsActive = false;
-  }
-  
-  inline void ResumeNavigation()
-  {
-    m_NavigateAction.m_IsActive = true;
-  }
 
     void RegisterAnimation(Animation* animation);
     void UnregisterAnimation(Animation* animation);
-		
+
+	  void ShowMetrics(const Control& control);
+
     void Flow(Link* link, FlowDirection direction);
 
     void SetUserContext(bool globalSpace = false);
@@ -1469,7 +1473,7 @@ struct EditorContext
     bool   IsBackgroundDoubleClicked()                     const { return m_BackgroundDoubleClickButtonIndex >= 0; }
     ImGuiMouseButton GetBackgroundClickButtonIndex()       const { return m_BackgroundClickButtonIndex; }
     ImGuiMouseButton GetBackgroundDoubleClickButtonIndex() const { return m_BackgroundDoubleClickButtonIndex; }
-    void ShowMetrics();
+
     float AlignPointToGrid(float p) const
     {
         if (!ImGui::GetIO().KeyAlt)
@@ -1490,6 +1494,7 @@ private:
     void SaveSettings();
 
     Control BuildControl(bool allowOffscreen);
+
 
     void UpdateAnimations();
 

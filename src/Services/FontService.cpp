@@ -5,6 +5,8 @@
 //  Created by Joe Crozier on 2022-05-10.
 //
 
+#include "Console.hpp"
+#import "ofMain.h"
 #include "FontService.hpp"
 #include "Fonts.hpp"
 
@@ -12,25 +14,32 @@ void FontService::addFontToGui(ofxImGui::Gui *gui) {
   ImGuiIO& io = ImGui::GetIO();
   io.Fonts->AddFontDefault();
   
-  ImFontConfig config;
-  config.MergeMode = false;
-//  config.PixelSnapH = true;
+  ImFontConfig mergeConfig;
+  mergeConfig.MergeMode = false;
+  
+  float scale = static_cast<float>(dynamic_cast<ofAppGLFWWindow*>(ofGetWindowPtr())->getPixelScreenCoordScale());
+  ImFontConfig rasterConfig;
+  log("%.2f", scale);
+  
+  // Account for Retina displays
+  rasterConfig.RasterizerDensity = scale > 1.0f ? 4.0f : 1.0f;
   
   static const ImWchar icon_ranges[] = { ICON_MIN_MD, ICON_MAX_16_MD, 0 };
   static const ImWchar audio_icon_range[] = {ICON_MIN_FAD, ICON_MAX_FAD, 0};
 
-  h1 = gui->addFont("fonts/Roboto-Medium.ttf", 72);
-  h2 = gui->addFont("fonts/Roboto-Medium.ttf", 24);
-  h3 = gui->addFont("fonts/Roboto-Medium.ttf", 18);
-  h3b = gui->addFont("fonts/Roboto-Bold.ttf", 18);
-  h4 = gui->addFont("fonts/Roboto-Bold.ttf", 16);
-  sm = gui->addFont("fonts/Roboto-Regular.ttf", 12);
-  b = gui->addFont("fonts/Roboto-Bold.ttf", 14);
-  i = gui->addFont("fonts/Roboto-Italic.ttf", 14);
-  p = gui->addFont("fonts/Roboto-Regular.ttf", 14);
-  audio = gui->addFont("fonts/fontaudio.ttf", 16, &config, audio_icon_range);
-  icon = gui->addFont("fonts/MaterialIcons-Regular.ttf", 16, &config, icon_ranges);
-  largeIcon = gui->addFont("fonts/MaterialIcons-Regular.ttf", 24, &config, icon_ranges);
+  h1 = gui->addFont("fonts/Roboto-Medium.ttf", 72, &rasterConfig);
+  h2 = gui->addFont("fonts/Roboto-Medium.ttf", 24, &rasterConfig);
+  h3 = gui->addFont("fonts/Roboto-Medium.ttf", 18, &rasterConfig);
+  h3b = gui->addFont("fonts/Roboto-Bold.ttf", 18, &rasterConfig);
+  h4 = gui->addFont("fonts/Roboto-Bold.ttf", 18, &rasterConfig);
+  sm = gui->addFont("fonts/Roboto-Regular.ttf", 12, &rasterConfig);
+  b = gui->addFont("fonts/Roboto-Bold.ttf", 16, &rasterConfig);
+  i = gui->addFont("fonts/Roboto-Italic.ttf", 16, &rasterConfig);
+  p = gui->addFont("fonts/Roboto-Regular.ttf", 16, &rasterConfig);
+  audio = gui->addFont("fonts/fontaudio.ttf", 16, &mergeConfig, audio_icon_range);
+  icon = gui->addFont("fonts/MaterialIcons-Regular.ttf", 16, &mergeConfig, icon_ranges);
+  largeIcon = gui->addFont("fonts/MaterialIcons-Regular.ttf", 24, &mergeConfig, icon_ranges);
+  xLargeIcon = gui->addFont("fonts/MaterialIcons-Regular.ttf", 72, &mergeConfig, icon_ranges);
   
   int width, height;
   unsigned char* pixels = NULL;

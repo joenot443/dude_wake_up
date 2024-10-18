@@ -16,6 +16,7 @@ class HelpService {
 
 public:
   bool completed;
+  bool hasOpenedStageMode = false;
   
   HelpService() {};
   
@@ -23,11 +24,11 @@ public:
   bool placedEffect();
   bool madeConnection();
   bool placedSecondSource();
-  bool placedMixEffect();
-  bool madeFirstMixConnection();
-  bool madeSecondMixConnection();
+  bool placedBlendEffect();
+  bool madeFirstBlendConnection();
+  bool madeSecondBlendConnection();
   bool openedShaderInfo();
-  bool editedMixParameter();
+  bool editedBlendParameter();
   bool openedStageMode();
   
   // Drop Source
@@ -46,18 +47,18 @@ public:
   void drawSecondSourceView();
   void drawSecondSource2View();
   
-  // Drop Mix Effect
-  void drawMixEffectView();
-  void drawMixEffect2View();
+  // Drop Blend Effect
+  void drawBlendEffectView();
+  void drawBlendEffect2View();
   void drawWrongEffectView();
   
-  // Connect first Source to Mix
-  void drawMixConnectionView(ImVec2 nodePosition, ImVec2 nodeSize, float scale);
-  void drawMixConnection2View(ImVec2 nodePosition, ImVec2 nodeSize, float scale);
+  // Connect first Source to Blend
+  void drawBlendConnectionView(ImVec2 nodePosition, ImVec2 nodeSize, float scale);
+  void drawBlendConnection2View(ImVec2 nodePosition, ImVec2 nodeSize, float scale);
   
-  // Connect second Source to Mix
-  void drawSecondMixConnectionView(ImVec2 nodePosition, ImVec2 nodeSize, float scale);
-  void drawSecondMixConnection2View(ImVec2 nodePosition, ImVec2 nodeSize, float scale);
+  // Connect second Source to Blend
+  void drawSecondBlendConnectionView(ImVec2 nodePosition, ImVec2 nodeSize, float scale);
+  void drawSecondBlendConnection2View(ImVec2 nodePosition, ImVec2 nodeSize, float scale);
   
   // Open the ShaderInfo pane
   void drawOpenShaderInfoView(ImVec2 nodePosition, ImVec2 nodeSize, float scale);
@@ -71,12 +72,13 @@ public:
   // Help in Stage Mode
   void drawStageModeHelp();
   
+  // Completion window
+  void drawCompletionPopup();
+  
   void drawStageModeActionButtonsHelp();
 
   void drawRightArrowView();
   void drawLeftArrowView();
-  
-  void drawHelp();
   
   static HelpService *service;
 

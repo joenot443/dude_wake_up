@@ -81,24 +81,23 @@ public:
   void handleUploadChain(std::shared_ptr<Node> node);
   void handleUnplacedDownloadedLibraryFile();
   
-  // Drag/Drop
   void handleDropZone();
   void handleDroppedSource(std::shared_ptr<VideoSource> source);
   std::shared_ptr<Node> nodeAtPosition(ImVec2 position);
   bool pointIsWithinNode(ImVec2 position, std::shared_ptr<Node> node);
   
-  // Saving
   void loadStrand(std::shared_ptr<AvailableStrand> availableStrand);
   void saveStrand();
 
-  // Notifications
   void haveDownloadedAvailableLibraryFile(LibraryFile &file);
   
-  // Deletion
   bool canDelete();
   
-  // Selection
   void selectChainer(std::shared_ptr<Node> node);
+
+  // New methods for handling blend shader creation
+  void createBlendShaderForSelectedNodes(ed::NodeId firstNodeId, ed::NodeId secondNodeId);
+  std::shared_ptr<Node> getNodeById(ed::NodeId nodeId);
 
   ed::EditorContext *context = nullptr;
   ed::Config *config = nullptr;
@@ -110,37 +109,27 @@ public:
   std::set<std::shared_ptr<Node>> previewWindowNodes = {};
   std::set<std::shared_ptr<Node>> terminalNodes = {};
   
-  // Resolution Popup
   std::shared_ptr<Node> resolutionPopupNode;
   ImVec2 resolutionPopupLocation;
   bool popupLaunched;
   
-  // Misc.
   bool firstFrame = true;
   bool shouldDelete = false;
   bool makingLink = false;
   bool fileDropInProgress = false;
   
-  // Saving Strands
   bool showSaveDialog = false;
   char saveFileName[256] = "";
   std::shared_ptr<Node> nodeToSave;
   
-  // Maps the id of the Shader or the VideoSource to the Node
   std::map<std::string, std::shared_ptr<Node>> idNodeMap;
-  
-  // Maps the id of the Pin to the Node
   std::map<long, std::shared_ptr<Node>> pinIdNodeMap;
-  // Maps the id of a Pin to a shared_ptr to the Pin
   std::map<long, std::shared_ptr<Pin>> pinIdPinMap;
-  // Maps the id of a Node to a shared_ptr of the Node
-  std::map<long, std::shared_ptr<Node>> nodeIdNodeMap;
+  std::map<long, std::shared_ptr<Node>> nodeIdNodeMap; // Use this map for node lookup
 
-  // Maps the id of a Link to the ShaderLink
   std::map<long, std::shared_ptr<ShaderLink>> linksMap;
   
   std::set<std::shared_ptr<Node>> nodesToOpen;
-  
   
   ed::NodeId contextMenuNodeId = 0;
   ImVec2 contextMenuLocation;

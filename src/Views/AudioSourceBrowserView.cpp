@@ -124,8 +124,9 @@ void AudioSourceBrowserView::drawAudioSourceSelector() {
       }
     }
   }
-  
-  ImGui::SetNextItemWidth(200.0);
+  CommonViews::HSpacing(10.0);
+  ImGui::SameLine();
+  ImGui::SetNextItemWidth(400.0);
   ImGui::PushFont(FontService::getService()->h4);
   ImGui::PushID("##AudioSourceSelector");
   if (ImGui::Combo("", &selection, out.data(), sources.size())) {

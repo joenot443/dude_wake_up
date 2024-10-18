@@ -42,7 +42,7 @@ public:
 
 
   void setup() override {
-    #ifdef TESTING
+    #ifdef DEBUG
 shader.load("shaders/AudioWaveform");
 #endif
 #ifdef RELEASE

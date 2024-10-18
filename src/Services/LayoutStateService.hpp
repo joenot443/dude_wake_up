@@ -13,8 +13,9 @@
 #include "ConfigService.hpp"
 #include "ConfigurableService.hpp"
 
+static const std::string PortraitJsonKey = "portrait";
 static const std::string ShowAudioSettingsJsonKey = "showAudioSettings";
-static const std::string OutputWindowUpdatesAutomaticallyJsonKey = "putputWindowUpdatesAutomatically";
+static const std::string OutputWindowUpdatesAutomaticallyJsonKey = "OutputWindowUpdatesAutomatically";
 static const std::string LibraryPathJsonKey = "libraryPath";
 static const std::string ColorHistoryJsonKey = "colorHistory";
 static const std::string MidiEnabledJsonKey = "midiEnabled";
@@ -45,7 +46,9 @@ public:
   
   bool helpEnabled = true;
   
-  bool welcomeScreenEnabled = true;
+  bool welcomeScreenEnabled = false;
+  
+  bool portrait = false;
   
   bool abletonLinkEnabled = false;
   
@@ -69,6 +72,8 @@ public:
   
   float audioSettingsViewHeight();
   
+  ImVec2 previewSize(float scale);
+  
   ImVec2 nodeLayoutSize();
   
   ImVec2 browserSize();
@@ -82,6 +87,8 @@ public:
   bool shouldDrawShaderInfo();
   
   void updateResolutionSettings(int index);
+  
+  void togglePortraitSetting();
   
   void subscribeToResolutionUpdates(std::function<void()> callback);
   

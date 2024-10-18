@@ -55,7 +55,7 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
   ParameterType type;
 
   // Color value contained by Parameter
-  std::shared_ptr<std::array<float, 4>> color = std::make_shared<std::array<float, 4>>(std::array<float, 4>({0.0f, 0.0f, 0.0f, 0.0f}));
+  std::shared_ptr<std::array<float, 4>> color = std::make_shared<std::array<float, 4>>(std::array<float, 4>({0.0f, 0.0f, 0.0f, 1.0f}));
 
   float min = 0.0;
   float max = 1.0;
@@ -76,11 +76,12 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
     j["favorited"] = favorited;
     
     // If the color RGB values are not all 0, add them to the json
-    if (color->at(0) != 0.0 || color->at(1) != 0.0 || color->at(2) != 0.0)
+    if (color->at(0) != 0.0 || color->at(1) != 0.0 || color->at(2) != 0.0 || color->at(3) != 0.0)
     {
       j["r"] = color->at(0);
       j["g"] = color->at(1);
       j["b"] = color->at(2);
+      j["a"] = color->at(3);
     }
     return j;
   }
@@ -129,6 +130,7 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
         color->at(0) = j["r"];
         color->at(1) = j["g"];
         color->at(2) = j["b"];
+        color->at(3) = j["a"];
       }
       if (j.contains("favorited")) {
         favorited = j["favorited"];

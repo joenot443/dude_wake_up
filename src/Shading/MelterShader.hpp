@@ -59,7 +59,7 @@ public:
 
   MeltShader(MeltSettings *settings) : settings(settings),
   Shader(settings) {
-    #ifdef TESTING
+    #ifdef DEBUG
 shader.load("shaders/Melt");
 #endif
 #ifdef RELEASE

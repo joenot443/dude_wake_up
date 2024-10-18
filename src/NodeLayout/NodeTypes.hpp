@@ -73,12 +73,13 @@ struct Node
     if (type == NodeTypeShader)
     {
       shader->drawSettings();
+      shader->drawOptionalSettings();
       ShaderConfigSelectionView::draw(shader);
     }
     else
     {
       source->drawSettings();
-      CommonViews::ResolutionSelector(source);
+      source->drawOptionalSettings();
     }
   }
 
@@ -116,6 +117,7 @@ struct Node
       return source->origin;
     }
   }
+
 
   Node(ed::NodeId id, std::map<OutputSlot, ed::PinId> outputIds, std::map<InputSlot, ed::PinId> inputIds, std::string name, NodeType type, std::shared_ptr<Connectable> conn)
       : id(id), outputIds(outputIds), inputIds(inputIds), type(type), name(name), position(ImVec2(0, 0)), connectable(conn) {}

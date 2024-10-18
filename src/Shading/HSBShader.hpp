@@ -55,7 +55,7 @@ public:
   HSBSettings *settings;
   
   void setup() override {
-    #ifdef TESTING
+    #ifdef DEBUG
 shader.load("shaders/hsb");
 #endif
 #ifdef RELEASE

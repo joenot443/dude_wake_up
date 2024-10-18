@@ -46,7 +46,7 @@ public:
   : settings(settings), Shader(settings){};
 
   void setup() override {
-#ifdef TESTING
+#ifdef DEBUG
     shader.load("shaders/Tissue");
 #endif
 #ifdef RELEASE

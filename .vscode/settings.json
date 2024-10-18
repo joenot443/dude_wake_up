@@ -3,5 +3,8 @@
   "C_Cpp.default.compilerPath": "/usr/bin/clang",
   "files.associations": {
     "memory": "cpp"
-  }
+  },
+  "clangd.arguments": [
+    "--compile-commands-dir=/Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up"
+  ]
 }

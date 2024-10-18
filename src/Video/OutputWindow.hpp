@@ -23,6 +23,10 @@ struct OutputWindow : public ofBaseApp, std::enable_shared_from_this<OutputWindo
   void draw();
   void teardown();
   void keyReleased(int key);
+  void keyPressed(int key);
+  void updateResolution();
+  bool drawFPS;
+  bool needsResolutionUpdate = true;
   
 public:
   std::shared_ptr<ofFbo> fbo;

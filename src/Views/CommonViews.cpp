@@ -154,30 +154,6 @@ void CommonViews::AudioParameterSelector(std::shared_ptr<Parameter> param)
   }
 }
 
-void CommonViews::ResolutionSelector(std::shared_ptr<VideoSource> source)
-{
-  static const char *resolutions[] = {"240p", "360p", "480p", "720p", "1080p", "1440p", "4k"};
-  
-  auto comboId = formatString("##Resolution%s", source->id.c_str());
-  auto selectedIdx = source->settings->resolution->intValue;
-  ImGui::PushItemWidth(100.0);
-  if (ImGui::BeginCombo(comboId.c_str(), resolutions[source->settings->resolution->intValue]))
-  {
-    for (int i = 0; i < IM_ARRAYSIZE(resolutions); i++)
-    {
-      bool isSelected = (selectedIdx == i);
-      if (ImGui::Selectable(resolutions[i], isSelected))
-      {
-        source->settings->resolution->intValue = i;
-        source->settings->updateResolutionSettings();
-      }
-      if (isSelected)
-        ImGui::SetItemDefaultFocus();
-    }
-    ImGui::EndCombo();
-  }
-}
-
 bool CommonViews::ShaderCheckbox(std::shared_ptr<Parameter> param, bool sameLine)
 {
   if (!sameLine) sSpacing();
@@ -262,9 +238,10 @@ void CommonViews::H4Title(std::string title, bool padding)
 }
 
 bool CommonViews::Slider(std::string title, std::string id,
-                         std::shared_ptr<Parameter> param)
+                         std::shared_ptr<Parameter> param,
+                         float width)
 {
-  ImGui::SetNextItemWidth(200.0);
+  ImGui::SetNextItemWidth(width);
   bool ret = ImGui::SliderFloat(idString(id).c_str(), &param->value, param->min, param->max, "%.3f");
   if (ret) {
     param->affirmValue();
@@ -299,7 +276,7 @@ void CommonViews::CheckboxShaderStageParameter(std::shared_ptr<Parameter> param)
 }
 
 void CommonViews::IntShaderStageParameter(std::shared_ptr<Parameter> param) {
-  ImGui::Columns(2, formatString("%s_param_columns", param->paramId.c_str()).c_str(), ImGuiColumnsFlags_NoResize | ImGuiColumnsFlags_NoBorder);
+  ImGui::Columns(2, formatString("%s_param_columns", param->paramId.c_str()).c_str(), ImGuiOldColumnFlags_NoResize | ImGuiOldColumnFlags_NoBorder);
   ImGui::SetColumnWidth(0, 65);
   ImGui::SetColumnWidth(1, 135);
   ImGui::PushStyleColor(ImGuiCol_SliderGrab, White90.Value);
@@ -348,7 +325,7 @@ void CommonViews::IntShaderStageParameter(std::shared_ptr<Parameter> param) {
 
 
 void CommonViews::ShaderStageParameter(std::shared_ptr<Parameter> param, std::shared_ptr<Oscillator> osc) {
-  ImGui::Columns(2, formatString("%s_param_columns", param->paramId.c_str()).c_str(), ImGuiColumnsFlags_NoResize | ImGuiColumnsFlags_NoBorder);
+  ImGui::Columns(2, formatString("%s_param_columns", param->paramId.c_str()).c_str(), ImGuiOldColumnFlags_NoResize | ImGuiOldColumnFlags_NoBorder);
   ImGui::SetColumnWidth(0, 65);
   ImGui::SetColumnWidth(1, 135);
   ImGui::PushStyleColor(ImGuiCol_SliderGrab, White90.Value);
@@ -506,7 +483,7 @@ void CommonViews::MultiSlider(std::string title, std::string id, std::shared_ptr
   FavoriteButton(param1);
   ImGui::SameLine();
   CommonViews::OscillateButton(formatString("##xOscillator_%s", id.c_str()).c_str(), param1Oscillator, param1);
-  CommonViews::Slider(param1->name, param1->paramId, param1);
+  CommonViews::Slider(param1->name, param1->paramId, param1, 150.0);
   ImGui::Text("Y Translate");
   CommonViews::ResetButton("##yMultiSliderReset", param2);
   ImGui::SameLine();
@@ -617,6 +594,7 @@ bool CommonViews::IconFieldAndBrowser(std::shared_ptr<Parameter> param) {
 void CommonViews::ShaderColor(std::shared_ptr<Parameter> param)
 {
   H4Title(param->name);
+  ImGui::SetNextItemWidth(200.0);
   ImGui::ColorEdit4(idString(param->paramId).c_str(), param->color->data());
   
   // Color history
@@ -778,6 +756,16 @@ void CommonViews::IconTitle(const char *icon)
   ImGui::PopFont();
 }
 
+void CommonViews::XLargeIconTitle(const char *icon)
+{
+  auto buttonId = formatString("%s", icon);
+  ImGui::PushFont(FontService::getService()->xLargeIcon);
+  ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(24.0, 24.0));
+  ImGui::Text(buttonId.c_str());
+  ImGui::PopStyleVar();
+  ImGui::PopFont();
+}
+
 bool CommonViews::LargeIconButton(const char *icon, std::string id)
 {
   auto buttonId = formatString("%s##%s", icon, id.c_str());
@@ -785,6 +773,20 @@ bool CommonViews::LargeIconButton(const char *icon, std::string id)
   ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32_BLACK_TRANS);
   ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0., 0.));
   auto button = ImGui::Button(buttonId.c_str(), ImVec2(24., 24.));
+  ImGui::PopStyleColor();
+  ImGui::PopStyleVar();
+  ImGui::PopFont();
+  
+  return button;
+}
+
+bool CommonViews::XLargeIconButton(const char *icon, std::string id)
+{
+  auto buttonId = formatString("%s##%s", icon, id.c_str());
+  ImGui::PushFont(FontService::getService()->xLargeIcon);
+  ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32_BLACK_TRANS);
+  ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0., 0.));
+  auto button = ImGui::Button(buttonId.c_str(), ImVec2(100.0, 100.0));
   ImGui::PopStyleColor();
   ImGui::PopStyleVar();
   ImGui::PopFont();
@@ -924,14 +926,15 @@ void CommonViews::BlendModeSelector(std::shared_ptr<Parameter> blendMode, std::s
   ImGui::Combo("##BlendMode", &blendMode->intValue, blendModeNamesC.data(), (int) BlendModeNames.size());
   
   if (flip != nullptr) {
-    CommonViews::ShaderCheckbox(flip);
+    ImGui::SameLine();
+    CommonViews::ShaderCheckbox(flip, true);
+  }
+  if (alpha != nullptr) {
+    CommonViews::ShaderParameter(alpha, alphaOscillator);
   }
   
   if (blendWithEmpty != nullptr) {
     CommonViews::ShaderCheckbox(blendWithEmpty);
-  }
-  if (alpha != nullptr) {
-    CommonViews::ShaderParameter(alpha, alphaOscillator);
   }
 }
 
@@ -973,4 +976,23 @@ bool CommonViews::IsMouseWithin(ImVec2 topLeft, ImVec2 bottomRight, ImVec2 offse
   mousePos += offset;
   return mousePos.x >= topLeft.x && mousePos.x <= bottomRight.x &&
   mousePos.y >= topLeft.y && mousePos.y <= bottomRight.y;
+}
+
+void CommonViews::PaddedText(std::string text, ImVec2 padding)
+{
+    // Calculate the size of the text with padding
+    ImVec2 textSize = ImGui::CalcTextSize(text.c_str());
+    ImVec2 paddedSize = ImVec2(textSize.x + padding.x * 2, textSize.y + padding.y * 2);
+
+    // Save the original cursor position
+    ImVec2 originalCursorPos = ImGui::GetCursorPos();
+
+    // Set the cursor position to account for padding
+    ImGui::SetCursorPos(originalCursorPos + padding);
+
+    // Draw the text
+    ImGui::TextUnformatted(text.c_str());
+
+    // Restore the cursor position to the original position + padded size to allow for correct layout
+    ImGui::SetCursorPos(originalCursorPos + ImVec2(0, paddedSize.y));
 }

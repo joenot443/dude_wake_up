@@ -35,7 +35,7 @@ public:
   OctahedronShader(OctahedronSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    #ifdef TESTING
+    #ifdef DEBUG
 shader.load("shaders/Octahedron");
 #endif
 #ifdef RELEASE

@@ -23,6 +23,7 @@ void AvailableShader::generatePreview() {
 
   auto shader = ShaderChainerService::getService()->shaderForType(
       type, UUID::generateUUID(), 0);
+  shader->allocateFrames();
   shader->setup();
   shader->shade(previewFbo, canvas);
   canvas->begin();

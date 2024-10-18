@@ -24,7 +24,7 @@ std::shared_ptr<TileItem> tileItemForShader(std::shared_ptr<AvailableShader> sha
       ImGui::EndDragDropSource();
     }
   };
-  auto textureId = GetImTextureID(*shader->preview.get());
+  ImTextureID textureId = (ImTextureID)(uint64_t) shader->preview->texData.textureID;
   return std::make_shared<TileItem>(shader->name, textureId, 0, dragCallback, "", shader->type);
 }
 
@@ -78,7 +78,7 @@ void ShaderBrowserView::draw()
     return;
   }
   
-  if (ImGui::BeginTabBar("VideoSourceBrowser", ImGuiTabBarFlags_None))
+  if (ImGui::BeginTabBar("VideoSourceBrowser", ImGuiTabBarFlags_FittingPolicyScroll))
   {
     if (ImGui::BeginTabItem("Favorites"))
     {

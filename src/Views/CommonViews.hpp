@@ -28,13 +28,18 @@ struct CommonViews
   static void Spacing(int n);
   static void HSpacing(int n);
   
+  static void PaddedText(std::string text, ImVec2 padding);
   static bool InvisibleIconButton(std::string id);
   
   static bool IconButton(const char *icon, std::string id);
   
   static bool LargeIconButton(const char *icon, std::string id);
   
+  static bool XLargeIconButton(const char *icon, std::string id);
+  
   static void IconTitle(const char *icon);
+  
+  static void XLargeIconTitle(const char *icon);
   
   static void ImageNamed(std::string filename, double width, double height);
   
@@ -80,8 +85,6 @@ struct CommonViews
   
   static void H4Title(std::string title, bool padding = true);
   
-  static void ResolutionSelector(std::shared_ptr<VideoSource> source);
-  
   static void CenteredVerticalLine();
   
   static void ModulationSelector(std::shared_ptr<Parameter> videoParam);
@@ -90,7 +93,7 @@ struct CommonViews
   
   static void AudioParameterSelector(std::shared_ptr<Parameter> videoParam);
   
-  static bool Slider(std::string title, std::string id, std::shared_ptr<Parameter> param);
+  static bool Slider(std::string title, std::string id, std::shared_ptr<Parameter> param, float width = 200.0f);
   
   static void MultiSlider(std::string title, std::string id, std::shared_ptr<Parameter> param1, std::shared_ptr<Parameter> param2,
                           std::shared_ptr<Oscillator> param1Oscillator,

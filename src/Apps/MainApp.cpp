@@ -44,6 +44,7 @@ void MainApp::setup()
   gui.setup();
   ImGui::CreateContext();
   ImPlot::CreateContext();
+  setupStyle(); // Apply the style
   FontService::getService()->addFontToGui(&gui);
   VideoSourceService::getService();
   MarkdownService::getService();
@@ -161,3 +162,13 @@ void MainApp::resetState() {}
 void MainApp::keyReleased(int key) {
   mainStageView->keyReleased(key);
 }
+
+void MainApp::setupStyle()
+{
+  ImGuiStyle& imguiStyle = ImGui::GetStyle();
+  imguiStyle.Alpha = style.alpha;
+  imguiStyle.WindowPadding = ImVec2(style.windowPadding[0], style.windowPadding[1]);
+  imguiStyle.FramePadding = ImVec2(style.framePadding[0], style.framePadding[1]);
+  imguiStyle.CellPadding = ImVec2(style.framePadding[0], style.framePadding[1]);
+}
+//

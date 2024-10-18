@@ -38,7 +38,7 @@ struct CrosshatchShader: Shader {
   };
 
   void setup() override {
-    #ifdef TESTING
+    #ifdef DEBUG
 shader.load("shaders/Crosshatch");
 #endif
 #ifdef RELEASE

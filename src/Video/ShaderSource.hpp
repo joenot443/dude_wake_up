@@ -5,6 +5,14 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "SimplePathShader.hpp"
+#include "ColoredDropsShader.hpp"
+#include "PlasmorShader.hpp"
+#include "DiffractorShader.hpp"
+#include "AerogelShader.hpp"
+#include "BreatheShader.hpp"
+#include "HeptagonsShader.hpp"
+#include "OctagramsShader.hpp"
 #include "PerplexionShader.hpp"
 #include "ColorWheelShader.hpp"
 #include "DiscoAudioShader.hpp"
@@ -140,6 +148,14 @@ enum ShaderSourceType {
   ShaderSource_DiscoAudio, //source enum,
   ShaderSource_ColorWheel, //source enum,
   ShaderSource_Perplexion, //source enum,
+  ShaderSource_Octagrams, //source enum,
+  ShaderSource_Heptagons, //source enum,
+  ShaderSource_Breathe, //source enum,
+  ShaderSource_Aerogel, //source enum,
+  ShaderSource_Diffractor, //source enum,
+  ShaderSource_Plasmor, //source enum,
+  ShaderSource_ColoredDrops, //source enum,
+  ShaderSource_SimplePath, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -193,7 +209,6 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_Cosmos, // Available
   ShaderSource_FloatingSparks, // Available
   ShaderSource_AudioBlocks, // Available
-  ShaderSource_CloudyShapes, // Available
   ShaderSource_SpaceRings, // Available
   ShaderSource_UnknownPleasures, // Available
   ShaderSource_StarryPlanes, // Available
@@ -202,11 +217,35 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_DiscoAudio, // Available
   ShaderSource_ColorWheel, // Available
   ShaderSource_Perplexion, // Available
+  ShaderSource_Octagrams, // Available
+  ShaderSource_Heptagons, // Available
+  ShaderSource_Breathe, // Available
+  ShaderSource_Aerogel, // Available
+  ShaderSource_Diffractor, // Available
+  ShaderSource_Plasmor, // Available
+  ShaderSource_ColoredDrops, // Available
+  ShaderSource_SimplePath, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
       // shaderTypeForShaderSourceType
+  case ShaderSource_SimplePath: //type enum
+    return ShaderTypeSimplePath;
+  case ShaderSource_ColoredDrops: //type enum
+    return ShaderTypeColoredDrops;
+  case ShaderSource_Plasmor: //type enum
+    return ShaderTypePlasmor;
+  case ShaderSource_Diffractor: //type enum
+    return ShaderTypeDiffractor;
+  case ShaderSource_Aerogel: //type enum
+    return ShaderTypeAerogel;
+  case ShaderSource_Breathe: //type enum
+    return ShaderTypeBreathe;
+  case ShaderSource_Heptagons: //type enum
+    return ShaderTypeHeptagons;
+  case ShaderSource_Octagrams: //type enum
+    return ShaderTypeOctagrams;
   case ShaderSource_Perplexion: //type enum
     return ShaderTypePerplexion;
     case ShaderSource_ColorWheel: //type enum
@@ -414,134 +453,7 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
 };
 
 static std::string shaderSourceTypeName(ShaderSourceType nameType) {
-  switch (nameType) { // ShaderNames
-  case ShaderSource_Perplexion: // Name  
-    return "Perplexion"; // Perplexion
-    case ShaderSource_ColorWheel: // Name
-      return "ColorWheel"; // ColorWheel
-    case ShaderSource_DiscoAudio: // Name
-      return "DiscoAudio"; // DiscoAudio
-    case ShaderSource_FlickerAudio: // Name
-      return "FlickerAudio"; // FlickerAudio
-    case ShaderSource_FractalAudio: // Name
-      return "FractalAudio"; // FractalAudio
-    case ShaderSource_StarryPlanes: // Name
-      return "StarryPlanes"; // StarryPlanes
-    case ShaderSource_UnknownPleasures: // Name
-      return "UnknownPleasures"; // UnknownPleasures
-    case ShaderSource_SpaceRings: // Name
-      return "SpaceRings"; // SpaceRings
-    case ShaderSource_CloudyShapes: // Name
-      return "CloudyShapes"; // CloudyShapes
-    case ShaderSource_AudioBlocks: // Name
-      return "AudioBlocks"; // AudioBlocks
-    case ShaderSource_FloatingSparks: // Name
-      return "FloatingSparks"; // FloatingSparks
-    case ShaderSource_Cosmos: // Name
-      return "Cosmos"; // Cosmos
-    case ShaderSource_GlitchAudio: // Name
-      return "GlitchAudio"; // GlitchAudio
-    case ShaderSource_ChromeGrill: // Name
-      return "ChromeGrill"; // ChromeGrill
-    case ShaderSource_Fibers: // Name
-      return "Fibers"; // Fibers
-    case ShaderSource_Mist: // Name
-      return "Mist"; // Mist
-    case ShaderSource_WelcomeRings: // Name
-      return "WelcomeRings"; // WelcomeRings
-    case ShaderSource_MotionBlurTexture: // Name
-      return "MotionBlurTexture"; // MotionBlurTexture
-    case ShaderSource_IsoFract: // Name
-      return "IsoFract"; // IsoFract
-    case ShaderSource_DirtyPlasma: // Name
-      return "DirtyPlasma"; // DirtyPlasma
-    case ShaderSource_TwistedTrip: // Name
-      return "TwistedTrip"; // TwistedTrip
-    case ShaderSource_TwistedCubes: // Name
-      return "TwistedCubes"; // TwistedCubes
-    case ShaderSource_Core: // Name
-      return "Core"; // Core
-    case ShaderSource_VoronoiColumns: // Name
-      return "VoronoiColumns"; // VoronoiColumns
-    case ShaderSource_Warpspeed: // Name
-      return "Warpspeed"; // Warpspeed
-    case ShaderSource_Reflector: // Name
-      return "Reflector"; // Reflector
-    case ShaderSource_FullHouse: // Name
-      return "FullHouse"; // FullHouse
-    case ShaderSource_GridRun: // Name
-      return "GridRun"; // GridRun
-    case ShaderSource_Gyroids: // Name
-      return "Gyroids"; // Gyroids
-    case ShaderSource_SwirlingSoul: // Name
-      return "Swirling Soul"; // SwirlingSoul
-    case ShaderSource_DoubleSwirl: // Name
-      return "Double Swirl"; // DoubleSwirl
-    case ShaderSource_SmokeRing: // Name
-      return "Smoke Ring"; // SmokeRing
-    case ShaderSource_AudioCircle: // Name
-      return "Audio Circle"; // AudioCircle
-    case ShaderSource_Limbo: // Name
-      return "Limbo"; // Limbo
-    case ShaderSource_Vertex: // Name
-      return "Vertex"; // Vertex
-    case ShaderSource_SolidColor: // Name
-      return "Solid Color"; // SolidColor
-    case ShaderSource_Hilbert: // Name
-      return "Hilbert"; // Hilbert
-    case ShaderSource_Warp: // Name
-      return "Warp"; // Warp
-    case ShaderSource_FrequencyVisualizer: // Name
-      return "Frequency Visualizer"; // FrequencyVisualizer
-    case ShaderSource_CurlySquares: // Name
-      return "Curly Squares"; // CurlySquares
-    case ShaderSource_PlasmaTwo: // Name
-      return "Plasma Two"; // PlasmaTwo
-    case ShaderSource_DancingSquares: // Name
-      return "Dancing Squares"; // DancingSquares
-    case ShaderSource_Circle: // Name
-      return "Circle"; // Circle
-    case ShaderSource_Tissue: // Name
-      return "Tissue"; // Tissue
-    case ShaderSource_Psycurves: // Name
-      return "Psycurves"; // Psycurves
-    case ShaderSource_TriangleMap: // Name
-      return "Triangle Map"; // TriangleMap
-    case ShaderSource_Disco: // Name
-      return "Disco"; // Disco
-    case ShaderSource_Octahedron: // Name
-      return "Octahedron"; // Octahedron
-    case ShaderSource_VanGogh: // Name
-      return "VanGogh"; // VanGogh
-    case ShaderSource_Rubiks: // Name
-      return "Rubiks"; // Rubiks
-    case ShaderSource_Mountains: // Name
-      return "Mountains";        // Mountain
-    case ShaderSource_empty:
-      return "Empty";
-    case ShaderSource_plasma:
-      return "Plasma";
-    case ShaderSource_fractal:
-      return "Fractal";
-    case ShaderSource_fuji:
-      return "Fuji";
-    case ShaderSource_clouds:
-      return "Clouds";
-    case ShaderSource_melter:
-      return "Melter";
-    case ShaderSource_rings:
-      return "Rings";
-    case ShaderSource_audioWaveform:
-      return "Audio Waveform";
-    case ShaderSource_audioBumper:
-      return "Audio Bumper";
-    case ShaderSource_audioMountains:
-      return "Audio Mountains";
-    case ShaderSource_galaxy:
-      return "Galaxy";
-    default:
-      return "Unknown";
-  }
+  return shaderTypeName(shaderTypeForShaderSourceType(nameType));
 };
 
 struct ShaderSource : public VideoSource {
@@ -561,6 +473,54 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
         // Shader Settings
+    case ShaderSource_SimplePath: { // Settings
+      auto settings = new SimplePathSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<SimplePathShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_ColoredDrops: { // Settings
+      auto settings = new ColoredDropsSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<ColoredDropsShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Plasmor: { // Settings
+      auto settings = new PlasmorSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<PlasmorShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Diffractor: { // Settings
+      auto settings = new DiffractorSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<DiffractorShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Aerogel: { // Settings
+      auto settings = new AerogelSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<AerogelShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Breathe: { // Settings
+      auto settings = new BreatheSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<BreatheShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Heptagons: { // Settings
+      auto settings = new HeptagonsSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<HeptagonsShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Octagrams: { // Settings
+      auto settings = new OctagramsSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<OctagramsShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_Perplexion: { // Settings
       auto settings = new PerplexionSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<PerplexionShader>(settings);

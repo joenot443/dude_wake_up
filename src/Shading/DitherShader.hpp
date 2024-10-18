@@ -39,7 +39,7 @@ public:
       : settings(settings), Shader(settings){};
 
   void setup() override {
-#ifdef TESTING
+#ifdef DEBUG
 shader.load("shaders/Dither");
 #endif
 #ifdef RELEASE

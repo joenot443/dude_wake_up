@@ -81,7 +81,7 @@ public:
   };
 
   void setup() override {
-    #ifdef TESTING
+    #ifdef DEBUG
 shader.load("shaders/fuji");
 #endif
 #ifdef RELEASE

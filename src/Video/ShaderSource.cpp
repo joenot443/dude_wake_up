@@ -32,6 +32,7 @@ json ShaderSource::serialize()
 void ShaderSource::setup() {
   shader->setup();
   fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y, GL_RGBA);
+  optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y, GL_RGBA);
   fbo->begin();
   ofSetColor(0, 0, 0, 255);
   ofDrawRectangle(0, 0, fbo->getWidth(), fbo->getHeight());

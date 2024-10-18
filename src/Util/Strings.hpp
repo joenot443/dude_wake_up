@@ -101,4 +101,11 @@ static std::string formatColor(std::array<float, 4> color) {
 }
 
 
+// Removes the file extension from a string
+static std::string removeFileExtension(const std::string& filename) {
+    size_t lastindex = filename.find_last_of(".");
+    return filename.substr(0, lastindex);
+}
+
+
 #endif Strings_h

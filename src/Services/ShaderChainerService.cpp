@@ -7,6 +7,17 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "BackgroundShader.hpp"
+#include "SimplePathShader.hpp"
+#include "ColoredDropsShader.hpp"
+#include "PlasmorShader.hpp"
+#include "AutotangentShader.hpp"
+#include "DiffractorShader.hpp"
+#include "ScratchyShader.hpp"
+#include "AerogelShader.hpp"
+#include "BreatheShader.hpp"
+#include "HeptagonsShader.hpp"
+#include "OctagramsShader.hpp"
 #include "PerplexionShader.hpp"
 #include "ColorWheelShader.hpp"
 #include "DiscoAudioShader.hpp"
@@ -134,10 +145,6 @@
 
 void ShaderChainerService::setup()
 {
-#ifdef TESTING
-  // Return early while testing. We don't test AvailableShaders for now.
-  return;
-#endif
   
   // Create an AvailableShader for each type
   for (auto const shaderType : AvailableBasicShaderTypes)
@@ -190,7 +197,7 @@ void ShaderChainerService::setup()
     allAvailableShaders.push_back(shader);
   }
   
-  for (auto const shaderType : { ShaderTypeMix, ShaderTypeBlend, ShaderTypeTransform, ShaderTypeRotate, ShaderTypeMirror, ShaderTypeHSB }) {
+  for (auto const shaderType : { ShaderTypeBlend, ShaderTypeTransform, ShaderTypeRotate, ShaderTypeMirror, ShaderTypeHSB, ShaderTypeVHS, ShaderType16bit, ShaderTypePixelate, ShaderTypeAutotangent }) {
     auto availableShader = availableShadersMap[shaderType];
     availableDefaultFavoriteShaders.push_back(availableShader);
   }
@@ -440,12 +447,13 @@ void ShaderChainerService::addShader(std::shared_ptr<Shader> shader)
   
   FeedbackSourceService::getService()->registerFeedbackSource(feedbackSource);
   shader->feedbackDestination = feedbackSource;
-  shader->allocateLastFrame();
+  shader->allocateFrames();
+  shader->generateOptionalShaders();
   shadersMap[shader->shaderId] = shader;
   
   // Subscribe the Shader's setup() to resolution updates
   LayoutStateService::getService()->subscribeToResolutionUpdates([shader]() {
-    shader->allocateLastFrame();
+    shader->allocateFrames();
     shader->setup();
   });
   
@@ -709,6 +717,72 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeBackground: {
+      auto settings = new BackgroundSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<BackgroundShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeSimplePath: {
+      auto settings = new SimplePathSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<SimplePathShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeColoredDrops: {
+      auto settings = new ColoredDropsSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<ColoredDropsShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypePlasmor: {
+      auto settings = new PlasmorSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<PlasmorShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeAutotangent: {
+      auto settings = new AutotangentSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AutotangentShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeDiffractor: {
+      auto settings = new DiffractorSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<DiffractorShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeScratchy: {
+      auto settings = new ScratchySettings(shaderId, shaderJson);
+      auto shader = std::make_shared<ScratchyShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeAerogel: {
+      auto settings = new AerogelSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AerogelShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeBreathe: {
+      auto settings = new BreatheSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<BreatheShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeHeptagons: {
+      auto settings = new HeptagonsSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<HeptagonsShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeOctagrams: {
+      auto settings = new OctagramsSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<OctagramsShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypePerplexion: {
       auto settings = new PerplexionSettings(shaderId, shaderJson);
       auto shader = std::make_shared<PerplexionShader>(settings);

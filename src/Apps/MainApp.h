@@ -39,7 +39,6 @@ private:
   void drawMainSettings();
   void resetState();
 
-
   std::shared_ptr<ofAppBaseWindow> window;
   ofxImGui::Gui gui;
   MainStageView *mainStageView = new MainStageView();
@@ -50,5 +49,16 @@ private:
   
   std::queue<std::function<void()>> mainThreadTasks;
   std::mutex mainThreadTasksMutex;
+
+  struct Style {
+    float alpha = 1.0f;
+    float windowPadding[2] = {8.0f, 8.0f};
+    float framePadding[2] = {8.0f, 4.0f};
+    float itemSpacing[2] = {8.0f, 4.0f};
+    
+//    ImColor majorColor = ImColor(0.7, 0.8, 0.7);
+  };
+
+  Style style;
 };
 

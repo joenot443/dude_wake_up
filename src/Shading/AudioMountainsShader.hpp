@@ -32,7 +32,7 @@ public:
   AudioMountainsShader(AudioMountainsSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    #ifdef TESTING
+    #ifdef DEBUG
 shader.load("shaders/AudioMountains");
 #endif
 #ifdef RELEASE

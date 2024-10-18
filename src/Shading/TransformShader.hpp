@@ -2,6 +2,7 @@
 #define TransformShader_hpp
 
 #include "ofMain.h"
+#include "ImHelpers.h"
 #include "Fonts.hpp"
 #include "ShaderConfigSelectionView.hpp"
 #include "ImGuiExtensions.hpp"
@@ -46,7 +47,7 @@ public:
   maxYOscillator(std::make_shared<WaveformOscillator>(maxY)),
   translateXOscillator(std::make_shared<WaveformOscillator>(translateX)),
   translateYOscillator(std::make_shared<WaveformOscillator>(translateY)),
-  scaleOscillator(std::make_shared<WaveformOscillator>(scale, 1.0, 0.0, 5.0)),
+  scaleOscillator(std::make_shared<WaveformOscillator>(scale, 0.2, 0.0, 5.0)),
   ShaderSettings(shaderId, j, name) {
     parameters = {minX, maxX, minY, maxY, scale, translateX, translateY};
     oscillators = {minXOscillator, maxXOscillator, minYOscillator, maxYOscillator, translateXOscillator, translateYOscillator, scaleOscillator};

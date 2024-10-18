@@ -9,6 +9,7 @@
 #define VideoSource_hpp
 
 #include "FeedbackSource.hpp"
+#include "OptionalShadersHelper.hpp"
 #include "Settings.hpp"
 #include "UUID.hpp"
 #include "VideoSourceSettings.hpp"
@@ -41,6 +42,7 @@ public:
   std::shared_ptr<VideoSourceSettings> settings;
   VideoSourceType type;
   std::shared_ptr<ofFbo> fbo;
+  std::shared_ptr<ofFbo> optionalFbo;
   std::shared_ptr<FeedbackSource> feedbackDestination;
   
   // Whether the source is generating new frames
@@ -53,7 +55,7 @@ public:
   VideoSource() : id(UUID::generateUUID()), sourceName(UUID::generateUUID()), settings(std::make_shared<VideoSourceSettings>(id, 0)), origin(ImVec2(0.,0.)) {};
 
   VideoSource(std::string id, std::string name, VideoSourceType type)
-      : id(id), fbo(std::make_shared<ofFbo>()), sourceName(name), type(type), settings(std::make_shared<VideoSourceSettings>(id, 0)), origin(ImVec2(0.,0.)) {};
+      : id(id), fbo(std::make_shared<ofFbo>()), optionalFbo(std::make_shared<ofFbo>()), sourceName(name), type(type), settings(std::make_shared<VideoSourceSettings>(id, 0)), origin(ImVec2(0.,0.)) {};
 
   virtual void setup(){};
   void update() {
@@ -63,6 +65,13 @@ public:
   }
   virtual void saveFrame(){};
   void drawSettings() override {};
+  
+  void drawOptionalSettings() override;
+  
+  void applyOptionalShaders();
+  
+  void generateOptionalShaders();
+  
   virtual json serialize() { return 0; };
   int inputCount() override { return 0; };
   
@@ -92,15 +101,7 @@ public:
     return ConnectableTypeSource;
   }
   
-  void drawPreview(ImVec2 pos, float scale) {
-    if (!fbo->isAllocated()) return;
-    
-    ofTexture tex = fbo->getTexture();
-    if (tex.isAllocated()) {
-      ImTextureID texID = (ImTextureID)(uintptr_t)tex.getTextureData().textureID;
-      ImGui::Image(texID, ImVec2(160/scale, 90/scale));
-    }
-  }
+  void drawPreview(ImVec2 pos, float scale);
 
   void saveFeedbackFrame() {
     if (fbo != nullptr) {
@@ -109,6 +110,8 @@ public:
   };
   
   void drawMaskSettings();
+
+  OptionalShadersHelper optionalShadersHelper;
 };
 
 #endif /* VideoSourceSource_hpp */

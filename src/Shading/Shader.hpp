@@ -24,7 +24,7 @@
 
 using json = nlohmann::json;
 
-static const bool AllowShaderMonitoring = true;
+static const bool AllowShaderMonitoring = false;
 
 class Shader: public Connectable
 {
@@ -35,19 +35,34 @@ public:
   shaderId(settings->shaderId),
   creationTime(ofGetUnixTime()),
   lastModified(ofGetUnixTime()),
-  lastFrame(std::make_shared<ofFbo>())
+  lastFrame(std::make_shared<ofFbo>()),
+  shader(ofShader()),
+  optionalFrame(std::make_shared<ofFbo>())
   {
     color = colorFromName(settings->name);
   };
   
   ofShader shader;
+  
   std::unique_ptr<ShaderSettings> settings;
   
   ImColor color;
   
   std::string shaderId;
   
+  // Whether this Shader is an optional phase in another Shader
+  bool isOptional;
+  
+  // If this Shader is optional, whether it is presently enabled
+  bool optionallyEnabled;
+  
   std::shared_ptr<ofFbo> lastFrame;
+  
+  // Used for applying the optional shaders
+  std::shared_ptr<ofFbo> optionalFrame;
+  
+  // Shaders which can be optionally applied to an existing Shader.
+  std::vector<std::shared_ptr<Shader>> optionalShaders;
   
   // Timestamp for the last time the Shader file was modified
   unsigned int lastModified;
@@ -67,7 +82,7 @@ public:
   // will act as a FeedbackSource.
   std::shared_ptr<FeedbackSource> feedbackDestination;
   
-  void allocateLastFrame();
+  void allocateFrames();
   
   virtual std::string name() { return shaderTypeName(type()); };
   virtual bool enabled() { return true; };
@@ -83,11 +98,7 @@ public:
 
   void drawSettings() override {};
 
-  virtual void drawPreview(ImVec2 pos, float scale)
-  {
-    ImTextureID texID = (ImTextureID)(uintptr_t)lastFrame->getTexture().getTextureData().textureID;
-    ImGui::Image(texID, ImVec2(160/scale, 90/scale));
-  }
+  virtual void drawPreview(ImVec2 pos, float scale);
 
   virtual std::string idName() { return formatString("%s##%s", name().c_str(), shaderId.c_str()); }
   
@@ -111,6 +122,8 @@ public:
   // Calls traverseFrame() on Shaders in the next set.
   void traverseFrame(std::shared_ptr<ofFbo> frame, int depth);
   
+  void applyOptionalSettings();
+  
   // Clears the lastFrame back to a 100% black
   void clearLastFrame();
 
@@ -122,6 +135,14 @@ public:
   
   // Sets the Shader's Parameters to be active.
   void activateParameters();
+  
+  // Optional Shaders
+  
+  void generateOptionalShaders();
+  
+  void drawOptionalSettings();
+  void applyOptionalShaders();
+  void populateLastFrame();
 };
 
 #endif /* Shader_h */

@@ -22,6 +22,7 @@ void FileSource::setup()
   player.setLoopState(OF_LOOP_NORMAL);
 //	updateSettings();
   fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
+  optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   sliderPosition->value = settings->start->value;
   position = start;
   maskShader.load("shaders/ColorKeyMaskMaker");
@@ -44,7 +45,8 @@ void FileSource::saveFrame()
   if (player.getSpeed() != speed->value) {
     player.setSpeed(speed->value);
   }
-  player.setLoopState(boomerang->boolValue ? OF_LOOP_PALINDROME : OF_LOOP_NORMAL);
+  player.setLoopState(OF_LOOP_NONE);
+//  player.setLoopState(boomerang->boolValue ? OF_LOOP_PALINDROME : OF_LOOP_NORMAL);
   player.update();
   updatePlaybackPosition();
 
@@ -161,29 +163,48 @@ void FileSource::drawSettings()
 
 void FileSource::updatePlaybackPosition()
 {
-  if (player.getPosition() > (end - 0.01) || player.getIsMovieDone())
+  if (abs(player.getPosition() - end) < 0.01 || player.getIsMovieDone())
   {
-    if (boomerang->boolValue) {
-      player.setSpeed(-1.0);
-    } else {
+    if (boomerang->boolValue && player.getSpeed() > 0.0 && direction) {
+      log("Boomeranging");
+      player.setPosition(end);
+      player.setSpeed(-speed->value);
+      player.play();
+      direction = false;
+    } else if (!boomerang->boolValue) {
+      log("Moving to %f", start);
       sliderPosition->value = start;
       position = start;
       player.setPosition(start);
+      player.play();
     }
+    
+    if (!player.isPlaying()) {
+      player.play();
+    }
+    
     return;
   }
   
-  if (player.getPosition() < start) {
-    player.setSpeed(1.0);
+  // Restarting Boomerang
+  if (abs(player.getPosition() - start) < 0.01 && !direction && boomerang->boolValue) {
     player.setPosition(start);
-    position = start;
+    player.setSpeed(1.0);
+    player.play();
+    direction = true;
     return;
+  }
+  
+  if (!player.isPlaying()) {
+    player.play();
   }
   
   // Slider position has changed a significant amount
   if (((float) fabs(position - sliderPosition->value)) > 0.01) {
+    log("Moving slider");
     position = sliderPosition->value;
     player.setPosition(position);
+    player.play();
   } else {
     position = player.getPosition();
     sliderPosition->value = position;
