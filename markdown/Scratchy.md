@@ -1,0 +1,3 @@
+# Scratchy
+
+Information about Scratchy
