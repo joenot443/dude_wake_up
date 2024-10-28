@@ -18,15 +18,15 @@ using json = nlohmann::json;
 
 enum OscillatorType
 {
-  Oscillator_value,
-  Oscillator_pulse,
-  Oscillator_waveform
+  OscillatorType_value,
+  OscillatorType_pulse,
+  OscillatorType_waveform
 };
 
 struct Oscillator: public std::enable_shared_from_this<Oscillator>
 {
 public:
-  OscillatorType type;
+  virtual OscillatorType type() = 0;
 
   std::shared_ptr<Parameter> enabled;
 
@@ -46,6 +46,20 @@ public:
 
   void load(json j)
   {
+    for (auto p : parameters) {
+      if (j[p->name].is_object()) {
+        p->load(j[p->name]);
+      }
+    }
+  }
+  
+  std::shared_ptr<Parameter> findParameter(std::string name) {
+    for (auto p : parameters) {
+      if (p->name == name) {
+        return p;
+      }
+    }
+    return nullptr;
   }
 
   // Returns the y values from data
@@ -61,7 +75,7 @@ public:
 
   json serialize()
   {
-    json j;
+    json j = json::object();
 
     for (auto p : parameters)
     {
@@ -74,19 +88,6 @@ public:
     return j;
   }
 
-  std::map<std::string, float> parameterValueMap()
-  {
-    std::map<std::string, float> m;
-    for (auto p : parameters)
-    {
-      if (p->value != p->defaultValue)
-      {
-        m[p->name] = p->value;
-      }
-    }
-    return m;
-  }
-
   Oscillator(std::shared_ptr<Parameter> v) : value(v),
                                              name(v->name),
                                              settingsId(value->paramId),
@@ -95,7 +96,7 @@ public:
     parameters = {enabled};
     data = ImVector<ImVec2>();
     xRange = {0.0, 10.0};
-    span = 100.0;
+    span = 10.0;
     yRange = {value->min, value->max};
   }
 

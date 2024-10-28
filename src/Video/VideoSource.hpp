@@ -85,19 +85,19 @@ public:
   
   // Connectable
   
-  std::shared_ptr<VideoSourceSettings> sourceSettings() {
+  std::shared_ptr<VideoSourceSettings> sourceSettings() override {
     return settings;
   }
   
-  std::shared_ptr<ofFbo> frame() {
+  std::shared_ptr<ofFbo> frame() override {
     return fbo;
   }
   
-  std::string connId() {
+  std::string connId() override {
     return id;
   }
   
-  ConnectableType connectableType() {
+  ConnectableType connectableType() override {
     return ConnectableTypeSource;
   }
   

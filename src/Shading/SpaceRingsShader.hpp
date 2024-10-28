@@ -72,4 +72,4 @@ struct SpaceRingsShader: Shader {
   }
 };
 
-#endif /* SpaceRingsShader_hpp */
+#endif

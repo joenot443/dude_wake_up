@@ -85,4 +85,4 @@ struct ReflectorShader: Shader {
   }
 };
 
-#endif /* ReflectorShader_hpp */
+#endif

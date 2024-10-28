@@ -29,7 +29,7 @@ struct HSBSettings: public ShaderSettings {
   
   HSBSettings(std::string shaderId, json j, std::string name) :
   shaderId(shaderId),
-  hue(std::make_shared<Parameter>("Hue", 0.0, 0.0, 1.0)),
+  hue(std::make_shared<Parameter>("Hue", 0.0, 0.0, 2.0)),
   saturation(std::make_shared<Parameter>("Saturation", 1.0, 0.0, 2.0)),
   brightness(std::make_shared<Parameter>("Brightness", 1.0, 0.0, 2.0)),
   hueOscillator(std::make_shared<WaveformOscillator>(hue)),
@@ -55,12 +55,8 @@ public:
   HSBSettings *settings;
   
   void setup() override {
-    #ifdef DEBUG
 shader.load("shaders/hsb");
-#endif
-#ifdef RELEASE
 shader.load("shaders/hsb");
-#endif
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -93,4 +89,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* HSBShader_hpp */
+#endif

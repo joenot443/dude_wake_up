@@ -93,4 +93,4 @@ struct GlitchRGBShader: Shader {
   }
 };
 
-#endif /* GlitchRGBShader_hpp */
+#endif

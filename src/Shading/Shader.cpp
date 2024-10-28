@@ -22,7 +22,7 @@ void Shader::traverseFrame(std::shared_ptr<ofFbo> frame, int depth)
   checkForFileChanges();
   activateParameters();
   shade(frame, lastFrame);
-//  applyOptionalShaders();
+  applyOptionalShaders();
   
   // On our terminal nodes, check if we need to update our defaultStageShader
   if (outputs.empty()) {
@@ -31,18 +31,17 @@ void Shader::traverseFrame(std::shared_ptr<ofFbo> frame, int depth)
     }
   }
   
-  for (auto [slot, connection] : outputs)
+  for (auto [slot, connections] : outputs) // Correctly iterate over connections
   {
-    // Only traverse the Main slots.
-    if (connection->inputSlot != InputSlotMain) { continue; }
-    if (connection->outputSlot != OutputSlotMain) { continue; }
-    
-    // Attempt to cast the connectable to a shader
-    std::shared_ptr<Shader> shader = std::dynamic_pointer_cast<Shader>(connection->end);
-    // If cast succeeded, traverse that shader's frame
-    if (shader)
-    {
-      shader->traverseFrame(lastFrame, depth + 1);
+    for (auto &connection : connections) {
+      if (connection->inputSlot != InputSlotMain) { continue; }
+      if (connection->outputSlot != OutputSlotMain) { continue; }
+      
+      std::shared_ptr<Shader> shader = std::dynamic_pointer_cast<Shader>(connection->end);
+      if (shader)
+      {
+        shader->traverseFrame(lastFrame, depth + 1);
+      }
     }
   }
 
@@ -97,7 +96,7 @@ json Shader::serialize()
 };
 
 void Shader::activateParameters() {
-  for (std::shared_ptr<Parameter> param : settings->allParameters()) {
+  for (std::shared_ptr<Parameter> param : settings->parameters) {
     param->active = true;
   }
 }

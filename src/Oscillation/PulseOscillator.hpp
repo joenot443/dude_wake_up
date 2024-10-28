@@ -31,8 +31,13 @@ struct PulseOscillator: public Oscillator {
   
   PulseOscillator(std::shared_ptr<Parameter> o);
   
-  void tick();
+  void tick() override;
   void pulse();
+  
+  OscillatorType type() override {
+    return OscillatorType_pulse;
+  }
+  
 private:
   void pushValue(float value);
 };

@@ -96,4 +96,4 @@ struct MaskShader : Shader
   }
 };
 
-#endif /* MaskShader_hpp */
+#endif

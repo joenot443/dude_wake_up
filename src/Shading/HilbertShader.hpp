@@ -71,4 +71,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* HilbertShader_hpp */
+#endif

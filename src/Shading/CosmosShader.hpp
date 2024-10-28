@@ -72,4 +72,4 @@ struct CosmosShader: Shader {
   }
 };
 
-#endif /* CosmosShader_hpp */
+#endif

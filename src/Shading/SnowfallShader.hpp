@@ -135,4 +135,4 @@ ShaderType type() override {
 };
 
 
-#endif /* SnowfallShader_hpp */
+#endif

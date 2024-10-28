@@ -90,4 +90,4 @@ struct MotionBlurTextureShader: Shader {
   }
 };
 
-#endif /* MotionBlurTextureShader_hpp */
+#endif

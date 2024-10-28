@@ -80,36 +80,27 @@ public:
 
   void selectConnectable(std::shared_ptr<Connectable> connectable);
   void deselectConnectable();
-  void addShader(std::shared_ptr<Shader> shader);
   std::shared_ptr<Shader> makeShader(ShaderType type);
+
+  // Actions
+  void addShader(std::shared_ptr<Shader> shader);
   void removeShader(std::shared_ptr<Shader> shader, bool fromMap = true);
   void removeConnectable(std::shared_ptr<Connectable> connectable);
-  void copyConnections(std::shared_ptr<Connectable> source, std::shared_ptr<Connectable> dest);
-  
-  // Break the connection from a Shader to the Input of another
-  void breakConnectionForConnectionId(std::string connectionId);
-  
-  void insert(std::shared_ptr<Connectable> start, std::shared_ptr<Connectable> connectable, OutputSlot slot);
-
-  
-  std::shared_ptr<Connection>
-  makeConnection(std::shared_ptr<Connectable> start,
+  std::shared_ptr<Connection>makeConnection(std::shared_ptr<Connectable> start,
            std::shared_ptr<Connectable> end,
            ConnectionType type,
            OutputSlot outputSlot,
            InputSlot inputSlot,
            bool shouldSaveConfig = false,
            bool copy = false);
+
+  // Break the connection from a Shader to the Input of another
+  void breakConnectionForConnectionId(std::string connectionId);
+
+  // Composite Actions
+  void copyConnections(std::shared_ptr<Connectable> source, std::shared_ptr<Connectable> dest);
   
-
-  // Removes the ShaderChainers associated with that VideoSource
-  void removeShaderChainersForVideoSourceId(std::string id);
-
-  // Link the VideoSource to a Shader.
-  // This will either create a new ShaderChainer, or will set the `front`
-  // Shader for an existing ShaderChainer using that source.
-  std::shared_ptr<Connection> linkVideoSourceToShader(std::shared_ptr<VideoSource> source,
-                                                      std::shared_ptr<Shader> shader);
+  void insert(std::shared_ptr<Connectable> start, std::shared_ptr<Connectable> connectable, OutputSlot slot);
 
   std::shared_ptr<Shader> shaderForId(std::string id);
   std::vector<std::shared_ptr<Shader>> shaders();

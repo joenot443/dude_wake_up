@@ -42,12 +42,8 @@ public:
 
 
   void setup() override {
-    #ifdef DEBUG
 shader.load("shaders/AudioWaveform");
-#endif
-#ifdef RELEASE
 shader.load("shaders/AudioWaveform");
-#endif
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -79,4 +75,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* AudioWaveformShader_hpp */
+#endif

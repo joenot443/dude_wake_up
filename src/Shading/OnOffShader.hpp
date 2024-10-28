@@ -68,4 +68,4 @@ struct OnOffShader: Shader {
   }
 };
 
-#endif /* OnOffShader_hpp */
+#endif

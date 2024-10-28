@@ -85,4 +85,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* VHSShader_hpp */
+#endif

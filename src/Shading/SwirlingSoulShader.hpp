@@ -82,4 +82,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* SwirlingSoulShader_hpp */
+#endif

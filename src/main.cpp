@@ -1,5 +1,7 @@
-# define JSON_DIAGNOSTICS 1
-# define IMGUI_DEFINE_MATH_OPERATORS 1
+#define JSON_DIAGNOSTICS 1
+#define IMGUI_DEFINE_MATH_OPERATORS 1
+#define DEBUG 1
+#define RELEASE 1
 
 #include <errno.h>
 #include <sentry.h>
@@ -33,8 +35,6 @@
 const static ofVec2f windowSize = ofVec2f(2400, 1600);
 
 using json = nlohmann::json;
-
-#define RELEASE
 
 const char* SubmitFeedbackView::popupId = "Submit Feedback";
 

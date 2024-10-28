@@ -6,6 +6,7 @@
 //
 
 #include "ValueOscillator.hpp"
+#include "Oscillation/Oscillator.hpp"
 #include "imgui.h"
 #include "OscillationService.hpp"
 #include "Video.hpp"

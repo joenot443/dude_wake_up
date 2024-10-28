@@ -91,4 +91,4 @@ struct AudioBlocksShader: Shader {
     CommonViews::ShaderParameter(settings->ySpread, settings->ySpreadOscillator);
   }
 };
-#endif /* AudioBlocksShader_hpp */
+#endif

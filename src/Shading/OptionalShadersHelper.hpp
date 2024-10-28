@@ -22,5 +22,5 @@ private:
     void populateLastFrame(std::shared_ptr<ofFbo> lastFrame, std::shared_ptr<ofFbo> optionalFrame);
 };
 
-#endif /* OptionalShadersHelper_hpp */
 
+#endif

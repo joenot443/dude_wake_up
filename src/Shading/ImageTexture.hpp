@@ -37,4 +37,4 @@ private:
   void drawImageWithTexture();
 };
 
-#endif /* ImageTexture_hpp */
+#endif

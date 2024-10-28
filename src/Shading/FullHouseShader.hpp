@@ -105,4 +105,4 @@ struct FullHouseShader: Shader {
   }
 };
 
-#endif /* FullHouseShader_hpp */
+#endif

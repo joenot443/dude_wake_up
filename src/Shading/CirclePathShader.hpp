@@ -105,4 +105,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* CirclePathShader_hpp */
+#endif

@@ -9,6 +9,7 @@
 #define Settings_hpp
 
 #include <stdio.h>
+#include "Console.hpp"
 #include "Parameter.hpp"
 #include "MidiService.hpp"
 #include "Oscillator.hpp"
@@ -34,8 +35,7 @@ public:
   Settings(std::string name) : name(name), settingsId(UUID::generateUUID()) {};
   
   virtual void registerParameters() {
-    std::vector<std::shared_ptr<Parameter>> params = allParameters();
-    for (auto param : params) {
+    for (auto param : parameters) {
       if (param == nullptr) continue;
       ParameterService::getService()->registerParameter(param);
       param->ownerName = name;
@@ -47,27 +47,30 @@ public:
       OscillationService::getService()->addOscillator(osc);
     }
   }
-  
-  // Returns all the parameters for the Shader including the ones on the Oscillators
-  virtual std::vector<std::shared_ptr<Parameter>> allParameters() {
-    std::vector<std::shared_ptr<Parameter>> allParams = {};
-    allParams.insert(allParams.end(), parameters.begin(), parameters.end());
-    return allParams;
-  }
 
   virtual json serialize() {
     json j;
     
-    for (auto p : allParameters()) {
+    j["param"] = json::object();
+    j["osc"] = json::object();
+    
+    for (auto p : parameters) {
       if (p != nullptr) {
-        j[p->name] = p->serialize();
+        j["param"][p->name] = p->serialize();
       }
     }
+    
+    for (auto o : oscillators) {
+      if (o != nullptr && o->enabled->boolValue) {
+        j["osc"][o->value->name] = o->serialize();
+      }
+    }
+    
     return j;
   }
   
   std::shared_ptr<Parameter> findParameter(std::string name) {
-    for (auto p : allParameters()) {
+    for (auto p : parameters) {
       if (p != nullptr && p->name == name) {
         return p;
       }
@@ -75,13 +78,28 @@ public:
     return NULL;
   }
   
+  std::shared_ptr<Oscillator> findOscillator(std::string name) {
+    for (auto o : oscillators) {
+      if (o != nullptr && o->value->name == name) {
+        return o;
+      }
+    }
+    return NULL;
+  }
+  
   virtual void load(json j) {
-    if (!j.is_object()) {
+    if (!j.is_object()) return;
+    
+    if (!j["param"].is_object() || !j["osc"].is_object()) {
+      log("Invalid JSON format for Settings");
       return;
     }
     
+    json paramJ = j["param"];
+    json oscJ = j["osc"];
+    
     // Iterate through every parameter in the json
-    for (auto it = j.begin(); it != j.end(); ++it) {
+    for (auto it = paramJ.begin(); it != paramJ.end(); ++it) {
       // Find the parameter with the name
       auto p = findParameter(it.key());
       if (p != NULL) {
@@ -89,6 +107,15 @@ public:
         // If the parameter has a midiDescriptor, add it to the MidiService
         if (p->midiDescriptor != "") {
           MidiService::getService()->saveAssignment(p, p->midiDescriptor);
+        }
+        
+        
+        // Check if the Oscillator for that Parameter has been saved
+        if (oscJ[p->name].is_object()) {
+          std::shared_ptr<Oscillator> osc = findOscillator(p->name);
+          osc->load(oscJ[p->name]);
+          // Enable the Oscillator
+          osc->enabled->setBoolValue(true);
         }
       }
     }

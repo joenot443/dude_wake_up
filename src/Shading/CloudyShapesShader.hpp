@@ -72,4 +72,4 @@ struct CloudyShapesShader: Shader {
   }
 };
 
-#endif /* CloudyShapesShader_hpp */
+#endif

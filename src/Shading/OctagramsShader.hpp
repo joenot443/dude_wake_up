@@ -72,4 +72,4 @@ struct OctagramsShader: Shader {
   }
 };
 
-#endif /* OctagramsShader_hpp */
+#endif

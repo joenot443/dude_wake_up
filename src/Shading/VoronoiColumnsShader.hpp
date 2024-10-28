@@ -71,4 +71,4 @@ struct VoronoiColumnsShader: Shader {
   }
 };
 
-#endif /* VoronoiColumnsShader_hpp */
+#endif

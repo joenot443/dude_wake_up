@@ -53,12 +53,8 @@ public:
   BlurShader(BlurSettings *settings) : Shader(settings), settings(settings) {}
   void setup() override
   {
-#ifdef DEBUG
     shader.load("shaders/blur");
-#endif
-#ifdef RELEASE
     shader.load("shaders/blur");
-#endif
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override
@@ -90,4 +86,4 @@ ShaderType type() override { return ShaderTypeBlur; }
   }
 };
 
-#endif /* BlurShader_hpp */
+#endif

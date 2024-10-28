@@ -76,4 +76,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* ColorStepperShader_hpp */
+#endif

@@ -47,12 +47,8 @@ class CloudShader: public Shader {
   Shader(settings) {};
 
   void setup() override {
-    #ifdef DEBUG
 shader.load("shaders/clouds");
-#endif
-#ifdef RELEASE
 shader.load("shaders/clouds");
-#endif
   }
 
   int inputCount() override {
@@ -80,4 +76,4 @@ shader.load("shaders/clouds");
 
 };
 
-#endif /* CloudShader_h */
+#endif

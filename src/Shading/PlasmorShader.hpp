@@ -90,4 +90,4 @@ struct PlasmorShader: Shader {
   }
 };
 
-#endif /* PlasmorShader_hpp */
+#endif

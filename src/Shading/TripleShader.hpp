@@ -118,4 +118,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* TripleShader_hpp */
+#endif

@@ -76,4 +76,4 @@ struct WelcomeRingsShader: Shader {
   }
 };
 
-#endif /* WelcomeRingsShader_hpp */
+#endif

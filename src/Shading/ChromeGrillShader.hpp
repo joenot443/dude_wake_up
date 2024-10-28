@@ -79,5 +79,5 @@ struct ChromeGrillShader: Shader {
   }
 };
 
-#endif /* ChromeGrillShader_hpp */
 
+#endif

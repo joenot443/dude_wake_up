@@ -21,6 +21,9 @@ void VideoSourceBrowserView::setup()
   ofAddListener(LibraryService::getService()->thumbnailNotification, this, &VideoSourceBrowserView::refreshSources);
 
   refreshSources();
+
+  // Initialize the search results view
+  searchResultsTileBrowserView = TileBrowserView(searchTileItems);
 }
 
 void VideoSourceBrowserView::refreshSources()
@@ -91,12 +94,56 @@ void VideoSourceBrowserView::refreshSources()
   fileBrowserView.setup();
 }
 
-void VideoSourceBrowserView::update() {}
+void VideoSourceBrowserView::update()
+{
+//  if (searchDirty) {
+//    // Filter tileItems based on searchQuery
+//    auto sources = VideoSourceService::getService()->availableVideoSources();
+//    std::vector<std::shared_ptr<TileItem>> filteredItems;
+//
+//    // Convert the searchQuery to lowercase for case-insensitive comparison
+//    std::string searchQueryLower = searchQuery;
+//    std::transform(searchQueryLower.begin(), searchQueryLower.end(), searchQueryLower.begin(),
+//                   [](unsigned char c){ return std::tolower(c); });
+//
+//    for (auto& source : sources) {
+//        // Convert source name to lowercase for case-insensitive comparison
+//        std::string sourceNameLower = source->sourceName;
+//        std::transform(sourceNameLower.begin(), sourceNameLower.end(), sourceNameLower.begin(),
+//                       [](unsigned char c){ return std::tolower(c); });
+//
+//        if (sourceNameLower.find(searchQueryLower) != std::string::npos) {
+//            ImTextureID textureId = (ImTextureID)(uint64_t) source->preview->texData.textureID;
+//            auto tileItem = std::make_shared<TileItem>(source->sourceName, textureId, 0, nullptr, source->category);
+//            filteredItems.push_back(tileItem);
+//        }
+//    }
+//    searchResultsTileBrowserView.setTileItems(filteredItems);
+//    searchDirty = false;
+//  }
+}
 
 void VideoSourceBrowserView::drawLibraryHeader() {}
 
 void VideoSourceBrowserView::draw()
 {
+//  char buffer[256];
+//  strncpy(buffer, searchQuery.c_str(), sizeof(buffer));
+//  if (ImGui::InputText("Search", buffer, sizeof(buffer))) {
+//    searchQuery = std::string(buffer);
+//    searchDirty = true;
+//  }
+//
+//  if (searchQuery.length() != 0) {
+//    if (ImGui::BeginTabBar("VideoSourceBrowser", ImGuiTabBarFlags_None)) {
+//      if (ImGui::BeginTabItem("Search")) {
+//        searchResultsTileBrowserView.draw();
+//      }
+//      ImGui::EndTabBar();
+//    }
+//    return;
+//  }
+
   if (ImGui::BeginTabBar("VideoSourceBrowser", ImGuiTabBarFlags_None))
   {
     if (ImGui::BeginTabItem("Generated"))

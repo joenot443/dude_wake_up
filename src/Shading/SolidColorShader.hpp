@@ -89,4 +89,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* SolidColorShader_hpp */
+#endif

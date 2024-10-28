@@ -72,4 +72,4 @@ struct OutlineShader: Shader {
   }
 };
 
-#endif /* OutlineShader_hpp */
+#endif

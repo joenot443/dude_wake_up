@@ -179,4 +179,4 @@ struct MultiMixShader: Shader {
   }
 };
 
-#endif /* MultiMixShader_hpp */
+#endif

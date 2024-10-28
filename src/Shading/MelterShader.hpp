@@ -59,12 +59,8 @@ public:
 
   MeltShader(MeltSettings *settings) : settings(settings),
   Shader(settings) {
-    #ifdef DEBUG
 shader.load("shaders/Melt");
-#endif
-#ifdef RELEASE
 shader.load("shaders/Melt");
-#endif
   }
   
   int inputCount() override {
@@ -95,4 +91,4 @@ shader.load("shaders/Melt");
     CommonViews::ShaderParameter(settings->smoothness, settings->smoothnessOscillator);
   }
 };
-#endif /* MelterShader_h */
+#endif

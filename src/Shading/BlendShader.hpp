@@ -116,4 +116,4 @@ struct BlendShader: Shader {
   }
 };
 
-#endif /* BlendShader_hpp */
+#endif

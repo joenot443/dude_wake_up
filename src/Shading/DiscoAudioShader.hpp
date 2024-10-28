@@ -78,4 +78,4 @@ struct DiscoAudioShader: Shader {
   }
 };
 
-#endif /* DiscoAudioShader_hpp */
+#endif

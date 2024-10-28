@@ -82,4 +82,4 @@ struct FractalAudioShader: Shader {
   }
 };
 
-#endif /* FractalAudioShader_hpp */
+#endif

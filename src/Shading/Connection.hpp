@@ -120,7 +120,7 @@ public:
   virtual ~Connectable() = default;
 
   std::map<InputSlot, std::shared_ptr<Connection>> inputs;
-  std::map<OutputSlot, std::shared_ptr<Connection>> outputs;
+  std::map<OutputSlot, std::vector<std::shared_ptr<Connection>>> outputs; // Changed to vector
   
   // Either a Shader::shaderId or a VideoSource::id
   virtual std::string connId() = 0;
@@ -156,15 +156,18 @@ public:
   
   bool hasOutputAtSlot(OutputSlot slot)
   {
-    return outputs.find(slot) != outputs.end();
+    return outputs.find(slot) != outputs.end() && !outputs[slot].empty();
   }
 
   bool hasOutputForType(ConnectionType type)
   {
-    for (auto const& [key, output] : outputs)
+    for (auto const& [key, connections] : outputs)
     {
-      if (output->type == type)
-        return true;
+      for (auto const& connection : connections)
+      {
+        if (connection->type == type)
+          return true;
+      }
     }
     return false;
   }
@@ -174,7 +177,7 @@ public:
     std::vector<OutputSlot> slots;
     
     for (OutputSlot slot : StandardOutputSlots) {
-      if (outputs.find(slot) != outputs.end()) {
+      if (outputs.find(slot) != outputs.end() && !outputs[slot].empty()) {
         slots.push_back(slot);
       }
     }
@@ -185,7 +188,7 @@ public:
   OutputSlot nextAvailableOutputSlot()
   {
     for (OutputSlot slot : StandardOutputSlots) {
-      if (outputs.find(slot) == outputs.end()) {
+      if (outputs.find(slot) == outputs.end() || outputs[slot].empty()) {
         return slot;
       }
     }
@@ -199,19 +202,25 @@ public:
 
   std::shared_ptr<Connectable> outputAtSlot(OutputSlot slot)
   {
-    return outputs.at(slot)->end;
+    if (outputs.find(slot) != outputs.end() && !outputs[slot].empty()) {
+      return outputs[slot].front()->end; // Return the first connection's end
+    }
+    return nullptr;
   }
   
   std::shared_ptr<Connection> connectionAtSlot(OutputSlot slot)
   {
-    return outputs.at(slot);
+    if (outputs.find(slot) != outputs.end() && !outputs[slot].empty()) {
+      return outputs[slot].front(); // Return the first connection
+    }
+    return nullptr;
   }
   
   // Returns the furthest descendent of the Connectable
   std::shared_ptr<Connectable> terminalDescendent() {
     if (outputs.empty()) return shared_from_this();
     
-    return outputs.begin()->second->end->terminalDescendent();
+    return outputs.begin()->second.front()->end->terminalDescendent();
   }
   
   std::shared_ptr<Connectable> parentOfType(ConnectableType type)
@@ -274,10 +283,13 @@ public:
   
   std::shared_ptr<Connectable> outputForType(ConnectionType type)
   {
-    for (auto const& [key, output] : outputs)
+    for (auto const& [key, connections] : outputs)
     {
-      if (output->type == type)
-        return output->end;
+      for (auto const& connection : connections)
+      {
+        if (connection->type == type)
+          return connection->end;
+      }
     }
     return nullptr;
   }
@@ -290,10 +302,13 @@ public:
         return connection;
     }
     
-    for (auto const& [key, connection] : outputs)
+    for (auto const& [key, connections] : outputs)
     {
-      if (connection->end == conn)
-        return connection;
+      for (auto const& connection : connections)
+      {
+        if (connection->end == conn)
+          return connection;
+      }
     }
     
     return nullptr;
@@ -315,11 +330,14 @@ public:
   std::vector<std::string> removeOutputConnections(ConnectionType type)
   {
     std::vector<std::string> idsToRemove;
-    for (auto const& [key, connection] : outputs)
+    for (auto const& [key, connections] : outputs)
     {
-      if (connection->type == type)
+      for (auto const& connection : connections)
       {
-        idsToRemove.push_back(connection->id);
+        if (connection->type == type)
+        {
+          idsToRemove.push_back(connection->id);
+        }
       }
     }
     return idsToRemove;
@@ -341,14 +359,8 @@ public:
     // Remove the connection from the 'outputs' map of the starting Connectable
     if (conn->start)
     {
-      auto it = conn->start->outputs.begin();
-      while (it != conn->start->outputs.end()) {
-        if (conn == it->second) {
-          it = conn->start->outputs.erase(it);
-        } else {
-          ++it;
-        }
-      }
+      auto& connections = conn->start->outputs[conn->outputSlot];
+      connections.erase(std::remove(connections.begin(), connections.end(), conn), connections.end());
     }
     
     // Remove the connection from the 'inputs' map of the ending Connectable

@@ -90,7 +90,7 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
   {
     driver = dr;
     shift = std::make_shared<Parameter>("shift", 0.5, -1.0, 1.0);
-    scale = std::make_shared<Parameter>("scale", 0.5, 0.0, 5.0);
+    scale = std::make_shared<Parameter>("scale", 0.2, 0.0, 2.0);
   }
   
   void removeDriver() {
@@ -154,6 +154,12 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
     value = newValue;
     intValue = static_cast<int>(newValue);
     boolValue = newValue > 0.0001;
+  }
+  
+  void setBoolValue(bool newValue) {
+    value = newValue ? 1.0 : 0.0;
+    intValue = newValue ? 1 : 0;
+    boolValue = newValue;
   }
   
   /// Sets the int and bool values of the Parameter to the float value.

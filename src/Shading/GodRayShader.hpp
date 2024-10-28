@@ -71,4 +71,4 @@ struct GodRayShader: Shader {
   }
 };
 
-#endif /* GodRayShader_hpp */
+#endif

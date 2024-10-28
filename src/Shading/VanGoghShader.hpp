@@ -31,12 +31,8 @@ public:
   VanGoghShader(VanGoghSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    #ifdef DEBUG
 shader.load("shaders/VanGogh");
-#endif
-#ifdef RELEASE
 shader.load("shaders/VanGogh");
-#endif
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -67,4 +63,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* VanGoghShader_hpp */
+#endif

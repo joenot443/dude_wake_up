@@ -90,4 +90,4 @@ struct DoubleBlurShader: Shader {
   }
 };
 
-#endif /* DoubleBlurShader_hpp */
+#endif

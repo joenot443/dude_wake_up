@@ -45,12 +45,8 @@ public:
   WobbleShader(WobbleSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    #ifdef DEBUG
 shader.load("shaders/Wobble");
-#endif
-#ifdef RELEASE
 shader.load("shaders/Wobble");
-#endif
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -87,4 +83,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* WobbleShader_hpp */
+#endif

@@ -71,4 +71,4 @@ struct TwistedTripShader: Shader {
   }
 };
 
-#endif /* TwistedTripShader_hpp */
+#endif

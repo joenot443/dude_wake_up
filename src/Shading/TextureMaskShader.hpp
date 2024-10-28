@@ -93,4 +93,4 @@ struct TextureMaskShader: Shader {
   }
 };
 
-#endif /* TextureMaskShader_hpp */
+#endif

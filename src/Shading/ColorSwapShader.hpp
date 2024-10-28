@@ -85,4 +85,4 @@ struct ColorSwapShader: Shader {
   }
 };
 
-#endif /* ColorSwapShader_hpp */
+#endif

@@ -91,4 +91,4 @@ struct PieSplitShader: Shader {
   }
 };
 
-#endif /* PieSplitShader_hpp */
+#endif

@@ -73,4 +73,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* CubifyShader_hpp */
+#endif

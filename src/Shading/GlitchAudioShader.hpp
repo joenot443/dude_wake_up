@@ -77,4 +77,4 @@ struct GlitchAudioShader: Shader {
   }
 };
 
-#endif /* GlitchAudioShader_hpp */
+#endif

@@ -14,7 +14,6 @@
 
 PulseOscillator::PulseOscillator(std::shared_ptr<Parameter> o) : Oscillator(o), value(o) {
   data.reserve(PulseOscillatorValueCount);
-  type = Oscillator_pulse;
   time = 0.0;
   xRange = {0.0, static_cast<float>(PulseOscillatorValueCount)};
   yRange = {o->min, o->max};
@@ -42,3 +41,4 @@ void PulseOscillator::pulse() {
   pulsing = true;
   time = 0.0;
 }
+

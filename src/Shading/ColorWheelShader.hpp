@@ -87,4 +87,4 @@ struct ColorWheelShader: Shader {
   }
 };
 
-#endif /* ColorWheelShader_hpp */
+#endif

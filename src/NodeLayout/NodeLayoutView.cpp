@@ -175,29 +175,29 @@ void NodeLayoutView::draw()
   {
     auto shaderNode = x.second;
     
-    // Create Links for every Output. [Can go to Mask, Aux, etc.]
     if (!shaderNode->connectable->outputs.empty())
     {
-      for (auto pair : shaderNode->connectable->outputs)
+      for (auto [slot, connections] : shaderNode->connectable->outputs)
       {
-        auto slot = pair.first;
-        auto connection = pair.second;
-        std::shared_ptr<Node> nextNode = idNodeMap[connection->end->connId()];
-        std::shared_ptr<Node> startNode = idNodeMap[connection->start->connId()];
-        
-        ed::LinkId nextShaderLinkId = uniqueId++;
-        
-        auto shaderLink =
-        std::make_shared<ShaderLink>(nextShaderLinkId, nextNode, shaderNode, connection->outputSlot, connection->inputSlot, connection->id);
-        linksMap[nextShaderLinkId.Get()] = shaderLink;
-        ed::PinId inputPinId = 0;
-        ed::PinId outputPinId = 0;
-        outputPinId = startNode->outputIds[connection->outputSlot];
-        inputPinId = nextNode->inputIds[connection->inputSlot];
-        
-        ed::Link(nextShaderLinkId,
-                 outputPinId,
-                 inputPinId);
+        for (auto &connection : connections) // Correctly iterate over connections
+        {
+          std::shared_ptr<Node> nextNode = idNodeMap[connection->end->connId()];
+          std::shared_ptr<Node> startNode = idNodeMap[connection->start->connId()];
+          
+          ed::LinkId nextShaderLinkId = uniqueId++;
+          
+          auto shaderLink =
+          std::make_shared<ShaderLink>(nextShaderLinkId, nextNode, shaderNode, connection->outputSlot, connection->inputSlot, connection->id);
+          linksMap[nextShaderLinkId.Get()] = shaderLink;
+          ed::PinId inputPinId = 0;
+          ed::PinId outputPinId = 0;
+          outputPinId = startNode->outputIds[connection->outputSlot];
+          inputPinId = nextNode->inputIds[connection->inputSlot];
+          
+          ed::Link(nextShaderLinkId,
+                   outputPinId,
+                   inputPinId);
+        }
       }
     }
   }

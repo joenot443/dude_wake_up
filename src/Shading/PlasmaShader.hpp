@@ -66,12 +66,8 @@ public:
   };
 
   void setup() override {
-    #ifdef DEBUG
 shader.load("shaders/plasma");
-#endif
-#ifdef RELEASE
 shader.load("shaders/plasma");
-#endif
   };
   
   int inputCount() override {
@@ -85,4 +81,4 @@ shader.load("shaders/plasma");
 };
 
 
-#endif /* PlasmaShader_h */
+#endif

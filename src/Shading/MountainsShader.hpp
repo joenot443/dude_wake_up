@@ -31,12 +31,8 @@ public:
   MountainsShader(MountainsSettings *settings) : settings(settings), Shader(settings) {};
 	
   void setup() override {
-#ifdef DEBUG
     shader.load("shaders/Mountains");
-#endif
-#ifdef RELEASE
     shader.load("shaders/Mountains");
-#endif
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -69,4 +65,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* MountainsShader_hpp */
+#endif

@@ -31,12 +31,8 @@ public:
   PsycurvesShader(PsycurvesSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    #ifdef DEBUG
 shader.load("shaders/Psycurves");
-#endif
-#ifdef RELEASE
 shader.load("shaders/Psycurves");
-#endif
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -68,4 +64,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* PsycurvesShader_hpp */
+#endif

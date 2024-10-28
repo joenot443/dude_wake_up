@@ -35,11 +35,11 @@ private:
   int note, ctl;
   std::vector<unsigned char> bytes;
   void addMessage(std::string msg);
-  void newMidiMessage(ofxMidiMessage& msg);
-  void midiInputAdded(std::string name, bool isNetwork);
-  void midiInputRemoved(std::string name, bool isNetwork);
-  void midiOutputAdded(std::string nam, bool isNetwork);
-  void midiOutputRemoved(std::string name, bool isNetwork);
+  void newMidiMessage(ofxMidiMessage& msg) override;
+  void midiInputAdded(std::string name, bool isNetwork) override;
+  void midiInputRemoved(std::string name, bool isNetwork) override;
+  void midiOutputAdded(std::string nam, bool isNetwork) override;
+  void midiOutputRemoved(std::string name, bool isNetwork) override;
   void removePairing(std::shared_ptr<Parameter> param);
   
 public:

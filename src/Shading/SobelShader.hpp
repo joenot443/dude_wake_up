@@ -37,12 +37,8 @@ struct SobelShader : Shader {
   SobelShader(SobelSettings *settings) : settings(settings), Shader(settings){};
 
   void setup() override {
-#ifdef DEBUG
     shader.load("shaders/Sobel");
-#endif
-#ifdef RELEASE
     shader.load("shaders/Sobel");
-#endif
   }
   
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -70,4 +66,4 @@ struct SobelShader : Shader {
   }
 };
 
-#endif /* SobelShader_hpp */
+#endif

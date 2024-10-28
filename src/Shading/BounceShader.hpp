@@ -98,4 +98,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* BounceShader_hpp */
+#endif

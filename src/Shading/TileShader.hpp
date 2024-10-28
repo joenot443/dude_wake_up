@@ -47,12 +47,8 @@ public:
   TileShader(TileSettings *settings) : settings(settings), Shader(settings) {};
   
   void setup() override {
-#ifdef DEBUG
     shader.load("shaders/Tile");
-#endif
-#ifdef RELEASE
     shader.load("shaders/Tile");
-#endif
   }
   
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -84,4 +80,4 @@ public:
   }
 };
 
-#endif /* TileShader_h */
+#endif

@@ -83,4 +83,4 @@ struct ColoredDropsShader: Shader {
   }
 };
 
-#endif /* ColoredDropsShader_hpp */
+#endif

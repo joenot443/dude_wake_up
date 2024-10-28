@@ -94,4 +94,4 @@ struct DiffractorShader: Shader {
   }
 };
 
-#endif /* DiffractorShader_hpp */
+#endif

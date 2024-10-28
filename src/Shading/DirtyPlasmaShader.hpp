@@ -90,4 +90,4 @@ struct DirtyPlasmaShader: Shader {
   }
 };
 
-#endif /* DirtyPlasmaShader_hpp */
+#endif

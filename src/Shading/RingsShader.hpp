@@ -44,12 +44,8 @@ public:
   RingsShader(RingsSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    #ifdef DEBUG
 shader.load("shaders/Rings");
-#endif
-#ifdef RELEASE
 shader.load("shaders/Rings");
-#endif
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -85,4 +81,4 @@ shader.load("shaders/Rings");
   }
 };
 
-#endif /* RingsShader_hpp */
+#endif

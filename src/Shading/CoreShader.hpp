@@ -79,4 +79,4 @@ struct CoreShader: Shader {
   }
 };
 
-#endif /* CoreShader_hpp */
+#endif

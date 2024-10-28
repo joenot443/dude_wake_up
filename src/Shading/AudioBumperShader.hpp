@@ -43,12 +43,8 @@ public:
   : settings(settings), Shader(settings){};
 
   void setup() override {
-#ifdef DEBUG
     shader.load("shaders/AudioBumper");
-#endif
-#ifdef RELEASE
     shader.load("shaders/AudioBumper");
-#endif
     
   }
   
@@ -86,4 +82,4 @@ public:
   }
 };
 
-#endif /* AudioBumperShader_hpp */
+#endif

@@ -148,6 +148,7 @@ void VideoSourceService::removeVideoSource(std::string id)
   {
     auto source = videoSourceMap[id];
     source->teardown();
+    OscillationService::getService()->removeOscillatorsFor(source->settings->parameters);
     FeedbackSourceService::getService()->removeFeedbackSource(id);
     ShaderChainerService::getService()->removeConnectable(source);
     videoSourceMap.erase(id);

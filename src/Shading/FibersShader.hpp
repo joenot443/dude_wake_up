@@ -72,4 +72,4 @@ struct FibersShader: Shader {
   }
 };
 
-#endif /* FibersShader_hpp */
+#endif

@@ -165,4 +165,4 @@ struct SwitcherShader : Shader {
   }
 };
 
-#endif /* SwitcherShader_hpp */
+#endif

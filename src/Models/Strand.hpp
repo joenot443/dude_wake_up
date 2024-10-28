@@ -40,9 +40,11 @@ struct Strand {
       if (name.length() > 20) return;
       
       // Visit all outputs (children) of the current connectable
-      for (const auto& output : current->outputs) {
-        std::shared_ptr<Connectable> end = output.second->end;
-        visit(end);
+      for (const auto& [slot, connections] : current->outputs) { // Correctly iterate over connections
+        for (const auto& connection : connections) {
+          std::shared_ptr<Connectable> end = connection->end;
+          visit(end);
+        }
       }
     };
     

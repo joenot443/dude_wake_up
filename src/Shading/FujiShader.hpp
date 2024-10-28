@@ -81,12 +81,8 @@ public:
   };
 
   void setup() override {
-    #ifdef DEBUG
 shader.load("shaders/fuji");
-#endif
-#ifdef RELEASE
 shader.load("shaders/fuji");
-#endif
   };
   
   int inputCount() override {
@@ -103,4 +99,4 @@ shader.load("shaders/fuji");
   }
 };
 
-#endif /* FujiShader_h */
+#endif

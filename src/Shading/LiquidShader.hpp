@@ -40,12 +40,8 @@ public:
   LiquidShader(LiquidSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-#ifdef DEBUG
     shader.load("shaders/Liquid");
-#endif
-#ifdef RELEASE
     shader.load("shaders/Liquid");
-#endif
   }
   
   int inputCount() override {
@@ -74,4 +70,4 @@ public:
   }
 };
 
-#endif /* LiquidShader_hpp */
+#endif

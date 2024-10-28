@@ -91,4 +91,4 @@ struct GlitchDigitalShader: Shader {
   }
 };
 
-#endif /* GlitchDigitalShader_hpp */
+#endif

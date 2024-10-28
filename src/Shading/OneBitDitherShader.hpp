@@ -82,4 +82,4 @@ struct OneBitDitherShader: Shader {
   }
 };
 
-#endif /* OneBitDitherShader_hpp */
+#endif

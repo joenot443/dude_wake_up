@@ -80,4 +80,4 @@ public:
   }
 };
 
-#endif /* HalfToneShader_hpp */
+#endif

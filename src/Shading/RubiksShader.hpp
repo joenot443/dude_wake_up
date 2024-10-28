@@ -31,12 +31,8 @@ public:
   RubiksShader(RubiksSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    #ifdef DEBUG
 shader.load("shaders/Rubiks");
-#endif
-#ifdef RELEASE
 shader.load("shaders/Rubiks");
-#endif
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -66,4 +62,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* RubiksShader_hpp */
+#endif

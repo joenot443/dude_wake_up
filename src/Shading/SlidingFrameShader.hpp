@@ -92,4 +92,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* SlidingFrameShader_hpp */
+#endif

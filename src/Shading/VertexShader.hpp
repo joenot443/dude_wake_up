@@ -68,4 +68,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* VertexShader_hpp */
+#endif

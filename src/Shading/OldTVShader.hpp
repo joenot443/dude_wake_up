@@ -63,4 +63,4 @@ struct OldTVShader: Shader {
   }
 };
 
-#endif /* OldTVShader_hpp */
+#endif

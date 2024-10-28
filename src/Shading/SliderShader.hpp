@@ -43,12 +43,8 @@ public:
       : settings(settings), Shader(settings){};
 
   void setup() override {
-#ifdef DEBUG
 shader.load("shaders/Slider");
-#endif
-#ifdef RELEASE
 shader.load("shaders/Slider");
-#endif
     
   }
 
@@ -83,4 +79,4 @@ ShaderType type() override { return ShaderTypeSlider; }
   }
 };
 
-#endif /* SliderShader_hpp */
+#endif

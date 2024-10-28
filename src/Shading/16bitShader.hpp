@@ -77,4 +77,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* SixteenBitShader_hpp */
+#endif

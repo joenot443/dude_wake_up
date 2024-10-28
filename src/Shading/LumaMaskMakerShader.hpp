@@ -87,4 +87,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* LumaMaskMakerShader_hpp */
+#endif

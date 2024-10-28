@@ -73,21 +73,50 @@ void MainStageView::draw()
   
   // Sources
   
-  //  ImGui::PopStyleVar();
   ImGui::BeginChild("##sourceBrowser", browserSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
-  //  CommonViews::H3Title("Sources");
   drawVideoSourceBrowser();
   ImGui::EndChild();
   
   ImGui::BeginChild("##shaderBrowser", browserSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
-  //  CommonViews::H3Title("Effects");
   drawShaderBrowser();
   ImGui::EndChild();
   
-  ImGui::BeginChild("##libraryBrowser", browserSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
-  //  CommonViews::H3Title("Saved Strands");
-  strandBrowserView.draw();
+  ImGui::BeginChild("##libraryOscillatorBrowser", browserSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
+  
+  if (ImGui::BeginTabBar("##LibraryOscillatorTabBar")) {
+    
+    // My Strands Tab
+    if (ImGui::BeginTabItem("My Strands", 0, LayoutStateService::getService()->utilityPanelTab == 0 ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
+      // Set the tab if user clicks manually
+      strandBrowserView.draw();
+      ImGui::EndTabItem();
+    }
+    if (ImGui::IsItemClicked()) {
+      LayoutStateService::getService()->utilityPanelTab = 0;
+    }
+    
+    // Oscillators Tab
+    if (ImGui::BeginTabItem("Oscillators", 0, LayoutStateService::getService()->utilityPanelTab == 1 ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
+      // Set the tab if user clicks manually
+      oscillatorPanelView.draw();
+      
+      ImGui::EndTabItem();
+    }
+    if (ImGui::IsItemClicked()) {
+      LayoutStateService::getService()->utilityPanelTab = 1;
+    }
+    
+    ImGui::EndTabBar();
+  }
+  
   ImGui::EndChild();
+  
+  // Now, handle external tab selection by checking `utilityPanelTab`
+  if (LayoutStateService::getService()->utilityPanelTab == 0) {
+    ImGui::SetTabItemClosed("Oscillators");  // Reflect external control by closing the other tab
+  } else if (LayoutStateService::getService()->utilityPanelTab == 1) {
+    ImGui::SetTabItemClosed("My Strands");   // Reflect external control by closing the other tab
+  }
   
   drawMenu();
   
@@ -115,9 +144,9 @@ void MainStageView::draw()
   
   // Welcome Screen
   
-//  if (LayoutStateService::getService()->showWelcomeScreen) {
-//    welcomeScreenView.draw();
-//  }
+  //  if (LayoutStateService::getService()->showWelcomeScreen) {
+  //    welcomeScreenView.draw();
+  //  }
 }
 
 void MainStageView::drawMenu()

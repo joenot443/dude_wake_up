@@ -77,4 +77,4 @@ struct TwistedCubesShader: Shader {
   }
 };
 
-#endif /* TwistedCubesShader_hpp */
+#endif

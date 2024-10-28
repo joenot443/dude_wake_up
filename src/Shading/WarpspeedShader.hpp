@@ -71,4 +71,4 @@ struct WarpspeedShader: Shader {
   }
 };
 
-#endif /* WarpspeedShader_hpp */
+#endif

@@ -46,12 +46,8 @@ public:
   : settings(settings), Shader(settings){};
 
   void setup() override {
-#ifdef DEBUG
     shader.load("shaders/ColorPass");
-#endif
-#ifdef RELEASE
     shader.load("shaders/ColorPass");
-#endif
     
   }
   
@@ -84,4 +80,4 @@ public:
   }
 };
 
-#endif /* ColorPassShader_hpp */
+#endif

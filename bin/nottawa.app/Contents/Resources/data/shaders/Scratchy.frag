@@ -20,8 +20,8 @@ void main()
 
     uv = vec2((uv.x + noise), uv.y);
     
-    vec3 col = texture(tex, uv).rgb;
+    vec4 col = texture(tex, uv);
     
-    outputColor = vec4(col, 1.);
+    outputColor = col;
 }
 

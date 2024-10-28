@@ -48,12 +48,8 @@ public:
   RGBShiftShader(RGBShiftSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    #ifdef DEBUG
 shader.load("shaders/RGBShift");
-#endif
-#ifdef RELEASE
 shader.load("shaders/RGBShift");
-#endif
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -90,4 +86,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* RGBShiftShader_hpp */
+#endif

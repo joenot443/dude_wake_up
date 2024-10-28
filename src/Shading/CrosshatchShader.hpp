@@ -38,12 +38,8 @@ struct CrosshatchShader: Shader {
   };
 
   void setup() override {
-    #ifdef DEBUG
 shader.load("shaders/Crosshatch");
-#endif
-#ifdef RELEASE
 shader.load("shaders/Crosshatch");
-#endif
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -78,4 +74,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* CrosshatchShader_hpp */
+#endif

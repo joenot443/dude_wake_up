@@ -80,4 +80,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* AudioCircleShader_hpp */
+#endif

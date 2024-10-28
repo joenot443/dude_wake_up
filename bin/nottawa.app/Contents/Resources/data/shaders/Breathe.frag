@@ -3,6 +3,9 @@
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
+uniform float pulseIntensity; // New parameter for controlling the intensity of the breathing effect
+uniform float warpSpeed;      // New parameter for controlling the speed of domain warping
+uniform float colorShift;     // New parameter for shifting the color palette
 in vec2 coord;
 out vec4 outputColor;
 
@@ -28,8 +31,8 @@ float highAmpNoise(vec2 x) {
 
 float fbm(vec2 x) {
   float v = 0.0;
-  float a = 0.5;
-  float angle = 0.5 + time * 0.001;
+  float a = 0.5 * pulseIntensity; // Use pulseIntensity to modulate the amplitude
+  float angle = 0.5 + time * warpSpeed * 0.001; // Use warpSpeed to modulate the rotation speed
   mat2 rot = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
   for (int i = 0; i < 8; ++i) {
     v += a * highAmpNoise(x);
@@ -69,13 +72,31 @@ vec3 hexToRgb(int hexValue) {
               );
 }
 
+vec3 hueShift(vec3 color, float shift) {
+    const mat3 rgb2yiq = mat3(
+        0.299, 0.587, 0.114,
+        0.596, -0.274, -0.322,
+        0.211, -0.523, 0.312
+    );
+    const mat3 yiq2rgb = mat3(
+        1.0, 0.956, 0.621,
+        1.0, -0.272, -0.647,
+        1.0, -1.107, 1.705
+    );
+    vec3 yiq = rgb2yiq * color;
+    float hue = atan(yiq.z, yiq.y) + shift;
+    float chroma = length(yiq.yz);
+    yiq.yz = chroma * vec2(cos(hue), sin(hue));
+    return yiq2rgb * yiq;
+}
+
 vec3 palette(float t) {
   t = fract(t + sin(t * 123.456) * 0.05);
   t = clamp(t, 0.0, 1.0);
   
   int hexColors[5] = int[5](
                             0x2C3531, // #2C3531
-                            0x116466, // #116466
+                             0x116466, // #116466
                             0xD9B08C, // #D9B08C
                             0xFFCB9A, // #FFCB9A
                             0xD1E8E2  // #D1E8E2
@@ -84,6 +105,7 @@ vec3 palette(float t) {
   vec3 colors[5];
   for (int i = 0; i < 5; i++) {
     colors[i] = hexToRgb(hexColors[i]);
+    colors[i] = hueShift(colors[i], colorShift); // Apply hue shift
     colors[i] = mix(vec3(0.5), colors[i] * 0.9, 1.2);
   }
   float thresholds[15] = float[15](
@@ -133,4 +155,3 @@ void main(  )
   vec3 color = palette(n);
   outputColor = vec4(color, 1.0);
 }
-

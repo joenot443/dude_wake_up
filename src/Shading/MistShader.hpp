@@ -72,4 +72,4 @@ struct MistShader: Shader {
   }
 };
 
-#endif /* MistShader_hpp */
+#endif

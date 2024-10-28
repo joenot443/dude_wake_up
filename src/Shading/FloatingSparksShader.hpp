@@ -72,4 +72,4 @@ struct FloatingSparksShader: Shader {
   }
 };
 
-#endif /* FloatingSparksShader_hpp */
+#endif

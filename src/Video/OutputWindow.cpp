@@ -35,7 +35,6 @@ void OutputWindow::updateResolution()
   needsResolutionUpdate = false;
 }
 
-
 void OutputWindow::keyReleased(int key) {
   // If the key released is ESC, close the output window
   if (key == OF_KEY_ESC) {

@@ -61,4 +61,4 @@ struct OverlayShader: Shader {
   }
 };
 
-#endif /* OverlayShader_hpp */
+#endif

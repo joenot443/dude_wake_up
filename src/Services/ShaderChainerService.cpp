@@ -292,21 +292,25 @@ bool ShaderChainerService::isShaderType(std::shared_ptr<Connectable> connectable
 
 std::shared_ptr<Shader> ShaderChainerService::terminalShader(std::shared_ptr<Shader> shader)
 {
-  if (isTerminalShader(shader))
-  {
+  if (!shader || shader->outputs.empty()) {
     return shader;
   }
-  
-  for (auto conn : shader->outputs)
-  {
-    std::shared_ptr<Connectable> end = conn.second->end;
-    if (end->connectableType() == ConnectableTypeShader)
-    {
-      auto nextShader = std::dynamic_pointer_cast<Shader>(end);
-      return terminalShader(nextShader);
+
+  std::shared_ptr<Shader> terminal = shader;
+
+  for (auto const& [slot, connections] : shader->outputs) {
+    for (auto const& connection : connections) {
+      auto candidate = std::dynamic_pointer_cast<Shader>(connection->end);
+      if (candidate) {
+        auto terminalCandidate = terminalShader(candidate);
+        if (terminalCandidate) {
+          terminal = terminalCandidate;
+        }
+      }
     }
   }
-  return nullptr;
+
+  return terminal;
 }
 
 bool ShaderChainerService::hasParents(std::shared_ptr<Shader> shader)
@@ -469,6 +473,8 @@ void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader, bool fro
     return;
   }
   
+  OscillationService::getService()->removeOscillatorsFor(shader->settings->parameters);
+  
   removeConnectable(shader);
   
   for (auto param : shader->settings->parameters) {
@@ -495,73 +501,68 @@ void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader, bool fro
 void ShaderChainerService::removeConnectable(std::shared_ptr<Connectable> connectable)
 {
   std::vector<std::string> connectionIdsToRemove;
-  
+
   // Remove the input Connections
-  if (!connectable->inputs.empty())
+  for (auto [slot, conn] : connectable->inputs)
   {
-    for (auto [slot, conn] : connectable->inputs)
-    {
-      // Remove the Connection connecting [Parent] -> [Us]
-      connectionIdsToRemove.push_back(conn->id);
-    }
+    connectionIdsToRemove.push_back(conn->id);
   }
-  
+
   // Remove the output Connections
-  if (!connectable->outputs.empty())
+  for (auto [slot, connections] : connectable->outputs)
   {
-    for (auto [slot, conn] : connectable->outputs)
+    for (auto &conn : connections)
     {
       connectionIdsToRemove.push_back(conn->id);
     }
   }
-  
+
   for (auto connId : connectionIdsToRemove)
   {
     breakConnectionForConnectionId(connId);
   }
-  
+
   for (auto connId : connectionIdsToRemove)
   {
     connectionMap.erase(connId);
   }
-  
+
   ConfigService::getService()->saveDefaultConfigFile();
 }
 
 void ShaderChainerService::insert(std::shared_ptr<Connectable> start, std::shared_ptr<Connectable> connectable, OutputSlot slot) {
-  // Check if the current Connectable has an output at the specified slot
   if (!start->hasOutputAtSlot(slot))
   {
       throw std::invalid_argument("No existing connection at the specified slot to insert into.");
   }
-
-  // Get the original connection at the specified slot
-  auto originalConnection = start->outputs.at(slot);
-  auto originalEnd = originalConnection->end;
-
-  // Remove the original connection from the current Connectable's outputs
+ 
+  auto originalConnections = start->outputs.at(slot); // Corrected to handle multiple connections
   start->outputs.erase(slot);
-  connectionMap.erase(originalConnection->id);
-
-  // Create a new connection from the current Connectable to the new Connectable
-  auto newConnection = makeConnection(start, connectable, start->connectableType() == ConnectableTypeShader ? ConnectionTypeShader : ConnectionTypeSource, OutputSlotMain, InputSlotMain);
-  
-  start->outputs[slot] = newConnection;
-  connectable->inputs[InputSlotMain] = newConnection;
-  
-  // Create a new connection from the new Connectable to the original end Connectable
-  auto continuationConnection = std::make_shared<Connection>(connectable, originalEnd, originalConnection->type, OutputSlotMain, originalConnection->inputSlot);
-  connectable->outputs[OutputSlotMain] = continuationConnection;
-  originalEnd->inputs[originalConnection->inputSlot] = continuationConnection;
+  for (auto &originalConnection : originalConnections) {
+    connectionMap.erase(originalConnection->id);
+  }
+ 
+  for (auto &originalConnection : originalConnections) {
+    auto newConnection = makeConnection(start, connectable, originalConnection->type, slot, InputSlotMain);
+    connectable->inputs[InputSlotMain] = newConnection;
+ 
+    auto continuationConnection = std::make_shared<Connection>(connectable, originalConnection->end, originalConnection->type, OutputSlotMain, originalConnection->inputSlot);
+    connectable->outputs[OutputSlotMain].push_back(continuationConnection); // Add to vector
+    originalConnection->end->inputs[originalConnection->inputSlot] = continuationConnection;
+  }
 }
 
 void ShaderChainerService::copyConnections(std::shared_ptr<Connectable> source, std::shared_ptr<Connectable> dest) {
+  // Copy input connections
   for (auto [slot, conn] : source->inputs) {
     makeConnection(conn->start, dest, conn->type, conn->outputSlot, conn->inputSlot, false, true);
   }
   
-  for (auto [slot, conn] : source->outputs) {
-    makeConnection(dest, conn->end, conn->type, conn->outputSlot, conn->inputSlot, false, true);
+  // Copy output connections
+  for (auto [slot, connections] : source->outputs) {
+    for (auto &conn : connections) { // Iterate over all connections
+      makeConnection(dest, conn->end, conn->type, conn->outputSlot, conn->inputSlot, false, true);
+    }
   }
 }
 
@@ -591,7 +592,7 @@ Strand ShaderChainerService::strandForConnectable(std::shared_ptr<Connectable> c
     strand.connectables.push_back(current);
     
     // Explore all inputs and outputs of the current connectable
-    for (const auto [key, conn] : current->inputs) {
+    for (const auto &[key, conn] : current->inputs) {
       if (visitedConnectionIds.find(conn->id) == visitedConnectionIds.end()) {
         strand.connections.push_back(conn);
         visitedConnectionIds.insert(conn->id);
@@ -599,11 +600,13 @@ Strand ShaderChainerService::strandForConnectable(std::shared_ptr<Connectable> c
       }
     }
     
-    for (const auto [key, conn] : current->outputs) {
-      if (visitedConnectionIds.find(conn->id) == visitedConnectionIds.end()) {
-        strand.connections.push_back(conn);
-        visitedConnectionIds.insert(conn->id);
-        explore(conn->end);
+    for (const auto &[key, connections] : current->outputs) {
+      for (const auto &conn : connections) {
+        if (visitedConnectionIds.find(conn->id) == visitedConnectionIds.end()) {
+          strand.connections.push_back(conn);
+          visitedConnectionIds.insert(conn->id);
+          explore(conn->end);
+        }
       }
     }
   };
@@ -679,7 +682,7 @@ std::shared_ptr<Connection> ShaderChainerService::makeConnection(std::shared_ptr
   }
   
   auto connection = std::make_shared<Connection>(start, end, type, outputSlot, inputSlot);
-  start->outputs[outputSlot] = connection;
+  start->outputs[outputSlot].push_back(connection); // Add to vector
   end->inputs[inputSlot] = connection;
   connectionMap[connection->id] = connection;
   

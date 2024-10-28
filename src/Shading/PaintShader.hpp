@@ -87,4 +87,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* PaintShader_hpp */
+#endif

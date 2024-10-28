@@ -88,4 +88,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* ColorKeyMaskMakerShader_hpp */
+#endif

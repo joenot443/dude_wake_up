@@ -18,15 +18,23 @@
 #include <stdio.h>
 
 struct BreatheSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
+  std::shared_ptr<Parameter> pulseIntensity; // New parameter
+  std::shared_ptr<Parameter> warpSpeed;      // New parameter
+  std::shared_ptr<Parameter> colorShift;     // New parameter
+  std::shared_ptr<WaveformOscillator> pulseIntensityOscillator; // New oscillator
+  std::shared_ptr<WaveformOscillator> warpSpeedOscillator;      // New oscillator
+  std::shared_ptr<WaveformOscillator> colorShiftOscillator;     // New oscillator
 
   BreatheSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
+  pulseIntensity(std::make_shared<Parameter>("Zoom", 1.0, 0.1, 2.0)), // Initialize new parameter
+  warpSpeed(std::make_shared<Parameter>("Warp Speed", 1.0, 0.1, 10.0)),           // Initialize new parameter
+  colorShift(std::make_shared<Parameter>("Color Shift", 0.0, -1.0, 1.0)),        // Initialize new parameter
+  pulseIntensityOscillator(std::make_shared<WaveformOscillator>(pulseIntensity)), // Initialize new oscillator
+  warpSpeedOscillator(std::make_shared<WaveformOscillator>(warpSpeed)),           // Initialize new oscillator
+  colorShiftOscillator(std::make_shared<WaveformOscillator>(colorShift)),         // Initialize new oscillator
   ShaderSettings(shaderId, j, "Breathe") {
-    parameters = { shaderValue };
-    oscillators = { shaderValueOscillator };
+    parameters = { pulseIntensity, warpSpeed, colorShift }; // Add new parameters
+    oscillators = { pulseIntensityOscillator, warpSpeedOscillator, colorShiftOscillator }; // Add new oscillators
     load(j);
     registerParameters();
   };
@@ -45,7 +53,9 @@ struct BreatheShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
+    shader.setUniform1f("pulseIntensity", settings->pulseIntensity->value); // Set uniform for pulseIntensity
+    shader.setUniform1f("warpSpeed", settings->warpSpeed->value);           // Set uniform for warpSpeed
+    shader.setUniform1f("colorShift", settings->colorShift->value);         // Set uniform for colorShift
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
@@ -68,8 +78,10 @@ struct BreatheShader: Shader {
   void drawSettings() override {
     CommonViews::H3Title("Breathe");
 
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
+    CommonViews::ShaderParameter(settings->pulseIntensity, settings->pulseIntensityOscillator); // Add pulseIntensity to drawSettings
+    CommonViews::ShaderParameter(settings->warpSpeed, settings->warpSpeedOscillator);           // Add warpSpeed to drawSettings
+    CommonViews::ShaderParameter(settings->colorShift, settings->colorShiftOscillator);         // Add colorShift to drawSettings
   }
 };
 
-#endif /* BreatheShader_hpp */
+#endif

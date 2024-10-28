@@ -71,4 +71,4 @@ struct AutotangentShader: Shader {
   }
 };
 
-#endif /* AutotangentShader_hpp */
+#endif

@@ -91,4 +91,4 @@ public:
   }
 };
 
-#endif /* CurlySquaresShader_hpp */
+#endif

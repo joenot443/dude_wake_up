@@ -79,4 +79,4 @@ struct PixelPlayShader: Shader {
   }
 };
 
-#endif /* PixelPlayShader_hpp */
+#endif

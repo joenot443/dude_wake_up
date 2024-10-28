@@ -32,12 +32,8 @@ public:
   AudioMountainsShader(AudioMountainsSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    #ifdef DEBUG
 shader.load("shaders/AudioMountains");
-#endif
-#ifdef RELEASE
 shader.load("shaders/AudioMountains");
-#endif
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -66,4 +62,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* AudioMountainsShader_hpp */
+#endif

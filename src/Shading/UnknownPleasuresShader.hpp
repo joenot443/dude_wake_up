@@ -72,4 +72,4 @@ struct UnknownPleasuresShader: Shader {
   }
 };
 
-#endif /* UnknownPleasuresShader_hpp */
+#endif

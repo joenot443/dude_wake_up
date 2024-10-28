@@ -46,12 +46,8 @@ public:
   : settings(settings), Shader(settings){};
 
   void setup() override {
-#ifdef DEBUG
     shader.load("shaders/Tissue");
-#endif
-#ifdef RELEASE
     shader.load("shaders/Tissue");
-#endif
   }
   
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -86,4 +82,4 @@ ShaderType type() override { return ShaderTypeTissue; }
   }
 };
 
-#endif /* TissueShader_hpp */
+#endif

@@ -59,12 +59,8 @@ public:
   };
 
   void setup() override {
-    #ifdef DEBUG
 shader.load("shaders/Fractal");
-#endif
-#ifdef RELEASE
 shader.load("shaders/Fractal");
-#endif
   };
   
   int inputCount() override {
@@ -77,4 +73,4 @@ shader.load("shaders/Fractal");
   };
 };
 
-#endif /* FractalShader_h */
+#endif

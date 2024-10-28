@@ -39,12 +39,8 @@ public:
       : settings(settings), Shader(settings){};
 
   void setup() override {
-#ifdef DEBUG
 shader.load("shaders/Dither");
-#endif
-#ifdef RELEASE
 shader.load("shaders/Dither");
-#endif
     
   }
 
@@ -73,4 +69,4 @@ ShaderType type() override { return ShaderTypeDither; }
   }
 };
 
-#endif /* DitherShader_hpp */
+#endif

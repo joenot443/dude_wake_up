@@ -81,4 +81,4 @@ struct IsoFractShader: Shader {
   }
 };
 
-#endif /* IsoFractShader_hpp */
+#endif

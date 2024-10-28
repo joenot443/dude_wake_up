@@ -36,12 +36,8 @@ public:
   FishEyeShader(FishEyeSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-#ifdef DEBUG
     shader.load("shaders/FishEye");
-#endif
-#ifdef RELEASE
     shader.load("shaders/FishEye");
-#endif
   }
   
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -73,4 +69,4 @@ public:
   }
 };
 
-#endif /* FishEyeShader_hpp */
+#endif

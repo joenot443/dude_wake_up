@@ -94,4 +94,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* StaticFrameShader_hpp */
+#endif

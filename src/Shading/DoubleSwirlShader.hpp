@@ -75,4 +75,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* DoubleSwirlShader_hpp */
+#endif

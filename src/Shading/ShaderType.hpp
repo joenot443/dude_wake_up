@@ -425,7 +425,7 @@ static std::string shaderTypeName(ShaderType type) {
     case ShaderTypeFrequencyVisualizer:
       return "Visualizer";
     case ShaderTypeColorKeyMaskMaker:
-      return "MaskMaker";
+      return "ColorMask";
     case ShaderTypeCurlySquares:
       return "Curly";
     case ShaderTypePlasmaTwo:
@@ -548,5 +548,5 @@ static bool shaderTypeSupportsFeedback(ShaderType type) {
   return false;
 }
 
-#endif /* ShaderType_h */
 // clang-format on
+#endif

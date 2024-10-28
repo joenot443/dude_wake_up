@@ -145,4 +145,4 @@ public:
   void populateLastFrame();
 };
 
-#endif /* Shader_h */
+#endif

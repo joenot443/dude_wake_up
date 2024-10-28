@@ -26,7 +26,11 @@ struct ValueOscillator: public Oscillator {
   
   std::vector<float> values;
   ValueOscillator(std::shared_ptr<Parameter> observed);
-  void tick();
+  void tick() override;
+  
+  OscillatorType type() override {
+    return OscillatorType_value;
+  }
 };
 
 

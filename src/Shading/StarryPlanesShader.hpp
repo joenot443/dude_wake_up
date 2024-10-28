@@ -89,4 +89,4 @@ struct StarryPlanesShader: Shader {
   }
 };
 
-#endif /* StarryPlanesShader_hpp */
+#endif

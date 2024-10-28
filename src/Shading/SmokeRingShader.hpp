@@ -82,4 +82,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* SmokeRingShader_hpp */
+#endif

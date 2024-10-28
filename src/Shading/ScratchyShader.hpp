@@ -78,4 +78,4 @@ struct ScratchyShader: Shader {
   }
 };
 
-#endif /* ScratchyShader_hpp */
+#endif

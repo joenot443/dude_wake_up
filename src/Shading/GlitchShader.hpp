@@ -38,12 +38,8 @@ public:
   GlitchShader(GlitchSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    #ifdef DEBUG
 shader.load("shaders/Glitch");
-#endif
-#ifdef RELEASE
 shader.load("shaders/Glitch");
-#endif
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -77,4 +73,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* GlitchShader_hpp */
+#endif

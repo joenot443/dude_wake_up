@@ -56,6 +56,8 @@ public:
   
   int resolutionSetting = 3;
   
+  int utilityPanelTab = 0;
+  
   ImVec2 resolution = ImVec2(1280.0, 720.0);
   observable::subject<void()> resolutionUpdateSubject;
 

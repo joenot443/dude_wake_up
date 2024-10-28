@@ -128,8 +128,8 @@ void CommonViews::AudioParameterSelector(std::shared_ptr<Parameter> param)
     {
       param->driver = NULL;
     }
-    ImGui::SliderFloat(formatString("Shift##%s", param->paramId.c_str()).c_str(), &param->shift->value, param->shift->min, param->shift->max);
-    ImGui::SliderFloat(formatString("Scale##%s", param->paramId.c_str()).c_str(), &param->scale->value, param->scale->min, param->scale->max);
+    ImGui::SliderFloat(formatString("Shift##%s", param->paramId.c_str()).c_str(), &param->shift->value, param->shift->min, param->shift->max, "%.3f", ImGuiSliderFlags_Logarithmic);
+    ImGui::SliderFloat(formatString("Scale##%s", param->paramId.c_str()).c_str(), &param->scale->value, param->scale->min, param->scale->max, "%.3f", ImGuiSliderFlags_Logarithmic);
     return;
   }
   
@@ -537,7 +537,7 @@ bool CommonViews::TextureFieldAndBrowser(std::shared_ptr<Parameter> param) {
   if (openMap[param->paramId]) {
     ImGui::SameLine();
     ImGui::SetNextWindowPos(ImGui::GetCursorScreenPos());
-    if (ImGui::Begin(idString(param->name).c_str()), ImGuiWindowFlags_NoDecoration) {
+    if (ImGui::Begin(idString(param->name).c_str(), 0, ImGuiWindowFlags_NoDecoration)) {
       ret = ParameterTileBrowserView::draw(items, param, false);
     }
     ImGui::End();
@@ -578,8 +578,8 @@ bool CommonViews::IconFieldAndBrowser(std::shared_ptr<Parameter> param) {
   if (openMap[param->paramId]) {
     ImGui::SameLine();
     ImGui::SetNextWindowPos(ImGui::GetCursorScreenPos());
-    auto title = formatString("##%s", param->name.c_str()).c_str();
-    if (ImGui::Begin(title), ImGuiWindowFlags_NoTitleBar) {
+    auto title = formatString("##%s", param->name.c_str());
+    if (ImGui::Begin(title.c_str()), ImGuiWindowFlags_NoTitleBar) {
       ret = ParameterTileBrowserView::draw(items, param, false);
     }
     ImGui::End();
@@ -817,6 +817,7 @@ void CommonViews::OscillateButton(std::string id, std::shared_ptr<Oscillator> o,
     
     o->enabled->boolValue = !o->enabled->boolValue;
     OscillationService::getService()->selectOscillator(o, p);
+    LayoutStateService::getService()->utilityPanelTab = 1;
   }
   ImGui::PopStyleVar();
   ImGui::PopFont();

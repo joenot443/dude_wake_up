@@ -64,4 +64,4 @@ struct GyroidsShader: Shader {
   }
 };
 
-#endif /* GyroidsShader_hpp */
+#endif

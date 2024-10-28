@@ -70,4 +70,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* AlphaMixShader_hpp */
+#endif

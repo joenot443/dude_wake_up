@@ -45,12 +45,8 @@ public:
   MixShader(MixSettings *settings) : settings(settings), Shader(settings) {};
   
   void setup() override {
-    #ifdef DEBUG
 shader.load("shaders/Mix");
-#endif
-#ifdef RELEASE
 shader.load("shaders/Mix");
-#endif
   }
   
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -95,4 +91,4 @@ shader.load("shaders/Mix");
   
 };
 
-#endif /* MixShader_h */
+#endif

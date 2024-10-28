@@ -59,12 +59,8 @@ public:
   : settings(settings), Shader(settings){};
   
   void setup() override {
-#ifdef DEBUG
     shader.load("shaders/mirror");
-#endif
-#ifdef RELEASE
     shader.load("shaders/mirror");
-#endif
     
   }
   
@@ -132,4 +128,4 @@ public:
   }
 };
 
-#endif /* EmptyShader_hpp */
+#endif

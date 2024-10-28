@@ -101,4 +101,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* GameboyShader_hpp */
+#endif

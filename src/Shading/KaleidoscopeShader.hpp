@@ -50,12 +50,8 @@ public:
   KaleidoscopeShader(KaleidoscopeSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    #ifdef DEBUG
 shader.load("shaders/kaleidoscope");
-#endif
-#ifdef RELEASE
 shader.load("shaders/kaleidoscope");
-#endif
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -89,4 +85,4 @@ ShaderType type() override {
 };
 
 
-#endif /* KaleidoscopeShader_h */
+#endif

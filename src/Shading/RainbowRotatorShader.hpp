@@ -40,12 +40,8 @@ public:
   RainbowRotatorShader(RainbowRotatorSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    #ifdef DEBUG
 shader.load("shaders/RainbowRotator");
-#endif
-#ifdef RELEASE
 shader.load("shaders/RainbowRotator");
-#endif
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -78,4 +74,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* RainbowRotatorShader_hpp */
+#endif

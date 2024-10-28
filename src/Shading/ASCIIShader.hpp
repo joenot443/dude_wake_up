@@ -44,12 +44,8 @@ public:
   AsciiShader(AsciiSettings *settings) : settings(settings), Shader(settings) {};
   
   void setup() override {
-#ifdef DEBUG
     shader.load("shaders/Ascii");
-#endif
-#ifdef RELEASE
     shader.load("shaders/Ascii");
-#endif
   }
   
   int inputCount() override {
@@ -81,4 +77,4 @@ public:
   }
 };
 
-#endif /* AsciiShader_hpp */
+#endif

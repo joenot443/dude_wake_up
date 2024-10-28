@@ -67,7 +67,7 @@ public:
   
   FeedbackSettings(std::string shaderId, json j, std::string name) : index(index),
   priority(std::make_shared<Parameter>("Main Takes Priority", ParameterType_Bool)),
-  blendMode(std::make_shared<Parameter>("Blend Mode", 0.0, 0.0, 15.0, ParameterType_Int)),
+  blendMode(std::make_shared<Parameter>("Blend Mode", 4.0, 0.0, 15.0, ParameterType_Int)),
   mainAlpha(std::make_shared<Parameter>("Main Alpha", 1.0, 0.0, 1.0)),
   mainAlphaOscillator(std::make_shared<WaveformOscillator>(mainAlpha)),
   feedbackAlpha(std::make_shared<Parameter>("Feedback Alpha", 1.0, 0.0, 1.0)),
@@ -153,4 +153,4 @@ struct FeedbackShader : Shader
   ShaderType type() override;
 };
 
-#endif /* FeedbackShader_hpp */
+#endif

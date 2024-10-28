@@ -77,4 +77,4 @@ struct TraceAudioShader: Shader {
   }
 };
 
-#endif /* TraceAudioShader_hpp */
+#endif

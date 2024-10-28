@@ -74,4 +74,4 @@ public:
   }
 };
 
-#endif /* WarpShader_hpp */
+#endif

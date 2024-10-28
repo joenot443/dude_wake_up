@@ -51,4 +51,4 @@ public:
   }
 };
 
-#endif /* EmptyShader_hpp */
+#endif

@@ -71,4 +71,4 @@ struct SwirlShader: Shader {
   }
 };
 
-#endif /* SwirlShader_hpp */
+#endif

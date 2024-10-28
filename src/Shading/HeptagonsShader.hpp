@@ -72,4 +72,4 @@ struct HeptagonsShader: Shader {
   }
 };
 
-#endif /* HeptagonsShader_hpp */
+#endif

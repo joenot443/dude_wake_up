@@ -71,4 +71,4 @@ struct BackgroundShader: Shader {
   }
 };
 
-#endif /* BackgroundShader_hpp */
+#endif

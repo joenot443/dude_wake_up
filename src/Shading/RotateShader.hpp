@@ -95,10 +95,10 @@ struct RotateShader: Shader {
   void drawSettings() override {
     CommonViews::H3Title("Rotate");
 
-    CommonViews::ShaderParameter(settings->scale, settings->rotateOscillator);
+    CommonViews::ShaderParameter(settings->scale, settings->scaleOscillator);
     CommonViews::ShaderParameter(settings->rotate, settings->rotateOscillator);
     CommonViews::ShaderParameter(settings->autoRotate, settings->autoRotateOscillator);
   }
 };
 
-#endif /* RotateShader_hpp */
+#endif

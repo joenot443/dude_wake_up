@@ -66,4 +66,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* DancingSquaresShader_hpp */
+#endif

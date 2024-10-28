@@ -31,12 +31,8 @@ public:
   DiscoShader(DiscoSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    #ifdef DEBUG
 shader.load("shaders/Disco");
-#endif
-#ifdef RELEASE
 shader.load("shaders/Disco");
-#endif
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -67,4 +63,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* DiscoShader_hpp */
+#endif

@@ -91,4 +91,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* FrequencyVisualizerShader_hpp */
+#endif

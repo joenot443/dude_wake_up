@@ -70,4 +70,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* LimboShader_hpp */
+#endif

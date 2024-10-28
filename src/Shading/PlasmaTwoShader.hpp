@@ -81,4 +81,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* PlasmaTwoShader_hpp */
+#endif

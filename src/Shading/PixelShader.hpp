@@ -45,12 +45,8 @@ public:
 
   
   void setup() override {
-#ifdef DEBUG
     shader.load("shaders/Pixel");
-#endif
-#ifdef RELEASE
     shader.load("shaders/Pixel");
-#endif
     
   }
   
@@ -77,4 +73,4 @@ public:
   }
 };
 
-#endif /* PixelShader_hpp */
+#endif

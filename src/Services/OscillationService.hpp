@@ -18,7 +18,6 @@
 
 class OscillationService: public ConfigurableService {
 private:
-  std::map<std::string, std::shared_ptr<Oscillator>> oscillators;
   // map of form:
   /*
    "HSB_hue": {
@@ -44,6 +43,8 @@ public:
     return service;
     
   }
+  std::map<std::string, std::shared_ptr<Oscillator>> oscillators;
+
   void selectOscillator(std::shared_ptr<Oscillator>, std::shared_ptr<Parameter>);
   void addOscillator(std::shared_ptr<Oscillator> o);
   void loadOscillatorSettings(std::shared_ptr<Oscillator> o);
@@ -54,6 +55,8 @@ public:
   
   json config() override;
   void loadConfig(json j) override;
+
+  void removeOscillatorsFor(std::vector<std::shared_ptr<Parameter>> parameters);
 };
 
 #endif /* OscillationService_hpp */

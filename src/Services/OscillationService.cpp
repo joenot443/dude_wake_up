@@ -21,7 +21,9 @@ void OscillationService::addOscillator(std::shared_ptr<Oscillator> obj) {
 
 void OscillationService::tickOscillators() {
   for (auto & [key, osc] : oscillators) {
-    osc->tick();
+    if (osc->enabled->boolValue) {
+      osc->tick();
+    }
   }
 }
 
@@ -71,8 +73,15 @@ std::shared_ptr<Oscillator> OscillationService::oscillatorForParameter(std::shar
 json OscillationService::config() {
   json j = json::object();
   
-  for (auto & osc : oscillators) {
-    j[osc.second->name] = osc.second->parameterValueMap();
+  for (auto & [id, osc] : oscillators) {
+    if (osc->enabled->boolValue && osc->type() == OscillatorType_waveform) {
+      std::shared_ptr<WaveformOscillator> wOsc = std::dynamic_pointer_cast<WaveformOscillator>(osc);
+      json oscJ = json::object();
+      oscJ["freq"] = wOsc->frequency->value;
+      oscJ["shift"] = wOsc->shift->value;
+      oscJ["amp"] = wOsc->amplitude->value;
+      j[wOsc->value->paramId] = oscJ;
+    }
   }
   
   return j;
@@ -83,10 +92,26 @@ void OscillationService::loadConfig(json data) {
     std::map<std::string, std::map<std::string, float>> itemsMap = data;
     
     
-    for (auto const& osc: itemsMap) {
-      for (auto const& param: osc.second) {
-        oscillatorSettings[osc.first][param.first] = param.second;
-      }
+    for (auto & [id, osc] : oscillators) {
+      if (itemsMap.count(id) == 0) { continue; }
+      
+      std::map<std::string, float> oscMap = itemsMap[id];
+      
+      std::shared_ptr<WaveformOscillator> wOsc = std::dynamic_pointer_cast<WaveformOscillator>(osc);
+      wOsc->frequency->value = oscMap["freq"];
+      wOsc->shift->value = oscMap["shift"];
+      wOsc->amplitude->value = oscMap["amp"];
+      wOsc->enabled->setBoolValue(true);
+    }
+  }
+}
+
+void OscillationService::removeOscillatorsFor(std::vector<std::shared_ptr<Parameter>> parameters) {
+  for (const auto& param : parameters) {
+    auto it = oscillators.find(param->paramId);
+    if (it != oscillators.end()) {
+      it->second->enabled->boolValue = false; // Disable the oscillator
+      oscillators.erase(it); // Remove the oscillator from the map
     }
   }
 }

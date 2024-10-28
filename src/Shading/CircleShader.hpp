@@ -28,12 +28,8 @@ struct CircleShader: public Shader {
   CircleShader(CircleSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-#ifdef DEBUG
 shader.load("shaders/Circle");
-#endif
-#ifdef RELEASE
 shader.load("shaders/Circle");
-#endif
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -64,4 +60,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* CircleShader_hpp */
+#endif

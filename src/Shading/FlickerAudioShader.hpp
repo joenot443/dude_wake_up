@@ -75,4 +75,4 @@ struct FlickerAudioShader: Shader {
   }
 };
 
-#endif /* FlickerAudioShader_hpp */
+#endif

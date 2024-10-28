@@ -72,4 +72,4 @@ struct AerogelShader: Shader {
   }
 };
 
-#endif /* AerogelShader_hpp */
+#endif

@@ -30,6 +30,12 @@ private:
   std::vector<std::shared_ptr<TileItem>> webcamItems;
   std::vector<std::shared_ptr<TileItem>> shaderItems;
   std::vector<std::shared_ptr<LibraryTileItem>> libraryItems;
+
+  // New member variables for search functionality
+  std::string searchQuery;
+  bool searchDirty = false;
+  std::vector<std::shared_ptr<TileItem>> searchTileItems = {};
+  TileBrowserView searchResultsTileBrowserView = TileBrowserView({});
 };
 
 #endif /* VideoSourceBrowserView_hpp */

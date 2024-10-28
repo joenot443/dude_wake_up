@@ -18,6 +18,7 @@
 #include "WelcomeScreenView.hpp"
 #include "StrandBrowserView.hpp"
 #include "StageModeView.hpp"
+#include "OscillatorPanelView.hpp"
 #include "ofMain.h"
 #include <stdio.h>
 
@@ -32,6 +33,7 @@ private:
   AudioSourceBrowserView audioSourceBrowserView = AudioSourceBrowserView();
   StrandBrowserView strandBrowserView = StrandBrowserView({});
   OscillatorView oscillatorView = OscillatorView();
+  OscillatorPanelView oscillatorPanelView = OscillatorPanelView();
   SubmitFeedbackView submitFeedbackView = SubmitFeedbackView();
   StageModeView stageModeView = StageModeView();
   WelcomeScreenView welcomeScreenView = WelcomeScreenView();

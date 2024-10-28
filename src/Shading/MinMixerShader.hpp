@@ -78,4 +78,4 @@ ShaderType type() override {
   }
 };
 
-#endif /* MinMixerShader_hpp */
+#endif

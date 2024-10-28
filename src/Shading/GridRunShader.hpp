@@ -82,4 +82,4 @@ struct GridRunShader: Shader {
   }
 };
 
-#endif /* GridRunShader_hpp */
+#endif

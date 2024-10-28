@@ -47,6 +47,7 @@
 		026ED08C2C52AC5F00810E44 /* ofxVideoRecorder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 026ED08A2C52AC5F00810E44 /* ofxVideoRecorder.cpp */; };
 		026ED08F2C52C63800810E44 /* VideoRecordingView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 026ED08D2C52C63800810E44 /* VideoRecordingView.cpp */; };
 		027637D92CBFFFE60072073F /* OptionalShadersHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 027637D72CBFFFE60072073F /* OptionalShadersHelper.cpp */; };
+		027637DC2CC8065C0072073F /* OscillatorPanelView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 027637DA2CC8065C0072073F /* OscillatorPanelView.cpp */; };
 		028BAE9A29684984003E7DF8 /* NodeLayoutView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028BAE9929684984003E7DF8 /* NodeLayoutView.cpp */; };
 		028E8E59299E72FE00B95C92 /* MaterialIcons-Regular.ttf in Copy Files */ = {isa = PBXBuildFile; fileRef = 028E8E58299E72FE00B95C92 /* MaterialIcons-Regular.ttf */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		028E8E5D29A697FD00B95C92 /* MarkdownView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028E8E5B29A697FD00B95C92 /* MarkdownView.cpp */; };
@@ -417,6 +418,8 @@
 		026ED0912C5929AB00810E44 /* libcpr.1.10.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcpr.1.10.5.dylib; path = ../../../../../../opt/local/lib/libcpr.1.10.5.dylib; sourceTree = "<group>"; };
 		027637D72CBFFFE60072073F /* OptionalShadersHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptionalShadersHelper.cpp; path = Shading/OptionalShadersHelper.cpp; sourceTree = "<group>"; };
 		027637D82CBFFFE60072073F /* OptionalShadersHelper.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = OptionalShadersHelper.hpp; path = Shading/OptionalShadersHelper.hpp; sourceTree = "<group>"; };
+		027637DA2CC8065C0072073F /* OscillatorPanelView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = OscillatorPanelView.cpp; path = Views/OscillatorPanelView.cpp; sourceTree = "<group>"; };
+		027637DB2CC8065C0072073F /* OscillatorPanelView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = OscillatorPanelView.hpp; path = Views/OscillatorPanelView.hpp; sourceTree = "<group>"; };
 		027C3DA5292D4B53005EE417 /* FractalShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = FractalShader.hpp; path = Shading/FractalShader.hpp; sourceTree = "<group>"; };
 		027C3DA7292D5A60005EE417 /* FujiShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = FujiShader.hpp; path = Shading/FujiShader.hpp; sourceTree = "<group>"; };
 		027FBC602BBEED3000057207 /* ColorSwapShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ColorSwapShader.hpp; path = Shading/ColorSwapShader.hpp; sourceTree = "<group>"; };
@@ -1637,6 +1640,8 @@
 				02BD34D02BFFD384007ED87E /* ShaderInfoView.hpp */,
 				026ED08D2C52C63800810E44 /* VideoRecordingView.cpp */,
 				026ED08E2C52C63800810E44 /* VideoRecordingView.hpp */,
+				027637DA2CC8065C0072073F /* OscillatorPanelView.cpp */,
+				027637DB2CC8065C0072073F /* OscillatorPanelView.hpp */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -2363,6 +2368,7 @@
 				02BE890629DCA12600C65C58 /* ShaderConfigSelectionView.cpp in Sources */,
 				028FA5C3295B117E00FE6FE3 /* BarPlotView.cpp in Sources */,
 				02BE890B29DEFBD700C65C58 /* ListBrowserView.cpp in Sources */,
+				027637DC2CC8065C0072073F /* OscillatorPanelView.cpp in Sources */,
 				6764CEA4D206EE90B9BEE3D4 /* MainApp.cpp in Sources */,
 				02B22C2F293812800095AC89 /* OutputWindow.cpp in Sources */,
 				02BD34CE2BFD3D8F007ED87E /* MultiSource.cpp in Sources */,
@@ -2878,6 +2884,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEBUG = 1;
 				DEVELOPMENT_TEAM = 7VUCELU5PL;
 				EXCLUDED_ARCHS = "";
 				FRAMEWORK_SEARCH_PATHS = (
@@ -2950,7 +2957,6 @@
 					/opt/local/lib,
 					"$(PROJECT_DIR)",
 				);
-				LINK_PLATFORM_MACOSX = 1;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
 				OTHER_CPLUSPLUSFLAGS = (
@@ -3103,6 +3109,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
+				DEBUG = 1;
 				DEVELOPMENT_TEAM = 7VUCELU5PL;
 				EXCLUDED_ARCHS = "";
 				FRAMEWORK_SEARCH_PATHS = (
@@ -3172,7 +3179,6 @@
 					/opt/local/lib,
 					"$(PROJECT_DIR)",
 				);
-				LINK_PLATFORM_MACOSX = 1;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
 				OTHER_CPLUSPLUSFLAGS = (
@@ -3206,6 +3212,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEBUG = 1;
 				DEVELOPMENT_TEAM = 7VUCELU5PL;
 				EXCLUDED_ARCHS = "";
 				FRAMEWORK_SEARCH_PATHS = (
@@ -3277,7 +3284,6 @@
 					/opt/local/lib,
 					"$(PROJECT_DIR)",
 				);
-				LINK_PLATFORM_MACOSX = 1;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
 				OTHER_CPLUSPLUSFLAGS = (

@@ -85,4 +85,4 @@ struct CannyShader: Shader {
   }
 };
 
-#endif /* CannyShader_hpp */
+#endif
