@@ -33,7 +33,7 @@ struct CommonViews
   
   static bool IconButton(const char *icon, std::string id);
   
-  static bool LargeIconButton(const char *icon, std::string id);
+  static bool LargeIconButton(const char *icon, std::string id, bool enabled = true);
   
   static bool XLargeIconButton(const char *icon, std::string id);
   

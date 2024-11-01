@@ -555,13 +555,13 @@ void ShaderChainerService::insert(std::shared_ptr<Connectable> start, std::share
 void ShaderChainerService::copyConnections(std::shared_ptr<Connectable> source, std::shared_ptr<Connectable> dest) {
   // Copy input connections
   for (auto [slot, conn] : source->inputs) {
-    makeConnection(conn->start, dest, conn->type, conn->outputSlot, conn->inputSlot, false, true);
+    makeConnection(conn->start, dest, conn->type, conn->outputSlot, conn->inputSlot, true);
   }
   
   // Copy output connections
   for (auto [slot, connections] : source->outputs) {
     for (auto &conn : connections) { // Iterate over all connections
-      makeConnection(dest, conn->end, conn->type, conn->outputSlot, conn->inputSlot, false, true);
+      makeConnection(dest, conn->end, conn->type, conn->outputSlot, conn->inputSlot, true);
     }
   }
 }
@@ -672,8 +672,7 @@ std::shared_ptr<Connection> ShaderChainerService::makeConnection(std::shared_ptr
                                                                  ConnectionType type,
                                                                  OutputSlot outputSlot,
                                                                  InputSlot inputSlot,
-                                                                 bool shouldSaveConfig,
-                                                                 bool copy)
+                                                                 bool shouldSaveConfig)
 {
   // Only allow a single input for each type
   if (end->hasInputAtSlot(inputSlot))

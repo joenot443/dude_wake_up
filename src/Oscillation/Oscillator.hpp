@@ -89,7 +89,7 @@ public:
   }
 
   Oscillator(std::shared_ptr<Parameter> v) : value(v),
-                                             name(v->name),
+                                             name(formatString("%s - %s", v->ownerName.c_str(), v->name.c_str())),
                                              settingsId(value->paramId),
                                              enabled(std::make_shared<Parameter>("enabled", 0.0, 0.0, 1.0, ParameterType_Hidden))
   {

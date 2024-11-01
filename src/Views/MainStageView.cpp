@@ -7,6 +7,7 @@
 
 #include <sentry.h>
 #include "ShaderInfoView.hpp"
+#include "ActionService.hpp"
 #include "CommonStrings.hpp"
 #include "MainStageView.hpp"
 #include "ConfigService.hpp"
@@ -344,6 +345,14 @@ void MainStageView::keyReleased(int key)
     // Enable Shader Info pane
     if (key == 't') {
       LayoutStateService::getService()->shaderInfoEnabled = !LayoutStateService::getService()->shaderInfoEnabled;
+    }
+    
+    if (key == 'z') {
+      ActionService::getService()->undo();
+    }
+    
+    if (key == 'y') {
+      ActionService::getService()->redo();
     }
   }
 }

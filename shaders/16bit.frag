@@ -27,14 +27,14 @@ void main()
     vec2 uv = coor / size;
                 
      // Get source color
-    vec3 col = texture(tex, uv).xyz;
+    vec4 col = texture(tex, uv);
     
     // Dither
     col += ditherTable[int( coor.x ) % 4][int( coor.y ) % 4] * 0.015; // last number is dithering strength
 
     // Reduce colors
-    col = floor(col * COLOR_FACTOR) / COLOR_FACTOR ;
+    col.xyz = floor(col.xyz * COLOR_FACTOR) / COLOR_FACTOR ;
     
     // Output to screen
-    outputColor = vec4(col,1.);
+    outputColor = vec4(col);
 }

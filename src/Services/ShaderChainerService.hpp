@@ -91,8 +91,7 @@ public:
            ConnectionType type,
            OutputSlot outputSlot,
            InputSlot inputSlot,
-           bool shouldSaveConfig = false,
-           bool copy = false);
+           bool shouldSaveConfig = false);
 
   // Break the connection from a Shader to the Input of another
   void breakConnectionForConnectionId(std::string connectionId);

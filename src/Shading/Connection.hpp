@@ -376,6 +376,23 @@ public:
       }
     }
   }
+
+  // Method to gather all connections
+  std::vector<std::shared_ptr<Connection>> connections() {
+    std::vector<std::shared_ptr<Connection>> allConnections;
+
+    // Add all input connections
+    for (const auto& [slot, connection] : inputs) {
+      allConnections.push_back(connection);
+    }
+
+    // Add all output connections
+    for (const auto& [slot, connectionList] : outputs) {
+      allConnections.insert(allConnections.end(), connectionList.begin(), connectionList.end());
+    }
+
+    return allConnections;
+  }
 };
 
 #endif /* Connection_hpp */

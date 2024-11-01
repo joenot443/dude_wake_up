@@ -45,6 +45,10 @@ static std::string idString(std::string idStr) {
   return formatString("##%s", idStr.c_str());
 }
 
+static std::string idAppendedToString(std::string str, std::string idStr) {
+  return formatString("%s##%s", str.c_str(), idStr.c_str());
+}
+
 static std::vector<std::string> split_string (std::string s, std::string delimiter) {
     size_t pos_start = 0, pos_end, delim_len = delimiter.length();
     std::string token;

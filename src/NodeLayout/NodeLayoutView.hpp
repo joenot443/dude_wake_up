@@ -44,7 +44,7 @@ public:
   void drawHelp();
   void drawSaveDialog();
   
-  void openSettingsWindow(std::shared_ptr<Shader> shader);
+  void closeSettingsWindow(std::shared_ptr<Connectable> connectable);
   void keyReleased(int key);
   
   // Returns the Node for the associated shaderSourceId, if it exists.

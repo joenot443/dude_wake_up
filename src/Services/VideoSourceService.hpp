@@ -81,15 +81,14 @@ public:
   
   std::shared_ptr<VideoSource> videoSourceForId(std::string id);
 
-  std::shared_ptr<VideoSource> addImageVideoSource(std::string name, std::string path, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
-  std::shared_ptr<VideoSource> addIconVideoSource(std::string name, std::string path, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
-  std::shared_ptr<MultiSource> addMultiVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
-  std::shared_ptr<VideoSource> addWebcamVideoSource(std::string name, int deviceId, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
-  std::shared_ptr<VideoSource> addShaderVideoSource(ShaderSourceType type, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
-  std::shared_ptr<VideoSource> addFileVideoSource(std::string name, std::string path, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
-  std::shared_ptr<VideoSource> addTextVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
-  std::shared_ptr<VideoSource> addIconVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
-  std::shared_ptr<VideoSource> addLibraryVideoSource(std::shared_ptr<LibraryFile> libraryFile, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
+  std::shared_ptr<VideoSource> makeImageVideoSource(std::string name, std::string path, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
+  std::shared_ptr<MultiSource> makeMultiVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
+  std::shared_ptr<VideoSource> makeWebcamVideoSource(std::string name, int deviceId, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
+  std::shared_ptr<VideoSource> makeShaderVideoSource(ShaderSourceType type, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
+  std::shared_ptr<VideoSource> makeFileVideoSource(std::string name, std::string path, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
+  std::shared_ptr<VideoSource> makeTextVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
+  std::shared_ptr<VideoSource> makeIconVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
+  std::shared_ptr<VideoSource> makeLibraryVideoSource(std::shared_ptr<LibraryFile> libraryFile, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
   
   // Output Windows
 

@@ -18,23 +18,27 @@
 
 struct TissueSettings : public ShaderSettings {
 	public:
-  std::shared_ptr<Parameter> alpha;
-  std::shared_ptr<Parameter> beta;
-  std::shared_ptr<Parameter> gamma;
+  std::shared_ptr<Parameter> modulationSpeed;
+  std::shared_ptr<WaveformOscillator> modulationSpeedOscillator;
+  std::shared_ptr<Parameter> distortionAmount;
+  std::shared_ptr<WaveformOscillator> distortionAmountOscillator;
+  std::shared_ptr<Parameter> waveIntensity;
+  std::shared_ptr<WaveformOscillator> waveIntensityOscillator;
+  std::shared_ptr<Parameter> cycles;
   
-  std::shared_ptr<Oscillator> alphaOscillator;
-  std::shared_ptr<Oscillator> betaOscillator;
-  std::shared_ptr<Oscillator> gammaOscillator;
-  
-  TissueSettings(std::string shaderId, json j, std::string name)
-  : alpha(std::make_shared<Parameter>("alpha", 3, 0., 10.)),
-  beta(std::make_shared<Parameter>("beta", 7, 0., 10.)),
-  gamma(std::make_shared<Parameter>("gamma", 4, 0., 10.)),
-  alphaOscillator(std::make_shared<WaveformOscillator>(alpha)),
-  betaOscillator(std::make_shared<WaveformOscillator>(beta)),
-  gammaOscillator(std::make_shared<WaveformOscillator>(gamma)),
-  ShaderSettings(shaderId, j, name){
-    
+  TissueSettings(std::string shaderId, json j, std::string name) :
+  modulationSpeed(std::make_shared<Parameter>("Modulation Speed", 1.0, 0.0, 10.0)),
+  modulationSpeedOscillator(std::make_shared<WaveformOscillator>(modulationSpeed)),
+  distortionAmount(std::make_shared<Parameter>("Distortion Amount", 1.0, 0.8, 2.0)),
+  distortionAmountOscillator(std::make_shared<WaveformOscillator>(distortionAmount)),
+  waveIntensity(std::make_shared<Parameter>("Wave Intensity", 1.0, -3.14, 3.14)),
+  waveIntensityOscillator(std::make_shared<WaveformOscillator>(waveIntensity)),
+  cycles(std::make_shared<Parameter>("Cycles", 30, 1, 100)),
+  ShaderSettings(shaderId, j, "Tissue") {
+    parameters = { modulationSpeed, distortionAmount, waveIntensity, cycles };
+    oscillators = { modulationSpeedOscillator, distortionAmountOscillator, waveIntensityOscillator };
+    load(j);
+    registerParameters();
   };
 };
 
@@ -47,7 +51,6 @@ public:
 
   void setup() override {
     shader.load("shaders/Tissue");
-    shader.load("shaders/Tissue");
   }
   
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -57,9 +60,10 @@ public:
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     
-    shader.setUniform1f("alpha", settings->alpha->value);
-    shader.setUniform1f("beta", settings->beta->value);
-    shader.setUniform1f("gamma", settings->gamma->value);
+    shader.setUniform1f("modulationSpeed", settings->modulationSpeed->value);
+    shader.setUniform1f("distortionAmount", settings->distortionAmount->value);
+    shader.setUniform1f("waveIntensity", settings->waveIntensity->value);
+    shader.setUniform1i("cycles", settings->cycles->intValue);
     
     frame->draw(0, 0);
     shader.end();
@@ -76,9 +80,10 @@ ShaderType type() override { return ShaderTypeTissue; }
   void drawSettings() override {
     
     CommonViews::H3Title("Tissue");
-    CommonViews::ShaderParameter(settings->alpha, settings->alphaOscillator);
-    CommonViews::ShaderParameter(settings->beta, settings->betaOscillator);
-    CommonViews::ShaderParameter(settings->gamma, settings->gammaOscillator);
+    CommonViews::ShaderParameter(settings->modulationSpeed, settings->modulationSpeedOscillator);
+    CommonViews::ShaderParameter(settings->distortionAmount, settings->distortionAmountOscillator);
+    CommonViews::ShaderParameter(settings->waveIntensity, settings->waveIntensityOscillator);
+    CommonViews::ShaderIntParameter(settings->cycles);
   }
 };
 

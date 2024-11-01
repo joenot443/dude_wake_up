@@ -222,21 +222,17 @@ std::vector<std::string> VideoSourceService::getWebcamNames()
 }
 
 // Adds a webcam video source to the map
-std::shared_ptr<VideoSource> VideoSourceService::addWebcamVideoSource(std::string name, int deviceId, ImVec2 origin, std::string id, json j)
+std::shared_ptr<VideoSource> VideoSourceService::makeWebcamVideoSource(std::string name, int deviceId, ImVec2 origin, std::string id, json j)
 {
   std::shared_ptr<WebcamSource> videoSource = std::make_shared<WebcamSource>(id, name);
   videoSource->origin = origin;
   videoSource->settings->deviceId->intValue = deviceId;
-  //  if (j["settings"].is_object()) {
-  //    videoSource->settings->load(j["settings"]);
-  //  }
   
-  addVideoSource(videoSource, id, j);
   return videoSource;
 }
 
 // Adds a file video source to the map
-std::shared_ptr<VideoSource> VideoSourceService::addFileVideoSource(std::string name, std::string path, ImVec2 origin, std::string id, json j)
+std::shared_ptr<VideoSource> VideoSourceService::makeFileVideoSource(std::string name, std::string path, ImVec2 origin, std::string id, json j)
 {
   // Get the bookmark service instance
   BookmarkService* bookmarkService = BookmarkService::getService();
@@ -301,8 +297,6 @@ std::shared_ptr<VideoSource> VideoSourceService::addFileVideoSource(std::string 
   // At this point, we have successfully resolved the bookmark and accessed the resource
   videoSource = std::make_shared<FileSource>(id, name, path);
   videoSource->origin = origin;
-  // Add the video source to the map (assuming addVideoSource takes care of this)
-  addVideoSource(videoSource, id, j);
   
   // Stop accessing the security-scoped resource when done
   CFURLStopAccessingSecurityScopedResource(fileURL);
@@ -315,26 +309,24 @@ std::shared_ptr<VideoSource> VideoSourceService::addFileVideoSource(std::string 
 }
 
 // Adds an icon video source to the map
-std::shared_ptr<VideoSource> VideoSourceService::addIconVideoSource(std::string name, ImVec2 origin, std::string id, json j)
+std::shared_ptr<VideoSource> VideoSourceService::makeIconVideoSource(std::string name, ImVec2 origin, std::string id, json j)
 {
   std::shared_ptr<VideoSource> videoSource = std::make_shared<IconSource>(id, "Icon");
   videoSource->origin = origin;
-  addVideoSource(videoSource, id, j);
   return videoSource;
 }
 
 // Adds a multi video source to the map
-std::shared_ptr<MultiSource> VideoSourceService::addMultiVideoSource(std::string name, ImVec2 origin, std::string id, json j)
+std::shared_ptr<MultiSource> VideoSourceService::makeMultiVideoSource(std::string name, ImVec2 origin, std::string id, json j)
 {
   std::shared_ptr<MultiSource> videoSource = std::make_shared<MultiSource>(id, "Multi");
   videoSource->origin = origin;
-  addVideoSource(videoSource, id, j);
   return videoSource;
 }
 
 
 // Adds a Shader video source to the map
-std::shared_ptr<VideoSource> VideoSourceService::addShaderVideoSource(ShaderSourceType type, ImVec2 origin, std::string id, json j)
+std::shared_ptr<VideoSource> VideoSourceService::makeShaderVideoSource(ShaderSourceType type, ImVec2 origin, std::string id, json j)
 {
   std::shared_ptr<ShaderSource> shaderSource = std::make_shared<ShaderSource>(id, type);
   // Check if "shader" exists in the json, if so, load it into the shaderSource
@@ -346,38 +338,34 @@ std::shared_ptr<VideoSource> VideoSourceService::addShaderVideoSource(ShaderSour
   auto videoSource = std::dynamic_pointer_cast<VideoSource>(shaderSource);
   
   videoSource->origin = origin;
-  addVideoSource(videoSource, id, j);
   return videoSource;
 }
 
 // Adds an Image video source to the map
-std::shared_ptr<VideoSource> VideoSourceService::addImageVideoSource(std::string name, std::string path, ImVec2 origin, std::string id, json j)
+std::shared_ptr<VideoSource> VideoSourceService::makeImageVideoSource(std::string name, std::string path, ImVec2 origin, std::string id, json j)
 {
   std::shared_ptr<VideoSource> videoSource = std::make_shared<ImageSource>(id, name, path);
   videoSource->load(j);
   videoSource->origin = origin;
-  addVideoSource(videoSource, id, j);
   return videoSource;
 }
 
 // Adds a Text video source to the map
-std::shared_ptr<VideoSource> VideoSourceService::addTextVideoSource(std::string name, ImVec2 origin, std::string id, json j)
+std::shared_ptr<VideoSource> VideoSourceService::makeTextVideoSource(std::string name, ImVec2 origin, std::string id, json j)
 {
   auto displayText = std::make_shared<DisplayText>();
   auto textSource = TextSource(id, name, displayText);
   textSource.load(j);
   std::shared_ptr<VideoSource> videoSource = std::make_shared<TextSource>(textSource);
   videoSource->origin = origin;
-  addVideoSource(videoSource, id, j);
   return videoSource;
 }
 
 // Adds a Library video source to the map
-std::shared_ptr<VideoSource> VideoSourceService::addLibraryVideoSource(std::shared_ptr<LibraryFile> libraryFile, ImVec2 origin, std::string id, json j)
+std::shared_ptr<VideoSource> VideoSourceService::makeLibraryVideoSource(std::shared_ptr<LibraryFile> libraryFile, ImVec2 origin, std::string id, json j)
 {
   std::shared_ptr<VideoSource> videoSource = std::make_shared<LibrarySource>(id, libraryFile);
   videoSource->origin = origin;
-  addVideoSource(videoSource, id, j);
   return videoSource;
 }
 
@@ -461,35 +449,36 @@ void VideoSourceService::appendConfig(json j)
   VideoSourceType type = j["videoSourceType"];
   std::string sourceId = j["id"];
   ImVec2 position = ImVec2(j["x"], j["y"]);
-  
+  std::shared_ptr<VideoSource> source;
   switch (type)
   {
     case VideoSource_empty:
       break;
     case VideoSource_file:
-      addFileVideoSource(j["sourceName"], j["path"], position, sourceId, j);
-      return;
+      source = makeFileVideoSource(j["sourceName"], j["path"], position, sourceId, j);
+      break;
     case VideoSource_webcam:
-      addWebcamVideoSource(j["sourceName"], 0, position, sourceId, j);
-      return;
+      source = makeWebcamVideoSource(j["sourceName"], 0, position, sourceId, j);
+      break;
     case VideoSource_shader:
-      addShaderVideoSource(j["shaderSourceType"], position, sourceId, j);
-      return;
+      source = makeShaderVideoSource(j["shaderSourceType"], position, sourceId, j);
+      break;
     case VideoSource_chainer:
-      return;
+      break;
     case VideoSource_image:
-      addImageVideoSource(j["sourceName"], j["path"], position, sourceId, j);
-      return;
+      source = makeImageVideoSource(j["sourceName"], j["path"], position, sourceId, j);
+      break;
     case VideoSource_text:
-      addTextVideoSource(j["sourceName"], position, sourceId, j);
-      return;
+      source = makeTextVideoSource(j["sourceName"], position, sourceId, j);
+      break;
     case VideoSource_icon:
-      addIconVideoSource(j["sourceName"], position, sourceId, j);
-      return;
+      source = makeIconVideoSource(j["sourceName"], position, sourceId, j);
+      break;
     case VideoSource_library:
       std::shared_ptr<LibraryFile> libraryFile = LibraryService::getService()->libraryFileForId(j["libraryFileId"]);
-      addLibraryVideoSource(libraryFile, position, sourceId, j);
+      source = makeLibraryVideoSource(libraryFile, position, sourceId, j);
   }
+  addVideoSource(source, sourceId);
 }
 
 void VideoSourceService::clear()

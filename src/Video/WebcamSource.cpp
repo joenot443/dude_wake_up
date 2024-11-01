@@ -23,10 +23,13 @@ void WebcamSource::setup() {
   // Collect the device names
   deviceNames.clear();
   std::vector<ofVideoDevice> devices = grabber.listDevices();
+  
   for (int i = 0; i < devices.size(); i++)
   {
     deviceNames.push_back(devices[i].deviceName);
   }
+  // Sort the deviceNames alphabetically
+  std::sort(deviceNames.begin(), deviceNames.end());
 }
 
 void WebcamSource::saveFrame() {

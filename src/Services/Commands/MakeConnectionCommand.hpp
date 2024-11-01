@@ -1,21 +1,36 @@
 #include "Command.hpp"
 #include "../ShaderChainerService.hpp"
+#include "Connection.hpp"
 
 class MakeConnectionCommand : public Command {
 public:
-  MakeConnectionCommand(std::shared_ptr<Connection> connection) : connection(connection) {}
+  MakeConnectionCommand(std::shared_ptr<Connectable> start,
+                        std::shared_ptr<Connectable> end,
+                        ConnectionType type,
+                        OutputSlot outputSlot,
+                        InputSlot inputSlot,
+                        bool shouldSaveConfig)
+    : start(start), end(end), type(type), outputSlot(outputSlot), inputSlot(inputSlot), shouldSaveConfig(shouldSaveConfig) {}
 
   void execute() override {
-    ShaderChainerService::getService()->makeConnection(
-      connection->start, connection->end, connection->type, 
-      connection->outputSlot, connection->inputSlot
-    );
+    connection = ShaderChainerService::getService()->makeConnection(start, end, type, outputSlot, inputSlot, shouldSaveConfig);
   }
 
   void undo() override {
-    ShaderChainerService::getService()->breakConnectionForConnectionId(connection->id);
+    if (connection) {
+      ShaderChainerService::getService()->breakConnectionForConnectionId(connection->id);
+    }
   }
 
-private:
+  std::shared_ptr<Connection> getConnection() const {
+    return connection;
+  }
+
+  bool shouldSaveConfig;
+  std::shared_ptr<Connectable> start;
+  std::shared_ptr<Connectable> end;
+  ConnectionType type;
+  OutputSlot outputSlot;
+  InputSlot inputSlot;
   std::shared_ptr<Connection> connection;
 };

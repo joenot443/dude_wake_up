@@ -52,6 +52,9 @@ struct RotateShader: Shader {
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     
+    ofClear(0, 0, 0, 255);
+    ofClear(0, 0, 0, 0);
+    
     // Push the current transformation matrix onto the matrix stack
     ofPushMatrix();
     

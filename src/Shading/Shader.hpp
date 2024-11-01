@@ -24,7 +24,7 @@
 
 using json = nlohmann::json;
 
-static const bool AllowShaderMonitoring = false;
+static const bool AllowShaderMonitoring = true;
 
 class Shader: public Connectable
 {

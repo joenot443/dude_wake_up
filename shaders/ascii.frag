@@ -47,5 +47,5 @@ void main() {
   
   col = col*character(n, p);
   
-  outputColor = vec4(col, 1.0);
+  outputColor = vec4(col, gray < 0.1 ? 0.0 : 1.0);
 }

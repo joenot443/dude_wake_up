@@ -1,5 +1,6 @@
 #include "MainApp.h"
 #include "AudioSourceService.hpp"
+#include "ActionService.hpp"
 #include "BookmarkService.hpp"
 #include "MSABPMTapper.h"
 #include "FileSource.hpp"
@@ -118,7 +119,7 @@ void MainApp::dragEvent(ofDragInfo dragInfo)
     // Create a new VideoSource for the file
     auto fileName = ofFilePath::getFileName(dragInfo.files[0]);
     
-    auto videoSource = VideoSourceService::getService()->addFileVideoSource(fileName, dragInfo.files[0]);
+    auto videoSource = ActionService::getService()->addFileVideoSource(fileName, dragInfo.files[0]);
     NodeLayoutView::getInstance()->fileDropInProgress = true;
     NodeLayoutView::getInstance()->handleDroppedSource(videoSource);
     return;
@@ -132,7 +133,7 @@ void MainApp::dragEvent(ofDragInfo dragInfo)
   {
     // Create a new VideoSource for the file
     auto fileName = ofFilePath::getFileName(dragInfo.files[0]);
-    auto videoSource = VideoSourceService::getService()->addImageVideoSource(fileName, dragInfo.files[0]);
+    auto videoSource = ActionService::getService()->addImageVideoSource(fileName, dragInfo.files[0]);
     NodeLayoutView::getInstance()->handleDroppedSource(videoSource);
   }
 }

@@ -766,13 +766,17 @@ void CommonViews::XLargeIconTitle(const char *icon)
   ImGui::PopFont();
 }
 
-bool CommonViews::LargeIconButton(const char *icon, std::string id)
+bool CommonViews::LargeIconButton(const char *icon, std::string id, bool enabled)
 {
   auto buttonId = formatString("%s##%s", icon, id.c_str());
   ImGui::PushFont(FontService::getService()->largeIcon);
   ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32_BLACK_TRANS);
+  ImGui::PushStyleColor(ImGuiCol_Text, enabled ? IM_COL32_WHITE : IM_COL32(100, 100, 100, 255));
   ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0., 0.));
+  if (!enabled) ImGui::BeginDisabled();
   auto button = ImGui::Button(buttonId.c_str(), ImVec2(24., 24.));
+  if (!enabled) ImGui::EndDisabled();
+  ImGui::PopStyleColor();
   ImGui::PopStyleColor();
   ImGui::PopStyleVar();
   ImGui::PopFont();

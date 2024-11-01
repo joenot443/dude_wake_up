@@ -70,7 +70,7 @@ public:
   blendMode(std::make_shared<Parameter>("Blend Mode", 4.0, 0.0, 15.0, ParameterType_Int)),
   mainAlpha(std::make_shared<Parameter>("Main Alpha", 1.0, 0.0, 1.0)),
   mainAlphaOscillator(std::make_shared<WaveformOscillator>(mainAlpha)),
-  feedbackAlpha(std::make_shared<Parameter>("Feedback Alpha", 1.0, 0.0, 1.0)),
+  feedbackAlpha(std::make_shared<Parameter>("Feedback Alpha", 0.95, 0.0, 1.0)),
   feedbackAlphaOscillator(std::make_shared<WaveformOscillator>(feedbackAlpha)),
   feedbackMix(std::make_shared<Parameter>("Feedback Mix", 0.6, 0.0, 1.0)),
   feedbackMixOscillator(std::make_shared<WaveformOscillator>(feedbackMix)),

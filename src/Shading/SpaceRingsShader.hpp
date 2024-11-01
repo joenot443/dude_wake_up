@@ -18,15 +18,23 @@
 #include <stdio.h>
 
 struct SpaceRingsSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
+  std::shared_ptr<Parameter> particleSize;
+  std::shared_ptr<WaveformOscillator> particleSizeOscillator;
+  std::shared_ptr<Parameter> ringCount;
+  std::shared_ptr<WaveformOscillator> ringCountOscillator;
+  std::shared_ptr<Parameter> colorVariation;
+  std::shared_ptr<WaveformOscillator> colorVariationOscillator;
 
   SpaceRingsSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
+  particleSize(std::make_shared<Parameter>("Particle Size", 0.03, 0.01, 0.1)),
+  particleSizeOscillator(std::make_shared<WaveformOscillator>(particleSize)),
+  ringCount(std::make_shared<Parameter>("Ring Count", 5.0, 1.0, 10.0)),
+  ringCountOscillator(std::make_shared<WaveformOscillator>(ringCount)),
+  colorVariation(std::make_shared<Parameter>("Color Variation", 0.5, 0.0, 1.0)),
+  colorVariationOscillator(std::make_shared<WaveformOscillator>(colorVariation)),
   ShaderSettings(shaderId, j, "SpaceRings") {
-    parameters = { shaderValue };
-    oscillators = { shaderValueOscillator };
+    parameters = { particleSize, ringCount, colorVariation };
+    oscillators = { particleSizeOscillator, ringCountOscillator, colorVariationOscillator };
     load(j);
     registerParameters();
   };
@@ -45,9 +53,11 @@ struct SpaceRingsShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
+    shader.setUniform1f("particleSize", settings->particleSize->value);
+    shader.setUniform1f("ringCount", settings->ringCount->value);
+    shader.setUniform1f("colorVariation", settings->colorVariation->value);
     frame->draw(0, 0);
     shader.end();
     canvas->end();
@@ -68,7 +78,9 @@ struct SpaceRingsShader: Shader {
   void drawSettings() override {
     CommonViews::H3Title("SpaceRings");
 
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
+    CommonViews::ShaderParameter(settings->particleSize, settings->particleSizeOscillator);
+    CommonViews::ShaderParameter(settings->ringCount, settings->ringCountOscillator);
+    CommonViews::ShaderParameter(settings->colorVariation, settings->colorVariationOscillator);
   }
 };
 

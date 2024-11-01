@@ -213,6 +213,7 @@
 		02E81F7E2C2086660009C073 /* HelpService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02E81F7C2C2086620009C073 /* HelpService.cpp */; };
 		02ED91042955EDFD002252CC /* AudioSourceBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02ED91022955EDFD002252CC /* AudioSourceBrowserView.cpp */; };
 		02ED91062955F179002252CC /* AudioSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02ED91052955F179002252CC /* AudioSource.cpp */; };
+		02EE435C2CD1345E008E9D41 /* ActionService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02EE435A2CD1345D008E9D41 /* ActionService.cpp */; };
 		02F2A06829C4D8F30072CE86 /* TextEditorView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F2A06629C4D8F30072CE86 /* TextEditorView.cpp */; };
 		02F2A06A29C4F2A00072CE86 /* TextSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F2A06429C4D8AF0072CE86 /* TextSource.cpp */; };
 		02F2A06F29C90FFD0072CE86 /* UploadChainerView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F2A06E29C90FFD0072CE86 /* UploadChainerView.cpp */; };
@@ -662,6 +663,21 @@
 		02ED91022955EDFD002252CC /* AudioSourceBrowserView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AudioSourceBrowserView.cpp; path = Views/AudioSourceBrowserView.cpp; sourceTree = "<group>"; };
 		02ED91032955EDFD002252CC /* AudioSourceBrowserView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = AudioSourceBrowserView.hpp; path = Views/AudioSourceBrowserView.hpp; sourceTree = "<group>"; };
 		02ED91052955F179002252CC /* AudioSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AudioSource.cpp; path = Audio/AudioSource.cpp; sourceTree = "<group>"; };
+		02EE435A2CD1345D008E9D41 /* ActionService.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ActionService.cpp; path = Services/ActionService.cpp; sourceTree = "<group>"; };
+		02EE435B2CD1345D008E9D41 /* ActionService.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ActionService.hpp; path = Services/ActionService.hpp; sourceTree = "<group>"; };
+		02EE43632CD13F56008E9D41 /* AddIconVideoSourceCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AddIconVideoSourceCommand.hpp; sourceTree = "<group>"; };
+		02EE43642CD13F56008E9D41 /* RemoveConnectionCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = RemoveConnectionCommand.hpp; sourceTree = "<group>"; };
+		02EE43652CD13F56008E9D41 /* AddShaderCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AddShaderCommand.hpp; sourceTree = "<group>"; };
+		02EE43662CD13F56008E9D41 /* RemoveShaderCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = RemoveShaderCommand.hpp; sourceTree = "<group>"; };
+		02EE43672CD13F56008E9D41 /* AddShaderVideoSourceCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AddShaderVideoSourceCommand.hpp; sourceTree = "<group>"; };
+		02EE43682CD13F56008E9D41 /* AddWebcamVideoSourceCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AddWebcamVideoSourceCommand.hpp; sourceTree = "<group>"; };
+		02EE43692CD13F56008E9D41 /* Command.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Command.hpp; sourceTree = "<group>"; };
+		02EE436A2CD13F56008E9D41 /* AddTextVideoSourceCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AddTextVideoSourceCommand.hpp; sourceTree = "<group>"; };
+		02EE436B2CD13F56008E9D41 /* AddImageVideoSourceCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AddImageVideoSourceCommand.hpp; sourceTree = "<group>"; };
+		02EE436C2CD13F56008E9D41 /* AddFileVideoSourceCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AddFileVideoSourceCommand.hpp; sourceTree = "<group>"; };
+		02EE436D2CD13F56008E9D41 /* MakeConnectionCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MakeConnectionCommand.hpp; sourceTree = "<group>"; };
+		02EE436E2CD13F57008E9D41 /* AddLibraryVideoSourceCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AddLibraryVideoSourceCommand.hpp; sourceTree = "<group>"; };
+		02EE436F2CD15AFF008E9D41 /* RemoveVideoSourceCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = RemoveVideoSourceCommand.hpp; sourceTree = "<group>"; };
 		02F064D42B4C47C70016E67B /* TripleShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TripleShader.hpp; path = Shading/TripleShader.hpp; sourceTree = "<group>"; };
 		02F2A06429C4D8AF0072CE86 /* TextSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TextSource.cpp; sourceTree = "<group>"; };
 		02F2A06529C4D8AF0072CE86 /* TextSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TextSource.hpp; sourceTree = "<group>"; };
@@ -1345,6 +1361,27 @@
 			path = fonts;
 			sourceTree = "<group>";
 		};
+		02EE435D2CD13561008E9D41 /* Commands */ = {
+			isa = PBXGroup;
+			children = (
+				02EE436F2CD15AFF008E9D41 /* RemoveVideoSourceCommand.hpp */,
+				02EE436C2CD13F56008E9D41 /* AddFileVideoSourceCommand.hpp */,
+				02EE43632CD13F56008E9D41 /* AddIconVideoSourceCommand.hpp */,
+				02EE436B2CD13F56008E9D41 /* AddImageVideoSourceCommand.hpp */,
+				02EE436E2CD13F57008E9D41 /* AddLibraryVideoSourceCommand.hpp */,
+				02EE43652CD13F56008E9D41 /* AddShaderCommand.hpp */,
+				02EE43672CD13F56008E9D41 /* AddShaderVideoSourceCommand.hpp */,
+				02EE436A2CD13F56008E9D41 /* AddTextVideoSourceCommand.hpp */,
+				02EE43682CD13F56008E9D41 /* AddWebcamVideoSourceCommand.hpp */,
+				02EE43692CD13F56008E9D41 /* Command.hpp */,
+				02EE436D2CD13F56008E9D41 /* MakeConnectionCommand.hpp */,
+				02EE43642CD13F56008E9D41 /* RemoveConnectionCommand.hpp */,
+				02EE43662CD13F56008E9D41 /* RemoveShaderCommand.hpp */,
+			);
+			name = Commands;
+			path = Services/Commands;
+			sourceTree = "<group>";
+		};
 		02FABA912A9EB0C6009D69B5 /* Shaders */ = {
 			isa = PBXGroup;
 			children = (
@@ -1468,6 +1505,9 @@
 		47E4E7757DB0771B0C4C58E1 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				02EE435A2CD1345D008E9D41 /* ActionService.cpp */,
+				02EE435B2CD1345D008E9D41 /* ActionService.hpp */,
+				02EE435D2CD13561008E9D41 /* Commands */,
 				02E81F7C2C2086620009C073 /* HelpService.cpp */,
 				02E81F7D2C2086620009C073 /* HelpService.hpp */,
 				029F41BE297B1CDD00B6DB77 /* Network */,
@@ -2446,6 +2486,7 @@
 				02B280EA2915480600B793D5 /* WebcamSource.cpp in Sources */,
 				028FA5DE295B1ACE00FE6FE3 /* implot_demo.cpp in Sources */,
 				02543DA82C9F57CD00513FEF /* MicrophoneAudioSource.cpp in Sources */,
+				02EE435C2CD1345E008E9D41 /* ActionService.cpp in Sources */,
 				026ED08F2C52C63800810E44 /* VideoRecordingView.cpp in Sources */,
 				02BED6612C46BE4200E75054 /* StrandBrowserView.cpp in Sources */,
 				025AD49E291A9E3200F78F46 /* FileBrowserView.cpp in Sources */,
