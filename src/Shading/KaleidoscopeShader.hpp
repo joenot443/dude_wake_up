@@ -18,15 +18,15 @@
 #include "Oscillator.hpp"
 
 struct KaleidoscopeSettings : public ShaderSettings {
-	public:
+public:
   std::shared_ptr<Parameter> sides;
   std::shared_ptr<Parameter> shift;
   std::shared_ptr<Parameter> rotation;
-
+  
   std::shared_ptr<Oscillator> sidesOscillator;
   std::shared_ptr<Oscillator> shiftOscillator;
   std::shared_ptr<Oscillator> rotationOscillator;
-
+  
   KaleidoscopeSettings(std::string shaderId, json j, std::string name) :
   sides(std::make_shared<Parameter>("Sides", 4.0,  1.0, 10.0, ParameterType_Int)),
   shift(std::make_shared<Parameter>("Frame Shift", 0.25,  0.0, 1.0)),
@@ -38,22 +38,21 @@ struct KaleidoscopeSettings : public ShaderSettings {
     parameters = {sides, shift, rotation};
     oscillators = {sidesOscillator, shiftOscillator, rotationOscillator};
     load(j);
-  registerParameters();
+    registerParameters();
   };
 };
 
 class KaleidoscopeShader : public Shader {
 public:
-
-
+  
+  
   KaleidoscopeSettings *settings;
   KaleidoscopeShader(KaleidoscopeSettings *settings) : settings(settings), Shader(settings) {};
-
+  
   void setup() override {
-shader.load("shaders/kaleidoscope");
-shader.load("shaders/kaleidoscope");
+    shader.load("shaders/kaleidoscope");
   }
-
+  
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
@@ -69,14 +68,14 @@ shader.load("shaders/kaleidoscope");
     shader.end();
     canvas->end();
   }
-
-    int inputCount() override {
+  
+  int inputCount() override {
     return 1;
   }
-ShaderType type() override {
+  ShaderType type() override {
     return ShaderType::ShaderTypeKaleidoscope;
   }
-
+  
   void drawSettings() override {
     CommonViews::ShaderParameter(settings->shift, settings->shiftOscillator);
     CommonViews::ShaderIntParameter(settings->sides);

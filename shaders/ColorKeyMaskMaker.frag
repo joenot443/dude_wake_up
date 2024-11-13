@@ -2,10 +2,12 @@
 
 uniform float tolerance;
 uniform sampler2D tex;
+uniform sampler2D auxTex;
 uniform vec2 dimensions;
 uniform float time;
 uniform vec4 chromaKey;
 uniform int drawTex;
+uniform int drawBackground;
 uniform int invert;
 
 in vec2 coord;
@@ -27,32 +29,30 @@ float colorclose(vec3 yuv, vec3 keyYuv)
 
 void main()
 {
-  vec2 fragPos =  coord.xy / dimensions.xy;
+  vec2 fragPos = coord.xy / dimensions.xy;
   vec4 texColor0 = texture(tex, fragPos);
+  vec4 auxColor = texture(auxTex, fragPos);
   
-  //convert from RGB to YCvCr/YUV
-  vec4 keyYUV =  RGBtoYUV * chromaKey;
+  // Convert from RGB to YCbCr/YUV
+  vec4 keyYUV = RGBtoYUV * chromaKey;
   vec4 yuv = RGBtoYUV * texColor0;
   
   float mask = colorclose(yuv.rgb, keyYUV.rgb);
-  float mixf = 0.0;
   
-  if (mask > tolerance) {
-    mixf = 0.0;
-  } else if (abs(mask - tolerance) < 0.05) {
-    mixf = mask;
+  if (mask >= tolerance) {
+    // If the pixel matches the mask color
+    if (drawTex == 1) {
+      outputColor = auxColor; // Use auxTex for matching pixels
+    } else {
+      outputColor = vec4(0.0); // Use vec4(0.0) if drawTex is false
+    }
   } else {
-    mixf = 1.0;
-  }
-  
-  if (invert == 1) {
-    mixf = 1. - mixf;
-  }
-  
-  if (drawTex == 1) {
-    outputColor = vec4(texColor0.xyz, min(texColor0.a, 1. - mixf));
-  } else {
-    outputColor = vec4(1.0, 1.0, 1.0, mixf);
+    // If the pixel does not match the mask color
+    if (drawBackground == 1) {
+      outputColor = texColor0; // Use tex for non-matching pixels
+    } else {
+      outputColor = vec4(0.0); // Use vec4(0.0) if drawBackground is false
+    }
   }
 }
 

@@ -27,6 +27,7 @@
 #include "LayoutStateService.hpp"
 #include "HelpService.hpp"
 #include "BookmarkService.hpp"
+#include "SyphonService.hpp"
 #include "StrandService.hpp"
 #include "ParameterService.hpp"
 #include "IconService.hpp"
@@ -57,6 +58,7 @@ LayoutStateService *LayoutStateService::service = 0;
 MarkdownService *MarkdownService::service = 0;
 LibraryService *LibraryService::service = 0;
 HelpService *HelpService::service = 0;
+SyphonService *SyphonService::service = 0;
 MainApp *MainApp::app = 0;
 
 void setupDirectories() {

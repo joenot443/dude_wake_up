@@ -86,6 +86,7 @@ public:
   void addShader(std::shared_ptr<Shader> shader);
   void removeShader(std::shared_ptr<Shader> shader, bool fromMap = true);
   void removeConnectable(std::shared_ptr<Connectable> connectable);
+  std::vector<std::shared_ptr<Connectable>> pasteConnectables(const std::vector<std::shared_ptr<Connectable>>& connectables);
   std::shared_ptr<Connection>makeConnection(std::shared_ptr<Connectable> start,
            std::shared_ptr<Connectable> end,
            ConnectionType type,
@@ -129,6 +130,7 @@ public:
   void loadConfig(json j) override;
   std::vector<std::string> idsFromLoadingConfig(json j);
   void loadConnectionsConfig(json j);
+
 };
 
 #endif /* ShaderChainerService_hpp */

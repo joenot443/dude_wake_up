@@ -143,8 +143,10 @@ enum ShaderType {
   ShaderTypeAutotangent,
   ShaderTypePlasmor,
   ShaderTypeColoredDrops,
-  ShaderTypeSimplePath,
+  ShaderTypeSimpleShape,
   ShaderTypeBackground,
+  ShaderTypeComicbook,
+  ShaderTypeSimpleBars,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -212,6 +214,7 @@ static const ShaderType AvailableFilterShaderTypes[] = {
   ShaderTypeCubify,
   ShaderTypeGodRay,
   ShaderTypeCanny,
+  ShaderTypeComicbook,
   ShaderTypeGameboy,
   ShaderTypeGlitch,
   ShaderTypeRainbowRotator, // Generated
@@ -256,10 +259,14 @@ static std::vector<ShaderType> AllShaderTypes() {
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) { // ShaderNames
+    case ShaderTypeSimpleBars:
+      return "SimpleBars";
+    case ShaderTypeComicbook:
+      return "Comicbook";
     case ShaderTypeBackground:
       return "Background";
-    case ShaderTypeSimplePath:
-      return "SimplePath";
+    case ShaderTypeSimpleShape:
+      return "SimpleShape";
     case ShaderTypeColoredDrops:
       return "ColoredDrops";
     case ShaderTypePlasmor:

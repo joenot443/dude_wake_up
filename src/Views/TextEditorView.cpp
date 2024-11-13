@@ -42,15 +42,15 @@ void TextEditorView::draw() {
   }
   LayoutStateService::getService()->isEditingText = ImGui::IsItemActive();
   
-  ImVec4 color(displayText->color.r / 255.0f, displayText->color.g / 255.0f, displayText->color.b / 255.0f, 1.0f);
-  
   CommonViews::sSpacing();
   ImGui::Text("Color");
-  ImGui::SameLine();
-  if (ImGui::ColorEdit3("##ColorValue", (float*)&color)) {
-    displayText->color = ofColor(color.x * 255.0f, color.y * 255.0f, color.z * 255.0f);
+  CommonViews::ShaderColor(displayText->color);
+  CommonViews::sSpacing();
+  CommonViews::ShaderCheckbox(displayText->strokeEnabled);
+  if (displayText->strokeEnabled->boolValue) {
+  ImGui::Text("Stroke Color");
+  CommonViews::ShaderColor(displayText->strokeColor);
   }
-  
   int currentFontSize = displayText->fontSize;
   
   CommonViews::sSpacing();

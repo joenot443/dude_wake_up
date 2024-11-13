@@ -1,11 +1,12 @@
 import argparse
 import subprocess
 import requests
+import json
 import sys
 
 def main():
     # Parse command-line arguments
-    parser = argparse.ArgumentParser(description="Script to create and modify a shader using Hygen and ShaderToy API")
+    parser = argparse.ArgumentParser(description="Script to create and modify a shader using Hygen and ShaderToy data")
     parser.add_argument("ID", help="ShaderToy ID")
     parser.add_argument("Name", help="Name for the new shader")
     args = parser.parse_args()
@@ -15,38 +16,39 @@ def main():
     
     # Step 1: Run the Hygen command
     hygen_command = f"hygen shader new {shader_name}"
-    subprocess.run(hygen_command, shell=True, check=True)
+    # subprocess.run(hygen_command, shell=True, check=True)
     
-    # Step 2: Access ShaderToy API with detailed headers
-    api_url = f"https://www.shadertoy.com/api/v1/shaders/{shader_id}?key=rt8lRn"
-    
+    # Step 2: Access ShaderToy data using curl
     headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-        "Accept-Encoding": "gzip, deflate, br, zstd",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Cookie": "scmp=0; sdt=dN4fjpe5j816salq6k59acu07en; AWSALB=UpvBPWeGgm9a0utZM7cMZx9vZ5BihVVK2B0m9E0J/pNheoKYSHasqim5+4NM4EfFjIDAq/WhWa+S577rB4rs3fIn9FeCDlnbBZFiKibtGxeaRQfX+4JXdAZxo/zu; AWSALBCORS=UpvBPWeGgm9a0utZM7cMZx9vZ5BihVVK2B0m9E0J/pNheoKYSHasqim5+4NM4EfFjIDAq/WhWa+S577rB4rs3fIn9FeCDlnbBZFiKibtGxeaRQfX+4JXdAZxo/zu",
-        "Cache-Control": "no-cache",
-        "Pragma": "no-cache"
+        'accept': '*/*',
+        'accept-language': 'en-US,en;q=0.9',
+        'content-type': 'application/x-www-form-urlencoded',
+        'origin': 'https://www.shadertoy.com',
+        'referer': f'https://www.shadertoy.com/view/{shader_id}',
+        'sec-ch-ua': '"Chromium";v="130", "Google Chrome";v="130", "Not?A_Brand";v="99"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"macOS"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'
     }
-    
-    response = requests.get(api_url, headers=headers)
-    
-    if response.status_code == 403:
-        print("Error: Received a 403 Forbidden response. This could be due to an invalid API key or other access restrictions.")
-        return
-    elif response.status_code != 200:
-        print(f"Error: Received an unexpected status code {response.status_code}.")
-        return
-    
-    shader_data = response.json()
-    # Check if the response contains shader information
-    if 'Shader' not in shader_data or 'renderpass' not in shader_data['Shader']:
-        print(shader_data)
-        print("Shader data not found in the response.")
+
+    data = f's=%7B%20%22shaders%22%20%3A%20%5B%22{shader_id}%22%5D%20%7D&nt=1&nl=1&np=1'
+    response = requests.post('https://www.shadertoy.com/shadertoy', headers=headers, data=data)
+
+    if response.status_code != 200:
+        print(f"Error: Received status code {response.status_code}")
         sys.exit(1)
 
-    shader_code = shader_data['Shader']['renderpass'][0]['code']
+    # Parse JSON response to extract shader code
+    try:
+        shader_data = response.json()
+        shader_code = shader_data[0]['renderpass'][0]['code']
+        print(shader_code)
+    except (KeyError, IndexError, json.JSONDecodeError) as e:
+        print("Error parsing shader data:", e)
+        sys.exit(1)
     
     # Step 3: Modify the shader file
     shader_file_path = f"./shaders/{shader_name}.frag"

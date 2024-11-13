@@ -76,14 +76,41 @@ void VideoSourceBrowserView::refreshSources()
       webcamItems.push_back(tileItem);
     }
   }
-  // Sort the shader items by name
+  // Sort the shader items by category count and then by name
+  
+  // Count the number of times each category appears in the tileItems
+  std::map<std::string, int> categoryCounts;
+  for (const auto &tileItem : shaderItems) {
+    categoryCounts[tileItem->category]++;
+  }
+  
+  // Sort the tileItems based on the number of times each category appears
   std::sort(shaderItems.begin(), shaderItems.end(),
-            [](std::shared_ptr<TileItem> a, std::shared_ptr<TileItem> b)
-            { return a->name < b->name; });
-  // Sort the library items by name
+            [&](const auto &a, const auto &b) {
+    // Compare based on category counts
+    if (categoryCounts[a->category] != categoryCounts[b->category]) {
+      return categoryCounts[a->category] > categoryCounts[b->category];
+    }
+    if (a->category == b->category) {
+      return a->name < b->name;
+    }
+    // If counts are equal, compare categories alphabetically
+    return a->category < b->category;
+  });
+  
+  
   std::sort(libraryItems.begin(), libraryItems.end(),
-            [](std::shared_ptr<LibraryTileItem> a, std::shared_ptr<LibraryTileItem> b)
-            { return a->name < b->name; });
+            [&](const auto &a, const auto &b) {
+    // Compare based on category counts
+    if (categoryCounts[a->category] != categoryCounts[b->category]) {
+      return categoryCounts[a->category] > categoryCounts[b->category];
+    }
+    if (a->category == b->category) {
+      return a->name < b->name;
+    }
+    // If counts are equal, compare categories alphabetically
+    return a->category < b->category;
+  });
 
   // Sort the webcam items by name
   std::sort(webcamItems.begin(), webcamItems.end(),
@@ -127,40 +154,23 @@ void VideoSourceBrowserView::drawLibraryHeader() {}
 
 void VideoSourceBrowserView::draw()
 {
-//  char buffer[256];
-//  strncpy(buffer, searchQuery.c_str(), sizeof(buffer));
-//  if (ImGui::InputText("Search", buffer, sizeof(buffer))) {
-//    searchQuery = std::string(buffer);
-//    searchDirty = true;
-//  }
-//
-//  if (searchQuery.length() != 0) {
-//    if (ImGui::BeginTabBar("VideoSourceBrowser", ImGuiTabBarFlags_None)) {
-//      if (ImGui::BeginTabItem("Search")) {
-//        searchResultsTileBrowserView.draw();
-//      }
-//      ImGui::EndTabBar();
-//    }
-//    return;
-//  }
-
   if (ImGui::BeginTabBar("VideoSourceBrowser", ImGuiTabBarFlags_None))
   {
     if (ImGui::BeginTabItem("Generated"))
     {
-      tileBrowserView = TileBrowserView(shaderItems);
+      tileBrowserView.setTileItems(shaderItems);
       tileBrowserView.draw();
       ImGui::EndTabItem();
     }
     if (ImGui::BeginTabItem("Webcam"))
     {
-      tileBrowserView = TileBrowserView(webcamItems);
+      tileBrowserView.setTileItems(webcamItems);
       tileBrowserView.draw();
       ImGui::EndTabItem();
     }
     if (ImGui::BeginTabItem("Library"))
     {
-      tileBrowserView = TileBrowserView(libraryItems);
+      tileBrowserView.setTileItems(std::vector<std::shared_ptr<TileItem>>(libraryItems.begin(), libraryItems.end()));
       tileBrowserView.draw();
       ImGui::EndTabItem();
     }

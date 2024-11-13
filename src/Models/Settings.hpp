@@ -110,17 +110,40 @@ public:
         }
         
         
-        // Check if the Oscillator for that Parameter has been saved
-        if (oscJ[p->name].is_object()) {
-          std::shared_ptr<Oscillator> osc = findOscillator(p->name);
-          osc->load(oscJ[p->name]);
-          // Enable the Oscillator
-          osc->enabled->setBoolValue(true);
-        }
+        // // Check if the Oscillator for that Parameter has been saved
+        // if (oscJ[p->name].is_object()) {
+        //   std::shared_ptr<Oscillator> osc = findOscillator(p->name);
+        //   osc->load(oscJ[p->name]);
+        //   // Enable the Oscillator
+        //   osc->enabled->setBoolValue(true);
+        // }
       }
     }
     
     
+  }
+
+  // Method to copy parameters and oscillators from another Settings object
+  void copyFrom(const Settings& other) {
+    // Update each parameter with the corresponding value from the other settings
+    for (size_t i = 0; i < parameters.size(); ++i) {
+      if (i < other.parameters.size() && parameters[i] && other.parameters[i]) {
+        parameters[i]->value = other.parameters[i]->value;
+        parameters[i]->intValue = other.parameters[i]->intValue;
+        parameters[i]->boolValue = other.parameters[i]->boolValue;
+        parameters[i]->midiDescriptor = other.parameters[i]->midiDescriptor;
+        parameters[i]->favorited = other.parameters[i]->favorited;
+        parameters[i]->ownerName = other.parameters[i]->ownerName;
+        parameters[i]->color = other.parameters[i]->color;
+      }
+    }
+
+//    // Update each oscillator with the corresponding value from the other settings
+//    for (size_t i = 0; i < oscillators.size(); ++i) {
+//      if (i < other.oscillators.size() && oscillators[i] && other.oscillators[i]) {
+//        oscillators[i]->copyFrom(*other.oscillators[i]);
+//      }
+//    }
   }
 };
 

@@ -27,6 +27,7 @@
 #include "SubmitFeedbackView.hpp"
 #include "VideoSourceService.hpp"
 #include "implot.h"
+#include "FramePreview.hpp"
 
 static const ImVec2 ShaderButtonSize = ImVec2(90, 30);
 
@@ -278,7 +279,6 @@ void MainStageView::drawMenu()
       showingMenu = true;
     }
 #endif
-    
     ImGui::EndMenuBar();
   }
 }
@@ -353,6 +353,14 @@ void MainStageView::keyReleased(int key)
     
     if (key == 'y') {
       ActionService::getService()->redo();
+    }
+    
+    if (key == 'c') {
+      ActionService::getService()->copy(NodeLayoutView::getInstance()->selectedConnectables);
+    }
+    
+    if (key == 'v') {
+      ActionService::getService()->paste();
     }
   }
 }

@@ -9,6 +9,7 @@
 #include "CommonViews.hpp"
 #include "Video.hpp"
 #include "FontService.hpp"
+#include "Fonts.hpp"
 #include "OscillationService.hpp"
 #include "ParameterService.hpp"
 #include "PulseOscillator.hpp"
@@ -85,6 +86,11 @@ void OscillatorView::draw(std::vector<std::tuple<std::shared_ptr<Oscillator>, st
       ImGui::VSliderFloat(formatString("##shift%s", value->name.c_str()).c_str(),
                           ImVec2(15, 130), &waveformOscillator->shift->value,
                           -value->max * 2, value->max * 2, "S");
+    }
+    
+    ImGui::SameLine();
+    if (CommonViews::IconButton(ICON_MD_CLOSE, value->paramId.c_str())) {
+      waveformOscillator->enabled->setBoolValue(false);
     }
 
     CommonViews::ShaderOption(waveformOscillator->waveShape, { "Sine Wave", "Square", "Sawtooth", "Triangle" }, false);

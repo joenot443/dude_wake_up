@@ -43,6 +43,9 @@ void FileAudioSource::loadFile(std::shared_ptr<AudioTrack> audioTrack) {
   disable();
   setup();
   active = true;
+  // Start the BPM clock
+  audioAnalysis.bpmEnabled = true;
+  audioAnalysis.bpmStartTime = ofGetSystemTimeMillis();
 }
 
 void FileAudioSource::disable() {

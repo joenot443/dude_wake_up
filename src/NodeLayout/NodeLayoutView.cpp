@@ -106,16 +106,8 @@ void NodeLayoutView::draw()
   float width = (ImGui::GetWindowContentRegionMax().x * 4.0) / 5;
   float height = ImGui::GetWindowContentRegionMax().y - LayoutStateService::getService()->audioSettingsViewHeight() - 56.0f;
   
-//  ImGui::SetNextItemAllowOverlap();
   ed::Begin("My Editor", ImVec2(width, height));
   ed::NavigateToContent();
-  
-  // Disable navigation if Tutorial is enabled
-  //  if (LayoutStateService::getService()->helpEnabled) {
-  //    ed::SuspendNavigation();
-  //  } else {
-  //    ed::ResumeNavigation();
-  //  }
   
   ed::PushStyleVar(ed::StyleVar_ScrollDuration, 0.1f);
   ed::PushStyleVar(ax::NodeEditor::StyleVar_NodeRounding, 0.0);
@@ -263,25 +255,24 @@ void NodeLayoutView::draw()
   handleDoubleClick();
   handleUnplacedDownloadedLibraryFile();
   populateNodePositions();
+  populateSelectedNodes();
   ed::End();
   
   handleDropZone();
   
   drawActionButtons();
   
-  
-  
+  drawDebugWindow();
+    
   drawNodeWindows();
   
   drawUploadChainerWindow();
-  
   
   drawPreviewWindows();
   
   drawHelp();
   
   ed::SetCurrentEditor(nullptr);
-  
   
   drawSaveDialog();
   
@@ -381,7 +372,7 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
   CommonViews::mSpacing();
   
   // Draw Aux pin if Feedback
-  if (node->type == NodeTypeShader && node->shader->type() == ShaderTypeFeedback) {
+  if (node->type == NodeTypeShader && node->shader->allowAuxOutputSlot()) {
     // Get secondary Output Pin
     ed::PinId outputPinId = node->outputIds[OutputSlotAux];
     
@@ -563,6 +554,7 @@ std::shared_ptr<Node> NodeLayoutView::nodeForShaderSourceId(std::string shaderSo
   node = std::make_shared<Node>(nodeId, outputIds, inputIds, name, nodeType, connectable);
   
   // If we're placing the node from a JSON, we have an origin.
+  // It's possible the Node hasn't actually be placed yet, in which case don't set its position
   if (origin.x != 0.)
   {
     ed::SetNodePosition(nodeId, origin);
@@ -586,6 +578,34 @@ void NodeLayoutView::populateNodePositions()
   for (auto node : nodes)
   {
     node->position = ed::GetNodePosition(node->id);
+  }
+}
+
+void NodeLayoutView::populateSelectedNodes()
+{
+  // Clear the current selection
+  selectedConnectables.clear();
+
+  // Get the count of selected nodes
+  int selectedCount = ed::GetSelectedObjectCount();
+  if (selectedCount == 0) return;
+
+  // Create a vector to hold the selected node IDs
+  std::vector<ed::NodeId> selectedNodeIds(selectedCount);
+
+  // Retrieve the selected node IDs
+  ed::GetSelectedNodes(selectedNodeIds.data(), selectedCount);
+
+  // Iterate over the selected node IDs
+  for (auto nodeId : selectedNodeIds)
+  {
+    // Find the node in the nodeIdNodeMap
+    auto it = nodeIdNodeMap.find(nodeId.Get());
+    if (it != nodeIdNodeMap.end())
+    {
+      // Add the node to the selectedNodes set
+      selectedConnectables.push_back(it->second->connectable);
+    }
   }
 }
 
@@ -646,22 +666,7 @@ void NodeLayoutView::handleUnplacedNodes()
 
 void NodeLayoutView::handleDoubleClick()
 {
-  auto edNode = ed::GetDoubleClickedNode();
   
-  if (edNode)
-  {
-    long id = edNode.Get();
-    // Check if the node is in our map
-    if (nodeIdNodeMap.find(id) != nodeIdNodeMap.end())
-    {
-      auto node = nodeIdNodeMap[id];
-      selectChainer(node);
-    }
-  }
-}
-
-void NodeLayoutView::selectChainer(std::shared_ptr<Node> node)
-{
 }
 
 void NodeLayoutView::closeSettingsWindow(std::shared_ptr<Connectable> connectable)
@@ -772,6 +777,13 @@ void NodeLayoutView::handleDeleteNode(std::shared_ptr<Node> node)
   nodesToOpen.erase(node);
 }
 
+void NodeLayoutView::addUnplacedConnectable(std::shared_ptr<Connectable> connectable) {
+  std::shared_ptr<Node> node = nodeForShaderSourceId(connectable->connId(), connectable->connectableType() == ConnectableTypeShader ? NodeTypeShader : NodeTypeSource, connectable->name(), connectable);
+  
+  unplacedNodeIds.push_back(connectable->connId());
+  drawNode(node);
+}
+
 void NodeLayoutView::handleSaveNode(std::shared_ptr<Node> node)
 {
   Strand strand = ShaderChainerService::getService()->strandForConnectable(node->connectable);
@@ -808,7 +820,7 @@ void NodeLayoutView::handleDropZone()
         nodeDropLocation = std::make_unique<ImVec2>(canvasPos);
       } else {
         // Dropped on an existing Shader
-        nodeDropLocation = std::make_unique<ImVec2>(ed::GetNodePosition(hovered) + ImVec2(400.0, 0.0));
+        nodeDropLocation = std::make_unique<ImVec2>(ed::GetNodePosition(hovered) + ImVec2(ed::GetNodeSize(hovered).x, 0.0) + ImVec2(400.0, 0.0));
         auto startNode = nodeIdNodeMap[hovered.Get()];
         // Check if the existing Shader was already connected to a next node
         std::shared_ptr<Connectable> next = nullptr;
@@ -843,8 +855,8 @@ void NodeLayoutView::handleDropZone()
         }
         case VideoSource_file:
         {
-          auto availableFileSource = std::dynamic_pointer_cast<AvailableVideoSourceFile>(availableSource);
-          source = ActionService::getService()->addFileVideoSource(availableFileSource->sourceName, availableFileSource->path);
+          auto availableFileSource = std::dynamic_pointer_cast<AvailableVideoSourceImage>(availableSource);
+          source = ActionService::getService()->addImageVideoSource(availableFileSource->sourceName, availableFileSource->path);
           unplacedNodeIds.push_back(source->id);
           break;
         }
@@ -1117,6 +1129,8 @@ void NodeLayoutView::drawActionButtons()
   {
     ActionService::getService()->undo();
   }
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+    ImGui::SetTooltip("Undo the last action (Cmd+Z)");
 
   ImGui::SameLine();
   CommonViews::HSpacing(2);
@@ -1127,6 +1141,8 @@ void NodeLayoutView::drawActionButtons()
   {
     ActionService::getService()->redo();
   }
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+    ImGui::SetTooltip("Redo the last undone action (Cmd+Y)");
 
   ImGui::SameLine();
   CommonViews::HSpacing(2);
@@ -1137,6 +1153,8 @@ void NodeLayoutView::drawActionButtons()
   {
     VideoSourceService::getService()->captureOutputWindowScreenshot();
   }
+  if (ImGui::IsItemHovered())
+    ImGui::SetTooltip("Capture a screenshot of the output window");
 
   ImGui::SameLine();
   CommonViews::HSpacing(2);
@@ -1148,6 +1166,8 @@ void NodeLayoutView::drawActionButtons()
   {
     LayoutStateService::getService()->helpEnabled = !LayoutStateService::getService()->helpEnabled;
   }
+  if (ImGui::IsItemHovered())
+    ImGui::SetTooltip("Toggle help overlay");
 
   ImGui::SameLine();
   CommonViews::HSpacing(2);
@@ -1158,6 +1178,9 @@ void NodeLayoutView::drawActionButtons()
   {
     clear();
   }
+  if (ImGui::IsItemHovered())
+    ImGui::SetTooltip("Remove all nodes and connections (Cmd+N)");
+
   ImGui::SameLine();
   CommonViews::HSpacing(2);
   ImGui::SameLine();
@@ -1169,6 +1192,9 @@ void NodeLayoutView::drawActionButtons()
     ed::NavigateToContent();
     ed::SetCurrentEditor(nullptr);
   }
+  if (ImGui::IsItemHovered())
+    ImGui::SetTooltip("Navigate to the content");
+
   ImGui::SameLine();
   CommonViews::HSpacing(2);
   ImGui::SameLine();
@@ -1178,6 +1204,9 @@ void NodeLayoutView::drawActionButtons()
   {
     LayoutStateService::getService()->stageModeEnabled = true;
   }
+  if (ImGui::IsItemHovered())
+    ImGui::SetTooltip("Enable stage mode (Cmd+B)");
+
   ImGui::EndChild();
   ImGui::SetCursorPos(pos);
 }
@@ -1205,6 +1234,40 @@ void NodeLayoutView::drawMetrics()
 
   ed::SetCurrentEditor(context);
 //  ed::ShowMetrics();
+}
+
+void NodeLayoutView::drawDebugWindow()
+{
+  auto cursorPos = ImGui::GetCursorPos();
+  
+  float shaderInfoPaneWidth = LayoutStateService::getService()->shouldDrawShaderInfo() ? LayoutStateService::getService()->browserSize().x : 0;
+  ImGui::SetCursorPos(ImVec2(getScaledWindowWidth() - 400.0 - shaderInfoPaneWidth, getScaledWindowHeight() - LayoutStateService::getService()->audioSettingsViewHeight() - 600.0));
+  
+  ImGui::BeginChild("Debug Window", ImVec2(300.0, 300.0));
+  // Draw live debug information about the state of the app
+  auto shaders = ShaderChainerService::getService()->shaders();
+  auto connections = ShaderChainerService::getService()->connections();
+  auto sources = VideoSourceService::getService()->videoSources();
+  
+  ImGui::Text("Shaders:");
+  for (const auto& shader : shaders) {
+    ImGui::BulletText("Name: %s, ID: %s", shader->name().c_str(), shader->shaderId.c_str());
+  }
+  
+  ImGui::Separator();
+  ImGui::Text("%s", formatString("Connections: %d", connections.size()).c_str());
+  for (const auto& connection : connections) {
+    ImGui::BulletText("Start: %s, End: %s", connection->start->name().c_str(), connection->end->name().c_str());
+  }
+  
+  ImGui::Separator();
+  ImGui::Text("Video Sources:");
+  for (const auto& source : sources) {
+    ImGui::BulletText("Name: %s, ID: %s", source->sourceName.c_str(), source->id.c_str());
+  }
+  ImGui::EndChild();
+  
+  ImGui::SetCursorPos(cursorPos);
 }
 
 void NodeLayoutView::drawSaveDialog() {

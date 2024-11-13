@@ -12,8 +12,9 @@ struct AudioTrack
 {
   std::string name;
   std::string path;
+  int bpm;
   
-  AudioTrack(std::string name, std::string path) : name(name), path(path) {};
+  AudioTrack(std::string name, std::string path, int bpm) : name(name), path(path), bpm(bpm) {};
 };
 
 #endif /* AudioTrack_h */

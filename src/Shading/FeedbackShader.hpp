@@ -96,7 +96,7 @@ public:
   ShaderSettings(shaderId, j, name)
   {
     parameters = {mainAlpha, feedbackMix, feedbackAlpha, keyValue, keyThreshold, delayAmount, lumaKeyEnabled, xPosition, yPosition, scale, sourceSelection, blendMode, priority, rotation, shouldClearFeedbackBuffer};
-    oscillators = {mainAlphaOscillator, feedbackMixOscillator, feedbackAlphaOscillator, keyValueOscillator, keyThresholdOscillator, delayAmountOscillator, xPositionOscillator, yPositionOscillator, scaleOscillator};
+    oscillators = {mainAlphaOscillator, feedbackMixOscillator, feedbackAlphaOscillator, keyValueOscillator, keyThresholdOscillator, delayAmountOscillator, xPositionOscillator, yPositionOscillator, scaleOscillator, rotationOscillator };
     
     load(j);
     registerParameters();
@@ -133,6 +133,13 @@ struct FeedbackShader : Shader
     "Linear Burn"
   };
   
+  std::vector<std::string> sourceNames = {
+    "Current Frame",
+    "Original Frame",
+    "End Frame",
+    "Self",
+  };
+  
   FeedbackShader(FeedbackSettings *settings) : Shader(settings),
   settings(settings){};
   
@@ -140,7 +147,6 @@ struct FeedbackShader : Shader
   void clearFrameBuffer();
   void populateSource();
   ofTexture feedbackTexture();
-  void drawFbo(std::shared_ptr<ofFbo> fbo);
   void drawFeedbackSourceSelector();
   void clearFrameIfNeeded();
   int frameIndex();

@@ -29,10 +29,13 @@ class DisplayText: public Settings {
 public:
   std::string text = "Sample text";
   std::string id;
-  ofColor color = ofColor::white;
+  std::shared_ptr<Parameter> color;
+  std::shared_ptr<Parameter> strokeColor;
+  std::shared_ptr<Parameter> strokeEnabled;
+
   int fontSize = 36;
   Font font = Font("");
-  
+    
   std::shared_ptr<Parameter> xPosition;
   std::shared_ptr<Parameter> yPosition;
   
@@ -43,11 +46,14 @@ public:
   id(UUID::generateUUID()),
   xPosition(std::make_shared<Parameter>("xPosition", 0.1, 0.0, 1.0)),
   yPosition(std::make_shared<Parameter>("yPosition", 0.1, 0.0, 1.0)),
+  color(std::make_shared<Parameter>("color", ParameterType_Color)),
+  strokeColor(std::make_shared<Parameter>("strokeColor", ParameterType_Color)),
+  strokeEnabled(std::make_shared<Parameter>("strokeEnabled", ParameterType_Bool)),
   xPositionOscillator(std::make_shared<WaveformOscillator>(xPosition)),
   yPositionOscillator(std::make_shared<WaveformOscillator>(yPosition))
   {
     oscillators = {xPositionOscillator, yPositionOscillator};
-    parameters = {xPosition, yPosition};
+    parameters = {xPosition, yPosition, strokeEnabled};
     registerParameters();
   };
 };

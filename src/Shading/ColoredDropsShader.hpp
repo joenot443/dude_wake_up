@@ -18,23 +18,19 @@
 #include <stdio.h>
 
 struct ColoredDropsSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
   std::shared_ptr<Parameter> zoom; // New parameter
   std::shared_ptr<Parameter> brightness; // New parameter
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
   std::shared_ptr<WaveformOscillator> zoomOscillator; // New oscillator
   std::shared_ptr<WaveformOscillator> brightnessOscillator; // New oscillator
 
   ColoredDropsSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
   zoom(std::make_shared<Parameter>("zoom", 1.0, 0.1, 10.0)), // Initialize new parameter
   brightness(std::make_shared<Parameter>("brightness", 1.0, 0.0, 2.0)), // Initialize new parameter
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   zoomOscillator(std::make_shared<WaveformOscillator>(zoom)), // Initialize new oscillator
   brightnessOscillator(std::make_shared<WaveformOscillator>(brightness)), // Initialize new oscillator
   ShaderSettings(shaderId, j, "ColoredDrops") {
-    parameters = { shaderValue, zoom, brightness }; // Add new parameters
-    oscillators = { shaderValueOscillator, zoomOscillator, brightnessOscillator }; // Add new oscillators
+    parameters = { zoom, brightness }; // Add new parameters
+    oscillators = { zoomOscillator, brightnessOscillator }; // Add new oscillators
     load(j);
     registerParameters();
   };
@@ -52,7 +48,6 @@ struct ColoredDropsShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("zoom", settings->zoom->value); // Set uniform for zoom
     shader.setUniform1f("brightness", settings->brightness->value); // Set uniform for brightness
     shader.setUniform1f("time", ofGetElapsedTimef());
@@ -77,7 +72,6 @@ struct ColoredDropsShader: Shader {
   void drawSettings() override {
     CommonViews::H3Title("ColoredDrops");
 
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
     CommonViews::ShaderParameter(settings->zoom, settings->zoomOscillator); // Add zoom to drawSettings
     CommonViews::ShaderParameter(settings->brightness, settings->brightnessOscillator); // Add brightness to drawSettings
   }

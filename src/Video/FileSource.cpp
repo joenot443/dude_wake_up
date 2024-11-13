@@ -6,6 +6,7 @@
 //
 
 #include "FileSource.hpp"
+#include "VideoSourceService.hpp"
 #include "NodeLayoutView.hpp"
 #include "Fonts.hpp"
 #include "CommonViews.hpp"
@@ -92,6 +93,7 @@ void FileSource::load(json j)
   }
 
   path = j["path"];
+  VideoSourceService::getService()->startAccessingBookmarkPath(path);
   id = j["id"];
   sourceName = j["sourceName"];
   mute->boolValue = j["mute"];

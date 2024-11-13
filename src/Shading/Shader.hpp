@@ -128,6 +128,9 @@ public:
   void clearLastFrame();
 
   json serialize();
+  
+  bool allowAuxOutputSlot();
+  
 
   // Called after all the Shaders have been created.
   // Used to populate aux.

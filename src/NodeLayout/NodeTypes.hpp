@@ -44,6 +44,7 @@ struct Node
   std::shared_ptr<Shader> shader;
   std::shared_ptr<VideoSource> source;
   std::shared_ptr<Connectable> connectable;
+  
 
   ImVec2 position;
 

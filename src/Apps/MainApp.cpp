@@ -14,6 +14,7 @@
 #include "ShaderChainerService.hpp"
 #include "TransformShader.hpp"
 #include "UUID.hpp"
+#include "SyphonService.hpp"
 #include "LayoutStateService.hpp"
 #include "VideoSourceService.hpp"
 #include "MarkdownService.hpp"
@@ -42,6 +43,7 @@ void MainApp::setup()
   BookmarkService::getService();
   StrandService::getService();
   LayoutStateService::getService();
+  SyphonService::getService();
   gui.setup();
   ImGui::CreateContext();
   ImPlot::CreateContext();
@@ -51,6 +53,7 @@ void MainApp::setup()
   MarkdownService::getService();
   ConfigService::getService()->loadDefaultConfigFile();
   StrandService::getService()->setup();
+  SyphonService::getService()->setup();
   mainStageView->setup();
   LibraryService::getService()->backgroundFetchLibraryFiles();
   ParameterService::getService()->setup();

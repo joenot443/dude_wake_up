@@ -238,37 +238,26 @@ std::shared_ptr<VideoSource> VideoSourceService::makeFileVideoSource(std::string
   BookmarkService* bookmarkService = BookmarkService::getService();
   std::shared_ptr<VideoSource> videoSource = nullptr;
   
-  // Check if bookmark exists for the given path
-  if (!bookmarkService->hasBookmarkForPath(path)) {
-    // No bookmark exists, create one
-    bookmarkService->saveBookmarkForPath(path);
-    
-    // Check again if bookmark was successfully saved
-    if (!bookmarkService->hasBookmarkForPath(path)) {
-      log("Failed to create bookmark for path: %s", path.c_str());
-      return nullptr;  // Return early on error
-    }
-  }
-  
-  // Load the bookmark data
-  CFDataRef bookmarkData = bookmarkService->loadBookmarkForPath(path);
-  if (!bookmarkData) {
-    log("Failed to load bookmark for path: %s", path.c_str());
+  // Use the new bookmarkForPath method
+  auto bookmarkString = bookmarkService->bookmarkForPath(path);
+  if (!bookmarkString) {
+    log("Failed to create or retrieve bookmark for path: %s", path.c_str());
     return nullptr;  // Return early on error
   }
   
   // Resolve the bookmark to get the file URL
+  CFDataRef bookmarkData = CFDataCreate(kCFAllocatorDefault, reinterpret_cast<const UInt8*>(bookmarkString->c_str()), bookmarkString->length());
   Boolean isStale = false;
   CFErrorRef error = nullptr;
   CFURLRef fileURL = CFURLCreateByResolvingBookmarkData(
-                                                        kCFAllocatorDefault,        // Allocator
-                                                        bookmarkData,               // Bookmark data
-                                                        kCFURLBookmarkResolutionWithSecurityScope,  // Options (or 0 if no security scope needed)
-                                                        nullptr,                    // relativeToURL (can be nullptr)
-                                                        nullptr,                    // resourcePropertiesToInclude (can be nullptr)
-                                                        &isStale,                   // isStale flag
-                                                        &error                      // CFErrorRef for error reporting
-                                                        );
+    kCFAllocatorDefault,        // Allocator
+    bookmarkData,               // Bookmark data
+    kCFURLBookmarkResolutionWithSecurityScope,  // Options (or 0 if no security scope needed)
+    nullptr,                    // relativeToURL (can be nullptr)
+    nullptr,                    // resourcePropertiesToInclude (can be nullptr)
+    &isStale,                   // isStale flag
+    &error                      // CFErrorRef for error reporting
+  );
   
   // Check if fileURL is resolved successfully
   if (!fileURL) {
@@ -297,9 +286,6 @@ std::shared_ptr<VideoSource> VideoSourceService::makeFileVideoSource(std::string
   // At this point, we have successfully resolved the bookmark and accessed the resource
   videoSource = std::make_shared<FileSource>(id, name, path);
   videoSource->origin = origin;
-  
-  // Stop accessing the security-scoped resource when done
-  CFURLStopAccessingSecurityScopedResource(fileURL);
   
   // Release CF objects
   CFRelease(fileURL);
@@ -344,9 +330,64 @@ std::shared_ptr<VideoSource> VideoSourceService::makeShaderVideoSource(ShaderSou
 // Adds an Image video source to the map
 std::shared_ptr<VideoSource> VideoSourceService::makeImageVideoSource(std::string name, std::string path, ImVec2 origin, std::string id, json j)
 {
-  std::shared_ptr<VideoSource> videoSource = std::make_shared<ImageSource>(id, name, path);
+  // Get the bookmark service instance
+  BookmarkService* bookmarkService = BookmarkService::getService();
+  std::shared_ptr<VideoSource> videoSource = nullptr;
+  
+  // Use the new bookmarkForPath method
+  auto bookmarkString = bookmarkService->bookmarkForPath(path);
+  if (!bookmarkString) {
+    log("Failed to create or retrieve bookmark for path: %s", path.c_str());
+    return nullptr;  // Return early on error
+  }
+  
+  // Resolve the bookmark to get the file URL
+  CFDataRef bookmarkData = CFDataCreate(kCFAllocatorDefault, reinterpret_cast<const UInt8*>(bookmarkString->c_str()), bookmarkString->length());
+  Boolean isStale = false;
+  CFErrorRef error = nullptr;
+  CFURLRef fileURL = CFURLCreateByResolvingBookmarkData(
+    kCFAllocatorDefault,        // Allocator
+    bookmarkData,               // Bookmark data
+    kCFURLBookmarkResolutionWithSecurityScope,  // Options (or 0 if no security scope needed)
+    nullptr,                    // relativeToURL (can be nullptr)
+    nullptr,                    // resourcePropertiesToInclude (can be nullptr)
+    &isStale,                   // isStale flag
+    &error                      // CFErrorRef for error reporting
+  );
+  
+  // Check if fileURL is resolved successfully
+  if (!fileURL) {
+    log("Failed to resolve bookmark data for path: %s", path.c_str());
+    if (error) {
+      CFStringRef errorDesc = CFErrorCopyDescription(error);
+      char buffer[256];
+      CFStringGetCString(errorDesc, buffer, sizeof(buffer), kCFStringEncodingUTF8);
+      log("Bookmark Resolution Error", buffer);
+      CFRelease(errorDesc);
+      CFRelease(error);  // Release error reference
+    }
+    CFRelease(bookmarkData);  // Release bookmarkData before returning
+    return nullptr;
+  }
+  
+  // Start accessing the security-scoped resource
+  Boolean success = CFURLStartAccessingSecurityScopedResource(fileURL);
+  if (!success) {
+    log("Failed to access security-scoped resource for URL: %s", path.c_str());
+    CFRelease(fileURL);     // Release fileURL
+    CFRelease(bookmarkData); // Release bookmarkData
+    return nullptr;  // Return early on error
+  }
+  
+  // At this point, we have successfully resolved the bookmark and accessed the resource
+  videoSource = std::make_shared<ImageSource>(id, name, path);
   videoSource->load(j);
   videoSource->origin = origin;
+  
+  // Release CF objects
+  CFRelease(fileURL);
+  CFRelease(bookmarkData);
+  
   return videoSource;
 }
 
@@ -478,7 +519,8 @@ void VideoSourceService::appendConfig(json j)
       std::shared_ptr<LibraryFile> libraryFile = LibraryService::getService()->libraryFileForId(j["libraryFileId"]);
       source = makeLibraryVideoSource(libraryFile, position, sourceId, j);
   }
-  addVideoSource(source, sourceId);
+  if (source != nullptr)
+  	addVideoSource(source, sourceId);
 }
 
 void VideoSourceService::clear()
@@ -555,4 +597,58 @@ void VideoSourceService::captureOutputWindowScreenshot()
   } else {
     ofLog() << "Failed";
   }
+}
+
+void VideoSourceService::startAccessingBookmarkPath(std::string path)
+{
+  // Get the bookmark service instance
+  BookmarkService* bookmarkService = BookmarkService::getService();
+  
+  // Use the bookmarkForPath method to get the bookmark string
+  auto bookmarkString = bookmarkService->bookmarkForPath(path);
+  if (!bookmarkString) {
+    log("Failed to create or retrieve bookmark for path: %s", path.c_str());
+    return;  // Return early on error
+  }
+  
+  // Convert the bookmark string to CFDataRef
+  CFDataRef bookmarkData = CFDataCreate(kCFAllocatorDefault, reinterpret_cast<const UInt8*>(bookmarkString->c_str()), bookmarkString->length());
+  Boolean isStale = false;
+  CFErrorRef error = nullptr;
+  
+  // Resolve the bookmark to get the file URL
+  CFURLRef fileURL = CFURLCreateByResolvingBookmarkData(
+    kCFAllocatorDefault,        // Allocator
+    bookmarkData,               // Bookmark data
+    kCFURLBookmarkResolutionWithSecurityScope,  // Options (or 0 if no security scope needed)
+    nullptr,                    // relativeToURL (can be nullptr)
+    nullptr,                    // resourcePropertiesToInclude (can be nullptr)
+    &isStale,                   // isStale flag
+    &error                      // CFErrorRef for error reporting
+  );
+  
+  // Check if fileURL is resolved successfully
+  if (!fileURL) {
+    log("Failed to resolve bookmark data for path: %s", path.c_str());
+    if (error) {
+      CFStringRef errorDesc = CFErrorCopyDescription(error);
+      char buffer[256];
+      CFStringGetCString(errorDesc, buffer, sizeof(buffer), kCFStringEncodingUTF8);
+      log("Bookmark Resolution Error", buffer);
+      CFRelease(errorDesc);
+      CFRelease(error);  // Release error reference
+    }
+    CFRelease(bookmarkData);  // Release bookmarkData before returning
+    return;
+  }
+  
+  // Start accessing the security-scoped resource
+  Boolean success = CFURLStartAccessingSecurityScopedResource(fileURL);
+  if (!success) {
+    log("Failed to access security-scoped resource for URL: %s", path.c_str());
+  }
+  
+  // Release CF objects
+  CFRelease(fileURL);
+  CFRelease(bookmarkData);
 }

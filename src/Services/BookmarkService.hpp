@@ -16,6 +16,7 @@ class BookmarkService
 public:
   void saveBookmarkForPath(std::string path);
   bool hasBookmarkForPath(std::string path);
+  std::shared_ptr<std::string> bookmarkForPath(std::string path);
   CFDataRef loadBookmarkForPath(std::string path);
 
   void setup() {

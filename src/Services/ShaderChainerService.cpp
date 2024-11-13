@@ -7,8 +7,10 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "SimpleBarsShader.hpp"
+#include "ComicbookShader.hpp"
 #include "BackgroundShader.hpp"
-#include "SimplePathShader.hpp"
+#include "SimpleShapeShader.hpp"
 #include "ColoredDropsShader.hpp"
 #include "PlasmorShader.hpp"
 #include "AutotangentShader.hpp"
@@ -141,6 +143,12 @@
 #include "VanGoghShader.hpp"
 #include "VideoSourceService.hpp"
 #include "WobbleShader.hpp"
+#include "WebcamSource.hpp"
+#include "FileSource.hpp"
+#include "ImageSource.hpp"
+#include "TextSource.hpp"
+#include "IconSource.hpp"
+#include "LibrarySource.hpp"
 #include "LayoutStateService.hpp"
 
 void ShaderChainerService::setup()
@@ -252,7 +260,7 @@ void ShaderChainerService::processFrame()
     std::shared_ptr<Shader> shader = std::dynamic_pointer_cast<Shader>(connection->end);
     
     // No need to traverse if the video's not active
-    if (!videoSource->active) continue;
+    if (videoSource && !videoSource->active) continue;
     
     shader->traverseFrame(videoSource->frame(), 0);
   }
@@ -498,6 +506,97 @@ void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader, bool fro
   ConfigService::getService()->saveDefaultConfigFile();
 }
 
+std::vector<std::shared_ptr<Connectable>> ShaderChainerService::pasteConnectables(const std::vector<std::shared_ptr<Connectable>>& connectables) {
+  std::map<std::shared_ptr<Connectable>, std::shared_ptr<Connectable>> originalToNewMap;
+  std::vector<std::shared_ptr<Connectable>> newConnectables;
+  
+  // Step 1: Create new instances of each connectable
+  for (const auto& original : connectables) {
+    std::shared_ptr<Connectable> newConnectable;
+
+    if (original->connectableType() == ConnectableTypeShader) {
+      auto originalShader = std::dynamic_pointer_cast<Shader>(original);
+      auto newShader = makeShader(originalShader->type());
+      newShader->settings->x->setValue(originalShader->settings->x->value);
+      newShader->settings->y->setValue(originalShader->settings->y->value);
+      newShader->settings->copyFrom(*originalShader->settings);
+      addShader(newShader);
+      newConnectable = newShader;
+    } else if (original->connectableType() == ConnectableTypeSource) {
+      auto originalSource = std::dynamic_pointer_cast<VideoSource>(original);
+      std::shared_ptr<VideoSource> newSource;
+
+      switch (originalSource->type) {
+        case VideoSource_webcam: {
+          auto webcamSource = std::dynamic_pointer_cast<WebcamSource>(originalSource);
+          newSource = VideoSourceService::getService()->makeWebcamVideoSource(webcamSource->name(), webcamSource->settings->deviceId->intValue);
+          break;
+        }
+        case VideoSource_file: {
+          auto fileSource = std::dynamic_pointer_cast<FileSource>(originalSource);
+          newSource = VideoSourceService::getService()->makeFileVideoSource(fileSource->name(), fileSource->path);
+          break;
+        }
+        case VideoSource_image: {
+          auto imageSource = std::dynamic_pointer_cast<ImageSource>(originalSource);
+          newSource = VideoSourceService::getService()->makeImageVideoSource(imageSource->name(), imageSource->path);
+          break;
+        }
+        case VideoSource_text: {
+          auto textSource = std::dynamic_pointer_cast<TextSource>(originalSource);
+          newSource = VideoSourceService::getService()->makeTextVideoSource(textSource->name());
+          break;
+        }
+        case VideoSource_icon: {
+          auto iconSource = std::dynamic_pointer_cast<IconSource>(originalSource);
+          newSource = VideoSourceService::getService()->makeIconVideoSource("Icon");
+          break;
+        }
+        case VideoSource_library: {
+          auto librarySource = std::dynamic_pointer_cast<LibrarySource>(originalSource);
+          newSource = VideoSourceService::getService()->makeLibraryVideoSource(librarySource->libraryFile);
+          break;
+        }
+        // Add other VideoSourceTypes as needed
+        default:
+          break;
+      }
+
+      if (newSource) {
+        newSource->settings->copyFrom(*originalSource->settings);
+        VideoSourceService::getService()->addVideoSource(newSource, UUID::generateUUID());
+        newConnectable = newSource;
+      }
+    }
+
+    if (newConnectable) {
+      originalToNewMap[original] = newConnectable;
+      newConnectables.push_back(newConnectable);
+    }
+  }
+
+  // Step 2: Create new connections
+  for (const auto& original : connectables) {
+    auto newConnectable = originalToNewMap[original];
+
+    // Copy input connections
+    for (const auto& [slot, conn] : original->inputs) {
+      auto newStart = originalToNewMap.count(conn->start) ? originalToNewMap[conn->start] : conn->start;
+      makeConnection(newStart, newConnectable, conn->type, conn->outputSlot, conn->inputSlot, true);
+    }
+
+    // Copy output connections
+    for (const auto& [slot, connections] : original->outputs) {
+      for (const auto& conn : connections) {
+        auto newEnd = originalToNewMap.count(conn->end) ? originalToNewMap[conn->end] : conn->end;
+        makeConnection(newConnectable, newEnd, conn->type, conn->outputSlot, conn->inputSlot, true);
+      }
+    }
+  }
+  
+  return newConnectables;
+}
+
 void ShaderChainerService::removeConnectable(std::shared_ptr<Connectable> connectable)
 {
   std::vector<std::string> connectionIdsToRemove;
@@ -677,7 +776,8 @@ std::shared_ptr<Connection> ShaderChainerService::makeConnection(std::shared_ptr
   // Only allow a single input for each type
   if (end->hasInputAtSlot(inputSlot))
   {
-    return nullptr;
+    log("Breaking Connection");
+    breakConnectionForConnectionId(end->connectionAt(inputSlot)->id);
   }
   
   auto connection = std::make_shared<Connection>(start, end, type, outputSlot, inputSlot);
@@ -719,15 +819,27 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeSimpleBars: {
+      auto settings = new SimpleBarsSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<SimpleBarsShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeComicbook: {
+      auto settings = new ComicbookSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<ComicbookShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeBackground: {
       auto settings = new BackgroundSettings(shaderId, shaderJson);
       auto shader = std::make_shared<BackgroundShader>(settings);
       shader->setup();
       return shader;
     }
-    case ShaderTypeSimplePath: {
-      auto settings = new SimplePathSettings(shaderId, shaderJson);
-      auto shader = std::make_shared<SimplePathShader>(settings);
+    case ShaderTypeSimpleShape: {
+      auto settings = new SimpleShapeSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<SimpleShapeShader>(settings);
       shader->setup();
       return shader;
     }

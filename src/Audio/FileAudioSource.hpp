@@ -17,10 +17,10 @@
 class FileAudioSource : public AudioSource {
 public:
   std::shared_ptr<AudioTrack> track;
+  
   ofxAudioFile audioFile;
   uint64_t currentSample = 0;
   size_t frameSize = 512;
-  
   ofSoundStream soundStream;
   
   void loadFile(std::shared_ptr<AudioTrack> audioTrack);

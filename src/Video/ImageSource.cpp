@@ -7,6 +7,7 @@
 
 #include "ImageSource.hpp"
 #include "NodeLayoutView.hpp"
+#include "VideoSourceService.hpp"
 #include "LayoutStateService.hpp"
 
 void ImageSource::setup()
@@ -51,6 +52,7 @@ void ImageSource::load(json j)
   }
 
   path = j["path"];
+  VideoSourceService::getService()->startAccessingBookmarkPath(path);
   id = j["id"];
   sourceName = j["sourceName"];
   settings->load(j["settings"]);

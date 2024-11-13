@@ -41,6 +41,7 @@ public:
   
   float widthFraction = 0.2;
   std::string tileBrowserId;
+  int tileCount = 0;
   
   template <typename T>
   TileBrowserView(const std::vector<std::shared_ptr<T>>& items) : tileItems(items.begin(), items.end()) {

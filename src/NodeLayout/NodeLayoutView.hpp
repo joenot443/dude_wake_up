@@ -61,10 +61,12 @@ public:
   
   
   void debug();
+  void drawDebugWindow();
   
   // Layout
   void queryNewLinks();
   void populateNodePositions();
+  void populateSelectedNodes();
   void drawNode(std::shared_ptr<Node> node);
   void drawPreviewWindow(std::shared_ptr<Node> node);
   void drawActionButtons();
@@ -95,9 +97,9 @@ public:
   
   void selectChainer(std::shared_ptr<Node> node);
 
-  // New methods for handling blend shader creation
   void createBlendShaderForSelectedNodes(ed::NodeId firstNodeId, ed::NodeId secondNodeId);
   std::shared_ptr<Node> getNodeById(ed::NodeId nodeId);
+  void addUnplacedConnectable(std::shared_ptr<Connectable> connectable);
 
   ed::EditorContext *context = nullptr;
   ed::Config *config = nullptr;
@@ -108,11 +110,13 @@ public:
   std::set<std::shared_ptr<Node>> nodes = {};
   std::set<std::shared_ptr<Node>> previewWindowNodes = {};
   std::set<std::shared_ptr<Node>> terminalNodes = {};
+  std::vector<std::shared_ptr<Connectable>> selectedConnectables = {};
   
   std::shared_ptr<Node> resolutionPopupNode;
   ImVec2 resolutionPopupLocation;
   bool popupLaunched;
   
+  bool debugWindowOpen = false;
   bool firstFrame = true;
   bool shouldDelete = false;
   bool makingLink = false;
@@ -126,7 +130,7 @@ public:
   std::map<long, std::shared_ptr<Node>> pinIdNodeMap;
   std::map<long, std::shared_ptr<Pin>> pinIdPinMap;
   std::map<long, std::shared_ptr<Node>> nodeIdNodeMap; // Use this map for node lookup
-
+	
   std::map<long, std::shared_ptr<ShaderLink>> linksMap;
   
   std::set<std::shared_ptr<Node>> nodesToOpen;

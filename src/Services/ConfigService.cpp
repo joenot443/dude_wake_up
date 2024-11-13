@@ -353,6 +353,11 @@ void ConfigService::saveConfigFile(std::string path)
   
   json config = currentConfig();
   
+  if (lastConfig == config) {
+    log("No need to save identical config");
+    return;
+  }
+  
   std::ofstream fileStream;
   fileStream.open(path.c_str(), std::ios::trunc);
   
@@ -363,6 +368,7 @@ void ConfigService::saveConfigFile(std::string path)
     fileStream.close();
     
     std::cout << "Successfully saved config" << std::endl;
+    lastConfig = config;
   }
   else
   {

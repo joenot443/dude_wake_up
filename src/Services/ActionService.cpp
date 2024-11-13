@@ -1,4 +1,6 @@
 #include "ActionService.hpp"
+#include "Commands/CopyCommand.hpp"
+#include "Commands/PasteCommand.hpp"
 
 // Initialize the static service instance
 ActionService* ActionService::service = nullptr;
@@ -126,4 +128,22 @@ std::shared_ptr<VideoSource> ActionService::addShaderVideoSource(ShaderSourceTyp
 void ActionService::removeVideoSource(std::shared_ptr<VideoSource> videoSource) {
   auto command = std::make_shared<RemoveVideoSourceCommand>(videoSource);
   executeCommand(command);
+}
+
+void ActionService::copy(const std::vector<std::shared_ptr<Connectable>>& connectables) {
+  auto command = std::make_shared<CopyCommand>(connectables);
+  executeCommand(command);
+}
+
+void ActionService::paste() {
+  auto command = std::make_shared<PasteCommand>();
+  executeCommand(command);
+}
+
+void ActionService::setCopiedConnectables(const std::vector<std::shared_ptr<Connectable>>& connectables) {
+  copiedConnectables = connectables;
+}
+
+std::vector<std::shared_ptr<Connectable>> ActionService::getCopiedConnectables() const {
+  return copiedConnectables;
 }

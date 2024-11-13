@@ -22,17 +22,17 @@ void TileBrowserView::setup(){};
 
 void TileBrowserView::setTileItems(std::vector<std::shared_ptr<TileItem>> items) {
   tileItems = items;
-  sortTileItems();
 }
 
 void TileBrowserView::sortTileItems() {
+  if (tileCount == tileItems.size()) return;
+  
   // Count the number of times each category appears in the tileItems
   std::map<std::string, int> categoryCounts;
   for (const auto &tileItem : tileItems) {
     categoryCounts[tileItem->category]++;
   }
   
-  // Sort the tileItems based on the number of times each category appears
   // Sort the tileItems based on the number of times each category appears
   std::sort(tileItems.begin(), tileItems.end(),
             [&](const auto &a, const auto &b) {
@@ -47,12 +47,12 @@ void TileBrowserView::sortTileItems() {
     return a->category < b->category;
   });
   
-  
+  tileCount = tileItems.size();
 }
 
 void TileBrowserView::draw()
 {
-  sortTileItems();
+//  sortTileItems();
   auto n = 0;
   auto size = ImGui::GetContentRegionAvail();
   std::string lastCategory = "";

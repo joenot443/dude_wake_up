@@ -168,33 +168,25 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
       ImGui::TableNextColumn();
       
       // Beats
-      if (LayoutStateService::getService()->abletonLinkEnabled) {
-        ImGui::Text("%s", formatString("Ableton Tempo: %f", AudioSourceService::getService()->link.captureAppSessionState().tempo()).c_str());
-      } else {
-        ImGui::Text("BPM Tracker");
-      }
-      ImGui::SameLine();
-      if (ImGui::BeginPopupModal("##BPMTrackerInfo", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
-        MarkdownView("BPM Tracker").draw();
-        ImGui::EndPopup();
-      }
+      bool isSampleTrack = source->type() == AudioSourceType_File;
       
-      if (CommonViews::IconButton(ICON_MD_INFO, "BPM Tracker")) {
-        ImGui::OpenPopup("##BPM Tracker");
+      if (LayoutStateService::getService()->abletonLinkEnabled) {
+        CommonViews::H3Title(formatString("Ableton BPM: %f", AudioSourceService::getService()->link.captureAppSessionState().tempo()).c_str(), false);
+      } else {
+        CommonViews::H3Title(formatString("BPM: %f", AudioSourceService::getService()->selectedAudioSource->audioAnalysis.bpm->value).c_str(), false);
       }
       ImGui::SameLine();
+      
       ImGui::Checkbox("Ableton Link?", &LayoutStateService::getService()->abletonLinkEnabled);
       
       // Only draw graph if we're enabled
-      if (source->audioAnalysis.bpmEnabled) {
+      if (source->audioAnalysis.bpmEnabled || isSampleTrack) {
         source->audioAnalysis.beatPulseOscillator->enabled = true;
         OscillatorView::draw(dynamic_pointer_cast<Oscillator>( source->audioAnalysis.beatPulseOscillator), source->audioAnalysis.beatPulse);
-      } else {
-        ImGui::NewLine();
       }
       
       // Draw BPM controls
-      if (!LayoutStateService::getService()->abletonLinkEnabled) {
+      if (!LayoutStateService::getService()->abletonLinkEnabled && !isSampleTrack) {
         ImGui::SameLine();
         
         if (ImGui::BeginChild("##BPMControls", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionMax().y))) {
@@ -232,8 +224,6 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
         }
         ImGui::EndChild();
       }
-      
-      
       
       ImGui::TableNextColumn();
       

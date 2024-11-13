@@ -60,6 +60,8 @@ public:
   std::shared_ptr<VideoSource> defaultVideoSource();
   std::shared_ptr<VideoSourceSettings> defaultVideoSourceSettings();
   
+  void startAccessingBookmarkPath(std::string path);
+  
   std::shared_ptr<ofFbo> emptyFbo;
 
   std::map<std::string, std::shared_ptr<AvailableVideoSource>> availableSourceMap;

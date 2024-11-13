@@ -5,7 +5,8 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
-#include "SimplePathShader.hpp"
+#include "SimpleBarsShader.hpp"
+#include "SimpleShapeShader.hpp"
 #include "ColoredDropsShader.hpp"
 #include "PlasmorShader.hpp"
 #include "DiffractorShader.hpp"
@@ -155,7 +156,8 @@ enum ShaderSourceType {
   ShaderSource_Diffractor, //source enum,
   ShaderSource_Plasmor, //source enum,
   ShaderSource_ColoredDrops, //source enum,
-  ShaderSource_SimplePath, //source enum,
+  ShaderSource_SimpleShape, //source enum,
+  ShaderSource_SimpleBars, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -224,14 +226,17 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_Diffractor, // Available
   ShaderSource_Plasmor, // Available
   ShaderSource_ColoredDrops, // Available
-  ShaderSource_SimplePath, // Available
+  ShaderSource_SimpleShape, // Available
+  ShaderSource_SimpleBars, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
       // shaderTypeForShaderSourceType
-  case ShaderSource_SimplePath: //type enum
-    return ShaderTypeSimplePath;
+  case ShaderSource_SimpleBars: //type enum
+    return ShaderTypeSimpleBars;
+  case ShaderSource_SimpleShape: //type enum
+    return ShaderTypeSimpleShape;
   case ShaderSource_ColoredDrops: //type enum
     return ShaderTypeColoredDrops;
   case ShaderSource_Plasmor: //type enum
@@ -473,9 +478,15 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
         // Shader Settings
-    case ShaderSource_SimplePath: { // Settings
-      auto settings = new SimplePathSettings(UUID::generateUUID(), 0);
-      shader = std::make_shared<SimplePathShader>(settings);
+    case ShaderSource_SimpleBars: { // Settings
+      auto settings = new SimpleBarsSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<SimpleBarsShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_SimpleShape: { // Settings
+      auto settings = new SimpleShapeSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<SimpleShapeShader>(settings);
       shader->setup();
       return;
     }

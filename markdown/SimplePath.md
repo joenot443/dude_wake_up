@@ -1,3 +1,3 @@
-# SimplePath
+# SimpleShape
 
-Information about SimplePath
+Information about SimpleShape

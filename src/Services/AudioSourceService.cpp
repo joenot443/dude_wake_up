@@ -23,6 +23,7 @@ void AudioSourceService::affirmSampleAudioTrack() {
   // Load the track into the Source
   if (selectedAudioSource->type() == AudioSourceType_File) {
     std::shared_ptr<FileAudioSource> source = std::dynamic_pointer_cast<FileAudioSource>(selectedAudioSource);
+    source->audioAnalysis.bpm->setValue((int) selectedSampleTrack->bpm);
     source->loadFile(selectedSampleTrack);
   }
 }
@@ -40,7 +41,14 @@ void AudioSourceService::populateTracks() {
   {
     std::string path = dir.getPath(i);
     std::string name = dir.getName(i);
-    audioTracks.push_back(std::make_shared<AudioTrack>(name, path));
+    // The first 3 characters of the filename will correspond to the BPM of the track.
+    // i.e. 120A Nottawa Song.mp3
+    int bpm = std::stoi(name.substr(0, 3));
+    if (bpm == 0) {
+      continue;
+    }
+    std::string trackName = name.substr(4);
+    audioTracks.push_back(std::make_shared<AudioTrack>(trackName, path, bpm));
   }
   // Sort by name
   std::sort(audioTracks.begin(), audioTracks.end(), [](std::shared_ptr<AudioTrack> a, std::shared_ptr<AudioTrack> b)
@@ -106,9 +114,12 @@ void AudioSourceService::update() {
     double beatCount = link.captureAppSessionState().beatAtTime(link.clock().micros(), 4.);
     // Only use the fractional component of the beatCount
     selectedAudioSource->audioAnalysis.updateBeat(beatCount - floor(beatCount));
-  } else {
+  } else if (selectedAudioSource->type() == AudioSourceType_Microphone){ // Don't update for the samples
     selectedAudioSource->audioAnalysis.bpm->value = AudioSourceService::getService()->tapper.bpm();
     selectedAudioSource->audioAnalysis.updateBeat(tapper.beatPerc());
+  } else if (selectedAudioSource->type() == AudioSourceType_File) {
+    selectedAudioSource->audioAnalysis.bpmEnabled = true;
+    selectedAudioSource->audioAnalysis.updateBeat(selectedAudioSource->audioAnalysis.bpmPct());
   }
 }
 

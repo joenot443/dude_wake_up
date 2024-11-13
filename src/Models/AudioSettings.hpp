@@ -111,7 +111,9 @@ struct AudioAnalysis {
   AudioAnalysisParameter highsAnalysisParam;
   AudioAnalysisParameter midsAnalysisParam;
   AudioAnalysisParameter lowsAnalysisParam;
-
+  
+  u_int64_t bpmStartTime;
+  
   std::vector<std::shared_ptr<Parameter>> parameters;
   std::vector<AudioAnalysisParameter *> analysisParameters;
   
@@ -126,7 +128,7 @@ struct AudioAnalysis {
         mids(std::make_shared<Parameter>("Mids", 0.0, 0.0, 1.0)),
         lows(std::make_shared<Parameter>("Lows", 0.0, 0.0, 1.0)),
         beatPulse(std::make_shared<Parameter>("BPM", 0.0, 0.0, 1.0)),
-        bpm(std::make_shared<Parameter>("bpm", 60.0, 0.0, 300.0)),
+        bpm(std::make_shared<Parameter>("bpm", 120.0, 0.0, 300.0)),
         frequencyRelease(std::make_shared<Parameter>("Frequency Release", 0.95, 0.0, 1.0)),
         frequencyScale(std::make_shared<Parameter>("Frequency Scale", 1.0, 0.0, 5.0)),
         rmsOscillator(std::make_shared<ValueOscillator>(rms)),
@@ -144,7 +146,6 @@ struct AudioAnalysis {
 
   void analyzeFrame(Gist<float> *gist) {
     magnitudeSpectrum = gist->getMagnitudeSpectrum();
-//        Vectors::normalize(Vectors::sqrt(gist->getMagnitudeSpectrum()));
     melFrequencySpectrum =
         Vectors::normalize(Vectors::sqrt(gist->getMelFrequencySpectrum()));
     smoothSpectrum = Vectors::release(magnitudeSpectrum, smoothSpectrum, frequencyRelease->value);
@@ -159,7 +160,23 @@ struct AudioAnalysis {
     mids->setValue(buckets[1]);
     highs->setValue(buckets[2]);
   }
-  
+
+  float bpmPct() {
+    // Get the current time in milliseconds
+    auto currentTime = std::chrono::steady_clock::now();
+    auto currentTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
+    
+    // Calculate the time elapsed since bpmStartTime in seconds
+    auto elapsedTime = (currentTimeMs - bpmStartTime) / 1000.0;
+    
+    // Calculate the duration of a single beat in seconds
+    float beatDuration = 60.0f / bpm->value;
+    
+    // Calculate the percentage of the current beat that has elapsed
+    float pct = fmod(elapsedTime, beatDuration) / beatDuration;
+    
+    return pct;
+  }
 
   std::vector<float> splitAndAverage(const std::vector<float>& frequencies, int count) {
       std::vector<float> averages;

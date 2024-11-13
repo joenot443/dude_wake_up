@@ -68,43 +68,43 @@
 		<data>
 		3y++sUAKzaCQmjLBz2v0kvESHgc=
 		</data>
-		<key>Resources/data/audio/A Nottawa Song.mp3</key>
-		<data>
-		WxD1wuDfZtO6BAGHaepfGVp2S0k=
-		</data>
-		<key>Resources/data/audio/Bass Cascade.mp3</key>
-		<data>
-		VKl2XB/Db/oHh6m2+r3hYj0aLkw=
-		</data>
-		<key>Resources/data/audio/Crisp Horizon.mp3</key>
-		<data>
-		+vpSo/ZnA1ADGQaJLJog1NYsLTU=
-		</data>
-		<key>Resources/data/audio/Echoes of Tomorrow.mp3</key>
-		<data>
-		04TEF5OOF1J8jf4j98W4VqtyaDY=
-		</data>
-		<key>Resources/data/audio/Eclipse.mp3</key>
-		<data>
-		huavnGUHHMPXYFhYk2cTJJR1/wI=
-		</data>
-		<key>Resources/data/audio/L Train.mp3</key>
-		<data>
-		4q6dG2mBE/p1yFUDXkRQ+KJ3AO4=
-		</data>
-		<key>Resources/data/audio/Liquid Glow.mp3</key>
+		<key>Resources/data/audio/065Liquid Glow.mp3</key>
 		<data>
 		Y077+I87B+2jqlGBBa7ah1lj9zw=
 		</data>
-		<key>Resources/data/audio/Neon Drift.mp3</key>
+		<key>Resources/data/audio/080L Train.mp3</key>
 		<data>
-		AcimDaFMkV9BKg9wo/Rs5xTd7Nw=
+		4q6dG2mBE/p1yFUDXkRQ+KJ3AO4=
 		</data>
-		<key>Resources/data/audio/Solar Flare.mp3</key>
+		<key>Resources/data/audio/088Solar Flare.mp3</key>
 		<data>
 		fuEIcSaJc/kUb8xS18pREMFbFIA=
 		</data>
-		<key>Resources/data/audio/Velvet Skies.mp3</key>
+		<key>Resources/data/audio/108Neon Drift.mp3</key>
+		<data>
+		AcimDaFMkV9BKg9wo/Rs5xTd7Nw=
+		</data>
+		<key>Resources/data/audio/110Crisp Horizon.mp3</key>
+		<data>
+		+vpSo/ZnA1ADGQaJLJog1NYsLTU=
+		</data>
+		<key>Resources/data/audio/120A Nottawa Song.mp3</key>
+		<data>
+		WxD1wuDfZtO6BAGHaepfGVp2S0k=
+		</data>
+		<key>Resources/data/audio/130Bass Cascade.mp3</key>
+		<data>
+		VKl2XB/Db/oHh6m2+r3hYj0aLkw=
+		</data>
+		<key>Resources/data/audio/133Echoes of Tomorrow.mp3</key>
+		<data>
+		04TEF5OOF1J8jf4j98W4VqtyaDY=
+		</data>
+		<key>Resources/data/audio/138Eclipse.mp3</key>
+		<data>
+		huavnGUHHMPXYFhYk2cTJJR1/wI=
+		</data>
+		<key>Resources/data/audio/87Velvet Skies.mp3</key>
 		<data>
 		R1Qw0X9SHp1jIjaxaDLP0zxqTRA=
 		</data>
@@ -1168,6 +1168,10 @@
 		<data>
 		BfUe0jYLmvSo3fFvJWfLBsm7SLo=
 		</data>
+		<key>Resources/data/markdown/Comicbook.md</key>
+		<data>
+		Jlzleo0uwTdERjR1S5yfritrH0M=
+		</data>
 		<key>Resources/data/markdown/Core.md</key>
 		<data>
 		HY6hpRs2eBVsBS8YBNgMAAA18ng=
@@ -1496,9 +1500,13 @@
 		<data>
 		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
 		</data>
+		<key>Resources/data/markdown/SimpleBars.md</key>
+		<data>
+		r7cb+Dt5avH0Y/Mih+CtGqp8UGI=
+		</data>
 		<key>Resources/data/markdown/SimplePath.md</key>
 		<data>
-		rGyV8NRPYPKCw07Q3z/xrSUyTFo=
+		OVgRgVyEiKTqWIVmbMlGyIFbgIA=
 		</data>
 		<key>Resources/data/markdown/Slider.md</key>
 		<data>
@@ -1774,7 +1782,7 @@
 		</data>
 		<key>Resources/data/shaders/Canny.frag</key>
 		<data>
-		wU8Cc2mm6ytXJN8+UHz4aCmZAuY=
+		+RnfyPWTs/vElh84q+X5gG4FefQ=
 		</data>
 		<key>Resources/data/shaders/Canny.vert</key>
 		<data>
@@ -1820,17 +1828,9 @@
 		<data>
 		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
-		<key>Resources/data/shaders/ColorKeyMask.frag</key>
-		<data>
-		LC282hiHV3xdskk6vq9/tXzXUDY=
-		</data>
-		<key>Resources/data/shaders/ColorKeyMask.vert</key>
-		<data>
-		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
-		</data>
 		<key>Resources/data/shaders/ColorKeyMaskMaker.frag</key>
 		<data>
-		uzsTQKFxzm1uHDSwmnu6fS4I5fc=
+		I40x6HTsnPV9IYNZeE/1aj0dphQ=
 		</data>
 		<key>Resources/data/shaders/ColorKeyMaskMaker.vert</key>
 		<data>
@@ -1881,6 +1881,14 @@
 		1DJ8rRrDJSPa+D4xhYcKdeU5A88=
 		</data>
 		<key>Resources/data/shaders/ColoredDrops.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
+		</data>
+		<key>Resources/data/shaders/Comicbook.frag</key>
+		<data>
+		OMRbDaWehqdIto7hy2zz2leJgXw=
+		</data>
+		<key>Resources/data/shaders/Comicbook.vert</key>
 		<data>
 		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
@@ -2346,11 +2354,11 @@
 		</data>
 		<key>Resources/data/shaders/Paint.frag</key>
 		<data>
-		ryvUiuw/EfqrSYFcn4Eso1OzINE=
+		Qq634sRDLbMVAgaHD1yvQjg8ozk=
 		</data>
 		<key>Resources/data/shaders/Paint.vert</key>
 		<data>
-		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
+		M0lC/95lwJABvm2Z7lQmY14j0Wo=
 		</data>
 		<key>Resources/data/shaders/Perplexion.frag</key>
 		<data>
@@ -2488,6 +2496,14 @@
 		<data>
 		QTEA/C8tXzVHzDb+mLcZYgqmg5o=
 		</data>
+		<key>Resources/data/shaders/SimpleBars.frag</key>
+		<data>
+		LC282hiHV3xdskk6vq9/tXzXUDY=
+		</data>
+		<key>Resources/data/shaders/SimpleBars.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
+		</data>
 		<key>Resources/data/shaders/SimplePath.frag</key>
 		<data>
 		LC282hiHV3xdskk6vq9/tXzXUDY=
@@ -2567,6 +2583,14 @@
 		<key>Resources/data/shaders/StaticFrame.vert</key>
 		<data>
 		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
+		</data>
+		<key>Resources/data/shaders/Stroke.frag</key>
+		<data>
+		UH45oTESEQYdaCgyoHFuSTy6PfY=
+		</data>
+		<key>Resources/data/shaders/Stroke.vert</key>
+		<data>
+		afYCI3/9k9dxCgcRYvZUPqDDsnQ=
 		</data>
 		<key>Resources/data/shaders/Swirl.frag</key>
 		<data>
@@ -3944,70 +3968,70 @@
 			ysvmS9xjmEDzWFKPCnf4AfRtakfLlHZOG3B95IT08nw=
 			</data>
 		</dict>
-		<key>Resources/data/audio/A Nottawa Song.mp3</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			OODhtDci0bH88CWqGIqdLZUIth2FTBo/FZp3x960/Ck=
-			</data>
-		</dict>
-		<key>Resources/data/audio/Bass Cascade.mp3</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			GbZUqbWuuIi1D2MqnfiqG6QXWypHtBKJ10J+0qLRhos=
-			</data>
-		</dict>
-		<key>Resources/data/audio/Crisp Horizon.mp3</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			zrbZun0kg2taV0tSv1PN/Apq7ABqLoKeEdTQL+YXjC4=
-			</data>
-		</dict>
-		<key>Resources/data/audio/Echoes of Tomorrow.mp3</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			EbX+e1sh598Peb/pJD83NJOcGZ/88R0RI6zEj3QQrQY=
-			</data>
-		</dict>
-		<key>Resources/data/audio/Eclipse.mp3</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			cZnGqujh+N6oFDvm0jNcQN3bP0ieh7ZCu5swJRTSniM=
-			</data>
-		</dict>
-		<key>Resources/data/audio/L Train.mp3</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			zee4iYeV7O6b4umCuxkKXqWTCSKdXhn6p9isGOOyThQ=
-			</data>
-		</dict>
-		<key>Resources/data/audio/Liquid Glow.mp3</key>
+		<key>Resources/data/audio/065Liquid Glow.mp3</key>
 		<dict>
 			<key>hash2</key>
 			<data>
 			sprgLd0CY250UZ5DJAB3Egw8YYRoodyvA4D/0wCkV24=
 			</data>
 		</dict>
-		<key>Resources/data/audio/Neon Drift.mp3</key>
+		<key>Resources/data/audio/080L Train.mp3</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			hnb0sYcxpm/QmttM3lxCsk9MDEPraAD2lb0TnijLnVQ=
+			zee4iYeV7O6b4umCuxkKXqWTCSKdXhn6p9isGOOyThQ=
 			</data>
 		</dict>
-		<key>Resources/data/audio/Solar Flare.mp3</key>
+		<key>Resources/data/audio/088Solar Flare.mp3</key>
 		<dict>
 			<key>hash2</key>
 			<data>
 			u6yyHu1zc7mWvGibfRrZ6JCQe3B32VHohHMpDZDxO6I=
 			</data>
 		</dict>
-		<key>Resources/data/audio/Velvet Skies.mp3</key>
+		<key>Resources/data/audio/108Neon Drift.mp3</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			hnb0sYcxpm/QmttM3lxCsk9MDEPraAD2lb0TnijLnVQ=
+			</data>
+		</dict>
+		<key>Resources/data/audio/110Crisp Horizon.mp3</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			zrbZun0kg2taV0tSv1PN/Apq7ABqLoKeEdTQL+YXjC4=
+			</data>
+		</dict>
+		<key>Resources/data/audio/120A Nottawa Song.mp3</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			OODhtDci0bH88CWqGIqdLZUIth2FTBo/FZp3x960/Ck=
+			</data>
+		</dict>
+		<key>Resources/data/audio/130Bass Cascade.mp3</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			GbZUqbWuuIi1D2MqnfiqG6QXWypHtBKJ10J+0qLRhos=
+			</data>
+		</dict>
+		<key>Resources/data/audio/133Echoes of Tomorrow.mp3</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			EbX+e1sh598Peb/pJD83NJOcGZ/88R0RI6zEj3QQrQY=
+			</data>
+		</dict>
+		<key>Resources/data/audio/138Eclipse.mp3</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			cZnGqujh+N6oFDvm0jNcQN3bP0ieh7ZCu5swJRTSniM=
+			</data>
+		</dict>
+		<key>Resources/data/audio/87Velvet Skies.mp3</key>
 		<dict>
 			<key>hash2</key>
 			<data>
@@ -5827,6 +5851,13 @@
 			TXPwPtuHJCyqEPtuchL+tRj2F16/eI2eN9qiL2iBqlY=
 			</data>
 		</dict>
+		<key>Resources/data/markdown/Comicbook.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			b0gjtf839NDgrATSkCpQMW6H4LFrRh/MzT7Fo+zbFcU=
+			</data>
+		</dict>
 		<key>Resources/data/markdown/Core.md</key>
 		<dict>
 			<key>hash2</key>
@@ -6401,11 +6432,18 @@
 			47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=
 			</data>
 		</dict>
+		<key>Resources/data/markdown/SimpleBars.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			esIYMOUgOS5d9FoWOSPRylVT+fwp2rzy15lusbgro7c=
+			</data>
+		</dict>
 		<key>Resources/data/markdown/SimplePath.md</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			hycFD3hVIrMVe7crL5GQbZ0NaQw19SVM/b+T+Pmj/g4=
+			Gc805f7zzvJEYk5jop1F8ZOn2efokAYlJTyLT4+O97o=
 			</data>
 		</dict>
 		<key>Resources/data/markdown/Slider.md</key>
@@ -6874,7 +6912,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			vsO6ql3jmbnrRpf//5mskQbcPUWMYFWuamILOdG2pvY=
+			E90MRopXaZSYi/TeLDRPfFFtfKb+rEZ0TV43mzDtIqc=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Canny.vert</key>
@@ -6954,25 +6992,11 @@
 			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
 			</data>
 		</dict>
-		<key>Resources/data/shaders/ColorKeyMask.frag</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			OH6EDyenQ1SmdgzROsupsf81AorN48zSfdnY/F4DOXU=
-			</data>
-		</dict>
-		<key>Resources/data/shaders/ColorKeyMask.vert</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
-			</data>
-		</dict>
 		<key>Resources/data/shaders/ColorKeyMaskMaker.frag</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			BuQo2de/hM2/QT6v0GT1thGPCUmeMv386J5sanI8Bxc=
+			aVvMUtFXAIJrNMM9t0UkIM1qOliRjTycUF2NJMd2Rbo=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/ColorKeyMaskMaker.vert</key>
@@ -7060,6 +7084,20 @@
 			</data>
 		</dict>
 		<key>Resources/data/shaders/ColoredDrops.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/Comicbook.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			7ARf+KM1p4blRjkWlXrtYjuP4y9q1GAzSO8VfnH5KW8=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/Comicbook.vert</key>
 		<dict>
 			<key>hash2</key>
 			<data>
@@ -7875,14 +7913,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			rfPanW4X0W0CASV7pqVhFVMfWfZlQ/5I1LrByzedf54=
+			trjbzrZIxBaTX5VktL/B2d2u9/qXDaHC4BJMFda/tbw=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Paint.vert</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			EzjQ626e/6hJOUBNVvWDMzY8Fa2sZ9KFntQe4SUcr9c=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Perplexion.frag</key>
@@ -8123,6 +8161,20 @@
 			IGPdwkBH8zPmzz0yIeEene5tWUVwQ4GfsnBkL9bDK/I=
 			</data>
 		</dict>
+		<key>Resources/data/shaders/SimpleBars.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			OH6EDyenQ1SmdgzROsupsf81AorN48zSfdnY/F4DOXU=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/SimpleBars.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			</data>
+		</dict>
 		<key>Resources/data/shaders/SimplePath.frag</key>
 		<dict>
 			<key>hash2</key>
@@ -8261,6 +8313,20 @@
 			<key>hash2</key>
 			<data>
 			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/Stroke.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			OVbT7BauBhiO7iUOfqwS0lNvI+WrRvhd8yF8bhqmGHQ=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/Stroke.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			mNd/IgH5jLksriHaEMVBXy6+EDQG5i2IZFeHoCiXrzk=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Swirl.frag</key>

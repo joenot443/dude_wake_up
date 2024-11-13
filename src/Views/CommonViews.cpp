@@ -84,7 +84,7 @@ bool CommonViews::ShaderParameter(std::shared_ptr<Parameter> param,
   {
     return ret;
   }
-  OscillatorWindow(osc, param);
+//  OscillatorWindow(osc, param);
   return ret;
 }
 
@@ -495,16 +495,16 @@ void CommonViews::MultiSlider(std::string title, std::string id, std::shared_ptr
   ImGui::SameLine();
   CommonViews::OscillateButton(formatString("##yOscillator_%s", id.c_str()).c_str(), param2Oscillator, param2);
   CommonViews::Slider(param2->name, param2->paramId, param2);
-  if (param1Oscillator->enabled->boolValue)
-  {
-    OscillatorWindow(param1Oscillator, param1);
-  }
-  
-  
-  if (param2Oscillator->enabled->boolValue)
-  {
-    OscillatorWindow(param2Oscillator, param2);
-  }
+//  if (param1Oscillator->enabled->boolValue)
+//  {
+//    OscillatorWindow(param1Oscillator, param1);
+//  }
+//  
+//  
+//  if (param2Oscillator->enabled->boolValue)
+//  {
+//    OscillatorWindow(param2Oscillator, param2);
+//  }
   ImGui::Columns(1);
 }
 

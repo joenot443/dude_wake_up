@@ -47,7 +47,7 @@ public:
   maxYOscillator(std::make_shared<WaveformOscillator>(maxY)),
   translateXOscillator(std::make_shared<WaveformOscillator>(translateX)),
   translateYOscillator(std::make_shared<WaveformOscillator>(translateY)),
-  scaleOscillator(std::make_shared<WaveformOscillator>(scale, 0.2, 0.0, 5.0)),
+  scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
   ShaderSettings(shaderId, j, name) {
     parameters = {minX, maxX, minY, maxY, scale, translateX, translateY};
     oscillators = {minXOscillator, maxXOscillator, minYOscillator, maxYOscillator, translateXOscillator, translateYOscillator, scaleOscillator};
@@ -86,8 +86,8 @@ public:
     float cropY = settings->minY->value * frameHeight;
     float cropWidth = (settings->maxX->value - settings->minX->value) * frameWidth;
     float cropHeight = (settings->maxY->value - settings->minY->value) * frameHeight;
-    float scaleX = cropWidth * settings->scale->value;
-    float scaleY = cropHeight * settings->scale->value;
+    float scaleX = cropWidth * settings->scale->value * settings->scale->value;
+    float scaleY = cropHeight * settings->scale->value * settings->scale->value;
     
     ofClear(0, 0, 0, 0);
     ofPushMatrix();

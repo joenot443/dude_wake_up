@@ -18,7 +18,10 @@
 #include <stdio.h>
 
 struct PaintSettings: public ShaderSettings {
+  std::shared_ptr<Parameter> paintOver;
+  
   PaintSettings(std::string shaderId, json j, std::string name) :
+  paintOver(std::make_shared<Parameter>("Paint Over", ParameterType_Bool)),
 
   ShaderSettings(shaderId, j, name) {
     parameters = { };
@@ -43,7 +46,11 @@ struct PaintShader: Shader {
     if (!lastFrame.isAllocated() || lastFrame.getWidth() != frame->getWidth() || lastFrame.getHeight() != frame->getHeight()) {
       lastFrame.allocate(frame->getWidth(), frame->getHeight());
     }
+    
     // Paint new frame onto lastFrame
+    shader.begin();
+    shader.setUniformTexture("newTex", frame->getTexture(), 4);
+    shader.setUniformTexture("baseTex", lastFrame.getTexture(), 8);
     lastFrame.begin();
     if (shouldClear) {
       ofClear(0,0,0, 255);
@@ -53,6 +60,7 @@ struct PaintShader: Shader {
     }
     frame->draw(0, 0);
     lastFrame.end();
+    shader.end();
     
     // Paint the lastFrame onto canvas
     canvas->begin();

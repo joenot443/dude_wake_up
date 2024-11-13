@@ -1,12 +1,12 @@
 //
-//  SimplePathShader.hpp
+//  SimpleShapeShader.hpp
 //  dude_wake_up
 //
 //  Created by Joe Crozier on 8/30/22.
 //
 
-#ifndef SimplePathShader_hpp
-#define SimplePathShader_hpp
+#ifndef SimpleShapeShader_hpp
+#define SimpleShapeShader_hpp
 
 #include "LayoutStateService.hpp"
 #include "ofMain.h"
@@ -18,7 +18,7 @@
 #include "Shader.hpp"
 #include <stdio.h>
 
-struct SimplePathSettings: public ShaderSettings {
+struct SimpleShapeSettings: public ShaderSettings {
   std::shared_ptr<Parameter> shape;
   std::shared_ptr<Parameter> scale;
   std::shared_ptr<Parameter> xPosition;
@@ -36,7 +36,7 @@ struct SimplePathSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> rotateOscillator;
   std::shared_ptr<WaveformOscillator> autoRotateOscillator;
   
-  SimplePathSettings(std::string shaderId, json j) :
+  SimpleShapeSettings(std::string shaderId, json j) :
   shape(std::make_shared<Parameter>("Shape", 0, 0, 2)), // 0: Square, 1: Triangle, 2: Circle
   scale(std::make_shared<Parameter>("Scale", 1.0, 0.1, 5.0)),
   xPosition(std::make_shared<Parameter>("X Position", 0.5, 0.0, 1.0)),
@@ -52,7 +52,7 @@ struct SimplePathSettings: public ShaderSettings {
   strokeWidthOscillator(std::make_shared<WaveformOscillator>(strokeWidth)),
   rotateOscillator(std::make_shared<WaveformOscillator>(rotate)),
   autoRotateOscillator(std::make_shared<WaveformOscillator>(autoRotate)),
-  ShaderSettings(shaderId, j, "SimplePath") {
+  ShaderSettings(shaderId, j, "SimpleShape") {
     parameters = { shape, scale, xPosition, yPosition, fillColor, strokeColor, strokeWidth, rotate, autoRotate };
     oscillators = { yPositionOscillator, xPositionOscillator, strokeWidthOscillator, rotateOscillator, autoRotateOscillator };
     strokeColor->setColor({1.0, 1.0, 0.0, 1.0});
@@ -61,12 +61,12 @@ struct SimplePathSettings: public ShaderSettings {
   };
 };
 
-struct SimplePathShader: Shader {
-  SimplePathSettings *settings;
-  SimplePathShader(SimplePathSettings *settings) : settings(settings), Shader(settings) {};
+struct SimpleShapeShader: Shader {
+  SimpleShapeSettings *settings;
+  SimpleShapeShader(SimpleShapeSettings *settings) : settings(settings), Shader(settings) {};
   
   void setup() override {
-    shader.load("shaders/SimplePath");
+    shader.load("shaders/SimpleShape");
   }
   
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -126,11 +126,11 @@ struct SimplePathShader: Shader {
   }
   
   ShaderType type() override {
-    return ShaderTypeSimplePath;
+    return ShaderTypeSimpleShape;
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("SimplePath");
+    CommonViews::H3Title("SimpleShape");
     if (ImGui::Button("Randomize Shape")) {
       random();
     }

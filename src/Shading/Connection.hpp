@@ -172,6 +172,7 @@ public:
     return false;
   }
   
+  
   std::vector<OutputSlot> populatedOutputSlots()
   {
     std::vector<OutputSlot> slots;
@@ -361,6 +362,11 @@ public:
     {
       auto& connections = conn->start->outputs[conn->outputSlot];
       connections.erase(std::remove(connections.begin(), connections.end(), conn), connections.end());
+      
+      // If it's the last Connection in that OutputSlot, remove the entry
+      if (connections.empty()) {
+        conn->start->outputs.erase(conn->outputSlot);
+      }
     }
     
     // Remove the connection from the 'inputs' map of the ending Connectable
@@ -392,6 +398,15 @@ public:
     }
 
     return allConnections;
+  }
+
+  std::shared_ptr<Connection> connectionAt(InputSlot slot)
+  {
+    auto it = inputs.find(slot);
+    if (it != inputs.end()) {
+      return it->second;
+    }
+    return nullptr;
   }
 };
 

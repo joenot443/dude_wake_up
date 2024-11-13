@@ -46,7 +46,7 @@ void Shader::traverseFrame(std::shared_ptr<ofFbo> frame, int depth)
   }
 
   // If necessary, copy the texture to the Shader's FeedbackDestination
-  if (feedbackDestination != nullptr && feedbackDestination->beingConsumed())
+  if (feedbackDestination != nullptr && feedbackDestination->beingConsumed() && feedbackDestination->type == FeedbackType_full)
   {
     feedbackDestination->pushFrame(lastFrame);
   }
@@ -194,4 +194,8 @@ void Shader::populateLastFrame() {
   ofClear(0,0,0,0);
   optionalFrame->draw(0, 0, lastFrame->getWidth(), lastFrame->getHeight());
   lastFrame->end();
+}
+
+bool Shader::allowAuxOutputSlot() {
+  return type() == ShaderTypeFeedback || type() == ShaderTypeColorKeyMaskMaker || type() == ShaderTypeLumaMaskMaker;
 }

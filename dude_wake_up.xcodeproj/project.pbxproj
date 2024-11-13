@@ -74,6 +74,12 @@
 		029F41BC297B047500B6DB77 /* LibraryService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 029F41BA297B047500B6DB77 /* LibraryService.cpp */; };
 		029F87B52BC585980059B1DA /* IconService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 029F87B32BC585980059B1DA /* IconService.cpp */; };
 		029F87B72BC76A7F0059B1DA /* Connection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 029F87B62BC76A7F0059B1DA /* Connection.cpp */; };
+		02ADC6AB2CE504350055B9AA /* ofxSyphonServer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 02ADC6A32CE504350055B9AA /* ofxSyphonServer.mm */; };
+		02ADC6AC2CE504350055B9AA /* ofxSyphonClient.mm in Sources */ = {isa = PBXBuildFile; fileRef = 02ADC6A52CE504350055B9AA /* ofxSyphonClient.mm */; };
+		02ADC6AD2CE504350055B9AA /* ofxSyphonServerDirectory.mm in Sources */ = {isa = PBXBuildFile; fileRef = 02ADC6A62CE504350055B9AA /* ofxSyphonServerDirectory.mm */; };
+		02ADC6AE2CE504350055B9AA /* ofxSyphonNSObject.mm in Sources */ = {isa = PBXBuildFile; fileRef = 02ADC6A82CE504350055B9AA /* ofxSyphonNSObject.mm */; };
+		02ADC6B12CE504860055B9AA /* SyphonNameboundClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 02ADC6AF2CE504860055B9AA /* SyphonNameboundClient.m */; };
+		02ADC6B32CE505370055B9AA /* Syphon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 02ADC6B22CE505370055B9AA /* Syphon.framework */; };
 		02B16FC829674AF30043CA74 /* imgui_node_editor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B16F3A29674AF30043CA74 /* imgui_node_editor.cpp */; };
 		02B16FC929674AF30043CA74 /* imgui_node_editor_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B16F4D29674AF30043CA74 /* imgui_node_editor_api.cpp */; };
 		02B16FCA29674AF30043CA74 /* imgui_canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02B16F4E29674AF30043CA74 /* imgui_canvas.cpp */; };
@@ -515,6 +521,18 @@
 		02A19F40294BC11800D3ECC0 /* RGBShiftShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = RGBShiftShader.hpp; path = Shading/RGBShiftShader.hpp; sourceTree = "<group>"; };
 		02A19F41294CBA3600D3ECC0 /* WobbleShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = WobbleShader.hpp; path = Shading/WobbleShader.hpp; sourceTree = "<group>"; };
 		02A442AE2A4F1735005B611A /* WarpShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = WarpShader.hpp; path = Shading/WarpShader.hpp; sourceTree = "<group>"; };
+		02ADC6A22CE504350055B9AA /* ofxSyphon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxSyphon.h; sourceTree = "<group>"; };
+		02ADC6A32CE504350055B9AA /* ofxSyphonServer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ofxSyphonServer.mm; sourceTree = "<group>"; };
+		02ADC6A42CE504350055B9AA /* ofxSyphonServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxSyphonServer.h; sourceTree = "<group>"; };
+		02ADC6A52CE504350055B9AA /* ofxSyphonClient.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ofxSyphonClient.mm; sourceTree = "<group>"; };
+		02ADC6A62CE504350055B9AA /* ofxSyphonServerDirectory.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ofxSyphonServerDirectory.mm; sourceTree = "<group>"; };
+		02ADC6A72CE504350055B9AA /* ofxSyphonClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxSyphonClient.h; sourceTree = "<group>"; };
+		02ADC6A82CE504350055B9AA /* ofxSyphonNSObject.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ofxSyphonNSObject.mm; sourceTree = "<group>"; };
+		02ADC6A92CE504350055B9AA /* ofxSyphonServerDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxSyphonServerDirectory.h; sourceTree = "<group>"; };
+		02ADC6AA2CE504350055B9AA /* ofxSyphonNSObject.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ofxSyphonNSObject.hpp; sourceTree = "<group>"; };
+		02ADC6AF2CE504860055B9AA /* SyphonNameboundClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SyphonNameboundClient.m; path = lib/Syphon/src/SyphonNameboundClient.m; sourceTree = SOURCE_ROOT; };
+		02ADC6B02CE504860055B9AA /* SyphonNameboundClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SyphonNameboundClient.h; path = lib/Syphon/src/SyphonNameboundClient.h; sourceTree = SOURCE_ROOT; };
+		02ADC6B22CE505370055B9AA /* Syphon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Syphon.framework; path = lib/Syphon/lib/osx/Syphon.framework; sourceTree = "<group>"; };
 		02B049C6296DCD8000F68451 /* AvailableVideoSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AvailableVideoSource.hpp; sourceTree = "<group>"; };
 		02B16F3A29674AF30043CA74 /* imgui_node_editor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_node_editor.cpp; sourceTree = "<group>"; };
 		02B16F3C29674AF30043CA74 /* imgui_node_editor.natvis */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = imgui_node_editor.natvis; sourceTree = "<group>"; };
@@ -678,6 +696,9 @@
 		02EE436D2CD13F56008E9D41 /* MakeConnectionCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MakeConnectionCommand.hpp; sourceTree = "<group>"; };
 		02EE436E2CD13F57008E9D41 /* AddLibraryVideoSourceCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AddLibraryVideoSourceCommand.hpp; sourceTree = "<group>"; };
 		02EE436F2CD15AFF008E9D41 /* RemoveVideoSourceCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = RemoveVideoSourceCommand.hpp; sourceTree = "<group>"; };
+		02EE43702CD55E18008E9D41 /* CopyCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CopyCommand.hpp; sourceTree = "<group>"; };
+		02EE43712CD55E18008E9D41 /* PasteCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PasteCommand.hpp; sourceTree = "<group>"; };
+		02EE43722CD953D8008E9D41 /* FramePreview.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = FramePreview.hpp; path = Views/FramePreview.hpp; sourceTree = "<group>"; };
 		02F064D42B4C47C70016E67B /* TripleShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TripleShader.hpp; path = Shading/TripleShader.hpp; sourceTree = "<group>"; };
 		02F2A06429C4D8AF0072CE86 /* TextSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TextSource.cpp; sourceTree = "<group>"; };
 		02F2A06529C4D8AF0072CE86 /* TextSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TextSource.hpp; sourceTree = "<group>"; };
@@ -966,6 +987,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				02ADC6B32CE505370055B9AA /* Syphon.framework in Frameworks */,
 				0216D34E2B8073E100D792AA /* libcpr.1.dylib in Frameworks */,
 				02FAEA3D2B3DDFD900CA20F6 /* libfftw3.a in Frameworks */,
 				02542F132A4C6FEB005D3C72 /* libsentry.dylib in Frameworks */,
@@ -1003,6 +1025,7 @@
 				026ED08B2C52AC5F00810E44 /* ofxVideoRecorder.h */,
 				02543DAC2C9F59B100513FEF /* ofxAudioFile.cpp */,
 				02543DAD2C9F59B300513FEF /* ofxAudioFile.h */,
+				02ADC6A12CE504350055B9AA /* ofxSyphon */,
 			);
 			name = libs;
 			sourceTree = "<group>";
@@ -1137,6 +1160,7 @@
 		02A0C4892A4B0C4500974602 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				02ADC6B22CE505370055B9AA /* Syphon.framework */,
 				023FA4692CADA123009512C3 /* boost_filesystem.a */,
 				023FA46A2CADA123009512C3 /* boost_system.a */,
 				026ED0912C5929AB00810E44 /* libcpr.1.10.5.dylib */,
@@ -1146,6 +1170,25 @@
 				02542F122A4C6FEB005D3C72 /* libsentry.dylib */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		02ADC6A12CE504350055B9AA /* ofxSyphon */ = {
+			isa = PBXGroup;
+			children = (
+				02ADC6A22CE504350055B9AA /* ofxSyphon.h */,
+				02ADC6A32CE504350055B9AA /* ofxSyphonServer.mm */,
+				02ADC6A42CE504350055B9AA /* ofxSyphonServer.h */,
+				02ADC6A52CE504350055B9AA /* ofxSyphonClient.mm */,
+				02ADC6A62CE504350055B9AA /* ofxSyphonServerDirectory.mm */,
+				02ADC6A72CE504350055B9AA /* ofxSyphonClient.h */,
+				02ADC6A82CE504350055B9AA /* ofxSyphonNSObject.mm */,
+				02ADC6A92CE504350055B9AA /* ofxSyphonServerDirectory.h */,
+				02ADC6AA2CE504350055B9AA /* ofxSyphonNSObject.hpp */,
+				02ADC6B02CE504860055B9AA /* SyphonNameboundClient.h */,
+				02ADC6AF2CE504860055B9AA /* SyphonNameboundClient.m */,
+			);
+			name = ofxSyphon;
+			path = lib/ofxSyphon;
 			sourceTree = "<group>";
 		};
 		02B16F3929674AF30043CA74 /* imgui-node-editor */ = {
@@ -1364,6 +1407,8 @@
 		02EE435D2CD13561008E9D41 /* Commands */ = {
 			isa = PBXGroup;
 			children = (
+				02EE43702CD55E18008E9D41 /* CopyCommand.hpp */,
+				02EE43712CD55E18008E9D41 /* PasteCommand.hpp */,
 				02EE436F2CD15AFF008E9D41 /* RemoveVideoSourceCommand.hpp */,
 				02EE436C2CD13F56008E9D41 /* AddFileVideoSourceCommand.hpp */,
 				02EE43632CD13F56008E9D41 /* AddIconVideoSourceCommand.hpp */,
@@ -1630,6 +1675,7 @@
 		721B30BA8F4AAE6EB850CE13 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				02EE43722CD953D8008E9D41 /* FramePreview.hpp */,
 				02BED6662C46BE7900E75054 /* StrandTileView.cpp */,
 				02BED6652C46BE7900E75054 /* StrandTileView.hpp */,
 				02BED65D2C46BD3300E75054 /* WelcomeScreenView.cpp */,
@@ -2295,7 +2341,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "mkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n# Copy default icon file into App/Resources\nrsync -aved \"$ICON_FILE\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n# Copy libfmod and change install directory for fmod to run\nrsync -aved \"$OF_PATH/libs/fmod/lib/osx/libfmod.dylib\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/\";\n# Not needed as we now call install_name_tool -id @loader_path/../Frameworks/libfmod.dylib libfmod.dylib on the dylib directly which prevents the need for calling every post build - keeping here for reference and possible legacy usage \n# install_name_tool -change @rpath/libfmod.dylib @executable_path/../Frameworks/libfmod.dylib \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/MacOS/$PRODUCT_NAME\";\n\nrsync -aved \"$NOTTAWA_DIR/lib/sentry-native/xcodebuild/Debug/libsentry.dylib\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/\";\n\necho \"$GCC_PREPROCESSOR_DEFINITIONS\";\nNOTTAWA_DIR=\"/Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up\"\nalias \n\n# Copy the shaders folder into Resources/data\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/\"\n\nrsync -av --progress \"$NOTTAWA_DIR/images/\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/images\"\n\n\ncp -R \"$NOTTAWA_DIR/shaders/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/shaders\"\n\n# Copy the markdown folder into Resources/data\ncp -R \"$NOTTAWA_DIR/markdown/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/markdown\"\n\n# Copy the fonts folder into Resources/data\ncp -R \"$NOTTAWA_DIR/fonts/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/fonts\"\n\n# Copy the misc folder into Resources/data\ncp -R \"$NOTTAWA_DIR/misc/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/misc\"\n\n# Copy the audio folder into Resources/data\ncp -R \"$NOTTAWA_DIR/audio/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/audio\"\n";
+			shellScript = "mkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n# Copy default icon file into App/Resources\nrsync -aved \"$ICON_FILE\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n# Copy libfmod and change install directory for fmod to run\nrsync -aved \"$OF_PATH/libs/fmod/lib/osx/libfmod.dylib\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/\";\n# Not needed as we now call install_name_tool -id @loader_path/../Frameworks/libfmod.dylib libfmod.dylib on the dylib directly which prevents the need for calling every post build - keeping here for reference and possible legacy usage \n# install_name_tool -change @rpath/libfmod.dylib @executable_path/../Frameworks/libfmod.dylib \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/MacOS/$PRODUCT_NAME\";\n\nrsync -aved \"$NOTTAWA_DIR/lib/sentry-native/xcodebuild/Debug/libsentry.dylib\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/\";\n\nrsync -aved \"$NOTTAWA_DIR/lib/Syphon/lib/osx/Syphon.framework\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/\";\n\n\necho \"$GCC_PREPROCESSOR_DEFINITIONS\";\nNOTTAWA_DIR=\"/Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up\"\nalias \n\n# Copy the shaders folder into Resources/data\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/\"\n\nrsync -av --progress \"$NOTTAWA_DIR/images/\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/images\"\n\n\ncp -R \"$NOTTAWA_DIR/shaders/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/shaders\"\n\n# Copy the markdown folder into Resources/data\ncp -R \"$NOTTAWA_DIR/markdown/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/markdown\"\n\n# Copy the fonts folder into Resources/data\ncp -R \"$NOTTAWA_DIR/fonts/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/fonts\"\n\n# Copy the misc folder into Resources/data\ncp -R \"$NOTTAWA_DIR/misc/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/misc\"\n\n# Copy the audio folder into Resources/data\ncp -R \"$NOTTAWA_DIR/audio/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/audio\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -2400,6 +2446,7 @@
 				02D63BC22CBB0785009CA010 /* imgui_impl_glfw_context_support.cpp in Sources */,
 				02B280E02913FE8200B793D5 /* FeedbackSourceService.cpp in Sources */,
 				9021CA48E18FB8B26215F64C /* Parameter.cpp in Sources */,
+				02ADC6AE2CE504350055B9AA /* ofxSyphonNSObject.mm in Sources */,
 				029F41BC297B047500B6DB77 /* LibraryService.cpp in Sources */,
 				DAA162C52DA366D4774E2A53 /* OscillatorView.cpp in Sources */,
 				75992458D44C948D353E0BF3 /* CommonViews.cpp in Sources */,
@@ -2458,6 +2505,7 @@
 				02B6272E2C5BD73D00D9D550 /* Icon.cpp in Sources */,
 				028FA5DC295B1ACE00FE6FE3 /* implot.cpp in Sources */,
 				DBBE189ECD171A97DCF46C6A /* BaseEngine.cpp in Sources */,
+				02ADC6AB2CE504350055B9AA /* ofxSyphonServer.mm in Sources */,
 				028FA5B22956062B00FE6FE3 /* OnsetDetectionFunction.cpp in Sources */,
 				023380D62BD05B710060A697 /* ImageTexture.cpp in Sources */,
 				C2114978C2A333BA9867109F /* DefaultTheme.cpp in Sources */,
@@ -2470,6 +2518,7 @@
 				023380D82BD05B710060A697 /* FeedbackShader.cpp in Sources */,
 				02F2A06A29C4F2A00072CE86 /* TextSource.cpp in Sources */,
 				029F87B72BC76A7F0059B1DA /* Connection.cpp in Sources */,
+				02ADC6AC2CE504350055B9AA /* ofxSyphonClient.mm in Sources */,
 				020B520D2BC8666200B88418 /* StageModeView.cpp in Sources */,
 				02543DA52C9DAF3300513FEF /* LibrarySource.cpp in Sources */,
 				026EA94A2A5EDA7500AA3E55 /* LibraryFile.cpp in Sources */,
@@ -2479,7 +2528,9 @@
 				028FA5B32956062B00FE6FE3 /* kiss_fft.c in Sources */,
 				028FA5B02956062B00FE6FE3 /* Gist.cpp in Sources */,
 				023C6349292A8DC700A8BC9E /* imgui_stdlib.cpp in Sources */,
+				02ADC6B12CE504860055B9AA /* SyphonNameboundClient.m in Sources */,
 				028BAE9A29684984003E7DF8 /* NodeLayoutView.cpp in Sources */,
+				02ADC6AD2CE504350055B9AA /* ofxSyphonServerDirectory.mm in Sources */,
 				A6F396BE5D1E24326E1F796A /* ofxImGuiLoggerChannel.cpp in Sources */,
 				02B16FDD29674AF30043CA74 /* crude_json.cpp in Sources */,
 				028E8E6029A6A0B800B95C92 /* MarkdownService.cpp in Sources */,
@@ -2932,6 +2983,8 @@
 					"$(inherited)",
 					/System/Library/Frameworks,
 					"$(PROJECT_DIR)/bin/$(PROJECT_NAME)/Contents/Frameworks",
+					"$(PROJECT_DIR)/lib/Syphon/**",
+					"$(PROJECT_DIR)/lib/Syphon/lib/osx",
 				);
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -2973,6 +3026,7 @@
 					"lib/imgui-node-editor",
 					"lib/sentry-native/include/**",
 					"lib/observable/**",
+					lib/ofxSyphon,
 					"lib/ableton/**",
 					src/Network,
 				);
@@ -2997,6 +3051,7 @@
 					"$(PROJECT_DIR)/frameworks",
 					/opt/local/lib,
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/lib/Syphon/lib/**",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
@@ -3157,6 +3212,8 @@
 					"$(inherited)",
 					/System/Library/Frameworks,
 					"$(PROJECT_DIR)/bin/$(PROJECT_NAME)/Contents/Frameworks",
+					"$(PROJECT_DIR)/lib/Syphon/**",
+					"$(PROJECT_DIR)/lib/Syphon/lib/osx",
 				);
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -3195,6 +3252,7 @@
 					"lib/imgui-node-editor",
 					"lib/sentry-native/include/**",
 					"lib/observable/**",
+					lib/ofxSyphon,
 					"lib/ableton/**",
 					src/Network,
 				);
@@ -3219,6 +3277,7 @@
 					"$(PROJECT_DIR)/frameworks",
 					/opt/local/lib,
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/lib/Syphon/lib/**",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
@@ -3260,6 +3319,8 @@
 					"$(inherited)",
 					/System/Library/Frameworks,
 					"$(PROJECT_DIR)/bin/$(PROJECT_NAME)/Contents/Frameworks",
+					"$(PROJECT_DIR)/lib/Syphon/**",
+					"$(PROJECT_DIR)/lib/Syphon/lib/osx",
 				);
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -3300,6 +3361,7 @@
 					"lib/imgui-node-editor",
 					"lib/sentry-native/include/**",
 					"lib/observable/**",
+					lib/ofxSyphon,
 					"lib/ableton/**",
 					src/Network,
 				);
@@ -3324,6 +3386,7 @@
 					"$(PROJECT_DIR)/frameworks",
 					/opt/local/lib,
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/lib/Syphon/lib/**",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;

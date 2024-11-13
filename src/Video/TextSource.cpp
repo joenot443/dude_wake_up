@@ -16,6 +16,8 @@ void TextSource::setup() {
   optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y, GL_RGBA);
   font.load(displayText->font.path(), displayText->fontSize);
   fontPath = displayText->font.path();
+  strokeShader.load("shaders/Stroke");
+  tempFbo.allocate(fbo->getWidth(), fbo->getHeight());
 }
 
 void TextSource::saveFrame() {
@@ -24,7 +26,7 @@ void TextSource::saveFrame() {
     setup();
   }
 
-  fbo->begin();
+  tempFbo.begin();
   
   bool shouldClear = false;
   
@@ -61,9 +63,28 @@ void TextSource::saveFrame() {
   }
 
   // Draw the text
-  ofSetColor(displayText->color);
-  bool anti = font.isAntiAliased();
+  ofSetColor(ofColor(255.0 * displayText->color->color->data()[0], 255.0 * displayText->color->color->data()[1], 255.0 * displayText->color->color->data()[2], 255.0 * displayText->color->color->data()[3]));
+  
   font.drawString(displayText->text, xPos, settings->height->intValue - yPos);
+  tempFbo.end();
+  
+  fbo->begin();
+  ofClear(0, 0.);
+  
+  if (displayText->strokeEnabled->boolValue) {
+    strokeShader.begin();
+    strokeShader.setUniform4f("backgroundColor", displayText->color->color->data()[0], displayText->color->color->data()[1], displayText->color->color->data()[2], 0.0);
+    strokeShader.setUniform4f("strokeColor", displayText->strokeColor->color->data()[0], displayText->strokeColor->color->data()[1], displayText->strokeColor->color->data()[2], displayText->strokeColor->color->data()[3]);
+    strokeShader.setUniform2f("dimensions", fbo->getWidth(), fbo->getHeight());
+    strokeShader.setUniform1f("minThresh", 0.1);
+    strokeShader.setUniform1f("maxThresh", 0.6);
+    strokeShader.setUniformTexture("tex", tempFbo.getTexture(), 4);
+    tempFbo.draw(0,0);
+    strokeShader.end();
+  } else {
+    tempFbo.draw(0,0);
+  }
+  
   fbo->end();
 }
 
@@ -72,13 +93,15 @@ json TextSource::serialize() {
   j["videoSourceType"] = VideoSource_text;
   j["id"] = id;
   j["fontName"] = displayText->font.name;
-  j["color"] = displayText->color.getHex();
+  j["color"] = displayText->color->serialize();
+  j["strokeColor"] = displayText->strokeColor->serialize();
   j["sourceName"] = sourceName;
   j["displayX"] = displayText->xPosition->value;
   j["displayY"] = displayText->yPosition->value;
   j["fontSize"] = displayText->fontSize;
   j["text"] = displayText->text;
   j["settings"] = settings->serialize();
+  j["strokeEnabled"] = displayText->strokeEnabled->boolValue;
   auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);
   if (node != nullptr) {
     j["x"] = node->position.x;
@@ -91,7 +114,8 @@ void TextSource::load(json j) {
   if (!j.is_object()) return;
   displayText->font.name = j["fontName"];
   font.load(displayText->font.path(), displayText->fontSize);
-  displayText->color = ofColor::fromHex(j["color"]);
+  displayText->color->load(j["color"]);
+  displayText->strokeColor->load(j["strokeColor"]);
 
   displayText->xPosition->value = j["displayX"];
   displayText->yPosition->value = j["displayY"];
@@ -100,6 +124,7 @@ void TextSource::load(json j) {
   displayText->text = j["text"];
   
   settings->load(j["settings"]);
+  displayText->strokeEnabled->setBoolValue(j.value("strokeEnabled", false));
 }
 
 void TextSource::drawSettings() {

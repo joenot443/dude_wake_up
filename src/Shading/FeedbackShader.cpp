@@ -45,18 +45,29 @@ void FeedbackShader::populateSource()
       {
         std::shared_ptr<Connectable> videoSource = parentOfType(ConnectableTypeSource);
         feedbackSource = FeedbackSourceService::getService()->feedbackSourceForId(videoSource->connId());
+        feedbackSource->type = FeedbackType_full;
       }
       else
       {
         feedbackSource = FeedbackSourceService::getService()->defaultFeedbackSource;
+        feedbackSource->type = FeedbackType_full;
       }
       break;
     case 1: // Current
+    {
       feedbackSource = FeedbackSourceService::getService()->feedbackSourceForId(shaderId);
+      feedbackSource->type = FeedbackType_full;
       break;
-    case 2: // Final
+    }
+    case 2: {// Final
       std::shared_ptr<Shader> terminalShader = ShaderChainerService::getService()->terminalShader(std::dynamic_pointer_cast<Shader>(shared_from_this()));
       feedbackSource = FeedbackSourceService::getService()->feedbackSourceForId(terminalShader->shaderId);
+      break;
+    }
+    case 3: // Self
+      feedbackSource = FeedbackSourceService::getService()->feedbackSourceForId(shaderId);
+      feedbackSource->type = FeedbackType_self;
+      if (feedbackSource->hasBeenPrimed == false) feedbackSource->primeFrameBuffer(parentFrame());
       break;
   }
   FeedbackSourceService::getService()->setConsumer(shaderId, feedbackSource);
@@ -87,8 +98,13 @@ ofTexture FeedbackShader::feedbackTexture()
   // Final descendent of the feedback aux chain
   std::shared_ptr<Shader> terminalAuxShader = std::dynamic_pointer_cast<Shader>(auxShader->terminalDescendent());
   std::shared_ptr<ofFbo> feedbackFbo = feedbackSource->getFbo(frameIndex());
-  
+  FramePreview::getInstance().setFrame(feedbackFbo);
   auxShader->traverseFrame(feedbackFbo, 0);
+  
+  // Push the resultant frame back into the feedbackSource
+  if (feedbackSource->type == FeedbackType_self) {
+    feedbackSource->pushFrame(terminalAuxShader->lastFrame);
+  }
   
   return terminalAuxShader->lastFrame->getTexture();
 }
@@ -135,39 +151,14 @@ void FeedbackShader::shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> 
   shader.setUniform1f("scale", 2.0 - settings->scale->value);
   
   
-  drawFbo(frame);
-  
-  //  // With feedback connected we need to flip our FBO to draw it
-  //  if (feedbackConnected())
-  //  {
-  //    ofPushMatrix();
-  //    ofScale(1, -1, 1);
-  //    ofTranslate(0, -frame->getHeight());
-  //    drawFbo(frame);
-  //    ofPopMatrix();
-  //  }
-  //  else
-  //  {
-  //    drawFbo(frame);
-  //  }
-  
+  frame->draw(0, 0);
+
   shader.end();
   canvas->end();
   
   clear();
 }
 
-void FeedbackShader::drawFbo(std::shared_ptr<ofFbo> fbo)
-{
-  if (settings->rotation->value != 0.0)
-  {
-    fbo->draw(0, 0);
-  }
-  else
-  {
-    fbo->draw(0, 0);
-  }
-}
 
 void FeedbackShader::clearFrameBuffer()
 {
@@ -186,7 +177,7 @@ void FeedbackShader::drawSettings()
   
   if (!hasInputAtSlot(InputSlotTwo)) {
     ImGui::PushItemWidth(50.0);
-    if (ImGui::Combo("Source", &settings->sourceSelection->intValue, "Origin\0Current\0Final\0"))
+    if (CommonViews::Selector(settings->sourceSelection, sourceNames))
     {
       populateSource();
     }

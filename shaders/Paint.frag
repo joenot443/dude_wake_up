@@ -1,6 +1,7 @@
 #version 150
 
-uniform sampler2D tex;
+uniform sampler2D newTex;
+uniform sampler2D baseTex;
 uniform vec2 dimensions;
 uniform float time;
 in vec2 coord;
@@ -9,13 +10,13 @@ out vec4 outputColor;
 
 void main()
 {
-  vec4 tex_color=texture(tex, coord);
-  float a = 0.0;
-  if (tex_color.a > 0.1) {
-    a = tex_color.a;
+  vec4 newTexColor = texture(newTex, coord);
+  vec4 baseTexColor = texture(baseTex, coord);
+  bool drawNewTex = false;
+  
+  if (baseTexColor.a < 0.1) {
+    outputColor = newTexColor;
+  } else {
+    outputColor = baseTexColor;
   }
-  outputColor = vec4(tex_color.x, tex_color.y, tex_color.z, a);
 }
-
-
-

@@ -16,8 +16,6 @@
 #include "Commands/RemoveVideoSourceCommand.hpp"
 #include "../Shading/ShaderType.hpp"
 #include "Connection.hpp"
-#include <stack>
-#include <memory>
 
 class ActionService {
 public:
@@ -43,6 +41,8 @@ public:
   bool canRedo() const;
   
   // Entry points for specific commands
+  
+  // Shader Commands
   std::shared_ptr<Shader> addShader(ShaderType shaderType);
   void removeShader(std::shared_ptr<Shader> shader);
   std::shared_ptr<Connection> makeConnection(std::shared_ptr<Connectable> start,
@@ -63,6 +63,14 @@ public:
   std::shared_ptr<VideoSource> addShaderVideoSource(ShaderSourceType type);
   void removeVideoSource(std::shared_ptr<VideoSource> videoSource);
   
+  // Copy/Paste
+  void copy(const std::vector<std::shared_ptr<Connectable>>& connectables);
+  void paste();
+  
+  // Methods to manage copied connectables
+  void setCopiedConnectables(const std::vector<std::shared_ptr<Connectable>>& connectables);
+  std::vector<std::shared_ptr<Connectable>> getCopiedConnectables() const;
+  
 private:
   // Private constructor to prevent instantiation
   ActionService() = default;
@@ -75,6 +83,9 @@ private:
   
   // Static instance of the service
   static ActionService* service;
+  
+  // Store copied connectables
+  std::vector<std::shared_ptr<Connectable>> copiedConnectables;
 };
 
 #endif // ACTION_SERVICE_HPP

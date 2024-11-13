@@ -22,8 +22,6 @@ public:
   void saveFrame() override;
   json serialize() override;
   void load(json j) override;
-
-private:
   std::string path;
 };
 

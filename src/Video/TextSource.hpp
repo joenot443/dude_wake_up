@@ -30,6 +30,8 @@ private:
   std::string fontPath;
   std::shared_ptr<DisplayText> displayText;
   std::string lastText;
+  ofShader strokeShader;
+  ofFbo tempFbo;
   float xPos = 0.0;
   float yPos = 0.0;
 };

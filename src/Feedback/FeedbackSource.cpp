@@ -15,26 +15,6 @@ bool FeedbackSource::beingConsumed() {
   return FeedbackSourceService::getService()->isSourceBeingConsumed(id);
 }
 
-void FeedbackSource::shadeFrame(std::shared_ptr<Connectable> conn) {
-  if (conn->connectableType() != ConnectableTypeShader) return;
-  
-  std::shared_ptr<Shader> shader = std::dynamic_pointer_cast<Shader>(conn);
-  
-  shader->traverseFrame(frameBuffer[startIndex], -INFINITY);
-  
-  // Get the final frame from that traversal chain
-  
-  std::shared_ptr<Shader> terminalShader = std::dynamic_pointer_cast<Shader>(shader->terminalDescendent());
-  
-  // Replace the relevant frame in our buffer
-  auto canvas = frameBuffer[startIndex];
-  canvas->begin();
-  ofClear(0,0,0, 255);
-  ofClear(0,0,0, 0);
-  terminalShader->lastFrame->draw(0, 0, terminalShader->lastFrame->getWidth(), terminalShader->lastFrame->getHeight());
-  canvas->end();
-}
-
 void FeedbackSource::resizeIfNecessary() {
   if (frameBuffer[0]->getWidth() != LayoutStateService::getService()->resolution.x) {
     setup();
@@ -57,4 +37,17 @@ void FeedbackSource::setup() {
     fbo->end();
     frameBuffer.push_back(fbo);
   }
+  
+  hasBeenPrimed = false;
+}
+
+void FeedbackSource::primeFrameBuffer(std::shared_ptr<ofFbo> fbo) {
+  setup();
+  
+  for (int i = 0; i < FrameBufferCount; i++) {
+    frameBuffer[i]->begin();
+    fbo->draw(0, 0);
+    frameBuffer[i]->end();
+  }
+  hasBeenPrimed = true;
 }
