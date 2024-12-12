@@ -7,6 +7,7 @@
 
 #include "FileBrowserView.hpp"
 #include "VideoSourceService.hpp"
+#include "Console.hpp"
 #include "File.hpp"
 #include "AvailableStrand.hpp"
 #include "AvailableVideoSource.hpp"
@@ -17,10 +18,7 @@
 #include "ofxImGui.h"
 
 void FileBrowserView::refresh()
-{
-  // TODO(joe) CHANGE AND FIX
-  return;
-  
+{  
   files.clear();
 
   currentDirectory.open(currentDirectory.getAbsolutePath());
@@ -33,7 +31,7 @@ void FileBrowserView::refresh()
     bool isDirectory = currentDirectory.getFile(i).isDirectory();
     files.push_back(File(currentDirectory.getPath(i), isDirectory));
   }
-  std::vector<TileItem> tileItems = {};
+  std::vector<std::shared_ptr<TileItem>> tileItems = {};
 
   for (auto file : files)
   {
@@ -45,6 +43,7 @@ void FileBrowserView::refresh()
                                                                      file.name, file.path);
       } else if (isImageFile(file.path)) {
         availableSource = std::make_shared<AvailableVideoSourceImage>(file.name, file.path);
+        availableSource->generatePreview();
       } else {
         continue;
       }
@@ -63,7 +62,12 @@ void FileBrowserView::refresh()
           ImGui::EndDragDropSource();
         }
       };
-      TileItem tileItem = TileItem(file.name, 0, 0, dragCallback);
+      ImTextureID textureId = (ImTextureID)(uint64_t) availableSource->preview->texData.textureID;
+      std::shared_ptr<TileItem> tileItem = std::make_shared<TileItem>(file.name, textureId, 0, dragCallback);
+      
+      if (isVideoFile(file.path))
+        previewQueue.push(std::make_pair(std::dynamic_pointer_cast<AvailableVideoSourceFile>(availableSource), tileItem));
+      
       tileItems.push_back(tileItem);
     }
     else if (type == FileBrowserType_JSON)
@@ -96,12 +100,13 @@ void FileBrowserView::refresh()
         }
       };
 
-      TileItem tileItem = TileItem(availableStrand.name, 0, 0, dragCallback);
+      std::shared_ptr<TileItem> tileItem = std::make_shared<TileItem>(availableStrand.name, (ImTextureID) 0, 0, dragCallback);
       tileItems.push_back(tileItem);
     }
   }
   VideoSourceService::getService()->addAvailableVideoSources(sources);
   listBrowserView.tileItems = tileItems;
+  tileBrowserView.setTileItems(tileItems);
 }
 
 void FileBrowserView::setup()
@@ -113,7 +118,7 @@ void FileBrowserView::setup()
   }
   else
   {
-    currentDirectory = ofDirectory(ConfigService::getService()->nottawaFolderFilePath());
+    currentDirectory = ofDirectory(LayoutStateService::getService()->libraryPath);
     ConfigService::getService()->subscribeToConfigUpdates([this]()
                                                           { refresh(); });
   }
@@ -121,9 +126,44 @@ void FileBrowserView::setup()
   refresh();
 }
 
-// Get a list of all files in the current directory.
-// Create a File for each file and add it to the files vector.
-void FileBrowserView::update() {}
+void FileBrowserView::loadDirectory(std::string directory)
+{
+  LayoutStateService::getService()->updateLibraryPath(directory);
+  currentDirectory = ofDirectory(directory);
+  refresh();
+}
+
+void FileBrowserView::update() {
+//  return; 
+  
+  if (previewQueue.empty()) return;
+  
+  auto& [source, tile] = previewQueue.front();
+  
+  if (!videoPlayer.isLoaded()) {
+    if (!videoPlayer.load(source->path)) {
+      ofLogError("FileBrowserView") << "Failed to load video file: " << source->path;
+      previewQueue.pop();
+      return;
+    }
+    videoPlayer.play();
+    videoPlayer.setVolume(0.0);
+  }
+  
+  videoPlayer.update();
+  
+  if (source->hasFailedToLoad(videoPlayer)) {
+    previewQueue.pop();
+    return;
+  }
+  
+  if (source->canGeneratePreview(videoPlayer)) {
+    source->generatePreview(videoPlayer);
+    tile->textureID = (ImTextureID) source->preview->texData.textureID;
+    previewQueue.pop();
+    videoPlayer.close();
+  }
+}
 
 // Display the Files in the files vector as items in a ListBox.
 // If a file is selected, update settings.selectedFile
@@ -184,5 +224,5 @@ void FileBrowserView::draw()
   
   ImGui::Text("%s", currentDirectory.getAbsolutePath().c_str());
 
-  listBrowserView.draw();
+  tileBrowserView.draw();
 }

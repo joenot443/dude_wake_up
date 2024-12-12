@@ -17,11 +17,11 @@ public:
   void draw();
   void update();
 
-  std::vector<TileItem> tileItems;
+  std::vector<std::shared_ptr<TileItem>> tileItems;
   float widthFraction = 0.2;
   std::string id;
 
-  ListBrowserView(std::vector<TileItem> tileItems) : tileItems(tileItems),
+  ListBrowserView(std::vector<std::shared_ptr<TileItem>> tileItems) : tileItems(tileItems),
   id(UUID::generateUUID())
   {};
 };

@@ -16,8 +16,11 @@ struct AvailableShader {
   ShaderType type;
   std::string name;
   std::shared_ptr<ofTexture> preview;
-  void generatePreview();
   
+  std::shared_ptr<ofFbo> basePreview;
+  void generatePreview();
+  void setBasePreview(std::shared_ptr<ofFbo> basePreview);
+
   AvailableShader(ShaderType type, std::string name);
 };
 

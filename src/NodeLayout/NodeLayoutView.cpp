@@ -8,6 +8,7 @@
 #include "NodeLayoutView.hpp"
 #include "FontService.hpp"
 #include "ImGuiExtensions.hpp"
+#include "SyphonService.hpp"
 #include "ActionService.hpp"
 #include "HelpService.hpp"
 #include "LibraryService.hpp"
@@ -42,12 +43,17 @@ void NodeLayoutView::setup()
   config = new ed::Config;
   config->SettingsFile = "NodeLayout.json";
   config->EnableSmoothZoom = true;
+
   ImVector<float> zooms = ImVector<float>();
-  //  zooms.push_back(1.0f);
-  //  config->CustomZoomLevels = zooms;
+    zooms.push_back(1.0f);
+//    config->CustomZoomLevels = zooms;
   
   context = ed::CreateEditor(config);
   ofAddListener(LibraryService::getService()->downloadNotification, this, &NodeLayoutView::haveDownloadedAvailableLibraryFile);
+  shaderBrowserView.setup();
+  shaderBrowserView.size = ImVec2(400.0, 500.0);
+  videoSourceBrowserView.setup();
+  videoSourceBrowserView.size = ImVec2(400.0, 500.0);
 }
 
 void NodeLayoutView::update() {}
@@ -99,7 +105,8 @@ void NodeLayoutView::draw()
   ed::SetCurrentEditor(context);
   ed::PushStyleColor(ax::NodeEditor::StyleColor_Bg, ImVec4(0, 0, 0, 0));
   ed::PushStyleColor(ax::NodeEditor::StyleColor_Grid, ImVec4(0, 0, 0, 0));
-  ed::PushStyleVar(ax::NodeEditor::StyleVar_SelectedNodeBorderWidth, 16.0);
+  CommonViews::PushRedesignStyle();
+
   
   bool showAudio = LayoutStateService::getService()->showAudioSettings;
   
@@ -109,17 +116,12 @@ void NodeLayoutView::draw()
   ed::Begin("My Editor", ImVec2(width, height));
   ed::NavigateToContent();
   
-  ed::PushStyleVar(ed::StyleVar_ScrollDuration, 0.1f);
-  ed::PushStyleVar(ax::NodeEditor::StyleVar_NodeRounding, 0.0);
-  ed::PushStyleVar(ax::NodeEditor::StyleVar_NodeBorderWidth, 1.0);
-  ed::PushStyleColor(ax::NodeEditor::StyleColor_NodeBorder, ImVec4(1.0, 1.0, 1.0, 1.0));
   int uniqueId = 1;
   int linkUniqueId = 1000;
   int sourceUniqueId = 10000;
   makingLink = false;
   linksMap.clear();
   nodeIdNodeMap.clear();
-  pinIdPinMap.clear();
   pinIdNodeMap.clear();
   terminalNodes.clear();
   
@@ -130,7 +132,7 @@ void NodeLayoutView::draw()
 //    log("Drawing node: %d - %s", count, shader->name().c_str());
     auto shaderNode = nodeForShaderSourceId(shader->shaderId, NodeTypeShader, shader->name(), shader);
     shaderNode->shader = shader;
-    drawNode(shaderNode);
+    drawNodeNew(shaderNode);
     
     nodes.insert(shaderNode);
     
@@ -153,7 +155,7 @@ void NodeLayoutView::draw()
     
     auto sourceNode = nodeForShaderSourceId(source->id, NodeTypeSource, source->sourceName, conn);
     sourceNode->source = source;
-    drawNode(sourceNode);
+    drawNodeNew(sourceNode);
     
     // Always draw a Preview for our Source
     terminalNodes.insert(sourceNode);
@@ -262,22 +264,115 @@ void NodeLayoutView::draw()
   
   drawActionButtons();
   
-  drawDebugWindow();
+//  drawDebugWindow();
     
   drawNodeWindows();
   
   drawUploadChainerWindow();
   
-  drawPreviewWindows();
+//  drawShaderBrowserView();
+//  drawPreviewWindows();
   
   drawHelp();
   
   ed::SetCurrentEditor(nullptr);
-  
+  CommonViews::PopRedesignStyle();
   drawSaveDialog();
   
   shouldDelete = false;
 }
+
+void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
+  ed::NodeId nodeId = node->id;
+  ed::BeginNode(node->id);
+  bool isSource = node->type == NodeTypeSource;
+  bool isShader = node->type == NodeTypeShader;
+  bool hasSelectorOpen = node->id == selectorNodeId;
+  bool height = hasSelectorOpen ? 1000.0 : 500.0;
+  auto pos = ImGui::GetCursorPos();
+  ImGui::Dummy(ImVec2(500.0, height));
+  ImGui::SetCursorScreenPos(ImGui::GetItemRectMin());
+  
+  // Preview:   500 x 280
+  // Node Size: 500 x 220  
+  node->drawPreviewSized(ImVec2(500.0, 280.0));
+    
+  /*
+  20 - 50   -    360   - 50  - 20
+    [Input] - Selector - [Output]
+   
+  */
+  pos = ImGui::GetCursorPos();
+  // Input Pin
+  
+  // Add padding
+  ImGui::SetCursorPos(pos + ImVec2(20.0, 30.0));
+  
+  // Inner Rect background
+  pos = ImGui::GetCursorPos();
+  float innerRectWidth = 460.0;
+  
+  // Offset to account for missing Input Pin for Source nodes
+  float offset = isSource ? 0.0 : 50.0;
+  
+  float selectorWidth = isSource ? 400.0 : 355.0;
+  
+  ed::GetCurrentDrawList()->AddRectFilled(ImVec2(pos.x, pos.y), ImVec2(pos.x + innerRectWidth, pos.y + 50.0), Colors::NodeInnerRectBackgroundColor, 10.0);
+  // Add padding
+  ImGui::SetCursorPos(pos + ImVec2(10.0, 10.0));
+  
+  // Input Pin if it exists
+  if (node->connectable->inputCount() > 0) {
+    ed::PinId inputPinId = CommonViews::InputNodePin(node, InputSlotMain);
+    pinIdNodeMap[inputPinId.Get()] = node;
+    ImGui::SameLine();
+  }
+  
+  if (CommonViews::SelectorTitleButton(node->connectable->name(), selectorWidth)) {
+    selectorNodeId = node->id;
+    if (isShader) {
+      ShaderChainerService::getService()->hydrateAuxillaryShaders(node->shader->lastFrame);
+      shaderBrowserView.setup();
+      shaderBrowserView.setCallback([this, &node](std::shared_ptr<TileItem> tile) {
+        handleUpdatedShaderNode(node, tile);
+      });
+    } else {
+      videoSourceBrowserView.setCallback([this, &node](std::shared_ptr<TileItem> tile) {
+        handleUpdatedSourceNode(node, tile);
+      });
+    }
+    
+  }
+  
+  // Right x padding
+  ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 10.0);
+  
+  ed::PinId outputPinId = CommonViews::OutputNodePin(node, OutputSlotMain);
+  pinIdNodeMap[outputPinId.Get()] = node;
+  
+  
+  // Draw the selector inside the node
+  if (hasSelectorOpen) {
+    if (isShader) {
+      shaderBrowserView.draw();
+    } else {
+      videoSourceBrowserView.setCurrentTab(VideoSourceBrowserView::tabForSourceType(node->source->type));
+      videoSourceBrowserView.draw();
+    }
+  }
+
+  
+  // Padding for button row
+  ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2(15.0, 10.0));
+  
+  CommonViews::ImageButton(node, "settings.png");
+  CommonViews::ImageButton(node, "settings.png");
+  CommonViews::ImageButton(node, "settings.png");
+  CommonViews::ImageButton(node, "settings.png");
+
+  ed::EndNode();
+}
+
 
 void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
 {
@@ -311,7 +406,6 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
     
     ed::EndPin();
     auto inPin = std::make_shared<Pin>(inputPinId, node, PinTypeInput);
-    pinIdPinMap[inputPinId.Get()] = inPin;
     pinIdNodeMap[inputPinId.Get()] = node;
   }
   
@@ -382,7 +476,6 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
     CommonViews::XLargeIconTitle(icon);
     ed::EndPin();
     auto outPin = std::make_shared<Pin>(outputPinId, node, PinTypeOutput);
-    pinIdPinMap[outputPinId.Get()] = outPin;
     pinIdNodeMap[outputPinId.Get()] = node;
   }
   
@@ -461,7 +554,6 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
     ed::PinId outputPinId = node->outputIds[slot];
     // Draw an Output Pin for each OutputSlot which is linked
     auto outPin = std::make_shared<Pin>(outputPinId, node, PinTypeOutput);
-    pinIdPinMap[outputPinId.Get()] = outPin;
     pinIdNodeMap[outputPinId.Get()] = node;
     
     ed::BeginPin(outputPinId, ed::PinKind::Output);
@@ -632,6 +724,29 @@ ImVec2 NodeLayoutView::coordinatesForNode(std::string id)
   return ImVec2(0, 0);
 }
 
+void NodeLayoutView::handleUpdatedSourceNode(std::shared_ptr<Node> node, std::shared_ptr<TileItem> tile) {
+  selectorNodeId = 0;
+  std::shared_ptr<VideoSource> newSource = nullptr;
+  switch (node->source->type) {
+      case VideoSource_shader:
+        newSource = VideoSourceService::getService()->replaceShaderVideoSource(std::dynamic_pointer_cast<ShaderSource>(node->source),  shaderSourceTypeForShaderType(tile->shaderType));
+        break;
+  }
+  idNodeMap.erase(node->source->id);
+  auto newNode = nodeForShaderSourceId(node->source->id, NodeTypeSource, newSource->name(), newSource);
+  ed::SetNodePosition(newNode->id, node->position);
+}
+
+void NodeLayoutView::handleUpdatedShaderNode(std::shared_ptr<Node> node, std::shared_ptr<TileItem> tile) {
+  selectorNodeId = 0;
+  auto shader = node->shader;
+  auto newShader = ShaderChainerService::getService()->replaceShader(shader, tile->shaderType);
+  ShaderChainerService::getService()->copyConnections(shader, newShader);
+  idNodeMap.erase(node->shader->shaderId);
+  auto newNode = nodeForShaderSourceId(newShader->shaderId, NodeTypeShader, newShader->name(), newShader);
+  ed::SetNodePosition(newNode->id, node->position);
+}
+
 void NodeLayoutView::handleUnplacedNodes()
 {
   if (nodeDropLocation == nullptr)
@@ -708,6 +823,10 @@ void NodeLayoutView::handleRightClick()
     {
       handleUploadChain(node);
     }
+    if (ImGui::MenuItem("Publish to Syphon"))
+    {
+      SyphonService::getService()->publishFbo(node->connectable->frame());
+    }
     int selectedNodeCount = ed::GetSelectedObjectCount();
     if (selectedNodeCount == 2) {
       ed::NodeId selectedNodes[2];
@@ -781,7 +900,7 @@ void NodeLayoutView::addUnplacedConnectable(std::shared_ptr<Connectable> connect
   std::shared_ptr<Node> node = nodeForShaderSourceId(connectable->connId(), connectable->connectableType() == ConnectableTypeShader ? NodeTypeShader : NodeTypeSource, connectable->name(), connectable);
   
   unplacedNodeIds.push_back(connectable->connId());
-  drawNode(node);
+  drawNodeNew(node);
 }
 
 void NodeLayoutView::handleSaveNode(std::shared_ptr<Node> node)
@@ -855,8 +974,8 @@ void NodeLayoutView::handleDropZone()
         }
         case VideoSource_file:
         {
-          auto availableFileSource = std::dynamic_pointer_cast<AvailableVideoSourceImage>(availableSource);
-          source = ActionService::getService()->addImageVideoSource(availableFileSource->sourceName, availableFileSource->path);
+          auto availableFileSource = std::dynamic_pointer_cast<AvailableVideoSourceFile>(availableSource);
+          source = ActionService::getService()->addFileVideoSource(availableFileSource->sourceName, availableFileSource->path);
           unplacedNodeIds.push_back(source->id);
           break;
         }
@@ -1074,6 +1193,7 @@ void NodeLayoutView::drawNodeWindows()
 
 void NodeLayoutView::drawPreviewWindows()
 {
+  ed::SetCurrentEditor(context);
   auto start = ImGui::GetCursorPos();
   if (previewWindowNodes.size() == 0 && terminalNodes.size() == 0)
     return;
@@ -1087,6 +1207,7 @@ void NodeLayoutView::drawPreviewWindows()
     drawPreviewWindow(node);
   }
   ImGui::SetCursorPos(start);
+  ed::SetCurrentEditor(nullptr);
 }
 
 void NodeLayoutView::drawPreviewWindow(std::shared_ptr<Node> node)
@@ -1213,9 +1334,11 @@ void NodeLayoutView::drawActionButtons()
 
 void NodeLayoutView::clear() {
   idNodeMap.clear();
+  nodeIdNodeMap.clear();
   previewWindowNodes.clear();
   terminalNodes.clear();
   nodesToOpen.clear();
+  selectorNodeId = ed::NodeId();
   ed::SetCurrentEditor(context);
   ShaderChainerService::getService()->clear();
   VideoSourceService::getService()->clear();
@@ -1548,5 +1671,66 @@ void NodeLayoutView::drawHelp()
     // Reset our cursor and return without drawing additional help
     ImGui::SetCursorPos(cursorPos);
     return;
+  }
+}
+
+void NodeLayoutView::drawShaderBrowserView()
+{
+  if (selectorNodeId.Get() != 0) // Check if a node is selected
+  {
+    auto node = nodeIdNodeMap[selectorNodeId.Get()];
+    if (node != nullptr)
+    {
+      // Get the position of the selected node
+      ImVec2 pos = ed::GetNodePosition(node->id);
+      pos = ed::CanvasToScreen(pos);
+      
+      // Set the position for the shader browser view window
+      pos.y += ed::GetNodeSize(node->id).y / ed::GetCurrentZoom() + 20; // Position it below the node
+      
+      // Set window properties
+      ImGui::SetNextWindowPos(pos);
+      ImGui::SetNextWindowSize(ImVec2(500.0, 500.0));
+      
+      // Begin the window for shader browser view
+      if (ImGui::Begin("Shader Browser", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize)) {
+        
+        if (node->type == NodeTypeShader) {
+          shaderBrowserView.draw();
+        } else {
+          switch (node->source->type) {
+            case VideoSource_webcam:
+              videoSourceBrowserView.setCurrentTab(1);
+              break;
+            case VideoSource_file:
+              videoSourceBrowserView.setCurrentTab(3);
+              break;
+            case VideoSource_image:
+              videoSourceBrowserView.setCurrentTab(3);
+              break;
+            case VideoSource_text:
+              videoSourceBrowserView.setCurrentTab(0);
+              break;
+            case VideoSource_icon:
+              videoSourceBrowserView.setCurrentTab(3);
+              break;
+            case VideoSource_shader:
+              videoSourceBrowserView.setCurrentTab(0);
+              break;
+            case VideoSource_library:
+              videoSourceBrowserView.setCurrentTab(2);
+              break;
+            case VideoSource_multi:
+              break;
+            case VideoSource_empty:
+              break;
+            default:
+              break;
+          }
+          videoSourceBrowserView.drawSelectedBrowser();
+        }
+        ImGui::End();
+      }
+    }
   }
 }

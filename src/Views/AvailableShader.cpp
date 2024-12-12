@@ -10,7 +10,8 @@
 #include "VideoSourceService.hpp"
 
 AvailableShader::AvailableShader(ShaderType type, std::string name)
-    : type(type), name(name) {
+: type(type), name(name) {
+  basePreview = VideoSourceService::getService()->previewFbo();
   preview = std::make_shared<ofTexture>();
   generatePreview();
 }
@@ -18,18 +19,21 @@ AvailableShader::AvailableShader(ShaderType type, std::string name)
 void AvailableShader::generatePreview() {
   std::shared_ptr<ofFbo> canvas = std::make_shared<ofFbo>();
   canvas->allocate(426, 240);
-
-  auto previewFbo = VideoSourceService::getService()->previewFbo();
-
+  
   auto shader = ShaderChainerService::getService()->shaderForType(
-      type, UUID::generateUUID(), 0);
+                                                                  type, UUID::generateUUID(), 0);
   shader->allocateFrames();
   shader->setup();
-  shader->shade(previewFbo, canvas);
+  shader->shade(basePreview, canvas);
   canvas->begin();
   // Add a 70% black overlay to the preview
   ofSetColor(0, 0, 0, 128);
   ofDrawRectangle(0, 0, 426, 240);
   canvas->end();
   preview = std::make_shared<ofTexture>(canvas->getTexture());
+}
+
+void AvailableShader::setBasePreview(std::shared_ptr<ofFbo> newBasePreview) {
+  basePreview = newBasePreview;
+  generatePreview();
 }

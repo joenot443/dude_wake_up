@@ -8,34 +8,8 @@
 #include "ShaderBrowserView.hpp"
 #include "FontService.hpp"
 #include "ShaderChainerService.hpp"
+#include "PagedTileBrowserView.hpp"
 #include "CommonViews.hpp"
-
-std::shared_ptr<TileItem> tileItemForShader(std::shared_ptr<AvailableShader> shader) {
-  // Create a closure which will be called when the tile is clicked
-  std::function<void()> dragCallback = [shader]()
-  {
-    // Create a payload to carry the video source
-    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
-    {
-      // Set payload to carry the index of our item (could be anything)
-      ImGui::SetDragDropPayload("NewShader", &shader->type,
-                                sizeof(ShaderType));
-      ImGui::Text("%s", shader->name.c_str());
-      ImGui::EndDragDropSource();
-    }
-  };
-  ImTextureID textureId = (ImTextureID)(uint64_t) shader->preview->texData.textureID;
-  return std::make_shared<TileItem>(shader->name, textureId, 0, dragCallback, "", shader->type);
-}
-
-std::vector<std::shared_ptr<TileItem>> tileItemsForShaders(std::vector<std::shared_ptr<AvailableShader>> shaders) {
-  std::vector<std::shared_ptr<TileItem>> tileItems = {};
-  for (auto shader : shaders)
-  {
-    tileItems.push_back(tileItemForShader(shader));
-  }
-  return tileItems;
-}
 
 TileBrowserView browserViewForShaders(std::vector<std::shared_ptr<AvailableShader>> shaders)
 {
@@ -44,28 +18,48 @@ TileBrowserView browserViewForShaders(std::vector<std::shared_ptr<AvailableShade
 
 void ShaderBrowserView::setup()
 {
-  auto basic = ShaderChainerService::getService()->availableBasicShaders;
-  auto mix = ShaderChainerService::getService()->availableMixShaders;
-  auto transform = ShaderChainerService::getService()->availableTransformShaders;
-  auto filter = ShaderChainerService::getService()->availableFilterShaders;
-  auto mask = ShaderChainerService::getService()->availableMaskShaders;
-  auto favorites = ShaderChainerService::getService()->availableFavoriteShaders();
-  auto defaultFavorites = ShaderChainerService::getService()->availableDefaultFavoriteShaders;
-  auto glitch = ShaderChainerService::getService()->availableGlitchShaders;
+  auto service = ShaderChainerService::getService();
+  auto basic = service->availableBasicShaders;
+  auto mix = service->availableMixShaders;
+  auto transform = service->availableTransformShaders;
+  auto filter = service->availableFilterShaders;
+  auto mask = service->availableMaskShaders;
+  auto favorites = service->availableFavoriteShaders();
+  auto defaultFavorites = service->availableDefaultFavoriteShaders;
+  auto glitch = service->availableGlitchShaders;
   
-  searchResultsTileBrowserView = TileBrowserView(searchTileItems);
-  basicTileBrowserView = browserViewForShaders(basic);
-  mixTileBrowserView = browserViewForShaders(mix);
-  transformTileBrowserView = browserViewForShaders(transform);
-  filterTileBrowserView = browserViewForShaders(filter);
-  maskTileBrowserView = browserViewForShaders(mask);
-  favoritesTileBrowserView = browserViewForShaders(favorites);
-  defaultFavoritesTileBrowserView = browserViewForShaders(defaultFavorites);
-  glitchTileBrowserView = browserViewForShaders(glitch);
-};
+  searchResultsTileBrowserView = std::make_unique<TileBrowserView>(searchTileItems);
+  basicTileBrowserView = std::make_unique<TileBrowserView>(tileItemsForShaders(basic));
+  mixTileBrowserView = std::make_unique<TileBrowserView>(tileItemsForShaders(mix));
+  transformTileBrowserView = std::make_unique<TileBrowserView>(tileItemsForShaders(transform));
+  filterTileBrowserView = std::make_unique<TileBrowserView>(tileItemsForShaders(filter));
+  maskTileBrowserView = std::make_unique<TileBrowserView>(tileItemsForShaders(mask));
+  favoritesTileBrowserView = std::make_unique<TileBrowserView>(tileItemsForShaders(favorites));
+  defaultFavoritesTileBrowserView = std::make_unique<TileBrowserView>(tileItemsForShaders(defaultFavorites));
+  glitchTileBrowserView = std::make_unique<TileBrowserView>(tileItemsForShaders(glitch));
 
-void ShaderBrowserView::draw()
-{
+  // Set sizes
+  for (auto* view : {&searchResultsTileBrowserView, &basicTileBrowserView, &mixTileBrowserView,
+                     &transformTileBrowserView, &filterTileBrowserView, &maskTileBrowserView,
+                     &favoritesTileBrowserView, &defaultFavoritesTileBrowserView, &glitchTileBrowserView}) {
+    (*view)->size = size;
+  }
+  
+  // Set tile items
+  searchResultsTileBrowserView->setTileItems(searchTileItems);
+  basicTileBrowserView->setTileItems(tileItemsForShaders(basic));
+  mixTileBrowserView->setTileItems(tileItemsForShaders(mix));
+  transformTileBrowserView->setTileItems(tileItemsForShaders(transform));
+  filterTileBrowserView->setTileItems(tileItemsForShaders(filter));
+  maskTileBrowserView->setTileItems(tileItemsForShaders(mask));
+  favoritesTileBrowserView->setTileItems(tileItemsForShaders(favorites));
+  defaultFavoritesTileBrowserView->setTileItems(tileItemsForShaders(defaultFavorites));
+  glitchTileBrowserView->setTileItems(tileItemsForShaders(glitch));
+  
+  currentTab = 0;
+}
+
+void ShaderBrowserView::drawSearchView() {
   char buffer[256];
   strncpy(buffer, searchQuery.c_str(), sizeof(buffer));
   if (ImGui::InputText("Search", buffer, sizeof(buffer))) {
@@ -74,53 +68,108 @@ void ShaderBrowserView::draw()
   }
   
   if (searchQuery.length() != 0) {
-    searchResultsTileBrowserView.draw();
+    searchResultsTileBrowserView->draw();
     return;
   }
+}
+
+void ShaderBrowserView::setCurrentTab(int tabIndex) {
+  currentTab = tabIndex;
+}
+
+void ShaderBrowserView::drawSelectedBrowser() {
+  switch (currentTab) {
+    case 0: // Favorites
+      CommonViews::H4Title(idAppendedToString("Default Favorites", browserId).c_str());
+      defaultFavoritesTileBrowserView->draw();
+      CommonViews::H4Title(idAppendedToString("Your Favorites", browserId).c_str());
+      favoritesTileBrowserView->draw();
+      break;
+    case 1: // Basic
+      basicTileBrowserView->draw();
+      break;
+    case 2: // Filter
+      filterTileBrowserView->draw();
+      break;
+    case 3: // Glitch
+      glitchTileBrowserView->draw();
+      break;
+    case 4: // Transform
+      transformTileBrowserView->draw();
+      break;
+    case 5: // Mix
+      mixTileBrowserView->draw();
+      break;
+    case 6: // Mask
+      maskTileBrowserView->draw();
+      break;
+  }
+}
+
+void ShaderBrowserView::draw()
+{
+  drawSearchView();
   
-  if (ImGui::BeginTabBar("VideoSourceBrowser", ImGuiTabBarFlags_FittingPolicyScroll))
-  {
-    if (ImGui::BeginTabItem("Favorites"))
-    {
-      CommonViews::H4Title("Default Favorites");
-      defaultFavoritesTileBrowserView.draw();
-      CommonViews::H4Title("Your Favorites");
-      favoritesTileBrowserView.draw();
+  if (ImGui::BeginTabBar(idAppendedToString("VideoSourceBrowser", browserId).c_str(), ImGuiTabBarFlags_FittingPolicyScroll)) {
+    if (ImGui::BeginTabItem(idAppendedToString("Favorites", browserId).c_str(), nullptr, currentTab == 0 ? ImGuiTabItemFlags_SetSelected : 0)) {
+      drawSelectedBrowser();
       ImGui::EndTabItem();
     }
-    if (ImGui::BeginTabItem("Basic"))
-    {
-      basicTileBrowserView.draw();
+    if (ImGui::IsItemClicked()) {
+      currentTab = 0;
+    }
+    
+    if (ImGui::BeginTabItem(idAppendedToString("Basic", browserId).c_str(), nullptr, currentTab == 1 ? ImGuiTabItemFlags_SetSelected : 0)) {
+      drawSelectedBrowser();
       ImGui::EndTabItem();
     }
-    if (ImGui::BeginTabItem("Filter"))
-    {
-      filterTileBrowserView.draw();
+    if (ImGui::IsItemClicked()) {
+      currentTab = 1;
+    }
+
+    if (ImGui::BeginTabItem(idAppendedToString("Filter", browserId).c_str(), nullptr, currentTab == 2 ? ImGuiTabItemFlags_SetSelected : 0)) {
+      drawSelectedBrowser();
       ImGui::EndTabItem();
     }
-    if (ImGui::BeginTabItem("Glitch"))
-    {
-      glitchTileBrowserView.draw();
+    if (ImGui::IsItemClicked()) {
+      currentTab = 2;
+    }
+
+    if (ImGui::BeginTabItem(idAppendedToString("Glitch", browserId).c_str(), nullptr, currentTab == 3 ? ImGuiTabItemFlags_SetSelected : 0)) {
+      drawSelectedBrowser();
       ImGui::EndTabItem();
     }
-    if (ImGui::BeginTabItem("Transform"))
-    {
-      transformTileBrowserView.draw();
+    if (ImGui::IsItemClicked()) {
+      currentTab = 3;
+    }
+
+    if (ImGui::BeginTabItem(idAppendedToString("Transform", browserId).c_str(), nullptr, currentTab == 4 ? ImGuiTabItemFlags_SetSelected : 0)) {
+      drawSelectedBrowser();
       ImGui::EndTabItem();
     }
-    if (ImGui::BeginTabItem("Mix"))
-    {
-      mixTileBrowserView.draw();
+    if (ImGui::IsItemClicked()) {
+      currentTab = 4;
+    }
+
+    if (ImGui::BeginTabItem(idAppendedToString("Mix", browserId).c_str(), nullptr, currentTab == 5 ? ImGuiTabItemFlags_SetSelected : 0)) {
+      drawSelectedBrowser();
       ImGui::EndTabItem();
     }
-    if (ImGui::BeginTabItem("Mask"))
-    {
-      maskTileBrowserView.draw();
+    if (ImGui::IsItemClicked()) {
+      currentTab = 5;
+    }
+
+    if (ImGui::BeginTabItem(idAppendedToString("Mask", browserId).c_str(), nullptr, currentTab == 6 ? ImGuiTabItemFlags_SetSelected : 0)) {
+      drawSelectedBrowser();
       ImGui::EndTabItem();
     }
+    if (ImGui::IsItemClicked()) {
+      currentTab = 6;
+    }
+    
     ImGui::EndTabBar();
   }
-};
+}
 
 void ShaderBrowserView::update(){
   if (searchDirty) {
@@ -143,7 +192,19 @@ void ShaderBrowserView::update(){
             filteredItems.push_back(tileItemForShader(shader));
         }
     }
-    searchResultsTileBrowserView.setTileItems(filteredItems);
+    searchResultsTileBrowserView->setTileItems(filteredItems);
     searchDirty = false;
   }
 };
+
+void ShaderBrowserView::setCallback(std::function<void(std::shared_ptr<TileItem>)> callback) {
+  searchResultsTileBrowserView->setCallback(callback);
+  basicTileBrowserView->setCallback(callback);
+  mixTileBrowserView->setCallback(callback);
+  transformTileBrowserView->setCallback(callback);
+  filterTileBrowserView->setCallback(callback);
+  maskTileBrowserView->setCallback(callback);
+  favoritesTileBrowserView->setCallback(callback);
+  defaultFavoritesTileBrowserView->setCallback(callback);
+  glitchTileBrowserView->setCallback(callback);
+}

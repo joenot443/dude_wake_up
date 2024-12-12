@@ -8,6 +8,7 @@
 #include "MultiSource.hpp"
 #include "NodeLayoutView.hpp"
 #include "LayoutStateService.hpp"
+#include "CommonViews.hpp"
 
 void MultiSource::setup()
 {

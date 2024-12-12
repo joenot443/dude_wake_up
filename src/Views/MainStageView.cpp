@@ -302,6 +302,11 @@ void MainStageView::drawVideoSourceBrowser()
 
 void MainStageView::drawShaderBrowser() { shaderBrowserView.draw(); }
 
+void MainStageView::loadDirectory(std::string directory)
+{
+  videoSourceBrowserView.loadDirectory(directory);
+}
+
 void MainStageView::keyReleased(int key)
 {
   

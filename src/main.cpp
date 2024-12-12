@@ -17,6 +17,7 @@
 #include "AudioSourceService.hpp"
 #include "MidiService.hpp"
 #include "ConfigService.hpp"
+#include "ImageService.hpp"
 #include "FeedbackSourceService.hpp"
 #include "LibraryService.hpp"
 #include "VideoSourceService.hpp"
@@ -55,6 +56,7 @@ VideoSourceService *VideoSourceService::service = 0;
 ShaderChainerService *ShaderChainerService::service = 0;
 AudioSourceService *AudioSourceService::service = 0;
 LayoutStateService *LayoutStateService::service = 0;
+ImageService *ImageService::service = 0;
 MarkdownService *MarkdownService::service = 0;
 LibraryService *LibraryService::service = 0;
 HelpService *HelpService::service = 0;

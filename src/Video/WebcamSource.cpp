@@ -37,36 +37,12 @@ void WebcamSource::saveFrame() {
     return;
   }
   grabber.update();
-  if (grabber.isFrameNew()) {
-    if (settings->maskEnabled->boolValue == true)
-    {
-      fbo->begin();
-      maskShader.begin();
-      maskShader.setUniformTexture("tex", grabber.getTexture(), 0);
-      maskShader.setUniform1f("time", ofGetElapsedTimef());
-      maskShader.setUniform2f("dimensions", LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
-      maskShader.setUniform1i("drawTex", 1);
-      maskShader.setUniform4f("chromaKey",
-                              settings->maskColor->color->data()[0],
-                              settings->maskColor->color->data()[1],
-                              settings->maskColor->color->data()[2], 1.0);
-      maskShader.setUniform1f("tolerance", settings->maskTolerance->value);
-      maskShader.setUniform1i("invert", settings->invert->boolValue);
-      ofClear(0, 0, 0, 255);
-      ofClear(0, 0, 0, 0);
-
-      grabber.draw(0, 0, LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
-      maskShader.end();
-      fbo->end();
-    }
-    else
-    {
-      fbo->begin();
-      ofClear(0, 0, 0, 255);
-      grabber.draw(0, 0, LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
-      fbo->end();
-    }
-  }
+  if (!grabber.isFrameNew()) return;
+  
+  fbo->begin();
+  ofClear(0, 0, 0, 255);
+  grabber.draw(0, 0, LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
+  fbo->end();
 }
 
 void WebcamSource::load(json j) {
@@ -99,5 +75,4 @@ void WebcamSource::drawSettings() {
   if (CommonViews::ShaderOption(settings->deviceId, deviceNames)) {
     setup();
   }
-  drawMaskSettings();
 }

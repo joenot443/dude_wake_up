@@ -12,6 +12,17 @@
 #include "ShaderType.hpp"
 
 
+// Redesign Colors
+
+struct Colors {
+  constexpr static ImColor NodeBackgroundColor = ImColor(32, 32, 35);
+  constexpr static ImColor NodeBorderColor = ImColor(86, 86, 89);
+  constexpr static ImColor NodeInnerRectBackgroundColor = IM_COL32(11, 11, 12, 255);
+  
+  constexpr static ImColor SecondaryDark = IM_COL32(44, 44, 48, 255);
+  constexpr static ImColor Secondary300 = IM_COL32(114, 114, 116, 255);
+};
+                                             
 static ImColor SourceNodeColor = ImColor(174, 32, 18);
 static ImColor ShaderNodeColor = ImColor(0, 95, 115);
 static ImColor AuxNodeColor = ImColor(202, 103, 2);

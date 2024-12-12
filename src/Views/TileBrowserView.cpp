@@ -50,6 +50,10 @@ void TileBrowserView::sortTileItems() {
   tileCount = tileItems.size();
 }
 
+void TileBrowserView::setCallback(std::function<void(std::shared_ptr<TileItem>)> callback) {
+  tileClickCallback = callback;
+}
+
 void TileBrowserView::draw()
 {
 //  sortTileItems();
@@ -91,7 +95,9 @@ void TileBrowserView::draw()
       ImGui::PushFont(FontService::getService()->p);
       // Set the font color to white
       ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0, 1.0, 1.0, 0.6));
-      ImGui::Button(tile->name.c_str(), TileSize);
+      if (ImGui::Button(tile->name.c_str(), TileSize)) {
+        tileClickCallback(tile);
+      }
       ImGui::PopStyleColor();
       ImGui::PopFont();
       
@@ -167,12 +173,16 @@ void TileBrowserView::draw()
       {
         // Push a smaller font size
         ImGui::PushFont(FontService::getService()->sm);
-        ImGui::Button(tile->name.c_str(), TileSize);
+        if (ImGui::Button(tile->name.c_str(), TileSize)) {
+          tileClickCallback(tile);
+        }
         ImGui::PopFont();
       }
       else
       {
-        ImGui::Button(tile->name.c_str(), TileSize);
+        if (ImGui::Button(tile->name.c_str(), TileSize)) {
+          tileClickCallback(tile);
+        }
       }
       tile->dragCallback();
       ImGui::SameLine();

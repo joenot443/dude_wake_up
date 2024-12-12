@@ -8,7 +8,11 @@
 #include "LayoutStateService.hpp"
 #include "CommonViews.hpp"
 #include "AudioSourceService.hpp"
+#include "NodeTypes.hpp"
+#include "ImageService.hpp"
+#include "VideoSourceService.hpp"
 #include "Icon.hpp"
+#include "ShaderChainerService.hpp"
 #include "IconService.hpp"
 #include "TextureService.hpp"
 #include "FontService.hpp"
@@ -26,8 +30,6 @@
 #include "imgui.h"
 #include <imgui_node_editor.h>
 #include <imgui_node_editor_internal.h>
-
-namespace ed = ax::NodeEditor;
 
 
 void CommonViews::xsSpacing() { Spacing(4); }
@@ -1000,4 +1002,135 @@ void CommonViews::PaddedText(std::string text, ImVec2 padding)
 
     // Restore the cursor position to the original position + padded size to allow for correct layout
     ImGui::SetCursorPos(originalCursorPos + ImVec2(0, paddedSize.y));
+}
+
+/// Redesign Implementations
+
+bool CommonViews::SelectorTitleButton(std::string title, float width) {
+  ImVec2 textSize = ImGui::CalcTextSize(title.c_str());
+  
+  auto pos = ImGui::GetCursorPos();
+  // Draw an InvisibleButton of size 400x50 with the shader name and asterisk inside
+  bool result = ImGui::InvisibleButton(idString(title).c_str(), ImVec2(width, 50.0));
+  ImGui::SameLine();
+  auto endPos = ImGui::GetCursorPos();
+    
+  // Set cursor position to draw the shader name
+  ImGui::SetCursorPos(pos + ImVec2(5.0, 0.0)); // Add some padding before the shader name
+  ImGui::TextUnformatted(title.c_str());
+  ImGui::SameLine();
+  // Set cursor position to draw chevron at the end and center
+  ImGui::SetCursorPos(pos + ImVec2(width - 25.0, 10.0));
+  ImageNamedNew("down.png", 15.0, 8.5);
+  ImGui::SetCursorPos(pos + ImVec2(width, 0.0));
+  return result;
+}
+
+ed::PinId CommonViews::InputNodePin(std::shared_ptr<Node> node, InputSlot slot) {
+  ed::PinId inputPinId = node->inputIds[slot];
+  ed::BeginPin(inputPinId, ed::PinKind::Input);
+  NodePin(node);
+  ed::EndPin();
+  return inputPinId;
+}
+
+ed::PinId CommonViews::OutputNodePin(std::shared_ptr<Node> node, OutputSlot slot) {
+  ed::PinId outputPinId = node->outputIds[slot];
+  auto outPin = std::make_shared<Pin>(outputPinId, node, PinTypeOutput);
+  
+  ed::BeginPin(outputPinId, ed::PinKind::Output);
+  NodePin(node);
+  ed::EndPin();
+  return outputPinId;
+}
+
+void CommonViews::NodePin(std::shared_ptr<Node> node) {
+  const float dummySize = 40.0;
+  const float outerRectSize = 40.0;
+  const float outerRectCornerRadius = 5.0;
+  const float circleRadius = 15.0;
+  const float innerRectSize = 15.0;
+  const float innerRectCornerRadius = 2.0;
+  ImGui::Dummy(ImVec2(dummySize, dummySize));
+  auto pos = ImGui::GetCursorPos();
+  pos -= ImVec2(5.0, dummySize + 5.0);
+
+  // Draw the outer rounded rectangle
+  ImDrawList* drawList = ed::GetCurrentDrawList();
+  drawList->AddRectFilled(ImVec2(pos.x, pos.y),
+                          ImVec2(pos.x + outerRectSize, pos.y + outerRectSize),
+                          Colors::SecondaryDark,
+                          outerRectCornerRadius);
+
+  // Draw the inner circle
+  drawList->AddCircleFilled(ImVec2(pos.x + outerRectSize / 2, pos.y + outerRectSize / 2),
+                            circleRadius,
+                            ImColor(65, 65, 69, 255),
+                            100);
+
+  // Draw the smallest rectangle inside the circle with alpha 1.0
+  drawList->AddRectFilled(ImVec2(pos.x + outerRectSize / 2 - innerRectSize / 2,
+                                 pos.y + outerRectSize / 2 - innerRectSize / 2),
+                          ImVec2(pos.x + outerRectSize / 2 + innerRectSize / 2,
+                                 pos.y + outerRectSize / 2 + innerRectSize / 2),
+                          Colors::Secondary300,
+                          innerRectCornerRadius);
+}
+
+void CommonViews::PushRedesignStyle() {
+  ImGui::PushFont(FontService::getService()->pN);
+  
+  ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32(0, 0, 0, 0));
+
+  // Paddings
+  
+  ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
+  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+  ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0.0f, 0.0f));
+  
+  ed::PushStyleVar(ax::NodeEditor::StyleVar_NodeRounding, 8.0);
+  ed::PushStyleVar(ax::NodeEditor::StyleVar_NodePadding, ImVec4(0.0, 0.0, 0.0, 0.0));
+  ed::PushStyleColor(ax::NodeEditor::StyleColor_NodeBorder, Colors::NodeBorderColor);
+  ed::PushStyleColor(ax::NodeEditor::StyleColor_NodeBg, Colors::NodeBackgroundColor);
+  ed::PushStyleVar(ax::NodeEditor::StyleVar_SelectedNodeBorderWidth, 4.0);
+  ed::PushStyleVar(ax::NodeEditor::StyleVar_NodeBorderWidth, 2.0);
+}
+
+void CommonViews::PopRedesignStyle() {
+  ImGui::PopFont();
+ 
+  ImGui::PopStyleColor();
+  
+  // Paddings
+  ImGui::PopStyleVar(4);
+}
+
+
+void CommonViews::ImageNamedNew(std::string name, float width, float height) {
+  auto image = ImageService::getService()->imageWithName(name);
+  ImGui::Image(image->textureID, ImVec2(width, height));
+}
+
+bool CommonViews::ImageButton(std::shared_ptr<Node> node, std::string imageName) {
+  auto pos = ImGui::GetCursorPos();
+  ImGui::SetCursorPosX(pos.x + 10.0);  // Increased padding by 5.0
+  pos = ImGui::GetCursorPos();
+  
+  bool ret = ImGui::InvisibleButton(idStringNamed(node->connectable->connId(), imageName).c_str(), ImVec2(105.0, 50.0));  // Updated width to 105.0 and height to 50.0
+  ImGui::SameLine();
+  auto endPos = ImGui::GetCursorPos();
+  ImGui::SetCursorPos(pos);
+  
+  ImDrawList* drawList = ed::GetCurrentDrawList();
+  drawList->AddRectFilled(ImVec2(pos.x, pos.y),
+                          ImVec2(pos.x + 105.0, pos.y + 50.0),  // Updated width to 105.0 and height to 50.0
+                          Colors::SecondaryDark,
+                          8.0);
+  
+  // Draw the Image button at the center of the InvisibleButton, sized at 24.0x24.0
+  ImGui::SetCursorPos(pos + ImVec2(40.5, 13.0));  // Adjusted X coordinate for new width
+  ImageNamedNew(imageName, 24.0, 24.0);
+  ImGui::SetCursorPos(endPos);
+  return ret;
 }

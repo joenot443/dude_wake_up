@@ -26,6 +26,8 @@ public:
   std::shared_ptr<Icon> iconWithName(std::string name);
   std::shared_ptr<ofShader> solidColorShader;
   
+  
+  
   static IconService *service;
   IconService() : solidColorShader(std::make_shared<ofShader>()) {};
   

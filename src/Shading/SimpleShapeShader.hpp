@@ -66,7 +66,6 @@ struct SimpleShapeShader: Shader {
   SimpleShapeShader(SimpleShapeSettings *settings) : settings(settings), Shader(settings) {};
   
   void setup() override {
-    shader.load("shaders/SimpleShape");
   }
   
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {

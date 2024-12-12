@@ -14,6 +14,7 @@
 #include "ofMain.h"
 #include <stdio.h>
 
+
 struct VideoSourceBrowserView {
 public:
   void setup();
@@ -21,7 +22,17 @@ public:
   void update();
   void draw();
   
+  void loadDirectory(std::string directory);
   void drawLibraryHeader();
+  void setCallback(std::function<void(std::shared_ptr<TileItem>)> callback);
+
+  // New public method to set the current tab
+  void setCurrentTab(int tabIndex);
+  
+  void drawSelectedBrowser();
+  
+  static int tabForSourceType(VideoSourceType type);
+  ImVec2 size = ImVec2(0.0, 0.0);
 
 private:
   ofFbo videoSourceFbo;
@@ -31,11 +42,12 @@ private:
   std::vector<std::shared_ptr<TileItem>> shaderItems;
   std::vector<std::shared_ptr<LibraryTileItem>> libraryItems;
 
-  // New member variables for search functionality
   std::string searchQuery;
   bool searchDirty = false;
   std::vector<std::shared_ptr<TileItem>> searchTileItems = {};
   TileBrowserView searchResultsTileBrowserView = TileBrowserView({});
+
+  int currentTab = 0;
 };
 
 #endif /* VideoSourceBrowserView_hpp */

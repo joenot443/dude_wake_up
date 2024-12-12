@@ -54,7 +54,6 @@ enum ShaderType {
   ShaderTypeTissue,
   ShaderTypeHalfTone,
   ShaderTypeCrosshatch,
-  ShaderTypeCircle,
   ShaderTypeMask,
   ShaderTypeLumaMaskMaker,
   ShaderTypeDancingSquares,
@@ -82,7 +81,6 @@ enum ShaderType {
   ShaderTypeLimbo,
   ShaderTypeAudioCircle,
   ShaderTypeSmokeRing,
-  ShaderTypeDoubleSwirl,
   ShaderTypeSwirlingSoul,
   ShaderTypeCubify,
   ShaderTypeGyroids,
@@ -147,6 +145,8 @@ enum ShaderType {
   ShaderTypeBackground,
   ShaderTypeComicbook,
   ShaderTypeSimpleBars,
+  ShaderTypeBlurryTrail,
+  ShaderTypeSpiral,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -253,12 +253,20 @@ static std::vector<ShaderType> AllShaderTypes() {
   for (const ShaderType& shader : AvailableMaskShaderTypes) {
       combinedShaderTypes.push_back(shader);
   }
+  
+  for (const ShaderType& shader : AvailableGlitchShaderTypes) {
+      combinedShaderTypes.push_back(shader);
+  }
 
   return combinedShaderTypes;
 }
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) { // ShaderNames
+    case ShaderTypeSpiral:
+      return "Spiral";
+    case ShaderTypeBlurryTrail:
+      return "BlurryTrail";
     case ShaderTypeSimpleBars:
       return "SimpleBars";
     case ShaderTypeComicbook:
@@ -387,8 +395,6 @@ static std::string shaderTypeName(ShaderType type) {
       return "Cubify";
     case ShaderTypeSwirlingSoul:
       return "Swirling Soul";
-    case ShaderTypeDoubleSwirl:
-      return "Double Swirl";
     case ShaderTypeSmokeRing:
       return "Smoke Ring";
     case ShaderTypeAudioCircle:
@@ -443,8 +449,6 @@ static std::string shaderTypeName(ShaderType type) {
       return "LumaMask";
     case ShaderTypeMask:
       return "Mask";
-    case ShaderTypeCircle:
-      return "Circle";
     case ShaderTypeCrosshatch:
       return "Crosshatch";
     case ShaderTypeHalfTone:

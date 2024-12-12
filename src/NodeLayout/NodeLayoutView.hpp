@@ -11,6 +11,8 @@
 #include "NodeTypes.hpp"
 #include "imgui.h"
 #include "VideoRecorder.hpp"
+#include "NodeShaderBrowserView.hpp"
+#include "VideoSourceBrowserView.hpp"
 #include "LibraryFile.hpp"
 #include "Shader.hpp"
 #include "VideoSource.hpp"
@@ -68,8 +70,10 @@ public:
   void populateNodePositions();
   void populateSelectedNodes();
   void drawNode(std::shared_ptr<Node> node);
+  void drawNodeNew(std::shared_ptr<Node> node);
   void drawPreviewWindow(std::shared_ptr<Node> node);
   void drawActionButtons();
+  void drawShaderBrowserView();
   void clear();
   void toggleCustomZoom();
   int nodeIdTicker = 1;
@@ -82,6 +86,8 @@ public:
   void handleDeleteNode(std::shared_ptr<Node> node);
   void handleUploadChain(std::shared_ptr<Node> node);
   void handleUnplacedDownloadedLibraryFile();
+  void handleUpdatedSourceNode(std::shared_ptr<Node> node, std::shared_ptr<TileItem> tile);
+  void handleUpdatedShaderNode(std::shared_ptr<Node> node, std::shared_ptr<TileItem> tile);
   
   void handleDropZone();
   void handleDroppedSource(std::shared_ptr<VideoSource> source);
@@ -128,7 +134,6 @@ public:
   
   std::map<std::string, std::shared_ptr<Node>> idNodeMap;
   std::map<long, std::shared_ptr<Node>> pinIdNodeMap;
-  std::map<long, std::shared_ptr<Pin>> pinIdPinMap;
   std::map<long, std::shared_ptr<Node>> nodeIdNodeMap; // Use this map for node lookup
 	
   std::map<long, std::shared_ptr<ShaderLink>> linksMap;
@@ -136,8 +141,14 @@ public:
   std::set<std::shared_ptr<Node>> nodesToOpen;
   
   ed::NodeId contextMenuNodeId = 0;
+  ed::NodeId selectorNodeId = 0;
+  
   ImVec2 contextMenuLocation;
   VideoRecorder recorder;
+  
+  // Node selector browsers
+  NodeShaderBrowserView shaderBrowserView = NodeShaderBrowserView();
+  VideoSourceBrowserView videoSourceBrowserView = VideoSourceBrowserView();
 };
 
 #endif /* NodeLayoutView_hpp */

@@ -9,11 +9,18 @@
 #define CommonViews_hpp
 
 #include <stdio.h>
+#include "imgui_node_editor.h"
 #include "Oscillator.hpp"
 #include "Parameter.hpp"
 #include "VideoSource.hpp"
 #include "ofMain.h"
 #include "ofxImGui.h"
+
+namespace ed = ax::NodeEditor;
+
+class ShaderSource;
+
+class Node;
 
 struct CommonViews
 {
@@ -120,6 +127,24 @@ struct CommonViews
   static void OscillatorWindow(std::shared_ptr<Oscillator> o, std::shared_ptr<Parameter> param);
   
   static bool IsMouseWithin(ImVec2 topLeft, ImVec2 bottomRight, ImVec2 offset = ImVec2(0.0, 0.0));
+  
+  // Redesign
+  
+  static void PushRedesignStyle();
+  static void PopRedesignStyle();
+  
+  static bool SelectorTitleButton(std::string title, float width);
+  
+  static void DownChevron(ImVec2 pos, float scale);
+  
+  static void NodePin(std::shared_ptr<Node> node);
+  static ed::PinId InputNodePin(std::shared_ptr<Node> node, InputSlot slot);
+  static ed::PinId OutputNodePin(std::shared_ptr<Node> node, OutputSlot slot);
+  
+  static void ImageNamedNew(std::string name, float width, float height);
+  
+  static bool ImageButton(std::shared_ptr<Node> node, std::string imageName);
+  
 };
 
 static ImVec2 getScaledWindowSize() {

@@ -99,6 +99,8 @@ public:
   void drawSettings() override {};
 
   virtual void drawPreview(ImVec2 pos, float scale);
+  
+  virtual void drawPreviewSized(ImVec2 size);
 
   virtual std::string idName() { return formatString("%s##%s", name().c_str(), shaderId.c_str()); }
   

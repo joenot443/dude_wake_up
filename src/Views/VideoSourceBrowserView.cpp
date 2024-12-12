@@ -26,6 +26,11 @@ void VideoSourceBrowserView::setup()
   searchResultsTileBrowserView = TileBrowserView(searchTileItems);
 }
 
+void VideoSourceBrowserView::loadDirectory(std::string directory) {
+  fileBrowserView.loadDirectory(directory);
+  setCurrentTab(3);
+}
+
 void VideoSourceBrowserView::refreshSources()
 {
   shaderItems.clear();
@@ -53,7 +58,11 @@ void VideoSourceBrowserView::refreshSources()
       }
     };
     ImTextureID textureId = (ImTextureID)(uint64_t) source->preview->texData.textureID;
-    auto tileItem = std::make_shared<TileItem>(source->sourceName, textureId, 0, dragCallback, source->category);
+    ShaderType type = ShaderTypeNone;
+    if (source->type == VideoSource_shader) {
+      type = shaderTypeForShaderSourceType(std::dynamic_pointer_cast<AvailableVideoSourceShader>(source)->shaderType);
+    }
+    auto tileItem = std::make_shared<TileItem>(source->sourceName, textureId, 0, dragCallback, source->category, type);
 
     if (source->type == VideoSource_shader || 
         source->type == VideoSource_text ||
@@ -118,11 +127,13 @@ void VideoSourceBrowserView::refreshSources()
             { return a->name < b->name; });
 
   tileBrowserView = TileBrowserView(shaderItems);
+  tileBrowserView.size = size;
   fileBrowserView.setup();
 }
 
 void VideoSourceBrowserView::update()
 {
+//  fileBrowserView.update();
 //  if (searchDirty) {
 //    // Filter tileItems based on searchQuery
 //    auto sources = VideoSourceService::getService()->availableVideoSources();
@@ -152,33 +163,101 @@ void VideoSourceBrowserView::update()
 
 void VideoSourceBrowserView::drawLibraryHeader() {}
 
-void VideoSourceBrowserView::draw()
-{
-  if (ImGui::BeginTabBar("VideoSourceBrowser", ImGuiTabBarFlags_None))
-  {
-    if (ImGui::BeginTabItem("Generated"))
-    {
+void VideoSourceBrowserView::setCurrentTab(int tabIndex) {
+  currentTab = tabIndex;
+}
+
+void VideoSourceBrowserView::drawSelectedBrowser() {
+  switch (currentTab) {
+    case 0: // Generated Tab
       tileBrowserView.setTileItems(shaderItems);
-      tileBrowserView.draw();
-      ImGui::EndTabItem();
-    }
-    if (ImGui::BeginTabItem("Webcam"))
-    {
+      break;
+    case 1: // Webcam Tab
       tileBrowserView.setTileItems(webcamItems);
-      tileBrowserView.draw();
-      ImGui::EndTabItem();
-    }
-    if (ImGui::BeginTabItem("Library"))
-    {
+      break;
+    case 2: // Library Tab
       tileBrowserView.setTileItems(std::vector<std::shared_ptr<TileItem>>(libraryItems.begin(), libraryItems.end()));
-      tileBrowserView.draw();
-      ImGui::EndTabItem();
-    }
-    if (ImGui::BeginTabItem("Local Files"))
-    {
+      break;
+    case 3: // Local Files Tab
       fileBrowserView.draw();
+      return; // Exit early since fileBrowserView handles its own drawing
+  }
+  tileBrowserView.draw();
+}
+
+void VideoSourceBrowserView::draw() {
+  if (ImGui::BeginTabBar("VideoSourceBrowser", ImGuiTabBarFlags_None)) {
+    if (ImGui::BeginTabItem("Generated", nullptr, currentTab == 0 ? ImGuiTabItemFlags_SetSelected : 0)) {
+      drawSelectedBrowser();
       ImGui::EndTabItem();
     }
+    if (ImGui::IsItemClicked()) {
+      currentTab = 0;  // Update local tab state on click
+    }
+
+    if (ImGui::BeginTabItem("Webcam", nullptr, currentTab == 1 ? ImGuiTabItemFlags_SetSelected : 0)) {
+      drawSelectedBrowser();
+      ImGui::EndTabItem();
+    }
+    if (ImGui::IsItemClicked()) {
+      currentTab = 1;  // Update local tab state on click
+    }
+
+    if (ImGui::BeginTabItem("Library", nullptr, currentTab == 2 ? ImGuiTabItemFlags_SetSelected : 0)) {
+      drawSelectedBrowser();
+      ImGui::EndTabItem();
+    }
+    if (ImGui::IsItemClicked()) {
+      currentTab = 2;  // Update local tab state on click
+    }
+
+    if (ImGui::BeginTabItem("Local Files", nullptr, currentTab == 3 ? ImGuiTabItemFlags_SetSelected : 0)) {
+      drawSelectedBrowser();
+      ImGui::EndTabItem();
+    }
+    if (ImGui::IsItemClicked()) {
+      currentTab = 3;  // Update local tab state on click
+    }
+
     ImGui::EndTabBar();
   }
 }
+
+void VideoSourceBrowserView::setCallback(std::function<void(std::shared_ptr<TileItem>)> callback) {
+  tileBrowserView.setCallback(callback);
+}
+
+int VideoSourceBrowserView::tabForSourceType(VideoSourceType type) {
+  switch (type) {
+    case VideoSource_webcam:
+      return 1;
+      break;
+    case VideoSource_file:
+      return 3;
+      break;
+    case VideoSource_image:
+      return 3;
+      break;
+    case VideoSource_text:
+      return 0;
+      break;
+    case VideoSource_icon:
+      return 3;
+      break;
+    case VideoSource_shader:
+      return 0;
+      break;
+    case VideoSource_library:
+      return 2;
+      break;
+    case VideoSource_multi:
+      break;
+    case VideoSource_empty:
+      break;
+    default:
+      break;
+  }
+  
+  return 0;
+}
+

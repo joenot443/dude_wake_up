@@ -56,11 +56,16 @@ public:
 
   // VideoSources which are available to be added to the Service
   std::vector<std::shared_ptr<AvailableVideoSource>> availableVideoSources();
+  std::vector<std::shared_ptr<AvailableVideoSource>> availableVideoSourcesForType(VideoSourceType type);
+  int indexOfSourceType(ShaderSourceType type);
 
+  
   std::shared_ptr<VideoSource> defaultVideoSource();
   std::shared_ptr<VideoSourceSettings> defaultVideoSourceSettings();
   
   void startAccessingBookmarkPath(std::string path);
+
+  std::shared_ptr<VideoSource> replaceShaderVideoSource(std::shared_ptr<ShaderSource> shaderSource, ShaderSourceType type);
   
   std::shared_ptr<ofFbo> emptyFbo;
 
@@ -107,6 +112,8 @@ public:
   void loadConfig(json j) override;
   std::vector<std::string> idsFromLoadingConfig(json j);
   void appendConfig(json j);
+
+  std::vector<std::shared_ptr<AvailableVideoSourceShader>> availableShaderSources;
 };
 
 #endif /* VideoSourceService_hpp */

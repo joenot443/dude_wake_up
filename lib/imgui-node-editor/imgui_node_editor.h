@@ -284,6 +284,7 @@ struct EditorContext;
 //------------------------------------------------------------------------------
 IMGUI_NODE_EDITOR_API void SetCurrentEditor(EditorContext* ctx);
 IMGUI_NODE_EDITOR_API EditorContext* GetCurrentEditor();
+IMGUI_NODE_EDITOR_API ImDrawList* GetCurrentDrawList();
 IMGUI_NODE_EDITOR_API EditorContext* CreateEditor(const Config* config = nullptr);
 IMGUI_NODE_EDITOR_API void DestroyEditor(EditorContext* ctx);
 IMGUI_NODE_EDITOR_API const Config& GetConfig(EditorContext* ctx = nullptr);

@@ -86,6 +86,7 @@ public:
   void addShader(std::shared_ptr<Shader> shader);
   void removeShader(std::shared_ptr<Shader> shader, bool fromMap = true);
   void removeConnectable(std::shared_ptr<Connectable> connectable);
+  std::shared_ptr<Shader> replaceShader(std::shared_ptr<Shader> oldShader, ShaderType newType);
   std::vector<std::shared_ptr<Connectable>> pasteConnectables(const std::vector<std::shared_ptr<Connectable>>& connectables);
   std::shared_ptr<Connection>makeConnection(std::shared_ptr<Connectable> start,
            std::shared_ptr<Connectable> end,
@@ -117,6 +118,19 @@ public:
   std::vector<std::shared_ptr<AvailableShader>> availableGlitchShaders;
   std::vector<std::shared_ptr<AvailableShader>> availableFavoriteShaders();
   std::map<ShaderType, std::shared_ptr<AvailableShader>> availableShadersMap;
+
+  // Auxiliary Available Shaders
+  std::vector<std::shared_ptr<AvailableShader>> auxillaryAvailableBasicShaders;
+  std::vector<std::shared_ptr<AvailableShader>> auxillaryAvailableMixShaders;
+  std::vector<std::shared_ptr<AvailableShader>> auxillaryAvailableTransformShaders;
+  std::vector<std::shared_ptr<AvailableShader>> auxillaryAvailableFilterShaders;
+  std::vector<std::shared_ptr<AvailableShader>> auxillaryAvailableMaskShaders;
+  std::vector<std::shared_ptr<AvailableShader>> auxillaryAvailableGlitchShaders;
+  std::vector<std::shared_ptr<AvailableShader>> auxillaryAvailableFavoriteShaders;
+  std::map<ShaderType, std::shared_ptr<AvailableShader>> availableAuxillaryShadersMap;
+  std::vector<std::shared_ptr<AvailableShader>> allAuxillaryAvailableShaders;
+  std::shared_ptr<ofFbo> basePreview;
+  void hydrateAuxillaryShaders(std::shared_ptr<ofFbo> basePreview);
 
   // Constructor Ops
   std::shared_ptr<Shader> shaderForType(ShaderType type, std::string shaderId,

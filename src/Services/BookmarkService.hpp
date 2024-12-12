@@ -19,6 +19,14 @@ public:
   std::shared_ptr<std::string> bookmarkForPath(std::string path);
   CFDataRef loadBookmarkForPath(std::string path);
 
+  void saveBookmarkForDirectory(std::string directoryPath);
+  bool hasBookmarkForDirectory(std::string directoryPath);
+  std::shared_ptr<std::string> bookmarkForDirectory(std::string directoryPath);
+  CFDataRef loadBookmarkForDirectory(std::string directoryPath);
+
+  void beginAccessingBookmark(std::string path);
+  void endAccessingBookmark(std::string path);
+  
   void setup() {
     
   }

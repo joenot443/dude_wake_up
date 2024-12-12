@@ -22,7 +22,6 @@ using json = nlohmann::json;
 enum VideoSourceType {
   VideoSource_webcam,
   VideoSource_file,
-  VideoSource_chainer,
   VideoSource_image,
   VideoSource_icon,
   VideoSource_shader,
@@ -102,14 +101,14 @@ public:
   }
   
   void drawPreview(ImVec2 pos, float scale);
+  
+  void drawPreviewSized(ImVec2 size);
 
   void saveFeedbackFrame() {
     if (fbo != nullptr) {
       feedbackDestination->pushFrame(fbo);
     }
   };
-  
-  void drawMaskSettings();
 
   OptionalShadersHelper optionalShadersHelper;
 };

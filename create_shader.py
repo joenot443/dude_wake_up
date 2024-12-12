@@ -16,7 +16,7 @@ def main():
     
     # Step 1: Run the Hygen command
     hygen_command = f"hygen shader new {shader_name}"
-    # subprocess.run(hygen_command, shell=True, check=True)
+    subprocess.run(hygen_command, shell=True, check=True)
     
     # Step 2: Access ShaderToy data using curl
     headers = {

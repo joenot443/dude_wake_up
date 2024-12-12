@@ -177,6 +177,12 @@ void Shader::drawPreview(ImVec2 pos, float scale)
   ImGui::Image(texID, LayoutStateService::getService()->previewSize(scale));
 }
 
+void Shader::drawPreviewSized(ImVec2 size)
+{
+  ImTextureID texID = (ImTextureID)(uintptr_t)lastFrame->getTexture().getTextureData().textureID;
+  ImGui::Image(texID, size);
+}
+
 void Shader::generateOptionalShaders() {
   if (isOptional) return;
   

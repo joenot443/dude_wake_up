@@ -7,6 +7,8 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "SpiralShader.hpp"
+#include "BlurryTrailShader.hpp"
 #include "SimpleBarsShader.hpp"
 #include "ComicbookShader.hpp"
 #include "BackgroundShader.hpp"
@@ -71,7 +73,6 @@
 #include "GyroidsShader.hpp"
 #include "CubifyShader.hpp"
 #include "SwirlingSoulShader.hpp"
-#include "DoubleSwirlShader.hpp"
 #include "SmokeRingShader.hpp"
 #include "AudioCircleShader.hpp"
 #include "LimboShader.hpp"
@@ -100,7 +101,6 @@
 #include "DancingSquaresShader.hpp"
 #include "LumaMaskMakerShader.hpp"
 #include "MaskShader.hpp"
-#include "CircleShader.hpp"
 #include "CrosshatchShader.hpp"
 #include "HalfToneShader.hpp"
 #include "AudioBumperShader.hpp"
@@ -162,6 +162,11 @@ void ShaderChainerService::setup()
     availableBasicShaders.push_back(shader);
     availableShadersMap[shaderType] = shader;
     allAvailableShaders.push_back(shader);
+
+    // Create a new auxiliary shader
+    auto auxShader = std::make_shared<AvailableShader>(shaderType, shaderTypeName(shaderType));
+    auxillaryAvailableBasicShaders.push_back(auxShader);
+    availableAuxillaryShadersMap[shaderType] = auxShader;
   }
   for (auto const shaderType : AvailableMixShaderTypes)
   {
@@ -170,6 +175,11 @@ void ShaderChainerService::setup()
     availableMixShaders.push_back(shader);
     availableShadersMap[shaderType] = shader;
     allAvailableShaders.push_back(shader);
+
+    // Create a new auxiliary shader
+    auto auxShader = std::make_shared<AvailableShader>(shaderType, shaderTypeName(shaderType));
+    auxillaryAvailableMixShaders.push_back(auxShader);
+    availableAuxillaryShadersMap[shaderType] = auxShader;
   }
   for (auto const shaderType : AvailableFilterShaderTypes)
   {
@@ -178,6 +188,11 @@ void ShaderChainerService::setup()
     availableFilterShaders.push_back(shader);
     availableShadersMap[shaderType] = shader;
     allAvailableShaders.push_back(shader);
+
+    // Create a new auxiliary shader
+    auto auxShader = std::make_shared<AvailableShader>(shaderType, shaderTypeName(shaderType));
+    auxillaryAvailableFilterShaders.push_back(auxShader);
+    availableAuxillaryShadersMap[shaderType] = auxShader;
   }
   for (auto const shaderType : AvailableTransformShaderTypes)
   {
@@ -186,6 +201,11 @@ void ShaderChainerService::setup()
     availableTransformShaders.push_back(shader);
     availableShadersMap[shaderType] = shader;
     allAvailableShaders.push_back(shader);
+
+    // Create a new auxiliary shader
+    auto auxShader = std::make_shared<AvailableShader>(shaderType, shaderTypeName(shaderType));
+    auxillaryAvailableTransformShaders.push_back(auxShader);
+    availableAuxillaryShadersMap[shaderType] = auxShader;
   }
   for (auto const shaderType : AvailableMaskShaderTypes)
   {
@@ -194,6 +214,11 @@ void ShaderChainerService::setup()
     availableMaskShaders.push_back(shader);
     availableShadersMap[shaderType] = shader;
     allAvailableShaders.push_back(shader);
+
+    // Create a new auxiliary shader
+    auto auxShader = std::make_shared<AvailableShader>(shaderType, shaderTypeName(shaderType));
+    auxillaryAvailableMaskShaders.push_back(auxShader);
+    availableAuxillaryShadersMap[shaderType] = auxShader;
   }
   
   for (auto const shaderType : AvailableGlitchShaderTypes)
@@ -203,11 +228,34 @@ void ShaderChainerService::setup()
     availableGlitchShaders.push_back(shader);
     availableShadersMap[shaderType] = shader;
     allAvailableShaders.push_back(shader);
+
+    // Create a new auxiliary shader
+    auto auxShader = std::make_shared<AvailableShader>(shaderType, shaderTypeName(shaderType));
+    auxillaryAvailableGlitchShaders.push_back(auxShader);
+    availableAuxillaryShadersMap[shaderType] = auxShader;
   }
   
   for (auto const shaderType : { ShaderTypeBlend, ShaderTypeTransform, ShaderTypeRotate, ShaderTypeMirror, ShaderTypeHSB, ShaderTypeVHS, ShaderType16bit, ShaderTypePixelate, ShaderTypeAutotangent }) {
     auto availableShader = availableShadersMap[shaderType];
     availableDefaultFavoriteShaders.push_back(availableShader);
+    
+    auto auxShader = availableAuxillaryShadersMap[shaderType];
+    auxillaryAvailableFavoriteShaders.push_back(auxShader);
+  }
+
+  basePreview = std::make_shared<ofFbo>();
+  basePreview->allocate(426, 240);
+}
+
+void ShaderChainerService::hydrateAuxillaryShaders(std::shared_ptr<ofFbo> newBasePreview) {
+  // Copy newBasePreview onto basePreview
+  basePreview->begin();
+  newBasePreview->draw(0, 0, 426, 240);
+  basePreview->end();
+
+  // Iterate through auxillaryAvailableShadersMap and set the basePreview for each
+  for (auto const &[shaderType, shader] : availableAuxillaryShadersMap) {
+    shader->setBasePreview(basePreview);
   }
 }
 
@@ -461,6 +509,7 @@ void ShaderChainerService::addShader(std::shared_ptr<Shader> shader)
   shader->feedbackDestination = feedbackSource;
   shader->allocateFrames();
   shader->generateOptionalShaders();
+  shader->settings->selectorParam->setValue(shader->type());
   shadersMap[shader->shaderId] = shader;
   
   // Subscribe the Shader's setup() to resolution updates
@@ -658,10 +707,18 @@ void ShaderChainerService::copyConnections(std::shared_ptr<Connectable> source, 
   }
   
   // Copy output connections
+  if (source->outputs.empty()) return;
+
+  std::vector<std::pair<OutputSlot, std::shared_ptr<Connection>>> sourceOutputs;
+  
   for (auto [slot, connections] : source->outputs) {
     for (auto &conn : connections) { // Iterate over all connections
-      makeConnection(dest, conn->end, conn->type, conn->outputSlot, conn->inputSlot, true);
+      sourceOutputs.push_back(std::make_pair(slot, conn));
     }
+  }
+
+  for (auto [slot, conn] : sourceOutputs) {
+    makeConnection(dest, conn->end, conn->type, slot, conn->inputSlot, true);
   }
 }
 
@@ -819,6 +876,18 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeSpiral: {
+      auto settings = new SpiralSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<SpiralShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeBlurryTrail: {
+      auto settings = new BlurryTrailSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<BlurryTrailShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeSimpleBars: {
       auto settings = new SimpleBarsSettings(shaderId, shaderJson);
       auto shader = std::make_shared<SimpleBarsShader>(settings);
@@ -1158,7 +1227,7 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
     case ShaderTypeMultiMix: {
       auto settings = new MultiMixSettings(shaderId, shaderJson);
       auto shader = std::make_shared<MultiMixShader>(settings);
-      shader->setup();
+      shader.get()->setup();
       return shader;
     }
     case ShaderTypeColorStepper: {
@@ -1200,12 +1269,6 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
     case ShaderTypeSwirlingSoul: {
       auto settings = new SwirlingSoulSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<SwirlingSoulShader>(settings);
-      shader->setup();
-      return shader;
-    }
-    case ShaderTypeDoubleSwirl: {
-      auto settings = new DoubleSwirlSettings(shaderId, shaderJson, shaderTypeName(shaderType));
-      auto shader = std::make_shared<DoubleSwirlShader>(settings);
       shader->setup();
       return shader;
     }
@@ -1393,13 +1456,6 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
     {
       auto settings = new MaskSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<MaskShader>(settings);
-      shader->setup();
-      return shader;
-    }
-    case ShaderTypeCircle:
-    {
-      auto settings = new CircleSettings(shaderId, shaderJson, shaderTypeName(shaderType));
-      auto shader = std::make_shared<CircleShader>(settings);
       shader->setup();
       return shader;
     }
@@ -1690,4 +1746,21 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
       break;
     }
   }
+}
+
+std::shared_ptr<Shader> ShaderChainerService::replaceShader(std::shared_ptr<Shader> oldShader, ShaderType newType) {
+  // Create a new shader of the specified type
+  auto newShader = makeShader(newType);
+
+  // Copy connections from the old shader to the new shader
+  copyConnections(oldShader, newShader);
+
+  // Remove the old shader
+  removeShader(oldShader);
+
+  // Add the new shader to the service
+  addShader(newShader);
+
+  // Return the new shader
+  return newShader;
 }

@@ -4,6 +4,10 @@
 <dict>
 	<key>files</key>
 	<dict>
+		<key>Resources/NodeLayout.json</key>
+		<data>
+		0v4o4Hxo4UN+O5uPyo6TU5C+IXI=
+		</data>
 		<key>Resources/data/MaterialIcons-Regular.ttf</key>
 		<data>
 		fgLD8AVTL/TSQUhWfIQIl1anhIo=
@@ -230,7 +234,11 @@
 		</data>
 		<key>Resources/data/images/icons/.DS_Store</key>
 		<data>
-		3y++sUAKzaCQmjLBz2v0kvESHgc=
+		B4MiFnRurbYomXw1SAlXEiR6JIw=
+		</data>
+		<key>Resources/data/images/icons/down.png</key>
+		<data>
+		yCCmxuKo+NE0kGk+VQZdoqiXa1I=
 		</data>
 		<key>Resources/data/images/icons/left-arrow.png</key>
 		<data>
@@ -239,6 +247,14 @@
 		<key>Resources/data/images/icons/right-arrow.png</key>
 		<data>
 		Kd+/kIQxSP6tdChzBT7lNyBInCA=
+		</data>
+		<key>Resources/data/images/icons/setting.png</key>
+		<data>
+		NrLlTrilR1+eTGVrbAks1yOj8Dk=
+		</data>
+		<key>Resources/data/images/icons/settings.png</key>
+		<data>
+		NrLlTrilR1+eTGVrbAks1yOj8Dk=
 		</data>
 		<key>Resources/data/images/stylized/.DS_Store</key>
 		<data>
@@ -1104,6 +1120,10 @@
 		<data>
 		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
 		</data>
+		<key>Resources/data/markdown/BlurryTrail.md</key>
+		<data>
+		h1hlTafEMVVYIf1dePARpIkDi9E=
+		</data>
 		<key>Resources/data/markdown/Bounce.md</key>
 		<data>
 		6Ki6odsUSvd+Yf1sZEorcQ4LMNw=
@@ -1536,6 +1556,10 @@
 		<data>
 		qIyozf7y+6WiVMBLgMOWE5a7dsg=
 		</data>
+		<key>Resources/data/markdown/Spiral.md</key>
+		<data>
+		xKNlU6aPcBays4oCYNl8/IEo0Ws=
+		</data>
 		<key>Resources/data/markdown/StarryPlanes.md</key>
 		<data>
 		q94oSZgxVLOYvPcYjSZwPeRTem0=
@@ -1763,6 +1787,14 @@
 		<key>Resources/data/shaders/Blur.vert</key>
 		<data>
 		iHXtG5txXYcAyl6+N0nbnxDNMeI=
+		</data>
+		<key>Resources/data/shaders/BlurryTrail.frag</key>
+		<data>
+		+rwjvgZP4xJ2El/KBo/apLa527E=
+		</data>
+		<key>Resources/data/shaders/BlurryTrail.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
 		<key>Resources/data/shaders/Bounce.frag</key>
 		<data>
@@ -2565,6 +2597,14 @@
 		f7VV3tFC9PX2ohtlZsSNBjJ+zWI=
 		</data>
 		<key>Resources/data/shaders/SpaceRings.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
+		</data>
+		<key>Resources/data/shaders/Spiral.frag</key>
+		<data>
+		LC282hiHV3xdskk6vq9/tXzXUDY=
+		</data>
+		<key>Resources/data/shaders/Spiral.vert</key>
 		<data>
 		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
@@ -3827,11 +3867,20 @@
 	</dict>
 	<key>files2</key>
 	<dict>
+		<key>Frameworks/Syphon.framework</key>
+		<dict>
+			<key>cdhash</key>
+			<data>
+			/vMwIZw8m5JjfIUXexugb3G63T4=
+			</data>
+			<key>requirement</key>
+			<string>identifier "info.v002.Syphon" and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: Joe Crozier (7HTR557REQ)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
+		</dict>
 		<key>Frameworks/libcpr.1.9.7.dylib</key>
 		<dict>
 			<key>cdhash</key>
 			<data>
-			mYeoHBOFo3GfIA77GW3Ef90hRGk=
+			7qUrc2fmQKWAiFO/3SrnEcK1Dsc=
 			</data>
 			<key>requirement</key>
 			<string>identifier "libcpr.1" and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: Joe Crozier (7HTR557REQ)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
@@ -3840,7 +3889,7 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			ZB0Fhe9hr581KQtjbtQdpDCiEAg=
+			zsgjxP4XAeALwSANydRiSDyscRg=
 			</data>
 			<key>requirement</key>
 			<string>identifier "libcpr.1" and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: Joe Crozier (7HTR557REQ)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
@@ -3849,7 +3898,7 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			MesaUFa4zcTGwbw0fap8vpCDoPY=
+			RUTU8GSGj1qeOCW1ZycaVwUzAS4=
 			</data>
 			<key>requirement</key>
 			<string>identifier libfmod and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: Joe Crozier (7HTR557REQ)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
@@ -3858,10 +3907,17 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			I9jx3aPsBryrG6ZzO/88goP2Qfw=
+			R4C3TjhWM9tuv/XfwSqhi9RPoD8=
 			</data>
 			<key>requirement</key>
 			<string>identifier libsentry and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: Joe Crozier (7HTR557REQ)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
+		</dict>
+		<key>Resources/NodeLayout.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			fnDve4r9iz/hw4Dvp1Ggbr6nvNaF308TmcSmPCQxU3E=
+			</data>
 		</dict>
 		<key>Resources/data/MaterialIcons-Regular.ttf</key>
 		<dict>
@@ -4227,6 +4283,13 @@
 			mPqYuLx89IV5s44Tdgu6bjU97NCdqHGyuoMOiga9OLI=
 			</data>
 		</dict>
+		<key>Resources/data/images/icons/down.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			KMD7YwvLjmHrND0dgGXfJpMmkcsH9WiJPC3SuKeO1h0=
+			</data>
+		</dict>
 		<key>Resources/data/images/icons/left-arrow.png</key>
 		<dict>
 			<key>hash2</key>
@@ -4239,6 +4302,20 @@
 			<key>hash2</key>
 			<data>
 			zZVhr5TLM3krufZjpHP3nJ2Tk6gW9Ra5v5hX/PcyQMc=
+			</data>
+		</dict>
+		<key>Resources/data/images/icons/setting.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			Df9zd/mt/BVrl1V7mDg+uj65rYJmfk4Y18oAuz2J+bE=
+			</data>
+		</dict>
+		<key>Resources/data/images/icons/settings.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			Df9zd/mt/BVrl1V7mDg+uj65rYJmfk4Y18oAuz2J+bE=
 			</data>
 		</dict>
 		<key>Resources/data/images/stylized/1.png</key>
@@ -5739,6 +5816,13 @@
 			47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=
 			</data>
 		</dict>
+		<key>Resources/data/markdown/BlurryTrail.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			DkZlHDbS93LYU5ZcFe6YnObInEzwM4UpIoyhJW5jmYA=
+			</data>
+		</dict>
 		<key>Resources/data/markdown/Bounce.md</key>
 		<dict>
 			<key>hash2</key>
@@ -6495,6 +6579,13 @@
 			FRSrm4KTL+bNqj/hwPtuebJRiL6P1QYE7tmMxtuOsuc=
 			</data>
 		</dict>
+		<key>Resources/data/markdown/Spiral.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			JS2BchwPqpk/UpCPCiTr3jN3bkWMYQKD0owW3DR9SKI=
+			</data>
+		</dict>
 		<key>Resources/data/markdown/StarryPlanes.md</key>
 		<dict>
 			<key>hash2</key>
@@ -6878,6 +6969,20 @@
 			<key>hash2</key>
 			<data>
 			BXiAgPB9AA3U/Xu819ApNfVuibF9oLeWaB9X/kfmqAE=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/BlurryTrail.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			tcHypMI/WKRfQQi4g81/YVilFiLqVYHuHDHt/uO0n3g=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/BlurryTrail.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Bounce.frag</key>
@@ -8281,6 +8386,20 @@
 			</data>
 		</dict>
 		<key>Resources/data/shaders/SpaceRings.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/Spiral.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			OH6EDyenQ1SmdgzROsupsf81AorN48zSfdnY/F4DOXU=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/Spiral.vert</key>
 		<dict>
 			<key>hash2</key>
 			<data>

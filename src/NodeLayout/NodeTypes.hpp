@@ -11,7 +11,6 @@
 #include "Shader.hpp"
 #include "Connection.hpp"
 #include "ShaderConfigSelectionView.hpp"
-#include "CommonViews.hpp"
 #include "Colors.hpp"
 #include "ShaderChainerService.hpp"
 #include "VideoSource.hpp"
@@ -45,9 +44,9 @@ struct Node
   std::shared_ptr<VideoSource> source;
   std::shared_ptr<Connectable> connectable;
   
-
+  
   ImVec2 position;
-
+  
   std::string idName()
   {
     return formatString("%s##%d", name.c_str(), id.Get());
@@ -57,7 +56,7 @@ struct Node
   {
     return connectable->hasInputAtSlot(slot);
   }
-
+  
   bool hasMainOutputLink()
   {
     return connectable->outputs.find(OutputSlotMain) != connectable->outputs.end();
@@ -83,7 +82,7 @@ struct Node
       source->drawOptionalSettings();
     }
   }
-
+  
   // Draws the frame for the node
   void drawPreview(ImVec2 pos, float scale)
   {
@@ -96,7 +95,20 @@ struct Node
       source->drawPreview(pos, scale);
     }
   }
-
+  
+  // Draws the frame for the node
+  void drawPreviewSized(ImVec2 size)
+  {
+    if (type == NodeTypeShader)
+    {
+      shader->drawPreviewSized(size);
+    }
+    else
+    {
+      source->drawPreviewSized(size);
+    }
+  }
+  
   ImColor nodeColor()
   {
     if (type == NodeTypeSource)
@@ -118,10 +130,10 @@ struct Node
       return source->origin;
     }
   }
-
-
+  
+  
   Node(ed::NodeId id, std::map<OutputSlot, ed::PinId> outputIds, std::map<InputSlot, ed::PinId> inputIds, std::string name, NodeType type, std::shared_ptr<Connectable> conn)
-      : id(id), outputIds(outputIds), inputIds(inputIds), type(type), name(name), position(ImVec2(0, 0)), connectable(conn) {}
+  : id(id), outputIds(outputIds), inputIds(inputIds), type(type), name(name), position(ImVec2(0, 0)), connectable(conn) {}
 };
 
 struct Pin
@@ -129,9 +141,9 @@ struct Pin
   ed::PinId id;
   std::shared_ptr<Node> node;
   PinType pinType;
-
+  
   Pin(ed::PinId id, std::shared_ptr<Node> node, PinType pinType)
-      : id(id), node(node), pinType(pinType) {}
+  : id(id), node(node), pinType(pinType) {}
 };
 
 struct ShaderLink
@@ -142,10 +154,10 @@ struct ShaderLink
   InputSlot inputSlot;
   OutputSlot outputSlot;
   std::string connectionId;
-
+  
   ShaderLink(ed::LinkId id, std::shared_ptr<Node> inputNode,
              std::shared_ptr<Node> outputNode, OutputSlot outputSlot, InputSlot inputSlot, std::string connectionId)
-      : id(id), output(outputNode), input(inputNode), inputSlot(inputSlot),
+  : id(id), output(outputNode), input(inputNode), inputSlot(inputSlot),
   outputSlot(outputSlot), connectionId(connectionId) {}
 };
 

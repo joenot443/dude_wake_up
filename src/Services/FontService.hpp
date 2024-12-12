@@ -34,6 +34,10 @@ public:
   ImFont * largeIcon;
   ImFont * xLargeIcon;
   
+  // Redesign
+  
+  ImFont *pN;
+  
   void loadFonts();
   void addFontToGui(ofxImGui::Gui *gui);
   

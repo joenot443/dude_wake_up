@@ -63,6 +63,8 @@ static const std::string ConfigTypeStrand = "strand";
 class ConfigService {
 private:
   observable::subject<void()> configUpdateSubject;
+  std::string fileBrowserPath;
+  
 public:
   void notifyConfigUpdate();
   void subscribeToConfigUpdates(std::function<void()> callback);
@@ -94,14 +96,14 @@ public:
   void loadConfigFile(std::string path);
   json currentConfig();
   
-  // File Paths
+  // Static File Paths
   std::string nottawaFolderFilePath();
   std::string libraryFolderFilePath();
   std::string exportsFolderFilePath();
   std::string templatesFolderFilePath();
   std::string strandsFolderFilePath();
   std::string relativeFilePathWithinNottawaFolder(std::string filePath);
-
+  
   json jsonFromParameters(std::vector<Parameter *> parameters);
   
   // Workspaces

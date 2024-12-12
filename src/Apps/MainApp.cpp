@@ -18,6 +18,7 @@
 #include "LayoutStateService.hpp"
 #include "VideoSourceService.hpp"
 #include "MarkdownService.hpp"
+#include "ImageService.hpp"
 #include "WebcamSource.hpp"
 #include "LibraryService.hpp"
 #include "TextureService.hpp"
@@ -54,6 +55,7 @@ void MainApp::setup()
   ConfigService::getService()->loadDefaultConfigFile();
   StrandService::getService()->setup();
   SyphonService::getService()->setup();
+  ImageService::getService()->setup();
   mainStageView->setup();
   LibraryService::getService()->backgroundFetchLibraryFiles();
   ParameterService::getService()->setup();
@@ -63,6 +65,7 @@ void MainApp::setup()
 void MainApp::update()
 {
   runMainThreadTasks();
+  SyphonService::getService()->update();
   OscillationService::getService()->tickOscillators();
   ModulationService::getService()->tickMappings();
   ParameterService::getService()->tickParameters();
@@ -104,6 +107,14 @@ void MainApp::exitStream(ofEventArgs &args) {}
 
 void MainApp::dragEvent(ofDragInfo dragInfo)
 {
+  
+  if (ofFile(dragInfo.files[0]).isDirectory()) {
+    BookmarkService::getService()->saveBookmarkForDirectory(dragInfo.files[0]);
+    BookmarkService::getService()->beginAccessingBookmark(dragInfo.files[0]);
+    mainStageView->loadDirectory(dragInfo.files[0]);
+    return;
+  }
+  
   // Check if the file is a JSON file
   if (ofIsStringInString(dragInfo.files[0], ".json"))
   {

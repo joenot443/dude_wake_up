@@ -10,34 +10,20 @@
 
 #include "ofMain.h"
 #include "ShaderType.hpp"
+#include "TileItem.hpp"
 #include <stdio.h>
 #include "UUID.hpp"
 #include "ofxImGui.h"
+#include "AbstractTileBrowserView.hpp"
 
-class TileItem {
+class TileBrowserView : public AbstractTileBrowserView {
 public:
-  virtual ~TileItem() {} 
-  std::string name;
-  std::string category = "";
-  ImTextureID textureID;
-  int index;
-  ShaderType shaderType;
-  // Closure which will be called when the tile is clicked
-  std::function<void()> dragCallback;
-
-  TileItem(std::string name, ImTextureID textureID, int index,
-           std::function<void()> dragCallback, std::string category = "", ShaderType type = ShaderTypeNone)
-      : name(name), textureID(textureID), index(index), shaderType(type), category(category),
-        dragCallback(dragCallback){};
-};
-
-class TileBrowserView {
-public:
-  void setup();
-  void draw();
-  void update();
+  void setup() override;
+  void draw() override;
+  void update() override;
   void sortTileItems();
-  void setTileItems(std::vector<std::shared_ptr<TileItem>> items);
+  void setTileItems(std::vector<std::shared_ptr<TileItem>> items) override;
+  void setCallback(std::function<void(std::shared_ptr<TileItem>)> callback) override;
   
   float widthFraction = 0.2;
   std::string tileBrowserId;
@@ -54,6 +40,7 @@ public:
   
 private:
   std::vector<std::shared_ptr<TileItem>> tileItems;
+  std::function<void(std::shared_ptr<TileItem>)> tileClickCallback;
 };
 
 #endif /* TileBrowserView_hpp */

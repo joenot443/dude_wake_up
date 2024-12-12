@@ -538,3 +538,4 @@ void ConfigService::loadConfigFile(std::string path)
   }
   isLoading = false;
 }
+

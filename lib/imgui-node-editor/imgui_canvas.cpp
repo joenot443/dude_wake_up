@@ -18,14 +18,14 @@
         struct mixin : public base, public check_type {};                            \
                                                                                      \
         template <void (base::*)()> struct aux {};                                   \
-                                                                                     \
-        template <typename U> static no_type  test(aux<&U::__member_name__>*);       \
-        template <typename U> static yes_type test(...);                             \
-                                                                                     \
-        public:                                                                      \
-                                                                                     \
-        static constexpr bool value = (sizeof(yes_type) == sizeof(test<mixin>(0)));  \
-    }
+\
+template <typename U> static no_type  test(aux<&U::__member_name__>*);       \
+template <typename U> static yes_type test(...);                             \
+\
+public:                                                                      \
+\
+static constexpr bool value = (sizeof(yes_type) == sizeof(test<mixin>(0)));  \
+}
 
 // Special sentinel value. This needs to be unique, so allow it to be overridden in the user's ImGui config
 # ifndef ImDrawCallback_ImCanvas
@@ -38,39 +38,39 @@ DECLARE_HAS_MEMBER(HasFringeScale, _FringeScale);
 
 struct FringeScaleRef
 {
-    // Overload is present when ImDrawList does have _FringeScale member variable.
-    template <typename T>
-    static float& Get(typename std::enable_if<HasFringeScale<T>::value, T>::type* drawList)
-    {
-        return drawList->_FringeScale;
-    }
-
-    // Overload is present when ImDrawList does not have _FringeScale member variable.
-    template <typename T>
-    static float& Get(typename std::enable_if<!HasFringeScale<T>::value, T>::type*)
-    {
-        static float placeholder = 1.0f;
-        return placeholder;
-    }
+  // Overload is present when ImDrawList does have _FringeScale member variable.
+  template <typename T>
+  static float& Get(typename std::enable_if<HasFringeScale<T>::value, T>::type* drawList)
+  {
+    return drawList->_FringeScale;
+  }
+  
+  // Overload is present when ImDrawList does not have _FringeScale member variable.
+  template <typename T>
+  static float& Get(typename std::enable_if<!HasFringeScale<T>::value, T>::type*)
+  {
+    static float placeholder = 1.0f;
+    return placeholder;
+  }
 };
 
 DECLARE_HAS_MEMBER(HasVtxCurrentOffset, _VtxCurrentOffset);
 
 struct VtxCurrentOffsetRef
 {
-    // Overload is present when ImDrawList does have _FringeScale member variable.
-    template <typename T>
-    static unsigned int& Get(typename std::enable_if<HasVtxCurrentOffset<T>::value, T>::type* drawList)
-    {
-        return drawList->_VtxCurrentOffset;
-    }
-
-    // Overload is present when ImDrawList does not have _FringeScale member variable.
-    template <typename T>
-    static unsigned int& Get(typename std::enable_if<!HasVtxCurrentOffset<T>::value, T>::type* drawList)
-    {
-        return drawList->_CmdHeader.VtxOffset;
-    }
+  // Overload is present when ImDrawList does have _FringeScale member variable.
+  template <typename T>
+  static unsigned int& Get(typename std::enable_if<HasVtxCurrentOffset<T>::value, T>::type* drawList)
+  {
+    return drawList->_VtxCurrentOffset;
+  }
+  
+  // Overload is present when ImDrawList does not have _FringeScale member variable.
+  template <typename T>
+  static unsigned int& Get(typename std::enable_if<!HasVtxCurrentOffset<T>::value, T>::type* drawList)
+  {
+    return drawList->_CmdHeader.VtxOffset;
+  }
 };
 
 } // namespace ImCanvasDetails
@@ -80,72 +80,122 @@ struct VtxCurrentOffsetRef
 // If ImDrawList does not have _FringeScale a placeholder is returned.
 static inline float& ImFringeScaleRef(ImDrawList* drawList)
 {
-    using namespace ImCanvasDetails;
-    return FringeScaleRef::Get<ImDrawList>(drawList);
+  using namespace ImCanvasDetails;
+  return FringeScaleRef::Get<ImDrawList>(drawList);
 }
 
 static inline unsigned int& ImVtxOffsetRef(ImDrawList* drawList)
 {
-    using namespace ImCanvasDetails;
-    return VtxCurrentOffsetRef::Get<ImDrawList>(drawList);
+  using namespace ImCanvasDetails;
+  return VtxCurrentOffsetRef::Get<ImDrawList>(drawList);
 }
 
 static inline ImVec2 ImSelectPositive(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x > 0.0f ? lhs.x : rhs.x, lhs.y > 0.0f ? lhs.y : rhs.y); }
 
 bool ImGuiEx::Canvas::Begin(const char* id, const ImVec2& size)
 {
-    return Begin(ImGui::GetID(id), size);
+  return Begin(ImGui::GetID(id), size);
 }
 
 bool ImGuiEx::Canvas::Begin(ImGuiID id, const ImVec2& size)
 {
-    IM_ASSERT(m_InBeginEnd == false);
-
-    m_WidgetPosition = ImGui::GetCursorScreenPos();
-    m_WidgetSize = ImSelectPositive(size, ImGui::GetContentRegionAvail());
-    m_WidgetRect = ImRect(m_WidgetPosition, m_WidgetPosition + m_WidgetSize);
-    m_DrawList = ImGui::GetWindowDrawList();
-
-    UpdateViewTransformPosition();
-
-    if (ImGui::IsClippedEx(m_WidgetRect, id))
-        return false;
-
-    // Save current channel, so we can assert when user
-    // call canvas API with different one.
-    m_ExpectedChannel = m_DrawList->_Splitter._Current;
-
-    // #debug: Canvas content.
-    //m_DrawList->AddRectFilled(m_StartPos, m_StartPos + m_CurrentSize, IM_COL32(0, 0, 0, 64));
-    //m_DrawList->AddRect(m_WidgetRect.Min, m_WidgetRect.Max, IM_COL32(255, 0, 255, 64));
-
-    ImGui::SetCursorScreenPos(ImVec2(0.0f, 0.0f));
-
+  IM_ASSERT(m_InBeginEnd == false);
+  
+  m_WidgetPosition = ImGui::GetCursorScreenPos();
+  m_WidgetSize = ImSelectPositive(size, ImGui::GetContentRegionAvail());
+  m_WidgetRect = ImRect(m_WidgetPosition, m_WidgetPosition + m_WidgetSize);
+  m_DrawList = ImGui::GetWindowDrawList();
+  
+  UpdateViewTransformPosition();
+  
+  if (ImGui::IsClippedEx(m_WidgetRect, id))
+    return false;
+  
+  // Save current channel, so we can assert when user
+  // call canvas API with different one.
+  m_ExpectedChannel = m_DrawList->_Splitter._Current;
+  
+  // #debug: Canvas content.
+  //m_DrawList->AddRectFilled(m_StartPos, m_StartPos + m_CurrentSize, IM_COL32(0, 0, 0, 64));
+  //m_DrawList->AddRect(m_WidgetRect.Min, m_WidgetRect.Max, IM_COL32(255, 0, 255, 64));
+  
+  ImGui::SetCursorScreenPos(ImVec2(0.0f, 0.0f));
+  
 # if IMGUI_EX_CANVAS_DEFERED()
-    m_Ranges.resize(0);
+  m_Ranges.resize(0);
 # endif
-
-    SaveInputState();
-    SaveViewportState();
-
-    // Record cursor max to prevent scrollbars from appearing.
-    m_WindowCursorMaxBackup = ImGui::GetCurrentWindow()->DC.CursorMaxPos;
-
-    EnterLocalSpace();
-
+  
+  SaveInputState();
+  SaveViewportState();
+  
+  // Record cursor max to prevent scrollbars from appearing.
+  m_WindowCursorMaxBackup = ImGui::GetCurrentWindow()->DC.CursorMaxPos;
+  
+  EnterLocalSpace();
+  
 # if IMGUI_VERSION_NUM >= 18967
-    ImGui::SetNextItemAllowOverlap();
+  ImGui::SetNextItemAllowOverlap();
 # endif
-
-    // Emit dummy widget matching bounds of the canvas.
-    ImGui::SetCursorScreenPos(m_ViewRect.Min);
-    ImGui::Dummy(m_ViewRect.GetSize());
-
-    ImGui::SetCursorScreenPos(ImVec2(0.0f, 0.0f));
-
-    m_InBeginEnd = true;
-
-    return true;
+  
+  // Emit dummy widget matching bounds of the canvas.
+  ImGui::SetCursorScreenPos(m_ViewRect.Min);
+  ImGui::Dummy(m_ViewRect.GetSize());
+  
+  ImGui::SetCursorScreenPos(ImVec2(0.0f, 0.0f));
+  
+  m_InBeginEnd = true;
+  
+  auto beginWindowHook = ImGuiContextHook{};
+  beginWindowHook.UserData = this;
+  beginWindowHook.Type = ImGuiContextHookType_BeginWindow;
+  beginWindowHook.Callback = []( ImGuiContext * context, ImGuiContextHook * hook )
+  {
+//    ImGui::SetNextWindowViewport( ImGui::GetCurrentWindow()->Viewport->ID );
+    
+    auto canvas = reinterpret_cast< Canvas * >( hook->UserData );
+    if ( canvas->m_SuspendCounter == 0 )
+    {
+      if ( ( context->NextWindowData.Flags & ImGuiNextWindowDataFlags_HasPos ) != 0 )
+      {
+        auto pos = canvas->FromLocal( context->NextWindowData.PosVal );
+        ImGui::SetNextWindowPos( pos, context->NextWindowData.PosCond, context->NextWindowData.PosPivotVal );
+      }
+      
+      if ( context->BeginPopupStack.size() )
+      {
+        auto & popup = context->BeginPopupStack.back();
+        popup.OpenPopupPos = canvas->FromLocal( popup.OpenPopupPos );
+        popup.OpenMousePos = canvas->FromLocal( popup.OpenMousePos );
+      }
+      
+      if ( context->OpenPopupStack.size() )
+      {
+        auto & popup = context->OpenPopupStack.back();
+        popup.OpenPopupPos = canvas->FromLocal( popup.OpenPopupPos );
+        popup.OpenMousePos = canvas->FromLocal( popup.OpenMousePos );
+      }
+      
+    }
+    canvas->m_WindowCursorMaxBackup = ImGui::GetCursorScreenPos();
+    canvas->Suspend();
+  };
+  
+  m_beginWindowHook = ImGui::AddContextHook( ImGui::GetCurrentContext(), &beginWindowHook );
+  
+  auto endWindowHook = ImGuiContextHook{};
+  endWindowHook.UserData = this;
+  endWindowHook.Type = ImGuiContextHookType_EndWindow;
+  endWindowHook.Callback = []( ImGuiContext * ctx, ImGuiContextHook * hook )
+  {
+    auto canvas = reinterpret_cast< Canvas * >( hook->UserData );
+    canvas->Resume();
+    ImGui::SetCursorScreenPos( canvas->m_WindowCursorMaxBackup );
+    ImGui::GetCurrentWindow()->DC.IsSetPos = false;
+  };
+  
+  m_endWindowHook = ImGui::AddContextHook( ImGui::GetCurrentContext(), &endWindowHook );
+  
+  return true;
 }
 
 void ImGuiEx::Canvas::End()
@@ -179,7 +229,11 @@ void ImGuiEx::Canvas::End()
     // #debug: Rect around canvas. Content should be inside these bounds.
     //m_DrawList->AddRect(m_WidgetPosition - ImVec2(1.0f, 1.0f), m_WidgetPosition + m_WidgetSize + ImVec2(1.0f, 1.0f), IM_COL32(196, 0, 0, 255));
 
-    m_InBeginEnd = false;
+  m_InBeginEnd = false;
+
+  ImGui::RemoveContextHook( ImGui::GetCurrentContext(), m_beginWindowHook );
+  ImGui::RemoveContextHook( ImGui::GetCurrentContext(), m_endWindowHook );
+	
 }
 
 void ImGuiEx::Canvas::SetView(const ImVec2& origin, float scale)

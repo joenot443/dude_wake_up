@@ -10,15 +10,6 @@
 #include "CommonViews.hpp"
 #include "LayoutStateService.hpp"
 
-void VideoSource::drawMaskSettings() {
- CommonViews::ShaderCheckbox(settings->maskEnabled);
- if (settings->maskEnabled->boolValue) {
-   CommonViews::Slider("Mask Tolerance", "##maskTolerance", settings->maskTolerance);
-   CommonViews::ShaderColor(settings->maskColor);
-   CommonViews::ShaderCheckbox(settings->invert);
- }
-}
-
 void VideoSource::drawPreview(ImVec2 pos, float scale) {
   if (!fbo->isAllocated()) return;
   
@@ -26,6 +17,16 @@ void VideoSource::drawPreview(ImVec2 pos, float scale) {
   if (tex.isAllocated()) {
     ImTextureID texID = (ImTextureID)(uintptr_t)tex.getTextureData().textureID;
     ImGui::Image(texID, LayoutStateService::getService()->previewSize(scale));
+  }
+}
+
+void VideoSource::drawPreviewSized(ImVec2 size) {
+  if (!fbo->isAllocated()) return;
+  
+  ofTexture tex = fbo->getTexture();
+  if (tex.isAllocated()) {
+    ImTextureID texID = (ImTextureID)(uintptr_t)tex.getTextureData().textureID;
+    ImGui::Image(texID, size);
   }
 }
 

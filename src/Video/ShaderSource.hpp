@@ -5,6 +5,7 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "SpiralShader.hpp"
 #include "SimpleBarsShader.hpp"
 #include "SimpleShapeShader.hpp"
 #include "ColoredDropsShader.hpp"
@@ -46,7 +47,6 @@
 #include "GridRunShader.hpp"
 #include "GyroidsShader.hpp"
 #include "SwirlingSoulShader.hpp"
-#include "DoubleSwirlShader.hpp"
 #include "SmokeRingShader.hpp"
 #include "AudioCircleShader.hpp"
 #include "LimboShader.hpp"
@@ -58,7 +58,6 @@
 #include "CurlySquaresShader.hpp"
 #include "PlasmaTwoShader.hpp"
 #include "DancingSquaresShader.hpp"
-#include "CircleShader.hpp"
 #include "TissueShader.hpp"
 #include "PsycurvesShader.hpp"
 #include "TriangleMapShader.hpp"
@@ -91,7 +90,6 @@ enum ShaderSourceType {
   ShaderSource_CurlySquares, //source enum,
   ShaderSource_PlasmaTwo, //source enum,
   ShaderSource_DancingSquares, //source enum,
-  ShaderSource_Circle, //source enum,
   ShaderSource_Tissue, //source enum,
   ShaderSource_Psycurves,
   ShaderSource_TriangleMap,
@@ -118,7 +116,6 @@ enum ShaderSourceType {
   ShaderSource_Limbo, //source enum,
   ShaderSource_AudioCircle, //source enum,
   ShaderSource_SmokeRing, //source enum,
-  ShaderSource_DoubleSwirl, //source enum,
   ShaderSource_SwirlingSoul, //source enum,
   ShaderSource_Gyroids, //source enum,
   ShaderSource_GridRun, //source enum,
@@ -158,6 +155,7 @@ enum ShaderSourceType {
   ShaderSource_ColoredDrops, //source enum,
   ShaderSource_SimpleShape, //source enum,
   ShaderSource_SimpleBars, //source enum,
+  ShaderSource_Spiral, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -166,7 +164,6 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_CurlySquares, // Available
   ShaderSource_PlasmaTwo, // Available
   ShaderSource_DancingSquares, // Available
-  ShaderSource_Circle, // Available
   ShaderSource_Tissue, // Available
   ShaderSource_Psycurves,
   ShaderSource_TriangleMap,
@@ -190,7 +187,6 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_Vertex, // Available
   ShaderSource_Limbo, // Available
   ShaderSource_SmokeRing, // Available
-  ShaderSource_DoubleSwirl, // Available
   ShaderSource_SwirlingSoul, // Available
   ShaderSource_Gyroids, // Available
   ShaderSource_GridRun, // Available
@@ -228,11 +224,14 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_ColoredDrops, // Available
   ShaderSource_SimpleShape, // Available
   ShaderSource_SimpleBars, // Available
+  ShaderSource_Spiral, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
       // shaderTypeForShaderSourceType
+  case ShaderSource_Spiral: //type enum
+    return ShaderTypeSpiral;
   case ShaderSource_SimpleBars: //type enum
     return ShaderTypeSimpleBars;
   case ShaderSource_SimpleShape: //type enum
@@ -311,8 +310,6 @@ static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
       return ShaderTypeGyroids;
     case ShaderSource_SwirlingSoul: //type enum
       return ShaderTypeSwirlingSoul;
-    case ShaderSource_DoubleSwirl: //type enum
-      return ShaderTypeDoubleSwirl;
     case ShaderSource_SmokeRing: //type enum
       return ShaderTypeSmokeRing;
     case ShaderSource_AudioCircle: //type enum
@@ -335,8 +332,6 @@ static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
       return ShaderTypePlasmaTwo;
     case ShaderSource_DancingSquares: //type enum
       return ShaderTypeDancingSquares;
-    case ShaderSource_Circle: //type enum
-      return ShaderTypeCircle;
     case ShaderSource_Tissue: //type enum
       return ShaderTypeTissue;
     case ShaderSource_Psycurves:
@@ -380,6 +375,154 @@ static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   }
 }
 
+static ShaderSourceType shaderSourceTypeForShaderType(ShaderType type) {
+  switch (type) {
+    // Reverse mapping from ShaderType to ShaderSourceType
+    case ShaderTypeSpiral:
+      return ShaderSource_Spiral;
+    case ShaderTypeSimpleBars:
+      return ShaderSource_SimpleBars;
+    case ShaderTypeSimpleShape:
+      return ShaderSource_SimpleShape;
+    case ShaderTypeColoredDrops:
+      return ShaderSource_ColoredDrops;
+    case ShaderTypePlasmor:
+      return ShaderSource_Plasmor;
+    case ShaderTypeDiffractor:
+      return ShaderSource_Diffractor;
+    case ShaderTypeAerogel:
+      return ShaderSource_Aerogel;
+    case ShaderTypeBreathe:
+      return ShaderSource_Breathe;
+    case ShaderTypeHeptagons:
+      return ShaderSource_Heptagons;
+    case ShaderTypeOctagrams:
+      return ShaderSource_Octagrams;
+    case ShaderTypePerplexion:
+      return ShaderSource_Perplexion;
+    case ShaderTypeColorWheel:
+      return ShaderSource_ColorWheel;
+    case ShaderTypeDiscoAudio:
+      return ShaderSource_DiscoAudio;
+    case ShaderTypeFlickerAudio:
+      return ShaderSource_FlickerAudio;
+    case ShaderTypeFractalAudio:
+      return ShaderSource_FractalAudio;
+    case ShaderTypeStarryPlanes:
+      return ShaderSource_StarryPlanes;
+    case ShaderTypeUnknownPleasures:
+      return ShaderSource_UnknownPleasures;
+    case ShaderTypeSpaceRings:
+      return ShaderSource_SpaceRings;
+    case ShaderTypeCloudyShapes:
+      return ShaderSource_CloudyShapes;
+    case ShaderTypeAudioBlocks:
+      return ShaderSource_AudioBlocks;
+    case ShaderTypeFloatingSparks:
+      return ShaderSource_FloatingSparks;
+    case ShaderTypeCosmos:
+      return ShaderSource_Cosmos;
+    case ShaderTypeGlitchAudio:
+      return ShaderSource_GlitchAudio;
+    case ShaderTypeChromeGrill:
+      return ShaderSource_ChromeGrill;
+    case ShaderTypeFibers:
+      return ShaderSource_Fibers;
+    case ShaderTypeMist:
+      return ShaderSource_Mist;
+    case ShaderTypeWelcomeRings:
+      return ShaderSource_WelcomeRings;
+    case ShaderTypeMotionBlurTexture:
+      return ShaderSource_MotionBlurTexture;
+    case ShaderTypeIsoFract:
+      return ShaderSource_IsoFract;
+    case ShaderTypeDirtyPlasma:
+      return ShaderSource_DirtyPlasma;
+    case ShaderTypeTwistedTrip:
+      return ShaderSource_TwistedTrip;
+    case ShaderTypeTwistedCubes:
+      return ShaderSource_TwistedCubes;
+    case ShaderTypeCore:
+      return ShaderSource_Core;
+    case ShaderTypeVoronoiColumns:
+      return ShaderSource_VoronoiColumns;
+    case ShaderTypeWarpspeed:
+      return ShaderSource_Warpspeed;
+    case ShaderTypeReflector:
+      return ShaderSource_Reflector;
+    case ShaderTypeFullHouse:
+      return ShaderSource_FullHouse;
+    case ShaderTypeGridRun:
+      return ShaderSource_GridRun;
+    case ShaderTypeGyroids:
+      return ShaderSource_Gyroids;
+    case ShaderTypeSwirlingSoul:
+      return ShaderSource_SwirlingSoul;
+    case ShaderTypeSmokeRing:
+      return ShaderSource_SmokeRing;
+    case ShaderTypeAudioCircle:
+      return ShaderSource_AudioCircle;
+    case ShaderTypeLimbo:
+      return ShaderSource_Limbo;
+    case ShaderTypeVertex:
+      return ShaderSource_Vertex;
+    case ShaderTypeSolidColor:
+      return ShaderSource_SolidColor;
+    case ShaderTypeHilbert:
+      return ShaderSource_Hilbert;
+    case ShaderTypeWarp:
+      return ShaderSource_Warp;
+    case ShaderTypeFrequencyVisualizer:
+      return ShaderSource_FrequencyVisualizer;
+    case ShaderTypeCurlySquares:
+      return ShaderSource_CurlySquares;
+    case ShaderTypePlasmaTwo:
+      return ShaderSource_PlasmaTwo;
+    case ShaderTypeDancingSquares:
+      return ShaderSource_DancingSquares;
+    case ShaderTypeTissue:
+      return ShaderSource_Tissue;
+    case ShaderTypePsycurves:
+      return ShaderSource_Psycurves;
+    case ShaderTypeTriangleMap:
+      return ShaderSource_TriangleMap;
+    case ShaderTypeDisco:
+      return ShaderSource_Disco;
+    case ShaderTypeOctahedron:
+      return ShaderSource_Octahedron;
+    case ShaderTypeVanGogh:
+      return ShaderSource_VanGogh;
+    case ShaderTypeRubiks:
+      return ShaderSource_Rubiks;
+    case ShaderTypeMountains:
+      return ShaderSource_Mountains;
+    case ShaderTypeNone:
+      return ShaderSource_empty;
+    case ShaderTypePlasma:
+      return ShaderSource_plasma;
+    case ShaderTypeFractal:
+      return ShaderSource_fractal;
+    case ShaderTypeFuji:
+      return ShaderSource_fuji;
+    case ShaderTypeClouds:
+      return ShaderSource_clouds;
+    case ShaderTypeMelter:
+      return ShaderSource_melter;
+    case ShaderTypeRings:
+      return ShaderSource_rings;
+    case ShaderTypeAudioWaveform:
+      return ShaderSource_audioWaveform;
+    case ShaderTypeAudioBumper:
+      return ShaderSource_audioBumper;
+    case ShaderTypeAudioMountains:
+      return ShaderSource_audioMountains;
+    case ShaderTypeGalaxy:
+      return ShaderSource_galaxy;
+    default:
+      return ShaderSource_empty; // Default case
+  }
+}
+
 static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
   switch (nameType) {
       // Audio Reactive
@@ -392,16 +535,18 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     case ShaderSource_FractalAudio:
     case ShaderSource_FlickerAudio:
     case ShaderSource_GlitchAudio:
+    case ShaderSource_DiscoAudio:
       return "Audio Reactive";
       
       // Simple
     case ShaderSource_SolidColor: // Name
-    case ShaderSource_Circle: // Name
     case ShaderSource_Octahedron: // Name
     case ShaderSource_empty:
     case ShaderSource_ColorWheel:
     case ShaderSource_FullHouse:
     case ShaderSource_FloatingSparks:
+    case ShaderSource_ColoredDrops:
+    case ShaderSource_SpaceRings:
       return "Simple";
       
       // Scenic
@@ -428,9 +573,19 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     case ShaderSource_plasma:
     case ShaderSource_Warp:
     case ShaderSource_IsoFract:
+    case ShaderSource_Octagrams:
     case ShaderSource_fractal:
     case ShaderSource_Cosmos:
+    case ShaderSource_Breathe:
+    case ShaderSource_Heptagons:
+    case ShaderSource_Plasmor:
       return "Textured";
+      
+    // Shapes & Solids
+    case ShaderSource_SimpleBars:
+    case ShaderSource_Spiral:
+    case ShaderSource_SimpleShape:
+      return "Shapes & Solids";
       
       // Psychedelic
     case ShaderSource_Mist:
@@ -451,6 +606,8 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     case ShaderSource_Reflector:
     case ShaderSource_DirtyPlasma:
     case ShaderSource_TwistedTrip:
+    case ShaderSource_Aerogel:
+    case ShaderSource_Diffractor:
       return "Psychedelic";
     default:
       return "Unknown";
@@ -478,6 +635,12 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
         // Shader Settings
+    case ShaderSource_Spiral: { // Settings
+      auto settings = new SpiralSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<SpiralShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_SimpleBars: { // Settings
       auto settings = new SimpleBarsSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<SimpleBarsShader>(settings);
@@ -712,12 +875,6 @@ public:
         shader->setup();
         return;
       }
-      case ShaderSource_DoubleSwirl: { // Settings
-        auto settings = new DoubleSwirlSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
-        shader = std::make_shared<DoubleSwirlShader>(settings);
-        shader->setup();
-        return;
-      }
       case ShaderSource_SmokeRing: { // Settings
         auto settings = new SmokeRingSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<SmokeRingShader>(settings);
@@ -781,12 +938,6 @@ public:
       case ShaderSource_DancingSquares: { // Settings
         auto settings = new DancingSquaresSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<DancingSquaresShader>(settings);
-        shader->setup();
-        return;
-      }
-      case ShaderSource_Circle: { // Settings
-        auto settings = new CircleSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
-        shader = std::make_shared<CircleShader>(settings);
         shader->setup();
         return;
       }
@@ -927,37 +1078,16 @@ public:
     shader->shade(fbo, canvas);
     shader->activateParameters();
     
-    if (settings->maskEnabled->boolValue == true) {
-      fbo->begin();
-      maskShader.begin();
-      maskShader.setUniformTexture("tex", canvas->getTexture(), 0);
-      maskShader.setUniform1f("time", ofGetElapsedTimef());
-      maskShader.setUniform2f("dimensions", fbo->getWidth(), fbo->getHeight());
-      maskShader.setUniform1i("drawTex", 1);
-      maskShader.setUniform4f("chromaKey",
-                              settings->maskColor->color->data()[0],
-                              settings->maskColor->color->data()[1],
-                              settings->maskColor->color->data()[2], 1.0);
-      maskShader.setUniform1f("tolerance", settings->maskTolerance->value);
-      maskShader.setUniform1i("invert", settings->invert->boolValue);
-      ofClear(0, 0, 0, 255);
-      ofClear(0, 0, 0, 0);
-      
-      canvas->draw(0, 0, fbo->getWidth(), fbo->getHeight());
-      maskShader.end();
-      fbo->end();
-    } else {
-      fbo->begin();
-      ofClear(0, 0, 0, 255);
-      canvas->draw(0, 0, fbo->getWidth(), fbo->getHeight());
-      fbo->end();
-    }
+    fbo->begin();
+    ofClear(0, 0, 0, 255);
+    canvas->draw(0, 0, fbo->getWidth(), fbo->getHeight());
+    fbo->end();
+    
   }
   
   void drawSettings() override {
     if (shader != nullptr) {
       shader->drawSettings();
-      drawMaskSettings();
     }
   }
   

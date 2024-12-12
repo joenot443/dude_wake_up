@@ -11,6 +11,7 @@
 #include "ShaderType.hpp"
 #include "TileBrowserView.hpp"
 #include "ParameterService.hpp"
+#include "UUID.hpp"
 #include "ofMain.h"
 #include "ofxImGui.h"
 #include <stdio.h>
@@ -21,23 +22,29 @@ public:
   void update();
   void draw();
   void drawSearchView();
-  
+  void setCallback(std::function<void(std::shared_ptr<TileItem>)> callback);
+  ImVec2 size = ImVec2(0.0, 0.0);
   std::string searchQuery = "";
+  std::string browserId;
   bool searchDirty = false;
   
   std::vector<std::shared_ptr<TileItem>> searchTileItems = {};
 
-  TileBrowserView searchResultsTileBrowserView = TileBrowserView({});
-  TileBrowserView defaultFavoritesTileBrowserView = TileBrowserView({});
-  TileBrowserView favoritesTileBrowserView = TileBrowserView({});
-  TileBrowserView filterTileBrowserView = TileBrowserView({});
-  TileBrowserView glitchTileBrowserView = TileBrowserView({});
-  TileBrowserView mixTileBrowserView = TileBrowserView({});
-  TileBrowserView basicTileBrowserView = TileBrowserView({});
-  TileBrowserView transformTileBrowserView = TileBrowserView({});
-  TileBrowserView maskTileBrowserView = TileBrowserView({});
+  std::unique_ptr<TileBrowserView> searchResultsTileBrowserView;
+  std::unique_ptr<TileBrowserView> defaultFavoritesTileBrowserView;
+  std::unique_ptr<TileBrowserView> favoritesTileBrowserView;
+  std::unique_ptr<TileBrowserView> filterTileBrowserView;
+  std::unique_ptr<TileBrowserView> glitchTileBrowserView;
+  std::unique_ptr<TileBrowserView> mixTileBrowserView;
+  std::unique_ptr<TileBrowserView> basicTileBrowserView;
+  std::unique_ptr<TileBrowserView> transformTileBrowserView;
+  std::unique_ptr<TileBrowserView> maskTileBrowserView;
   
-  ShaderBrowserView() {
+  int currentTab = 0;
+  void setCurrentTab(int tabIndex);
+  void drawSelectedBrowser();
+  
+  ShaderBrowserView() : browserId(UUID::generateUUID()) {
     ParameterService::getService()->subscribeToFavoritesUpdates(
         [this]()
         { setup(); });

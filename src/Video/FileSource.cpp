@@ -21,7 +21,6 @@ void FileSource::setup()
   player.play();
   player.setVolume(0.5);
   player.setLoopState(OF_LOOP_NORMAL);
-//	updateSettings();
   fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   sliderPosition->value = settings->start->value;
@@ -47,41 +46,17 @@ void FileSource::saveFrame()
     player.setSpeed(speed->value);
   }
   player.setLoopState(OF_LOOP_NONE);
-//  player.setLoopState(boomerang->boolValue ? OF_LOOP_PALINDROME : OF_LOOP_NORMAL);
+  //  player.setLoopState(boomerang->boolValue ? OF_LOOP_PALINDROME : OF_LOOP_NORMAL);
   player.update();
   updatePlaybackPosition();
-
+  
   if (!player.isFrameNew())
     return;
-
-  if (settings->maskEnabled->boolValue == true)
-  {
-    fbo->begin();
-    maskShader.begin();
-    maskShader.setUniformTexture("tex", player.getTexture(), 0);
-    maskShader.setUniform1f("time", ofGetElapsedTimef());
-    maskShader.setUniform2f("dimensions", fbo->getWidth(), fbo->getHeight());
-    maskShader.setUniform1i("drawTex", 1);
-    maskShader.setUniform4f("chromaKey",
-                            settings->maskColor->color->data()[0],
-                            settings->maskColor->color->data()[1],
-                            settings->maskColor->color->data()[2], 1.0);
-    maskShader.setUniform1f("tolerance", settings->maskTolerance->value);
-    maskShader.setUniform1i("invert", settings->invert->boolValue);
-    ofClear(0, 0, 0, 255);
-    ofClear(0, 0, 0, 0);
-
-    player.draw(0, 0, fbo->getWidth(), fbo->getHeight());
-    maskShader.end();
-    fbo->end();
-  }
-  else
-  {
-    fbo->begin();
-    ofClear(0, 0, 0, 255);
-    player.draw(0, 0, fbo->getWidth(), fbo->getHeight());
-    fbo->end();
-  }
+  
+  fbo->begin();
+  ofClear(0, 0, 0, 255);
+  player.draw(0, 0, fbo->getWidth(), fbo->getHeight());
+  fbo->end();
 }
 
 void FileSource::load(json j)
@@ -160,7 +135,6 @@ void FileSource::drawSettings()
   
   CommonViews::ShaderCheckbox(boomerang);
   CommonViews::ShaderParameter(speed, nullptr);
-  drawMaskSettings();
 }
 
 void FileSource::updatePlaybackPosition()

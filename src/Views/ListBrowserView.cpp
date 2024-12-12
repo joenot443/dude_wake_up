@@ -21,8 +21,8 @@ void ListBrowserView::draw() {
   {
       for (int n = 0; n < tileItems.size(); n++)
       {
-        ImGui::Selectable(tileItems[n].name.c_str(), false);
-        tileItems[n].dragCallback();
+        ImGui::Selectable(tileItems[n]->name.c_str(), false);
+        tileItems[n]->dragCallback();
       }
       ImGui::EndListBox();
   }

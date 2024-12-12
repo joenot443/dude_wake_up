@@ -49,6 +49,8 @@ public:
   void update();
   void draw();
   void keyReleased(int key);
+  
+  void loadDirectory(std::string directory);
 };
 
 #endif /* MainStageView_hpp */

@@ -46,11 +46,14 @@ class AvailableVideoSourceFile : public AvailableVideoSource
 public:
   AvailableVideoSourceFile(std::string sourceName, std::string path)
       : AvailableVideoSource(std::move(sourceName), "", VideoSource_file), path(std::move(path)) {}
+  
+  void generatePreview() override {};
 
-  void generatePreview() override
-  {
-    // file-specific implementation
-  }
+  void generatePreview(ofVideoPlayer& videoPlayer);
+  
+  bool hasFailedToLoad(ofVideoPlayer& videoPlayer);
+  bool canGeneratePreview(ofVideoPlayer& videoPlayer);
+  
   std::string path;
 };
 
@@ -60,10 +63,8 @@ public:
   AvailableVideoSourceImage(std::string sourceName, std::string path)
       : AvailableVideoSource(std::move(sourceName), "", VideoSource_image), path(std::move(path)) {}
 
-  void generatePreview() override
-  {
-    // file-specific implementation
-  }
+  void generatePreview();
+  
   std::string path;
 };
 

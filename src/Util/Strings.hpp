@@ -45,6 +45,10 @@ static std::string idString(std::string idStr) {
   return formatString("##%s", idStr.c_str());
 }
 
+static std::string idStringNamed(std::string idStr, std::string name) {
+  return formatString("##%s%s", idStr.c_str(), name.c_str());
+}
+
 static std::string idAppendedToString(std::string str, std::string idStr) {
   return formatString("%s##%s", str.c_str(), idStr.c_str());
 }

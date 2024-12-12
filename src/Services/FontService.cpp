@@ -36,6 +36,7 @@ void FontService::addFontToGui(ofxImGui::Gui *gui) {
   b = gui->addFont("fonts/Roboto-Bold.ttf", 16, &rasterConfig);
   i = gui->addFont("fonts/Roboto-Italic.ttf", 16, &rasterConfig);
   p = gui->addFont("fonts/Roboto-Regular.ttf", 16, &rasterConfig);
+  pN = gui->addFont("fonts/Roboto-Regular.ttf", 32, &rasterConfig);
   audio = gui->addFont("fonts/fontaudio.ttf", 16, &mergeConfig, audio_icon_range);
   icon = gui->addFont("fonts/MaterialIcons-Regular.ttf", 16, &mergeConfig, icon_ranges);
   largeIcon = gui->addFont("fonts/MaterialIcons-Regular.ttf", 24, &mergeConfig, icon_ranges);

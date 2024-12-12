@@ -32,6 +32,7 @@ void VideoSourceService::setup()
 void VideoSourceService::populateAvailableVideoSources()
 {
   availableSourceMap.clear();
+  availableShaderSources.clear();
   
   // Add an AvailableVideoSource for each Webcam and each ShaderType
   for (auto const &x : ofVideoGrabber().listDevices())
@@ -45,6 +46,7 @@ void VideoSourceService::populateAvailableVideoSources()
     auto shaderSource = std::make_shared<AvailableVideoSourceShader>(shaderSourceTypeName(x), shaderSourceTypeCategory(x), x);
     shaderSource->generatePreview();
     availableSourceMap[shaderSource->availableVideoSourceId] = shaderSource;
+    availableShaderSources.push_back(shaderSource);
   }
   
   auto textSource = std::make_shared<AvailableVideoSourceText>("Basic Text");
@@ -60,6 +62,24 @@ void VideoSourceService::populateAvailableVideoSources()
     fileSource->generatePreview();
     availableSourceMap[fileSource->availableVideoSourceId] = fileSource;
   }
+  
+  // Sort the shader sources by category count and then by name
+  std::map<std::string, int> categoryCounts;
+  for (const auto &shaderSource : availableShaderSources) {
+    categoryCounts[shaderSource->category]++;
+  }
+
+  std::sort(availableShaderSources.begin(), availableShaderSources.end(),
+            [&](const std::shared_ptr<AvailableVideoSourceShader> &a, const std::shared_ptr<AvailableVideoSourceShader> &b) {
+    
+    if (categoryCounts[a->category] != categoryCounts[b->category]) {
+      return categoryCounts[a->category] > categoryCounts[b->category];
+    }
+    if (a->category == b->category) {
+      return a->sourceName < b->sourceName;
+    }
+    return a->category < b->category;
+  });
   
   availableVideoSourceUpdateSubject.notify();
 }
@@ -195,6 +215,19 @@ std::vector<std::shared_ptr<AvailableVideoSource>> VideoSourceService::available
   return videoSources;
 }
 
+std::vector<std::shared_ptr<AvailableVideoSource>> VideoSourceService::availableVideoSourcesForType(VideoSourceType type)
+{
+  std::vector<std::shared_ptr<AvailableVideoSource>> videoSources;
+  for (auto const &x : availableSourceMap)
+  {
+    if (x.second->type == type)
+    {
+      videoSources.push_back(x.second);
+    }
+  }
+  return videoSources;
+}
+
 // Return a vector of all video sources which should be used as inputs (non empty, non ShaderChainer)
 
 std::vector<std::shared_ptr<VideoSource>> VideoSourceService::inputSources()
@@ -202,7 +235,7 @@ std::vector<std::shared_ptr<VideoSource>> VideoSourceService::inputSources()
   std::vector<std::shared_ptr<VideoSource>> videoSources;
   for (auto const &x : videoSourceMap)
   {
-    if (x.second != nullptr && !(x.second->type == VideoSource_chainer))
+    if (x.second != nullptr)
     {
       videoSources.push_back(x.second);
     }
@@ -321,9 +354,11 @@ std::shared_ptr<VideoSource> VideoSourceService::makeShaderVideoSource(ShaderSou
     shaderSource->shader->settings->load(j["shader"]);
     shaderSource->shader->settings->registerParameters();
   }
+  
   auto videoSource = std::dynamic_pointer_cast<VideoSource>(shaderSource);
   
   videoSource->origin = origin;
+  videoSource->settings->selectorParam->setValue(indexOfSourceType(type));
   return videoSource;
 }
 
@@ -456,11 +491,6 @@ json VideoSourceService::config()
   
   for (auto source : sources)
   {
-    // Don't serialize Chainer video sources, they'll be added in the ShaderChainerService
-    if (source->type == VideoSource_chainer)
-    {
-      continue;
-    }
     // Don't serialize an Empty source
     if (source->type == VideoSource_shader && std::dynamic_pointer_cast<ShaderSource>(source)->shaderSourceType == ShaderSource_empty)
     {
@@ -503,8 +533,6 @@ void VideoSourceService::appendConfig(json j)
       break;
     case VideoSource_shader:
       source = makeShaderVideoSource(j["shaderSourceType"], position, sourceId, j);
-      break;
-    case VideoSource_chainer:
       break;
     case VideoSource_image:
       source = makeImageVideoSource(j["sourceName"], j["path"], position, sourceId, j);
@@ -566,6 +594,16 @@ std::shared_ptr<VideoSource> VideoSourceService::videoSourceForId(std::string id
     return videoSourceMap[id];
   }
   return nullptr;
+}
+
+std::shared_ptr<VideoSource> VideoSourceService::replaceShaderVideoSource(std::shared_ptr<ShaderSource> shaderSource, ShaderSourceType type) {
+  auto newShaderSource = makeShaderVideoSource(type, shaderSource->origin, shaderSource->id, 0);
+  ShaderChainerService::getService()->copyConnections(shaderSource, newShaderSource);
+  removeVideoSource(shaderSource->id);
+  addVideoSource(newShaderSource, shaderSource->id);
+  newShaderSource->sourceName = shaderSourceTypeName(type);
+  newShaderSource->origin = shaderSource->origin;
+  return newShaderSource;
 }
 
 void VideoSourceService::captureOutputWindowScreenshot()
@@ -651,4 +689,16 @@ void VideoSourceService::startAccessingBookmarkPath(std::string path)
   // Release CF objects
   CFRelease(fileURL);
   CFRelease(bookmarkData);
+}
+
+int VideoSourceService::indexOfSourceType(ShaderSourceType type)
+{
+  for (size_t i = 0; i < availableShaderSources.size(); ++i)
+  {
+    if (availableShaderSources[i]->shaderType == type)
+    {
+      return static_cast<int>(i);
+    }
+  }
+  return -1; // Return -1 if the type is not found
 }

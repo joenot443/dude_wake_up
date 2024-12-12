@@ -127,5 +127,5 @@ ImVec2 LayoutStateService::browserSize() {
 
 ImVec2 LayoutStateService::previewSize(float scale) {
   bool portrait = LayoutStateService::getService()->portrait;
-  return portrait ? ImVec2(90 * 4.0 /scale, 160 * 4.0 /scale) : ImVec2(160 * 4.0 /scale, 90 * 4.0 /scale);
+  return portrait ? ImVec2(500 * 4.0 / scale, 281.25 * 4.0 /scale) : ImVec2(500 * 4.0 /scale, 281.25 * 4.0 /scale);
 }
