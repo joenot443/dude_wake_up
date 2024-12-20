@@ -6,6 +6,7 @@
 //
 
 #include <stdio.h>
+#include "Colors.hpp"
 #include "Shader.hpp"
 #include "LayoutStateService.hpp"
 #include "Console.hpp"
@@ -18,6 +19,7 @@
 
 void Shader::traverseFrame(std::shared_ptr<ofFbo> frame, int depth)
 {
+  if (!active) return;
   clearLastFrame();
   checkForFileChanges();
   activateParameters();
@@ -180,7 +182,7 @@ void Shader::drawPreview(ImVec2 pos, float scale)
 void Shader::drawPreviewSized(ImVec2 size)
 {
   ImTextureID texID = (ImTextureID)(uintptr_t)lastFrame->getTexture().getTextureData().textureID;
-  ImGui::Image(texID, size);
+  ImGui::GetWindowDrawList()->AddImageRounded(texID, ImGui::GetCursorPos() - ImVec2(0.0, size.y), ImGui::GetCursorPos() + ImVec2(size.x, 0.0), ImVec2(0,0), ImVec2(1,1), IM_COL32_WHITE, 8.0);
 }
 
 void Shader::generateOptionalShaders() {

@@ -869,13 +869,13 @@ void CommonViews::MidiSelector(std::shared_ptr<Parameter> videoParam)
   else if (MidiService::getService()->isLearning())
   {
     // Currently learning a different Param, so start Learning this one
-    buttonTitle = "Learning Other Parameter";
+    buttonTitle = "...";
     buttonAction = learnParamBlock;
   }
   else
   {
     // Learn Assignment
-    buttonTitle = "Learn Assignment";
+    buttonTitle = "MIDI";
     buttonAction = learnParamBlock;
   }
   
@@ -955,7 +955,7 @@ bool CommonViews::Selector(std::shared_ptr<Parameter> param, std::vector<std::st
   for (auto &option : options) {
     optionsC.push_back(option.c_str());
   }
-  return ImGui::Combo(formatString("%s", param->name.c_str()).c_str(), &param->intValue, optionsC.data(), (int) options.size());
+  return ImGui::Combo(idString(param->paramId.c_str()).c_str(), &param->intValue, optionsC.data(), (int) options.size());
 }
 
 void CommonViews::HorizontallyAligned(float width, float alignment)
@@ -1029,7 +1029,7 @@ bool CommonViews::SelectorTitleButton(std::string title, float width) {
 ed::PinId CommonViews::InputNodePin(std::shared_ptr<Node> node, InputSlot slot) {
   ed::PinId inputPinId = node->inputIds[slot];
   ed::BeginPin(inputPinId, ed::PinKind::Input);
-  NodePin(node);
+  NodePin(node, node->connectable->hasInputAtSlot(slot));
   ed::EndPin();
   return inputPinId;
 }
@@ -1039,12 +1039,12 @@ ed::PinId CommonViews::OutputNodePin(std::shared_ptr<Node> node, OutputSlot slot
   auto outPin = std::make_shared<Pin>(outputPinId, node, PinTypeOutput);
   
   ed::BeginPin(outputPinId, ed::PinKind::Output);
-  NodePin(node);
+  NodePin(node, node->connectable->hasOutputAtSlot(slot));
   ed::EndPin();
   return outputPinId;
 }
 
-void CommonViews::NodePin(std::shared_ptr<Node> node) {
+void CommonViews::NodePin(std::shared_ptr<Node> node, bool active) {
   const float dummySize = 40.0;
   const float outerRectSize = 40.0;
   const float outerRectCornerRadius = 5.0;
@@ -1059,13 +1059,13 @@ void CommonViews::NodePin(std::shared_ptr<Node> node) {
   ImDrawList* drawList = ed::GetCurrentDrawList();
   drawList->AddRectFilled(ImVec2(pos.x, pos.y),
                           ImVec2(pos.x + outerRectSize, pos.y + outerRectSize),
-                          Colors::SecondaryDark,
+                          ImGui::IsItemHovered() ? Colors::Secondary300 : Colors::SecondaryDark,
                           outerRectCornerRadius);
 
   // Draw the inner circle
   drawList->AddCircleFilled(ImVec2(pos.x + outerRectSize / 2, pos.y + outerRectSize / 2),
                             circleRadius,
-                            ImColor(65, 65, 69, 255),
+                            active ? (ImGui::IsItemHovered() ? Colors::PinActiveSecondary : Colors::PinActiveTertiary) : (ImGui::IsItemHovered() ? Colors::SecondaryDark : Colors::SecondaryDark200),
                             100);
 
   // Draw the smallest rectangle inside the circle with alpha 1.0
@@ -1073,7 +1073,7 @@ void CommonViews::NodePin(std::shared_ptr<Node> node) {
                                  pos.y + outerRectSize / 2 - innerRectSize / 2),
                           ImVec2(pos.x + outerRectSize / 2 + innerRectSize / 2,
                                  pos.y + outerRectSize / 2 + innerRectSize / 2),
-                          Colors::Secondary300,
+                          active ? Colors::PinActive : (ImGui::IsItemHovered() ? Colors::Secondary300 : Colors::Secondary200),
                           innerRectCornerRadius);
 }
 
@@ -1107,30 +1107,73 @@ void CommonViews::PopRedesignStyle() {
 }
 
 
-void CommonViews::ImageNamedNew(std::string name, float width, float height) {
+void CommonViews::ImageNamedNew(std::string name, float width, float height) {	
   auto image = ImageService::getService()->imageWithName(name);
   ImGui::Image(image->textureID, ImVec2(width, height));
 }
 
 bool CommonViews::ImageButton(std::shared_ptr<Node> node, std::string imageName) {
   auto pos = ImGui::GetCursorPos();
-  ImGui::SetCursorPosX(pos.x + 10.0);  // Increased padding by 5.0
+  ImGui::SetCursorPosX(pos.x + 10.0);
   pos = ImGui::GetCursorPos();
   
   bool ret = ImGui::InvisibleButton(idStringNamed(node->connectable->connId(), imageName).c_str(), ImVec2(105.0, 50.0));  // Updated width to 105.0 and height to 50.0
   ImGui::SameLine();
   auto endPos = ImGui::GetCursorPos();
+  
   ImGui::SetCursorPos(pos);
   
   ImDrawList* drawList = ed::GetCurrentDrawList();
+  ImColor rectColor;
+  if (ImGui::IsItemActive()) {
+    rectColor = Colors::Secondary200;  
+  } else if (ImGui::IsItemHovered()) {
+    rectColor = Colors::Secondary300;
+  } else {
+    rectColor = Colors::SecondaryDark;
+  }
+  
   drawList->AddRectFilled(ImVec2(pos.x, pos.y),
                           ImVec2(pos.x + 105.0, pos.y + 50.0),  // Updated width to 105.0 and height to 50.0
-                          Colors::SecondaryDark,
+                          rectColor,
                           8.0);
   
   // Draw the Image button at the center of the InvisibleButton, sized at 24.0x24.0
   ImGui::SetCursorPos(pos + ImVec2(40.5, 13.0));  // Adjusted X coordinate for new width
   ImageNamedNew(imageName, 24.0, 24.0);
+  ImGui::SetCursorPos(endPos);
+  return ret;
+}
+
+bool CommonViews::SmallImageButton(std::string id, std::string imageName) {
+  auto pos = ImGui::GetCursorPos();
+  ImGui::SetCursorPosX(pos.x + 10.0);
+  pos = ImGui::GetCursorPos();
+  
+  bool ret = ImGui::InvisibleButton(idStringNamed(id, imageName).c_str(), ImVec2(40.0, 40.0));
+  ImGui::SameLine();
+  auto endPos = ImGui::GetCursorPos();
+  
+  ImGui::SetCursorPos(pos);
+  
+  ImDrawList* drawList = ed::GetCurrentDrawList();
+  ImColor rectColor;
+  if (ImGui::IsItemActive()) {
+    rectColor = Colors::Secondary200;  
+  } else if (ImGui::IsItemHovered()) {
+    rectColor = Colors::Secondary300;
+  } else {
+    rectColor = Colors::SecondaryDark;
+  }
+  
+  drawList->AddRectFilled(ImVec2(pos.x, pos.y),
+                          ImVec2(pos.x + 40.0, pos.y + 40.0),
+                          rectColor,
+                          8.0);
+  
+  // Draw the Image button at the center of the InvisibleButton, sized at 20x20
+  ImGui::SetCursorPos(pos + ImVec2(10.0, 10.0));
+  ImageNamedNew(imageName, 20.0, 20.0);
   ImGui::SetCursorPos(endPos);
   return ret;
 }

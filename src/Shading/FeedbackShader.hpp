@@ -70,11 +70,11 @@ public:
   blendMode(std::make_shared<Parameter>("Blend Mode", 4.0, 0.0, 15.0, ParameterType_Int)),
   mainAlpha(std::make_shared<Parameter>("Main Alpha", 1.0, 0.0, 1.0)),
   mainAlphaOscillator(std::make_shared<WaveformOscillator>(mainAlpha)),
-  feedbackAlpha(std::make_shared<Parameter>("Feedback Alpha", 0.95, 0.0, 1.0)),
+  feedbackAlpha(std::make_shared<Parameter>("Feedback Alpha", 0.5, 0.0, 1.0)),
   feedbackAlphaOscillator(std::make_shared<WaveformOscillator>(feedbackAlpha)),
   feedbackMix(std::make_shared<Parameter>("Feedback Mix", 0.6, 0.0, 1.0)),
   feedbackMixOscillator(std::make_shared<WaveformOscillator>(feedbackMix)),
-  rotation(std::make_shared<Parameter>("Rotation", 0.0, 0.0, TWO_PI)),
+  rotation(std::make_shared<Parameter>("Rotation", 0.0, -PI / 2.0, PI / 2.0)),
   rotationOscillator(std::make_shared<WaveformOscillator>(rotation)),
   
   keyValue(std::make_shared<Parameter>("Key Value", 0.5, 0.0, 1.0)),
@@ -84,13 +84,13 @@ public:
   delayAmount(std::make_shared<Parameter>("Delay Amount", 20.0, 0.0, 28.0)),
   delayAmountOscillator(std::make_shared<WaveformOscillator>(delayAmount)),
   lumaKeyEnabled(std::make_shared<Parameter>("Luma Key Enabled", 0.0, 0.0, 0.0)),
-  xPosition(std::make_shared<Parameter>("xPosition", 0.0, -1.0, 1.0)),
-  yPosition(std::make_shared<Parameter>("yPosition", 0.0, -1.0, 1.0)),
+  xPosition(std::make_shared<Parameter>("X Position", 0.0, -1.0, 1.0)),
+  yPosition(std::make_shared<Parameter>("Y Position", 0.0, -1.0, 1.0)),
   xPositionOscillator(std::make_shared<WaveformOscillator>(xPosition)),
   yPositionOscillator(std::make_shared<WaveformOscillator>(yPosition)),
   scale(std::make_shared<Parameter>("Scale", 1.0, 0.0, 2.0)),
   scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
-  sourceSelection(std::make_shared<Parameter>("source", 1.0, 0.0, 3.0)),
+  sourceSelection(std::make_shared<Parameter>("Source", 1.0, 0.0, 3.0)),
   shouldClearFeedbackBuffer(std::make_shared<Parameter>("Clear Feedback Buffer", ParameterType_Bool)),
   shaderId(shaderId),
   ShaderSettings(shaderId, j, name)
@@ -134,10 +134,10 @@ struct FeedbackShader : Shader
   };
   
   std::vector<std::string> sourceNames = {
-    "Current Frame",
-    "Original Frame",
-    "End Frame",
-    "Self",
+    "Origin Source",
+    "Feedback",
+    "Final Node",
+    "Original",
   };
   
   FeedbackShader(FeedbackSettings *settings) : Shader(settings),

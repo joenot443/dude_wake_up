@@ -3,7 +3,7 @@
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
-uniform float amount;
+uniform float weight;
 uniform vec4 strokeColor;
 in vec2 coord;
 out vec4 outputColor;
@@ -11,11 +11,11 @@ out vec4 outputColor;
 
 void main() {
   
-  const vec3 target = vec3(0.0, 0.0, 0.0);
+  const float targetAlpha = 0.0;
   const float TAU = 6.28318530;
   const float steps = 32.0;
   
-  float radius = 10.0;
+  float radius = weight;
   vec2 uv = coord / dimensions.xy;
   
   // Correct aspect ratio
@@ -28,12 +28,12 @@ void main() {
     vec4 col = texture(tex, uv + offset);
     
     // Mix outline with background
-    float alpha = smoothstep(0.5, 0.7, distance(col.rgb, target));
+    float alpha = smoothstep(0.5, 0.7, distance(col.a, targetAlpha));
     texColor = mix(texColor, vec4(strokeColor.rgb, 1.0), alpha);
   }
   
   // Overlay original video
   vec4 mat = texture(tex, uv);
-  float factor = smoothstep(0.5, 0.7, distance(mat.rgb, target));
+  float factor = smoothstep(0.5, 0.7, distance(mat.a, targetAlpha));
   outputColor = mix(texColor, mat, factor);
 }

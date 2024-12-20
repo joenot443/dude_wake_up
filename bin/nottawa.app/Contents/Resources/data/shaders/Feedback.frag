@@ -147,7 +147,7 @@ void main() {
   vec4 outColor = vec4(0.0, 0.0, 0.0, 0.0);
 
   // If both are empty
-  if (mainColor.a < 0.0001 && fbColor.a < 0.0001) {
+  if (mainColor.a < 0.000001 && fbColor.a < 0.000001) {
     outputColor = outColor;
     return;
   }
@@ -167,7 +167,7 @@ void main() {
     outColor = vec4(fbColor.rgb, fbColor.a * fbAlpha);
   }
   // Empty alpha
-  else if (fbColor.a < 0.05) {
+  else if (fbColor.a < 0.001) {
     outColor = vec4(mainColor.rgb, mainColor.a * mainAlpha);
   }
   // Blend normally
@@ -175,10 +175,10 @@ void main() {
     outColor = blend(mainColor, fbColor, blendMode);
   }
   
-  // Check for black
-  if (outColor.r < 0.05 && outColor.g < 0.05 && outColor.b < 0.05) {
-    outColor = vec4(0.0);
-  }
+//  // Check for black
+//  if (outColor.r < 0.05 && outColor.g < 0.05 && outColor.b < 0.05) {
+//    outColor = vec4(0.0);
+//  }
 
   outputColor = outColor;
 }

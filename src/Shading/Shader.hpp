@@ -31,7 +31,7 @@ class Shader: public Connectable
 public:
   
   Shader(ShaderSettings *settings)
-  : settings(std::unique_ptr<ShaderSettings>(settings)),
+  : settings(std::shared_ptr<ShaderSettings>(settings)),
   shaderId(settings->shaderId),
   creationTime(ofGetUnixTime()),
   lastModified(ofGetUnixTime()),
@@ -44,7 +44,7 @@ public:
   
   ofShader shader;
   
-  std::unique_ptr<ShaderSettings> settings;
+  std::shared_ptr<ShaderSettings> settings;
   
   ImColor color;
   
@@ -97,6 +97,10 @@ public:
   virtual ShaderType type() { return ShaderTypeNone; };
 
   void drawSettings() override {};
+  
+  std::shared_ptr<Settings> settingsRef() override { 
+    return std::dynamic_pointer_cast<Settings>(settings);
+  }
 
   virtual void drawPreview(ImVec2 pos, float scale);
   

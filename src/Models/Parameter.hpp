@@ -93,6 +93,8 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
     scale = std::make_shared<Parameter>("scale", 0.2, 0.0, 2.0);
   }
   
+  bool hasDriver() { return driver != nullptr; }
+  
   void removeDriver() {
     driver = nullptr;
     shift = nullptr;

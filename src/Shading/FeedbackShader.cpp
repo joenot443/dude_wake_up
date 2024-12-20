@@ -139,7 +139,7 @@ void FeedbackShader::shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> 
                       settings->lumaKeyEnabled->boolValue);
   shader.setUniformTexture("mainTexture", frame->getTexture(), 4);
   shader.setUniform1f("mainAlpha", settings->mainAlpha->value);
-  shader.setUniform1f("fbAlpha", settings->feedbackAlpha->value);
+  shader.setUniform1f("fbAlpha", 0.999 + 0.001 * settings->feedbackAlpha->value);
   shader.setUniform1i("priority", settings->priority->boolValue);
   shader.setUniform1f("fbMix", settings->feedbackMix->value);
   shader.setUniform1i("blendMode", settings->blendMode->intValue);
@@ -147,7 +147,7 @@ void FeedbackShader::shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> 
   shader.setUniform1f("rotate", settings->rotation->value);
   shader.setUniform1f("lumaKey", settings->keyValue->value);
   shader.setUniform1f("lumaThresh", settings->keyThreshold->value);
-  shader.setUniform2f("translate", settings->xPosition->value, settings->yPosition->value);
+  shader.setUniform2f("translate", settings->xPosition->value, -settings->yPosition->value);
   shader.setUniform1f("scale", 2.0 - settings->scale->value);
   
   
@@ -217,6 +217,6 @@ void FeedbackShader::drawSettings()
   ImGui::Combo("##BlendMode", &settings->blendMode->intValue, blendModeNamesC.data(), (int) blendModeNames.size());
 }
 
-int FeedbackShader::inputCount() { return 2; }
+int FeedbackShader::inputCount() { return 1; }
 
 ShaderType FeedbackShader::type() { return ShaderTypeFeedback; }

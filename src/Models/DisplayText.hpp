@@ -31,6 +31,7 @@ public:
   std::string id;
   std::shared_ptr<Parameter> color;
   std::shared_ptr<Parameter> strokeColor;
+  std::shared_ptr<Parameter> strokeWeight;
   std::shared_ptr<Parameter> strokeEnabled;
 
   int fontSize = 36;
@@ -46,6 +47,7 @@ public:
   id(UUID::generateUUID()),
   xPosition(std::make_shared<Parameter>("xPosition", 0.1, 0.0, 1.0)),
   yPosition(std::make_shared<Parameter>("yPosition", 0.1, 0.0, 1.0)),
+  strokeWeight(std::make_shared<Parameter>("strokeWeight", 5.0, 0.0, 20.0)),
   color(std::make_shared<Parameter>("color", ParameterType_Color)),
   strokeColor(std::make_shared<Parameter>("strokeColor", ParameterType_Color)),
   strokeEnabled(std::make_shared<Parameter>("strokeEnabled", ParameterType_Bool)),

@@ -380,6 +380,7 @@
 		023380D42BD05B710060A697 /* TextureMaskShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TextureMaskShader.hpp; path = Shading/TextureMaskShader.hpp; sourceTree = "<group>"; };
 		023380D52BD05B710060A697 /* ImageTexture.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ImageTexture.hpp; path = Shading/ImageTexture.hpp; sourceTree = "<group>"; };
 		023380D92BD05BEF0060A697 /* PlasmaShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = PlasmaShader.hpp; path = Shading/PlasmaShader.hpp; sourceTree = "<group>"; };
+		02385D122D1350270067853C /* WebShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = WebShader.hpp; path = Shading/WebShader.hpp; sourceTree = "<group>"; };
 		0238773529D20CB300B20386 /* ImGuiExtensions.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ImGuiExtensions.cpp; path = Views/ImGuiExtensions.cpp; sourceTree = "<group>"; };
 		0238773629D20CB300B20386 /* ImGuiExtensions.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = ImGuiExtensions.hpp; path = Views/ImGuiExtensions.hpp; sourceTree = "<group>"; };
 		023C633B2922E2D400A8BC9E /* MainStageView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MainStageView.cpp; path = Views/MainStageView.cpp; sourceTree = "<group>"; };
@@ -1443,6 +1444,7 @@
 			isa = PBXGroup;
 			children = (
 				02D63BBD2CB8852F009CA010 /* SimplePathShader.hpp */,
+				02385D122D1350270067853C /* WebShader.hpp */,
 				029F6BE02C6BEA5A007E7081 /* WelcomeRingsShader.hpp */,
 				02E7FBC92C51502000460E44 /* OnOffShader.hpp */,
 				02210BD52C50370B00883117 /* PixelPlayShader.hpp */,

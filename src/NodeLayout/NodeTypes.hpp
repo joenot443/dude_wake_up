@@ -44,12 +44,20 @@ struct Node
   std::shared_ptr<VideoSource> source;
   std::shared_ptr<Connectable> connectable;
   
-  
   ImVec2 position;
   
   std::string idName()
   {
     return formatString("%s##%d", name.c_str(), id.Get());
+  }
+  
+  bool isAudioReactiveParameterActive() {
+    if (!hasAudioReactiveParameter()) return false;
+    return connectable->settingsRef()->audioReactiveParameter->hasDriver();
+  }
+  
+  bool hasAudioReactiveParameter() {
+    return connectable->settingsRef()->hasAudioReactiveParameter();
   }
   
   bool hasInputLinkAt(InputSlot slot)

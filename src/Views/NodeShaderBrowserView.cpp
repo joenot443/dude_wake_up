@@ -3,20 +3,20 @@
 #include "CommonViews.hpp"
 
 void NodeShaderBrowserView::setup() {
-  // Initialize all browsers with 4x3 grid
   basicTileBrowserView = std::make_unique<PagedTileBrowserView>(3, 3);
   filterTileBrowserView = std::make_unique<PagedTileBrowserView>(3, 3);
   glitchTileBrowserView = std::make_unique<PagedTileBrowserView>(3, 3);
   transformTileBrowserView = std::make_unique<PagedTileBrowserView>(3, 3);
   mixTileBrowserView = std::make_unique<PagedTileBrowserView>(3, 3);
   maskTileBrowserView = std::make_unique<PagedTileBrowserView>(3, 3);
-
-  // Set sizes
+  
+  // Set sizes and padding
   for (auto* view : {&basicTileBrowserView, &filterTileBrowserView, &glitchTileBrowserView,
-                     &transformTileBrowserView, &mixTileBrowserView, &maskTileBrowserView}) {
-    (*view)->size = size;
-  }
-
+    &transformTileBrowserView, &mixTileBrowserView, &maskTileBrowserView}) {
+      (*view)->setWidth(size.x);
+      (*view)->leftPadding = leftPadding;
+    }
+  
   // Set tile items
   auto service = ShaderChainerService::getService();
   basicTileBrowserView->setTileItems(tileItemsForShaders(service->auxillaryAvailableBasicShaders));
@@ -27,27 +27,48 @@ void NodeShaderBrowserView::setup() {
   maskTileBrowserView->setTileItems(tileItemsForShaders(service->auxillaryAvailableMaskShaders));
 }
 
+void NodeShaderBrowserView::applyButtonStyles(bool isSelected) {
+  if (isSelected) {
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
+    ImGui::PushStyleColor(ImGuiCol_Button, Colors::ButtonSelected.Value);
+  } else {
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0)); // transparent
+  }
+  ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Colors::ButtonSelectedHovered.Value);
+  ImGui::PushStyleColor(ImGuiCol_ButtonActive, Colors::ButtonSelected.Value);
+  ImGui::PushStyleColor(ImGuiCol_Border, Colors::NodeBorderColor.Value);
+}
+
+void NodeShaderBrowserView::popButtonStyles(bool isSelected) {
+  if (isSelected) {
+    ImGui::PopStyleVar(2);
+  }
+  ImGui::PopStyleColor(4);
+}
+
 void NodeShaderBrowserView::drawTabButtons() {
+  ImGui::Dummy(ImVec2(leftPadding, 0.0));
+  ImGui::SameLine();
   ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 0));
   
+  float buttonWidth = (size.x - leftPadding) / 6.0f;
   for (int i = 0; i < 6; i++) {
     if (i > 0) ImGui::SameLine();
     
     bool isSelected = (currentTab == i);
-    if (isSelected) {
-      ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
-    }
+    applyButtonStyles(isSelected);
     
-    if (ImGui::Button(tabLabels[i], ImVec2(0, 0))) {
+    if (ImGui::Button(tabLabels[i], ImVec2(buttonWidth, 0))) {
       currentTab = i;
     }
     
-    if (isSelected) {
-      ImGui::PopStyleColor();
-    }
+    popButtonStyles(isSelected);
   }
   
-  ImGui::PopStyleVar();
+  ImGui::PopStyleVar(); // Pop ItemSpacing
+  
+  ImGui::Dummy(ImVec2(0.0, 10.0));
 }
 
 void NodeShaderBrowserView::drawSelectedBrowser() {
@@ -74,4 +95,4 @@ void NodeShaderBrowserView::setCallback(std::function<void(std::shared_ptr<TileI
   transformTileBrowserView->setCallback(callback);
   mixTileBrowserView->setCallback(callback);
   maskTileBrowserView->setCallback(callback);
-} 
+}

@@ -48,8 +48,8 @@ void TextEditorView::draw() {
   CommonViews::sSpacing();
   CommonViews::ShaderCheckbox(displayText->strokeEnabled);
   if (displayText->strokeEnabled->boolValue) {
-  ImGui::Text("Stroke Color");
-  CommonViews::ShaderColor(displayText->strokeColor);
+	  CommonViews::ShaderColor(displayText->strokeColor);
+    CommonViews::ShaderParameter(displayText->strokeWeight, nullptr);
   }
   int currentFontSize = displayText->fontSize;
   

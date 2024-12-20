@@ -7,6 +7,8 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "StellarShader.hpp"
+#include "WebShader.hpp"
 #include "SpiralShader.hpp"
 #include "BlurryTrailShader.hpp"
 #include "SimpleBarsShader.hpp"
@@ -235,7 +237,7 @@ void ShaderChainerService::setup()
     availableAuxillaryShadersMap[shaderType] = auxShader;
   }
   
-  for (auto const shaderType : { ShaderTypeBlend, ShaderTypeTransform, ShaderTypeRotate, ShaderTypeMirror, ShaderTypeHSB, ShaderTypeVHS, ShaderType16bit, ShaderTypePixelate, ShaderTypeAutotangent }) {
+  for (auto const shaderType : { ShaderTypeBlend, ShaderTypeTransform, ShaderTypeFeedback, ShaderTypeRotate, ShaderTypeMirror, ShaderTypeHSB, ShaderTypeVHS, ShaderType16bit, ShaderTypePixelate, ShaderTypeAutotangent }) {
     auto availableShader = availableShadersMap[shaderType];
     availableDefaultFavoriteShaders.push_back(availableShader);
     
@@ -876,6 +878,18 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeStellar: {
+      auto settings = new StellarSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<StellarShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeWeb: {
+      auto settings = new WebSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<WebShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeSpiral: {
       auto settings = new SpiralSettings(shaderId, shaderJson);
       auto shader = std::make_shared<SpiralShader>(settings);

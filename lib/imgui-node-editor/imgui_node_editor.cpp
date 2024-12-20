@@ -2409,11 +2409,14 @@ ed::Control ed::EditorContext::BuildControl(bool allowOffscreen)
         // Check for interactions with live pins in node before
         // processing node itself. Pins does not overlap each other
         // and all are within node bounds.
+      Pin* lastPin = NULL;
         for (auto pin = node->m_LastPin; pin; pin = pin->m_PreviousPin)
         {
-            if (!pin->m_IsLive) continue;
+          if (lastPin == pin) break;
+          if (!pin->m_IsLive) continue;
 
-            checkInteractionsInArea(pin->m_ID, pin->m_Bounds, pin);
+          checkInteractionsInArea(pin->m_ID, pin->m_Bounds, pin);
+          lastPin = pin;
         }
 
         // Check for interactions with node.
@@ -3975,10 +3978,13 @@ bool ed::DragAction::Process(const Control& control)
                 }
             };
 
+	          Pin* lastPin = NULL;
             for (auto pin = draggedNode->m_LastPin; pin; pin = pin->m_PreviousPin)
             {
-                auto pivot = pin->m_Pivot.GetCenter() - draggedNode->m_Bounds.Min;
-                testPivot(pivot);
+              if (lastPin == pin) break;
+              auto pivot = pin->m_Pivot.GetCenter() - draggedNode->m_Bounds.Min;
+              testPivot(pivot);
+              lastPin = pin;
             }
 
             //testPivot(point(0, 0));

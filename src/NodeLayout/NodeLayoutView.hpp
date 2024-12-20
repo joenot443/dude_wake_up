@@ -102,6 +102,8 @@ public:
   bool canDelete();
   
   void selectChainer(std::shared_ptr<Node> node);
+  
+  void toggleAudioReactiveParameter(std::shared_ptr<Node> node);
 
   void createBlendShaderForSelectedNodes(ed::NodeId firstNodeId, ed::NodeId secondNodeId);
   std::shared_ptr<Node> getNodeById(ed::NodeId nodeId);

@@ -30,10 +30,17 @@ public:
   
   std::string settingsId;
   
+  // Audio
+  std::shared_ptr<Parameter> audioReactiveParameter;
+  
   Settings() : name("None"), settingsId(UUID::generateUUID()) {};
   
-  Settings(std::string name) : name(name), settingsId(UUID::generateUUID()) {};
+  Settings(std::string name) : name(name), audioReactiveParameter(nullptr), settingsId(UUID::generateUUID()) {};
   
+  bool hasAudioReactiveParameter() {
+    return audioReactiveParameter != nullptr;
+  }
+
   virtual void registerParameters() {
     for (auto param : parameters) {
       if (param == nullptr) continue;

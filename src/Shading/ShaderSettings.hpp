@@ -29,9 +29,6 @@ public:
   std::shared_ptr<Parameter> x;
   std::shared_ptr<Parameter> y;
   
-  // Audio
-  std::shared_ptr<Parameter> audioReactiveParameter;
-  
   // Optional Parameters
   std::shared_ptr<Parameter> backgroundColor;
   std::shared_ptr<Parameter> backgroundColorEnabled;
@@ -44,7 +41,6 @@ public:
   x(std::make_shared<Parameter>("x", 0.0, 0.0, 10000.0)),
   y(std::make_shared<Parameter>("y", 0.0, 0.0, 10000.0)),
   selectorParam(std::make_shared<Parameter>("Selector", ParameterType_Int)),
-  audioReactiveParameter(nullptr),
   backgroundColor(std::make_shared<Parameter>("Background Color", 0.0, 0.0, 1.0)),
   backgroundColorEnabled(std::make_shared<Parameter>("Background Color Enabled", ParameterType_Bool))
   {

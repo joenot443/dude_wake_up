@@ -6,7 +6,7 @@
 	<dict>
 		<key>Resources/NodeLayout.json</key>
 		<data>
-		0v4o4Hxo4UN+O5uPyo6TU5C+IXI=
+		KMNVP1ICfir1WGqo/4kXNHxkvBM=
 		</data>
 		<key>Resources/data/MaterialIcons-Regular.ttf</key>
 		<data>
@@ -236,21 +236,49 @@
 		<data>
 		B4MiFnRurbYomXw1SAlXEiR6JIw=
 		</data>
+		<key>Resources/data/images/icons/back.png</key>
+		<data>
+		8BsrCgS8eKtcRCCQxexvPhxGoow=
+		</data>
 		<key>Resources/data/images/icons/down.png</key>
 		<data>
 		yCCmxuKo+NE0kGk+VQZdoqiXa1I=
+		</data>
+		<key>Resources/data/images/icons/forward.png</key>
+		<data>
+		v9II/nLvAktH9VXEvdgmEJA+3BY=
+		</data>
+		<key>Resources/data/images/icons/fullscreen.png</key>
+		<data>
+		0KBFtkL45plVi5xKXGvgdIhK6wc=
 		</data>
 		<key>Resources/data/images/icons/left-arrow.png</key>
 		<data>
 		Wn+RmeG31OIU7/A7vmTtq129UBk=
 		</data>
+		<key>Resources/data/images/icons/music.png</key>
+		<data>
+		ULLF8oIdhS/9oVKfIgv7ajcN0Uk=
+		</data>
+		<key>Resources/data/images/icons/no-music.png</key>
+		<data>
+		I+ipgVggNfS19dvCSmCZqc7X2vs=
+		</data>
+		<key>Resources/data/images/icons/pause.png</key>
+		<data>
+		NDMrsA2dR6wGCVSsL2nGr9xqDX4=
+		</data>
+		<key>Resources/data/images/icons/play.png</key>
+		<data>
+		zEqxd85xYRyKOWzgVw9lRShLVe8=
+		</data>
 		<key>Resources/data/images/icons/right-arrow.png</key>
 		<data>
 		Kd+/kIQxSP6tdChzBT7lNyBInCA=
 		</data>
-		<key>Resources/data/images/icons/setting.png</key>
+		<key>Resources/data/images/icons/save.png</key>
 		<data>
-		NrLlTrilR1+eTGVrbAks1yOj8Dk=
+		5moVl+B7vO7SPYW9A0Ig4t+0UaU=
 		</data>
 		<key>Resources/data/images/icons/settings.png</key>
 		<data>
@@ -1564,6 +1592,10 @@
 		<data>
 		q94oSZgxVLOYvPcYjSZwPeRTem0=
 		</data>
+		<key>Resources/data/markdown/Stellar.md</key>
+		<data>
+		7lTHYRBJOiDAj1ycrAF1Okvu0HA=
+		</data>
 		<key>Resources/data/markdown/Swirl.md</key>
 		<data>
 		aM29LoqKDb7GglLlMogotLc2//o=
@@ -1639,6 +1671,10 @@
 		<key>Resources/data/markdown/Warpspeed.md</key>
 		<data>
 		Gc2jLdpwXiy3jxr0YxEMIpUAsSk=
+		</data>
+		<key>Resources/data/markdown/Web.md</key>
+		<data>
+		HhlpwROLe97PrqS2zKRZiwzd8Sw=
 		</data>
 		<key>Resources/data/markdown/WelcomeRings.md</key>
 		<data>
@@ -2038,7 +2074,7 @@
 		</data>
 		<key>Resources/data/shaders/Feedback.frag</key>
 		<data>
-		qviokQzPgTahyV7h0qgQhKroXiA=
+		jTDmrbUqODR3oggkd6lnb9PxhtM=
 		</data>
 		<key>Resources/data/shaders/Feedback.vert</key>
 		<data>
@@ -2624,9 +2660,17 @@
 		<data>
 		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
+		<key>Resources/data/shaders/Stellar.frag</key>
+		<data>
+		9RioYRX+79LfIshsk7txUdC2A/k=
+		</data>
+		<key>Resources/data/shaders/Stellar.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
+		</data>
 		<key>Resources/data/shaders/Stroke.frag</key>
 		<data>
-		UH45oTESEQYdaCgyoHFuSTy6PfY=
+		fuQe466W4YJa7DmBAFw7Udhxb/A=
 		</data>
 		<key>Resources/data/shaders/Stroke.vert</key>
 		<data>
@@ -2781,6 +2825,14 @@
 		chhsRFDgNOAjp3shdm7z5upiAKw=
 		</data>
 		<key>Resources/data/shaders/Warpspeed.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
+		</data>
+		<key>Resources/data/shaders/Web.frag</key>
+		<data>
+		OC0g7gRr+D15YkNzHzNzrTQ+w/s=
+		</data>
+		<key>Resources/data/shaders/Web.vert</key>
 		<data>
 		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
@@ -3916,7 +3968,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			fnDve4r9iz/hw4Dvp1Ggbr6nvNaF308TmcSmPCQxU3E=
+			GmRY3T0Rzv1rO7fiK4ruYKKOWJ/PXgxwM8t2/Bmm1fE=
 			</data>
 		</dict>
 		<key>Resources/data/MaterialIcons-Regular.ttf</key>
@@ -4283,11 +4335,32 @@
 			mPqYuLx89IV5s44Tdgu6bjU97NCdqHGyuoMOiga9OLI=
 			</data>
 		</dict>
+		<key>Resources/data/images/icons/back.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			7L6H/wGMXCajSO2JGOYUxwDvwNKp/TeapwjlKosoKg0=
+			</data>
+		</dict>
 		<key>Resources/data/images/icons/down.png</key>
 		<dict>
 			<key>hash2</key>
 			<data>
 			KMD7YwvLjmHrND0dgGXfJpMmkcsH9WiJPC3SuKeO1h0=
+			</data>
+		</dict>
+		<key>Resources/data/images/icons/forward.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			63eV+Nt178fzzORcOQr7HsP7+N7EQueW0IpIe9ro6Ek=
+			</data>
+		</dict>
+		<key>Resources/data/images/icons/fullscreen.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			Fm7ojHxldUiInvZUROD6zKhtBeSGV1yl55Wwtx7kLPc=
 			</data>
 		</dict>
 		<key>Resources/data/images/icons/left-arrow.png</key>
@@ -4297,6 +4370,34 @@
 			SteY1qHoInRUstLlFQxfq0jbZZUeD5ltPSsqL7Lg8tQ=
 			</data>
 		</dict>
+		<key>Resources/data/images/icons/music.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			jeliWGX2l232cl0HnkBZaiL3Twjks0xXtI5HRHXS2ck=
+			</data>
+		</dict>
+		<key>Resources/data/images/icons/no-music.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			D5HBCKMzlOS395nY+DghtG6vEQqNYtFq98cpxg15d+E=
+			</data>
+		</dict>
+		<key>Resources/data/images/icons/pause.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			poWLJfmzm1GSgGyiu8CEB+c52t9C3yFX0FpKprahpgU=
+			</data>
+		</dict>
+		<key>Resources/data/images/icons/play.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			UoC6ZdFmtAe1/3U+gduzqRbO5lhBOoz6N+W0W32zPis=
+			</data>
+		</dict>
 		<key>Resources/data/images/icons/right-arrow.png</key>
 		<dict>
 			<key>hash2</key>
@@ -4304,11 +4405,11 @@
 			zZVhr5TLM3krufZjpHP3nJ2Tk6gW9Ra5v5hX/PcyQMc=
 			</data>
 		</dict>
-		<key>Resources/data/images/icons/setting.png</key>
+		<key>Resources/data/images/icons/save.png</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			Df9zd/mt/BVrl1V7mDg+uj65rYJmfk4Y18oAuz2J+bE=
+			fj1dEtv2FKE9jYp5WVOy7XO/H5Uif/kdyX7+epRSanw=
 			</data>
 		</dict>
 		<key>Resources/data/images/icons/settings.png</key>
@@ -6593,6 +6694,13 @@
 			iIj+PjF7rE/MuJsD8y32EqCBdw2kL6jtcolSoEFf84g=
 			</data>
 		</dict>
+		<key>Resources/data/markdown/Stellar.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			KDa5s2ayTsVrjEtcHzEr8VgAtJt/FGIUhdzgN7y3N7o=
+			</data>
+		</dict>
 		<key>Resources/data/markdown/Swirl.md</key>
 		<dict>
 			<key>hash2</key>
@@ -6724,6 +6832,13 @@
 			<key>hash2</key>
 			<data>
 			9f6+DXcbr055YJXzAX/v/VdLRlbpHA1dePgV622DeIk=
+			</data>
+		</dict>
+		<key>Resources/data/markdown/Web.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			cjY4GIT7qUiPQz7QfBSlTWxr36Re6ml56iRHfFvi5gE=
 			</data>
 		</dict>
 		<key>Resources/data/markdown/WelcomeRings.md</key>
@@ -7409,7 +7524,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			0cS6LHPo+GhYhn9dwJNNFGUPY00VLcSL/e/BFhA5JLg=
+			AMHQTqwB2VEB9wccN9nwyGnWXWQBwuCTF9W3zogivs8=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Feedback.vert</key>
@@ -8434,11 +8549,25 @@
 			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
 			</data>
 		</dict>
+		<key>Resources/data/shaders/Stellar.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			JP61zzHOEMlL6/3mn6TqjKlCmspEwH1VAQGaS1vgzZk=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/Stellar.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			</data>
+		</dict>
 		<key>Resources/data/shaders/Stroke.frag</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			OVbT7BauBhiO7iUOfqwS0lNvI+WrRvhd8yF8bhqmGHQ=
+			b0gubR+FzqKrtF6+5/1eO1fbVZkMhBXZGPVG/tTdFEk=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Stroke.vert</key>
@@ -8708,6 +8837,20 @@
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Warpspeed.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/Web.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			78lXhiMwPYnXr31pxpZSMikixx+cd75849hoN1zTCuw=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/Web.vert</key>
 		<dict>
 			<key>hash2</key>
 			<data>

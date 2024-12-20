@@ -137,13 +137,15 @@ struct CommonViews
   
   static void DownChevron(ImVec2 pos, float scale);
   
-  static void NodePin(std::shared_ptr<Node> node);
+  static void NodePin(std::shared_ptr<Node> node, bool active);
   static ed::PinId InputNodePin(std::shared_ptr<Node> node, InputSlot slot);
   static ed::PinId OutputNodePin(std::shared_ptr<Node> node, OutputSlot slot);
   
   static void ImageNamedNew(std::string name, float width, float height);
   
   static bool ImageButton(std::shared_ptr<Node> node, std::string imageName);
+  
+  static bool SmallImageButton(std::string id, std::string imageName);
   
 };
 

@@ -50,10 +50,12 @@ void NodeLayoutView::setup()
   
   context = ed::CreateEditor(config);
   ofAddListener(LibraryService::getService()->downloadNotification, this, &NodeLayoutView::haveDownloadedAvailableLibraryFile);
+  shaderBrowserView.size = ImVec2(460.0, 500.0);
+  shaderBrowserView.leftPadding = 20.0f;
   shaderBrowserView.setup();
-  shaderBrowserView.size = ImVec2(400.0, 500.0);
+  
+  videoSourceBrowserView.size = ImVec2(460.0, 500.0);
   videoSourceBrowserView.setup();
-  videoSourceBrowserView.size = ImVec2(400.0, 500.0);
 }
 
 void NodeLayoutView::update() {}
@@ -133,6 +135,7 @@ void NodeLayoutView::draw()
     auto shaderNode = nodeForShaderSourceId(shader->shaderId, NodeTypeShader, shader->name(), shader);
     shaderNode->shader = shader;
     drawNodeNew(shaderNode);
+//    drawNode(shaderNode);
     
     nodes.insert(shaderNode);
     
@@ -290,13 +293,19 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
   bool hasSelectorOpen = node->id == selectorNodeId;
   bool height = hasSelectorOpen ? 1000.0 : 500.0;
   auto pos = ImGui::GetCursorPos();
-  ImGui::Dummy(ImVec2(500.0, height));
-  ImGui::SetCursorScreenPos(ImGui::GetItemRectMin());
+  auto startPos = pos;
   
   // Preview:   500 x 280
-  // Node Size: 500 x 220  
-  node->drawPreviewSized(ImVec2(500.0, 280.0));
-    
+  // Node Size: 500 x 220
+  if (isSource || node->hasInputLinkAt(InputSlotMain)) {
+    ImGui::Dummy(ImVec2(500.0, 280.0));
+    node->drawPreviewSized(ImVec2(500.0, 280.0));
+  }
+  
+  if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && ImGui::IsItemHovered()) {
+    VideoSourceService::getService()->addOutputWindow(node->connectable);
+  }
+  
   /*
   20 - 50   -    360   - 50  - 20
     [Input] - Selector - [Output]
@@ -321,27 +330,41 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
   // Add padding
   ImGui::SetCursorPos(pos + ImVec2(10.0, 10.0));
   
-  // Input Pin if it exists
-  if (node->connectable->inputCount() > 0) {
-    ed::PinId inputPinId = CommonViews::InputNodePin(node, InputSlotMain);
+  // Input Pin
+  pos = ImGui::GetCursorPos();
+  // No inputs case
+  ImVec2 postPinPos = pos;
+  for (int i = 0; i < node->connectable->inputCount(); i++) {
+    InputSlot slot = static_cast<InputSlot>(i);
+    ed::PinId inputPinId = CommonViews::InputNodePin(node, slot);
     pinIdNodeMap[inputPinId.Get()] = node;
     ImGui::SameLine();
+    postPinPos = ImGui::GetCursorPos();
+    ImGui::SetCursorPos(pos);
   }
+  ImGui::SetCursorPos(postPinPos);
   
+  // Selector
   if (CommonViews::SelectorTitleButton(node->connectable->name(), selectorWidth)) {
-    selectorNodeId = node->id;
-    if (isShader) {
-      ShaderChainerService::getService()->hydrateAuxillaryShaders(node->shader->lastFrame);
-      shaderBrowserView.setup();
-      shaderBrowserView.setCallback([this, &node](std::shared_ptr<TileItem> tile) {
-        handleUpdatedShaderNode(node, tile);
-      });
+    if (hasSelectorOpen) {
+      selectorNodeId = 0;
     } else {
-      videoSourceBrowserView.setCallback([this, &node](std::shared_ptr<TileItem> tile) {
-        handleUpdatedSourceNode(node, tile);
-      });
+      selectorNodeId = node->id;
     }
     
+    if (!hasSelectorOpen) {
+      if (isShader) {
+        ShaderChainerService::getService()->hydrateAuxillaryShaders(node->shader->parentFrame());
+        shaderBrowserView.setup();
+        shaderBrowserView.setCallback([this, &node](std::shared_ptr<TileItem> tile) {
+          handleUpdatedShaderNode(node, tile);
+        });
+      } else {
+        videoSourceBrowserView.setCallback([this, &node](std::shared_ptr<TileItem> tile) {
+          handleUpdatedSourceNode(node, tile);
+        });
+      }
+    }
   }
   
   // Right x padding
@@ -353,6 +376,7 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
   
   // Draw the selector inside the node
   if (hasSelectorOpen) {
+    ImGui::Dummy(ImVec2(0.0, 15.0));
     if (isShader) {
       shaderBrowserView.draw();
     } else {
@@ -360,15 +384,32 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
       videoSourceBrowserView.draw();
     }
   }
-
   
   // Padding for button row
   ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2(15.0, 10.0));
   
-  CommonViews::ImageButton(node, "settings.png");
-  CommonViews::ImageButton(node, "settings.png");
-  CommonViews::ImageButton(node, "settings.png");
-  CommonViews::ImageButton(node, "settings.png");
+  if (node->hasAudioReactiveParameter()) {
+    const char* buttonImage = node->isAudioReactiveParameterActive() ? "no-music.png" : "music.png";
+
+    if (CommonViews::ImageButton(node, buttonImage)) {
+      toggleAudioReactiveParameter(node);
+    }
+  }
+  
+  const char* buttonImage = node->connectable->active ? "pause.png" : "play.png";
+  if (CommonViews::ImageButton(node, buttonImage)) {
+    node->connectable->active = !node->connectable->active;
+  }
+  
+  if (CommonViews::ImageButton(node, "save.png")) {
+    handleSaveNode(node);
+  }
+  
+  if (CommonViews::ImageButton(node, "fullscreen.png")) {
+    VideoSourceService::getService()->addOutputWindow(node->connectable);
+  }
+  ImGui::NewLine();
+  ImGui::Dummy(ImVec2(500.0, 40.0));
 
   ed::EndNode();
 }
@@ -491,31 +532,7 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
     }
     // Otherwise drive the default audio driver button
     else if (CommonViews::XLargeIconButton(ICON_MD_MUSIC_NOTE, formatString("##enableAudio%s", node->shader->shaderId.c_str()))) {
-      
-      // Prefer to use the BPM param, use RMS is BPM isn't enabled
-      auto analysisParameters = AudioSourceService::getService()->selectedAudioSource->audioAnalysis.parameters;
-      auto bpmEnabled = AudioSourceService::getService()->selectedAudioSource->audioAnalysis.bpmEnabled;
-      
-      std::shared_ptr<Parameter> updateParameter = nullptr;
-      
-      for (auto param : analysisParameters) {
-        if (bpmEnabled && param->name == "BPM") {
-          updateParameter = param;
-          break;
-        } else if (!bpmEnabled && param->name == "Loudness") {
-          updateParameter = param;
-          break;
-        }
-      }
-      
-      if (updateParameter == nullptr) return;
-      
-      // Successfully assigned driver, begin Audio Analysis if it's not runnig
-      if (AudioSourceService::getService()->selectedAudioSource != nullptr &&
-          !AudioSourceService::getService()->selectedAudioSource->active) {
-        AudioSourceService::getService()->selectedAudioSource->toggle();
-      }
-      node->shader->settings->audioReactiveParameter->addDriver(updateParameter);
+      toggleAudioReactiveParameter(node);
     }
   }
   
@@ -550,7 +567,6 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
   }
   
   for (OutputSlot slot : slotsToDraw) {
-    // HERE
     ed::PinId outputPinId = node->outputIds[slot];
     // Draw an Output Pin for each OutputSlot which is linked
     auto outPin = std::make_shared<Pin>(outputPinId, node, PinTypeOutput);
@@ -1141,6 +1157,15 @@ void NodeLayoutView::queryNewLinks()
       {
         if (ed::AcceptNewItem())
         {
+          if (destNode->hasInputLinkAt(inputSlot)) {
+            InputSlot slot = inputSlot;
+            while (slot < destNode->connectable->inputCount()) {
+              if (!destNode->connectable->hasInputAtSlot(slot)) { break; }
+              slot = (InputSlot)((int) slot + 1);
+            }
+            inputSlot = slot;
+          }
+          
           // VideoSource is our Source
           if (sourceNode->type == NodeTypeSource)
           {
@@ -1733,4 +1758,36 @@ void NodeLayoutView::drawShaderBrowserView()
       }
     }
   }
+}
+
+void NodeLayoutView::toggleAudioReactiveParameter(std::shared_ptr<Node> node) {
+  if (node->isAudioReactiveParameterActive()) {
+    node->shader->settings->audioReactiveParameter->removeDriver();
+    return;
+  }
+  
+  // Prefer to use the BPM param, use RMS is BPM isn't enabled
+  auto analysisParameters = AudioSourceService::getService()->selectedAudioSource->audioAnalysis.parameters;
+  auto bpmEnabled = AudioSourceService::getService()->selectedAudioSource->audioAnalysis.bpmEnabled;
+  
+  std::shared_ptr<Parameter> updateParameter = nullptr;
+  
+  for (auto param : analysisParameters) {
+    if (bpmEnabled && param->name == "BPM") {
+      updateParameter = param;
+      break;
+    } else if (!bpmEnabled && param->name == "Loudness") {
+      updateParameter = param;
+      break;
+    }
+  }
+  
+  if (updateParameter == nullptr) return;
+  
+  // Successfully assigned driver, begin Audio Analysis if it's not runnig
+  if (AudioSourceService::getService()->selectedAudioSource != nullptr &&
+      !AudioSourceService::getService()->selectedAudioSource->active) {
+    AudioSourceService::getService()->selectedAudioSource->toggle();
+  }
+  node->shader->settings->audioReactiveParameter->addDriver(updateParameter);
 }

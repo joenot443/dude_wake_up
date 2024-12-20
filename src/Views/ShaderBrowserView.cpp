@@ -80,9 +80,9 @@ void ShaderBrowserView::setCurrentTab(int tabIndex) {
 void ShaderBrowserView::drawSelectedBrowser() {
   switch (currentTab) {
     case 0: // Favorites
-      CommonViews::H4Title(idAppendedToString("Default Favorites", browserId).c_str());
+      CommonViews::H4Title("Default Favorites");
       defaultFavoritesTileBrowserView->draw();
-      CommonViews::H4Title(idAppendedToString("Your Favorites", browserId).c_str());
+      CommonViews::H4Title("Your Favorites");
       favoritesTileBrowserView->draw();
       break;
     case 1: // Basic

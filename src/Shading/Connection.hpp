@@ -128,6 +128,9 @@ public:
   // The Shader name or VideoSource name
   virtual std::string name() = 0;
   
+  // The settings for the underlying Shader or VideoSource
+  virtual std::shared_ptr<Settings> settingsRef() = 0;
+  
   // The max number of inputs supported.
   virtual int inputCount() = 0;
   
@@ -143,6 +146,9 @@ public:
   virtual std::shared_ptr<ofFbo> frame() = 0;
   
   virtual ConnectableType connectableType() = 0;
+  
+  // Whether the Connectable is processing new frames
+  bool active = true;
   
   bool hasOutputs()
   {

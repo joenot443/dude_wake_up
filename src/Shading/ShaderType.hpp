@@ -147,6 +147,8 @@ enum ShaderType {
   ShaderTypeSimpleBars,
   ShaderTypeBlurryTrail,
   ShaderTypeSpiral,
+  ShaderTypeWeb,
+  ShaderTypeStellar,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -190,6 +192,7 @@ static const ShaderType AvailableGlitchShaderTypes[] = {
   ShaderTypePixelPlay,
   ShaderTypeGlitchDigital,
   ShaderTypeGlitchAudio,
+  ShaderTypeWeb,
   ShaderTypeScratchy,
   ShaderTypeAutotangent
 };
@@ -263,6 +266,10 @@ static std::vector<ShaderType> AllShaderTypes() {
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) { // ShaderNames
+    case ShaderTypeStellar:
+      return "Stellar";
+    case ShaderTypeWeb:
+      return "Web";
     case ShaderTypeSpiral:
       return "Spiral";
     case ShaderTypeBlurryTrail:

@@ -44,9 +44,6 @@ public:
   std::shared_ptr<ofFbo> optionalFbo;
   std::shared_ptr<FeedbackSource> feedbackDestination;
   
-  // Whether the source is generating new frames
-  bool active = true;
-  
   // Layout
   ImVec2 origin;
   
@@ -66,6 +63,10 @@ public:
   void drawSettings() override {};
   
   void drawOptionalSettings() override;
+  
+  std::shared_ptr<Settings> settingsRef() override {
+    return std::dynamic_pointer_cast<Settings>(settings);
+  }
   
   void applyOptionalShaders();
   

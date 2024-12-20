@@ -60,10 +60,12 @@ void FileAudioSource::disable() {
 
 void FileAudioSource::pausePlayback() {
   isPaused.store(true);
+  audioAnalysis.bpmEnabled = false;
 }
 
 void FileAudioSource::resumePlayback() {
   isPaused.store(false);
+  audioAnalysis.bpmEnabled = true;
 }
 
 void FileAudioSource::audioOut(ofSoundBuffer &outputBuffer) {
