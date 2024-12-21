@@ -3526,9 +3526,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1060"
-            endingLineNumber = "1060"
-            landmarkName = "NodeLayoutView::handleDropZone()"
+            startingLineNumber = "1062"
+            endingLineNumber = "1062"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -3574,9 +3574,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "695"
-            endingLineNumber = "695"
-            landmarkName = "NodeLayoutView::populateSelectedNodes()"
+            startingLineNumber = "697"
+            endingLineNumber = "697"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -3590,9 +3590,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1045"
-            endingLineNumber = "1045"
-            landmarkName = "NodeLayoutView::handleDropZone()"
+            startingLineNumber = "1047"
+            endingLineNumber = "1047"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
             <Locations>
                <Location
@@ -3668,9 +3668,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1006"
-            endingLineNumber = "1006"
-            landmarkName = "NodeLayoutView::handleDropZone()"
+            startingLineNumber = "1008"
+            endingLineNumber = "1008"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -4062,9 +4062,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "429"
-            endingLineNumber = "429"
-            landmarkName = "NodeLayoutView::drawNode(node)"
+            startingLineNumber = "431"
+            endingLineNumber = "431"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -4269,10 +4269,10 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1078"
-            endingLineNumber = "1078"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            startingLineNumber = "1080"
+            endingLineNumber = "1080"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -4285,9 +4285,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1070"
-            endingLineNumber = "1070"
-            landmarkName = "NodeLayoutView::handleDropZone()"
+            startingLineNumber = "1072"
+            endingLineNumber = "1072"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -4301,9 +4301,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1085"
-            endingLineNumber = "1085"
-            landmarkName = "NodeLayoutView::loadStrand(availableStrand)"
+            startingLineNumber = "1087"
+            endingLineNumber = "1087"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
             <Locations>
                <Location
@@ -4555,9 +4555,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1282"
-            endingLineNumber = "1282"
-            landmarkName = "NodeLayoutView::drawActionButtons()"
+            startingLineNumber = "1284"
+            endingLineNumber = "1284"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -5562,9 +5562,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "645"
-            endingLineNumber = "645"
-            landmarkName = "NodeLayoutView::nodeForShaderSourceId(shaderSourceId, nodeType, name, connectable)"
+            startingLineNumber = "647"
+            endingLineNumber = "647"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
             <Locations>
                <Location
@@ -6132,9 +6132,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "569"
-            endingLineNumber = "569"
-            landmarkName = "NodeLayoutView::drawNode(node)"
+            startingLineNumber = "571"
+            endingLineNumber = "571"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -6420,9 +6420,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1267"
-            endingLineNumber = "1267"
-            landmarkName = "NodeLayoutView::drawActionButtons()"
+            startingLineNumber = "1269"
+            endingLineNumber = "1269"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -6900,9 +6900,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "912"
-            endingLineNumber = "912"
-            landmarkName = "NodeLayoutView::handleDeleteNode(node)"
+            startingLineNumber = "914"
+            endingLineNumber = "914"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -7156,9 +7156,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1039"
-            endingLineNumber = "1039"
-            landmarkName = "NodeLayoutView::handleDropZone()"
+            startingLineNumber = "1041"
+            endingLineNumber = "1041"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -7220,9 +7220,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1388"
-            endingLineNumber = "1388"
-            landmarkName = "NodeLayoutView::drawDebugWindow()"
+            startingLineNumber = "1390"
+            endingLineNumber = "1390"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -7588,9 +7588,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "715"
-            endingLineNumber = "715"
-            landmarkName = "NodeLayoutView::populateSelectedNodes()"
+            startingLineNumber = "717"
+            endingLineNumber = "717"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -7604,9 +7604,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1053"
-            endingLineNumber = "1053"
-            landmarkName = "NodeLayoutView::handleDropZone()"
+            startingLineNumber = "1055"
+            endingLineNumber = "1055"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -7620,9 +7620,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "923"
-            endingLineNumber = "923"
-            landmarkName = "NodeLayoutView::handleSaveNode(node)"
+            startingLineNumber = "925"
+            endingLineNumber = "925"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -8595,6 +8595,21 @@
                   endingLineNumber = "202"
                   offsetFromSymbolStart = "545">
                </Location>
+               <Location
+                  uuid = "689D0B92-F5FD-4BA1-910B-AF2C917D9D1D - 6e1f9bf56f118db6"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "MainStageView::drawMenu()"
+                  moduleName = "nottawa"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up/src/Views/MainStageView.cpp"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "202"
+                  endingLineNumber = "202"
+                  offsetFromSymbolStart = "489">
+               </Location>
             </Locations>
          </BreakpointContent>
       </BreakpointProxy>
@@ -8831,9 +8846,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1616"
-            endingLineNumber = "1616"
-            landmarkName = "NodeLayoutView::drawHelp()"
+            startingLineNumber = "1618"
+            endingLineNumber = "1618"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -8847,9 +8862,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1607"
-            endingLineNumber = "1607"
-            landmarkName = "NodeLayoutView::drawHelp()"
+            startingLineNumber = "1609"
+            endingLineNumber = "1609"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -9435,9 +9450,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1250"
-            endingLineNumber = "1250"
-            landmarkName = "NodeLayoutView::drawPreviewWindow(node)"
+            startingLineNumber = "1252"
+            endingLineNumber = "1252"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -9467,10 +9482,10 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "899"
-            endingLineNumber = "899"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            startingLineNumber = "901"
+            endingLineNumber = "901"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
+            landmarkType = "7">
             <Locations>
                <Location
                   uuid = "026ABA26-B4A7-4AE5-9553-ED5A3BFDDCD4 - b44b6025bcb626d8"
@@ -9530,9 +9545,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "889"
-            endingLineNumber = "889"
-            landmarkName = "NodeLayoutView::createBlendShaderForSelectedNodes(firstNodeId, secondNodeId)"
+            startingLineNumber = "891"
+            endingLineNumber = "891"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -10493,9 +10508,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "565"
-            endingLineNumber = "565"
-            landmarkName = "NodeLayoutView::drawNode(node)"
+            startingLineNumber = "567"
+            endingLineNumber = "567"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -10717,9 +10732,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "837"
-            endingLineNumber = "837"
-            landmarkName = "NodeLayoutView::handleRightClick()"
+            startingLineNumber = "839"
+            endingLineNumber = "839"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -10733,9 +10748,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "830"
-            endingLineNumber = "830"
-            landmarkName = "NodeLayoutView::handleRightClick()"
+            startingLineNumber = "832"
+            endingLineNumber = "832"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -11101,9 +11116,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "760"
-            endingLineNumber = "760"
-            landmarkName = "NodeLayoutView::handleUpdatedShaderNode(node, tile)"
+            startingLineNumber = "762"
+            endingLineNumber = "762"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -11117,9 +11132,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "757"
-            endingLineNumber = "757"
-            landmarkName = "NodeLayoutView::handleUpdatedShaderNode(node, tile)"
+            startingLineNumber = "759"
+            endingLineNumber = "759"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -11149,9 +11164,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "895"
-            endingLineNumber = "895"
-            landmarkName = "NodeLayoutView::handleUploadChain(node)"
+            startingLineNumber = "897"
+            endingLineNumber = "897"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -11501,9 +11516,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1137"
-            endingLineNumber = "1137"
-            landmarkName = "NodeLayoutView::queryNewLinks()"
+            startingLineNumber = "1139"
+            endingLineNumber = "1139"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
             <Locations>
                <Location
@@ -11740,9 +11755,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1370"
-            endingLineNumber = "1370"
-            landmarkName = "NodeLayoutView::clear()"
+            startingLineNumber = "1372"
+            endingLineNumber = "1372"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -11756,9 +11771,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1375"
-            endingLineNumber = "1375"
-            landmarkName = "NodeLayoutView::clear()"
+            startingLineNumber = "1377"
+            endingLineNumber = "1377"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -12108,9 +12123,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "975"
-            endingLineNumber = "975"
-            landmarkName = "NodeLayoutView::handleDropZone()"
+            startingLineNumber = "977"
+            endingLineNumber = "977"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -12124,9 +12139,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "976"
-            endingLineNumber = "976"
-            landmarkName = "NodeLayoutView::handleDropZone()"
+            startingLineNumber = "978"
+            endingLineNumber = "978"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -12827,6 +12842,21 @@
                   endingLineNumber = "651"
                   offsetFromSymbolStart = "78">
                </Location>
+               <Location
+                  uuid = "31B9337B-32A8-4FCC-9F84-6E22B616D62F - 39722253028c5aba"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "CommonViews::ImageNamed(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt;, double, double)"
+                  moduleName = "nottawa"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up/src/Views/CommonViews.cpp"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "651"
+                  endingLineNumber = "651"
+                  offsetFromSymbolStart = "123">
+               </Location>
             </Locations>
          </BreakpointContent>
       </BreakpointProxy>
@@ -12903,8 +12933,8 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "359"
-            endingLineNumber = "359"
+            startingLineNumber = "360"
+            endingLineNumber = "360"
             landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
             <Locations>
@@ -13030,8 +13060,8 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "357"
-            endingLineNumber = "357"
+            startingLineNumber = "358"
+            endingLineNumber = "358"
             landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
@@ -13110,9 +13140,9 @@
             filePath = "src/NodeLayout/NodeLayoutView.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "759"
-            endingLineNumber = "759"
-            landmarkName = "NodeLayoutView::handleUpdatedShaderNode(node, tile)"
+            startingLineNumber = "761"
+            endingLineNumber = "761"
+            landmarkName = "NodeLayoutView::drawNodeNew(node)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

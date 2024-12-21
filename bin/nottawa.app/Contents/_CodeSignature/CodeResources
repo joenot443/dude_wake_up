@@ -6,7 +6,7 @@
 	<dict>
 		<key>Resources/NodeLayout.json</key>
 		<data>
-		KMNVP1ICfir1WGqo/4kXNHxkvBM=
+		9/9XHabTeNkDYkWtZx5yaFt8eh8=
 		</data>
 		<key>Resources/data/MaterialIcons-Regular.ttf</key>
 		<data>
@@ -226,7 +226,7 @@
 		</data>
 		<key>Resources/data/images/.DS_Store</key>
 		<data>
-		XldxI+ptQmfVf9JQ9RRdBd8dlF8=
+		R/hQ8Av2F6NEY61sF37OOhMx24o=
 		</data>
 		<key>Resources/data/images/basic/star.png</key>
 		<data>
@@ -235,6 +235,10 @@
 		<key>Resources/data/images/icons/.DS_Store</key>
 		<data>
 		B4MiFnRurbYomXw1SAlXEiR6JIw=
+		</data>
+		<key>Resources/data/images/icons/back 2.png</key>
+		<data>
+		8BsrCgS8eKtcRCCQxexvPhxGoow=
 		</data>
 		<key>Resources/data/images/icons/back.png</key>
 		<data>
@@ -283,6 +287,10 @@
 		<key>Resources/data/images/icons/settings.png</key>
 		<data>
 		NrLlTrilR1+eTGVrbAks1yOj8Dk=
+		</data>
+		<key>Resources/data/images/icons/up.png</key>
+		<data>
+		BWfe/+atGy6mCKDl8c+IQWJn5gg=
 		</data>
 		<key>Resources/data/images/stylized/.DS_Store</key>
 		<data>
@@ -3968,7 +3976,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			GmRY3T0Rzv1rO7fiK4ruYKKOWJ/PXgxwM8t2/Bmm1fE=
+			lAnbBtd9AbqLlVRYvkj2PaTW6+7eI0H86OjPLOynCv4=
 			</data>
 		</dict>
 		<key>Resources/data/MaterialIcons-Regular.ttf</key>
@@ -4335,6 +4343,13 @@
 			mPqYuLx89IV5s44Tdgu6bjU97NCdqHGyuoMOiga9OLI=
 			</data>
 		</dict>
+		<key>Resources/data/images/icons/back 2.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			7L6H/wGMXCajSO2JGOYUxwDvwNKp/TeapwjlKosoKg0=
+			</data>
+		</dict>
 		<key>Resources/data/images/icons/back.png</key>
 		<dict>
 			<key>hash2</key>
@@ -4417,6 +4432,13 @@
 			<key>hash2</key>
 			<data>
 			Df9zd/mt/BVrl1V7mDg+uj65rYJmfk4Y18oAuz2J+bE=
+			</data>
+		</dict>
+		<key>Resources/data/images/icons/up.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			8wgGm3F3jKRQAmcwVFARJJuKdqEnd9l8PCKdJAAuQm0=
 			</data>
 		</dict>
 		<key>Resources/data/images/stylized/1.png</key>

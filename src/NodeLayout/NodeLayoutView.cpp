@@ -354,11 +354,13 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
     
     if (!hasSelectorOpen) {
       if (isShader) {
-        ShaderChainerService::getService()->hydrateAuxillaryShaders(node->shader->parentFrame());
-        shaderBrowserView.setup();
-        shaderBrowserView.setCallback([this, &node](std::shared_ptr<TileItem> tile) {
-          handleUpdatedShaderNode(node, tile);
-        });
+        if (node->hasInputLinkAt(InputSlotMain)) {
+          ShaderChainerService::getService()->hydrateAuxillaryShaders(node->shader->parentFrame());
+          shaderBrowserView.setup();
+          shaderBrowserView.setCallback([this, &node](std::shared_ptr<TileItem> tile) {
+            handleUpdatedShaderNode(node, tile);
+          });
+        }
       } else {
         videoSourceBrowserView.setCallback([this, &node](std::shared_ptr<TileItem> tile) {
           handleUpdatedSourceNode(node, tile);
