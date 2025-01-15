@@ -86,6 +86,7 @@ void NodeShaderBrowserView::draw() {
   drawTabButtons();
   ImGui::Spacing();
   drawSelectedBrowser();
+  ImGui::NewLine();
 }
 
 void NodeShaderBrowserView::setCallback(std::function<void(std::shared_ptr<TileItem>)> callback) {

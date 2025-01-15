@@ -3,7 +3,6 @@
 #include "CommonViews.hpp"
 
 static const float TILE_ASPECT_RATIO = 88.0f / 55.0f;  // Original ratio
-static const float TILE_PADDING = 5.0f;  // Padding between tiles
 
 void PagedTileBrowserView::setup() {}
 
@@ -26,7 +25,7 @@ ImVec2 PagedTileBrowserView::calculateTileSize() const {
   }
   
   // Calculate available width considering padding between tiles
-  float totalPadding = TILE_PADDING * (columnCount - 1);
+  float totalPadding = (ImGui::GetStyle().ItemSpacing.x * 2.0) * (columnCount - 1);
   float availableWidth = viewWidth - totalPadding;
   
   // Calculate tile width
@@ -47,14 +46,14 @@ void PagedTileBrowserView::draw() {
   for (int i = 0; i < rowCount; i++) {
     // Add left padding at the start of each row
     ImGui::Dummy(ImVec2(leftPadding, 0.0f));
-    ImGui::SameLine();
+    ImGui::SameLine(0.0);
     
     for (int j = 0; j < columnCount; j++) {
       int idx = startIdx + i * columnCount + j;
       
       // Add horizontal spacing between tiles (except for first column)
       if (j > 0) {
-        ImGui::SameLine();
+        ImGui::SameLine(0.0);
       }
       
       if (idx < endIdx) {
@@ -68,7 +67,7 @@ void PagedTileBrowserView::draw() {
           ImGui::SetCursorPos(startPos);
           
           ImGui::PushFont(FontService::getService()->p);
-          ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0, 1.0, 1.0, 0.6));
+          ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0, 1.0, 1.0, 0.8));
           ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0, 0.0, 0.0, 0.0));
           ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0, 0.0, 0.0, 0.0));
           ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0, 0.0, 0.0, 0.0));
@@ -104,33 +103,52 @@ void PagedTileBrowserView::draw() {
       
       // Add horizontal spacing after each tile (except last column)
       if (j < columnCount - 1) {
-        ImGui::SameLine();
-        ImGui::Dummy(ImVec2(TILE_PADDING, 0.0f));
+        ImGui::SameLine(0.0);
+        ImGui::Dummy(ImVec2(0.0f, 0.0f));
       }
     }
     
     // Add vertical spacing after each row (except last row)
     if (i < rowCount - 1) {
-      ImGui::Dummy(ImVec2(0.0f, TILE_PADDING));
+      ImGui::Dummy(ImVec2(0.0f, 0.0f));
     }
   }
+  
+  
   
   // Navigation buttons
   ImGui::NewLine();
   bool canGoPrev = currentPage > 0;
   bool canGoNext = currentPage < getTotalPages() - 1;
   
-  if (canGoPrev) {
-    if (CommonViews::SmallImageButton("prev", "back.png")) currentPage--;
-  } 
+  // Calculate total width of navigation elements
+  float buttonWidth = 40.0;
+  float textWidth = ImGui::CalcTextSize((std::to_string(currentPage + 1) + "/" + std::to_string(getTotalPages())).c_str()).x;
+  float spacing = ImGui::GetStyle().ItemSpacing.x;
+  float totalNavWidth = (buttonWidth * 2) + textWidth + (spacing * 2);
   
+  // Center the navigation elements
+  float leftOffset = (viewWidth - totalNavWidth) * 0.5f;
+
+  ImGui::SetCursorPosX(ImGui::GetCursorPosX() + leftOffset);
+  
+  if (canGoPrev) {
+    if (CommonViews::SmallImageButton("prev", "back.png"))  currentPage--;
+  } else {
+    ImGui::Dummy(ImVec2(buttonWidth, buttonWidth));
+  }
+  
+  ImGui::SameLine();
+  ImGui::Dummy(ImVec2(10.0, 0.0));
   ImGui::SameLine();
   ImGui::Text("%d/%d", currentPage + 1, getTotalPages());
   
   ImGui::SameLine();
   if (canGoNext) {
     if (CommonViews::SmallImageButton("next", "forward.png")) currentPage++;
-  } 
+  } else {
+    ImGui::Dummy(ImVec2(buttonWidth, buttonWidth));
+  }
 }
 
 void PagedTileBrowserView::update() {} 

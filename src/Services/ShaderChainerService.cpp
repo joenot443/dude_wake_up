@@ -310,7 +310,7 @@ void ShaderChainerService::processFrame()
     std::shared_ptr<Shader> shader = std::dynamic_pointer_cast<Shader>(connection->end);
     
     // No need to traverse if the video's not active
-    if (videoSource && !videoSource->active) continue;
+    if (videoSource != nullptr && !videoSource->active) continue;
     
     shader->traverseFrame(videoSource->frame(), 0);
   }

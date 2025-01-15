@@ -50,12 +50,15 @@ void NodeLayoutView::setup()
   
   context = ed::CreateEditor(config);
   ofAddListener(LibraryService::getService()->downloadNotification, this, &NodeLayoutView::haveDownloadedAvailableLibraryFile);
-  shaderBrowserView.size = ImVec2(460.0, 500.0);
-  shaderBrowserView.leftPadding = 20.0f;
-  shaderBrowserView.setup();
+  nodeShaderBrowserView = std::make_unique<NodeShaderBrowserView>();
+  nodeShaderBrowserView->size = ImVec2(460.0, 500.0);
+  nodeShaderBrowserView->leftPadding = 10.0f;
+  nodeShaderBrowserView->setup();
   
-  videoSourceBrowserView.size = ImVec2(460.0, 500.0);
-  videoSourceBrowserView.setup();
+  nodeVideoSourceBrowserView = std::make_unique<NodeVideoSourceBrowserView>();
+  nodeVideoSourceBrowserView->size = ImVec2(460.0, 500.0);
+  nodeVideoSourceBrowserView->leftPadding = 10.0f;
+  nodeVideoSourceBrowserView->setup();
 }
 
 void NodeLayoutView::update() {}
@@ -103,11 +106,8 @@ void NodeLayoutView::draw()
   auto shaders = ShaderChainerService::getService()->shaders();
   
   nodes = {};
-  
   ed::SetCurrentEditor(context);
-  ed::PushStyleColor(ax::NodeEditor::StyleColor_Bg, ImVec4(0, 0, 0, 0));
-  ed::PushStyleColor(ax::NodeEditor::StyleColor_Grid, ImVec4(0, 0, 0, 0));
-  CommonViews::PushRedesignStyle();
+  CommonViews::PushNodeRedesignStyle();
 
   
   bool showAudio = LayoutStateService::getService()->showAudioSettings;
@@ -278,8 +278,8 @@ void NodeLayoutView::draw()
   
   drawHelp();
   
+  CommonViews::PopNodeRedesignStyle();
   ed::SetCurrentEditor(nullptr);
-  CommonViews::PopRedesignStyle();
   drawSaveDialog();
   
   shouldDelete = false;
@@ -292,14 +292,16 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
   bool isShader = node->type == NodeTypeShader;
   bool hasSelectorOpen = node->id == selectorNodeId;
   bool height = hasSelectorOpen ? 1000.0 : 500.0;
+  ImVec2 previewPadding = ImVec2(0.9, 0.7);
   auto pos = ImGui::GetCursorPos();
   auto startPos = pos;
   
   // Preview:   500 x 280
   // Node Size: 500 x 220
   if (isSource || node->hasInputLinkAt(InputSlotMain)) {
+    ImGui::SetCursorPos(ImGui::GetCursorPos() + previewPadding);
+    node->drawPreviewSized(ImVec2(500.0, 280.0) - 2*previewPadding);
     ImGui::Dummy(ImVec2(500.0, 280.0));
-    node->drawPreviewSized(ImVec2(500.0, 280.0));
   }
   
   if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && ImGui::IsItemHovered()) {
@@ -315,34 +317,28 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
   // Input Pin
   
   // Add padding
-  ImGui::SetCursorPos(pos + ImVec2(20.0, 30.0));
+  ImGui::SetCursorPos(pos + ImVec2(20.0, 20.0));
   
   // Inner Rect background
   pos = ImGui::GetCursorPos();
   float innerRectWidth = 460.0;
   
-  // Offset to account for missing Input Pin for Source nodes
-  float offset = isSource ? 0.0 : 50.0;
-  
-  float selectorWidth = isSource ? 400.0 : 355.0;
+  float selectorWidth = 400.0;
   
   ed::GetCurrentDrawList()->AddRectFilled(ImVec2(pos.x, pos.y), ImVec2(pos.x + innerRectWidth, pos.y + 50.0), Colors::NodeInnerRectBackgroundColor, 10.0);
   // Add padding
-  ImGui::SetCursorPos(pos + ImVec2(10.0, 10.0));
+  ImGui::SetCursorPos(pos + ImVec2(10.0, 0.0));
   
   // Input Pin
   pos = ImGui::GetCursorPos();
-  // No inputs case
-  ImVec2 postPinPos = pos;
   for (int i = 0; i < node->connectable->inputCount(); i++) {
     InputSlot slot = static_cast<InputSlot>(i);
     ed::PinId inputPinId = CommonViews::InputNodePin(node, slot);
     pinIdNodeMap[inputPinId.Get()] = node;
     ImGui::SameLine();
-    postPinPos = ImGui::GetCursorPos();
-    ImGui::SetCursorPos(pos);
   }
-  ImGui::SetCursorPos(postPinPos);
+
+  selectorWidth = selectorWidth - (ImGui::GetCursorPosX() - pos.x);
   
   // Selector
   if (CommonViews::SelectorTitleButton(node->connectable->name(), selectorWidth)) {
@@ -356,13 +352,13 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
       if (isShader) {
         if (node->hasInputLinkAt(InputSlotMain)) {
           ShaderChainerService::getService()->hydrateAuxillaryShaders(node->shader->parentFrame());
-          shaderBrowserView.setup();
-          shaderBrowserView.setCallback([this, &node](std::shared_ptr<TileItem> tile) {
+          nodeShaderBrowserView->setup();
+          nodeShaderBrowserView->setCallback([this, &node](std::shared_ptr<TileItem> tile) {
             handleUpdatedShaderNode(node, tile);
           });
         }
       } else {
-        videoSourceBrowserView.setCallback([this, &node](std::shared_ptr<TileItem> tile) {
+        nodeVideoSourceBrowserView->setCallback([this, &node](std::shared_ptr<TileItem> tile) {
           handleUpdatedSourceNode(node, tile);
         });
       }
@@ -380,38 +376,52 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
   if (hasSelectorOpen) {
     ImGui::Dummy(ImVec2(0.0, 15.0));
     if (isShader) {
-      shaderBrowserView.draw();
+      nodeShaderBrowserView->draw();
     } else {
-      videoSourceBrowserView.setCurrentTab(VideoSourceBrowserView::tabForSourceType(node->source->type));
-      videoSourceBrowserView.draw();
+      nodeVideoSourceBrowserView->draw();
     }
   }
   
-  // Padding for button row
-  ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2(15.0, 10.0));
+  // Calculate total available width and spacing
+  float totalWidth = 460.0f;
+  float buttonSpacing = 8.0f;
+  
+  // Calculate button count (accounting for conditional audio button)
+  int buttonCount = 3; // Base buttons: play/pause, save, fullscreen
+  if (node->hasAudioReactiveParameter()) {
+    buttonCount++; // Add audio reactive button if available
+  }
+
+  // Calculate dynamic button size based on total width and spacing
+  float buttonSize = (totalWidth - (buttonSpacing * (buttonCount - 1))) / buttonCount;
+  float buttonHeight = 48.0;
+  // Start position for first button
+  ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2(20.0, 10.0));
   
   if (node->hasAudioReactiveParameter()) {
     const char* buttonImage = node->isAudioReactiveParameterActive() ? "no-music.png" : "music.png";
 
-    if (CommonViews::ImageButton(node, buttonImage)) {
+    if (CommonViews::ImageButton(node->connectable->connId(), buttonImage, ImVec2(buttonSize,  buttonHeight))) {
       toggleAudioReactiveParameter(node);
     }
+    ImGui::SameLine(0, buttonSpacing);
   }
   
   const char* buttonImage = node->connectable->active ? "pause.png" : "play.png";
-  if (CommonViews::ImageButton(node, buttonImage)) {
+  if (CommonViews::ImageButton(node->connectable->connId(), buttonImage, ImVec2(buttonSize,  buttonHeight))) {
     node->connectable->active = !node->connectable->active;
   }
+  ImGui::SameLine(0, buttonSpacing);
   
-  if (CommonViews::ImageButton(node, "save.png")) {
+  if (CommonViews::ImageButton(node->connectable->connId(), "save.png", ImVec2(buttonSize,  buttonHeight))) {
     handleSaveNode(node);
   }
+  ImGui::SameLine(0, buttonSpacing);
   
-  if (CommonViews::ImageButton(node, "fullscreen.png")) {
+  if (CommonViews::ImageButton(node->connectable->connId(), "fullscreen.png", ImVec2(buttonSize,  buttonHeight))) {
     VideoSourceService::getService()->addOutputWindow(node->connectable);
   }
-  ImGui::NewLine();
-  ImGui::Dummy(ImVec2(500.0, 40.0));
+  ImGui::Dummy(ImVec2(500.0, 20.0));
 
   ed::EndNode();
 }
@@ -622,12 +632,8 @@ std::shared_ptr<Node> NodeLayoutView::nodeForShaderSourceId(std::string shaderSo
   bool supportsAux = nodeType == NodeTypeShader && ShaderChainerService::getService()->shaderForId(shaderSourceId)->inputCount() > 1;
   bool supportsMask = nodeType == NodeTypeShader && ShaderChainerService::getService()->shaderForId(shaderSourceId)->inputCount() > 2;
   
-  
-  std::shared_ptr<Node> node = idNodeMap[shaderSourceId];
-  
-  // We already have a node, return it
-  if (node != nullptr)
-  {
+  if (idNodeMap.count(shaderSourceId) != 0) {
+    std::shared_ptr<Node> node = idNodeMap[shaderSourceId];
     nodeIdNodeMap[node->id.Get()] = node;
     idNodeMap[shaderSourceId] = node;
     return node;
@@ -661,7 +667,7 @@ std::shared_ptr<Node> NodeLayoutView::nodeForShaderSourceId(std::string shaderSo
     origin = ImVec2(ShaderChainerService::getService()->shaderForId(shaderSourceId)->settings->x->value, ShaderChainerService::getService()->shaderForId(shaderSourceId)->settings->y->value);
   }
   
-  node = std::make_shared<Node>(nodeId, outputIds, inputIds, name, nodeType, connectable);
+  std::shared_ptr<Node> node = std::make_shared<Node>(nodeId, outputIds, inputIds, name, nodeType, connectable);
   
   // If we're placing the node from a JSON, we have an origin.
   // It's possible the Node hasn't actually be placed yet, in which case don't set its position
@@ -909,6 +915,10 @@ void NodeLayoutView::handleDeleteNode(std::shared_ptr<Node> node)
     case NodeTypeSource:
       ActionService::getService()->removeVideoSource(node->source);
       break;
+  }
+  // Deselect the node if it's selected
+  if (ed::IsNodeSelected(node->id)) {
+    ed::ClearSelection();
   }
   previewWindowNodes.erase(node);
   nodesToOpen.erase(node);
@@ -1701,66 +1711,66 @@ void NodeLayoutView::drawHelp()
   }
 }
 
-void NodeLayoutView::drawShaderBrowserView()
-{
-  if (selectorNodeId.Get() != 0) // Check if a node is selected
-  {
-    auto node = nodeIdNodeMap[selectorNodeId.Get()];
-    if (node != nullptr)
-    {
-      // Get the position of the selected node
-      ImVec2 pos = ed::GetNodePosition(node->id);
-      pos = ed::CanvasToScreen(pos);
-      
-      // Set the position for the shader browser view window
-      pos.y += ed::GetNodeSize(node->id).y / ed::GetCurrentZoom() + 20; // Position it below the node
-      
-      // Set window properties
-      ImGui::SetNextWindowPos(pos);
-      ImGui::SetNextWindowSize(ImVec2(500.0, 500.0));
-      
-      // Begin the window for shader browser view
-      if (ImGui::Begin("Shader Browser", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize)) {
-        
-        if (node->type == NodeTypeShader) {
-          shaderBrowserView.draw();
-        } else {
-          switch (node->source->type) {
-            case VideoSource_webcam:
-              videoSourceBrowserView.setCurrentTab(1);
-              break;
-            case VideoSource_file:
-              videoSourceBrowserView.setCurrentTab(3);
-              break;
-            case VideoSource_image:
-              videoSourceBrowserView.setCurrentTab(3);
-              break;
-            case VideoSource_text:
-              videoSourceBrowserView.setCurrentTab(0);
-              break;
-            case VideoSource_icon:
-              videoSourceBrowserView.setCurrentTab(3);
-              break;
-            case VideoSource_shader:
-              videoSourceBrowserView.setCurrentTab(0);
-              break;
-            case VideoSource_library:
-              videoSourceBrowserView.setCurrentTab(2);
-              break;
-            case VideoSource_multi:
-              break;
-            case VideoSource_empty:
-              break;
-            default:
-              break;
-          }
-          videoSourceBrowserView.drawSelectedBrowser();
-        }
-        ImGui::End();
-      }
-    }
-  }
-}
+//void NodeLayoutView::drawShaderBrowserView()
+//{
+//  if (selectorNodeId.Get() != 0) // Check if a node is selected
+//  {
+//    auto node = nodeIdNodeMap[selectorNodeId.Get()];
+//    if (node != nullptr)
+//    {
+//      // Get the position of the selected node
+//      ImVec2 pos = ed::GetNodePosition(node->id);
+//      pos = ed::CanvasToScreen(pos);
+//      
+//      // Set the position for the shader browser view window
+//      pos.y += ed::GetNodeSize(node->id).y / ed::GetCurrentZoom() + 20; // Position it below the node
+//      
+//      // Set window properties
+//      ImGui::SetNextWindowPos(pos);
+//      ImGui::SetNextWindowSize(ImVec2(500.0, 500.0));
+//      
+//      // Begin the window for shader browser view
+//      if (ImGui::Begin("Shader Browser", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize)) {
+//        
+//        if (node->type == NodeTypeShader) {
+//          nodeShaderBrowserView->draw();
+//        } else {
+//          switch (node->source->type) {
+//            case VideoSource_webcam:
+//              nodeVideoSourceBrowserView->setCurrentTab(1);
+//              break;
+//            case VideoSource_file:
+//              nodeVideoSourceBrowserView->setCurrentTab(3);
+//              break;
+//            case VideoSource_image:
+//              nodeVideoSourceBrowserView->setCurrentTab(3);
+//              break;
+//            case VideoSource_text:
+//              nodeVideoSourceBrowserView->setCurrentTab(0);
+//              break;
+//            case VideoSource_icon:
+//              nodeVideoSourceBrowserView->setCurrentTab(3);
+//              break;
+//            case VideoSource_shader:
+//              nodeVideoSourceBrowserView->setCurrentTab(0);
+//              break;
+//            case VideoSource_library:
+//              nodeVideoSourceBrowserView->setCurrentTab(2);
+//              break;
+//            case VideoSource_multi:
+//              break;
+//            case VideoSource_empty:
+//              break;
+//            default:
+//              break;
+//          }
+//          nodeVideoSourceBrowserView->drawSelectedBrowser();
+//        }
+//        ImGui::End();
+//      }
+//    }
+//  }
+//}
 
 void NodeLayoutView::toggleAudioReactiveParameter(std::shared_ptr<Node> node) {
   if (node->isAudioReactiveParameterActive()) {

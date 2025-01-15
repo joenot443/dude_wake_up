@@ -34,6 +34,11 @@ public:
   ImFont * largeIcon;
   ImFont * xLargeIcon;
   
+  ImVec2 paddingH1 = ImVec2(0, 30);
+  ImVec2 paddingH2 = ImVec2(0, 12);
+  ImVec2 paddingH3 = ImVec2(0, 10);
+  ImVec2 paddingH4 = ImVec2(0, 10);
+
   // Redesign
   
   ImFont *pN;

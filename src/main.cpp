@@ -124,6 +124,7 @@ int main( ){
   ofSetWindowShape(ofGetScreenWidth(), ofGetScreenHeight());
   ofSetFrameRate(60);
   ofSetEscapeQuitsApp(false);
+  ofSetLogLevel(OF_LOG_ERROR);
   ofRunApp(window, app);
   ofRunMainLoop();
   sentry_close();

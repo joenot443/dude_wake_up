@@ -31,6 +31,7 @@ public:
   ShaderSettings(shaderId, j, name) {
     parameters = {size};
     oscillators = {sizeOscillator};
+    audioReactiveParameter = size;
     load(j);
     registerParameters();
   }
@@ -45,7 +46,6 @@ public:
 
   
   void setup() override {
-    shader.load("shaders/Pixel");
     shader.load("shaders/Pixel");
     
   }

@@ -10,9 +10,9 @@
 #include "LayoutStateService.hpp"
 
 void OutputWindow::setup() {
-  LayoutStateService::getService()->subscribeToResolutionUpdates([this]() {
-    needsResolutionUpdate = true;
-  });
+//  LayoutStateService::getService()->subscribeToResolutionUpdates([this]() {
+//    needsResolutionUpdate = true;
+//  });
 }
 
 void OutputWindow::update()
@@ -29,10 +29,10 @@ void OutputWindow::draw()
 
 void OutputWindow::updateResolution()
 {
-  bool portrait = LayoutStateService::getService()->portrait;
-  ImVec2 res = LayoutStateService::getService()->resolution;
-  ofSetWindowShape(portrait ? res.y : res.x, portrait ? res.x : res.y);
-  needsResolutionUpdate = false;
+//  bool portrait = LayoutStateService::getService()->portrait;
+//  ImVec2 res = LayoutStateService::getService()->resolution;
+//  ofSetWindowShape(portrait ? res.y : res.x, portrait ? res.x : res.y);
+//  needsResolutionUpdate = false;
 }
 
 void OutputWindow::keyReleased(int key) {

@@ -6,7 +6,7 @@
 	<dict>
 		<key>Resources/NodeLayout.json</key>
 		<data>
-		9/9XHabTeNkDYkWtZx5yaFt8eh8=
+		F1w8IX77ylcbaZoK3H84UUg7QRg=
 		</data>
 		<key>Resources/data/MaterialIcons-Regular.ttf</key>
 		<data>
@@ -246,7 +246,7 @@
 		</data>
 		<key>Resources/data/images/icons/down.png</key>
 		<data>
-		yCCmxuKo+NE0kGk+VQZdoqiXa1I=
+		O8Qial0qt8IOSnsshGJEIftLKp0=
 		</data>
 		<key>Resources/data/images/icons/forward.png</key>
 		<data>
@@ -255,6 +255,14 @@
 		<key>Resources/data/images/icons/fullscreen.png</key>
 		<data>
 		0KBFtkL45plVi5xKXGvgdIhK6wc=
+		</data>
+		<key>Resources/data/images/icons/heart-fill.png</key>
+		<data>
+		Qu2DP1mXX7AkY+UGH2wulOdZM/k=
+		</data>
+		<key>Resources/data/images/icons/heart.png</key>
+		<data>
+		bCd8UwVK76qgZscTv3dK7jBoFzs=
 		</data>
 		<key>Resources/data/images/icons/left-arrow.png</key>
 		<data>
@@ -276,6 +284,10 @@
 		<data>
 		zEqxd85xYRyKOWzgVw9lRShLVe8=
 		</data>
+		<key>Resources/data/images/icons/reset.png</key>
+		<data>
+		P0+qn4loQaxFujfhzS9b9GPEaJE=
+		</data>
 		<key>Resources/data/images/icons/right-arrow.png</key>
 		<data>
 		Kd+/kIQxSP6tdChzBT7lNyBInCA=
@@ -288,9 +300,13 @@
 		<data>
 		NrLlTrilR1+eTGVrbAks1yOj8Dk=
 		</data>
+		<key>Resources/data/images/icons/sine.png</key>
+		<data>
+		RYDjA+Ywf7/86hMkrXZt0CYLja8=
+		</data>
 		<key>Resources/data/images/icons/up.png</key>
 		<data>
-		BWfe/+atGy6mCKDl8c+IQWJn5gg=
+		L/wilLHV32PKflQE7OJbL6iCL+E=
 		</data>
 		<key>Resources/data/images/stylized/.DS_Store</key>
 		<data>
@@ -3976,7 +3992,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			lAnbBtd9AbqLlVRYvkj2PaTW6+7eI0H86OjPLOynCv4=
+			HPLp26DSwnviiI/XZuXhzR2NDEPkvbm4A5ufZLPyTDI=
 			</data>
 		</dict>
 		<key>Resources/data/MaterialIcons-Regular.ttf</key>
@@ -4361,7 +4377,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			KMD7YwvLjmHrND0dgGXfJpMmkcsH9WiJPC3SuKeO1h0=
+			z3rZJMf8lyMdjxdW5t5XV9XiRwRFF5Pq24MfMsMTaT4=
 			</data>
 		</dict>
 		<key>Resources/data/images/icons/forward.png</key>
@@ -4376,6 +4392,20 @@
 			<key>hash2</key>
 			<data>
 			Fm7ojHxldUiInvZUROD6zKhtBeSGV1yl55Wwtx7kLPc=
+			</data>
+		</dict>
+		<key>Resources/data/images/icons/heart-fill.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			Sr8Y6HyzHryZjLxGCri8CVmwHK2kiyzWu2h8iGDpfQU=
+			</data>
+		</dict>
+		<key>Resources/data/images/icons/heart.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			F3fIIjoDhgwNwIRy4WBIJrpInRfVQoBiaxTQLdY6r48=
 			</data>
 		</dict>
 		<key>Resources/data/images/icons/left-arrow.png</key>
@@ -4413,6 +4443,13 @@
 			UoC6ZdFmtAe1/3U+gduzqRbO5lhBOoz6N+W0W32zPis=
 			</data>
 		</dict>
+		<key>Resources/data/images/icons/reset.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			eGlNEX3wRZ3VkgomilYLBtnQW70bZcw/FaTJXYl+eT4=
+			</data>
+		</dict>
 		<key>Resources/data/images/icons/right-arrow.png</key>
 		<dict>
 			<key>hash2</key>
@@ -4434,11 +4471,18 @@
 			Df9zd/mt/BVrl1V7mDg+uj65rYJmfk4Y18oAuz2J+bE=
 			</data>
 		</dict>
+		<key>Resources/data/images/icons/sine.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			1zq8UyptakZ3okDeW3Tuuv1ELaKzMOM1H5GORg/4bNE=
+			</data>
+		</dict>
 		<key>Resources/data/images/icons/up.png</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			8wgGm3F3jKRQAmcwVFARJJuKdqEnd9l8PCKdJAAuQm0=
+			BxLB/4dCaqXwFIDRTDL2G3okewmDsLakDaeSbJUoXdY=
 			</data>
 		</dict>
 		<key>Resources/data/images/stylized/1.png</key>

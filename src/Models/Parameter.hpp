@@ -37,6 +37,7 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
   int intValue = 0;
   bool boolValue = false;
   bool favorited = false;
+  bool buttonsVisible = false;
   
   // Whether the Parameter is within a connected Node
   bool active = false;

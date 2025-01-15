@@ -44,6 +44,7 @@ json LibrarySource::serialize()
   j["boomerang"] = boomerang->boolValue;
   j["settings"] = settings->serialize();
   j["libraryFile"] = libraryFile->serialize();
+  j["libraryFileId"] = libraryFile->id;
   auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);
   if (node != nullptr)
   {

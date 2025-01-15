@@ -451,7 +451,7 @@ bool ax::NodeEditor::IsSuspended()
 
 bool ax::NodeEditor::IsActive()
 {
-    return s_Editor->IsFocused();
+    return s_Editor != NULL && s_Editor->IsFocused();
 }
 
 bool ax::NodeEditor::HasSelectionChanged()

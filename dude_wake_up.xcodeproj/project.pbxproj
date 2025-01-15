@@ -29,6 +29,7 @@
 		022D18F12A71C21000AEBC05 /* VideoRecorder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 022D18EF2A71C21000AEBC05 /* VideoRecorder.cpp */; };
 		0230658129534CF600489A9F /* VideoSourceBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0230657F29534CF600489A9F /* VideoSourceBrowserView.cpp */; };
 		0230658729534E7400489A9F /* AudioSourceService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0230658529534E7400489A9F /* AudioSourceService.cpp */; };
+		0230AEE32D15E2800096CA52 /* NodeVideoSourceBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0230AEE12D15E27F0096CA52 /* NodeVideoSourceBrowserView.cpp */; };
 		023380D62BD05B710060A697 /* ImageTexture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 023380CD2BD05B700060A697 /* ImageTexture.cpp */; };
 		023380D82BD05B710060A697 /* FeedbackShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 023380D12BD05B700060A697 /* FeedbackShader.cpp */; };
 		0238773729D20CB300B20386 /* ImGuiExtensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0238773529D20CB300B20386 /* ImGuiExtensions.cpp */; };
@@ -363,6 +364,8 @@
 		0230658529534E7400489A9F /* AudioSourceService.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AudioSourceService.cpp; path = Services/AudioSourceService.cpp; sourceTree = "<group>"; };
 		0230658629534E7400489A9F /* AudioSourceService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = AudioSourceService.hpp; path = Services/AudioSourceService.hpp; sourceTree = "<group>"; };
 		0230658A29534EAD00489A9F /* AudioSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = AudioSource.hpp; path = Audio/AudioSource.hpp; sourceTree = "<group>"; };
+		0230AEE12D15E27F0096CA52 /* NodeVideoSourceBrowserView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NodeVideoSourceBrowserView.cpp; path = Views/NodeVideoSourceBrowserView.cpp; sourceTree = "<group>"; };
+		0230AEE22D15E2800096CA52 /* NodeVideoSourceBrowserView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = NodeVideoSourceBrowserView.hpp; path = Views/NodeVideoSourceBrowserView.hpp; sourceTree = "<group>"; };
 		0230DAF72B6D64FF00C44ADB /* File.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = File.hpp; path = Util/File.hpp; sourceTree = "<group>"; };
 		0230DAF82B6D864B00C44ADB /* BounceShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = BounceShader.hpp; path = Shading/BounceShader.hpp; sourceTree = "<group>"; };
 		0230DAF92B6DAAF400C44ADB /* CirclePathShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = CirclePathShader.hpp; path = Shading/CirclePathShader.hpp; sourceTree = "<group>"; };
@@ -1692,6 +1695,8 @@
 		721B30BA8F4AAE6EB850CE13 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				0230AEE12D15E27F0096CA52 /* NodeVideoSourceBrowserView.cpp */,
+				0230AEE22D15E2800096CA52 /* NodeVideoSourceBrowserView.hpp */,
 				021E14BF2D0B2EE500F36B84 /* AbstractTileBrowserView.hpp */,
 				02EE43722CD953D8008E9D41 /* FramePreview.hpp */,
 				02BED6662C46BE7900E75054 /* StrandTileView.cpp */,
@@ -2556,6 +2561,7 @@
 				028BAE9A29684984003E7DF8 /* NodeLayoutView.cpp in Sources */,
 				02ADC6AD2CE504350055B9AA /* ofxSyphonServerDirectory.mm in Sources */,
 				A6F396BE5D1E24326E1F796A /* ofxImGuiLoggerChannel.cpp in Sources */,
+				0230AEE32D15E2800096CA52 /* NodeVideoSourceBrowserView.cpp in Sources */,
 				02B16FDD29674AF30043CA74 /* crude_json.cpp in Sources */,
 				028E8E6029A6A0B800B95C92 /* MarkdownService.cpp in Sources */,
 				02B280EA2915480600B793D5 /* WebcamSource.cpp in Sources */,

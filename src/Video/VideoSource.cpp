@@ -24,10 +24,18 @@ void VideoSource::drawPreviewSized(ImVec2 size) {
   if (!fbo->isAllocated()) return;
   
   ofTexture tex = fbo->getTexture();
+  ImVec2 cursorPos = ImGui::GetCursorPos();
   if (tex.isAllocated()) {
     ImTextureID texID = (ImTextureID)(uintptr_t)tex.getTextureData().textureID;
-    ImGui::GetWindowDrawList()->AddImageRounded(texID, ImGui::GetCursorPos() - ImVec2(0.0, size.y), ImGui::GetCursorPos() + ImVec2(size.x, 0.0), ImVec2(0,0), ImVec2(1,1), IM_COL32_WHITE, 8.0);
-  }
+  ImGui::GetWindowDrawList()->AddImageRounded(
+    texID,
+    cursorPos,                          // top-left corner
+    cursorPos + size,                   // bottom-right corner
+    ImVec2(0,0),                        // UV coordinates for top-left
+    ImVec2(1,1),                        // UV coordinates for bottom-right
+    IM_COL32_WHITE,
+    8.0
+  );  }
 }
 
 void VideoSource::drawOptionalSettings() {

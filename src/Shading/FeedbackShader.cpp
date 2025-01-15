@@ -139,7 +139,7 @@ void FeedbackShader::shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> 
                       settings->lumaKeyEnabled->boolValue);
   shader.setUniformTexture("mainTexture", frame->getTexture(), 4);
   shader.setUniform1f("mainAlpha", settings->mainAlpha->value);
-  shader.setUniform1f("fbAlpha", 0.999 + 0.001 * settings->feedbackAlpha->value);
+  shader.setUniform1f("fbAlpha", 0.95 + 0.05 * settings->feedbackAlpha->value);
   shader.setUniform1i("priority", settings->priority->boolValue);
   shader.setUniform1f("fbMix", settings->feedbackMix->value);
   shader.setUniform1i("blendMode", settings->blendMode->intValue);

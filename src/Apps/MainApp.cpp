@@ -94,13 +94,16 @@ void MainApp::drawMainStage()
   ImGuiWindowFlags_NoTitleBar |
   ImGuiWindowFlags_MenuBar |
   ImGuiWindowFlags_NoBringToFrontOnFocus |
-  ImGuiWindowFlags_NoScrollbar;
+  ImGuiWindowFlags_NoScrollbar |
+  ImGuiWindowFlags_NoScrollWithMouse;
   
+  CommonViews::PushRedesignStyle();
   ImGui::Begin("Main Stage", NULL, windowFlags);
   ImGui::PushFont(FontService::getService()->p);
   mainStageView->draw();
   ImGui::PopFont();
   ImGui::End();
+  CommonViews::PopRedesignStyle();
 }
 
 void MainApp::exitStream(ofEventArgs &args) {}
@@ -186,4 +189,3 @@ void MainApp::setupStyle()
   imguiStyle.FramePadding = ImVec2(style.framePadding[0], style.framePadding[1]);
   imguiStyle.CellPadding = ImVec2(style.framePadding[0], style.framePadding[1]);
 }
-//

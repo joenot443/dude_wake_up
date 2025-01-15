@@ -21,6 +21,7 @@ void OscillationService::addOscillator(std::shared_ptr<Oscillator> obj) {
 
 void OscillationService::tickOscillators() {
   for (auto & [key, osc] : oscillators) {
+    if (osc == nullptr) continue;
     if (osc->enabled->boolValue) {
       osc->tick();
     }

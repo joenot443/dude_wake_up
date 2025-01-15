@@ -79,6 +79,7 @@ void NodeVideoSourceBrowserView::draw() {
   drawTabButtons();
   ImGui::Spacing();
   drawSelectedBrowser();
+  ImGui::NewLine();
 }
 
 void NodeVideoSourceBrowserView::setCallback(std::function<void(std::shared_ptr<TileItem>)> callback) {
@@ -184,5 +185,14 @@ void NodeVideoSourceBrowserView::refreshSources()
 
   generatedTileBrowserView->setTileItems(shaderItems);
   webcamTileBrowserView->setTileItems(webcamItems);
-  libraryTileBrowserView->setTileItems(libraryItems);
+  auto libraryItems = std::vector<std::shared_ptr<LibraryTileItem>>();
+  for (auto item : libraryItems) {
+    libraryItems.push_back(item);
+  }
+  // Cast to vector of shared_ptr<TileItem>
+  std::vector<std::shared_ptr<TileItem>> libraryItems2;
+  for (auto item : libraryItems) {
+    libraryItems2.push_back(item);
+  }
+  libraryTileBrowserView->setTileItems(libraryItems2);
 } 

@@ -13,6 +13,7 @@
 #include "VideoRecorder.hpp"
 #include "NodeShaderBrowserView.hpp"
 #include "VideoSourceBrowserView.hpp"
+#include "NodeVideoSourceBrowserView.hpp"
 #include "LibraryFile.hpp"
 #include "Shader.hpp"
 #include "VideoSource.hpp"
@@ -151,6 +152,9 @@ public:
   // Node selector browsers
   NodeShaderBrowserView shaderBrowserView = NodeShaderBrowserView();
   VideoSourceBrowserView videoSourceBrowserView = VideoSourceBrowserView();
+
+  std::unique_ptr<NodeVideoSourceBrowserView> nodeVideoSourceBrowserView;
+  std::unique_ptr<NodeShaderBrowserView> nodeShaderBrowserView;
 };
 
 #endif /* NodeLayoutView_hpp */

@@ -80,7 +80,7 @@ struct CommonViews
   
   static void HorizontallyAligned(float width, float alignment = 0.5);
   
-  static void MidiSelector(std::shared_ptr<Parameter> videoParam);
+  static void MidiSelector(std::shared_ptr<Parameter> videoParam, ImVec2 size = ImVec2(105.0, 50.0));
   
   static void H1Title(std::string title, bool padding = true);
   
@@ -96,9 +96,11 @@ struct CommonViews
   
   static void ModulationSelector(std::shared_ptr<Parameter> videoParam);
   
-  static void FavoriteButton(std::shared_ptr<Parameter> param);
+  static void FavoriteButton(std::shared_ptr<Parameter> param, ImVec2 size = ImVec2(105.0, 50.0));
   
-  static void AudioParameterSelector(std::shared_ptr<Parameter> videoParam);
+  static void AudioParameterSelector(std::shared_ptr<Parameter> videoParam, ImVec2 size = ImVec2(105.0, 50.0));
+
+  static void OscillateButton(std::string id, std::shared_ptr<Oscillator> o, std::shared_ptr<Parameter> param, ImVec2 size = ImVec2(105.0, 50.0));
   
   static bool Slider(std::string title, std::string id, std::shared_ptr<Parameter> param, float width = 200.0f);
   
@@ -123,7 +125,7 @@ struct CommonViews
   static void BlendModeSelector(std::shared_ptr<Parameter> param, std::shared_ptr<Parameter> flip = nullptr, std::shared_ptr<Parameter> alpha = nullptr, std::shared_ptr<Oscillator> alphaOscillator = nullptr, std::shared_ptr<Parameter> blendWithEmpty = nullptr);
   
   static bool ResetButton(std::string id, std::shared_ptr<Parameter> param);
-  static void OscillateButton(std::string id, std::shared_ptr<Oscillator> o, std::shared_ptr<Parameter> param);
+  
   static void OscillatorWindow(std::shared_ptr<Oscillator> o, std::shared_ptr<Parameter> param);
   
   static bool IsMouseWithin(ImVec2 topLeft, ImVec2 bottomRight, ImVec2 offset = ImVec2(0.0, 0.0));
@@ -132,6 +134,9 @@ struct CommonViews
   
   static void PushRedesignStyle();
   static void PopRedesignStyle();
+  static void PushNodeRedesignStyle();
+  static void PopNodeRedesignStyle();
+  
   
   static bool SelectorTitleButton(std::string title, float width);
   
@@ -143,10 +148,13 @@ struct CommonViews
   
   static void ImageNamedNew(std::string name, float width, float height);
   
-  static bool ImageButton(std::shared_ptr<Node> node, std::string imageName);
+  static bool ImageButton(std::string id, std::string imageName, ImVec2 size = ImVec2(105.0, 50.0));
+  
+  static bool TitledButton(std::shared_ptr<Parameter> param, std::string title, ImVec2 size = ImVec2(105.0, 50.0));
   
   static bool SmallImageButton(std::string id, std::string imageName);
   
+  static bool ShaderDropdownButton(std::shared_ptr<Parameter> param);
 };
 
 static ImVec2 getScaledWindowSize() {

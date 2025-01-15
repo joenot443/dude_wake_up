@@ -38,6 +38,7 @@ struct AudioBlocksSettings: public ShaderSettings {
     
     parameters = { size, speed, ySpread };
     oscillators = { sizeOscillator, speedOscillator, ySpreadOscillator };
+      audioReactiveParameter = size;
     load(j);
     registerParameters();
   };

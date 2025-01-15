@@ -18,6 +18,7 @@ void WebcamSource::setup() {
   
   grabber.setup(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
+  optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   maskShader.load("shaders/ColorKeyMaskMaker");
 
   // Collect the device names

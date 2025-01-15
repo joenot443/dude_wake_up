@@ -65,32 +65,62 @@ struct BlendShader: Shader {
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
+    // Clear both FBOs
     canvas->begin();
-    shader.begin();
-    shader.setUniform1i("mode", settings->mode->intValue);
-    shader.setUniform1i("blendWithEmpty", settings->blendWithEmpty->intValue);
-    shader.setUniform1f("time", ofGetElapsedTimef());
-    shader.setUniform1f("alpha", settings->alpha->value);
-    shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
+    ofClear(0, 0, 0, 0);
+    canvas->end();
     
-    if (hasInputAtSlot(InputSlotTwo)) {
-      std::shared_ptr<ofFbo> tex2 = inputAtSlot(InputSlotTwo)->frame();
-      ofTexture mainTexture = settings->flip->boolValue ? tex2->getTexture() : frame->getTexture();
-      ofTexture secondaryTexture = settings->flip->boolValue ? frame->getTexture() : tex2->getTexture();
+    optionalFrame->begin();
+    ofClear(0, 0, 0, 0);
+    optionalFrame->end();
+    
+    // Start with the main frame in the canvas
+    canvas->begin();
+    frame->draw(0, 0);
+    canvas->end();
+    
+    bool useOptionalAsSource = false;
+    
+    // For each possible input slot after the main one
+    for (InputSlot slot : AllInputSlots) {
+      if (slot == InputSlotMain) continue; // Skip main input as it's already drawn
+      if (!hasInputAtSlot(slot)) continue; // Skip if no input at this slot
+      
+      // Determine source and destination FBOs
+      std::shared_ptr<ofFbo> sourceFbo = useOptionalAsSource ? optionalFrame : canvas;
+      std::shared_ptr<ofFbo> destFbo = useOptionalAsSource ? canvas : optionalFrame;
+      
+      destFbo->begin();
+      shader.begin();
+      shader.setUniform1i("mode", settings->mode->intValue);
+      shader.setUniform1i("blendWithEmpty", settings->blendWithEmpty->intValue);
+      shader.setUniform1f("time", ofGetElapsedTimef());
+      shader.setUniform1f("alpha", settings->alpha->value);
+      shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
+      
+      std::shared_ptr<ofFbo> nextFrame = inputAtSlot(slot)->frame();
+      
+      // Set textures based on flip setting
+      ofTexture mainTexture = settings->flip->boolValue ? nextFrame->getTexture() : sourceFbo->getTexture();
+      ofTexture secondaryTexture = settings->flip->boolValue ? sourceFbo->getTexture() : nextFrame->getTexture();
+      
       shader.setUniformTexture("tex", mainTexture, 4);
       shader.setUniformTexture("tex2", secondaryTexture, 5);
-    } else {
-      shader.setUniformTexture("tex", frame->getTexture(), 4);
+      
+      sourceFbo->draw(0, 0);
       shader.end();
-      frame->draw(0, 0);
-      shader.end();
-      canvas->end();
-      return;
+      destFbo->end();
+      
+      // Toggle which FBO we use as source for next iteration
+      useOptionalAsSource = !useOptionalAsSource;
     }
     
-    frame->draw(0, 0);
-    shader.end();
-    canvas->end();
+    // Final copy to canvas if needed
+    if (useOptionalAsSource) {
+      canvas->begin();
+      optionalFrame->draw(0, 0);
+      canvas->end();
+    }
   }
 
   void clear() override {
@@ -98,7 +128,7 @@ struct BlendShader: Shader {
   }
 
   int inputCount() override {
-    return 2;
+    return inputs.size() + 1;
   }
 
   ShaderType type() override {
