@@ -17,15 +17,22 @@
 
 typedef std::tuple<std::shared_ptr<Oscillator>, std::shared_ptr<Parameter>> OscillatorParam;
 
+static const ImVec2 ChartSize = ImVec2(190, 190);
+
 struct OscillatorView {
 public:
   static void draw(std::shared_ptr<Oscillator> oscillator,
-                   std::shared_ptr<Parameter> value);
-  
-  static void draw(std::vector<std::tuple<std::shared_ptr<Oscillator>, std::shared_ptr<Parameter>>> subjects);
+                   std::shared_ptr<Parameter> value,
+                   ImVec2 size = ChartSize,
+                   bool drawExtras = true);
+
+  static void draw(std::vector<std::tuple<std::shared_ptr<Oscillator>, std::shared_ptr<Parameter>>> subjects,
+                   ImVec2 size = ChartSize,
+                   bool drawExtras = true);
   
   static void drawMini(std::shared_ptr<Oscillator> oscillator,
-                       std::shared_ptr<Parameter> value);
+                       std::shared_ptr<Parameter> value,
+                       bool drawExtras = true);
 };
 
 #endif /* Waveform_hpp */

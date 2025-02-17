@@ -85,7 +85,7 @@ struct AudioAnalysisParameter {
 
 struct AudioAnalysis {
   std::string name;
-  bool bpmEnabled = false;
+  bool bpmEnabled = true;
   std::shared_ptr<Parameter> rms;
   std::shared_ptr<Parameter> highs;
   std::shared_ptr<Parameter> lows;
@@ -129,8 +129,8 @@ struct AudioAnalysis {
         lows(std::make_shared<Parameter>("Lows", 0.0, 0.0, 1.0)),
         beatPulse(std::make_shared<Parameter>("BPM", 0.0, 0.0, 1.0)),
         bpm(std::make_shared<Parameter>("bpm", 120.0, 0.0, 300.0)),
-        frequencyRelease(std::make_shared<Parameter>("Frequency Release", 0.95, 0.0, 1.0)),
-        frequencyScale(std::make_shared<Parameter>("Frequency Scale", 1.0, 0.0, 5.0)),
+        frequencyRelease(std::make_shared<Parameter>("Release", 0.95, 0.01, 1.0)),
+        frequencyScale(std::make_shared<Parameter>("Scale", 1.0, 0.01, 5.0)),
         rmsOscillator(std::make_shared<ValueOscillator>(rms)),
         beatPulseOscillator(std::make_shared<PulseOscillator>(beatPulse)),
         highsOscillator(std::make_shared<ValueOscillator>(highs)),
@@ -155,7 +155,7 @@ struct AudioAnalysis {
     smoothMelSpectrum = Vectors::scalarMultiply(smoothMelSpectrum, frequencyScale->value);
     
     rmsAnalysisParam.tick(gist->rootMeanSquare());
-    std::vector<float> buckets = splitAndAverage(magnitudeSpectrum, 3);
+    std::vector<float> buckets = splitAndAverage(smoothMelSpectrum, 3);
     lows->setValue(buckets[0]);
     mids->setValue(buckets[1]);
     highs->setValue(buckets[2]);

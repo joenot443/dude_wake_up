@@ -12,6 +12,7 @@
 #include "Fonts.hpp"
 #include "OscillationService.hpp"
 #include "ParameterService.hpp"
+#include "Colors.hpp"
 #include "PulseOscillator.hpp"
 #include "WaveformOscillator.hpp"
 #include "Strings.hpp"
@@ -19,9 +20,9 @@
 #include "implot.h"
 #include "ofxImGui.h"
 
-static const ImVec2 ChartSize = ImVec2(190, 190);
 
-void OscillatorView::draw(std::vector<std::tuple<std::shared_ptr<Oscillator>, std::shared_ptr<Parameter>>> subjects) {
+void OscillatorView::draw(std::vector<std::tuple<std::shared_ptr<Oscillator>, std::shared_ptr<Parameter>>> subjects, ImVec2 size, bool drawExtras) {
+  
   if (subjects.empty()) {
     return;
   }
@@ -36,7 +37,6 @@ void OscillatorView::draw(std::vector<std::tuple<std::shared_ptr<Oscillator>, st
   
   OscillatorType type = oscillator->type();
   
-  
   if (type == OscillatorType_waveform)
   {
     WaveformOscillator *waveformOscillator = (WaveformOscillator *)oscillator.get();
@@ -49,9 +49,15 @@ void OscillatorView::draw(std::vector<std::tuple<std::shared_ptr<Oscillator>, st
     auto plotStyle = ImPlot::GetStyle();
     ImPlot::PushStyleVar(ImPlotStyleVar_FitPadding, ImVec2(0.3f, 0.3f));
     ImPlot::SetNextAxesToFit();
-     if (data.size() > 0 && ImPlot::BeginPlot(formatString("##plot%s", value->paramId.c_str()).c_str(), ChartSize, ImPlotFlags_CanvasOnly))
+    if (data.size() > 0 && ImPlot::BeginPlot(formatString("##plot%s", value->paramId.c_str()).c_str(), size, ImPlotFlags_CanvasOnly | (drawExtras ? 0 : ImPlotFlags_NoLegend)))
     {
-      ImPlot::PlotLine("", &data[0].x, &data[0].y, data.size(), 0, 2.0, 2 * sizeof(float));
+      if (!drawExtras) {
+        ImPlot::SetupAxis(ImAxis_X1, "", ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoLabel);
+        ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoLabel);
+        ImPlot::SetupAxisFormat(ImAxis_X1, "");
+        ImPlot::SetupAxisFormat(ImAxis_Y1, "");
+      }
+      ImPlot::PlotLine("##", &data[0].x, &data[0].y, data.size(), 0, 2.0, 2 * sizeof(float));
       ImPlot::EndPlot();
     }
     ImGui::SameLine(0, 10);
@@ -107,15 +113,23 @@ void OscillatorView::draw(std::vector<std::tuple<std::shared_ptr<Oscillator>, st
     ImPlot::SetNextAxisLimits(ImAxis_Y1, 0.0, 1.0);
     auto plotStyle = ImPlot::GetStyle();
     ImPlot::PushStyleVar(ImPlotStyleVar_FitPadding, ImVec2(0.3f, 0.3f));
-    
-    if (ImPlot::BeginPlot(formatString("##plot%s", value->name.c_str()).c_str(), ChartSize, ImPlotFlags_None))
+    ImPlot::PushStyleColor(ImPlotCol_PlotBg, Colors::EditorBackgroundColor.Value);
+    if (ImPlot::BeginPlot(formatString("##plot%s", value->name.c_str()).c_str(), size, ImPlotFlags_None | (drawExtras ? 0 : ImPlotFlags_NoLegend | ImPlotFlags_NoTitle)))
     {
+      if (!drawExtras) {
+        ImPlot::SetupAxis(ImAxis_X1, "", ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoLabel);
+        ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoLabel);
+        ImPlot::SetupAxisFormat(ImAxis_X1, "");
+        ImPlot::SetupAxisFormat(ImAxis_Y1, "");
+      }
+      int idx = 0;
       for (auto pair : subjects) {
         ValueOscillator *valueOscillator = (ValueOscillator *)std::get<0>(pair).get();
         valueOscillator->tick();
         std::shared_ptr<Parameter> param = std::get<1>(pair);
         std::vector<float> data = valueOscillator->values;
-        ImPlot::PlotLine(param->name.c_str(), &data[0], (int)data.size());
+        ImPlot::PlotLine(drawExtras ? param->name.c_str() : formatString("##%d", idx).c_str(), &data[0], (int)data.size());
+        idx += 1;
       }
       ImPlot::EndPlot();
     }
@@ -131,29 +145,35 @@ void OscillatorView::draw(std::vector<std::tuple<std::shared_ptr<Oscillator>, st
     ImPlot::SetNextAxisToFit(ImAxis_Y1);
     auto plotStyle = ImPlot::GetStyle();
     ImPlot::PushStyleVar(ImPlotStyleVar_FitPadding, ImVec2(0.3f, 0.3f));
-    ImPlot::SetNextAxisLimits(ImAxis_X1, pulseOscillator->xRange[0], pulseOscillator->xRange[1]);
-    bool size = oscillator->values().size() > 0;
-    if (size && ImPlot::BeginPlot(formatString("##plot%s", value->name.c_str()).c_str(), ChartSize, ImPlotFlags_CanvasOnly))
+    bool hasValues = oscillator->values().size() > 0;
+    if (hasValues && ImPlot::BeginPlot(formatString("##plot%s", value->name.c_str()).c_str(), size, ImPlotFlags_CanvasOnly | (drawExtras ? 0 : ImPlotFlags_CanvasOnly)))
     {
+      if (!drawExtras) {
+        ImPlot::SetupAxis(ImAxis_X1, "", ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoLabel);
+        ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoLabel);
+        ImPlot::SetupAxisFormat(ImAxis_X1, "");
+        ImPlot::SetupAxisFormat(ImAxis_Y1, "");
+      }
       std::vector<float> values = pulseOscillator->values();
-      ImPlot::PlotLine(value->name.c_str(), &values.at(0), (int)values.size());
+      ImPlot::PlotLine(drawExtras ? value->name.c_str() : "##", &values.at(0), (int)values.size());
       ImPlot::EndPlot();
     }
   }
 }
 
 void OscillatorView::draw(std::shared_ptr<Oscillator> oscillator,
-                          std::shared_ptr<Parameter> value)
-{
+                          std::shared_ptr<Parameter> value,
+                          ImVec2 size,
+                          bool drawExtras) {
   std::vector<
   std::tuple<std::shared_ptr<Oscillator>, std::shared_ptr<Parameter>>> subjects =
   std::vector<
   std::tuple<std::shared_ptr<Oscillator>, std::shared_ptr<Parameter>>>
   (1, std::tuple<std::shared_ptr<Oscillator>, std::shared_ptr<Parameter>>(oscillator, value));
-  draw(subjects);
+  draw(subjects, size, drawExtras);
 }
 
-void OscillatorView::drawMini(std::shared_ptr<Oscillator> oscillator, std::shared_ptr<Parameter> value) {
+void OscillatorView::drawMini(std::shared_ptr<Oscillator> oscillator, std::shared_ptr<Parameter> value, bool drawExtras) {
   if (oscillator.get()->type() == OscillatorType_waveform)
   {
     WaveformOscillator *waveformOscillator = (WaveformOscillator *)oscillator.get();
@@ -192,13 +212,16 @@ void OscillatorView::drawMini(std::shared_ptr<Oscillator> oscillator, std::share
     ImGui::VSliderFloat(formatString("##shift%s", value->name.c_str()).c_str(),
                         ImVec2(15, 50), &waveformOscillator->shift->value,
                         -value->max * 2, value->max * 2, "S");
-    ImGui::PushFont(FontService::getService()->sm);
-    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 50);
-    ImGui::Text("%s", formatString("%.2f", waveformOscillator->frequency->value).c_str());
-    ImGui::SameLine(0, 5);
-    ImGui::Text("%s", formatString("%.2f", waveformOscillator->amplitude->value).c_str());
-    ImGui::SameLine(0, 5);
-    ImGui::Text("%s", formatString("%.2f", waveformOscillator->shift->value).c_str());
-    ImGui::PopFont();
+
+    if (drawExtras) {
+      ImGui::PushFont(FontService::getService()->sm);
+      ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 50);
+      ImGui::Text("%s", formatString("%.2f", waveformOscillator->frequency->value).c_str());
+      ImGui::SameLine(0, 5);
+      ImGui::Text("%s", formatString("%.2f", waveformOscillator->amplitude->value).c_str());
+      ImGui::SameLine(0, 5);
+      ImGui::Text("%s", formatString("%.2f", waveformOscillator->shift->value).c_str());
+      ImGui::PopFont();
+    }
   }
 }

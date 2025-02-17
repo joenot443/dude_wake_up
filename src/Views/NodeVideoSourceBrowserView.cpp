@@ -7,7 +7,6 @@ void NodeVideoSourceBrowserView::setup() {
   generatedTileBrowserView = std::make_unique<PagedTileBrowserView>(3, 3);
   webcamTileBrowserView = std::make_unique<PagedTileBrowserView>(3, 3);
   libraryTileBrowserView = std::make_unique<PagedTileBrowserView>(3, 3);
-  fileBrowserView = std::make_unique<FileBrowserView>(FileBrowserType_Source);
   
   // Set sizes and padding
   for (auto* view : {&generatedTileBrowserView, &webcamTileBrowserView, &libraryTileBrowserView}) {
@@ -20,7 +19,6 @@ void NodeVideoSourceBrowserView::setup() {
   ofAddListener(LibraryService::getService()->thumbnailNotification, this, &NodeVideoSourceBrowserView::refreshSources);
   
   refreshSources();
-  fileBrowserView->setup();
 }
 
 void NodeVideoSourceBrowserView::applyButtonStyles(bool isSelected) {
@@ -48,8 +46,8 @@ void NodeVideoSourceBrowserView::drawTabButtons() {
   ImGui::SameLine();
   ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 0));
   
-  float buttonWidth = (size.x - leftPadding) / 4.0f;
-  for (int i = 0; i < 4; i++) {
+  float buttonWidth = (size.x - leftPadding) / 3.0f;
+  for (int i = 0; i < 3; i++) {
     if (i > 0) ImGui::SameLine();
     
     bool isSelected = (currentTab == i);
@@ -71,7 +69,6 @@ void NodeVideoSourceBrowserView::drawSelectedBrowser() {
     case 0: generatedTileBrowserView->draw(); break;
     case 1: webcamTileBrowserView->draw(); break;
     case 2: libraryTileBrowserView->draw(); break;
-    case 3: fileBrowserView->draw(); break;
   }
 }
 
@@ -119,7 +116,7 @@ void NodeVideoSourceBrowserView::refreshSources()
     if (source->type == VideoSource_shader) {
       type = shaderTypeForShaderSourceType(std::dynamic_pointer_cast<AvailableVideoSourceShader>(source)->shaderType);
     }
-    auto tileItem = std::make_shared<TileItem>(source->sourceName, textureId, 0, dragCallback, source->category, type);
+    auto tileItem = std::make_shared<TileItem>(source->sourceName, textureId, 0, dragCallback, source->category, TileType_Source, type);
 
     if (source->type == VideoSource_shader || 
         source->type == VideoSource_text ||
@@ -195,4 +192,6 @@ void NodeVideoSourceBrowserView::refreshSources()
     libraryItems2.push_back(item);
   }
   libraryTileBrowserView->setTileItems(libraryItems2);
-} 
+}
+
+void NodeVideoSourceBrowserView::update() {}

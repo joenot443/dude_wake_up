@@ -59,17 +59,10 @@ void LayoutStateService::pushColor(std::shared_ptr<std::array<float, 4>> color) 
 }
 
 float LayoutStateService::audioSettingsViewHeight() {
-  /*
-   Three states:
-      hidden: ImGuiWindowTitleBarHeight
-      stopped: 40.0
-      running: 250.0
-   */
-  if (!showAudioSettings) {
-    return 0.0;
+  if (!AudioSourceService::getService()->selectedAudioSource->active) {
+    return 30.0;
   }
-  float scale = static_cast<float>(dynamic_cast<ofAppGLFWWindow*>(ofGetWindowPtr())->getPixelScreenCoordScale());
-  return AudioSourceService::getService()->selectedAudioSource->active ? 250.0 : 50.0;
+  return 215.0;
 }
 
 ofRectangle LayoutStateService::canvasRect() {
@@ -77,7 +70,7 @@ ofRectangle LayoutStateService::canvasRect() {
 }
 
 bool LayoutStateService::shouldDrawShaderInfo() {
-  return ShaderChainerService::getService()->selectedConnectable != nullptr && shaderInfoEnabled && !stageModeEnabled;
+  return ShaderChainerService::getService()->selectedConnectable != nullptr && !stageModeEnabled;
 }
 
 void LayoutStateService::updateResolutionSettings(int i) {

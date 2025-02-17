@@ -149,18 +149,18 @@ enum ShaderType {
   ShaderTypeSpiral,
   ShaderTypeWeb,
   ShaderTypeStellar,
+  ShaderTypeSpiralWhirlpool,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
   ShaderTypeHSB,
   ShaderTypeSolidColor,
-  ShaderTypeBlur,
-  ShaderTypePixelate, 
+  ShaderTypeDoubleBlur,
+  ShaderTypePixelate,
   ShaderTypeMirror,
   ShaderType16bit,
   ShaderTypePaint,
   ShaderTypeColorStepper,
-  ShaderTypeDoubleBlur,
   ShaderTypeOnOff,
   ShaderTypeOutline
 };
@@ -266,6 +266,8 @@ static std::vector<ShaderType> AllShaderTypes() {
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) { // ShaderNames
+    case ShaderTypeSpiralWhirlpool:
+      return "SpiralWhirlpool";
     case ShaderTypeStellar:
       return "Stellar";
     case ShaderTypeWeb:
@@ -327,7 +329,7 @@ static std::string shaderTypeName(ShaderType type) {
     case ShaderTypeOutline:
       return "Outline";
     case ShaderTypeDoubleBlur:
-      return "Double Blur";
+      return "Blur";
     case ShaderTypeGlitchAudio:
       return "Glitchy";
     case ShaderTypeChromeGrill:

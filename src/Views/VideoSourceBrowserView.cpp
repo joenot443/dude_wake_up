@@ -62,7 +62,7 @@ void VideoSourceBrowserView::refreshSources()
     if (source->type == VideoSource_shader) {
       type = shaderTypeForShaderSourceType(std::dynamic_pointer_cast<AvailableVideoSourceShader>(source)->shaderType);
     }
-    auto tileItem = std::make_shared<TileItem>(source->sourceName, textureId, 0, dragCallback, source->category, type);
+    auto tileItem = std::make_shared<TileItem>(source->sourceName, textureId, 0, dragCallback, source->category, TileType_Source, type);
 
     if (source->type == VideoSource_shader || 
         source->type == VideoSource_text ||
@@ -168,21 +168,31 @@ void VideoSourceBrowserView::setCurrentTab(int tabIndex) {
 }
 
 void VideoSourceBrowserView::drawSelectedBrowser() {
-  switch (currentTab) {
-    case 0: // Generated Tab
-      tileBrowserView.setTileItems(shaderItems);
-      break;
-    case 1: // Webcam Tab
-      tileBrowserView.setTileItems(webcamItems);
-      break;
-    case 2: // Library Tab
-      tileBrowserView.setTileItems(std::vector<std::shared_ptr<TileItem>>(libraryItems.begin(), libraryItems.end()));
-      break;
-    case 3: // Local Files Tab
-      fileBrowserView.draw();
-      return; // Exit early since fileBrowserView handles its own drawing
+  static int lastTab = -1;  // Track the last tab we were on
+  ImGui::BeginChild("##selectedBrowser");
+  if (currentTab != lastTab) {  // Only update tiles if we've changed tabs
+    switch (currentTab) {
+      case 0: // Generated Tab
+        tileBrowserView.setTileItems(shaderItems);
+        break;
+      case 1: // Webcam Tab
+        tileBrowserView.setTileItems(webcamItems);
+        break;
+      case 2: // Library Tab
+        tileBrowserView.setTileItems(std::vector<std::shared_ptr<TileItem>>(libraryItems.begin(), libraryItems.end()));
+        break;
+      case 3: // Local Files Tab
+        fileBrowserView.draw();
+        ImGui::EndChild();
+        return;
+    }
+    lastTab = currentTab;  // Update the last tab
   }
-  tileBrowserView.draw();
+  
+  if (currentTab != 3) {  // Only draw tileBrowserView if we're not on Local Files tab
+    tileBrowserView.draw();
+  }
+  ImGui::EndChild();
 }
 
 void VideoSourceBrowserView::draw() {

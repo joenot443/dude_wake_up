@@ -10,10 +10,11 @@
 
 #include <stdio.h>
 #include "ofMain.h"
+#include "implot.h"
 
 struct BarPlotView {
 public:
-  static void draw(std::vector<float> data, std::string id);
+  static void draw(std::vector<float> yData, std::string id, ImVec2 size = ImVec2(200, 200));
 };
 
 

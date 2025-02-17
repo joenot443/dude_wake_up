@@ -7,6 +7,13 @@
 #include "AvailableShader.hpp"
 #include <stdio.h>
 
+enum TileType {
+  TileType_Shader,
+  TileType_Source,
+  TileType_Library,
+  TileType_File,
+};
+
 class TileItem {
 public:
   virtual ~TileItem() {} 
@@ -15,12 +22,13 @@ public:
   ImTextureID textureID;
   int index;
   ShaderType shaderType;
+  TileType tileType;
   // Closure which will be called when the tile is clicked
   std::function<void()> dragCallback;
 
   TileItem(std::string name, ImTextureID textureID, int index,
-           std::function<void()> dragCallback, std::string category = "", ShaderType type = ShaderTypeNone)
-      : name(name), textureID(textureID), index(index), shaderType(type), category(category),
+           std::function<void()> dragCallback, std::string category = "", TileType tileType = TileType_Shader, ShaderType type = ShaderTypeNone)
+      : name(name), textureID(textureID), index(index), shaderType(type), category(category), tileType(tileType),
         dragCallback(dragCallback){};
 };
 
@@ -39,7 +47,7 @@ static std::shared_ptr<TileItem> tileItemForShader(std::shared_ptr<AvailableShad
     }
   };
   ImTextureID textureId = (ImTextureID)(uint64_t) shader->preview->texData.textureID;
-  return std::make_shared<TileItem>(shader->name, textureId, 0, dragCallback, "", shader->type);
+  return std::make_shared<TileItem>(shader->name, textureId, 0, dragCallback, "", TileType_Shader, shader->type);
 }
 
 static std::vector<std::shared_ptr<TileItem>> tileItemsForShaders(std::vector<std::shared_ptr<AvailableShader>> shaders) {

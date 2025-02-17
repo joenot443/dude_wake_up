@@ -6,7 +6,7 @@
 	<dict>
 		<key>Resources/NodeLayout.json</key>
 		<data>
-		F1w8IX77ylcbaZoK3H84UUg7QRg=
+		sSuH7FSKIzR0UbRu0u9N9QiWcCk=
 		</data>
 		<key>Resources/data/MaterialIcons-Regular.ttf</key>
 		<data>
@@ -226,7 +226,7 @@
 		</data>
 		<key>Resources/data/images/.DS_Store</key>
 		<data>
-		R/hQ8Av2F6NEY61sF37OOhMx24o=
+		lkDwdZyPTg9+D2zBtFWTWCuXWp4=
 		</data>
 		<key>Resources/data/images/basic/star.png</key>
 		<data>
@@ -244,9 +244,25 @@
 		<data>
 		8BsrCgS8eKtcRCCQxexvPhxGoow=
 		</data>
+		<key>Resources/data/images/icons/camera.png</key>
+		<data>
+		J68QLK2Q5cfzyA5KWcyfLz6Sj5Y=
+		</data>
+		<key>Resources/data/images/icons/delete.png</key>
+		<data>
+		xdZWViQF/Mnmos9amAaXSf+/jAo=
+		</data>
 		<key>Resources/data/images/icons/down.png</key>
 		<data>
 		O8Qial0qt8IOSnsshGJEIftLKp0=
+		</data>
+		<key>Resources/data/images/icons/flip.png</key>
+		<data>
+		w/UeoGLEdTgx7b5G0jpf4nUQHj8=
+		</data>
+		<key>Resources/data/images/icons/focus.png</key>
+		<data>
+		po6hEcS2/1hTCkgQNQx2SU8JpkM=
 		</data>
 		<key>Resources/data/images/icons/forward.png</key>
 		<data>
@@ -263,6 +279,14 @@
 		<key>Resources/data/images/icons/heart.png</key>
 		<data>
 		bCd8UwVK76qgZscTv3dK7jBoFzs=
+		</data>
+		<key>Resources/data/images/icons/help-outline.png</key>
+		<data>
+		wEKItWgXSvBYyJPGIq/TgjhsQ00=
+		</data>
+		<key>Resources/data/images/icons/help.png</key>
+		<data>
+		gjrbd9ePVRxotR3NzeTRUunOEOc=
 		</data>
 		<key>Resources/data/images/icons/left-arrow.png</key>
 		<data>
@@ -284,6 +308,10 @@
 		<data>
 		zEqxd85xYRyKOWzgVw9lRShLVe8=
 		</data>
+		<key>Resources/data/images/icons/redo.png</key>
+		<data>
+		tgQ5+9V8BIbLKaZfJ5OAFDE6Q+U=
+		</data>
 		<key>Resources/data/images/icons/reset.png</key>
 		<data>
 		P0+qn4loQaxFujfhzS9b9GPEaJE=
@@ -303,6 +331,14 @@
 		<key>Resources/data/images/icons/sine.png</key>
 		<data>
 		RYDjA+Ywf7/86hMkrXZt0CYLja8=
+		</data>
+		<key>Resources/data/images/icons/stage.png</key>
+		<data>
+		PnAh827rzFw7WMaeB3Ka25FcEGw=
+		</data>
+		<key>Resources/data/images/icons/undo.png</key>
+		<data>
+		6nfzqgtigOH3QfYmKs5SxwIhU9E=
 		</data>
 		<key>Resources/data/images/icons/up.png</key>
 		<data>
@@ -1612,6 +1648,10 @@
 		<data>
 		xKNlU6aPcBays4oCYNl8/IEo0Ws=
 		</data>
+		<key>Resources/data/markdown/SpiralWhirlpool.md</key>
+		<data>
+		Uqdeu6yfGHofm7N0whQ1QuP+sgk=
+		</data>
 		<key>Resources/data/markdown/StarryPlanes.md</key>
 		<data>
 		q94oSZgxVLOYvPcYjSZwPeRTem0=
@@ -2665,6 +2705,14 @@
 		LC282hiHV3xdskk6vq9/tXzXUDY=
 		</data>
 		<key>Resources/data/shaders/Spiral.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
+		</data>
+		<key>Resources/data/shaders/SpiralWhirlpool.frag</key>
+		<data>
+		nLYR6dazzlk+1Op9ST1plvPu+2I=
+		</data>
+		<key>Resources/data/shaders/SpiralWhirlpool.vert</key>
 		<data>
 		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
@@ -3992,7 +4040,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			HPLp26DSwnviiI/XZuXhzR2NDEPkvbm4A5ufZLPyTDI=
+			cOHEUkmKx7ovSE5CtYVElW6klN+8URe7myJnA8sCgMU=
 			</data>
 		</dict>
 		<key>Resources/data/MaterialIcons-Regular.ttf</key>
@@ -4373,11 +4421,39 @@
 			7L6H/wGMXCajSO2JGOYUxwDvwNKp/TeapwjlKosoKg0=
 			</data>
 		</dict>
+		<key>Resources/data/images/icons/camera.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			3Q9EaHyqrAB2u+AdLmv5IELzhhmJyvMdaQFqp1j5hGU=
+			</data>
+		</dict>
+		<key>Resources/data/images/icons/delete.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			RCB4pc0RnaxL8W8h19vI+3w7wmOAKVStRPOgqO41tFs=
+			</data>
+		</dict>
 		<key>Resources/data/images/icons/down.png</key>
 		<dict>
 			<key>hash2</key>
 			<data>
 			z3rZJMf8lyMdjxdW5t5XV9XiRwRFF5Pq24MfMsMTaT4=
+			</data>
+		</dict>
+		<key>Resources/data/images/icons/flip.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			pmwr/GtCmz5YuzHOb8liAmntKlPLZYJXVXooIzqf1OI=
+			</data>
+		</dict>
+		<key>Resources/data/images/icons/focus.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			cmEfhPtEckm3yIdnoJFEVtJXm4zPhs2af3N0iHDfRf0=
 			</data>
 		</dict>
 		<key>Resources/data/images/icons/forward.png</key>
@@ -4406,6 +4482,20 @@
 			<key>hash2</key>
 			<data>
 			F3fIIjoDhgwNwIRy4WBIJrpInRfVQoBiaxTQLdY6r48=
+			</data>
+		</dict>
+		<key>Resources/data/images/icons/help-outline.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			NvpYCnX90Lalgs7VGz6l6wOgvpfnbf8cKOcmh9uTxg8=
+			</data>
+		</dict>
+		<key>Resources/data/images/icons/help.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			my/JbV0EYUosOj+Ky2pnxkvtetJLFG93ApGTWv+P1k4=
 			</data>
 		</dict>
 		<key>Resources/data/images/icons/left-arrow.png</key>
@@ -4443,6 +4533,13 @@
 			UoC6ZdFmtAe1/3U+gduzqRbO5lhBOoz6N+W0W32zPis=
 			</data>
 		</dict>
+		<key>Resources/data/images/icons/redo.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			hPj8P12zAdsrGK86HoI6xFrAw113qGZc6+ihn7E/gz0=
+			</data>
+		</dict>
 		<key>Resources/data/images/icons/reset.png</key>
 		<dict>
 			<key>hash2</key>
@@ -4476,6 +4573,20 @@
 			<key>hash2</key>
 			<data>
 			1zq8UyptakZ3okDeW3Tuuv1ELaKzMOM1H5GORg/4bNE=
+			</data>
+		</dict>
+		<key>Resources/data/images/icons/stage.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			3Fjia3TzclgNWCHwt4f3PQ1NmQBAbRJoc4x5UhpufWk=
+			</data>
+		</dict>
+		<key>Resources/data/images/icons/undo.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			yAnBc1ed9AhVJhSX8x6sToCdU8gSgeuiQ1c5uDq+0FQ=
 			</data>
 		</dict>
 		<key>Resources/data/images/icons/up.png</key>
@@ -6753,6 +6864,13 @@
 			JS2BchwPqpk/UpCPCiTr3jN3bkWMYQKD0owW3DR9SKI=
 			</data>
 		</dict>
+		<key>Resources/data/markdown/SpiralWhirlpool.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			poxy3fzXztGZk6Tic/rnuGBUSV2o+UMEcnm2Ib4/9YQ=
+			</data>
+		</dict>
 		<key>Resources/data/markdown/StarryPlanes.md</key>
 		<dict>
 			<key>hash2</key>
@@ -8581,6 +8699,20 @@
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Spiral.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/SpiralWhirlpool.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			+6SJC9TJCVueqjswCX9EF5isyOL55k3al9107LaGZeA=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/SpiralWhirlpool.vert</key>
 		<dict>
 			<key>hash2</key>
 			<data>

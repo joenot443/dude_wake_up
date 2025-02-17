@@ -14,6 +14,7 @@
 #include "TileBrowserView.hpp"
 #include "ParameterTileBrowserView.hpp"
 #include "MarkdownView.hpp"
+#include "AudioSourceService.hpp"
 #include "FontService.hpp"
 #include "HSBShader.hpp"
 #include "LayoutStateService.hpp"
@@ -75,7 +76,7 @@ void MainStageView::draw()
   
   // Sources
   
-  ImGui::BeginChild("##sourceBrowser", browserSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
+  ImGui::BeginChild("##sourceBrowser", browserSize, false, ImGuiWindowFlags_NoScrollbar);
   drawVideoSourceBrowser();
   ImGui::EndChild();
   
@@ -136,7 +137,7 @@ void MainStageView::draw()
   
   // Shader Info
   if (LayoutStateService::getService()->shouldDrawShaderInfo()) {
-    auto shaderInfoPaneSize = ImVec2(ImGui::GetWindowContentRegionMax().x / 5.,(ImGui::GetWindowContentRegionMax().y - MenuBarHeight));
+    auto shaderInfoPaneSize = ImVec2(browserSize.x ,(ImGui::GetWindowContentRegionMax().y - MenuBarHeight));
     
     ImGui::NextColumn();
     ImGui::BeginChild("##shaderInfo", shaderInfoPaneSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
@@ -221,6 +222,39 @@ void MainStageView::drawMenu()
         LayoutStateService::getService()->togglePortraitSetting();
       }
       
+      ImGui::EndMenu();
+    }
+
+    /// #Audio Menu
+    if (ImGui::BeginMenu("Audio"))
+    {
+      bool analysisEnabled = AudioSourceService::getService()->selectedAudioSource->active;
+      if (ImGui::MenuItem(analysisEnabled ? "Stop Analysis" : "Start Analysis"))
+      {
+        AudioSourceService::getService()->selectedAudioSource->active = !analysisEnabled;
+      }
+
+      if (ImGui::BeginMenu("Audio Source"))
+      {
+        auto audioSources = AudioSourceService::getService()->audioSources();
+        auto selectedSource = AudioSourceService::getService()->selectedAudioSource;
+        
+        for (auto& source : audioSources) {
+          bool isSelected = (source == selectedSource);
+          if (ImGui::MenuItem(source->name.c_str(), nullptr, isSelected)) {
+            AudioSourceService::getService()->selectedAudioSource = source;
+            AudioSourceService::getService()->selectedAudioSource->active = true;
+          }
+        }
+        ImGui::EndMenu();
+      }
+
+      bool linkEnabled = LayoutStateService::getService()->abletonLinkEnabled;
+      if (ImGui::MenuItem("Enable Ableton Link", nullptr, &linkEnabled))
+      {
+        LayoutStateService::getService()->abletonLinkEnabled = linkEnabled;
+      }
+
       ImGui::EndMenu();
     }
     

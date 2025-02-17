@@ -192,7 +192,15 @@ void FeedbackShader::drawSettings()
                                settings->delayAmountOscillator);
   
   CommonViews::ShaderParameter(settings->scale, settings->scaleOscillator);
-  CommonViews::MultiSlider("Position", formatString("##position%s", shaderId.c_str()), settings->xPosition, settings->yPosition, settings->xPositionOscillator, settings->yPositionOscillator);
+  CommonViews::H3Title("Position", false);
+  ImGui::SameLine();
+  if (CommonViews::ShaderDropdownButton(settings->positionDropdown)) {
+    settings->positionDropdown->buttonsVisible = !settings->positionDropdown->buttonsVisible;
+  }
+  if (settings->positionDropdown->buttonsVisible) {
+    CommonViews::MultiSlider("", formatString("##position%s", shaderId.c_str()), settings->xPosition, settings->yPosition, settings->xPositionOscillator, settings->yPositionOscillator);
+  }
+  ImGui::NewLine();
   
   CommonViews::ShaderParameter(settings->rotation, settings->rotationOscillator);
   // Blend

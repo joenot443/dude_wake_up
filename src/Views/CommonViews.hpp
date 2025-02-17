@@ -60,7 +60,7 @@ struct CommonViews
   
   static bool ShaderParameter(std::shared_ptr<Parameter> param, std::shared_ptr<Oscillator> osc);
   
-  static bool MiniSlider(std::shared_ptr<Parameter> param);
+  static bool MiniSlider(std::shared_ptr<Parameter> param, bool sameLine = true);
   
   static bool MiniVSlider(std::shared_ptr<Parameter> param);
   
@@ -116,7 +116,7 @@ struct CommonViews
   
   static void RangeSlider(std::string title, std::string id, std::shared_ptr<Parameter> param, std::shared_ptr<Parameter> param2, std::string label, bool dirty = false);
   
-  static void PlaybackSlider(std::shared_ptr<Parameter> param, float length);
+  static bool PlaybackSlider(std::shared_ptr<Parameter> param, float length);
   
   static void PlaybackRangeSlider(std::string title, std::string id, std::shared_ptr<Parameter> param, std::shared_ptr<Parameter> param2, float duration, bool dirty = false);
   
@@ -124,7 +124,7 @@ struct CommonViews
   
   static void BlendModeSelector(std::shared_ptr<Parameter> param, std::shared_ptr<Parameter> flip = nullptr, std::shared_ptr<Parameter> alpha = nullptr, std::shared_ptr<Oscillator> alphaOscillator = nullptr, std::shared_ptr<Parameter> blendWithEmpty = nullptr);
   
-  static bool ResetButton(std::string id, std::shared_ptr<Parameter> param);
+  static bool ResetButton(std::string id, std::shared_ptr<Parameter> param, ImVec2 size = ImVec2(25.0, 25.0), ImVec2 padding = ImVec2(7.5, 7.5));
   
   static void OscillatorWindow(std::shared_ptr<Oscillator> o, std::shared_ptr<Parameter> param);
   
@@ -148,13 +148,17 @@ struct CommonViews
   
   static void ImageNamedNew(std::string name, float width, float height);
   
-  static bool ImageButton(std::string id, std::string imageName, ImVec2 size = ImVec2(105.0, 50.0));
+  static bool ImageButton(std::string id, std::string imageName, ImVec2 size = ImVec2(105.0, 50.0), ImVec2 imageRatio = ImVec2(3.0, 2.0), bool forceImGuiContext = false);
   
   static bool TitledButton(std::shared_ptr<Parameter> param, std::string title, ImVec2 size = ImVec2(105.0, 50.0));
   
   static bool SmallImageButton(std::string id, std::string imageName);
   
   static bool ShaderDropdownButton(std::shared_ptr<Parameter> param);
+
+  static bool FlipButton(std::string id, std::shared_ptr<Parameter> param, ImVec2 size = ImVec2(40.0, 40.0));
+
+  static bool PlayPauseButton(std::string id, bool playing, ImVec2 size = ImVec2(40.0, 40.0), ImVec2 padding = ImVec2(7.5, 7.5));
 };
 
 static ImVec2 getScaledWindowSize() {

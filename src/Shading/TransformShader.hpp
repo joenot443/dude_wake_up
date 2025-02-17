@@ -6,6 +6,7 @@
 #include "Fonts.hpp"
 #include "ShaderConfigSelectionView.hpp"
 #include "ImGuiExtensions.hpp"
+#include "CommonViews.hpp"
 #include "Shader.hpp"
 #include "ofxImGui.h"
 #include <stdio.h>
@@ -24,6 +25,7 @@ public:
   std::shared_ptr<Parameter> translateY;
   
   std::shared_ptr<Parameter> scale;
+  std::shared_ptr<Parameter> mode;
   std::shared_ptr<WaveformOscillator> minXOscillator;
   std::shared_ptr<WaveformOscillator> maxXOscillator;
   std::shared_ptr<WaveformOscillator> minYOscillator;
@@ -41,6 +43,7 @@ public:
   translateX(std::make_shared<Parameter>("Translate X", 0.0, -2.0, 2.0)),
   translateY(std::make_shared<Parameter>("Translate Y", 0.0, -2.0, 2.0)),
   scale(std::make_shared<Parameter>("Scale", 1.0, 0.0, 5.0)),
+  mode(std::make_shared<Parameter>("Mode", 0, ParameterType_Int)),
   minXOscillator(std::make_shared<WaveformOscillator>(minX)),
   maxXOscillator(std::make_shared<WaveformOscillator>(maxX)),
   minYOscillator(std::make_shared<WaveformOscillator>(minY)),
@@ -49,7 +52,8 @@ public:
   translateYOscillator(std::make_shared<WaveformOscillator>(translateY)),
   scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
   ShaderSettings(shaderId, j, name) {
-    parameters = {minX, maxX, minY, maxY, scale, translateX, translateY};
+    mode->options = {"Standard", "Fill", "Fit", "Fill + Aspect"};
+    parameters = {minX, maxX, minY, maxY, scale, translateX, translateY, mode};
     oscillators = {minXOscillator, maxXOscillator, minYOscillator, maxYOscillator, translateXOscillator, translateYOscillator, scaleOscillator};
     load(j);
     audioReactiveParameter = scale;
@@ -86,23 +90,59 @@ public:
     float cropY = settings->minY->value * frameHeight;
     float cropWidth = (settings->maxX->value - settings->minX->value) * frameWidth;
     float cropHeight = (settings->maxY->value - settings->minY->value) * frameHeight;
-    float scaleX = cropWidth * settings->scale->value * settings->scale->value;
-    float scaleY = cropHeight * settings->scale->value * settings->scale->value;
+    float scaleX = cropWidth;
+    float scaleY = cropHeight;
+    
+    // Calculate scaling based on mode
+    float canvasAspect = canvas->getWidth() / (float)canvas->getHeight();
+    float cropAspect = cropWidth / cropHeight;
+    
+    switch(settings->mode->intValue) {
+      case 1: // Fill (stretch to fill)
+        scaleX = canvas->getWidth();
+        scaleY = canvas->getHeight();
+        break;
+      case 2: // Fit (fit within bounds)
+        if (canvasAspect > cropAspect) {
+          // Canvas is wider than content - fit to height
+          scaleY = canvas->getHeight();
+          scaleX = cropWidth * (canvas->getHeight() / cropHeight);
+        } else {
+          // Canvas is taller than content - fit to width
+          scaleX = canvas->getWidth();
+          scaleY = cropHeight * (canvas->getWidth() / cropWidth);
+        }
+        break;
+      case 3: // Fill + Aspect (fill while maintaining aspect ratio)
+        if (canvasAspect > cropAspect) {
+          // Canvas is wider than content - fill width and overflow height
+          scaleX = canvas->getWidth();
+          scaleY = cropHeight * (canvas->getWidth() / cropWidth);
+        } else {
+          // Canvas is taller than content - fill height and overflow width
+          scaleY = canvas->getHeight();
+          scaleX = cropWidth * (canvas->getHeight() / cropHeight);
+        }
+        break;
+      default: // Standard (manual scaling)
+        scaleX *= settings->scale->value * settings->scale->value;
+        scaleY *= settings->scale->value * settings->scale->value;
+        break;
+    }
     
     ofClear(0, 0, 0, 0);
     ofPushMatrix();
     
     // Calculate the position to center the scaled texture
-    float scaledWidth = scaleX;
-    float scaledHeight = scaleY;
-    float translateX = (canvas->getWidth() - scaledWidth) / 2;
-    float translateY = (canvas->getHeight() - scaledHeight) / 2;
+    float translateX = (canvas->getWidth() - scaleX) / 2;
+    float translateY = (canvas->getHeight() - scaleY) / 2;
     
     // Translate to center the scaled image on the canvas
-    ofTranslate(translateX + settings->translateX->value * canvas->getWidth(), translateY - settings->translateY->value * canvas->getHeight());
+    ofTranslate(translateX + settings->translateX->value * canvas->getWidth(), 
+                translateY - settings->translateY->value * canvas->getHeight());
     
     // Draw the cropped and scaled texture
-    texture.drawSubsection(0, 0, scaledWidth, scaledHeight, cropX, cropY, cropWidth, cropHeight);
+    texture.drawSubsection(0, 0, scaleX, scaleY, cropX, cropY, cropWidth, cropHeight);
     
     ofPopMatrix();
     
@@ -112,15 +152,17 @@ public:
   
   
   void drawSettings() override {
-    CommonViews::H4Title("Crop");
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 5.0);
+    CommonViews::H3Title("Crop", false);
     ImGui::SameLine();
-    CommonViews::HSpacing(5);
-    if (CommonViews::IconButton(ICON_MD_UNDO, idString(settings->minX->paramId).c_str())) {
-      settings->minX->resetValue();
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 7.5);
+    if (CommonViews::ResetButton(shaderId, settings->minX)) {
       settings->maxX->resetValue();
       settings->minY->resetValue();
       settings->maxY->resetValue();
     }
+    ImGui::NewLine();
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 7.5);
     auto frame = parentFrame();
     auto cursorPos = ImGui::GetCursorPos();
     if (frame != nullptr) {
@@ -128,19 +170,23 @@ public:
     }
     ImGui::SetCursorPos(cursorPos);
     
-    ImGui::Columns(2);
-    ImGui::SetColumnWidth(0, 256.0);
     CommonViews::AreaSlider(shaderId, settings->minX, settings->maxX, settings->minY, settings->maxY, settings->minXOscillator, settings->maxXOscillator, settings->minYOscillator, settings->maxYOscillator);
-    ImGui::NextColumn();
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0);
     CommonViews::MiniSlider(settings->minX);
+    ImGui::SameLine();
     CommonViews::MiniSlider(settings->maxX);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0);
     CommonViews::MiniSlider(settings->minY);
+    ImGui::SameLine();
     CommonViews::MiniSlider(settings->maxY);
-    ImGui::Columns(1);
     
     CommonViews::ShaderParameter(settings->scale, settings->scaleOscillator);
     CommonViews::ShaderParameter(settings->translateX, settings->translateXOscillator);
     CommonViews::ShaderParameter(settings->translateY, settings->translateYOscillator);
+    
+    // Add mode selector
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 5.0);
+    CommonViews::Selector(settings->mode, settings->mode->options);
   }
   
   void clear() override {}

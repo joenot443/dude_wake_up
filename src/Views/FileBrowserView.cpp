@@ -63,7 +63,7 @@ void FileBrowserView::refresh()
         }
       };
       ImTextureID textureId = (ImTextureID)(uint64_t) availableSource->preview->texData.textureID;
-      std::shared_ptr<TileItem> tileItem = std::make_shared<TileItem>(file.name, textureId, 0, dragCallback);
+      std::shared_ptr<TileItem> tileItem = std::make_shared<TileItem>(file.name, textureId, 0, dragCallback, "", TileType_File, ShaderTypeNone);
       
       if (isVideoFile(file.path))
         previewQueue.push(std::make_pair(std::dynamic_pointer_cast<AvailableVideoSourceFile>(availableSource), tileItem));
@@ -100,13 +100,14 @@ void FileBrowserView::refresh()
         }
       };
 
-      std::shared_ptr<TileItem> tileItem = std::make_shared<TileItem>(availableStrand.name, (ImTextureID) 0, 0, dragCallback);
+      std::shared_ptr<TileItem> tileItem = std::make_shared<TileItem>(availableStrand.name, (ImTextureID) 0, 0, dragCallback, "", TileType_File, ShaderTypeNone);
       tileItems.push_back(tileItem);
     }
   }
   VideoSourceService::getService()->addAvailableVideoSources(sources);
   listBrowserView.tileItems = tileItems;
   tileBrowserView.setTileItems(tileItems);
+  update();
 }
 
 void FileBrowserView::setup()

@@ -5,6 +5,7 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "SpiralWhirlpoolShader.hpp"
 #include "SpiralShader.hpp"
 #include "SimpleBarsShader.hpp"
 #include "SimpleShapeShader.hpp"
@@ -156,6 +157,7 @@ enum ShaderSourceType {
   ShaderSource_SimpleShape, //source enum,
   ShaderSource_SimpleBars, //source enum,
   ShaderSource_Spiral, //source enum,
+  ShaderSource_SpiralWhirlpool, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -225,11 +227,14 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_SimpleShape, // Available
   ShaderSource_SimpleBars, // Available
   ShaderSource_Spiral, // Available
+  ShaderSource_SpiralWhirlpool, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
       // shaderTypeForShaderSourceType
+  case ShaderSource_SpiralWhirlpool: //type enum
+    return ShaderTypeSpiralWhirlpool;
   case ShaderSource_Spiral: //type enum
     return ShaderTypeSpiral;
   case ShaderSource_SimpleBars: //type enum
@@ -635,6 +640,12 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
         // Shader Settings
+    case ShaderSource_SpiralWhirlpool: { // Settings
+      auto settings = new SpiralWhirlpoolSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<SpiralWhirlpoolShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_Spiral: { // Settings
       auto settings = new SpiralSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<SpiralShader>(settings);

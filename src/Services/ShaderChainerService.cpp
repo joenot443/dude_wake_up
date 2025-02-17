@@ -7,6 +7,7 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "SpiralWhirlpoolShader.hpp"
 #include "StellarShader.hpp"
 #include "WebShader.hpp"
 #include "SpiralShader.hpp"
@@ -266,6 +267,7 @@ std::vector<std::shared_ptr<AvailableShader>> ShaderChainerService::availableFav
   std::set<ShaderType> favoriteTypes = ParameterService::getService()->favoriteShaderTypes;
   
   for (auto type : favoriteTypes) {
+    auto availableShader = availableShadersMap[type];
     favorites.push_back(availableShadersMap[type]);
   }
   
@@ -878,6 +880,12 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeSpiralWhirlpool: {
+      auto settings = new SpiralWhirlpoolSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<SpiralWhirlpoolShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeStellar: {
       auto settings = new StellarSettings(shaderId, shaderJson);
       auto shader = std::make_shared<StellarShader>(settings);

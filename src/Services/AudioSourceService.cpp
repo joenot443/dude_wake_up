@@ -107,6 +107,9 @@ AudioSourceService::audioSourceForId(std::string id) {
 }
 
 void AudioSourceService::update() {
+  // Return if we're not enabled
+  if (!selectedAudioSource->active) return;
+  
   if (LayoutStateService::getService()->abletonLinkEnabled) {
     selectedAudioSource->audioAnalysis.bpmEnabled = true;
     selectedAudioSource->audioAnalysis.bpm->setValue(link.captureAppSessionState().tempo());

@@ -19,6 +19,8 @@
 #include "Strings.hpp"
 #include "ofxImGui.h"
 
+static const ImVec2 AudioOscillatorSize = ImVec2(140.0, 140.0);
+
 void AudioSourceBrowserView::setup() {}
 
 void AudioSourceBrowserView::update() {
@@ -28,23 +30,17 @@ void AudioSourceBrowserView::update() {
 
 void AudioSourceBrowserView::draw() {
   auto source = AudioSourceService::getService()->selectedAudioSource;
-  ImVec2 size = ImVec2(ImGui::GetContentRegionAvail().x, source->active ? 200.0 : 20.0);
-  ImGui::SetNextItemOpen(LayoutStateService::getService()->showAudioSettings);
-  ImGui::SetNextWindowSize(size);
-  auto title = source->active ? formatString("Audio Reactivity - \t RMS: %0.2f", source->audioAnalysis.rms->value) : "Audio Reactivity - Disabled";
-  if (ImGui::CollapsingHeader(title.c_str(), ImGuiTreeNodeFlags_CollapsingHeader))
-  {
-    LayoutStateService::getService()->showAudioSettings = true;
-    ImGui::BeginChild("##AudioSourceBrowser");
-    CommonViews::sSpacing();
-    drawStartAnalysisButton();
-    ImGui::SameLine();
-    drawAudioSourceSelector();
+  ImVec2 size = ImVec2(ImGui::GetContentRegionAvail().x, LayoutStateService::getService()->audioSettingsViewHeight());
+  ImGui::BeginChild("##AudioSourceBrowser", size);
+  drawStartAnalysisButton();
+  ImGui::SameLine();
+  drawAudioSourceSelector();
+  if (source->active) {
     drawSampleTrack();
     drawSelectedAudioSource();
     ImGui::EndChild();
   } else {
-    LayoutStateService::getService()->showAudioSettings = false;
+    ImGui::EndChild();
   }
 }
 
@@ -56,22 +52,25 @@ void AudioSourceBrowserView::drawSampleTrack() {
     options.push_back(track->name);
   }
   ImGui::SameLine();
-  ImGui::PushItemWidth(150.0);
+  ImGui::PushItemWidth(200.0);
   if (CommonViews::ShaderOption(AudioSourceService::getService()->selectedSampleTrackParam, options, false)) {
     AudioSourceService::getService()->affirmSampleAudioTrack();
   }
   ImGui::PopItemWidth();
   ImGui::SameLine();
-  CommonViews::PlaybackSlider(samplePlaybackSliderPosition, source->getTotalDuration());
-  auto playPauseIcon = source->isPaused ? ICON_MD_PLAY_ARROW : ICON_MD_PAUSE;
+  if (CommonViews::PlaybackSlider(samplePlaybackSliderPosition, source->getTotalDuration())) {
+    source->setPlaybackPosition(samplePlaybackSliderPosition->value);
+  }
   ImGui::SameLine();
-  if (CommonViews::IconButton(playPauseIcon, "Play/Pause")) {
+  if (CommonViews::PlayPauseButton("##playPause", !source->isPaused, ImVec2(25.0, 25.0))) {
     if (source->isPaused) {
       source->resumePlayback();
     } else {
       source->pausePlayback();
     }
   }
+  ImGui::NewLine();
+  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0);
 }
 
 void AudioSourceBrowserView::updatePlaybackPosition() {
@@ -124,9 +123,8 @@ void AudioSourceBrowserView::drawAudioSourceSelector() {
       }
     }
   }
-  CommonViews::HSpacing(10.0);
   ImGui::SameLine();
-  ImGui::SetNextItemWidth(400.0);
+  ImGui::SetNextItemWidth(200.0);
   ImGui::PushFont(FontService::getService()->h4);
   ImGui::PushID("##AudioSourceSelector");
   if (ImGui::Combo("", &selection, out.data(), sources.size())) {
@@ -139,9 +137,10 @@ void AudioSourceBrowserView::drawAudioSourceSelector() {
 void AudioSourceBrowserView::drawStartAnalysisButton() {
   auto source = AudioSourceService::getService()->selectedAudioSource;
   ImGui::SameLine();
-  auto buttonText = source->active ? "Stop Analysis" : "Start Analysis";
+  auto buttonText = source->active ? "Stop Audio Analysis" : "Start Audio Analysis";
   if (ImGui::Button(buttonText)) {
     source->toggle();
+    LayoutStateService::getService()->showAudioSettings = !LayoutStateService::getService()->showAudioSettings;
   }
 }
 
@@ -163,7 +162,7 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
       OscillatorParam original = OscillatorParam (std::static_pointer_cast<Oscillator>(source->audioAnalysis.rmsOscillator), source->audioAnalysis.rms);
       std::vector<OscillatorParam> subjects = {original};
       
-      OscillatorView::draw(subjects);
+      OscillatorView::draw(subjects, AudioOscillatorSize, false);
       
       ImGui::TableNextColumn();
       
@@ -171,58 +170,37 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
       bool isSampleTrack = source->type() == AudioSourceType_File;
       
       if (LayoutStateService::getService()->abletonLinkEnabled) {
-        CommonViews::H3Title(formatString("Ableton BPM: %f", AudioSourceService::getService()->link.captureAppSessionState().tempo()).c_str(), false);
-      } else {
-        CommonViews::H3Title(formatString("BPM: %f", AudioSourceService::getService()->selectedAudioSource->audioAnalysis.bpm->value).c_str(), false);
+        ImGui::Text("%s", formatString("Ableton BPM: %f", AudioSourceService::getService()->link.captureAppSessionState().tempo()).c_str());
+      } else if (!isSampleTrack) {
+        ImGui::Text("BPM");
+        ImGui::SameLine();
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8.0, 2.0));
+        if (CommonViews::Slider("BPM", "##bpm", source->audioAnalysis.bpm, ImGui::GetContentRegionAvail().x - 100.0)) {
+          AudioSourceService::getService()->tapper.setBpm(source->audioAnalysis.bpm->value);
+        }
+        ImGui::SameLine();
+        static float lastTapTime = ofGetCurrentTime().seconds;
+        if (ImGui::Button("Tap")) {
+          if (ofGetCurrentTime().seconds - lastTapTime > 5.0f) {
+            AudioSourceService::getService()->tapper.startFresh();
+          } else {
+            AudioSourceService::getService()->tapper.tap();
+          }
+          lastTapTime = ofGetCurrentTime().seconds;
+        }
+        ImGui::SameLine();
+        if (CommonViews::PlayPauseButton("##bpmPlayPause", source->audioAnalysis.bpmEnabled, ImVec2(25.0, 25.0))) {
+          source->audioAnalysis.bpmEnabled = !source->audioAnalysis.bpmEnabled;
+        }
+        ImGui::PopStyleVar();
+
       }
-      ImGui::SameLine();
-      
-      ImGui::Checkbox("Ableton Link?", &LayoutStateService::getService()->abletonLinkEnabled);
       
       // Only draw graph if we're enabled
       if (source->audioAnalysis.bpmEnabled || isSampleTrack) {
+        ImGui::NewLine();
         source->audioAnalysis.beatPulseOscillator->enabled = true;
-        OscillatorView::draw(dynamic_pointer_cast<Oscillator>( source->audioAnalysis.beatPulseOscillator), source->audioAnalysis.beatPulse);
-      }
-      
-      // Draw BPM controls
-      if (!LayoutStateService::getService()->abletonLinkEnabled && !isSampleTrack) {
-        ImGui::SameLine();
-        
-        if (ImGui::BeginChild("##BPMControls", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionMax().y))) {
-          
-          static float lastTapTime = ofGetCurrentTime().seconds;
-          if (ImGui::Button("Tap for BPM")) {
-            if (ofGetCurrentTime().seconds - lastTapTime > 5.0f) {
-              AudioSourceService::getService()->tapper.startFresh();
-            } else {
-              AudioSourceService::getService()->tapper.tap();
-            }
-            lastTapTime = ofGetCurrentTime().seconds;
-          }
-          
-          
-          if (ImGui::Button("Beat Start")) {
-            float bpm = AudioSourceService::getService()->tapper.bpm();
-            AudioSourceService::getService()->tapper.startFresh();
-            AudioSourceService::getService()->tapper.setBpm(bpm);
-            source->audioAnalysis.bpmEnabled = true;
-          }
-          
-          if (ImGui::Button("Reset")) {
-            AudioSourceService::getService()->tapper.startFresh();
-          }
-          
-          const char* buttonText = source->audioAnalysis.bpmEnabled ? "Stop" : "Start";
-          if (ImGui::Button(buttonText)) {
-            source->audioAnalysis.bpmEnabled = !source->audioAnalysis.bpmEnabled;
-          }
-          
-          if (CommonViews::Slider("BPM", "##bpm", source->audioAnalysis.bpm)) {
-            AudioSourceService::getService()->tapper.setBpm(source->audioAnalysis.bpm->value);
-          }
-        }
-        ImGui::EndChild();
+        OscillatorView::draw(dynamic_pointer_cast<Oscillator>(source->audioAnalysis.beatPulseOscillator), source->audioAnalysis.beatPulse, AudioOscillatorSize, false);
       }
       
       ImGui::TableNextColumn();
@@ -241,7 +219,7 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
       OscillatorParam mids = OscillatorParam(source->audioAnalysis.midsOscillator, source->audioAnalysis.midsAnalysisParam.param);
       OscillatorParam highs = OscillatorParam(source->audioAnalysis.highsOscillator, source->audioAnalysis.highsAnalysisParam.param);
       
-      OscillatorView::draw({low, mids, highs});
+      OscillatorView::draw({low, mids, highs}, AudioOscillatorSize, false);
       
       ImGui::TableNextColumn();
       
@@ -255,11 +233,11 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
       if (CommonViews::IconButton(ICON_MD_INFO, "Frequency")) {
         ImGui::OpenPopup("##Frequency");
       }
-      BarPlotView::draw(source->audioAnalysis.smoothMelSpectrum, "mel");
+      BarPlotView::draw(source->audioAnalysis.smoothMelSpectrum, "mel", AudioOscillatorSize);
       ImGui::SameLine();
       ImGui::BeginChild("##FrequencyMods");
-      CommonViews::MiniSlider(source->audioAnalysis.frequencyRelease);
-      CommonViews::MiniSlider(source->audioAnalysis.frequencyScale);
+      CommonViews::MiniSlider(source->audioAnalysis.frequencyRelease, false);
+      CommonViews::MiniSlider(source->audioAnalysis.frequencyScale, false);
       ImGui::EndChild();
       ImGui::EndTable();
     }

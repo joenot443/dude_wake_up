@@ -133,8 +133,7 @@ void FileSource::drawSettings()
     }
   }
   
-  CommonViews::ShaderCheckbox(boomerang);
-  CommonViews::ShaderParameter(speed, nullptr);
+//  CommonViews::ShaderCheckbox(boomerang);
 }
 
 void FileSource::updatePlaybackPosition()

@@ -40,6 +40,8 @@ public:
   std::shared_ptr<Parameter> yPosition;
   std::shared_ptr<Oscillator> yPositionOscillator;
   
+  std::shared_ptr<Parameter> positionDropdown;
+  
   std::shared_ptr<Parameter> mainAlpha;
   std::shared_ptr<Oscillator> mainAlphaOscillator;
   
@@ -88,6 +90,7 @@ public:
   yPosition(std::make_shared<Parameter>("Y Position", 0.0, -1.0, 1.0)),
   xPositionOscillator(std::make_shared<WaveformOscillator>(xPosition)),
   yPositionOscillator(std::make_shared<WaveformOscillator>(yPosition)),
+  positionDropdown(std::make_shared<Parameter>("Position Dropdown")),
   scale(std::make_shared<Parameter>("Scale", 1.0, 0.0, 2.0)),
   scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
   sourceSelection(std::make_shared<Parameter>("Source", 1.0, 0.0, 3.0)),

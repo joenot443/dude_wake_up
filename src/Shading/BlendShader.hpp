@@ -137,12 +137,7 @@ struct BlendShader: Shader {
 
   void drawSettings() override {
     CommonViews::H3Title("Blend");
-    drawSelector();
-    CommonViews::ShaderParameter(settings->alpha, settings->alphaOscillator);
-  }
-  
-  void drawSelector() {
-    CommonViews::BlendModeSelector(settings->mode, settings->flip);
+    CommonViews::BlendModeSelector(settings->mode, settings->flip, settings->alpha, settings->alphaOscillator);
   }
 };
 

@@ -29,6 +29,7 @@ static const std::string AbletonLinkEnabledJsonKey = "abletonBPMEnabled";
 
 static const std::vector<std::string> ResolutionOptions = {"240p", "360p", "480p", "720p", "1080p", "1440p", "4k"};
 static const float MenuBarHeight = 50.0f;
+static const float TabBarHeight = 15.0f;
 
 class LayoutStateService: public ConfigurableService {
 public:

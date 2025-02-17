@@ -13,199 +13,223 @@
 #include "LibraryFile.hpp"
 #include "MarkdownService.hpp"
 #include "MarkdownView.hpp"
+#include "Colors.hpp"
 #include "Fonts.hpp"
 #include "CommonViews.hpp"
 
-static const ImVec2 TileSize = ImVec2(88, 55);
-
-void TileBrowserView::setup(){};
+void TileBrowserView::setup() {}
 
 void TileBrowserView::setTileItems(std::vector<std::shared_ptr<TileItem>> items) {
-  tileItems = items;
-}
-
-void TileBrowserView::sortTileItems() {
-  if (tileCount == tileItems.size()) return;
+  // Clear existing data
+  categoryMap.clear();
+  categories.clear();
   
-  // Count the number of times each category appears in the tileItems
-  std::map<std::string, int> categoryCounts;
-  for (const auto &tileItem : tileItems) {
-    categoryCounts[tileItem->category]++;
+  // Group items by category
+  for (const auto& item : items) {
+    categoryMap[item->category].push_back(item);
+    
+    // Add category to ordered list if it's new
+    if (std::find(categories.begin(), categories.end(), item->category) == categories.end()) {
+      categories.push_back(item->category);
+    }
   }
   
-  // Sort the tileItems based on the number of times each category appears
-  std::sort(tileItems.begin(), tileItems.end(),
-            [&](const auto &a, const auto &b) {
-    // Compare based on category counts
-    if (categoryCounts[a->category] != categoryCounts[b->category]) {
-      return categoryCounts[a->category] > categoryCounts[b->category];
-    }
-    if (a->category == b->category) {
-      return a->name < b->name;
-    }
-    // If counts are equal, compare categories alphabetically
-    return a->category < b->category;
+  // Sort categories by number of items
+  std::sort(categories.begin(), categories.end(),
+            [this](const std::string& a, const std::string& b) {
+    return categoryMap[a].size() > categoryMap[b].size();
   });
   
-  tileCount = tileItems.size();
+  // Sort items within each category by name
+  for (auto& [category, categoryItems] : categoryMap) {
+    std::sort(categoryItems.begin(), categoryItems.end(),
+              [](const auto& a, const auto& b) {
+      return a->name < b->name;
+    });
+  }
 }
 
 void TileBrowserView::setCallback(std::function<void(std::shared_ptr<TileItem>)> callback) {
   tileClickCallback = callback;
 }
 
-void TileBrowserView::draw()
-{
-//  sortTileItems();
-  auto n = 0;
-  auto size = ImGui::GetContentRegionAvail();
-  std::string lastCategory = "";
-  for (int idx = 0; idx < tileItems.size(); ++idx)
-  {
-    bool isLast = tileItems.size() - 1 == idx;
-    auto tile = tileItems[idx];
-    
-    if (lastCategory != tile->category) {
-      if (idx != 0) ImGui::NewLine();
-      // Add 8.0 of vertical padding
-      ImGui::PushFont(FontService::getService()->h4);
-      CommonViews::PaddedText(tile->category, ImVec2(2.0, 8.0));
-      ImGui::PopFont();
-      lastCategory = tile->category;
-    }
-    
-    float xPos = ImGui::GetCursorPosX();
-    float yPos = ImGui::GetCursorPosY();
-    float endXPos = xPos;
+void TileBrowserView::applyHeaderStyles(bool isSelected) {
+  if (isSelected) {
+    ImGui::PushStyleColor(ImGuiCol_Header, Colors::ButtonSelected.Value);
+    ImGui::PushStyleColor(ImGuiCol_Border, Colors::NodeBorderColor.Value);
+  }
+}
 
-    if (tile->textureID != nullptr)
-    {
-      bool isLibraryItem = std::dynamic_pointer_cast<LibraryTileItem>(tile) != nullptr;
-      
-      auto startPos = ImGui::GetCursorPos();
-      ImGui::Image(tile->textureID, TileSize);
-      ImGui::SameLine();
-      
-      ImGui::GetWindowDrawList()->AddRectFilled(startPos, ImGui::GetCursorPos(), IM_COL32(0, 0, 0, 178));
-      
-      endXPos = ImGui::GetCursorPosX();
-      
-      ImGui::SetCursorPosX(xPos);
-      
-      ImGui::PushFont(FontService::getService()->p);
-      // Set the font color to white
-      ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0, 1.0, 1.0, 0.6));
-      if (ImGui::Button(tile->name.c_str(), TileSize)) {
-        tileClickCallback(tile);
-      }
-      ImGui::PopStyleColor();
-      ImGui::PopFont();
-      
-      tile->dragCallback();
-      
-      ImGui::SameLine();
-      ImGui::SetCursorPosX(xPos);
-      ImGui::SetItemAllowOverlap();
-      
-      // INFO BUTTON
-      
-      // If we have a markdown file, draw the info button
-      if (MarkdownService::getService()->hasItemForName(tile->name))
-      {
-        auto popupId = formatString("##%s_tilepopup", tile->name.c_str());
-        if (ImGui::BeginPopupModal(popupId.c_str(), nullptr, ImGuiPopupFlags_MouseButtonLeft))
-        {
-          MarkdownView(tile->name).draw();
-          ImGui::EndPopup();
-        }
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0, 1.0, 1.0, 0.5));
-        if (CommonViews::IconButton(ICON_MD_INFO, tile->name.c_str()))
-        {
-          ImGui::OpenPopup(popupId.c_str());
-        }
-        ImGui::PopStyleColor();
-      } else {
-        CommonViews::InvisibleIconButton(formatString("##%s_invisible_icon", tile->name.c_str()));
-      }
-      
-      // FAVORITE BUTTON
-      if (tile->shaderType != ShaderTypeNone) {
-        ImGui::SameLine();
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + TileSize.x - 2 * 16. - 6);
-        std::string icon = ParameterService::getService()->isShaderTypeFavorited(tile->shaderType) ?  ICON_MD_FAVORITE : ICON_MD_FAVORITE_BORDER;
-        if (CommonViews::IconButton(icon.c_str(), tile->name.c_str()))
-        {
-          ParameterService::getService()->toggleFavoriteShaderType(tile->shaderType);
-        }
-      }
-      
-      
-      
-      // PROGRESS INDICATOR
-      // If we have a LibraryFile as our TileItem, we may need to draw the progress of its download.
-      if (isLibraryItem)
-      {
-        ImGui::SetCursorPosY(yPos);
-        ImGui::SetCursorPosX(xPos);
-        auto libraryTileItem = std::dynamic_pointer_cast<LibraryTileItem>(tile);
-        auto file = libraryTileItem->libraryFile;
-        if (LibraryService::getService()->libraryFileIdDownloadedMap[file->id])
-        {
-          CommonViews::IconTitle(ICON_MD_SAVE);
-        }
-        else if (file->isDownloading)
-        {
-          ImGui::Text("%s", formatString("%.0f %", libraryTileItem->libraryFile->progress * 100.0).c_str());
-        }
-        else
-        {
-          CommonViews::IconTitle(ICON_MD_CLOUD);
-        }
-        ImGui::SetItemAllowOverlap();
-      }
+void TileBrowserView::popHeaderStyles(bool isSelected) {
+  ImGui::PopStyleColor(isSelected ? 2 : 0);
+}
 
-      ImGui::SetCursorPosY(yPos + TileSize.y - 10);
-      ImGui::SetCursorPosX(endXPos);
-    }
-    else
-    {
-      if (tile->name.size() > 10)
-      {
-        // Push a smaller font size
-        ImGui::PushFont(FontService::getService()->sm);
-        if (ImGui::Button(tile->name.c_str(), TileSize)) {
-          tileClickCallback(tile);
-        }
-        ImGui::PopFont();
-      }
-      else
-      {
-        if (ImGui::Button(tile->name.c_str(), TileSize)) {
-          tileClickCallback(tile);
-        }
-      }
-      tile->dragCallback();
-      ImGui::SameLine();
-      endXPos = ImGui::GetCursorPosX();
-    }
+void TileBrowserView::draw() {
+  auto availableWidth = ImGui::GetContentRegionAvail().x;
+  float spacing = ImGui::GetStyle().ItemSpacing.x;
+  
+  // Calculate tile width: (available width - 2 * spacing) / 3 tiles
+  float tileWidth = (availableWidth - (2 * spacing)) / 3.0f;
+  // Maintain aspect ratio of original tiles (88:55)
+  float tileHeight = tileWidth * (55.0f/88.0f);
+  ImVec2 tileSize(tileWidth, tileHeight);
+  
+  if (categories.size() == 1) {
+    drawSingleCategory(categories[0], tileSize);
+  } else {
+    drawCategories(tileSize);
+  }
+  
+  ImGui::NewLine();
+}
 
-    float nextX = ImGui::GetCursorPosX() + ImGui::GetStyle().ItemSpacing.x + TileSize.x;
-
-    if (n + 1 < tileItems.size() && nextX < size.x)
-    {
-      ImGui::SameLine();
-      ImGui::SetCursorPosX(endXPos);
-    }
-    else
-    {
+void TileBrowserView::drawSingleCategory(const std::string& category, const ImVec2& tileSize) {
+  // Start a new group to contain the tiles
+  ImGui::BeginGroup();
+  int tileCount = 0;
+  
+  std::vector<std::shared_ptr<TileItem>> tiles = categoryMap[category];
+  
+  for (const auto& tile : tiles) {
+    // If we've drawn 3 tiles, start a new row
+    if (tileCount > 0 && tileCount % 3 == 0) {
       ImGui::NewLine();
     }
-    n += 1;
+    
+    drawTile(tile, tileSize);
+    tileCount++;
+  }
+  
+  ImGui::EndGroup();
+  ImGui::NewLine();
+}
+
+void TileBrowserView::drawCategories(const ImVec2& tileSize) {
+  // Draw each category as a collapsable header
+  for (const auto& category : categories) {
+    ImGui::PushFont(FontService::getService()->h4);
+    
+    bool isOpen = activeCategory == category;
+    ImGui::SetNextItemOpen(isOpen);
+    
+    applyHeaderStyles(isOpen);
+    if (ImGui::CollapsingHeader(category.c_str())) {
+      if (!isOpen) {
+        activeCategory = category;
+      }
+    } else if (isOpen) {
+      activeCategory = "";
+    }
+    popHeaderStyles(isOpen);
+    ImGui::PopFont();
+    
+    // Draw tiles for active category
+    if (activeCategory == category) {
+      drawSingleCategory(category, tileSize);
+    }
+  }
+}
+
+void TileBrowserView::drawTile(std::shared_ptr<TileItem> tile, const ImVec2& tileSize) {
+  if (tile->textureID != nullptr) {
+    
+    // Store initial cursor position
+    ImVec2 startPos = ImGui::GetCursorScreenPos();
+    
+    // Create a child frame to contain everything
+    ImGui::BeginChild(formatString("##tile_%s", tile->name.c_str()).c_str(), tileSize, false);
+    
+    ImGui::SetNextItemAllowOverlap();
+    
+    // Draw the base image
+    ImGui::Image(tile->textureID, tileSize);
+    
+    // Draw dark overlay
+    ImGui::GetWindowDrawList()->AddRectFilled(
+      startPos,
+      ImVec2(startPos.x + tileSize.x, startPos.y + tileSize.y),
+      IM_COL32(0, 0, 0, 178)
+    );
+    
+    // Draw the clickable button with same size as image
+    ImGui::SetCursorScreenPos(startPos);
+    ImGui::PushFont(FontService::getService()->p);
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0, 1.0, 1.0, 0.6));
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1, 1, 1, 0.1));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1, 1, 1, 0.2));
+    ImGui::SetNextItemAllowOverlap();
+    if (ImGui::Button(tile->name.c_str(), tileSize)) {
+      if (tileClickCallback != NULL)
+      	tileClickCallback(tile);
+    }
+    ImGui::PopStyleColor(4);
+    ImGui::PopFont();
+    
+    tile->dragCallback();
+    
+    // Draw info button in top-left
+    ImGui::SetCursorScreenPos(ImVec2(startPos.x + 4, startPos.y + 4));
+    if (MarkdownService::getService()->hasItemForName(tile->name)) {
+      auto popupId = formatString("##%s_tilepopup", tile->name.c_str());
+      if (ImGui::BeginPopupModal(popupId.c_str(), nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
+        MarkdownView(tile->name).draw();
+        ImGui::EndPopup();
+      }
+      ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0, 1.0, 1.0, 0.5));
+      if (CommonViews::IconButton(ICON_MD_INFO, tile->name.c_str())) {
+        ImGui::OpenPopup(popupId.c_str());
+      }
+      ImGui::PopStyleColor();
+    } else {
+      CommonViews::InvisibleIconButton(formatString("##%s_invisible_icon", tile->name.c_str()));
+    }
+    
+    ImGui::SetNextItemAllowOverlap();
+    
+    // Draw favorite button in top-right
+    if (tile->tileType == TileType_Shader) {
+      ImGui::SetCursorScreenPos(ImVec2(startPos.x + tileSize.x - 24, startPos.y + 4));
+      std::string icon = ParameterService::getService()->isShaderTypeFavorited(tile->shaderType) ? 
+        ICON_MD_FAVORITE : ICON_MD_FAVORITE_BORDER;
+      if (CommonViews::IconButton(icon.c_str(), tile->name.c_str())) {
+        ParameterService::getService()->toggleFavoriteShaderType(tile->shaderType);
+      }
+    }
+    
+    // Draw progress indicator in top-left
+    if (tile->tileType == TileType_Library) {
+      ImGui::SetCursorScreenPos(ImVec2(startPos.x + 4, startPos.y + 4));
+      auto libraryTileItem = std::dynamic_pointer_cast<LibraryTileItem>(tile);
+      auto file = libraryTileItem->libraryFile;
+      if (LibraryService::getService()->libraryFileIdDownloadedMap[file->id]) {
+        CommonViews::IconTitle(ICON_MD_SAVE);
+      } else if (file->isDownloading) {
+        ImGui::Text("%s", formatString("%.0f %", libraryTileItem->libraryFile->progress * 100.0).c_str());
+      } else {
+        CommonViews::IconTitle(ICON_MD_CLOUD);
+      }
+    }
+    
+    ImGui::EndChild();
+  } else {
+    // Simple button for items without texture
+    if (tile->name.size() > 10) {
+      ImGui::PushFont(FontService::getService()->sm);
+    }
+    if (ImGui::Button(tile->name.c_str(), tileSize)) {
+      tileClickCallback(tile);
+    }
+    if (tile->name.size() > 10) {
+      ImGui::PopFont();
+    }
+    tile->dragCallback();
   }
 
-  ImGui::NewLine();
-};
+  // Handle tile layout - this is now managed by the draw() method
+  if (ImGui::GetCursorPosX() + tileSize.x + ImGui::GetStyle().ItemSpacing.x < ImGui::GetWindowContentRegionMax().x) {
+    ImGui::SameLine();
+  }
+}
 
-void TileBrowserView::update(){
-  
-};
+void TileBrowserView::update() {}

@@ -29,7 +29,6 @@
 #include <imgui_node_editor.h>
 #include <imgui_node_editor_internal.h>
 
-static const float ImGuiWindowTitleBarHeight = 70.0f;
 static const float NodeWidth = 100.0f;
 static const float NodeSettingsWidth = 350.0f;
 
@@ -61,7 +60,10 @@ void NodeLayoutView::setup()
   nodeVideoSourceBrowserView->setup();
 }
 
-void NodeLayoutView::update() {}
+void NodeLayoutView::update() {
+  nodeVideoSourceBrowserView->update();
+}
+
 void ImGuiEx_BeginColumn() { ImGui::BeginGroup(); }
 
 void ImGuiEx_NextColumn()
@@ -264,20 +266,15 @@ void NodeLayoutView::draw()
   ed::End();
   
   handleDropZone();
-  
-  drawActionButtons();
-  
+    
 //  drawDebugWindow();
     
   drawNodeWindows();
   
   drawUploadChainerWindow();
   
-//  drawShaderBrowserView();
-//  drawPreviewWindows();
-  
   drawHelp();
-  
+  drawActionButtons();
   CommonViews::PopNodeRedesignStyle();
   ed::SetCurrentEditor(nullptr);
   drawSaveDialog();
@@ -325,7 +322,7 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
   
   float selectorWidth = 400.0;
   
-  ed::GetCurrentDrawList()->AddRectFilled(ImVec2(pos.x, pos.y), ImVec2(pos.x + innerRectWidth, pos.y + 50.0), Colors::NodeInnerRectBackgroundColor, 10.0);
+  ed::GetCurrentDrawList()->AddRectFilled(ImVec2(pos.x, pos.y), ImVec2(pos.x + innerRectWidth, pos.y + 46.0), Colors::NodeInnerRectBackgroundColor, 10.0);
   // Add padding
   ImGui::SetCursorPos(pos + ImVec2(10.0, 0.0));
   
@@ -879,12 +876,7 @@ void NodeLayoutView::createBlendShaderForSelectedNodes(ed::NodeId firstNodeId, e
   ImVec2 firstPos = topNode->position;
   ImVec2 secondPos = bottomNode->position;
   
-  log("First Position: %f, %f", firstPos.x, firstPos.y);
-  log("Second Position: %f, %f", secondPos.x, secondPos.y);
-  
   ImVec2 pos = ImVec2(max(firstPos.x, secondPos.x) + 800.0, (firstPos.y + secondPos.y) / 2.0);
-  
-  log("New Position: %f, %f", pos.x, pos.y);
   
   // Create a new BlendShader
   std::shared_ptr<Shader> blendShader = ActionService::getService()->addShader(ShaderTypeBlend);
@@ -893,11 +885,14 @@ void NodeLayoutView::createBlendShaderForSelectedNodes(ed::NodeId firstNodeId, e
   
   unplacedNodeIds.push_back(blendShader->shaderId);
 
-  // Connect the selected nodes to the BlendShader's input slots
-  ActionService::getService()->makeConnection(topNode->connectable, blendShader, topNode->type == NodeTypeShader ? ConnectionTypeShader : ConnectionTypeSource, topNode->connectable->nextAvailableOutputSlot(), InputSlotMain, false);
+  // Always use OutputSlotMain since we allow multiple connections from the same output
+  ActionService::getService()->makeConnection(topNode->connectable, blendShader, 
+    topNode->type == NodeTypeShader ? ConnectionTypeShader : ConnectionTypeSource, 
+    OutputSlotMain, InputSlotMain, false);
   
-  // Save the config on our second Connection
-  ActionService::getService()->makeConnection(bottomNode->connectable, blendShader, bottomNode->type == NodeTypeShader ? ConnectionTypeShader : ConnectionTypeSource, bottomNode->connectable->nextAvailableOutputSlot(), InputSlotTwo, true);
+  ActionService::getService()->makeConnection(bottomNode->connectable, blendShader, 
+    bottomNode->type == NodeTypeShader ? ConnectionTypeShader : ConnectionTypeSource, 
+    OutputSlotMain, InputSlotTwo, true);
 }
 
 void NodeLayoutView::handleUploadChain(std::shared_ptr<Node> node)
@@ -1278,36 +1273,47 @@ void NodeLayoutView::drawActionButtons()
 
   // Set the cursor to the bottom right of the window
   float shaderInfoPaneWidth = LayoutStateService::getService()->shouldDrawShaderInfo() ? LayoutStateService::getService()->browserSize().x : 0;
+  float buttonWidth = 35.0;
+  float buttonHeight = 35.0;
+  ImVec2 imageSize = ImVec2(buttonWidth, buttonHeight);
+  ImVec2 imageRatio = ImVec2(1.5, 1.5);
+  float actionBarWidth = buttonWidth * buttonCount * imageRatio.x + shaderInfoPaneWidth + 10.0;
 
-  ImGui::SetCursorPos(ImVec2(getScaledWindowWidth() - 50.0 * buttonCount - shaderInfoPaneWidth, getScaledWindowHeight() - LayoutStateService::getService()->audioSettingsViewHeight() - 100.0));
-  ImGui::BeginChild("##ActionButtons", ImVec2(50.0 * buttonCount, 50.0));
+  ImGui::SetCursorPos(ImVec2(getScaledWindowWidth() - actionBarWidth, getScaledWindowHeight() - LayoutStateService::getService()->audioSettingsViewHeight() - 100.0));
+  ImGui::PushStyleColor(ImGuiCol_ChildBg, Colors::ActionBarBackgroundColor.Value);
+  ImGui::SetNextItemAllowOverlap();
+  ImGui::BeginChild("##ActionButtons", ImVec2(actionBarWidth, buttonHeight));
 
   // Draw the undo button
-  if (CommonViews::LargeIconButton(ICON_MD_UNDO, "undo", ActionService::getService()->canUndo()))
+  if (CommonViews::ImageButton("undo", "undo.png", imageSize, imageRatio, true))
   {
-    ActionService::getService()->undo();
+    if (ActionService::getService()->canUndo()) {
+      ActionService::getService()->undo();
+    }
   }
   if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
     ImGui::SetTooltip("Undo the last action (Cmd+Z)");
 
   ImGui::SameLine();
-  CommonViews::HSpacing(2);
+  CommonViews::HSpacing(1);
   ImGui::SameLine();
 
   // Draw the redo button
-  if (CommonViews::LargeIconButton(ICON_MD_REDO, "redo", ActionService::getService()->canRedo()))
+  if (CommonViews::ImageButton("redo", "redo.png", imageSize, imageRatio, true))
   {
-    ActionService::getService()->redo();
+    if (ActionService::getService()->canRedo()) {
+      ActionService::getService()->redo();
+    }
   }
   if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
     ImGui::SetTooltip("Redo the last undone action (Cmd+Y)");
 
   ImGui::SameLine();
-  CommonViews::HSpacing(2);
+  CommonViews::HSpacing(1);
   ImGui::SameLine();
 
   // Draw the capture screenshot button
-  if (CommonViews::LargeIconButton(ICON_MD_PHOTO_CAMERA, "capture_screenshot"))
+  if (CommonViews::ImageButton("capture", "camera.png", imageSize, imageRatio, true))
   {
     VideoSourceService::getService()->captureOutputWindowScreenshot();
   }
@@ -1315,12 +1321,12 @@ void NodeLayoutView::drawActionButtons()
     ImGui::SetTooltip("Capture a screenshot of the output window");
 
   ImGui::SameLine();
-  CommonViews::HSpacing(2);
+  CommonViews::HSpacing(1);
   ImGui::SameLine();
 
-  auto helpIcon = LayoutStateService::getService()->helpEnabled ? ICON_MD_HELP_OUTLINE : ICON_MD_HELP;
   // Draw the help button
-  if (CommonViews::LargeIconButton(helpIcon, "help"))
+  std::string helpImage = LayoutStateService::getService()->helpEnabled ? "help.png" : "help-outline.png";
+  if (CommonViews::ImageButton("help", helpImage, imageSize, imageRatio, true))
   {
     LayoutStateService::getService()->helpEnabled = !LayoutStateService::getService()->helpEnabled;
   }
@@ -1328,11 +1334,11 @@ void NodeLayoutView::drawActionButtons()
     ImGui::SetTooltip("Toggle help overlay");
 
   ImGui::SameLine();
-  CommonViews::HSpacing(2);
+  CommonViews::HSpacing(1);
   ImGui::SameLine();
 
   // Draw the reset button
-  if (CommonViews::LargeIconButton(ICON_MD_DELETE_FOREVER, "reset"))
+  if (CommonViews::ImageButton("reset", "delete.png", imageSize, imageRatio, true))
   {
     clear();
   }
@@ -1340,25 +1346,25 @@ void NodeLayoutView::drawActionButtons()
     ImGui::SetTooltip("Remove all nodes and connections (Cmd+N)");
 
   ImGui::SameLine();
-  CommonViews::HSpacing(2);
+  CommonViews::HSpacing(1);
   ImGui::SameLine();
 
   // Draw the navigate to content button
-  if (CommonViews::LargeIconButton(ICON_MD_CENTER_FOCUS_WEAK, "navigate"))
+  if (CommonViews::ImageButton("navigate", "focus.png", imageSize, imageRatio, true))
   {
     ed::SetCurrentEditor(context);
     ed::NavigateToContent();
     ed::SetCurrentEditor(nullptr);
   }
   if (ImGui::IsItemHovered())
-    ImGui::SetTooltip("Navigate to the content");
+    ImGui::SetTooltip("Scale to fit content (100%)");
 
   ImGui::SameLine();
-  CommonViews::HSpacing(2);
+  CommonViews::HSpacing(1);
   ImGui::SameLine();
 
   // Draw the stage mode button
-  if (CommonViews::LargeIconButton(ICON_MD_GRID_VIEW, "stageMode"))
+  if (CommonViews::ImageButton("stage", "stage.png", imageSize, imageRatio, true ))
   {
     LayoutStateService::getService()->stageModeEnabled = true;
   }
@@ -1366,6 +1372,7 @@ void NodeLayoutView::drawActionButtons()
     ImGui::SetTooltip("Enable stage mode (Cmd+B)");
 
   ImGui::EndChild();
+  ImGui::PopStyleColor();
   ImGui::SetCursorPos(pos);
 }
 
