@@ -1,3 +1,0 @@
-# SimpleShape
-
-Information about SimpleShape

@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include "VideoSource.hpp"
 #include "CommonViews.hpp"
+#include "ShaderSource.hpp"
 #include "LayoutStateService.hpp"
 
 void VideoSource::drawPreview(ImVec2 pos, float scale) {
@@ -48,4 +49,16 @@ void VideoSource::applyOptionalShaders() {
 
 void VideoSource::generateOptionalShaders() {
     optionalShadersHelper.generateOptionalShaders();
+}
+
+std::shared_ptr<Settings> VideoSource::settingsRef() {
+  if (type == VideoSource_shader) {
+    std::shared_ptr<ShaderSource> shaderSource = std::dynamic_pointer_cast<ShaderSource>(shared_from_this());
+    if (shaderSource && shaderSource->shader) {
+      return std::dynamic_pointer_cast<Settings>(shaderSource->shader->settings);
+    }
+    return nullptr;
+  } else {
+    return std::dynamic_pointer_cast<Settings>(settings);
+  }
 }

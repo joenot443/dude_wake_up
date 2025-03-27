@@ -70,15 +70,8 @@ bool CommonViews::ShaderParameter(std::shared_ptr<Parameter> param,
                                   std::shared_ptr<Oscillator> osc)
 {
   H3Title(param->name, false);
-  std::string label = formatString("%.2f", param->value);
-  ImGui::PushFont(FontService::getService()->h4);
-  float valueTextWidth = ImGui::CalcTextSize(label.c_str()).x;
-  ImGui::PopFont();
-  float sliderWidth = ImGui::GetContentRegionAvail().x - 80.0;
   ImGui::SameLine();
-  ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - valueTextWidth);
-  H4Title(label.c_str(), false);
-  
+  float sliderWidth = ImGui::GetContentRegionAvail().x - 80.0;
   bool ret = Slider(param->name, param->paramId, param, sliderWidth);
   float endYPos = ImGui::GetCursorPosY();
   ImGui::SameLine();
@@ -94,10 +87,15 @@ bool CommonViews::ShaderParameter(std::shared_ptr<Parameter> param,
     int buttonCount = osc != nullptr ? 4 : 3;
     float buttonSpacing = 8.0;
     float buttonWidth = (ImGui::GetContentRegionAvail().x - 8.0 - buttonSpacing * (buttonCount - 1)) / buttonCount;
-    MidiSelector(param, ImVec2(buttonWidth, 36.0));
-    ImGui::SameLine();
-    AudioParameterSelector(param, ImVec2(buttonWidth, 36.0));
-    ImGui::SameLine();
+    if (LayoutStateService::getService()->midiEnabled) {
+      MidiSelector(param, ImVec2(buttonWidth, 36.0));
+      ImGui::SameLine();
+    }
+    if (AudioSourceService::getService()->selectedAudioSource != nullptr) {
+      AudioParameterSelector(param, ImVec2(buttonWidth, 36.0));
+      ImGui::SameLine();
+    }
+    
     FavoriteButton(param, ImVec2(buttonWidth, 36.0));
     
     if (osc != nullptr) {
@@ -181,8 +179,6 @@ void CommonViews::AudioParameterSelector(std::shared_ptr<Parameter> param, ImVec
 
 bool CommonViews::ShaderCheckbox(std::shared_ptr<Parameter> param, bool sameLine)
 {
-  if (!sameLine) sSpacing();
-  
   bool old = param->boolValue;
   ImGui::Checkbox(param->name.c_str(), &param->boolValue);
   bool ret = false;
@@ -191,25 +187,6 @@ bool CommonViews::ShaderCheckbox(std::shared_ptr<Parameter> param, bool sameLine
     ret = true;
     param->setValue(static_cast<float>(param->boolValue));
   }
-  float endYPos = ImGui::GetCursorPosY();
-  ImGui::SameLine();
-  if (ShaderDropdownButton(param)) {
-    param->buttonsVisible = !param->buttonsVisible;
-  }
-  
-  if (param->buttonsVisible) {
-    ImGui::NewLine();
-    ImGui::SetCursorPosY(endYPos);
-    int buttonCount = 3;
-    float buttonSpacing = 8.0;
-    float buttonWidth = (ImGui::GetContentRegionAvail().x - 8.0 - buttonSpacing * (buttonCount - 1)) / buttonCount;
-    MidiSelector(param, ImVec2(buttonWidth, 36.0));
-    ImGui::SameLine();
-    AudioParameterSelector(param, ImVec2(buttonWidth, 36.0));
-    ImGui::SameLine();
-    FavoriteButton(param, ImVec2(buttonWidth, 36.0));
-  }
-  if (!sameLine) sSpacing();
   return ret;
 }
 
@@ -368,7 +345,7 @@ void CommonViews::ShaderStageParameter(std::shared_ptr<Parameter> param, std::sh
   if (ret) {
     param->affirmValue();
   }
-  ImGui::SetItemUsingMouseWheel();
+//  ImGui::SetItemUsingMouseWheel();
   if (ImGui::IsItemHovered()) {
     
     float wheel = ImGui::GetIO().MouseWheel;
@@ -620,14 +597,6 @@ void CommonViews::ShaderColor(std::shared_ptr<Parameter> param)
     }
     ImGui::EndCombo();
   }
-  ImGui::SameLine(0, 20);
-  GLubyte *pixels = new GLubyte[640*480*4];
-  if (IconButton(ICON_FA_EYE_DROPPER, idString(param->paramId).c_str())) {
-    LayoutStateService::getService()->isEyeDroppingColor = true;
-    glReadPixels(200,200,1,1,GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-    log("%s, %s, %s", pixels[0], pixels[1], pixels[2]);
-  }
-//  mSpacing();
 }
 
 void CommonViews::ImageNamed(std::string filename, double width, double height) {
@@ -970,10 +939,8 @@ void CommonViews::BlendModeSelector(std::shared_ptr<Parameter> blendMode, std::s
     ImGui::NewLine();
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15.0);
     CommonViews::ShaderParameter(alpha, alphaOscillator);
+    ImGui::NewLine();
   }
-  // if (blendWithEmpty != nullptr) {
-  //   CommonViews::ShaderCheckbox(blendWithEmpty);
-  // }
 }
 
 bool CommonViews::Selector(std::shared_ptr<Parameter> param, std::vector<std::string> options)

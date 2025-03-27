@@ -1,3 +1,0 @@
-# LumaFeedback
-
-Information about LumaFeedback

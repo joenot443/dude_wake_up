@@ -51,6 +51,7 @@ struct BlendSettings: public ShaderSettings {
     mode->options = BlendModeNames;
     parameters = { mode, blendWithEmpty, flip, alpha };
     oscillators = { alphaOscillator };
+    audioReactiveParameter = alpha;
     load(j);
     registerParameters();
   };

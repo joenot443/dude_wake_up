@@ -57,6 +57,8 @@ public:
   // VideoSources which are available to be added to the Service
   std::vector<std::shared_ptr<AvailableVideoSource>> availableVideoSources();
   std::vector<std::shared_ptr<AvailableVideoSource>> availableVideoSourcesForType(VideoSourceType type);
+  std::vector<std::shared_ptr<AvailableVideoSourceShader>> availableShaderVideoSources();
+
   int indexOfSourceType(ShaderSourceType type);
 
   
@@ -66,6 +68,7 @@ public:
   void startAccessingBookmarkPath(std::string path);
 
   std::shared_ptr<VideoSource> replaceShaderVideoSource(std::shared_ptr<ShaderSource> shaderSource, ShaderSourceType type);
+//  std::shared_ptr<VideoSource> replaceWebcamVideoSource(std::shared_ptr<WebcamSource> shaderSource, ShaderSourceType type);
   
   std::shared_ptr<ofFbo> emptyFbo;
 
@@ -114,6 +117,7 @@ public:
   void appendConfig(json j);
 
   std::vector<std::shared_ptr<AvailableVideoSourceShader>> availableShaderSources;
+  std::vector<std::shared_ptr<AvailableVideoSourceShader>> availableRandomShaderSources;
 };
 
 #endif /* VideoSourceService_hpp */

@@ -172,7 +172,7 @@ private:
     int videoPipeFd, audioPipeFd;
     int pipeNumber;
 
-    static set<int> openPipes;
+    static std::set<int> openPipes;
     static int requestPipeNumber();
     static void retirePipeNumber(int num);
 };

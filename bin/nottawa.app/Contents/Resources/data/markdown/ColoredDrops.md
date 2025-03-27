@@ -1,3 +1,0 @@
-# ColoredDrops
-
-Information about ColoredDrops

@@ -1,3 +1,0 @@
-# AudioCircle
-
-Information about AudioCircle

@@ -1,3 +1,0 @@
-# Aerogel
-
-Information about Aerogel

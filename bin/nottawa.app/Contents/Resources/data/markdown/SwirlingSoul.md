@@ -1,3 +1,0 @@
-# SwirlingSoul
-
-Information about SwirlingSoul

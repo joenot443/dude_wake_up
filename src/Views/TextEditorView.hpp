@@ -22,9 +22,8 @@ public:
 private:
   std::shared_ptr<DisplayText> displayText;
   ofTrueTypeFont font;
-  std::vector<Font> fonts;
+  std::vector<std::string> fontNames;
   std::string id;
-  int selectedFontIndex;
 };
 
 #endif /* TextEditorView_hpp */

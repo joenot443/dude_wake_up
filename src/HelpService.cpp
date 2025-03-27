@@ -126,7 +126,9 @@ void HelpService::drawEffect2View() {
 }
 
 void HelpService::drawConnectionView(ImVec2 sourceNodePosition, ImVec2 sourceNodeSize, float scale) {
-  ImGui::SetCursorPos(ImVec2(sourceNodePosition.x, sourceNodePosition.y - 90 / scale - 100.0));
+  // Position to right and 2/3 down node
+  ImGui::SetCursorPos(ImVec2(sourceNodePosition.x + sourceNodeSize.x + 50.0 / scale,
+                             sourceNodePosition.y + sourceNodeSize.y * (2.0/3.0)));
   float x = ImGui::GetCursorPosX();
   CommonViews::H2Title(StringManager::get("connect_source_effect_title"), false);
   ImGui::SetCursorPosX(x);
@@ -255,7 +257,6 @@ void HelpService::drawEditParametersShaderInfoPane() {
   ImGui::SetCursorPos(ImVec2(ImGui::GetWindowWidth() * (4.0 / 5.0) - 300.0, ImGui::GetWindowHeight() / 3.0));
   float x = ImGui::GetCursorPosX();
   CommonViews::H2Title(StringManager::get("change_parameters_title"), false);
-  CommonViews::mSpacing();
   ImGui::SetCursorPosX(x);
   CommonViews::H3Title(StringManager::get("drag_slider_instruction"), false);
   CommonViews::mSpacing();
@@ -319,7 +320,7 @@ void HelpService::drawStageModeActionButtonsHelp() {
 
 void HelpService::drawCompletionPopup() {
   ImGui::SetNextWindowSize(ImVec2(ImGui::GetWindowSize().x / 4.0, ImGui::GetWindowSize().y / 3.0));
-  if (ImGui::BeginPopupModal("CompletionPopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration)) {
+  if (ImGui::BeginPopupModal("CompletionPopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_Popup)) {
     CommonViews::H2Title(StringManager::get("completion_title"), false);
     CommonViews::mSpacing();
     CommonViews::H3Title(StringManager::get("completion_description"), false);

@@ -60,7 +60,7 @@ void PagedTileBrowserView::draw() {
         auto tile = tileItems[idx];
         ImVec2 startPos = ImGui::GetCursorPos();
         
-        if (tile->textureID != nullptr) {
+        if (tile->textureID != 0) {
           ImVec2 endPos = ImVec2(startPos.x + tileSize.x, startPos.y + tileSize.y);
           ImGui::GetWindowDrawList()->AddImageRounded(tile->textureID, startPos, endPos, ImVec2(0,0), ImVec2(1,1), ImColor(255, 255, 255), 5.0);
 

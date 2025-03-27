@@ -8,6 +8,7 @@
 //
 
 #include "ofMain.h"
+#include <CoreFoundation/CoreFoundation.h>
 #include <algorithm>
 
 class ofxSyphonServerDirectory;

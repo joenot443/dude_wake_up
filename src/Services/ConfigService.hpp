@@ -102,6 +102,7 @@ public:
   std::string exportsFolderFilePath();
   std::string templatesFolderFilePath();
   std::string strandsFolderFilePath();
+  std::string defaultConfigFilePath();
   std::string relativeFilePathWithinNottawaFolder(std::string filePath);
   
   json jsonFromParameters(std::vector<Parameter *> parameters);

@@ -5,7 +5,8 @@
 //  Created by Joe Crozier on 11/14/22.
 //
 
-#include <sentry.h>
+//#include <sentry.h>
+#include <CoreFoundation/CoreFoundation.h>
 #include "ShaderInfoView.hpp"
 #include "ActionService.hpp"
 #include "CommonStrings.hpp"
@@ -48,7 +49,9 @@ void MainStageView::update()
   videoSourceBrowserView.update();
   audioSourceBrowserView.update();
   shaderBrowserView.update();
-  stageModeView.update();
+  if (LayoutStateService::getService()->stageModeEnabled) {
+    stageModeView.update();
+  }
   NodeLayoutView::getInstance()->update();
   welcomeScreenView.update();
 }

@@ -1,3 +1,0 @@
-# GeoGlass
-
-Information about GeoGlass

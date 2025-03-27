@@ -1,3 +1,0 @@
-# BlurryTrail
-
-Information about BlurryTrail

@@ -1,3 +1,0 @@
-# Spiral
-
-Information about Spiral

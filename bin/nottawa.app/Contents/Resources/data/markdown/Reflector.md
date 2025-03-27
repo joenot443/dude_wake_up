@@ -1,3 +1,0 @@
-# Reflector
-
-Information about Reflector

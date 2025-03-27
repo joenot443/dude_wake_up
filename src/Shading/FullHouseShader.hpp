@@ -36,6 +36,7 @@ struct FullHouseSettings: public ShaderSettings {
     parameters = { count, length, speed };
     oscillators = { countOscillator, lengthOscillator, speedOscillator };
     load(j);
+    audioReactiveParameter = length;
     registerParameters();
   };
 };

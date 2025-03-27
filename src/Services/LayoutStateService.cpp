@@ -7,6 +7,7 @@
 
 #include "imgui.h"
 #include "LayoutStateService.hpp"
+#include "BookmarkService.hpp"
 #include "NodeLayoutView.hpp"
 #include "ShaderChainerService.hpp"
 #include "AudioSourceService.hpp"
@@ -28,11 +29,15 @@ json LayoutStateService::config() {
   j[ResolutionJsonKey] = resolutionSetting;
   j[AbletonLinkEnabledJsonKey] = abletonLinkEnabled;
   j[OutputWindowUpdatesAutomaticallyJsonKey] = outputWindowUpdatesAutomatically;
+  j[ActionBarExpandedJsonKey] = actionBarExpanded;
   return j;
 }
 
 void LayoutStateService::loadConfig(json j) {
   showAudioSettings = j[ShowAudioSettingsJsonKey];
+  if (!j[LibraryPathJsonKey].is_null()) {
+    updateLibraryPath(j[LibraryPathJsonKey]);
+  }
   libraryPath = j[LibraryPathJsonKey];
   midiEnabled = j[MidiEnabledJsonKey];
 //  stageModeEnabled = j[StageModeEnabled];
@@ -47,10 +52,13 @@ void LayoutStateService::loadConfig(json j) {
   showWelcomeScreen = j[WelcomeScreenEnabledJsonKey];
   resolutionSetting = j[ResolutionJsonKey];
   abletonLinkEnabled = j[AbletonLinkEnabledJsonKey];
+  actionBarExpanded = j[ActionBarExpandedJsonKey];
 }
 
 void LayoutStateService::updateLibraryPath(std::string path) {
+  BookmarkService::getService()->endAccessingBookmark(libraryPath);
   libraryPath = path;
+  BookmarkService::getService()->beginAccessingBookmark(libraryPath);
   ConfigService::getService()->saveDefaultConfigFile();
 }
 

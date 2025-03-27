@@ -1,3 +1,0 @@
-# FlickerAudio
-
-Information about FlickerAudio

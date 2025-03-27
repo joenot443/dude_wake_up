@@ -14,6 +14,7 @@
 #include "HSBShader.hpp"
 #include "MirrorShader.hpp"
 #include "OscillationService.hpp"
+#include "BookmarkService.hpp"
 #include "ParameterService.hpp"
 #include "PixelShader.hpp"
 #include "ShaderChainerService.hpp"
@@ -290,16 +291,19 @@ void ConfigService::checkAndSaveDefaultConfigFile()
   }
 }
 
+std::string ConfigService::defaultConfigFilePath() {
+  return formatString("%s/config.json", appSupportFilePath().c_str());
+}
+
 void ConfigService::loadDefaultConfigFile()
 {
-  auto path = formatString("%s/config.json", appSupportFilePath().c_str());
-  loadConfigFile(path);
+  BookmarkService::getService()->beginAccessingBookmark(defaultConfigFilePath());
+  loadConfigFile(defaultConfigFilePath());
 }
 
 void ConfigService::saveDefaultConfigFile()
 {
-  auto path = formatString("%s/config.json", appSupportFilePath().c_str());
-  saveConfigFile(path);
+  saveConfigFile(defaultConfigFilePath());
 }
 
 void ConfigService::saveCurrentWorkspace() {
@@ -364,7 +368,7 @@ void ConfigService::saveConfigFile(std::string path)
   if (fileStream.is_open())
   {
     //    std::cout << config.dump(4) << std::endl;
-    fileStream << config.dump(4);
+    fileStream << config.dump(4, ' ', false, nlohmann::detail::error_handler_t::ignore);
     fileStream.close();
     
     std::cout << "Successfully saved config" << std::endl;
@@ -466,6 +470,7 @@ void ConfigService::loadConfigFile(std::string path)
       if (fileStream.peek() == std::ifstream::traits_type::eof())
       {
         log("JSON file for %s is empty.", path.c_str());
+        isLoading = false;
         return;
       }
       fileStream >> data;
@@ -473,6 +478,7 @@ void ConfigService::loadConfigFile(std::string path)
     catch (int code)
     {
       log("Could not load JSON file for %s.", path.c_str());
+      isLoading = false;
       return;
     }
   }
@@ -482,6 +488,8 @@ void ConfigService::loadConfigFile(std::string path)
   if (!data.is_object())
   {
     log("Failed to parse JSON file.");
+    isLoading = false;
+    return;
   }
   try {
     

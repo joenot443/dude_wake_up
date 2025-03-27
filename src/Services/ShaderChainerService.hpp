@@ -9,6 +9,7 @@
 #define ShaderChainerService_hpp
 
 #include "AvailableShader.hpp"
+#include "AvailableVideoSource.hpp"
 #include "ConfigurableService.hpp"
 #include "Strand.hpp"
 #include "Shader.hpp"
@@ -117,6 +118,7 @@ public:
   std::vector<std::shared_ptr<AvailableShader>> availableDefaultFavoriteShaders;
   std::vector<std::shared_ptr<AvailableShader>> availableGlitchShaders;
   std::vector<std::shared_ptr<AvailableShader>> availableFavoriteShaders();
+  std::vector<std::shared_ptr<AvailableShader>> availableRandomShaders;
   std::map<ShaderType, std::shared_ptr<AvailableShader>> availableShadersMap;
 
   // Auxiliary Available Shaders
@@ -144,6 +146,11 @@ public:
   void loadConfig(json j) override;
   std::vector<std::string> idsFromLoadingConfig(json j);
   void loadConnectionsConfig(json j);
+
+  // Creates a random strand with two sources connected to two shaders, feeding into a blend shader
+  void randomStrand(const std::vector<std::shared_ptr<AvailableVideoSourceShader>>& sources, 
+                   const std::vector<std::shared_ptr<AvailableShader>>& shaders,
+                   ImVec2 origin = ImVec2(50,0));
 
 };
 

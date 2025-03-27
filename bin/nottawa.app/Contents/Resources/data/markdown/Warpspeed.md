@@ -1,3 +1,0 @@
-# Warpspeed
-
-Information about Warpspeed

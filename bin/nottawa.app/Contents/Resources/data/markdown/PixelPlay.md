@@ -1,3 +1,0 @@
-# PixelPlay
-
-Information about PixelPlay

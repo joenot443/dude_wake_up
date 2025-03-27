@@ -1,3 +1,0 @@
-# FloatingSparks
-
-Information about FloatingSparks

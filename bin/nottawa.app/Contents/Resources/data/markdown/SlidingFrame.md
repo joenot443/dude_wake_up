@@ -1,3 +1,0 @@
-# StaticFrame
-
-Information about StaticFrame

@@ -1,3 +1,0 @@
-# TwistedTrip
-
-Information about TwistedTrip

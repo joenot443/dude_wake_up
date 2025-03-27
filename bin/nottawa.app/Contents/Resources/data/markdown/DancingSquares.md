@@ -1,3 +1,0 @@
-# CurlySquares
-
-Information about CurlySquares

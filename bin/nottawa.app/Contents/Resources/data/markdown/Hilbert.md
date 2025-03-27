@@ -1,3 +1,0 @@
-# Hilbert
-
-Information about Hilbert

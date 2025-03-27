@@ -1,3 +1,0 @@
-# SimpleBars
-
-Information about SimpleBars

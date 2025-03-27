@@ -27,6 +27,7 @@ struct WebSettings: public ShaderSettings {
   ShaderSettings(shaderId, j, "Web") {
     parameters = { amount };
     oscillators = { amountOscillator };
+    audioReactiveParameter = amount;
     load(j);
     registerParameters();
   };

@@ -1,3 +1,0 @@
-# Limbo
-
-Information about Limbo

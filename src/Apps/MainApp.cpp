@@ -1,3 +1,5 @@
+#define IMGUI_DEFINE_MATH_OPERATORS 1
+
 #include "MainApp.h"
 #include "AudioSourceService.hpp"
 #include "ActionService.hpp"
@@ -14,7 +16,6 @@
 #include "ShaderChainerService.hpp"
 #include "TransformShader.hpp"
 #include "UUID.hpp"
-#include "SyphonService.hpp"
 #include "LayoutStateService.hpp"
 #include "VideoSourceService.hpp"
 #include "MarkdownService.hpp"
@@ -44,7 +45,6 @@ void MainApp::setup()
   BookmarkService::getService();
   StrandService::getService();
   LayoutStateService::getService();
-  SyphonService::getService();
   gui.setup();
   ImGui::CreateContext();
   ImPlot::CreateContext();
@@ -54,7 +54,6 @@ void MainApp::setup()
   MarkdownService::getService();
   ConfigService::getService()->loadDefaultConfigFile();
   StrandService::getService()->setup();
-  SyphonService::getService()->setup();
   ImageService::getService()->setup();
   mainStageView->setup();
   LibraryService::getService()->backgroundFetchLibraryFiles();
@@ -65,7 +64,6 @@ void MainApp::setup()
 void MainApp::update()
 {
   runMainThreadTasks();
-  SyphonService::getService()->update();
   OscillationService::getService()->tickOscillators();
   ModulationService::getService()->tickMappings();
   ParameterService::getService()->tickParameters();
@@ -79,9 +77,9 @@ void MainApp::update()
 void MainApp::draw()
 {
   gui.begin();
-  ImGui::PushFont(FontService::getService()->p);
+//  ImGui::PushFont(FontService::getService()->p);
   drawMainStage();
-  ImGui::PopFont();
+//  ImGui::PopFont();
   gui.end();
 }
 

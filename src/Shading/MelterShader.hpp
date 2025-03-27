@@ -43,8 +43,11 @@ struct MeltSettings : public ShaderSettings {
   smoothness(std::make_shared<Parameter>("Smoothness", 0.6, 0.0, 1.0)),
   smoothnessOscillator(std::make_shared<WaveformOscillator>(smoothness)),
   ShaderSettings(shaderId, j, name) {
+    oscillators = {alphaOscillator, betaOscillator, speedOscillator, smoothnessOscillator};
+    parameters = {alpha, beta, speed, smoothness};
+    audioReactiveParameter = alpha;
     load(j);
-  registerParameters();
+    registerParameters();
   };
 };
 

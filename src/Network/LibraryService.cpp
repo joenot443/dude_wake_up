@@ -12,8 +12,7 @@
 #include "Console.hpp"
 #include "httplib.h"
 #include "base64.h"
-#include <sentry.h>
-#include <cpr/cpr.h>
+//#include <sentry.h>
 
 const static std::string API_URL = "http://165.227.44.1";
 //const static std::string API_URL = "localhost:6000";
@@ -76,13 +75,16 @@ void LibraryService::repopulateVideoSourcesFromMainThread() {
 // }
 void LibraryService::fetchLibraryFiles()
 {
-  // Send GET request
-  cpr::Response res = cpr::Get(cpr::Url{API_URL + ":6000/api/media"});
+  // Create httplib client
+  httplib::Client cli(API_URL + ":6000/api/media");
 
-  if (res.status_code == 200)
+  // Send GET request
+  auto res = cli.Get("/");
+
+  if (res && res->status == 200)
   {
     // Parse the response body as JSON
-    nlohmann::json json_body = nlohmann::json::parse(res.text);
+    nlohmann::json json_body = nlohmann::json::parse(res->body);
 
     // Clear the library files vector
     libraryFiles.clear();
@@ -129,14 +131,17 @@ bool LibraryService::hasMediaOnDisk(std::shared_ptr<LibraryFile> file)
 // ConfigService::libraryFolderFilePath
 void LibraryService::downloadThumbnail(std::shared_ptr<LibraryFile> file)
 {
-  // Send GET request
-  cpr::Response res = cpr::Get(cpr::Url{file->thumbnailUrl});
+  // Create httplib client from URL
+  httplib::Client cli(file->thumbnailUrl);
 
-  if (res.status_code == 200)
+  // Send GET request
+  auto res = cli.Get("/");
+
+  if (res && res->status == 200)
   {
     std::string path = ConfigService::getService()->libraryFolderFilePath() + "/" + file->thumbnailFilename;
     std::ofstream file_stream(path, std::ios::binary);
-    file_stream.write(res.text.data(), res.text.size());
+    file_stream.write(res->body.data(), res->body.size());
     file_stream.close();
   }
   else
@@ -159,39 +164,38 @@ void LibraryService::downloadAllThumbnails()
 void LibraryService::submitFeedback(Feedback feedback, std::function<void()> success_callback, std::function<void(const std::string &)> error_callback)
 {
   // First create a new sentry event
-  sentry_uuid_t uuid = sentry_capture_event(sentry_value_new_message_event(
-      SENTRY_LEVEL_INFO,
-      "User Feedback",
-      formatFeedback(feedback).c_str()));
+//  sentry_uuid_t uuid = sentry_capture_event(sentry_value_new_message_event(
+//      SENTRY_LEVEL_INFO,
+//      "User Feedback",
+//      formatFeedback(feedback).c_str()));
 }
 
 void LibraryService::downloadFile(std::shared_ptr<LibraryFile> file, std::function<void()> callback)
 {
-  // Send GET request with a progress callback
-  cpr::Response res =
-      cpr::Get(
-          cpr::Url{file->url},
-          cpr::ProgressCallback{[file](cpr::cpr_off_t total, cpr::cpr_off_t current, cpr::cpr_off_t, cpr::cpr_off_t, intptr_t)
-                                {
-                                  log("Total: %ld", total);
-                                  log("Current: %ld", current);
-                                  file->isDownloading = true;
+  // Create httplib client from URL
+  httplib::Client cli(file->url);
 
-                                  float progress = (static_cast<double>(current) / static_cast<double>(total));
+  // Send GET request
+  auto res = cli.Get("/", [file](uint64_t current, uint64_t total) {
+    log("Total: %ld", total);
+    log("Current: %ld", current);
+    file->isDownloading = true;
 
-                                  if (progress > 0)
-                                  {
-                                    file->progress = progress;
-                                  }
+    float progress = (static_cast<double>(current) / static_cast<double>(total));
 
-                                  return true;
-                                }});
+    if (progress > 0)
+    {
+      file->progress = progress;
+    }
 
-  if (res.status_code == 200)
+    return true;
+  });
+
+  if (res && res->status == 200)
   {
     std::string path = ConfigService::getService()->libraryFolderFilePath() + "/" + file->filename;
     std::ofstream file_stream(path, std::ios::binary);
-    file_stream.write(res.text.data(), res.text.size());
+    file_stream.write(res->body.data(), res->body.size());
     file_stream.close();
     libraryFileIdDownloadedMap[file->id] = true;
     log("Successfully downloaded file");

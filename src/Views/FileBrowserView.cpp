@@ -8,6 +8,7 @@
 #include "FileBrowserView.hpp"
 #include "VideoSourceService.hpp"
 #include "Console.hpp"
+#include "BookmarkService.hpp"
 #include "File.hpp"
 #include "AvailableStrand.hpp"
 #include "AvailableVideoSource.hpp"
@@ -23,6 +24,13 @@ void FileBrowserView::refresh()
 
   currentDirectory.open(currentDirectory.getAbsolutePath());
   if (!currentDirectory.isDirectory() || !currentDirectory.canRead()) { return; }
+  
+  try {
+    currentDirectory.listDir();
+  } catch (std::exception &) {
+    log("Couldn't open directory for FileBrowserView");
+    return;
+  }
   
   currentDirectory.sort();
 
@@ -176,22 +184,6 @@ void FileBrowserView::draw()
     listBrowserView.draw();
     return;
   }
-
-  // Add a button to change the current directory to the parent directory.
-  if (ImGui::Button("Go Up"))
-  {
-    ofDirectory dir;
-    dir.open(currentDirectory);
-    // Get the parent directory of the current directory by removing the last
-    // directory from the path.
-    auto newPath = currentDirectory.getAbsolutePath().substr(
-        0, dir.getAbsolutePath().find_last_of("/\\"));
-    // Save the new path in LayoutStateService
-    LayoutStateService::getService()->updateLibraryPath(newPath);
-    currentDirectory = ofDirectory(newPath);
-    refresh();
-  }
-  ImGui::SameLine();
 
   // Add a button to open the file browser to choose the current directory
   if (ImGui::Button("Open"))

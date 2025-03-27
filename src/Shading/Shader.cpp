@@ -124,8 +124,7 @@ void Shader::checkForFileChanges() {
   
   std::string shaderName = name();
   // Remove any spaces from the name
-  shaderName.erase(std::remove(shaderName.begin(), shaderName.end(), ' '));
-  
+  shaderName.erase(std::remove(shaderName.begin(), shaderName.end(), ' '), shaderName.end());
   auto path = "shaders/" + shaderName + ".frag";
   
   auto shaderFile = ofFile(path);

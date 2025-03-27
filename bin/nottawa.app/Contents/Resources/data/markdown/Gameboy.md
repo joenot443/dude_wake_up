@@ -1,3 +1,0 @@
-# Gameboy
-
-Information about Gameboy

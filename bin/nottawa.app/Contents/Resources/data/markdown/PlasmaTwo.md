@@ -1,3 +1,0 @@
-# PlasmaTwo
-
-Information about PlasmaTwo

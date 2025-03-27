@@ -9,7 +9,6 @@
 #define LayoutStateService_hpp
 
 #include <stdio.h>
-#include "ofMain.h"
 #include "ConfigService.hpp"
 #include "ConfigurableService.hpp"
 
@@ -26,6 +25,7 @@ static const std::string AllParametersInStageMode = "allParametersInStageMode";
 static const std::string HelpEnabledJsonKey = "helpEnabled";
 static const std::string WelcomeScreenEnabledJsonKey = "welcomeScreenEnabled";
 static const std::string AbletonLinkEnabledJsonKey = "abletonBPMEnabled";
+static const std::string ActionBarExpandedJsonKey = "actionBarExpanded";
 
 static const std::vector<std::string> ResolutionOptions = {"240p", "360p", "480p", "720p", "1080p", "1440p", "4k"};
 static const float MenuBarHeight = 50.0f;
@@ -94,6 +94,8 @@ public:
   void togglePortraitSetting();
   
   void subscribeToResolutionUpdates(std::function<void()> callback);
+  
+  bool actionBarExpanded = true;
   
   static LayoutStateService *service;
 

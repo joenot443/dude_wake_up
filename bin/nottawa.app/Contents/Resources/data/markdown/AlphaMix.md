@@ -1,3 +1,0 @@
-# AlphaMix
-
-Information about AlphaMix

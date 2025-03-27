@@ -30,6 +30,7 @@ struct WelcomeRingsSettings: public ShaderSettings {
   ShaderSettings(shaderId, j, "WelcomeRings") {
     parameters = { cycles };
     oscillators = { cyclesOscillator };
+    audioReactiveParameter = cycles;
     load(j);
     registerParameters();
   };

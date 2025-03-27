@@ -1,3 +1,0 @@
-# AudioBlocks
-
-Information about AudioBlocks

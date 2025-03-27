@@ -93,14 +93,15 @@ json TextSource::serialize() {
   json j;
   j["videoSourceType"] = VideoSource_text;
   j["id"] = id;
+  j["fontSize"] = displayText->fontSize;
+  j["text"] = displayText->text;
+  j["fontSelector"] = displayText->fontSelector->serialize();
   j["fontName"] = displayText->font.name;
   j["color"] = displayText->color->serialize();
   j["strokeColor"] = displayText->strokeColor->serialize();
   j["sourceName"] = sourceName;
   j["displayX"] = displayText->xPosition->value;
   j["displayY"] = displayText->yPosition->value;
-  j["fontSize"] = displayText->fontSize;
-  j["text"] = displayText->text;
   j["settings"] = settings->serialize();
   j["strokeEnabled"] = displayText->strokeEnabled->boolValue;
   auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);
@@ -113,19 +114,50 @@ json TextSource::serialize() {
 
 void TextSource::load(json j) {
   if (!j.is_object()) return;
-  displayText->font.name = j["fontName"];
-  font.load(displayText->font.path(), displayText->fontSize);
-  displayText->color->load(j["color"]);
-  displayText->strokeColor->load(j["strokeColor"]);
-
-  displayText->xPosition->value = j["displayX"];
-  displayText->yPosition->value = j["displayY"];
-
-  displayText->fontSize = j["fontSize"];
-  displayText->text = j["text"];
   
-  settings->load(j["settings"]);
-  displayText->strokeEnabled->setBoolValue(j.value("strokeEnabled", false));
+  if (j.contains("text")) {
+    displayText->text = j["text"];
+  }
+  if (j.contains("fontSize")) {
+    displayText->fontSize = j["fontSize"];
+  }
+  if (j.contains("fontSelector")) {
+    displayText->fontSelector->load(j["fontSelector"]);
+    displayText->font = Font(displayText->fontSelector->options[displayText->fontSelector->intValue]);
+  }
+  if (j.contains("fontName")) {
+    displayText->font.name = j["fontName"];
+  }
+  if (j.contains("color")) {
+    displayText->color->load(j["color"]);
+  }
+  if (j.contains("strokeColor")) {
+    displayText->strokeColor->load(j["strokeColor"]);
+  }
+  if (j.contains("displayX")) {
+    displayText->xPosition->value = j["displayX"];
+  }
+  if (j.contains("displayY")) {
+    displayText->yPosition->value = j["displayY"];
+  }
+  if (j.contains("settings")) {
+    settings->load(j["settings"]);
+  }
+  if (j.contains("strokeEnabled")) {
+    displayText->strokeEnabled->setBoolValue(j["strokeEnabled"]);
+  }
+  if (j.contains("x")) {
+    auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);
+    if (node != nullptr) {
+      node->position.x = j["x"];
+    }
+  }
+  if (j.contains("y")) {
+    auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);
+    if (node != nullptr) {
+      node->position.y = j["y"];
+    }
+  }
 }
 
 void TextSource::drawSettings() {

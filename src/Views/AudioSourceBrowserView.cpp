@@ -170,7 +170,7 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
       bool isSampleTrack = source->type() == AudioSourceType_File;
       
       if (LayoutStateService::getService()->abletonLinkEnabled) {
-        ImGui::Text("%s", formatString("Ableton BPM: %f", AudioSourceService::getService()->link.captureAppSessionState().tempo()).c_str());
+//        ImGui::Text("%s", formatString("Ableton BPM: %f", AudioSourceService::getService()->link.captureAppSessionState().tempo()).c_str());
       } else if (!isSampleTrack) {
         ImGui::Text("BPM");
         ImGui::SameLine();

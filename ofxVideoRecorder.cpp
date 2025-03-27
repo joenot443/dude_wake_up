@@ -505,7 +505,7 @@ float ofxVideoRecorder::systemClock()
   return totalRecordingDuration + recordingDuration;
 }
 
-set<int> ofxVideoRecorder::openPipes;
+std::set<int> ofxVideoRecorder::openPipes;
 
 int ofxVideoRecorder::requestPipeNumber(){
   int n = 0;

@@ -7,7 +7,6 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
-#include "SpiralWhirlpoolShader.hpp"
 #include "StellarShader.hpp"
 #include "WebShader.hpp"
 #include "SpiralShader.hpp"
@@ -72,7 +71,6 @@
 #include "ColorStepperShader.hpp"
 #include "GridRunShader.hpp"
 #include "ColorSwapShader.hpp"
-#include "AlphaMixShader.hpp"
 #include "GyroidsShader.hpp"
 #include "CubifyShader.hpp"
 #include "SwirlingSoulShader.hpp"
@@ -245,6 +243,20 @@ void ShaderChainerService::setup()
     auto auxShader = availableAuxillaryShadersMap[shaderType];
     auxillaryAvailableFavoriteShaders.push_back(auxShader);
   }
+  
+  // Populate randomShaders with Basic, Filter, Glitch, and Transform shaders
+  availableRandomShaders = availableBasicShaders;
+  availableRandomShaders.insert(availableRandomShaders.end(), availableFilterShaders.begin(), availableFilterShaders.end());
+  availableRandomShaders.insert(availableRandomShaders.end(), availableGlitchShaders.begin(), availableGlitchShaders.end());
+  availableRandomShaders.insert(availableRandomShaders.end(), availableTransformShaders.begin(), availableTransformShaders.end());
+
+
+  // Remove shaders that are in the ExcludedRandomShaderTypes array
+  for (auto const shaderType : ExcludedRandomShaderTypes) {
+    availableRandomShaders.erase(std::remove_if(availableRandomShaders.begin(), availableRandomShaders.end(), [shaderType](std::shared_ptr<AvailableShader> shader) {
+      return shader->type == shaderType;
+    }), availableRandomShaders.end());
+  }
 
   basePreview = std::make_shared<ofFbo>();
   basePreview->allocate(426, 240);
@@ -310,6 +322,11 @@ void ShaderChainerService::processFrame()
     
     std::shared_ptr<VideoSource> videoSource = std::dynamic_pointer_cast<VideoSource>(connection->start);
     std::shared_ptr<Shader> shader = std::dynamic_pointer_cast<Shader>(connection->end);
+    
+    if (videoSource == nullptr || shader == nullptr) {
+      
+      breakConnectionForConnectionId(connection->id);
+    }
     
     // No need to traverse if the video's not active
     if (videoSource != nullptr && !videoSource->active) continue;
@@ -880,12 +897,6 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
-    case ShaderTypeSpiralWhirlpool: {
-      auto settings = new SpiralWhirlpoolSettings(shaderId, shaderJson);
-      auto shader = std::make_shared<SpiralWhirlpoolShader>(settings);
-      shader->setup();
-      return shader;
-    }
     case ShaderTypeStellar: {
       auto settings = new StellarSettings(shaderId, shaderJson);
       auto shader = std::make_shared<StellarShader>(settings);
@@ -1267,12 +1278,6 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
     case ShaderTypeColorSwap: {
       auto settings = new ColorSwapSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<ColorSwapShader>(settings);
-      shader->setup();
-      return shader;
-    }
-    case ShaderTypeAlphaMix: {
-      auto settings = new AlphaMixSettings(shaderId, shaderJson, shaderTypeName(shaderType));
-      auto shader = std::make_shared<AlphaMixShader>(settings);
       shader->setup();
       return shader;
     }
@@ -1768,6 +1773,7 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
       break;
     }
   }
+  return nullptr;
 }
 
 std::shared_ptr<Shader> ShaderChainerService::replaceShader(std::shared_ptr<Shader> oldShader, ShaderType newType) {
@@ -1785,4 +1791,72 @@ std::shared_ptr<Shader> ShaderChainerService::replaceShader(std::shared_ptr<Shad
 
   // Return the new shader
   return newShader;
+}
+
+
+void ShaderChainerService::randomStrand(const std::vector<std::shared_ptr<AvailableVideoSourceShader>>& sources,
+                                      const std::vector<std::shared_ptr<AvailableShader>>& shaders,
+                                      ImVec2 origin) {
+  if (sources.size() < 2 || shaders.size() < 2) {
+    return;
+  }
+
+  // Randomly select two different sources
+  int sourceIndex1 = rand() % sources.size();
+  int sourceIndex2;
+  do {
+    sourceIndex2 = rand() % sources.size();
+  } while (sourceIndex2 == sourceIndex1);
+
+  // Randomly select two different shaders
+  int shaderIndex1 = rand() % shaders.size();
+  int shaderIndex2;
+  do {
+    shaderIndex2 = rand() % shaders.size();
+  } while (shaderIndex2 == shaderIndex1);
+
+  // Create the video sources
+  auto source1 = VideoSourceService::getService()->makeShaderVideoSource(
+    sources[sourceIndex1]->shaderType,
+    ImVec2(origin.x, origin.y),
+    UUID::generateUUID(),
+    0
+  );
+  
+  auto source2 = VideoSourceService::getService()->makeShaderVideoSource(
+    sources[sourceIndex2]->shaderType,
+    ImVec2(origin.x, origin.y + 1200),
+    UUID::generateUUID(),
+    0
+  );
+
+  // Add the sources to the VideoSourceService
+  VideoSourceService::getService()->addVideoSource(source1, source1->id);
+  VideoSourceService::getService()->addVideoSource(source2, source2->id);
+
+  // Create the effect shaders
+  auto shader1 = makeShader(shaders[shaderIndex1]->type);
+  auto shader2 = makeShader(shaders[shaderIndex2]->type);
+
+  // Position the effect shaders to the right of their sources
+  shader1->settings->x->setValue(origin.x + 900);
+  shader1->settings->y->setValue(origin.y);
+  
+  shader2->settings->x->setValue(origin.x + 900);
+  shader2->settings->y->setValue(origin.y + 1200);
+  
+  // Create the blend shader
+  auto blendShader = makeShader(ShaderTypeBlend);
+
+  // Position the blend shader centered between and to the right of the effect shaders
+  blendShader->settings->x->setValue(origin.x + 1800);
+  blendShader->settings->y->setValue(origin.y + 600);
+
+  // Connect sources to shaders
+  makeConnection(source1, shader1, ConnectionTypeSource, OutputSlotMain, InputSlotMain);
+  makeConnection(source2, shader2, ConnectionTypeSource, OutputSlotMain, InputSlotMain);
+
+  // Connect shaders to blend shader
+  makeConnection(shader1, blendShader, ConnectionTypeShader, OutputSlotMain, InputSlotMain);
+  makeConnection(shader2, blendShader, ConnectionTypeShader, OutputSlotMain, InputSlotTwo);
 }

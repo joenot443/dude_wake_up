@@ -13,7 +13,7 @@
 #include "ConfigurableService.hpp"
 #include "AudioTrack.hpp"
 #include "Parameter.hpp"
-#include "Link.hpp"
+//#include "Link.hpp"
 #include <stdio.h>
 
 class AudioSourceService : public ConfigurableService {
@@ -27,9 +27,9 @@ public:
   std::shared_ptr<AudioSource> selectedAudioSource;
   std::shared_ptr<AudioTrack> selectedSampleTrack;
   std::shared_ptr<Parameter> selectedSampleTrackParam;
-  ableton::Link link;
+//  ableton::Link link;
 
-  AudioSourceService() : link(120.0), selectedSampleTrackParam(std::make_shared<Parameter>("Sample Track", ParameterType_Int)) {};
+  AudioSourceService() : selectedSampleTrackParam(std::make_shared<Parameter>("Sample Track", ParameterType_Int)) {};
   
   static AudioSourceService *getService() {
     if (!service) {

@@ -545,6 +545,7 @@ void VideoSourceService::appendConfig(json j)
       break;
     case VideoSource_library:
       std::shared_ptr<LibraryFile> libraryFile = LibraryService::getService()->libraryFileForId(j["libraryFileId"]);
+      if (libraryFile == nullptr) return;
       source = makeLibraryVideoSource(libraryFile, position, sourceId, j);
   }
   if (source != nullptr)

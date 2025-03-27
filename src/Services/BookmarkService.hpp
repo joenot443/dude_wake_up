@@ -9,6 +9,8 @@
 #define BookmarkService_hpp
 
 #include <stdio.h>
+#include <CoreFoundation/CoreFoundation.h>
+
 #include "ofMain.h"
 
 class BookmarkService

@@ -191,7 +191,6 @@ static const ShaderType AvailableGlitchShaderTypes[] = {
   ShaderTypeGlitchRGB,
   ShaderTypePixelPlay,
   ShaderTypeGlitchDigital,
-  ShaderTypeGlitchAudio,
   ShaderTypeWeb,
   ShaderTypeScratchy,
   ShaderTypeAutotangent
@@ -232,6 +231,22 @@ static const ShaderType AvailableFilterShaderTypes[] = {
   ShaderTypeOldTV,
   ShaderTypeOneBitDither,
   ShaderTypeTraceAudio,
+};
+
+static const ShaderType ExcludedRandomShaderTypes[] = {
+  ShaderTypeTransform,
+  ShaderTypeOnOff,
+  ShaderTypeHSB,
+  ShaderTypeGlitchAudio,
+  ShaderTypeBounce,
+  ShaderTypeRotate,
+  ShaderTypeColorPass,
+  ShaderTypeColorStepper,
+  ShaderTypePaint,
+  ShaderTypeTraceAudio,
+  ShaderTypeTriple,
+  ShaderTypeGodRay,
+  ShaderTypeHalfTone
 };
 
 static std::vector<ShaderType> AllShaderTypes() {

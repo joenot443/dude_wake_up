@@ -64,9 +64,7 @@ public:
   
   void drawOptionalSettings() override;
   
-  std::shared_ptr<Settings> settingsRef() override {
-    return std::dynamic_pointer_cast<Settings>(settings);
-  }
+  std::shared_ptr<Settings> settingsRef() override;
   
   void applyOptionalShaders();
   

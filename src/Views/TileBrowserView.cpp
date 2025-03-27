@@ -131,7 +131,7 @@ void TileBrowserView::drawCategories(const ImVec2& tileSize) {
 }
 
 void TileBrowserView::drawTile(std::shared_ptr<TileItem> tile, const ImVec2& tileSize) {
-  if (tile->textureID != nullptr) {
+  if (tile->textureID != 0) {
     
     // Store initial cursor position
     ImVec2 startPos = ImGui::GetCursorScreenPos();
@@ -148,7 +148,7 @@ void TileBrowserView::drawTile(std::shared_ptr<TileItem> tile, const ImVec2& til
     ImGui::GetWindowDrawList()->AddRectFilled(
       startPos,
       ImVec2(startPos.x + tileSize.x, startPos.y + tileSize.y),
-      IM_COL32(0, 0, 0, 178)
+      IM_COL32(0, 0, 0, 50)
     );
     
     // Draw the clickable button with same size as image

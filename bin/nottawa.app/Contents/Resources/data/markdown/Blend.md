@@ -1,3 +1,0 @@
-# Blend
-
-Information about Blend

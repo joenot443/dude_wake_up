@@ -34,14 +34,17 @@ void ShaderBrowserView::setup()
   transformTileBrowserView = std::make_unique<TileBrowserView>(tileItemsForShaders(transform));
   filterTileBrowserView = std::make_unique<TileBrowserView>(tileItemsForShaders(filter));
   maskTileBrowserView = std::make_unique<TileBrowserView>(tileItemsForShaders(mask));
-  favoritesTileBrowserView = std::make_unique<TileBrowserView>(tileItemsForShaders(favorites));
-  defaultFavoritesTileBrowserView = std::make_unique<TileBrowserView>(tileItemsForShaders(defaultFavorites));
+  std::vector<std::shared_ptr<TileItem>> favoriteTileItems = tileItemsForShaders(favorites, "My Favorites");
+  std::vector<std::shared_ptr<TileItem>> defaultFavoriteTileItems = tileItemsForShaders(defaultFavorites, "Default Favorites");
+
+  favoriteTileItems.insert(favoriteTileItems.end(), defaultFavoriteTileItems.begin(), defaultFavoriteTileItems.end());
+  favoritesTileBrowserView = std::make_unique<TileBrowserView>(favoriteTileItems);
   glitchTileBrowserView = std::make_unique<TileBrowserView>(tileItemsForShaders(glitch));
 
   // Set sizes
   for (auto* view : {&searchResultsTileBrowserView, &basicTileBrowserView, &mixTileBrowserView,
                      &transformTileBrowserView, &filterTileBrowserView, &maskTileBrowserView,
-                     &favoritesTileBrowserView, &defaultFavoritesTileBrowserView, &glitchTileBrowserView}) {
+                     &favoritesTileBrowserView, &glitchTileBrowserView}) {
     (*view)->size = size;
   }
   
@@ -52,8 +55,8 @@ void ShaderBrowserView::setup()
   transformTileBrowserView->setTileItems(tileItemsForShaders(transform));
   filterTileBrowserView->setTileItems(tileItemsForShaders(filter));
   maskTileBrowserView->setTileItems(tileItemsForShaders(mask));
-  favoritesTileBrowserView->setTileItems(tileItemsForShaders(favorites));
-  defaultFavoritesTileBrowserView->setTileItems(tileItemsForShaders(defaultFavorites));
+  favoritesTileBrowserView->setTileItems(favoriteTileItems);
+//  defaultFavoritesTileBrowserView->setTileItems(tileItemsForShaders(defaultFavorites));
   glitchTileBrowserView->setTileItems(tileItemsForShaders(glitch));
   
   currentTab = 0;
@@ -80,9 +83,6 @@ void ShaderBrowserView::setCurrentTab(int tabIndex) {
 void ShaderBrowserView::drawSelectedBrowser() {
   switch (currentTab) {
     case 0: // Favorites
-      CommonViews::H4Title("Default Favorites");
-      defaultFavoritesTileBrowserView->draw();
-      CommonViews::H4Title("Your Favorites");
       favoritesTileBrowserView->draw();
       break;
     case 1: // Basic

@@ -1,3 +1,0 @@
-# SolidColor
-
-Information about SolidColor

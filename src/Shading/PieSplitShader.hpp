@@ -18,15 +18,11 @@
 #include <stdio.h>
 
 struct PieSplitSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderWaveformOscillator;
-
+  
   PieSplitSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 1.0  , -1.0, 2.0)),
-  shaderWaveformOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   ShaderSettings(shaderId, j, "PieSplit") {
-    parameters = { shaderValue };
-    oscillators = { shaderWaveformOscillator };
+    parameters = { };
+    oscillators = { };
     load(j);
     registerParameters();
   };
@@ -52,7 +48,6 @@ struct PieSplitShader: Shader {
       activeInputs.insert(slot);
       loadTextureAt(slot);
     }
-    
     
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
@@ -86,8 +81,6 @@ struct PieSplitShader: Shader {
 
   void drawSettings() override {
     CommonViews::H3Title("PieSplit");
-
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderWaveformOscillator);
   }
 };
 

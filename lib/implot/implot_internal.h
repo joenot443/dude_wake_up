@@ -36,6 +36,7 @@
 #endif
 
 #include <time.h>
+#include "imgui.h"
 #include "imgui_internal.h"
 
 #ifndef IMPLOT_VERSION

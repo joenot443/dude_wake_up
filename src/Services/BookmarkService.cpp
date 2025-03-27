@@ -8,7 +8,6 @@
 #include "BookmarkService.hpp"
 #include "Strings.hpp"
 #include "Console.hpp"
-#include <CoreFoundation/CoreFoundation.h>
 #include <string>
 
 // Save the bookmark for the given path into UserDefaults

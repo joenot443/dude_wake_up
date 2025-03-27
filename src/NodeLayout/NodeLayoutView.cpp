@@ -8,7 +8,7 @@
 #include "NodeLayoutView.hpp"
 #include "FontService.hpp"
 #include "ImGuiExtensions.hpp"
-#include "SyphonService.hpp"
+//#include "SyphonService.hpp"
 #include "ActionService.hpp"
 #include "HelpService.hpp"
 #include "LibraryService.hpp"
@@ -338,7 +338,7 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
   selectorWidth = selectorWidth - (ImGui::GetCursorPosX() - pos.x);
   
   // Selector
-  if (CommonViews::SelectorTitleButton(node->connectable->name(), selectorWidth)) {
+  if (CommonViews::SelectorTitleButton(node->connectable->name().substr(0, 30), selectorWidth)) {
     if (hasSelectorOpen) {
       selectorNodeId = 0;
     } else {
@@ -631,9 +631,11 @@ std::shared_ptr<Node> NodeLayoutView::nodeForShaderSourceId(std::string shaderSo
   
   if (idNodeMap.count(shaderSourceId) != 0) {
     std::shared_ptr<Node> node = idNodeMap[shaderSourceId];
-    nodeIdNodeMap[node->id.Get()] = node;
-    idNodeMap[shaderSourceId] = node;
-    return node;
+    if (node != nullptr) {
+      nodeIdNodeMap[node->id.Get()] = node;
+      idNodeMap[shaderSourceId] = node;
+      return node;
+    }
   }
   
   // We don't have a node, create one
@@ -752,6 +754,8 @@ void NodeLayoutView::handleUpdatedSourceNode(std::shared_ptr<Node> node, std::sh
       case VideoSource_shader:
         newSource = VideoSourceService::getService()->replaceShaderVideoSource(std::dynamic_pointer_cast<ShaderSource>(node->source),  shaderSourceTypeForShaderType(tile->shaderType));
         break;
+    case VideoSource_webcam:
+      
   }
   idNodeMap.erase(node->source->id);
   auto newNode = nodeForShaderSourceId(node->source->id, NodeTypeSource, newSource->name(), newSource);
@@ -846,7 +850,7 @@ void NodeLayoutView::handleRightClick()
     }
     if (ImGui::MenuItem("Publish to Syphon"))
     {
-      SyphonService::getService()->publishFbo(node->connectable->frame());
+//      SyphonService::getService()->publishFbo(node->connectable->frame());
     }
     int selectedNodeCount = ed::GetSelectedObjectCount();
     if (selectedNodeCount == 2) {
@@ -1270,108 +1274,128 @@ void NodeLayoutView::drawActionButtons()
 {
   ImVec2 pos = ImGui::GetCursorPos();
   int buttonCount = 7;
-
-  // Set the cursor to the bottom right of the window
-  float shaderInfoPaneWidth = LayoutStateService::getService()->shouldDrawShaderInfo() ? LayoutStateService::getService()->browserSize().x : 0;
-  float buttonWidth = 35.0;
-  float buttonHeight = 35.0;
+  float buttonWidth = 48.0;
+  float buttonHeight = 48.0;
   ImVec2 imageSize = ImVec2(buttonWidth, buttonHeight);
   ImVec2 imageRatio = ImVec2(1.5, 1.5);
-  float actionBarWidth = buttonWidth * buttonCount * imageRatio.x + shaderInfoPaneWidth + 10.0;
+  float shaderInfoPaneWidth = LayoutStateService::getService()->shouldDrawShaderInfo() ? LayoutStateService::getService()->browserSize().x : 0;
+  
+  // Position for either the collapsed or expanded action bar
+  float yPos = getScaledWindowHeight() - LayoutStateService::getService()->audioSettingsViewHeight() - 100.0;
+  
+  if (!LayoutStateService::getService()->actionBarExpanded) {
+    // Draw collapsed state with single button
+    ImVec2 collapsedPos = ImVec2(getScaledWindowWidth() - 70.0 - shaderInfoPaneWidth, yPos);
+    ImGui::SetCursorPos(collapsedPos);
+    
+    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, Colors::ActionBarBackgroundColor.Value);
+    ImGui::BeginChild("##CollapsedActionBar", ImVec2(64.0, 64.0), ImGuiChildFlags_AlwaysUseWindowPadding, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+    
+    if (CommonViews::ImageButton("expand", "back.png", ImVec2(48.0, 48.0), imageRatio, true)) {
+      LayoutStateService::getService()->actionBarExpanded = true;
+    }
+    
+    ImGui::EndChild();
+    ImGui::PopStyleVar(2);
+    ImGui::PopStyleColor();
+    ImGui::SetCursorPos(pos);
+    return;
+  }
 
-  ImGui::SetCursorPos(ImVec2(getScaledWindowWidth() - actionBarWidth, getScaledWindowHeight() - LayoutStateService::getService()->audioSettingsViewHeight() - 100.0));
+  // Draw expanded action bar
+  float actionBarWidth = buttonWidth * buttonCount * imageRatio.x + shaderInfoPaneWidth + 20.0;
+  ImGui::SetCursorPos(ImVec2(getScaledWindowWidth() - actionBarWidth, yPos));
+  
   ImGui::PushStyleColor(ImGuiCol_ChildBg, Colors::ActionBarBackgroundColor.Value);
+  ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
+  ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
   ImGui::SetNextItemAllowOverlap();
-  ImGui::BeginChild("##ActionButtons", ImVec2(actionBarWidth, buttonHeight));
+  ImGui::BeginChild("##ActionButtons", ImVec2(actionBarWidth, 64.0), ImGuiChildFlags_AlwaysUseWindowPadding, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+  // Collapse button
+  if (CommonViews::ImageButton("collapse", "forward.png", ImVec2(48.0, 48.0), imageRatio, true)) {
+    LayoutStateService::getService()->actionBarExpanded = false;
+  }
+  ImGui::SameLine(0, 10);
 
   // Draw the undo button
-  if (CommonViews::ImageButton("undo", "undo.png", imageSize, imageRatio, true))
-  {
+  if (CommonViews::ImageButton("undo", "undo.png", imageSize, imageRatio, true)) {
     if (ActionService::getService()->canUndo()) {
       ActionService::getService()->undo();
     }
   }
   if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
     ImGui::SetTooltip("Undo the last action (Cmd+Z)");
-
-  ImGui::SameLine();
-  CommonViews::HSpacing(1);
-  ImGui::SameLine();
+  ImGui::SameLine(0, 10);
 
   // Draw the redo button
-  if (CommonViews::ImageButton("redo", "redo.png", imageSize, imageRatio, true))
-  {
+  if (CommonViews::ImageButton("redo", "redo.png", imageSize, imageRatio, true)) {
     if (ActionService::getService()->canRedo()) {
       ActionService::getService()->redo();
     }
   }
   if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
     ImGui::SetTooltip("Redo the last undone action (Cmd+Y)");
-
-  ImGui::SameLine();
-  CommonViews::HSpacing(1);
-  ImGui::SameLine();
+  ImGui::SameLine(0, 10);
 
   // Draw the capture screenshot button
-  if (CommonViews::ImageButton("capture", "camera.png", imageSize, imageRatio, true))
-  {
+  if (CommonViews::ImageButton("capture", "camera.png", imageSize, imageRatio, true)) {
     VideoSourceService::getService()->captureOutputWindowScreenshot();
   }
   if (ImGui::IsItemHovered())
     ImGui::SetTooltip("Capture a screenshot of the output window");
-
-  ImGui::SameLine();
-  CommonViews::HSpacing(1);
-  ImGui::SameLine();
+  ImGui::SameLine(0, 10);
 
   // Draw the help button
   std::string helpImage = LayoutStateService::getService()->helpEnabled ? "help.png" : "help-outline.png";
-  if (CommonViews::ImageButton("help", helpImage, imageSize, imageRatio, true))
-  {
+  if (CommonViews::ImageButton("help", helpImage, imageSize, imageRatio, true)) {
     LayoutStateService::getService()->helpEnabled = !LayoutStateService::getService()->helpEnabled;
   }
   if (ImGui::IsItemHovered())
     ImGui::SetTooltip("Toggle help overlay");
-
-  ImGui::SameLine();
-  CommonViews::HSpacing(1);
-  ImGui::SameLine();
+  ImGui::SameLine(0, 10);
 
   // Draw the reset button
-  if (CommonViews::ImageButton("reset", "delete.png", imageSize, imageRatio, true))
-  {
+  if (CommonViews::ImageButton("reset", "delete.png", imageSize, imageRatio, true)) {
     clear();
   }
   if (ImGui::IsItemHovered())
     ImGui::SetTooltip("Remove all nodes and connections (Cmd+N)");
-
-  ImGui::SameLine();
-  CommonViews::HSpacing(1);
-  ImGui::SameLine();
+  ImGui::SameLine(0, 10);
 
   // Draw the navigate to content button
-  if (CommonViews::ImageButton("navigate", "focus.png", imageSize, imageRatio, true))
-  {
+  if (CommonViews::ImageButton("navigate", "focus.png", imageSize, imageRatio, true)) {
     ed::SetCurrentEditor(context);
     ed::NavigateToContent();
     ed::SetCurrentEditor(nullptr);
   }
   if (ImGui::IsItemHovered())
-    ImGui::SetTooltip("Scale to fit content (100%)");
-
-  ImGui::SameLine();
-  CommonViews::HSpacing(1);
-  ImGui::SameLine();
+    ImGui::SetTooltip("Scale to fit content (100\%)");
+  ImGui::SameLine(0, 10);
 
   // Draw the stage mode button
-  if (CommonViews::ImageButton("stage", "stage.png", imageSize, imageRatio, true ))
-  {
+  if (CommonViews::ImageButton("stage", "stage.png", imageSize, imageRatio, true)) {
     LayoutStateService::getService()->stageModeEnabled = true;
   }
   if (ImGui::IsItemHovered())
     ImGui::SetTooltip("Enable stage mode (Cmd+B)");
+  ImGui::SameLine(0, 10);
+
+  // Draw the random strand button
+  if (CommonViews::ImageButton("random", "dice.png", imageSize, imageRatio, true)) {
+    clear();
+    ShaderChainerService::getService()->randomStrand(
+      VideoSourceService::getService()->availableShaderSources,
+      ShaderChainerService::getService()->availableFilterShaders
+    );
+  }
+  if (ImGui::IsItemHovered())
+    ImGui::SetTooltip("Create Random Filter Chain");
 
   ImGui::EndChild();
+  ImGui::PopStyleVar(2);
   ImGui::PopStyleColor();
   ImGui::SetCursorPos(pos);
 }
@@ -1781,7 +1805,7 @@ void NodeLayoutView::drawHelp()
 
 void NodeLayoutView::toggleAudioReactiveParameter(std::shared_ptr<Node> node) {
   if (node->isAudioReactiveParameterActive()) {
-    node->shader->settings->audioReactiveParameter->removeDriver();
+    node->connectable->settingsRef()->audioReactiveParameter->removeDriver();
     return;
   }
   
@@ -1808,5 +1832,5 @@ void NodeLayoutView::toggleAudioReactiveParameter(std::shared_ptr<Node> node) {
       !AudioSourceService::getService()->selectedAudioSource->active) {
     AudioSourceService::getService()->selectedAudioSource->toggle();
   }
-  node->shader->settings->audioReactiveParameter->addDriver(updateParameter);
+  node->connectable->settingsRef()->audioReactiveParameter->addDriver(updateParameter);
 }

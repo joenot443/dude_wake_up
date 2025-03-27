@@ -85,7 +85,11 @@ void LibrarySource::drawSettings()
     FileSource::drawSettings();
     return;
   } else {
-    ImGui::Text("%s", formatString("%0.2f", libraryFile->progress).c_str());
+    float progress = libraryFile->progress * 100.0f;  // Multiply by 100 for percentage
+    ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(0.2f, 0.6f, 1.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(0.2f, 0.6f, 1.0f, 1.0f));
+    ImGui::SliderFloat("Downloading...", &progress, 0.0f, 100.0f, "%.1f%%", ImGuiSliderFlags_NoInput);
+    ImGui::PopStyleColor(2);
   }
 }
 

@@ -13,19 +13,19 @@
 #include "CommonViews.hpp"
 #include "TextEditorView.hpp"
 #include "UUID.hpp"
-#include "dear_widgets.h"
 #include "Strings.hpp"
 #include "ConfigService.hpp"
 
 TextEditorView::TextEditorView(std::shared_ptr<DisplayText> displayText)
-: displayText(displayText), selectedFontIndex(0), id(UUID::generateUUID()) {
+: displayText(displayText), id(UUID::generateUUID()) {
   ofDirectory fontsDir = ofDirectory("fonts/editor");
   fontsDir.listDir();
   
+  // Collect font names
   for (auto& file : fontsDir.getFiles()) {
-    fonts.push_back(Font(removeFileExtension(file.getFileName())));
+    fontNames.push_back(removeFileExtension(file.getFileName()));
   }
-  displayText->font = fonts[selectedFontIndex];
+  
   font.load(displayText->font.path(), displayText->fontSize);
 }
 
@@ -65,19 +65,11 @@ void TextEditorView::draw() {
   
   // Font selection
   CommonViews::sSpacing();
-  ImGui::Text("Font");
-  ImGui::SameLine();
-  if (ImGui::BeginCombo("##FontsValue", fonts[selectedFontIndex].name.c_str())) {
-    for (int i = 0; i < fonts.size(); ++i) {
-      bool isSelected = (selectedFontIndex == i);
-      if (ImGui::Selectable(fonts[i].name.c_str(), isSelected)) {
-        selectedFontIndex = i;
-        displayText->font = fonts[i];
-      }
-      if (isSelected) {
-        ImGui::SetItemDefaultFocus();
-      }
-    }
-    ImGui::EndCombo();
+  CommonViews::ShaderOption(displayText->fontSelector, fontNames);
+  
+  // Update font if selection changed
+  if (displayText->font.name != fontNames[displayText->fontSelector->intValue]) {
+    displayText->font = Font(fontNames[displayText->fontSelector->intValue]);
+    font.load(displayText->font.path(), displayText->fontSize);
   }
 }

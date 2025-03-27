@@ -1,3 +1,0 @@
-# StarryPlanes
-
-Information about StarryPlanes

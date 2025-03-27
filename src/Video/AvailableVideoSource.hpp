@@ -81,10 +81,10 @@ private:
 };
 
 class AvailableVideoSourceLibrary : public AvailableVideoSource
-{
+{ 
 public:
   AvailableVideoSourceLibrary(std::string sourceName, std::shared_ptr<LibraryFile> libraryFile)
-      : AvailableVideoSource(std::move(sourceName), "", VideoSource_library), libraryFile(libraryFile) {}
+      : AvailableVideoSource(std::move(sourceName), libraryFile->category, VideoSource_library), libraryFile(libraryFile) {}
 
   std::shared_ptr<LibraryFile> libraryFile;
   void generatePreview() override
@@ -97,23 +97,28 @@ public:
       return;
     }
 
-    auto fbo = ofFbo();
-    fbo.allocate(426, 240);
-    // Read the file from libraryFile->thumbnailFilename and draw it to the fbo
-    auto img = ofImage();
-    img.load(libraryFile->thumbnailPath());
-    if (!img.isAllocated()) {
-        ofLogError("Main") << "Image not correctly loaded!";
-        return;
+    // Only generate the preview if we haven't already
+    if (!hasPreview || !preview || !preview->isAllocated()) {
+      auto fbo = ofFbo();
+      fbo.allocate(426, 240);
+      // Read the file from libraryFile->thumbnailFilename and draw it to the fbo
+      auto img = ofImage();
+      img.load(libraryFile->thumbnailPath());
+      if (!img.isAllocated()) {
+          ofLogError("Main") << "Image not correctly loaded!";
+          return;
+      }
+      
+      fbo.begin();
+      ofClear(0, 0, 0, 0);  // Clear the FBO first
+      img.draw(0, 0, 426, 240);
+      ofSetColor(0, 0, 0, 128);
+      ofDrawRectangle(0, 0, 426, 240);
+      ofSetColor(255);
+      fbo.end();
+      preview = std::make_shared<ofTexture>(fbo.getTexture());
+      hasPreview = true;
     }
-    
-    fbo.begin();
-    img.draw(0, 0, 426, 240);
-    ofSetColor(0, 0, 0, 128);
-    ofDrawRectangle(0, 0, 426, 240);
-    ofSetColor(255);
-    fbo.end();
-    preview = std::make_shared<ofTexture>(fbo.getTexture());
   }
 
 private:

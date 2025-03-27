@@ -27,6 +27,8 @@ std::vector<std::shared_ptr<Parameter>> ParameterService::allActiveParameters() 
   std::vector<std::shared_ptr<Parameter>> parameters;
   for (auto const &[key, val] : parameterMap) {
     std::shared_ptr<Parameter> param = val;
+    if (param == nullptr) continue;
+    
     if (param->active && !param->hiddenFromNode) {
       parameters.push_back(val);
     }
@@ -36,6 +38,9 @@ std::vector<std::shared_ptr<Parameter>> ParameterService::allActiveParameters() 
   std::sort(parameters.begin(), parameters.end(), [](std::shared_ptr<Parameter> a, std::shared_ptr<Parameter> b) {
     if (a->ownerSettingsId == b->ownerSettingsId) {
       return a->name < b->name;
+    }
+    if (a->ownerName == b->ownerName) {
+      return a->paramId < b->paramId;
     }
     return a->ownerName < b->ownerName;
   });

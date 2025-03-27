@@ -1,3 +1,0 @@
-# DoubleSwirl
-
-Information about DoubleSwirl

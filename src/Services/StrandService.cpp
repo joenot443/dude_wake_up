@@ -94,7 +94,7 @@ std::string StrandService::savePreview(std::string name, std::shared_ptr<Connect
 }
 
 std::string StrandService::strandPreviewPath(std::string name) {
-  return ConfigService::getService()->relativeFilePathWithinNottawaFolder(formatString("%s.png", name.c_str()));
+  return ConfigService::getService()->strandsFolderFilePath() + formatString("%s.png", name.c_str());
 }
 
 void StrandService::clear()
@@ -150,8 +150,12 @@ void StrandService::populateMapFromFolder(std::map<std::string, std::shared_ptr<
   
   ofDirectory directory;
   directory.open(folder);
-  directory.listDir();
-  directory.sort();
+  try {
+    directory.listDir();
+    directory.sort();
+  } catch (std::exception &) {
+    log("Couldn't read Strands directory");
+  }
   
   for (int i = 0; i < directory.size(); i++)
   {

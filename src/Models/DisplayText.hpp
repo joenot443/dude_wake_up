@@ -43,6 +43,8 @@ public:
   std::shared_ptr<Oscillator> xPositionOscillator;
   std::shared_ptr<Oscillator> yPositionOscillator;
   
+  std::shared_ptr<Parameter> fontSelector;
+  
   DisplayText() : font(Font("")),
   id(UUID::generateUUID()),
   xPosition(std::make_shared<Parameter>("xPosition", 0.1, 0.0, 1.0)),
@@ -50,12 +52,23 @@ public:
   strokeWeight(std::make_shared<Parameter>("strokeWeight", 5.0, 0.0, 20.0)),
   color(std::make_shared<Parameter>("color", ParameterType_Color)),
   strokeColor(std::make_shared<Parameter>("strokeColor", ParameterType_Color)),
-  strokeEnabled(std::make_shared<Parameter>("strokeEnabled", ParameterType_Bool)),
+  strokeEnabled(std::make_shared<Parameter>("Stroke", ParameterType_Bool)),
   xPositionOscillator(std::make_shared<WaveformOscillator>(xPosition)),
-  yPositionOscillator(std::make_shared<WaveformOscillator>(yPosition))
+  yPositionOscillator(std::make_shared<WaveformOscillator>(yPosition)),
+  fontSelector(std::make_shared<Parameter>("Font", 0.0, 0.0, 0.0, ParameterType_Int))
   {
+    // Initialize font parameter if not already set
+    std::vector<std::string> fontNames;
+    ofDirectory fontsDir = ofDirectory("fonts/editor");
+    fontsDir.listDir();
+    
+    // Collect font names
+    for (auto& file : fontsDir.getFiles()) {
+      fontNames.push_back(removeFileExtension(file.getFileName()));
+    }
+    fontSelector->options = fontNames;
     oscillators = {xPositionOscillator, yPositionOscillator};
-    parameters = {xPosition, yPosition, strokeEnabled};
+    parameters = {xPosition, yPosition, strokeEnabled, fontSelector};
     registerParameters();
   };
 };

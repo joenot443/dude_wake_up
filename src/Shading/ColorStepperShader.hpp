@@ -31,6 +31,7 @@ struct ColorStepperSettings: public ShaderSettings {
   ShaderSettings(shaderId, j, "ColorStepper") {
     parameters = { speed };
     oscillators = { speedOscillator };
+    audioReactiveParameter = speed;
     load(j);
     registerParameters();
   };

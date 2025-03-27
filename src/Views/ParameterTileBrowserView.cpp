@@ -41,7 +41,7 @@ bool  ParameterTileBrowserView::draw(std::vector<std::shared_ptr<ParameterTileIt
     float yPos = ImGui::GetCursorPosY();
     float endXPos = xPos;
     
-    if (tile->textureID != nullptr)
+    if (tile->textureID != 0)
     {
       auto startPos = ImGui::GetCursorPos();
       ImGui::Image(tile->textureID, TileSize);

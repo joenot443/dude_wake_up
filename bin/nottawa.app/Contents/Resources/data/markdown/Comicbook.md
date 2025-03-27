@@ -1,3 +1,0 @@
-# Comicbook
-
-Information about Comicbook

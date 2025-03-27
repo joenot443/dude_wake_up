@@ -1,3 +1,0 @@
-# ColorStepper
-
-Information about ColorStepper

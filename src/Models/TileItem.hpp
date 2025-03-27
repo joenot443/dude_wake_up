@@ -50,11 +50,18 @@ static std::shared_ptr<TileItem> tileItemForShader(std::shared_ptr<AvailableShad
   return std::make_shared<TileItem>(shader->name, textureId, 0, dragCallback, "", TileType_Shader, shader->type);
 }
 
-static std::vector<std::shared_ptr<TileItem>> tileItemsForShaders(std::vector<std::shared_ptr<AvailableShader>> shaders) {
+static std::vector<std::shared_ptr<TileItem>> tileItemsForShaders(std::vector<std::shared_ptr<AvailableShader>> shaders, std::string category = "") {
   std::vector<std::shared_ptr<TileItem>> tileItems = {};
   for (auto shader : shaders)
   {
-    tileItems.push_back(tileItemForShader(shader));
+    std::shared_ptr<TileItem> tileItem = tileItemForShader(shader);
+    if (tileItem == nullptr) {
+      continue;
+    }
+    if (category.length() != 0) {
+      tileItem->category = category;
+    }
+    tileItems.push_back(tileItem);
   }
   return tileItems;
 }

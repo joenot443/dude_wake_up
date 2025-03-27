@@ -1,3 +1,0 @@
-# Stellar
-
-Information about Stellar

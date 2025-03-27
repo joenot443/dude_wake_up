@@ -1,3 +1,0 @@
-# AudioSquares
-
-Information about AudioSquares

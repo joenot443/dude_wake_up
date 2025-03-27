@@ -21,8 +21,8 @@ struct OnOffSettings: public ShaderSettings {
   std::shared_ptr<Parameter> onOff;
 
   OnOffSettings(std::string shaderId, json j) :
-  onOff(std::make_shared<Parameter>("onOff", ParameterType_Bool)),
-  ShaderSettings(shaderId, j, "OnOff") {
+  onOff(std::make_shared<Parameter>("Enabled", ParameterType_Bool)),
+  ShaderSettings(shaderId, j, "On Off") {
     parameters = { onOff };
     load(j);
     registerParameters();
@@ -62,7 +62,7 @@ struct OnOffShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("OnOff");
+    CommonViews::H3Title("On Off");
 
     CommonViews::ShaderCheckbox(settings->onOff);
   }

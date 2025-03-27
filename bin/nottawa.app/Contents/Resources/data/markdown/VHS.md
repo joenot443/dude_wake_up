@@ -1,3 +1,0 @@
-# VHS
-
-Information about VHS

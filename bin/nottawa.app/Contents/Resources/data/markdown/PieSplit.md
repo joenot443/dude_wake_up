@@ -1,3 +1,0 @@
-# PieSplit
-
-Information about PieSplit

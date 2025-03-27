@@ -9,9 +9,9 @@
 #include "ConfigService.hpp"
 
 void VideoRecorder::setup() {
-  recorder.setVideoCodec("mpeg4");
+//  recorder.setVideoCodec("mpeg4");
 
-  recorder.setFfmpegLocation(ofFilePath::getAbsolutePath("ffmpeg"));
+//  recorder.setFfmpegLocation(ofFilePath::getAbsolutePath("ffmpeg"));
 }
 
 void VideoRecorder::startRecording() {

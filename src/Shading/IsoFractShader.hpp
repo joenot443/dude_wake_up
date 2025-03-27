@@ -44,6 +44,7 @@ struct IsoFractSettings: public ShaderSettings {
     parameters = { alpha, beta, gamma, shaderValue };
     oscillators = { alphaOscillator, betaOscillator, gammaOscillator, shaderValueOscillator };
     load(j);
+    audioReactiveParameter = gamma;
     registerParameters();
   };
 };

@@ -8,8 +8,7 @@
 #ifndef VideoRecorder_hpp
 #define VideoRecorder_hpp
 
-#include <stdio.h>
-#include "ofxVideoRecorder.h"
+#include <string>
 
 struct VideoRecordingSettings {
   std::string filePath;
@@ -27,8 +26,6 @@ public:
   
   bool isRecording();
 
-  
-  ofxVideoRecorder recorder;
 };
 
 #endif /* VideoRecorder_hpp */

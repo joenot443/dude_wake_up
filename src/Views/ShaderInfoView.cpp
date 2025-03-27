@@ -6,6 +6,7 @@
 //
 
 #include "ShaderInfoView.hpp"
+#include "NodeLayoutView.hpp"
 #include "ShaderChainerService.hpp"
 #include "imgui.h"
 #include "CommonViews.hpp"
@@ -17,7 +18,7 @@ void ShaderInfoView::draw() {
   ImGui::BeginChild("ShaderInfoView", ImVec2(size.x - 20.0, size.y - 40.0));
   CommonViews::H2Title("Preview");
   drawPreview();
-  CommonViews::H2Title("Settings");
+  CommonViews::H2Title(selectedShader->name() + " Settings");
   // Wrap in a Child with 20px padding
   auto innerSize = ImGui::GetContentRegionAvail();
   ImGui::PushStyleColor(ImGuiCol_ChildBg, Colors::InnerChildBackgroundColor.Value);

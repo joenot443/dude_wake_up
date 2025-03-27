@@ -8,6 +8,7 @@
 #ifndef MainStageView_hpp
 #define MainStageView_hpp
 
+#include <CoreFoundation/CoreFoundation.h>
 #include "AudioSourceBrowserView.hpp"
 #include "NodeLayoutView.hpp"
 #include "OscillatorView.hpp"

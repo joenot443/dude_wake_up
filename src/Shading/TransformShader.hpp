@@ -88,8 +88,8 @@ public:
     // Define cropping region based on parameters
     float cropX = settings->minX->value * frameWidth;
     float cropY = settings->minY->value * frameHeight;
-    float cropWidth = (settings->maxX->value - settings->minX->value) * frameWidth;
-    float cropHeight = (settings->maxY->value - settings->minY->value) * frameHeight;
+    float cropWidth = (settings->maxX->value - settings->minX->value) * frameWidth * (1 / settings->scale->value);
+    float cropHeight = (settings->maxY->value - settings->minY->value) * frameHeight * (1 / settings->scale->value);
     float scaleX = cropWidth;
     float scaleY = cropHeight;
     
@@ -139,10 +139,12 @@ public:
     
     // Translate to center the scaled image on the canvas
     ofTranslate(translateX + settings->translateX->value * canvas->getWidth(), 
-                translateY - settings->translateY->value * canvas->getHeight());
+                translateY + settings->translateY->value * canvas->getHeight());
     
     // Draw the cropped and scaled texture
-    texture.drawSubsection(0, 0, scaleX, scaleY, cropX, cropY, cropWidth, cropHeight);
+    texture.drawSubsection(0, 0, scaleX, scaleY, 
+                          cropX, cropY, 
+                          cropWidth, cropHeight);
     
     ofPopMatrix();
     

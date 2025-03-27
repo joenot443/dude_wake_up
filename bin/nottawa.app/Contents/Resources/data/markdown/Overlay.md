@@ -1,3 +1,0 @@
-# Overlay
-
-Information about Overlay

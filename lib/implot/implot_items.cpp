@@ -2213,13 +2213,21 @@ void PlotPieChart(const char* const label_ids[], const T* values, int count, dou
                 double angle = a0 + (a1 - a0) * 0.5;
                 ImVec2 pos = PlotToPixels(center.x + 0.5 * radius * cos(angle), center.y + 0.5 * radius * sin(angle),IMPLOT_AUTO,IMPLOT_AUTO);
                 ImU32 col  = CalcTextColor(ImGui::ColorConvertU32ToFloat4(item->Color));
-                draw_list.AddText(pos - size * 0.5f, col, buffer);
+              size = 0.5f * size;
+                draw_list.AddText(ImVec2(pos.x - size.x, pos.y - size.y), col, buffer);
             }
             a0 = a1;
         }
     }
     PopPlotClipRect();
 }
+
+inline ImVec2 operator-(const ImVec2& vec, const ofVec2f& vec2 ) {
+    return ofVec2f(vec.x + vec2.x, vec.y + vec2.y);
+}
+
+
+
 #define INSTANTIATE_MACRO(T) template IMPLOT_API void PlotPieChart<T>(const char* const label_ids[], const T* values, int count, double x, double y, double radius, const char* fmt, double angle0, ImPlotPieChartFlags flags);
 CALL_INSTANTIATE_FOR_NUMERIC_TYPES()
 #undef INSTANTIATE_MACRO
@@ -2342,7 +2350,7 @@ void RenderHeatmap(ImDrawList& draw_list, const T* values, int rows, int cols, d
                     double t = ImClamp(ImRemap01((double)values[i], scale_min, scale_max),0.0,1.0);
                     ImVec4 color = SampleColormap((float)t);
                     ImU32 col = CalcTextColor(color);
-                    draw_list.AddText(px - size * 0.5f, col, buff);
+                    draw_list.AddText(px - 0.5f * size, col, buff);
                     i++;
                 }
             }
@@ -2360,7 +2368,7 @@ void RenderHeatmap(ImDrawList& draw_list, const T* values, int rows, int cols, d
                     double t = ImClamp(ImRemap01((double)values[i], scale_min, scale_max),0.0,1.0);
                     ImVec4 color = SampleColormap((float)t);
                     ImU32 col = CalcTextColor(color);
-                    draw_list.AddText(px - size * 0.5f, col, buff);
+                    draw_list.AddText(px - 0.5f * size, col, buff);
                     i++;
                 }
             }
@@ -2653,8 +2661,8 @@ void PlotText(const char* text, double x, double y, const ImVec2& pixel_offset, 
     PushPlotClipRect();
     ImU32 colTxt = GetStyleColorU32(ImPlotCol_InlayText);
     if (ImHasFlag(flags,ImPlotTextFlags_Vertical)) {
-        ImVec2 siz = CalcTextSizeVertical(text) * 0.5f;
-        ImVec2 ctr = siz * 0.5f;
+        ImVec2 siz =  0.5f * CalcTextSizeVertical(text);
+        ImVec2 ctr = 0.5f * siz;
         ImVec2 pos = PlotToPixels(ImPlotPoint(x,y),IMPLOT_AUTO,IMPLOT_AUTO) + ImVec2(-ctr.x, ctr.y) + pixel_offset;
         if (FitThisFrame() && !ImHasFlag(flags, ImPlotItemFlags_NoFit)) {
             FitPoint(PixelsToPlot(pos));
@@ -2664,7 +2672,7 @@ void PlotText(const char* text, double x, double y, const ImVec2& pixel_offset, 
     }
     else {
         ImVec2 siz = ImGui::CalcTextSize(text);
-        ImVec2 pos = PlotToPixels(ImPlotPoint(x,y),IMPLOT_AUTO,IMPLOT_AUTO) - siz * 0.5f + pixel_offset;
+        ImVec2 pos = PlotToPixels(ImPlotPoint(x,y),IMPLOT_AUTO,IMPLOT_AUTO) - 0.5f * siz + pixel_offset;
         if (FitThisFrame() && !ImHasFlag(flags, ImPlotItemFlags_NoFit)) {
             FitPoint(PixelsToPlot(pos));
             FitPoint(PixelsToPlot(pos+siz));
