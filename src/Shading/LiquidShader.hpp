@@ -65,7 +65,7 @@ public:
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Liquid");
+    
     CommonViews::ShaderParameter(settings->intensity, settings->intensityOscillator);
   }
 };

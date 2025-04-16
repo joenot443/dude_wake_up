@@ -78,7 +78,7 @@ struct MotionBlurTextureShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("MotionBlurTexture");
+    
     if (CommonViews::ShaderOption(settings->texture, settings->textureOptions))
     {
       if (settings->texture->value != 0) {

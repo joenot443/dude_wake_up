@@ -68,7 +68,7 @@ ShaderType type() override {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Octahedron");
+    
     CommonViews::ShaderCheckbox(settings->enableBackground);
   }
 };

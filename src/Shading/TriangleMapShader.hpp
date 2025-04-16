@@ -78,7 +78,7 @@ ShaderType type() override {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("TriangleMap");
+    
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     CommonViews::ShaderParameter(settings->scale, settings->scaleOscillator);
   }

@@ -65,7 +65,7 @@ void TileBrowserView::popHeaderStyles(bool isSelected) {
 }
 
 void TileBrowserView::draw() {
-  auto availableWidth = ImGui::GetContentRegionAvail().x;
+  auto availableWidth = ImGui::GetContentRegionAvail().x - 4.0;
   float spacing = ImGui::GetStyle().ItemSpacing.x;
   
   // Calculate tile width: (available width - 2 * spacing) / 3 tiles
@@ -137,7 +137,7 @@ void TileBrowserView::drawTile(std::shared_ptr<TileItem> tile, const ImVec2& til
     ImVec2 startPos = ImGui::GetCursorScreenPos();
     
     // Create a child frame to contain everything
-    ImGui::BeginChild(formatString("##tile_%s", tile->name.c_str()).c_str(), tileSize, false);
+    ImGui::BeginChild(formatString("##tile_%s", tile->id.c_str()).c_str(), tileSize, false);
     
     ImGui::SetNextItemAllowOverlap();
     
@@ -159,10 +159,12 @@ void TileBrowserView::drawTile(std::shared_ptr<TileItem> tile, const ImVec2& til
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1, 1, 1, 0.1));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1, 1, 1, 0.2));
     ImGui::SetNextItemAllowOverlap();
-    if (ImGui::Button(tile->name.c_str(), tileSize)) {
+    ImGui::PushID(tile->id.c_str());
+    if (ImGui::Button(idAppendedToString(tile->name.c_str(), tile->id).c_str(), tileSize)) {
       if (tileClickCallback != NULL)
       	tileClickCallback(tile);
     }
+    ImGui::PopID();
     ImGui::PopStyleColor(4);
     ImGui::PopFont();
     
@@ -217,9 +219,12 @@ void TileBrowserView::drawTile(std::shared_ptr<TileItem> tile, const ImVec2& til
     if (tile->name.size() > 10) {
       ImGui::PushFont(FontService::getService()->sm);
     }
-    if (ImGui::Button(tile->name.c_str(), tileSize)) {
-      tileClickCallback(tile);
+    ImGui::PushID(tile->id.c_str());
+    if (ImGui::Button(idAppendedToString(tile->name.c_str(), tile->id).c_str(), tileSize)) {
+      if (tileClickCallback != NULL)
+        tileClickCallback(tile);
     }
+    ImGui::PopID();
     if (tile->name.size() > 10) {
       ImGui::PopFont();
     }

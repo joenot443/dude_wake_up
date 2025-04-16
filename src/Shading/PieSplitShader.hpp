@@ -80,7 +80,7 @@ struct PieSplitShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("PieSplit");
+    
   }
 };
 

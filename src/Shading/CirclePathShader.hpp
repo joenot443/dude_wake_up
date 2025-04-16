@@ -97,7 +97,7 @@ ShaderType type() override {
 
   void drawSettings() override
   {
-    CommonViews::H3Title("Circle Path");
+    
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     CommonViews::ShaderParameter(settings->radius, settings->radiusOscillator);
     CommonViews::ShaderParameter(settings->scale, settings->scaleOscillator);

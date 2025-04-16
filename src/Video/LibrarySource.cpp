@@ -102,3 +102,7 @@ void LibrarySource::runSetupOnMainThread(ofEventArgs & args)
     // Now it's safe to call FileSource::setup on the main thread
     FileSource::setup();
 }
+
+void LibrarySource::teardown() {
+  FileSource::teardown();
+}

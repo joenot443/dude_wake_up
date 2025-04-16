@@ -81,7 +81,7 @@ public:
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("CurlySquares");
+    
     
     CommonViews::ShaderColor(settings->color);
     CommonViews::ShaderParameter(settings->size, settings->sizeOscillator);

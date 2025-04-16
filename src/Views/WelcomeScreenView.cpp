@@ -9,15 +9,21 @@
 #include "LayoutStateService.hpp"
 #include "CommonViews.hpp"
 #include "FontService.hpp"
+#include "NodeLayoutView.hpp"
 #include "imgui.h"
 
 void WelcomeScreenView::setup() {
   recentBrowserWindow.setup();
   templateBrowserWindow.setup();
+  ofDirectory dir("images/intro");
+  dir.listDir();
+  ofFile file = dir.getFile(0);
+  player.load(file.pathFS());
+  player.play();
 }
 
 void WelcomeScreenView::update() {
-  
+  player.update();
 }
 
 void WelcomeScreenView::draw() {
@@ -25,21 +31,15 @@ void WelcomeScreenView::draw() {
   ImVec2 helpPos = ImVec2(ImGui::GetWindowWidth() / 4.0, ImGui::GetWindowHeight() / 4.0);
   
   ImGui::SetNextWindowPos(helpPos);
-  ImGui::SetNextWindowSize(helpSize);
+  ImGui::SetNextItemWidth(helpSize.x);
   
   ImGui::OpenPopup("##welcomeScreen");
   
   if (ImGui::BeginPopupModal("##welcomeScreen", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration)) {
     ImVec2 containerSize = ImVec2(ImGui::GetContentRegionAvail().x * 0.8, ImGui::GetContentRegionAvail().y * 0.2);
     float containerOffset = ImGui::GetContentRegionAvail().x * 0.1;
-    float titleWidth = 557.0; // Tested
-    CommonViews::mSpacing();
-    ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - titleWidth) / 2.0);
-    CommonViews::H1Title("welcome to nottawa", false);
-    
-    CommonViews::mSpacing();
-    
-    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - 525.0)/ 2.0);
+    ImTextureID texID = (ImTextureID)(uintptr_t)player.getTexture().getTextureData().textureID;
+    ImGui::Image(texID, ImVec2(helpSize.x, helpSize.x * 0.304));
     
     ImGui::PushFont(FontService::getService()->h3);
     
@@ -60,27 +60,19 @@ void WelcomeScreenView::draw() {
     }
     ImGui::PopFont();
     
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetContentRegionAvail().y -
-                         containerSize.y * 2 - 130.0);
-    
-    
     ImGui::SetCursorPosX(containerOffset);
     // Templates container
     CommonViews::H3Title("Templates", false);
-    CommonViews::sSpacing();
     ImGui::SetCursorPosX(containerOffset);
     ImGui::BeginChild("##templatesContainer", containerSize);
     templateBrowserWindow.draw();
     ImGui::EndChild();
     
-    CommonViews::lSpacing();
-    
     ImGui::SetCursorPosX(containerOffset);
     // Recent container
     CommonViews::H3Title("Recent", false);
-    CommonViews::sSpacing();
     ImGui::SetCursorPosX(containerOffset);
-    ImGui::BeginChild("##recentsContainer", containerSize, ImGuiWindowFlags_HorizontalScrollbar);
+    ImGui::BeginChild("##recentsContainer", containerSize, ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar);
     recentBrowserWindow.draw();
     ImGui::EndChild();
     
@@ -94,6 +86,7 @@ void WelcomeScreenView::draw() {
 
 
 void WelcomeScreenView::newWorkspace() {
+  NodeLayoutView::getInstance()->clear();
   LayoutStateService::getService()->showWelcomeScreen = false;
 }
 

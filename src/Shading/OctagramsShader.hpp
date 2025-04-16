@@ -66,7 +66,7 @@ struct OctagramsShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Octagrams");
+    
 
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
   }

@@ -81,7 +81,7 @@ struct PlasmorShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Plasmor");
+    
 
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
     CommonViews::ShaderParameter(settings->alpha, settings->alphaOscillator); // Add alpha to drawSettings

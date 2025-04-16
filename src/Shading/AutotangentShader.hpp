@@ -20,12 +20,16 @@
 struct AutotangentSettings: public ShaderSettings {
   std::shared_ptr<Parameter> brightness;
   std::shared_ptr<WaveformOscillator> brightnessOscillator;
+  
+  std::shared_ptr<Parameter> color;
 
   AutotangentSettings(std::string shaderId, json j) :
-  brightness(std::make_shared<Parameter>("brightness", 0.2, 0.0, 3.0)),
+  brightness(std::make_shared<Parameter>("Brightness", 0.2, 0.0, 3.0)),
+  color(std::make_shared<Parameter>("Color", ParameterType_Color)),
   brightnessOscillator(std::make_shared<WaveformOscillator>(brightness)),
   ShaderSettings(shaderId, j, "Autotangent") {
-    parameters = { brightness };
+    color->setColor({1.0, 1.0, 1.0, 1.0});
+    parameters = { brightness, color };
     oscillators = { brightnessOscillator };
     load(j);
     registerParameters();
@@ -47,6 +51,10 @@ struct AutotangentShader: Shader {
     shader.setUniform1f("brightness", settings->brightness->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
+    shader.setUniform3f("color",
+      settings->color->color->data()[0],
+      settings->color->color->data()[1],
+      settings->color->color->data()[2]);
     frame->draw(0, 0);
     shader.end();
     canvas->end();
@@ -65,9 +73,8 @@ struct AutotangentShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Autotangent");
-
     CommonViews::ShaderParameter(settings->brightness, settings->brightnessOscillator);
+    CommonViews::ShaderColor(settings->color);
   }
 };
 

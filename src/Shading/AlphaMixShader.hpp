@@ -64,7 +64,7 @@ ShaderType type() override {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("AlphaMix");
+    
 
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderWaveformOscillator);
   }

@@ -73,7 +73,7 @@ struct IsoFractShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("IsoFract");
+    
 
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
     CommonViews::ShaderParameter(settings->alpha, settings->alphaOscillator);

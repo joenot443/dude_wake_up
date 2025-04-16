@@ -22,6 +22,7 @@ class StrandService : public ConfigurableService
 private:
   std::map<std::string, std::shared_ptr<AvailableStrand>> strandMap;
   std::map<std::string, std::shared_ptr<AvailableStrand>> templateMap;
+  std::map<std::string, std::shared_ptr<AvailableStrand>> folderMap;
   
   std::set<std::string> strandNames;
   

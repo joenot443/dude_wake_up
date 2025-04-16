@@ -97,8 +97,6 @@ enum ShaderType {
   ShaderTypeBlend,
   ShaderTypeReflector,
   ShaderTypeWarpspeed,
-  ShaderTypeGodRay,
-  ShaderTypeVoronoiColumns,
   ShaderTypeCore,
   ShaderTypeTwistedCubes,
   ShaderTypeTwistedTrip,
@@ -106,7 +104,6 @@ enum ShaderType {
   ShaderTypeOneBitDither,
   ShaderTypeDirtyPlasma,
   ShaderTypePixelPlay,
-  ShaderTypeTraceAudio,
   ShaderTypeSwirl,
   ShaderTypeIsoFract,
   ShaderTypeOnOff,
@@ -150,6 +147,7 @@ enum ShaderType {
   ShaderTypeWeb,
   ShaderTypeStellar,
   ShaderTypeSpiralWhirlpool,
+  ShaderTypeStrangeScreen,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -214,8 +212,8 @@ static const ShaderType AvailableTransformShaderTypes[] = {
 
 static const ShaderType AvailableFilterShaderTypes[] = {
   ShaderTypeCubify,
-  ShaderTypeGodRay,
   ShaderTypeCanny,
+  ShaderTypeStrangeScreen,
   ShaderTypeComicbook,
   ShaderTypeGameboy,
   ShaderTypeGlitch,
@@ -230,7 +228,6 @@ static const ShaderType AvailableFilterShaderTypes[] = {
   ShaderTypeVHS,
   ShaderTypeOldTV,
   ShaderTypeOneBitDither,
-  ShaderTypeTraceAudio,
 };
 
 static const ShaderType ExcludedRandomShaderTypes[] = {
@@ -243,9 +240,7 @@ static const ShaderType ExcludedRandomShaderTypes[] = {
   ShaderTypeColorPass,
   ShaderTypeColorStepper,
   ShaderTypePaint,
-  ShaderTypeTraceAudio,
   ShaderTypeTriple,
-  ShaderTypeGodRay,
   ShaderTypeHalfTone
 };
 
@@ -281,6 +276,8 @@ static std::vector<ShaderType> AllShaderTypes() {
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) { // ShaderNames
+    case ShaderTypeStrangeScreen:
+      return "StrangeScreen";
     case ShaderTypeSpiralWhirlpool:
       return "SpiralWhirlpool";
     case ShaderTypeStellar:
@@ -367,8 +364,6 @@ static std::string shaderTypeName(ShaderType type) {
       return "Isofractal";
     case ShaderTypeSwirl:
       return "Swirl";
-    case ShaderTypeTraceAudio:
-      return "Trace";
     case ShaderTypePixelPlay:
       return "PixelPlay";
     case ShaderTypeDirtyPlasma:
@@ -383,10 +378,6 @@ static std::string shaderTypeName(ShaderType type) {
       return "Vortex Cubes";
     case ShaderTypeCore:
       return "Core";
-    case ShaderTypeVoronoiColumns:
-      return "VoronoiColumns";
-    case ShaderTypeGodRay:
-      return "GodRay";
     case ShaderTypeWarpspeed:
       return "Warpspeed";
     case ShaderTypeReflector:

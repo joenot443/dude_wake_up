@@ -77,7 +77,7 @@ struct ReflectorShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Reflector");
+    
 
     CommonViews::ShaderParameter(settings->polyU, settings->polyUOscillator);
     CommonViews::ShaderParameter(settings->polyV, settings->polyVOscillator);

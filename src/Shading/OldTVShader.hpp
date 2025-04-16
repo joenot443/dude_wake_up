@@ -59,7 +59,7 @@ struct OldTVShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("OldTV");
+    
   }
 };
 

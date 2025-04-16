@@ -64,8 +64,10 @@ struct AudioBlocksShader: Shader {
     shader.setUniform1f("audio", settings->size->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
-    if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() > 0)
-      shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0], 256);
+    if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() > 0) {
+      shader.setUniform1f("audioLow", source->audioAnalysis.lows->value);
+      shader.setUniform1f("audioHigh", source->audioAnalysis.highs->value);
+    }
 
     frame->draw(0, 0);
     shader.end();
@@ -85,7 +87,6 @@ struct AudioBlocksShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("AudioBlocks");
 
     CommonViews::ShaderParameter(settings->size, settings->sizeOscillator);
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);

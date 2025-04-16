@@ -89,7 +89,7 @@ struct SpiralShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Spiral");
+    
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     CommonViews::ShaderParameter(settings->size, settings->sizeOscillator);

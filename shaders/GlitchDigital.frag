@@ -4,6 +4,8 @@ uniform sampler2D tex;
 uniform sampler2D tex2;
 uniform vec2 dimensions;
 uniform float time;
+uniform float amount;
+uniform float threshold;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -14,8 +16,10 @@ void main(  )
   vec2 uv_noise = block / vec2(64);
   uv_noise += floor(vec2(time) * vec2(1234.0, 3543.0)) / vec2(64);
   
-  float block_thresh = pow(fract(time * 1236.0453), 2.0);
-  float line_thresh = pow(fract(time * 2236.0453), 3.0) * 0.7;
+  
+  // thresh
+  float block_thresh = pow(fract(time * 1236.0453), 2.0) * 0.2 * threshold;
+  float line_thresh = pow(fract(time * 2236.0453), 3.0) * 2.0 * threshold;
   
   vec2 uv_r = uv;
   vec2 uv_g = uv;
@@ -26,9 +30,9 @@ void main(  )
     texture(tex2, vec2(uv_noise.y, 0.0)).g < line_thresh) {
 
     vec2 dist = (fract(uv_noise) - 0.5) * 0.3;
-    uv_r += dist * 0.1;
-    uv_g += dist * 0.2;
-    uv_b += dist * 0.125;
+    uv_r += dist * 0.1 * amount;
+    uv_g += dist * 0.2 * amount;
+    uv_b += dist * 0.125 * amount;
   }
 
   outputColor.r = texture(tex, uv_r).r;

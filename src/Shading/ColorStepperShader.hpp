@@ -48,6 +48,9 @@ struct ColorStepperShader: Shader {
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
+    // Clear the frame
+    ofClear(0, 0, 0, 255);
+    ofClear(0, 0, 0, 0);
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("speed", settings->speed->max - settings->speed->value);
     shader.setUniform1f("smoothness", settings->smoothness->value);
@@ -70,8 +73,6 @@ ShaderType type() override {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("ColorStepper");
-
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     CommonViews::ShaderParameter(settings->smoothness, settings->smoothnessOscillator);
   }

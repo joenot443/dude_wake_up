@@ -72,7 +72,7 @@ struct DiscoAudioShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("DiscoAudio");
+    
 
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
   }

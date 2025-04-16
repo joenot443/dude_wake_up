@@ -86,7 +86,7 @@ struct PerplexionShader: Shader {
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("Perplexion");
+    
     
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);

@@ -90,7 +90,7 @@ struct MaskShader : Shader
 
   void drawSettings() override
   {
-    CommonViews::H3Title("Mask");
+    
     CommonViews::ShaderParameter(settings->blend, settings->blendOscillator);
     CommonViews::ShaderCheckbox(settings->swap); // Add swap to settings view
   }

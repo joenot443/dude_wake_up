@@ -521,27 +521,32 @@ void VideoSourceService::appendConfig(json j)
   std::string sourceId = j["id"];
   ImVec2 position = ImVec2(j["x"], j["y"]);
   std::shared_ptr<VideoSource> source;
+  std::string name = "New Source";
+  if (j.contains("sourceName")) {
+    name = j["sourceName"];
+  }
+    
   switch (type)
   {
     case VideoSource_empty:
       break;
     case VideoSource_file:
-      source = makeFileVideoSource(j["sourceName"], j["path"], position, sourceId, j);
+      source = makeFileVideoSource(name, j["path"], position, sourceId, j);
       break;
     case VideoSource_webcam:
-      source = makeWebcamVideoSource(j["sourceName"], 0, position, sourceId, j);
+      source = makeWebcamVideoSource(name, 0, position, sourceId, j);
       break;
     case VideoSource_shader:
       source = makeShaderVideoSource(j["shaderSourceType"], position, sourceId, j);
       break;
     case VideoSource_image:
-      source = makeImageVideoSource(j["sourceName"], j["path"], position, sourceId, j);
+      source = makeImageVideoSource(name, j["path"], position, sourceId, j);
       break;
     case VideoSource_text:
-      source = makeTextVideoSource(j["sourceName"], position, sourceId, j);
+      source = makeTextVideoSource(name, position, sourceId, j);
       break;
     case VideoSource_icon:
-      source = makeIconVideoSource(j["sourceName"], position, sourceId, j);
+      source = makeIconVideoSource(name, position, sourceId, j);
       break;
     case VideoSource_library:
       std::shared_ptr<LibraryFile> libraryFile = LibraryService::getService()->libraryFileForId(j["libraryFileId"]);

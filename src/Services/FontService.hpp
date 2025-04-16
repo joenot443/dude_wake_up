@@ -9,6 +9,8 @@
 #define FontService_hpp
 
 #include <stdio.h>
+// load the fonts here and then set them in the TextSource init directly
+#include "Font.hpp"
 #include "ofxImGui.h"
 
 class FontService
@@ -35,13 +37,16 @@ public:
   ImFont * xLargeIcon;
   
   ImVec2 paddingH1 = ImVec2(0, 30);
-  ImVec2 paddingH2 = ImVec2(0, 12);
+  ImVec2 paddingH2 = ImVec2(0, 8);
   ImVec2 paddingH3 = ImVec2(0, 10);
   ImVec2 paddingH4 = ImVec2(0, 10);
 
   // Redesign
   
   ImFont *pN;
+  
+  std::vector<Font> fonts;
+  std::vector<std::string> fontNames;
   
   void loadFonts();
   void addFontToGui(ofxImGui::Gui *gui);

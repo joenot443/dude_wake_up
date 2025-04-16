@@ -23,7 +23,7 @@ public:
   bool selected = false;
 
   AvailableStrandTileItem(std::shared_ptr<AvailableStrand> availableStrand, ImTextureID textureID, int index, std::function<void()> dragCallback)
-      : availableStrand(availableStrand), textureID(textureID), index(index), selected(selected), TileItem(availableStrand->name, textureID, index, dragCallback){};
+  : availableStrand(availableStrand), textureID(textureID), index(index), TileItem(availableStrand->name, textureID, index, dragCallback, "", TileType_Strand){};
 };
 
 class StrandBrowserView {

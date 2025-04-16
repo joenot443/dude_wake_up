@@ -127,7 +127,7 @@ ShaderType type() override {
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("Snowfall");
+    
     CommonViews::ShaderParameter(settings->flakesCount, settings->flakesCountOscillator);
     CommonViews::ShaderParameter(settings->descentSpeed, settings->descentSpeedOscillator);
     CommonViews::ShaderParameter(settings->size, settings->sizeOscillator);

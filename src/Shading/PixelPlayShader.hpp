@@ -72,7 +72,7 @@ struct PixelPlayShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("PixelPlay");
+    
 
     CommonViews::ShaderParameter(settings->displaceFactor, settings->displaceFactorOscillator);
     CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);

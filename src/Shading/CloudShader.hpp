@@ -69,7 +69,6 @@ shader.load("shaders/clouds");
   
 
   void drawSettings() override {
-    ImGui::Text("Clouds");
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
   }
 

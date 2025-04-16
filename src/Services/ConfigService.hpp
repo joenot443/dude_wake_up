@@ -29,6 +29,7 @@ static const std::string NameJsonKey = "name";
 static const std::string PreviewPathJsonKey = "preview";
 static const std::string LayoutJsonKey = "layout";
 static const std::string ParametersJsonKey = "parameters";
+static const std::string WorkspaceJsonKey = "workspace";
 static const std::string StrandsJsonKey = "strands";
 static const std::string AudioJsonKey = "audio";
 
@@ -91,7 +92,6 @@ public:
   void loadDefaultConfigFile();
 
   
-  // Full Config
   void saveConfigFile(std::string path);
   void loadConfigFile(std::string path);
   json currentConfig();
@@ -107,11 +107,12 @@ public:
   
   json jsonFromParameters(std::vector<Parameter *> parameters);
   
-  // Workspaces
+  // Workspaces ("full" config files")
   std::shared_ptr<Workspace> currentWorkspace;
   bool isEditingWorkspace();
   void saveCurrentWorkspace();
   void saveNewWorkspace();
+  void updateWorkspace(std::shared_ptr<Workspace> workspace);
   void saveWorkspace(std::shared_ptr<Workspace> workspace);
   bool loadWorkspaceDialogue();
   void loadWorkspace(std::shared_ptr<Workspace> workspace);

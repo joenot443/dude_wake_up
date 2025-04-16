@@ -75,7 +75,7 @@ std::string ConfigService::appSupportFilePath() {
 
 std::string ConfigService::templatesFolderFilePath()
 {
-  return "templates";
+  return "misc/templates";
 }
 
 json jsonFromParameters(std::vector<Parameter *> parameters)
@@ -347,6 +347,9 @@ json ConfigService::currentConfig()
   config[StrandsJsonKey] = StrandService::getService()->config();
   config[ParametersJsonKey] = ParameterService::getService()->config();
   config[AudioJsonKey] = AudioSourceService::getService()->config();
+  if (currentWorkspace != nullptr) {
+    config[WorkspaceJsonKey] = currentWorkspace->serialize();
+  }
   config[ConfigTypeKey] = ConfigTypeFull;
   return config;
 }
@@ -384,11 +387,17 @@ void ConfigService::saveConfigFile(std::string path)
 void ConfigService::saveWorkspace(std::shared_ptr<Workspace> workspace) {
   currentWorkspace = workspace;
   saveConfigFile(workspace->path);
+  updateWorkspace(workspace);
 }
 
 void ConfigService::loadWorkspace(std::shared_ptr<Workspace> workspace) {
   currentWorkspace = workspace;
   loadConfigFile(workspace->path);
+  updateWorkspace(workspace);
+}
+
+void ConfigService::updateWorkspace(std::shared_ptr<Workspace> workspace) {
+  ofSetWindowTitle(workspace->name);
 }
 
 bool ConfigService::loadWorkspaceDialogue() {
@@ -491,59 +500,110 @@ void ConfigService::loadConfigFile(std::string path)
     isLoading = false;
     return;
   }
-  try {
-    
-    
-    if (data[LayoutJsonKey].is_object())
-    {
+  
+  // Load Layout State
+  if (data[LayoutJsonKey].is_object())
+  {
+    try {
       LayoutStateService::getService()->loadConfig(data[LayoutJsonKey]);
+    } catch (const json::exception& e) {
+      std::cerr << "Error loading Layout config: " << e.what() << std::endl;
     }
-    
-    if (data[MidiJsonKey].is_object())
-    {
+  }
+  
+  // Load MIDI Service Config
+  if (data[MidiJsonKey].is_object())
+  {
+    try {
       MidiService::getService()->loadConfig(data[MidiJsonKey]);
+    } catch (const json::exception& e) {
+      std::cerr << "Error loading MIDI config: " << e.what() << std::endl;
     }
-    
-    if (data[OscJsonKey].is_object())
-    {
-      OscillationService::getService()->loadConfig(data[OscJsonKey]);
-    }
-    
-    if (data[SourcesJsonKey].is_object())
-    {
+  }
+  
+  // Load Video Source Service Config
+  if (data[SourcesJsonKey].is_object())
+  {
+    try {
       VideoSourceService::getService()->clear();
       VideoSourceService::getService()->loadConfig(data[SourcesJsonKey]);
+    } catch (const json::exception& e) {
+      std::cerr << "Error loading Sources config: " << e.what() << std::endl;
     }
-    
-    if (data[ShadersJsonKey].is_object())
-    {
+  }
+  
+  // Load Shader Chainer Service Config
+  if (data[ShadersJsonKey].is_object())
+  {
+    try {
       ShaderChainerService::getService()->clear();
       ShaderChainerService::getService()->loadConfig(data[ShadersJsonKey]);
+    } catch (const json::exception& e) {
+      std::cerr << "Error loading Shaders config: " << e.what() << std::endl;
     }
-    
-    if (data[ConnectionsJsonKey].is_object())
-    {
-      ShaderChainerService::getService()->loadConnectionsConfig(data[ConnectionsJsonKey]);
-    }
-    
-    if (data[StrandsJsonKey].is_object())
-    {
-      StrandService::getService()->loadConfig(data[StrandsJsonKey]);
-    }
-    
-    if (data[ParametersJsonKey].is_object())
-    {
-      ParameterService::getService()->loadConfig(data[ParametersJsonKey]);
-    }
-    
-    if (data[AudioJsonKey].is_object())
-    {
-      AudioSourceService::getService()->loadConfig(data[AudioJsonKey]);
-    }
-    
-  } catch (const json::exception& e) {
-    std::cerr << "Error reading or parsing config file: " << e.what() << std::endl;
   }
+  
+  // Load Connections Config
+  if (data[ConnectionsJsonKey].is_object())
+  {
+    try {
+      ShaderChainerService::getService()->loadConnectionsConfig(data[ConnectionsJsonKey]);
+    } catch (const json::exception& e) {
+      std::cerr << "Error loading Connections config: " << e.what() << std::endl;
+    }
+  }
+  
+  // Load Oscillation Service Config
+  if (data[OscJsonKey].is_object())
+  {
+    try {
+      OscillationService::getService()->loadConfig(data[OscJsonKey]);
+    } catch (const json::exception& e) {
+      std::cerr << "Error loading OSC config: " << e.what() << std::endl;
+    }
+  }
+  
+  // Load Strand Service Config
+  if (data[StrandsJsonKey].is_object())
+  {
+    try {
+      StrandService::getService()->loadConfig(data[StrandsJsonKey]);
+    } catch (const json::exception& e) {
+      std::cerr << "Error loading Strands config: " << e.what() << std::endl;
+    }
+  }
+  
+  // Load Parameter Service Config
+  if (data[ParametersJsonKey].is_object())
+  {
+    try {
+      ParameterService::getService()->loadConfig(data[ParametersJsonKey]);
+    } catch (const json::exception& e) {
+      std::cerr << "Error loading Parameters config: " << e.what() << std::endl;
+    }
+  }
+  
+  // Load Audio Source Service Config
+  if (data[AudioJsonKey].is_object())
+  {
+    try {
+      AudioSourceService::getService()->loadConfig(data[AudioJsonKey]);
+    } catch (const json::exception& e) {
+      std::cerr << "Error loading Audio config: " << e.what() << std::endl;
+    }
+  }
+  
+  // Load Workspace Config
+  if (data[WorkspaceJsonKey].is_object()) {
+    try {
+      std::string workspaceName = data[WorkspaceJsonKey]["name"];
+      std::string workspacePath = data[WorkspaceJsonKey]["path"];
+      loadWorkspace(std::make_shared<Workspace>(workspaceName, workspacePath));
+    } catch (const json::exception& e) {
+        std::cerr << "Error loading Workspace config: " << e.what() << std::endl;
+    }
+  }
+    
   isLoading = false;
 }
 

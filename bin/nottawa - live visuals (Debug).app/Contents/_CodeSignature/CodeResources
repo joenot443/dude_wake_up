@@ -4,6 +4,14 @@
 <dict>
 	<key>files</key>
 	<dict>
+		<key>Resources/.gitignore</key>
+		<data>
+		PwXlDHrPW8ijMg/yUmr6jqjTdRs=
+		</data>
+		<key>Resources/README.md</key>
+		<data>
+		n4ZVV8UhErn+1COA3ZrDFYao2Tw=
+		</data>
 		<key>Resources/data/audio/.DS_Store</key>
 		<data>
 		3y++sUAKzaCQmjLBz2v0kvESHgc=
@@ -50,7 +58,11 @@
 		</data>
 		<key>Resources/data/fonts/.DS_Store</key>
 		<data>
-		5xr7hDgF/go7PgsVUMbvCsd+QTw=
+		7SQjwFBO9Aih3C1LPPrIufHS+Ik=
+		</data>
+		<key>Resources/data/fonts/Material Icons- Regular.ttf</key>
+		<data>
+		fgLD8AVTL/TSQUhWfIQIl1anhIo=
 		</data>
 		<key>Resources/data/fonts/MaterialIcons-Regular.ttf</key>
 		<data>
@@ -60,9 +72,29 @@
 		<data>
 		rer3XohmbhmHJVvgnnvMRSu0ci0=
 		</data>
+		<key>Resources/data/fonts/Open Font Icons.ttf</key>
+		<data>
+		RidD9lEUc4M8oD/HKPMozLfkwgA=
+		</data>
 		<key>Resources/data/fonts/OpenFontIcons.ttf</key>
 		<data>
 		RidD9lEUc4M8oD/HKPMozLfkwgA=
+		</data>
+		<key>Resources/data/fonts/Roboto- Bold.ttf</key>
+		<data>
+		AT8bvLvYCZGl8A/KUqkNDXq4uB8=
+		</data>
+		<key>Resources/data/fonts/Roboto- Italic.ttf</key>
+		<data>
+		IEINtOE9ZUy+IrX7pilseKY2BTc=
+		</data>
+		<key>Resources/data/fonts/Roboto- Medium.ttf</key>
+		<data>
+		/dyLHGiO87rtDVpGq/XwHw7a8Cs=
+		</data>
+		<key>Resources/data/fonts/Roboto- Regular.ttf</key>
+		<data>
+		hNECSIc4sOu8elCHlz7/vVTJW9U=
 		</data>
 		<key>Resources/data/fonts/Roboto-Black.ttf</key>
 		<data>
@@ -114,21 +146,77 @@
 		</data>
 		<key>Resources/data/fonts/editor/.DS_Store</key>
 		<data>
-		3y++sUAKzaCQmjLBz2v0kvESHgc=
+		elHbcZuyLx7lOdiH5zACeXGCaCs=
+		</data>
+		<key>Resources/data/fonts/editor/Abril Fatface.otf</key>
+		<data>
+		SKmG52gmNEagA4HhfucbzpKX/I8=
+		</data>
+		<key>Resources/data/fonts/editor/Alex Brush.ttf</key>
+		<data>
+		CwYl0NlGtu51qZ+J9P3oPIhkR2k=
 		</data>
 		<key>Resources/data/fonts/editor/Alkatra.ttf</key>
 		<data>
 		uCxZJ9LAiY7Aonm4XESI/YwSDCI=
 		</data>
+		<key>Resources/data/fonts/editor/Aller.ttf</key>
+		<data>
+		Kck0aFG6pCSqCZfJBBFM70fD1GY=
+		</data>
+		<key>Resources/data/fonts/editor/Allura.otf</key>
+		<data>
+		J2QypF83B8E+7LCAjotu2atBOOo=
+		</data>
+		<key>Resources/data/fonts/editor/Amatic S C.ttf</key>
+		<data>
+		eD8mJ+DBeJDxsvxBQ94/sNJBsJk=
+		</data>
+		<key>Resources/data/fonts/editor/Amatic.ttf</key>
+		<data>
+		+4xeiZPUuuxSADSZ7CxVs8sLFSM=
+		</data>
 		<key>Resources/data/fonts/editor/American Captain.ttf</key>
 		<data>
 		wC998M4YYl6IOIAkHJwFKafXSsY=
+		</data>
+		<key>Resources/data/fonts/editor/Antonio.ttf</key>
+		<data>
+		qIWvE3HYR4ZnkD+Y89Vd99bD06c=
 		</data>
 		<key>Resources/data/fonts/editor/Baskerville.ttf</key>
 		<data>
 		7XBtJ0c6CVNtlP7Y/uSAn9pxN1k=
 		</data>
-		<key>Resources/data/fonts/editor/DeliciousHandrawn.ttf</key>
+		<key>Resources/data/fonts/editor/Bebas.ttf</key>
+		<data>
+		ssHzjvjhlWyrB0y5nUl6+ZIbkto=
+		</data>
+		<key>Resources/data/fonts/editor/Blackjack.otf</key>
+		<data>
+		Gyp5s79o1EwGqeIFwLg3iZVJFUU=
+		</data>
+		<key>Resources/data/fonts/editor/Caviar Dreams.ttf</key>
+		<data>
+		/brmgOU+p/XHpH1ZvFWIVT/5f0A=
+		</data>
+		<key>Resources/data/fonts/editor/Chunk Five.otf</key>
+		<data>
+		hBH3pl2OrKPaeiwczcd5NlE/B2U=
+		</data>
+		<key>Resources/data/fonts/editor/Cooper Hewitt.otf</key>
+		<data>
+		o4M9RARMZMAppbbtwv65wxWMlNU=
+		</data>
+		<key>Resources/data/fonts/editor/Courier Prime.ttf</key>
+		<data>
+		wv4ezfN+GWfdUCbUwv9q7J03hFk=
+		</data>
+		<key>Resources/data/fonts/editor/Dancing Script.otf</key>
+		<data>
+		Smz8VW7CtJB8zDgNxqNzgHMNvAo=
+		</data>
+		<key>Resources/data/fonts/editor/Delicious Handrawn.ttf</key>
 		<data>
 		nkgZIF45M58jRMIvV5QL1GVRtgA=
 		</data>
@@ -136,13 +224,105 @@
 		<data>
 		HOHtMStBojfLJTxwYpDA/XKHhZ0=
 		</data>
-		<key>Resources/data/fonts/editor/LemonMilk.otf</key>
+		<key>Resources/data/fonts/editor/Exo.otf</key>
+		<data>
+		tZ36E7Xgao2YA3m2Lr/2YkN0luc=
+		</data>
+		<key>Resources/data/fonts/editor/Fira  Sans.otf</key>
+		<data>
+		MS8FECXh6KgOSWUQFM2lUHuzlgw=
+		</data>
+		<key>Resources/data/fonts/editor/Grand Hotel.otf</key>
+		<data>
+		o6z260Qfxjc0/9J98aYk+Bj5V3A=
+		</data>
+		<key>Resources/data/fonts/editor/Great Vibes.otf</key>
+		<data>
+		engniDfiaexdC/M4U0eBuUwL74w=
+		</data>
+		<key>Resources/data/fonts/editor/Josefin Sans.ttf</key>
+		<data>
+		lfQF1mV4rmOeFUpSSfRZAJhoS6E=
+		</data>
+		<key>Resources/data/fonts/editor/Kaushan Script.otf</key>
+		<data>
+		OmZOsSr3EOTAr1dwQEOme5IzmX0=
+		</data>
+		<key>Resources/data/fonts/editor/League Gothic.otf</key>
+		<data>
+		odmFcYuQumVvod0dcv1myYmgwi0=
+		</data>
+		<key>Resources/data/fonts/editor/Lemon Milk.otf</key>
 		<data>
 		H2YIRff+QO5IKqfM2n0QHSDYcPo=
+		</data>
+		<key>Resources/data/fonts/editor/Lobster Two.otf</key>
+		<data>
+		gDdJSgUeAluCFt2THoSSKVm39a0=
+		</data>
+		<key>Resources/data/fonts/editor/Lobster.otf</key>
+		<data>
+		DqADWhQruJb/Eqfzqq9jEqCfv4c=
+		</data>
+		<key>Resources/data/fonts/editor/Montserrat Alternates.otf</key>
+		<data>
+		/4y1Mqk+sObU8VZYigfLhAoaIGA=
+		</data>
+		<key>Resources/data/fonts/editor/Montserrat.otf</key>
+		<data>
+		o/VAPibfng38q9XBe98pZi++lsI=
+		</data>
+		<key>Resources/data/fonts/editor/PT Sans.ttf</key>
+		<data>
+		Wi/Sx8s8Ank2toihEzr6QqMkubg=
+		</data>
+		<key>Resources/data/fonts/editor/Pacifico.ttf</key>
+		<data>
+		4saSQHgYO9n+5y6KazmS3GN1gPA=
+		</data>
+		<key>Resources/data/fonts/editor/Playfair.otf</key>
+		<data>
+		tPKq4XpGZtKmnL8s3gKpw3ivQVY=
+		</data>
+		<key>Resources/data/fonts/editor/Podarok.ttf</key>
+		<data>
+		hp48j409TVSuRjCJhAS2J9zkzvM=
 		</data>
 		<key>Resources/data/fonts/editor/Roboto.ttf</key>
 		<data>
 		TEsiJhfs3aFj4BqIwZGrClDDNs8=
+		</data>
+		<key>Resources/data/fonts/editor/Seaside.ttf</key>
+		<data>
+		RashjB7oWCkeQnJfJgLTFPI/4EU=
+		</data>
+		<key>Resources/data/fonts/editor/Sofia.otf</key>
+		<data>
+		9Oh/pW3QrOgY/9pGT+3bae+ZnJc=
+		</data>
+		<key>Resources/data/fonts/editor/Source Sans Pro.otf</key>
+		<data>
+		fjepGWCGOlivRKNODE/tf143bQQ=
+		</data>
+		<key>Resources/data/fonts/editor/VCR.ttf</key>
+		<data>
+		aEN4LPMx3FO1kTwVvz7mfO74NwU=
+		</data>
+		<key>Resources/data/fonts/editor/Veter.ttf</key>
+		<data>
+		0MxRa417gqx2t2Zz+rCD1T8nRzA=
+		</data>
+		<key>Resources/data/fonts/editor/Windsong.ttf</key>
+		<data>
+		yLpvYMCJEEl8zx4PTp6FUaKbqUg=
+		</data>
+		<key>Resources/data/fonts/editor/remove.py</key>
+		<data>
+		ZPviizLDA3Pt5pqrJjUvJ1K1Bmc=
+		</data>
+		<key>Resources/data/fonts/fa-400.ttf</key>
+		<data>
+		TwxaL9PbSu7YG4pf8JX5PQN7/ow=
 		</data>
 		<key>Resources/data/fonts/fa-regular-400.ttf</key>
 		<data>
@@ -154,7 +334,7 @@
 		</data>
 		<key>Resources/data/images/.DS_Store</key>
 		<data>
-		gw/zOnMe71D6iLWZWXIgcdoNsKg=
+		cSMsJOnKV8AoLpkD9yQXkCCRDyY=
 		</data>
 		<key>Resources/data/images/basic/star.png</key>
 		<data>
@@ -190,7 +370,7 @@
 		</data>
 		<key>Resources/data/images/icons/flip.png</key>
 		<data>
-		w/UeoGLEdTgx7b5G0jpf4nUQHj8=
+		RO2MS0ILjnszwFoIgx07eXtYgxU=
 		</data>
 		<key>Resources/data/images/icons/focus.png</key>
 		<data>
@@ -226,7 +406,7 @@
 		</data>
 		<key>Resources/data/images/icons/music.png</key>
 		<data>
-		ULLF8oIdhS/9oVKfIgv7ajcN0Uk=
+		ACsj/APn0MsbRautywrz971XlzY=
 		</data>
 		<key>Resources/data/images/icons/no-music.png</key>
 		<data>
@@ -246,7 +426,7 @@
 		</data>
 		<key>Resources/data/images/icons/reset.png</key>
 		<data>
-		P0+qn4loQaxFujfhzS9b9GPEaJE=
+		wdo9JPmKN98v1ytJ6fm9741VuFI=
 		</data>
 		<key>Resources/data/images/icons/right-arrow.png</key>
 		<data>
@@ -276,9 +456,17 @@
 		<data>
 		L/wilLHV32PKflQE7OJbL6iCL+E=
 		</data>
+		<key>Resources/data/images/intro.mov</key>
+		<data>
+		ZI7O9QBkeJV3X0m3WnUQxasrleE=
+		</data>
+		<key>Resources/data/images/intro/intro.mov</key>
+		<data>
+		ZI7O9QBkeJV3X0m3WnUQxasrleE=
+		</data>
 		<key>Resources/data/images/stylized/.DS_Store</key>
 		<data>
-		vB3saQDliZ0MjWw3YlHrSWFwrks=
+		iczH3bdhLGw0teqBgHecYdwCB7E=
 		</data>
 		<key>Resources/data/images/stylized/1.png</key>
 		<data>
@@ -1588,6 +1776,10 @@
 		<data>
 		7lTHYRBJOiDAj1ycrAF1Okvu0HA=
 		</data>
+		<key>Resources/data/markdown/StrangeScreen.md</key>
+		<data>
+		omeGULSm4DUVoN9YIeNauK1RRNc=
+		</data>
 		<key>Resources/data/markdown/Swirl.md</key>
 		<data>
 		aM29LoqKDb7GglLlMogotLc2//o=
@@ -1702,11 +1894,23 @@
 		</data>
 		<key>Resources/data/misc/.DS_Store</key>
 		<data>
-		YG+/Gt6XMMAV6/DadoFTtMUzu/s=
+		lGYGI3PKL7fCmO3jM9mqbh3Z0+A=
+		</data>
+		<key>Resources/data/misc/nottawa_final.json</key>
+		<data>
+		EVZcM5XCnJgGLYTEt0/F+6V4rqc=
 		</data>
 		<key>Resources/data/misc/strings.json</key>
 		<data>
 		MEYOFkyMX3+tKh2c2qtR5Wt7pe0=
+		</data>
+		<key>Resources/data/misc/templates/nottawa_final.json</key>
+		<data>
+		oI6VjUg1qsk81Tu5iOfr5lo9gqg=
+		</data>
+		<key>Resources/data/misc/templates/nottawa_final.png</key>
+		<data>
+		wB71LZzUjGGZTdmtlIXCJDw9WBg=
 		</data>
 		<key>Resources/data/shaders/.DS_Store</key>
 		<data>
@@ -1746,7 +1950,7 @@
 		</data>
 		<key>Resources/data/shaders/AudioBlocks.frag</key>
 		<data>
-		rnwEe1ry6TXWg+TBDT3Ob9/qikA=
+		9VecKM/CaNmCnj66wH7Bz1UQ14s=
 		</data>
 		<key>Resources/data/shaders/AudioBlocks.vert</key>
 		<data>
@@ -1786,7 +1990,7 @@
 		</data>
 		<key>Resources/data/shaders/Autotangent.frag</key>
 		<data>
-		jW9GRth1k8t1ZHl7kBb75lKWaDY=
+		j5jCuwaQkVsT7BxnvY8Jvq8v4QM=
 		</data>
 		<key>Resources/data/shaders/Autotangent.vert</key>
 		<data>
@@ -1914,7 +2118,7 @@
 		</data>
 		<key>Resources/data/shaders/ColorStepper.frag</key>
 		<data>
-		PkTrNg0GlNR2OdeONS9xt9GazVc=
+		3W8aHLB234hA+qEYr6P1FSMAah0=
 		</data>
 		<key>Resources/data/shaders/ColorStepper.vert</key>
 		<data>
@@ -1962,7 +2166,7 @@
 		</data>
 		<key>Resources/data/shaders/Cosmos.frag</key>
 		<data>
-		V2ZBtdbjOT0KC4+XOrZdRf/m63E=
+		cHvf8mrXogP2g7P0Y5Xm90iVGEY=
 		</data>
 		<key>Resources/data/shaders/Cosmos.vert</key>
 		<data>
@@ -2063,10 +2267,6 @@
 		<key>Resources/data/shaders/Empty.vert</key>
 		<data>
 		ghdhlwxhWYrTt/cwnkAKWeAc8W8=
-		</data>
-		<key>Resources/data/shaders/Feedback.frag</key>
-		<data>
-		jTDmrbUqODR3oggkd6lnb9PxhtM=
 		</data>
 		<key>Resources/data/shaders/Feedback.vert</key>
 		<data>
@@ -2178,7 +2378,7 @@
 		</data>
 		<key>Resources/data/shaders/GlitchDigital.frag</key>
 		<data>
-		C7C4t0OffaLVEA/V0TVDQ/cb72I=
+		MKTFcE29cs/XxI9OeymMjnn2/VM=
 		</data>
 		<key>Resources/data/shaders/GlitchDigital.vert</key>
 		<data>
@@ -2660,6 +2860,14 @@
 		<data>
 		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
+		<key>Resources/data/shaders/StrangeScreen.frag</key>
+		<data>
+		xLutV7u4L8y1aq44YL/A3Wcgrzo=
+		</data>
+		<key>Resources/data/shaders/StrangeScreen.vert</key>
+		<data>
+		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
+		</data>
 		<key>Resources/data/shaders/Stroke.frag</key>
 		<data>
 		fuQe466W4YJa7DmBAFw7Udhxb/A=
@@ -2847,6 +3055,10 @@
 		<key>Resources/data/shaders/download.png</key>
 		<data>
 		Q+eCeqaCZHbxJsnELhih5f1MQtM=
+		</data>
+		<key>Resources/data/shaders/feedback.frag</key>
+		<data>
+		jTDmrbUqODR3oggkd6lnb9PxhtM=
 		</data>
 		<key>Resources/data/shaders/textures/.DS_Store</key>
 		<data>
@@ -3904,6 +4116,14 @@
 		<data>
 		tbg/lHcZCh+meOR6FfnHNZ+JRrA=
 		</data>
+		<key>Resources/ffmpeg</key>
+		<data>
+		c+TfA+9DwtFYdaA0g0BFJI023Qk=
+		</data>
+		<key>Resources/ffmpeg.exe</key>
+		<data>
+		Bv38STKrK5jSiLWr+SYTjjt5fmw=
+		</data>
 		<key>Resources/icon.icns</key>
 		<data>
 		X1f6LkxbhsXqWiRgJuZv+v1kxIM=
@@ -3911,6 +4131,20 @@
 	</dict>
 	<key>files2</key>
 	<dict>
+		<key>Resources/.gitignore</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			zL/EAkL7Pk/Rkd1F9sQyGS8eOEaZRGhrPXVXp8yxK+0=
+			</data>
+		</dict>
+		<key>Resources/README.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			4ny20dHZXT5Gll7Nnba8XQxJxNMtcbz8KSqbpEACu78=
+			</data>
+		</dict>
 		<key>Resources/data/audio/065Liquid Glow.mp3</key>
 		<dict>
 			<key>hash2</key>
@@ -3981,6 +4215,13 @@
 			SppRuxxuyawEWhAz8vT9pmPpl12Zzwj6EBDvYVMgVyw=
 			</data>
 		</dict>
+		<key>Resources/data/fonts/Material Icons- Regular.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			7xSfCL3S/wmk4shXNHa3sPP7sVtiOVSt5ZiZ5xdb7do=
+			</data>
+		</dict>
 		<key>Resources/data/fonts/MaterialIcons-Regular.ttf</key>
 		<dict>
 			<key>hash2</key>
@@ -3995,11 +4236,46 @@
 			vUcxTTAeUP9NEJv/KN/PY3y36xOUVIAlmHi4SIdazGU=
 			</data>
 		</dict>
+		<key>Resources/data/fonts/Open Font Icons.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			zgxmQRIcET8pw+S8tv2zLzlj9M6aDAgKHyAGQGF9iW0=
+			</data>
+		</dict>
 		<key>Resources/data/fonts/OpenFontIcons.ttf</key>
 		<dict>
 			<key>hash2</key>
 			<data>
 			zgxmQRIcET8pw+S8tv2zLzlj9M6aDAgKHyAGQGF9iW0=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/Roboto- Bold.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			uvRM6BY2zJJ/wndoQ35dqFO6xpnoqvgy0ELw3+0ptLQ=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/Roboto- Italic.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			iq8jrC7ps+8bYcI5Cz5uAsCqakCdWRx/1/PU189R4As=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/Roboto- Medium.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			SsjgNgb/pMN/YaZRCiCA8fN6cFT0cmwhSIfTsj9y42k=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/Roboto- Regular.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			MZz/bnox8PKkHEddykKJCqXRn+FgF+IpD4wdThT3ZIE=
 			</data>
 		</dict>
 		<key>Resources/data/fonts/Roboto-Black.ttf</key>
@@ -4086,11 +4362,53 @@
 			ysvmS9xjmEDzWFKPCnf4AfRtakfLlHZOG3B95IT08nw=
 			</data>
 		</dict>
+		<key>Resources/data/fonts/editor/Abril Fatface.otf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			+DWtgZhIwlNQfTLYxTiFmHTK+crsWh/t0eQ6FwwWe2w=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Alex Brush.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			iBcv7+rqhcUj0djD7IIC76jul4zJvNdnSaoYb6ZC2R4=
+			</data>
+		</dict>
 		<key>Resources/data/fonts/editor/Alkatra.ttf</key>
 		<dict>
 			<key>hash2</key>
 			<data>
 			Q+J0KghBV/ujy1+fT4APd84mGDKfS3cREIq4k8GfqbU=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Aller.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			q2XhKQaxkTvYHZAtADO3yHx+p+DY0IQylKLzU54IfzI=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Allura.otf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			YBAGj5SlNPtX6Vt9ggDpBpS4YAvf6tQAyx55XH2mgLc=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Amatic S C.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			HTzZ72BMeca064IQ1+CgpYpHTUFbVI8QnByuz/UI+7Q=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Amatic.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			iJmJ9qSZc8GtJEcyq3uq5cqs1dRaiwAdzV8Ce4DhTnY=
 			</data>
 		</dict>
 		<key>Resources/data/fonts/editor/American Captain.ttf</key>
@@ -4100,6 +4418,13 @@
 			D/tj41VCQqghADpKdwtlOhQTbSpOUiYm1h6o8+hBWJw=
 			</data>
 		</dict>
+		<key>Resources/data/fonts/editor/Antonio.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			J/QZ/yyQnC+ralTiFdh+OlAdK4l8EJcHs2DjCevui2I=
+			</data>
+		</dict>
 		<key>Resources/data/fonts/editor/Baskerville.ttf</key>
 		<dict>
 			<key>hash2</key>
@@ -4107,7 +4432,56 @@
 			JDvPng4q5owuL81DDppA0NwDl5kY3YUjPNzSpLGd0uI=
 			</data>
 		</dict>
-		<key>Resources/data/fonts/editor/DeliciousHandrawn.ttf</key>
+		<key>Resources/data/fonts/editor/Bebas.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			OdLrF4/dUrTDUKxt7j0gkK5afBhyJbDRYaFHPMu2Mg0=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Blackjack.otf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			GmgGcQmi0Uyg4f6hQzrr7umztxu18VweYqX3HcIYqxk=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Caviar Dreams.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			SOZCFicMte/r3lC6OgrPjiDbP790W9xf8D5UWW+OBio=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Chunk Five.otf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			s80p7Njc8U2J8/HJEE5CURrjiawRODL8urOhkRM8tYo=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Cooper Hewitt.otf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			4yvymj9/O80IVTjqWZe8ZJqi+Ti/B+vQsd/j8qG3RCY=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Courier Prime.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			bMlSWxM0BHRFy6U/Mj6BAzGs/fWfGPQAg5fRMTdze5E=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Dancing Script.otf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			Tohjl01gRwyBw0ezBiqrXvcSA+Rlu+ipxFcCwu445nk=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Delicious Handrawn.ttf</key>
 		<dict>
 			<key>hash2</key>
 			<data>
@@ -4121,11 +4495,116 @@
 			h+sU1B7urAvX/gxi7OBRNLvx7oBZtuPnAdf0p3mVBtw=
 			</data>
 		</dict>
-		<key>Resources/data/fonts/editor/LemonMilk.otf</key>
+		<key>Resources/data/fonts/editor/Exo.otf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			i2XnxVdhfppazqztEiACsGfn9wT5sFAkCfECm9VA6cg=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Fira  Sans.otf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			3RpdppDukbRW46iQ+fOoyZPUTIIYIEUI3Ak/LzFLDvs=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Grand Hotel.otf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			kHF71tzLRq4n7QsI4HYD8UDxb1OGXmr5toVeyxV2tkE=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Great Vibes.otf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			jOAy9nm8pToypLYSfVHWvkp2m85Kg4llYPAl32hYT6E=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Josefin Sans.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			c6TAduS0aceVbmo/Ylt54PtLan7jz+S8PtBTMglYb88=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Kaushan Script.otf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			wAfr5MgTN07QLaADOUtzs5+nCf9YkcVhNzPJa+WVuig=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/League Gothic.otf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			px1XTLXItOeAlkNWIjylBO7uAUQgJ2b1aZgtqec8DUc=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Lemon Milk.otf</key>
 		<dict>
 			<key>hash2</key>
 			<data>
 			3nemG4QpWNxO++/MtVMoJPLV79c4/1/swNXW62UoiWs=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Lobster Two.otf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			Aa/LqCOnboGPTuCWh0o/wwOOuOVNPhj4mgtjPZQe9ZA=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Lobster.otf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			s9UC6D2HYYy6FazMiFVQ2k6Yv/TeitzloZCbrAKMQ/o=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Montserrat Alternates.otf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			j2mJqh5eraIj0sQOHHCtc+AsxhOwM6f2BYS/LmI5h2A=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Montserrat.otf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			8aNvrLO1C1Xt4WZgoJMMCRgfNy9CAHUQ7pwku5swHOA=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/PT Sans.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			O7/5q2mEU6THBeyaudj1KNIVYqaEu2gW8VcWNjfqyRQ=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Pacifico.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			iwJipHf1drc+z6vnJViUDKoR4+iqd40bb2rNA59bu9E=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Playfair.otf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			phJSH28Iqy+t9NTF1iEwoz//hNkfZkmjDr7LTqSALwM=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Podarok.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			VvfpzLIwMVMHGz1QryMuGmRHCkeecmMqx60q93q7Z7w=
 			</data>
 		</dict>
 		<key>Resources/data/fonts/editor/Roboto.ttf</key>
@@ -4133,6 +4612,62 @@
 			<key>hash2</key>
 			<data>
 			OzAUhbHFGsAkbpRezAfgmkOV4ArZi2Jf6EA6g880toY=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Seaside.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			iAyjgOhyl2zsZzVYlt91aTcRPcyS0MG+dt/fGFSdvTA=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Sofia.otf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			OPq8pVCRt8g5KB/0NwQoT08MgSZG9BCKxNy7zPoGWq0=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Source Sans Pro.otf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			awlrRyBtj3iixJry8q5Gs12TsOPPEFqf6+9ZFEqi6uI=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/VCR.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			AZGNhssWOnFdy5cWW5lyVnNN/Mn1UL7rfBQvpKBkzxw=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Veter.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			r6L6lLcks9/YA6xBN5j35tdPS5LbTbPcb7KiAacBdPY=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/Windsong.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			JYCh+ZygPy3Twm/1kegxgvdYirlnkEw5IRp5KTh9lCE=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/editor/remove.py</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			nyPwf7Ianc61B3AhCDvlF87ZZEBgzXUrifOc7a8+dYE=
+			</data>
+		</dict>
+		<key>Resources/data/fonts/fa-400.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			GmpZWgL5Po3urukCH4vQxdxDoXd8w56sQDVWoOBwCmk=
 			</data>
 		</dict>
 		<key>Resources/data/fonts/fa-regular-400.ttf</key>
@@ -4202,7 +4737,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			pmwr/GtCmz5YuzHOb8liAmntKlPLZYJXVXooIzqf1OI=
+			X8OA+nltznlW6gVyFH6LS3aG5F/m1Vj6mQN8yOmHk8g=
 			</data>
 		</dict>
 		<key>Resources/data/images/icons/focus.png</key>
@@ -4265,7 +4800,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			jeliWGX2l232cl0HnkBZaiL3Twjks0xXtI5HRHXS2ck=
+			ulEuostcdIy7V6aDNcls9SUyJgyQ5X/qqO2c1SR3B1E=
 			</data>
 		</dict>
 		<key>Resources/data/images/icons/no-music.png</key>
@@ -4300,7 +4835,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			eGlNEX3wRZ3VkgomilYLBtnQW70bZcw/FaTJXYl+eT4=
+			UXHxNYU7dMu6Q/vKk5KFjSUAftMgr9eQgH6bFuvFPsE=
 			</data>
 		</dict>
 		<key>Resources/data/images/icons/right-arrow.png</key>
@@ -4350,6 +4885,20 @@
 			<key>hash2</key>
 			<data>
 			BxLB/4dCaqXwFIDRTDL2G3okewmDsLakDaeSbJUoXdY=
+			</data>
+		</dict>
+		<key>Resources/data/images/intro.mov</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			d49OmEuZjY0O8u/Jc4BwHDmm6KkO0GsvAKHzDESu1Eg=
+			</data>
+		</dict>
+		<key>Resources/data/images/intro/intro.mov</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			d49OmEuZjY0O8u/Jc4BwHDmm6KkO0GsvAKHzDESu1Eg=
 			</data>
 		</dict>
 		<key>Resources/data/images/stylized/1.png</key>
@@ -6634,6 +7183,13 @@
 			KDa5s2ayTsVrjEtcHzEr8VgAtJt/FGIUhdzgN7y3N7o=
 			</data>
 		</dict>
+		<key>Resources/data/markdown/StrangeScreen.md</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			JYJWV1YnuZsPyQXg85jrGpLTc/MRCARXzsUuTgRNmk8=
+			</data>
+		</dict>
 		<key>Resources/data/markdown/Swirl.md</key>
 		<dict>
 			<key>hash2</key>
@@ -6830,11 +7386,32 @@
 			gJMXGvxXxCWsSwnbrW5ZD2gxbwmpQy75c+8Boahy/w8=
 			</data>
 		</dict>
+		<key>Resources/data/misc/nottawa_final.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			J4j8UiTkNkmUDGUDTZH2/LYBQVe/Z8Y+9JIbOoPSTo0=
+			</data>
+		</dict>
 		<key>Resources/data/misc/strings.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
 			ESC3FZpyjcoxygl+CEwVguxxg+NVC2g9EZ6UXxhqHaQ=
+			</data>
+		</dict>
+		<key>Resources/data/misc/templates/nottawa_final.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			nU6yUi48ixaZUHO8/AZulv+b0rBJeb8i1Tp4WvKq6w8=
+			</data>
+		</dict>
+		<key>Resources/data/misc/templates/nottawa_final.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			K6DCtRedbtVUrKbBpDqicGF0LUdUQIf7fj/RL3GbFgI=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/16bit.frag</key>
@@ -6897,7 +7474,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			mZ5M0J5dbEZ0V+D+3zB8PpJdlJGQ2tem6hFu2pJBQtY=
+			FFieTAMiBIoedFPuFEnU7jDetnnt507enmx32+yQ8Ps=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/AudioBlocks.vert</key>
@@ -6967,7 +7544,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			w5KOVK/A5iiGOPP1PrTleqVsDQNU8zRM0qwS3xkmee8=
+			Zacefuc1hVWoAyQ6F9AlRd3UeL1g5OVCHG7ZgIegfWo=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Autotangent.vert</key>
@@ -7191,7 +7768,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			qkdZ+UFlP4FpVnhu8UdRuDP1T4n0WyHwk3Pu/gk9EU0=
+			AhWgaDBIzSdCprprNY089XEKQP8CoDudFkTASACDrkc=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/ColorStepper.vert</key>
@@ -7275,7 +7852,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			iFIVAqSRaCMUuO5DrcMTzXTMKvx5Ayno/WlbUbf2URc=
+			7TgsGld3zpCzsG39wfP8eEEvRS6nvswS7J+qzyyVe2I=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Cosmos.vert</key>
@@ -7451,13 +8028,6 @@
 			<key>hash2</key>
 			<data>
 			WF5Evh01mNqA8t7+62G5Sd8OhuFq7+Ua85WDdCXdP4A=
-			</data>
-		</dict>
-		<key>Resources/data/shaders/Feedback.frag</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			AMHQTqwB2VEB9wccN9nwyGnWXWQBwuCTF9W3zogivs8=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/Feedback.vert</key>
@@ -7653,7 +8223,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			HCgVkEF3mX4g7MPpKF69RbJuB/s83DZe/ybnfX6ywWM=
+			vqTApHU2WzqB1zGlValnldruT9IKH02HAhrf8S7nPCY=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/GlitchDigital.vert</key>
@@ -8496,6 +9066,20 @@
 			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
 			</data>
 		</dict>
+		<key>Resources/data/shaders/StrangeScreen.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			N7ViicVbAE/me8W9Z5XHm7shpeRHJulsem8E/2JeKrc=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/StrangeScreen.vert</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			</data>
+		</dict>
 		<key>Resources/data/shaders/Stroke.frag</key>
 		<dict>
 			<key>hash2</key>
@@ -8823,6 +9407,13 @@
 			<key>hash2</key>
 			<data>
 			jNZEfXKBuaQDwfBJ+OaQLpOCPzaBFMWgHCMbaRhKsOs=
+			</data>
+		</dict>
+		<key>Resources/data/shaders/feedback.frag</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			AMHQTqwB2VEB9wccN9nwyGnWXWQBwuCTF9W3zogivs8=
 			</data>
 		</dict>
 		<key>Resources/data/shaders/textures/4-steps-stairs.png</key>
@@ -10664,6 +11255,20 @@
 			<key>hash2</key>
 			<data>
 			ZkHvb9EQ3QeZ1VLYKKMLFQ5nmMtUIkmvbBYXPiKLaGw=
+			</data>
+		</dict>
+		<key>Resources/ffmpeg</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			WIJdFcLORQodWXU2Hmg1tLuJRNI4FlHgzMQ+Z5xYd3U=
+			</data>
+		</dict>
+		<key>Resources/ffmpeg.exe</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			M42XyaEaNdZyQPKciQnkg2O9l1pwK1Cs11CfvAdGElw=
 			</data>
 		</dict>
 		<key>Resources/icon.icns</key>

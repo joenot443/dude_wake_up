@@ -38,6 +38,7 @@ private:
   void setupStyle();
   void drawMainSettings();
   void resetState();
+  void affirmWindowSize();
 
   std::shared_ptr<ofAppBaseWindow> window;
   ofxImGui::Gui gui;

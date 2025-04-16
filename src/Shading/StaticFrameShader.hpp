@@ -85,7 +85,7 @@ ShaderType type() override {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("StaticFrame");
+    
 
     CommonViews::ShaderParameter(settings->position, settings->positionOscillator);
     CommonViews::ShaderParameter(settings->lineWidth, settings->lineWidthOscillator);

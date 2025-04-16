@@ -76,7 +76,7 @@ struct SpaceRingsShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("SpaceRings");
+    
 
     CommonViews::ShaderParameter(settings->particleSize, settings->particleSizeOscillator);
     CommonViews::ShaderParameter(settings->ringCount, settings->ringCountOscillator);

@@ -40,7 +40,6 @@
 #include "TwistedCubesShader.hpp"
 #include "LayoutStateService.hpp"
 #include "CoreShader.hpp"
-#include "VoronoiColumnsShader.hpp"
 #include "WarpspeedShader.hpp"
 #include "ReflectorShader.hpp"
 #include "FullHouseShader.hpp"
@@ -122,7 +121,6 @@ enum ShaderSourceType {
   ShaderSource_FullHouse, //source enum,
   ShaderSource_Reflector, //source enum,
   ShaderSource_Warpspeed, //source enum,
-  ShaderSource_VoronoiColumns, //source enum,
   ShaderSource_Core, //source enum,
   ShaderSource_TwistedCubes, //source enum,
   ShaderSource_TwistedTrip, //source enum,
@@ -296,8 +294,6 @@ static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
       return ShaderTypeTwistedCubes;
     case ShaderSource_Core: //type enum
       return ShaderTypeCore;
-    case ShaderSource_VoronoiColumns: //type enum
-      return ShaderTypeVoronoiColumns;
     case ShaderSource_Warpspeed: //type enum
       return ShaderTypeWarpspeed;
     case ShaderSource_Reflector: //type enum
@@ -444,8 +440,6 @@ static ShaderSourceType shaderSourceTypeForShaderType(ShaderType type) {
       return ShaderSource_TwistedCubes;
     case ShaderTypeCore:
       return ShaderSource_Core;
-    case ShaderTypeVoronoiColumns:
-      return ShaderSource_VoronoiColumns;
     case ShaderTypeWarpspeed:
       return ShaderSource_Warpspeed;
     case ShaderTypeReflector:
@@ -530,7 +524,6 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     case ShaderSource_audioWaveform:
     case ShaderSource_audioMountains:
     case ShaderSource_FrequencyVisualizer:
-    case ShaderSource_VoronoiColumns:
     case ShaderSource_AudioBlocks:
     case ShaderSource_FractalAudio:
     case ShaderSource_FlickerAudio:
@@ -830,12 +823,6 @@ public:
       case ShaderSource_Core: { // Settings
         auto settings = new CoreSettings(UUID::generateUUID(), 0);
         shader = std::make_shared<CoreShader>(settings);
-        shader->setup();
-        return;
-      }
-      case ShaderSource_VoronoiColumns: { // Settings
-        auto settings = new VoronoiColumnsSettings(UUID::generateUUID(), 0);
-        shader = std::make_shared<VoronoiColumnsShader>(settings);
         shader->setup();
         return;
       }

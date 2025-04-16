@@ -74,7 +74,7 @@ struct OneBitDitherShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("OneBitDither");
+    
 
     CommonViews::ShaderParameter(settings->scale, settings->scaleOscillator);
     CommonViews::ShaderColor(settings->lightColor);

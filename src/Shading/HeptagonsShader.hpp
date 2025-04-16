@@ -66,7 +66,7 @@ struct HeptagonsShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Heptagons");
+    
 
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
   }

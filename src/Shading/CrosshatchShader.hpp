@@ -69,7 +69,7 @@ ShaderType type() override {
 
   void drawSettings() override {
     
-    CommonViews::H3Title("Crosshatch");
+    
     CommonViews::ShaderParameter(settings->mix, settings->mixOscillator);
   }
 };

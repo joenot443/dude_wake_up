@@ -12,18 +12,18 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
-#include "ValueOscillator.hpp"
+#include "WaveformOscillator.hpp"
 #include "Parameter.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct WarpspeedSettings: public ShaderSettings {
   std::shared_ptr<Parameter> speed;
-  std::shared_ptr<ValueOscillator> speedOscillator;
+  std::shared_ptr<WaveformOscillator> speedOscillator;
 
   WarpspeedSettings(std::string shaderId, json j) :
   speed(std::make_shared<Parameter>("speed", 1.0, 0.0, 5.0)),
-  speedOscillator(std::make_shared<ValueOscillator>(speed)),
+  speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   ShaderSettings(shaderId, j, "Warpspeed") {
     parameters = { speed };
     oscillators = { speedOscillator };
@@ -65,7 +65,7 @@ struct WarpspeedShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Warpspeed");
+    
 
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
   }

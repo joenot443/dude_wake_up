@@ -66,7 +66,7 @@ struct OutlineShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Outline");
+    
 
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
   }

@@ -79,7 +79,7 @@ ShaderType type() override { return ShaderTypeTissue; }
   
   void drawSettings() override {
     
-    CommonViews::H3Title("Tissue");
+    
     CommonViews::ShaderParameter(settings->modulationSpeed, settings->modulationSpeedOscillator);
     CommonViews::ShaderParameter(settings->distortionAmount, settings->distortionAmountOscillator);
     CommonViews::ShaderParameter(settings->waveIntensity, settings->waveIntensityOscillator);

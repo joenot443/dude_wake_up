@@ -32,6 +32,8 @@
 #include "StrandService.hpp"
 #include "ParameterService.hpp"
 #include "IconService.hpp"
+#include "ofxFFmpegRecorder.h"
+#include "ofxFastFboReader.h"
 
 
 const static ofVec2f windowSize = ofVec2f(2400, 1600);
@@ -114,7 +116,8 @@ int main( ){
   ofSetWindowShape(ofGetScreenWidth(), ofGetScreenHeight());
   ofSetFrameRate(60);
   ofSetEscapeQuitsApp(false);
-  ofSetLogLevel(OF_LOG_ERROR);
+  ofSetWindowTitle("Nottawa");
+  ofSetLogLevel(OF_LOG_NOTICE);
   ofRunApp(window, app);
   ofRunMainLoop();
   return 0;

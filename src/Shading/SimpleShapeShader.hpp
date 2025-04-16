@@ -129,7 +129,7 @@ struct SimpleShapeShader: Shader {
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("SimpleShape");
+    
     if (ImGui::Button("Randomize Shape")) {
       random();
     }

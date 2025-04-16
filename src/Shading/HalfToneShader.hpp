@@ -74,7 +74,7 @@ public:
   
   void drawSettings() override {
     
-    CommonViews::H3Title("HalfTone");
+    
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     CommonViews::ShaderParameter(settings->radius, settings->radiusOscillator);
   }

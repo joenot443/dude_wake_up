@@ -65,7 +65,7 @@ struct StellarShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Stellar");
+    
 
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
   }

@@ -74,7 +74,7 @@ struct CannyShader: Shader {
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("Canny");
+    
     
     CommonViews::ShaderColor(settings->backgroundColor);
     CommonViews::ShaderColor(settings->edgeColor);

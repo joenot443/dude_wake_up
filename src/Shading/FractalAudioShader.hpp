@@ -76,7 +76,7 @@ struct FractalAudioShader: Shader {
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("FractalAudio");
+    
     
     CommonViews::ShaderCheckbox(settings->enableAudio);
   }

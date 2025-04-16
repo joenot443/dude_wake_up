@@ -70,7 +70,7 @@ struct WelcomeRingsShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("WelcomeRings");
+    
 
     CommonViews::ShaderParameter(settings->cycles, settings->cyclesOscillator);
     CommonViews::ShaderIntParameter(settings->palette);

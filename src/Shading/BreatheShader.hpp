@@ -76,7 +76,7 @@ struct BreatheShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Breathe");
+    
 
     CommonViews::ShaderParameter(settings->pulseIntensity, settings->pulseIntensityOscillator); // Add pulseIntensity to drawSettings
     CommonViews::ShaderParameter(settings->warpSpeed, settings->warpSpeedOscillator);           // Add warpSpeed to drawSettings

@@ -62,7 +62,7 @@ ShaderType type() override {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Vertex");
+    
 
     CommonViews::ShaderColor(settings->color);
   }

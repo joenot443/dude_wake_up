@@ -22,7 +22,6 @@ json LayoutStateService::config() {
   j[MidiEnabledJsonKey] = midiEnabled;
   j[StageModeEnabled] = stageModeEnabled;
   j[PortraitJsonKey] = portrait;
-  j[ShaderInfoEnabledJsonKey] = shaderInfoEnabled;
   j[AllParametersInStageMode] = allParametersInStageModeEnabled;
   j[HelpEnabledJsonKey] = helpEnabled;
   j[WelcomeScreenEnabledJsonKey] = welcomeScreenEnabled;
@@ -41,7 +40,6 @@ void LayoutStateService::loadConfig(json j) {
   libraryPath = j[LibraryPathJsonKey];
   midiEnabled = j[MidiEnabledJsonKey];
 //  stageModeEnabled = j[StageModeEnabled];
-  shaderInfoEnabled = j[ShaderInfoEnabledJsonKey];
   portrait = j[PortraitJsonKey];
   outputWindowUpdatesAutomatically = j[OutputWindowUpdatesAutomaticallyJsonKey];
   allParametersInStageModeEnabled = j[AllParametersInStageMode];
@@ -68,9 +66,9 @@ void LayoutStateService::pushColor(std::shared_ptr<std::array<float, 4>> color) 
 
 float LayoutStateService::audioSettingsViewHeight() {
   if (!AudioSourceService::getService()->selectedAudioSource->active) {
-    return 30.0;
+    return 60.0;
   }
-  return 215.0;
+  return 250.0;
 }
 
 ofRectangle LayoutStateService::canvasRect() {

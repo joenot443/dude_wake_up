@@ -61,7 +61,7 @@ struct ComicbookShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Comicbook");
+    
   }
 };
 

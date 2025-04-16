@@ -7,6 +7,7 @@
 
 #include "TextSource.hpp"
 #include "Console.hpp"
+#include "FontService.hpp"
 #include "CommonViews.hpp"
 #include "NodeLayoutView.hpp"
 #include "LayoutStateService.hpp"
@@ -14,8 +15,9 @@
 void TextSource::setup() {
   fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y, GL_RGBA);
   optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y, GL_RGBA);
-  font.load(displayText->font.path(), displayText->fontSize);
-  fontPath = displayText->font.path();
+  
+  font.load(displayText->font.path, displayText->fontSize);
+  fontPath = displayText->font.path;
   strokeShader.load("shaders/Stroke");
   tempFbo.allocate(fbo->getWidth(), fbo->getHeight());
 }
@@ -33,9 +35,9 @@ void TextSource::saveFrame() {
   // Clear if we've changed font size
   if (!font.isLoaded() ||
       font.getSize() != displayText->fontSize
-      || fontPath != displayText->font.path()) {
-    fontPath = displayText->font.path();
-    font.load(displayText->font.path(), displayText->fontSize);
+      || fontPath != displayText->font.path) {
+    fontPath = displayText->font.path;
+    font.load(displayText->font.path, displayText->fontSize);
     shouldClear = true;
   }
   
@@ -123,7 +125,7 @@ void TextSource::load(json j) {
   }
   if (j.contains("fontSelector")) {
     displayText->fontSelector->load(j["fontSelector"]);
-    displayText->font = Font(displayText->fontSelector->options[displayText->fontSelector->intValue]);
+    displayText->font = FontService::getService()->fonts[displayText->fontSelector->intValue];
   }
   if (j.contains("fontName")) {
     displayText->font.name = j["fontName"];

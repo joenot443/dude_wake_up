@@ -66,7 +66,7 @@ struct FibersShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Fibers");
+    
 
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
   }

@@ -41,7 +41,6 @@ public:
   
   bool stageModeEnabled = false;
   
-  bool shaderInfoEnabled = true;
   
   bool allParametersInStageModeEnabled = true;
   

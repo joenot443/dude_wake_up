@@ -87,7 +87,7 @@ ShaderType type() override {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Gameboy");
+    
     CommonViews::ShaderCheckbox(settings->mode);
     CommonViews::ShaderParameter(settings->scale, settings->scaleOscillator);
     if (CommonViews::ShaderOption(settings->texture, settings->textureOptions))

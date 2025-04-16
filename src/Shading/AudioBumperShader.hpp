@@ -76,7 +76,7 @@ public:
   ShaderType type() override { return ShaderTypeAudioBumper; }
   
   void drawSettings() override {
-    CommonViews::H3Title("AudioBumper");
+    
     CommonViews::ShaderColor(settings->minColor);
     CommonViews::ShaderColor(settings->maxColor);
   }

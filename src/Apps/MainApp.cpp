@@ -50,6 +50,7 @@ void MainApp::setup()
   ImPlot::CreateContext();
   setupStyle(); // Apply the style
   FontService::getService()->addFontToGui(&gui);
+  FontService::getService()->loadFonts();
   VideoSourceService::getService();
   MarkdownService::getService();
   ConfigService::getService()->loadDefaultConfigFile();
@@ -72,14 +73,13 @@ void MainApp::update()
   ConfigService::getService()->checkAndSaveDefaultConfigFile();
   AudioSourceService::getService()->update();
   mainStageView->update();
+  affirmWindowSize();
 }
 
 void MainApp::draw()
 {
   gui.begin();
-//  ImGui::PushFont(FontService::getService()->p);
   drawMainStage();
-//  ImGui::PopFont();
   gui.end();
 }
 
@@ -186,4 +186,10 @@ void MainApp::setupStyle()
   imguiStyle.WindowPadding = ImVec2(style.windowPadding[0], style.windowPadding[1]);
   imguiStyle.FramePadding = ImVec2(style.framePadding[0], style.framePadding[1]);
   imguiStyle.CellPadding = ImVec2(style.framePadding[0], style.framePadding[1]);
+}
+
+void MainApp::affirmWindowSize() {
+  if (ofGetWindowWidth() < 500) {
+    ofSetWindowShape(500, ofGetWindowHeight());
+  }
 }

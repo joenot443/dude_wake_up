@@ -169,7 +169,7 @@ struct MultiMixShader: Shader {
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("MultiMix");
+    
     
     for (InputSlot slot : activeInputs) {
       if (CommonViews::ShaderParameter(settings->slotMixMap[slot], nullptr)) {

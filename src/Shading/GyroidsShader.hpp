@@ -60,7 +60,7 @@ struct GyroidsShader: Shader {
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("Gyroids");
+    
   }
 };
 

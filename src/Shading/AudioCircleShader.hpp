@@ -74,7 +74,7 @@ ShaderType type() override {
 
   void drawSettings() override
   {
-    CommonViews::H3Title("AudioCircle");
+    
 
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
   }

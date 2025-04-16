@@ -61,7 +61,7 @@ struct SobelShader : Shader {
   ShaderType type() override { return ShaderTypeSobel; }
   
   void drawSettings() override {
-    CommonViews::H3Title("Sobel");
+    
     CommonViews::ShaderParameter(settings->tolerance, settings->toleranceOscillator);
   }
 };

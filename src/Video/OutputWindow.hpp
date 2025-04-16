@@ -12,6 +12,8 @@
 #include "ofMain.h"
 #include "ofxImGui.h"
 #include "Connection.hpp"
+#include "ofxFastFboReader.h"
+#include "AVFRecorderWrapper.hpp"
 
 struct OutputWindow : public ofBaseApp, std::enable_shared_from_this<OutputWindow>
 {
@@ -28,9 +30,17 @@ struct OutputWindow : public ofBaseApp, std::enable_shared_from_this<OutputWindo
   bool drawFPS;
   bool needsResolutionUpdate = true;
   
+  // Recording variables
+  AVFRecorderWrapper vidRecorder;
+  ofPixels recordPixels;
+  ofxFastFboReader reader;
+  bool loggedPixelFormat = false;
+
 public:
   std::shared_ptr<ofFbo> fbo;
   std::shared_ptr<Connectable> connectable;
 };
 
 #endif /* OutputWindow_hpp */
+
+

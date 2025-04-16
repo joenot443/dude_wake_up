@@ -74,7 +74,7 @@ ShaderType type() override {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("SwirlingSoul");
+    
 
     CommonViews::ShaderParameter(settings->centerX, settings->centerXOscillator);
     CommonViews::ShaderParameter(settings->centerY, settings->centerYOscillator);

@@ -66,7 +66,7 @@ struct CosmosShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Cosmos");
+    
 
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
   }

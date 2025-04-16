@@ -1,6 +1,6 @@
 #version 150
 
-uniform sampler2D texx;
+uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
 uniform float speed;
@@ -10,28 +10,24 @@ out vec4 outputColor;
 
 
 // MODIFY THIS: color stepping size
-vec3 stepSize = vec3(smoothness * 1000.0);
+vec4 stepSize = vec4(smoothness * 1000.0);
 
 void main(  )
 {
-    // Normalized pixel coordinates (from 0 to 1)
-    vec2 uv = coord/dimensions.xy;
-
-    // Time varying pixel color
-    vec3 col = 0.5 + 0.5*cos(time / speed+uv.xyx+vec3(0,2,4));
-
-    // MODIFY THIS: toggle between webcam and video textures
-    vec3 tex = texture(texx, uv).rgb;
-    
-    col *= tex;
-    
-    // step the color range
-    col *= stepSize;
-    
-    col = round(col);
-    
-    col /= stepSize;
-    
-    // Output to screen
-    outputColor = vec4(col,1.0);
+  // Normalized pixel coordinates (from 0 to 1)
+  vec2 uv = coord/dimensions.xy;
+  vec4 col = 0.5 + 0.5*cos(time / speed+uv.xyxy+vec4(0,2,4,1.0));
+  vec4 text = texture(tex, uv);
+  
+  col *= text;
+  
+  // step the color range
+  col *= stepSize;
+  
+  col = round(col);
+  
+  col /= stepSize;
+  
+  // Output to screen
+  outputColor = vec4(col.xyz, text.a);
 }

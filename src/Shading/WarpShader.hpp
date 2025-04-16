@@ -68,7 +68,7 @@ public:
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("Warp");
+    
     
     CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
   }

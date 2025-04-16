@@ -85,7 +85,7 @@ ShaderType type() override {
 
   void drawSettings() override
   {
-    CommonViews::H3Title("FrequencyVisualizer");
+    
 
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderWaveformOscillator);
   }

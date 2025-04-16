@@ -13,8 +13,10 @@
 #include "httplib.h"
 #include "base64.h"
 //#include <sentry.h>
+#include <fstream>
+#include <iostream>
 
-const static std::string API_URL = "http://165.227.44.1";
+const static std::string API_URL = "165.227.44.1";
 //const static std::string API_URL = "localhost:6000";
 
 void LibraryService::setup()
@@ -75,21 +77,14 @@ void LibraryService::repopulateVideoSourcesFromMainThread() {
 // }
 void LibraryService::fetchLibraryFiles()
 {
-  // Create httplib client
-  httplib::Client cli(API_URL + ":6000/api/media");
-
-  // Send GET request
-  auto res = cli.Get("/");
+  httplib::Client cli(API_URL, 6000);
+  auto res = cli.Get("/api/media");
 
   if (res && res->status == 200)
   {
-    // Parse the response body as JSON
     nlohmann::json json_body = nlohmann::json::parse(res->body);
-
-    // Clear the library files vector
     libraryFiles.clear();
 
-    // Iterate over the JSON array and add each object to the library files vector
     for (auto &library_file : json_body)
     {
       LibraryFile file;
@@ -100,20 +95,17 @@ void LibraryService::fetchLibraryFiles()
       file.thumbnailUrl = library_file["thumbnailUrl"];
       file.filename = library_file["filename"];
       file.category = library_file["category"];
-      
-      auto shared = std::make_shared<LibraryFile>(file);
 
-      
+      auto shared = std::make_shared<LibraryFile>(file);
       libraryFileIdDownloadedMap[file.id] = hasMediaOnDisk(shared);
       libraryFiles[file.id] = shared;
-      
-      
     }
+
     didFetchLibraryFiles();
   }
   else
   {
-    std::cout << "Error: Failed to fetch library files" << std::endl;
+    std::cout << "Error: Failed to fetch library files " << res->status << std::endl;
   }
 }
 
@@ -127,26 +119,98 @@ bool LibraryService::hasMediaOnDisk(std::shared_ptr<LibraryFile> file)
   return ofFile::doesFileExist(file->videoPath());
 }
 
+// Helper function to parse HTTPS URL into host and path
+// Returns false if parsing fails
+inline bool parseHttpsUrl(const std::string& url_str, std::string& host, std::string& path) {
+    const std::string scheme = "https://";
+    if (url_str.rfind(scheme, 0) != 0) {
+        log("Error: URL does not start with https:// : %s", url_str.c_str());
+        return false; // Not an HTTPS URL
+    }
+    size_t scheme_end = scheme.length();
+    size_t host_end = url_str.find('/', scheme_end);
+
+    if (host_end != std::string::npos) {
+        host = url_str.substr(scheme_end, host_end - scheme_end);
+        path = url_str.substr(host_end);
+    } else {
+        // URL is just "https://hostname"
+        host = url_str.substr(scheme_end);
+        path = "/"; // Default path
+    }
+
+    if (host.empty()) {
+       log("Error: Could not parse host from HTTPS URL: %s", url_str.c_str());
+       return false;
+    }
+    return true;
+}
+
 // Downloads the .jpg stored at file.thumbnailUrl, then stores it in
 // ConfigService::libraryFolderFilePath
+// Assumes thumbnailUrl is always HTTPS.
 void LibraryService::downloadThumbnail(std::shared_ptr<LibraryFile> file)
 {
-  // Create httplib client from URL
-  httplib::Client cli(file->thumbnailUrl);
+  std::string host, path;
+
+  // Parse the HTTPS URL
+  if (!parseHttpsUrl(file->thumbnailUrl, host, path)) {
+    log("Error: Could not parse thumbnail HTTPS URL: %s", file->thumbnailUrl.c_str());
+    std::cerr << "Error: Could not parse thumbnail HTTPS URL: " << file->thumbnailUrl << std::endl;
+    return; // Stop if URL is invalid
+  }
+
+  #ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+    log("Error: HTTPS URL provided but httplib not compiled with SSL support for thumbnail download.");
+    std::cerr << "Error: HTTPS URL provided but httplib not compiled with SSL support for thumbnail download." << std::endl;
+    return; // Stop if SSL support is missing
+  #endif
+
+  // Create SSL client directly
+  httplib::SSLClient cli(host);
+
+  // --- Option 2: Disable Verification (Insecure) ---
+  log("Warning: Disabling SSL server certificate verification! This is insecure.");
+  cli.enable_server_certificate_verification(false);
+  // --- End Option 2 ---
+
+
+  // Common settings
+  cli.set_follow_location(true);
+  cli.set_connection_timeout(10, 0);
+  cli.set_read_timeout(30, 0); // Thumbnails should be smaller
+
+  httplib::Headers headers = {
+    { "User-Agent", "dude_wake_up_downloader/1.0" } // Add a user agent
+  };
 
   // Send GET request
-  auto res = cli.Get("/");
+  auto res = cli.Get(path.c_str(), headers);
 
   if (res && res->status == 200)
   {
-    std::string path = ConfigService::getService()->libraryFolderFilePath() + "/" + file->thumbnailFilename;
-    std::ofstream file_stream(path, std::ios::binary);
-    file_stream.write(res->body.data(), res->body.size());
-    file_stream.close();
+    std::string file_path = ConfigService::getService()->libraryFolderFilePath() + "/" + file->thumbnailFilename;
+    std::ofstream file_stream(file_path, std::ios::binary);
+    if (file_stream.is_open()) {
+        file_stream.write(res->body.data(), res->body.size());
+        file_stream.close();
+        log("Successfully downloaded thumbnail %s", file->thumbnailFilename.c_str());
+    } else {
+      
+        log("Error: Failed to open thumbnail file %s for writing.", file_path.c_str());
+        std::cerr << "Error: Failed to open thumbnail file " << file_path << " for writing." << std::endl;
+    }
   }
   else
   {
-    std::cout << "Error: Failed to download thumbnail" << std::endl;
+    if (res) {
+        log("Error: Failed to download thumbnail %s. Status: %d", file->thumbnailFilename.c_str(), res->status);
+        std::cerr << "Error: Failed to download thumbnail " << file->thumbnailFilename << ". Status: " << res->status << std::endl;
+    } else {
+        auto err = res.error();
+        log("Error: Failed to download thumbnail %s. Error: %s (%d)", file->thumbnailFilename.c_str(), httplib::to_string(err).c_str(), static_cast<int>(err));
+        std::cerr << "Error: Failed to download thumbnail " << file->thumbnailFilename << ". Connection/request error: " << httplib::to_string(err) << std::endl;
+    }
   }
 }
 
@@ -170,43 +234,106 @@ void LibraryService::submitFeedback(Feedback feedback, std::function<void()> suc
 //      formatFeedback(feedback).c_str()));
 }
 
+// Downloads the file specified by file->url.
+// Assumes file->url is always HTTPS.
 void LibraryService::downloadFile(std::shared_ptr<LibraryFile> file, std::function<void()> callback)
 {
-  // Create httplib client from URL
-  httplib::Client cli(file->url);
+  std::string host, path;
 
-  // Send GET request
-  auto res = cli.Get("/", [file](uint64_t current, uint64_t total) {
-    log("Total: %ld", total);
-    log("Current: %ld", current);
-    file->isDownloading = true;
+  // Parse the HTTPS URL
+  if (!parseHttpsUrl(file->url, host, path)) {
+    log("Error: Could not parse file HTTPS URL: %s", file->url.c_str());
+    std::cerr << "Error: Could not parse file HTTPS URL: " << file->url << std::endl;
+    file->isDownloading = false; // Ensure flag is reset on parse error
+    return; // Stop if URL is invalid
+  }
 
-    float progress = (static_cast<double>(current) / static_cast<double>(total));
+  #ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+      log("Error: HTTPS URL provided but httplib not compiled with SSL support.");
+      std::cerr << "Error: HTTPS URL provided but httplib not compiled with SSL support." << std::endl;
+      file->isDownloading = false; // Ensure flag is reset
+      return; // Cannot proceed without SSL support
+  #endif
 
-    if (progress > 0)
-    {
-      file->progress = progress;
-    }
+  // Create SSL client directly
+  httplib::SSLClient cli(host);
+  log("Using SSLClient for host: %s", host.c_str());
 
-    return true;
-  });
+  // --- Option 2: Disable Verification (Insecure) ---
+  log("Warning: Disabling SSL server certificate verification! This is insecure.");
+  cli.enable_server_certificate_verification(false);
+  // --- End Option 2 ---
 
+  // Set reasonable timeouts to prevent hangs
+  cli.set_connection_timeout(15, 0); // Increased connection timeout slightly
+  cli.set_read_timeout(120, 0);      // Increased read timeout for potentially larger files
+  cli.set_follow_location(true);     // Automatically follow redirects (e.g., HTTP 301/302)
+
+  // Add a User-Agent header - some servers require this
+  httplib::Headers headers = {
+    { "User-Agent", "dude_wake_up_downloader/1.0" }
+  };
+
+  // Send GET request using the parsed path
+  auto res = cli.Get(path.c_str(), headers,
+                      // Progress callback lambda
+                      [file](uint64_t current, uint64_t total) {
+                        // Log progress. Handle cases where server doesn't send total size (total == 0)
+                        if (!file->isDownloading) file->isDownloading = true; // Set flag on first progress update
+                        if (total > 0) {
+                          log("Download Progress: %llu / %llu", current, total);
+                          // Update progress only if total is known
+                          file->progress = (static_cast<double>(current) / static_cast<double>(total));
+                        } else {
+                          // Log bytes downloaded when total size is unknown
+                          log("Download Progress: %llu bytes / Unknown total", current);
+                          file->progress = -1.0f; // Indicate unknown/indeterminate progress
+                        }
+
+                        // Return true to continue the download, false to abort.
+                        return true;
+                      });
+
+  // Check the result of the GET request
   if (res && res->status == 200)
   {
-    std::string path = ConfigService::getService()->libraryFolderFilePath() + "/" + file->filename;
-    std::ofstream file_stream(path, std::ios::binary);
-    file_stream.write(res->body.data(), res->body.size());
-    file_stream.close();
-    libraryFileIdDownloadedMap[file->id] = true;
-    log("Successfully downloaded file");
-    file->isDownloading = false;
-    if (callback) {
-      callback();
+    // Write the downloaded data to the file
+    std::string file_path = ConfigService::getService()->libraryFolderFilePath() + "/" + file->filename;
+    std::ofstream file_stream(file_path, std::ios::binary);
+    if (file_stream.is_open()) {
+        file_stream.write(res->body.data(), res->body.size());
+        file_stream.close();
+        libraryFileIdDownloadedMap[file->id] = true;
+        log("Successfully downloaded file %s", file->filename.c_str());
+        file->isDownloading = false; // Reset flag on success
+        if (callback) {
+          MainApp::getApp()->executeOnMainThread([callback](){ 
+             callback();
+          });
+        }
+    } else {
+        log("Error: Failed to open file %s for writing.", file_path.c_str());
+        std::cerr << "Error: Failed to open file " << file_path << " for writing." << std::endl;
+        file->isDownloading = false; // Reset flag on file error
+        // Consider adding error reporting or callback here
     }
   }
   else
   {
-    std::cout << "Error: Failed to download file" << std::endl;
+    // Handle HTTP errors or connection failures
+    if (res) {
+       // Request completed but received an error status code (e.g., 404 Not Found, 500 Server Error)
+       log("Error: Failed to download file %s. URL: %s. Status: %d", file->filename.c_str(), file->url.c_str(), res->status);
+       std::cerr << "Error: Failed to download file " << file->filename << ". URL: " << file->url << ". Status: " << res->status << std::endl;
+    } else {
+       // res is null, meaning the request failed at a lower level (e.g., connection timeout, DNS error, SSL handshake)
+       auto err = res.error();
+       // Log the error even without the explicit logger
+       log("Error: Failed to download file %s. URL: %s. Error: %s (%d)", file->filename.c_str(), file->url.c_str(), httplib::to_string(err).c_str(), static_cast<int>(err));
+       std::cerr << "Error: Failed to download file " << file->filename << ". URL: " << file->url << ". Connection/request error: " << httplib::to_string(err) << std::endl;
+    }
+    file->isDownloading = false; // Reset downloading flag on failure
+    // Consider adding error reporting or callback here
   }
 }
 

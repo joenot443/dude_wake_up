@@ -74,7 +74,7 @@ struct GridRunShader: Shader {
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("GridRun");
+    
     
     CommonViews::ShaderColor(settings->color);
     CommonViews::ShaderParameter(settings->zoom, settings->zoomOscillator);

@@ -27,22 +27,19 @@ void BarPlotView::draw(std::vector<float> yData, std::string id, ImVec2 size) {
 
   max = max * 1.2;
   
-  if (max < 0.01) {
-    ImGui::BeginChildFrame(123, size);
-    ImGui::EndChildFrame();
-  }
-  
   // Draw the plot
   if (ImPlot::BeginPlot(formatString("##%s", id.c_str()).c_str(),
                         size, ImPlotFlags_CanvasOnly)) {
-    ImPlot::SetupAxesLimits(0.0, 1.0 * yData.size(), 0.0, max);
-    ImPlot::PlotBars(formatString("##%s", id.c_str()).c_str(),
+    ImPlot::SetupAxis(ImAxis_X1, "", ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoLabel | ImPlotAxisFlags_AutoFit);
+    ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoLabel | ImPlotAxisFlags_AutoFit);
+
+    ImPlot::PlotBars(formatString("##%s-BarPlot", id.c_str()).c_str(),
                      &xData[0],
                      &yData[0],
                      (int)
                      yData.size(),
                      0.7,
-                     1.0);
+                     ImPlotBarsFlags_None);
     ImPlot::EndPlot();
   }
 }

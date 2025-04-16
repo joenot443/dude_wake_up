@@ -195,6 +195,7 @@ void Shader::drawPreviewSized(ImVec2 size)
 
 void Shader::generateOptionalShaders() {
   if (isOptional) return;
+  if (!optionalShaders.empty()) return;
   
   std::vector<ShaderType> optionalShaderTypes = {ShaderTypeHSB, ShaderTypeBackground, ShaderTypeTransform, ShaderTypeRotate, ShaderTypeDoubleBlur, ShaderTypeMirror};
   

@@ -104,7 +104,7 @@ public:
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("ColorKeyMaskMaker");
+    
     CommonViews::ShaderParameter(settings->tolerance, settings->toleranceOscillator);
     CommonViews::ShaderCheckbox(settings->drawInput);
     CommonViews::ShaderCheckbox(settings->invert);

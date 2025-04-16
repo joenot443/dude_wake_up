@@ -45,6 +45,9 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
   // Whether the Parameter should be hidden from Node view
   bool hiddenFromNode = false;
   
+  // Whether buttons which correspond to this Parameter are currently being hovered
+  std::map<std::string, ButtonHoverState> buttonHoverMap;
+  
   // The options associated with this Parameter when used in Int mode
   std::vector<std::string> options = {};
   
@@ -127,6 +130,10 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
       if (j.contains("midiDescriptor"))
       {
         midiDescriptor = j["midiDescriptor"];
+      }
+      if (j.contains("paramId"))
+      {
+        paramId = j["paramId"];
       }
       if (j.contains("r"))
       {

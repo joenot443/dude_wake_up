@@ -66,16 +66,16 @@ void OscillatorView::draw(std::vector<std::tuple<std::shared_ptr<Oscillator>, st
     // Draw regular sliders
     if (ImGui::GetContentRegionAvail().x > 120.0) {
       ImGui::VSliderFloat(formatString("##freq%s", value->name.c_str()).c_str(),
-                          ImVec2(40, 130), &waveformOscillator->frequency->value, 0.0f,
+                          ImVec2(40, 120), &waveformOscillator->frequency->value, 0.0f,
                           100.0f, "Freq.\n%.2f", ImGuiSliderFlags_Logarithmic);
       ImGui::SameLine();
       ImGui::VSliderFloat(formatString("##amp%s", value->name.c_str()).c_str(),
-                          ImVec2(40, 130), &waveformOscillator->amplitude->value, 0.0f,
+                          ImVec2(40, 120), &waveformOscillator->amplitude->value, 0.0f,
                           waveformOscillator->amplitude->max, "Amp.\n%.2f",
                           ImGuiSliderFlags_None);
       ImGui::SameLine();
       ImGui::VSliderFloat(formatString("##shift%s", value->name.c_str()).c_str(),
-                          ImVec2(40, 130), &waveformOscillator->shift->value,
+                          ImVec2(40, 120), &waveformOscillator->shift->value,
                           -value->max * 2, value->max * 2, "Shift\n%.2f");
     }
     // Draw mini sliders
@@ -99,7 +99,11 @@ void OscillatorView::draw(std::vector<std::tuple<std::shared_ptr<Oscillator>, st
       waveformOscillator->enabled->setBoolValue(false);
     }
 
-    CommonViews::ShaderOption(waveformOscillator->waveShape, { "Sine Wave", "Square", "Sawtooth", "Triangle" }, false);
+    CommonViews::ShaderOption(waveformOscillator->waveShape, { 
+      "Sine Wave", "Square", "Sawtooth", "Triangle",
+      "Pulse", "Exp. Sine", "Harmonic", "Rectified",
+      "Noise Mod.", "Bitcrush", "Moire"
+    }, false);
     ImGui::EndChild();
   }
   
@@ -200,18 +204,22 @@ void OscillatorView::drawMini(std::shared_ptr<Oscillator> oscillator, std::share
     }
     
     ImGui::SameLine(0, 5);
+    ImGui::GetWindowDrawList()->AddRect(ImGui::GetCursorPos() - ImVec2(2, 2), ImVec2(ImGui::GetCursorPos().x + 20, ImGui::GetCursorPos().y + 55), ImColor(255, 0, 0), 4.0, ImDrawFlags_RoundCornersAll, 2.0);
+    ImGui::BeginChild(formatString("##freqChild%s", value->name.c_str()).c_str(), ImVec2(0,0), ImGuiChildFlags_AutoResizeY | ImGuiChildFlags_AlwaysAutoResize, ImGuiWindowFlags_NoDecoration);
+    CommonViews::ResetButton("freqReset", waveformOscillator->frequency);
     ImGui::VSliderFloat(formatString("##freq%s", value->name.c_str()).c_str(),
                         ImVec2(15, 50), &waveformOscillator->frequency->value, 0.0f,
                         100.0f, "F", ImGuiSliderFlags_Logarithmic);
+    ImGui::EndChild();
     ImGui::SameLine();
     ImGui::VSliderFloat(formatString("##amp%s", value->name.c_str()).c_str(),
                         ImVec2(15, 50), &waveformOscillator->amplitude->value, 0.0f,
                         waveformOscillator->amplitude->max, "A",
-                        ImGuiSliderFlags_None);
+                        ImGuiSliderFlags_Logarithmic);
     ImGui::SameLine();
     ImGui::VSliderFloat(formatString("##shift%s", value->name.c_str()).c_str(),
                         ImVec2(15, 50), &waveformOscillator->shift->value,
-                        -value->max * 2, value->max * 2, "S");
+                        -value->max * 2, value->max * 2, "S", ImGuiSliderFlags_Logarithmic);
 
     if (drawExtras) {
       ImGui::PushFont(FontService::getService()->sm);

@@ -39,7 +39,6 @@ public:
 
   void setup() override {
 shader.load("shaders/Glitch");
-shader.load("shaders/Glitch");
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -68,7 +67,7 @@ ShaderType type() override {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Glitch");
+    
     CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
   }
 };

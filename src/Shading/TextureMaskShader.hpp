@@ -79,7 +79,7 @@ struct TextureMaskShader: Shader {
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("TextureMask");
+    
     
     if (CommonViews::ShaderOption(settings->texture, settings->textureOptions))
     {

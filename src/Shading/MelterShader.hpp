@@ -87,7 +87,7 @@ shader.load("shaders/Melt");
 
   void drawSettings() override {
     
-    CommonViews::H3Title("Melt");
+    
     CommonViews::ShaderParameter(settings->alpha, settings->alphaOscillator);
     CommonViews::ShaderParameter(settings->beta, settings->betaOscillator);
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);

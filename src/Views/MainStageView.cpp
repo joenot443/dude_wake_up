@@ -53,7 +53,9 @@ void MainStageView::update()
     stageModeView.update();
   }
   NodeLayoutView::getInstance()->update();
-  welcomeScreenView.update();
+  if (LayoutStateService::getService()->showWelcomeScreen) {
+    welcomeScreenView.update();
+  }
 }
 
 void MainStageView::draw()
@@ -78,14 +80,17 @@ void MainStageView::draw()
   // | Library |       Audio
   
   // Sources
-  
-  ImGui::BeginChild("##sourceBrowser", browserSize, false, ImGuiWindowFlags_NoScrollbar);
+  ImGui::PushStyleColor(ImGuiCol_FrameBg, Colors::InnerChildBackgroundColor.Value);
+  ImGui::BeginChild("##sourceBrowser", browserSize, false);
   drawVideoSourceBrowser();
   ImGui::EndChild();
   
   ImGui::BeginChild("##shaderBrowser", browserSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
   drawShaderBrowser();
   ImGui::EndChild();
+  ImGui::PopStyleColor();
+  
+  if (ImGui::GetContentRegionAvail().x < 10) { return; }
   
   ImGui::BeginChild("##libraryOscillatorBrowser", browserSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
   
@@ -125,9 +130,8 @@ void MainStageView::draw()
   }
   
   drawMenu();
-  
+    
   ImGui::NextColumn();
-  
   // NodeLayout OR StageMode
   if (LayoutStateService::getService()->stageModeEnabled) {
     stageModeView.draw();
@@ -136,7 +140,6 @@ void MainStageView::draw()
     NodeLayoutView::getInstance()->draw();
     audioSourceBrowserView.draw();
   }
-  
   
   // Shader Info
   if (LayoutStateService::getService()->shouldDrawShaderInfo()) {
@@ -150,9 +153,9 @@ void MainStageView::draw()
   
   // Welcome Screen
   
-  //  if (LayoutStateService::getService()->showWelcomeScreen) {
-  //    welcomeScreenView.draw();
-  //  }
+    if (LayoutStateService::getService()->showWelcomeScreen) {
+      welcomeScreenView.draw();
+    }
 }
 
 void MainStageView::drawMenu()
@@ -170,7 +173,7 @@ void MainStageView::drawMenu()
       {
         ConfigService::getService()->saveNewWorkspace();
       }
-      if (ImGui::MenuItem("Load Workspace", "Cmd+O"))
+      if (ImGui::MenuItem("Open Workspace", "Cmd+O"))
       {
         ConfigService::getService()->loadWorkspaceDialogue();
       }
@@ -277,10 +280,6 @@ void MainStageView::drawMenu()
       {
         LayoutStateService::getService()->stageModeEnabled = !LayoutStateService::getService()->stageModeEnabled;
       }
-      if (ImGui::MenuItem("Toggle Shader Info View", "Cmd+T"))
-      {
-        LayoutStateService::getService()->shaderInfoEnabled = !LayoutStateService::getService()->shaderInfoEnabled;
-      }
       if (ImGui::MenuItem("Launch Welcome Screen"))
       {
         LayoutStateService::getService()->showWelcomeScreen = true;
@@ -318,18 +317,6 @@ void MainStageView::drawMenu()
 #endif
     ImGui::EndMenuBar();
   }
-}
-
-void MainStageView::drawMasks() {
-  ImVec2 windowSize = ofGetWindowSize();
-  float audioViewHeight = LayoutStateService::getService()->audioSettingsViewHeight();
-  ofRectangle browserRect = ofRectangle(0, 0, windowSize.x / 5.0, windowSize.y);
-  ofRectangle audioRect = ofRectangle(0, windowSize.y - audioViewHeight, windowSize.x, audioViewHeight);
-  auto cursor = ImGui::GetCursorPos();
-  ImGui::SetCursorPos(ImVec2(0,0));
-  ImGui::SetNextWindowSize(ImVec2(windowSize.x / 5.0, windowSize.y));
-  ImGui::End();
-  ImGui::SetCursorPos(cursor);
 }
 
 void MainStageView::drawVideoSourceBrowser()
@@ -382,11 +369,6 @@ void MainStageView::keyReleased(int key)
     // Enable Stage mode
     if (key == 'b') {
       LayoutStateService::getService()->stageModeEnabled = !LayoutStateService::getService()->stageModeEnabled;
-    }
-    
-    // Enable Shader Info pane
-    if (key == 't') {
-      LayoutStateService::getService()->shaderInfoEnabled = !LayoutStateService::getService()->shaderInfoEnabled;
     }
     
     if (key == 'z') {

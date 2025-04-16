@@ -14,9 +14,10 @@
 void ShaderInfoView::draw() {
   std::shared_ptr<Connectable> selectedShader = ShaderChainerService::getService()->selectedConnectable;
   auto size = ImGui::GetContentRegionAvail();
-  ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 10.0);
+  ImGui::SetCursorPosX(ImGui::GetCursorPosX());
   ImGui::BeginChild("ShaderInfoView", ImVec2(size.x - 20.0, size.y - 40.0));
-  CommonViews::H2Title("Preview");
+  CommonViews::H2Title("Preview", false);
+  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0);
   drawPreview();
   CommonViews::H2Title(selectedShader->name() + " Settings");
   // Wrap in a Child with 20px padding

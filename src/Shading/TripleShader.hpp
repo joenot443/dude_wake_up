@@ -105,7 +105,7 @@ ShaderType type() override {
 
   void drawSettings() override
   {
-    CommonViews::H3Title("Triple");
+    
 
     CommonViews::ShaderParameter(settings->scale, settings->scaleOscillator);
     CommonViews::ShaderParameter(settings->xShift, settings->xShiftOscillator);

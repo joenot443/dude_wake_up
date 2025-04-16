@@ -79,7 +79,7 @@ struct GlitchRGBShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("GlitchRGB");
+    
 
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
     if (CommonViews::ShaderOption(settings->texture, settings->textureOptions))

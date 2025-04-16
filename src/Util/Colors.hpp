@@ -15,7 +15,9 @@
 // Redesign Colors
 
 struct Colors {
-  constexpr static ImColor ChildBackgroundColor = ImColor(11, 11, 12);
+  constexpr static ImColor AccentColor = IM_COL32(181, 81, 38, 255);
+
+  constexpr static ImColor ChildBackgroundColor = ImColor(47, 50, 50);
   constexpr static ImColor InnerChildBackgroundColor = ImColor(22, 22, 24);
   
   constexpr static ImColor NodeBackgroundColor = ImColor(32, 32, 35);
@@ -29,17 +31,19 @@ struct Colors {
   constexpr static ImColor Secondary300 = IM_COL32(114, 114, 116, 255);
   constexpr static ImColor Secondary200 = IM_COL32(144, 144, 146, 255);
   
-  constexpr static ImColor PinActive = IM_COL32(181, 81, 38, 255);
+  constexpr static ImColor PinActive = AccentColor;
   constexpr static ImColor PinActiveSecondary = IM_COL32(181, 81, 38, 51);
   constexpr static ImColor PinActiveTertiary = IM_COL32(181, 81, 38, 25);
 
-  constexpr static ImColor ButtonHovered = IM_COL32(50, 50, 52, 100);
+  constexpr static ImColor ButtonHovered = IM_COL32(40, 40, 44, 255);
   constexpr static ImColor ButtonSelected = IM_COL32(50, 50, 52, 255);
   constexpr static ImColor ButtonSelectedHovered = IM_COL32(60, 60, 62, 255);
   
   constexpr static ImColor TabSelected = IM_COL32(30, 30, 32, 255);
 };
-                                             
+                       
+
+
 static ImColor SourceNodeColor = ImColor(174, 32, 18);
 static ImColor ShaderNodeColor = ImColor(0, 95, 115);
 static ImColor AuxNodeColor = ImColor(202, 103, 2);

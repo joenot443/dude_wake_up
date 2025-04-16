@@ -70,7 +70,7 @@ struct ColoredDropsShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("ColoredDrops");
+    
 
     CommonViews::ShaderParameter(settings->zoom, settings->zoomOscillator); // Add zoom to drawSettings
     CommonViews::ShaderParameter(settings->brightness, settings->brightnessOscillator); // Add brightness to drawSettings

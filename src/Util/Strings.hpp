@@ -115,5 +115,26 @@ static std::string removeFileExtension(const std::string& filename) {
     return filename.substr(0, lastindex);
 }
 
+// Gets the filename without the extension from a given string path
+// i.e. "path/to/file.txt" -> "file"
+static std::string getFilenameWithoutExtension(const std::string& path) {
+    size_t lastindex = path.find_last_of(".");
+    return path.substr(0, lastindex);
+}
+
+// Gets the filename from a given string path
+// i.e. "path/to/file.txt" -> "file.txt"
+static std::string getFilename(const std::string& path) {
+    size_t lastindex = path.find_last_of("/");
+    return path.substr(lastindex + 1);
+}
+
+enum ButtonHoverState {
+  ButtonHoverState_None,
+  ButtonHoverState_Hovered,
+  ButtonHoverState_Active
+};
+
 
 #endif Strings_h
+

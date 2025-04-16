@@ -136,7 +136,7 @@ struct SwitcherShader : Shader {
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("Switcher");
+    
     CommonViews::ShaderParameter(settings->delay, nullptr);
     ImGui::SameLine();
     auto playIcon = isPlaying ? ICON_MD_PAUSE : ICON_MD_PLAY_ARROW;

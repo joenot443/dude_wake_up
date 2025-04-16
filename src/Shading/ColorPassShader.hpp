@@ -75,7 +75,7 @@ public:
   
   void drawSettings() override {
     
-    CommonViews::H3Title("ColorPass");
+    
     CommonViews::RangeSlider("Hue", settings->lowHue->paramId, settings->lowHue, settings->highHue, "Threshold", false);
   }
 };

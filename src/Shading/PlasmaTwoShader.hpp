@@ -75,7 +75,7 @@ ShaderType type() override {
 
   void drawSettings() override
   {
-    CommonViews::H3Title("PlasmaTwo");
+    
     CommonViews::ShaderColor(settings->color);
     CommonViews::ShaderParameter(settings->mix, settings->mixOscillator);
   }

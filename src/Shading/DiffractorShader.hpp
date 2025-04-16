@@ -84,8 +84,6 @@ struct DiffractorShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Diffractor");
-
     CommonViews::ShaderParameter(settings->spacing, settings->spacingOscillator);
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     CommonViews::ShaderParameter(settings->scale, settings->scaleOscillator);

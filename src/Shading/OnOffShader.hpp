@@ -62,7 +62,7 @@ struct OnOffShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("On Off");
+    
 
     CommonViews::ShaderCheckbox(settings->onOff);
   }

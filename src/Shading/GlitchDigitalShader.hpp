@@ -78,7 +78,7 @@ struct GlitchDigitalShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("GlitchDigital");
+    
 
     if (CommonViews::ShaderOption(settings->texture, settings->textureOptions))
     {

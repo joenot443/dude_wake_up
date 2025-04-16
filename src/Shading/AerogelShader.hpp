@@ -66,7 +66,7 @@ struct AerogelShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Aerogel");
+    
 
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
   }

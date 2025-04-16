@@ -31,7 +31,7 @@ struct SimpleBarsSettings: public ShaderSettings {
   
   SimpleBarsSettings(std::string shaderId, json j) :
   orientation(std::make_shared<Parameter>("Orientation", 0, 0, 1)), // 0: Horizontal, 1: Vertical
-  barCount(std::make_shared<Parameter>("Bar Count", 10, 1, 1000)),
+  barCount(std::make_shared<Parameter>("Bar Count", 10, 1, 100)),
   barWidth(std::make_shared<Parameter>("Bar Width", 100.0, 1.0, 500.0)),
   barSpacing(std::make_shared<Parameter>("Bar Spacing", 20.0, 0.0, 200.0)),
   fillColor(std::make_shared<Parameter>("FillColor", ParameterType_Color)),
@@ -95,7 +95,7 @@ struct SimpleBarsShader: Shader {
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("SimpleBars");
+    
     if (ImGui::Button("Randomize Bars")) {
       random();
     }

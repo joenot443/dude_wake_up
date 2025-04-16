@@ -66,7 +66,7 @@ struct MistShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Mist");
+    
 
     CommonViews::ShaderParameter(settings->color, settings->colorOscillator);
   }

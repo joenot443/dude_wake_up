@@ -123,7 +123,10 @@ void FileSource::drawSettings()
   }
 
   // Draw a slider to control the video playback position
-  CommonViews::PlaybackSlider(sliderPosition, player.getDuration());
+  if (CommonViews::PlaybackSlider(sliderPosition, player.getDuration())) {
+    applyRanges();
+  }
+  
   CommonViews::PlaybackRangeSlider("Playback Range", "##playbackRange", settings->start, settings->end, player.getDuration(), playbackRangeDirty());
   
   if (playbackRangeDirty())

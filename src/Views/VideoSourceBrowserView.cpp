@@ -169,7 +169,7 @@ void VideoSourceBrowserView::setCurrentTab(int tabIndex) {
 
 void VideoSourceBrowserView::drawSelectedBrowser() {
   static int lastTab = -1;  // Track the last tab we were on
-  ImGui::BeginChild("##selectedBrowser");
+  ImGui::BeginChild("##selectedBrowser", ImVec2(ImGui::GetWindowWidth() - 10.0, ImGui::GetWindowHeight()), ImGuiChildFlags_None);
   if (currentTab != lastTab) {  // Only update tiles if we've changed tabs
     switch (currentTab) {
       case 0: // Generated Tab

@@ -58,7 +58,7 @@ struct FullHouseShader: Shader {
     
     ofTranslate(frame->getWidth() * 0.5, frame->getHeight() * 0.5);
     
-    int numberOfActor = settings->count->value;
+    int numberOfActor = settings->count->intValue;
     auto len = settings->length->value;
     ofColor color;
     
@@ -98,10 +98,10 @@ struct FullHouseShader: Shader {
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("FullHouse");
+    
     
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
-    CommonViews::ShaderParameter(settings->count, settings->countOscillator);
+    CommonViews::ShaderIntParameter(settings->count);
     CommonViews::ShaderParameter(settings->length, settings->lengthOscillator);
   }
 };

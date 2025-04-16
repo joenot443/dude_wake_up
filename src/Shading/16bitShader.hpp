@@ -71,7 +71,7 @@ ShaderType type() override {
 
   void drawSettings() override
   {
-    CommonViews::H3Title("16bit");
+    
 
     CommonViews::ShaderParameter(settings->pixelFactor, settings->pixelFactorOscillator);
   }

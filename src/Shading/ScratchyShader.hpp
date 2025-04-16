@@ -71,7 +71,7 @@ struct ScratchyShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Scratchy");
+    
 
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
     CommonViews::ShaderParameter(settings->amount, settings->amountOscillator); // Add amount to drawSettings

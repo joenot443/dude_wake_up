@@ -69,7 +69,7 @@ struct FlickerAudioShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("FlickerAudio");
+    
 
     CommonViews::ShaderCheckbox(settings->enableAudio);
   }

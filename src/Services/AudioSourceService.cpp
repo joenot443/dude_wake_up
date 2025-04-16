@@ -117,9 +117,9 @@ void AudioSourceService::update() {
 //    double beatCount = link.captureAppSessionState().beatAtTime(link.clock().micros(), 4.);
     // Only use the fractional component of the beatCount
 //    selectedAudioSource->audioAnalysis.updateBeat(beatCount - floor(beatCount));
-  } else if (selectedAudioSource->type() == AudioSourceType_Microphone){ // Don't update for the samples
+  } else if (selectedAudioSource->type() == AudioSourceType_Microphone) { // Don't update for the samples
     selectedAudioSource->audioAnalysis.bpm->value = AudioSourceService::getService()->tapper.bpm();
-    selectedAudioSource->audioAnalysis.updateBeat(tapper.beatPerc());
+    selectedAudioSource->audioAnalysis.updateBeat(selectedAudioSource->audioAnalysis.bpmPct());
   } else if (selectedAudioSource->type() == AudioSourceType_File) {
     selectedAudioSource->audioAnalysis.bpmEnabled = true;
     selectedAudioSource->audioAnalysis.updateBeat(selectedAudioSource->audioAnalysis.bpmPct());

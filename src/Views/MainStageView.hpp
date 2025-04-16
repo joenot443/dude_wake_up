@@ -40,7 +40,6 @@ private:
   WelcomeScreenView welcomeScreenView = WelcomeScreenView();
   
   void drawMenu();
-  void drawMasks();
   void drawVideoSourceBrowser();
   void drawOutputBrowser();
   void drawShaderBrowser();

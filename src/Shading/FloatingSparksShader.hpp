@@ -66,7 +66,7 @@ struct FloatingSparksShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("FloatingSparks");
+    
 
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
   }

@@ -87,7 +87,7 @@ ShaderType type() override {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Paint");
+    
 
     if (ImGui::Button("Clear Buffer")) {
       shouldClear = true;

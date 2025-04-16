@@ -66,7 +66,7 @@ struct UnknownPleasuresShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("UnknownPleasures");
+    
 
     CommonViews::ShaderParameter(settings->height, settings->heightOscillator);
   }

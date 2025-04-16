@@ -23,6 +23,7 @@ public:
   
   std::shared_ptr<Parameter> translateX;
   std::shared_ptr<Parameter> translateY;
+  std::shared_ptr<Parameter> center;
   
   std::shared_ptr<Parameter> scale;
   std::shared_ptr<Parameter> mode;
@@ -44,6 +45,7 @@ public:
   translateY(std::make_shared<Parameter>("Translate Y", 0.0, -2.0, 2.0)),
   scale(std::make_shared<Parameter>("Scale", 1.0, 0.0, 5.0)),
   mode(std::make_shared<Parameter>("Mode", 0, ParameterType_Int)),
+  center(std::make_shared<Parameter>("Center", ParameterType_Bool)),
   minXOscillator(std::make_shared<WaveformOscillator>(minX)),
   maxXOscillator(std::make_shared<WaveformOscillator>(maxX)),
   minYOscillator(std::make_shared<WaveformOscillator>(minY)),
@@ -53,7 +55,7 @@ public:
   scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
   ShaderSettings(shaderId, j, name) {
     mode->options = {"Standard", "Fill", "Fit", "Fill + Aspect"};
-    parameters = {minX, maxX, minY, maxY, scale, translateX, translateY, mode};
+    parameters = {minX, maxX, minY, maxY, scale, translateX, translateY, mode, center};
     oscillators = {minXOscillator, maxXOscillator, minYOscillator, maxYOscillator, translateXOscillator, translateYOscillator, scaleOscillator};
     load(j);
     audioReactiveParameter = scale;
@@ -134,11 +136,12 @@ public:
     ofPushMatrix();
     
     // Calculate the position to center the scaled texture
-    float translateX = (canvas->getWidth() - scaleX) / 2;
-    float translateY = (canvas->getHeight() - scaleY) / 2;
+    float translateX = settings->center->boolValue ? (canvas->getWidth() - scaleX) / 2 : settings->minX->value * canvas->getWidth();
+    float translateY = settings->center->boolValue ? (canvas->getHeight() - scaleY) / 2 : settings->minY->value * canvas->getHeight();
     
     // Translate to center the scaled image on the canvas
-    ofTranslate(translateX + settings->translateX->value * canvas->getWidth(), 
+    ofTranslate(
+                translateX + settings->translateX->value * canvas->getWidth(),
                 translateY + settings->translateY->value * canvas->getHeight());
     
     // Draw the cropped and scaled texture
@@ -154,17 +157,6 @@ public:
   
   
   void drawSettings() override {
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 5.0);
-    CommonViews::H3Title("Crop", false);
-    ImGui::SameLine();
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 7.5);
-    if (CommonViews::ResetButton(shaderId, settings->minX)) {
-      settings->maxX->resetValue();
-      settings->minY->resetValue();
-      settings->maxY->resetValue();
-    }
-    ImGui::NewLine();
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 7.5);
     auto frame = parentFrame();
     auto cursorPos = ImGui::GetCursorPos();
     if (frame != nullptr) {
@@ -173,13 +165,22 @@ public:
     ImGui::SetCursorPos(cursorPos);
     
     CommonViews::AreaSlider(shaderId, settings->minX, settings->maxX, settings->minY, settings->maxY, settings->minXOscillator, settings->maxXOscillator, settings->minYOscillator, settings->maxYOscillator);
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0);
+    // X
+    auto pos = ImGui::GetCursorPos();
     CommonViews::MiniSlider(settings->minX);
-    ImGui::SameLine();
+    ImGui::SetCursorPos(ImVec2(pos.x + 120.0, pos.y));
     CommonViews::MiniSlider(settings->maxX);
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0);
-    CommonViews::MiniSlider(settings->minY);
     ImGui::SameLine();
+    if (CommonViews::ResetButton(shaderId, settings->minX)) {
+      settings->maxX->resetValue();
+      settings->minY->resetValue();
+      settings->maxY->resetValue();
+    }
+    
+    // Y
+    pos = ImGui::GetCursorPos();
+    CommonViews::MiniSlider(settings->minY);
+    ImGui::SetCursorPos(ImVec2(pos.x + 120.0, pos.y));
     CommonViews::MiniSlider(settings->maxY);
     
     CommonViews::ShaderParameter(settings->scale, settings->scaleOscillator);
@@ -188,6 +189,7 @@ public:
     
     // Add mode selector
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 5.0);
+    CommonViews::ShaderCheckbox(settings->center);
     CommonViews::Selector(settings->mode, settings->mode->options);
   }
   

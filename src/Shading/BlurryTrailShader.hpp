@@ -65,7 +65,7 @@ struct BlurryTrailShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("BlurryTrail");
+    
 
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
   }

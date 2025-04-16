@@ -96,7 +96,7 @@ struct SpiralWhirlpoolShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("SpiralWhirlpool");
+    
     
     CommonViews::ShaderParameter(settings->warpSize, settings->warpSizeOscillator);
     CommonViews::ShaderParameter(settings->objectSize, settings->objectSizeOscillator);

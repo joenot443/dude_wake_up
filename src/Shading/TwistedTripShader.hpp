@@ -12,18 +12,18 @@
 #include "ShaderSettings.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
-#include "ValueOscillator.hpp"
+#include "WaveformOscillator.hpp"
 #include "Parameter.hpp"
 #include "Shader.hpp"
 #include <stdio.h>
 
 struct TwistedTripSettings: public ShaderSettings {
   std::shared_ptr<Parameter> speed;
-  std::shared_ptr<ValueOscillator> speedOscillator;
+  std::shared_ptr<WaveformOscillator> speedOscillator;
 
   TwistedTripSettings(std::string shaderId, json j) :
   speed(std::make_shared<Parameter>("speed", 1.0, 0.0, 10.0)),
-  speedOscillator(std::make_shared<ValueOscillator>(speed)),
+  speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   ShaderSettings(shaderId, j, "TwistedTrip") {
     parameters = { speed };
     oscillators = { speedOscillator };
@@ -65,7 +65,7 @@ struct TwistedTripShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("TwistedTrip");
+    
 
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
   }

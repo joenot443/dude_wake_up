@@ -75,7 +75,7 @@ ShaderType type() override {
 
   void drawSettings() override
   {
-    CommonViews::H3Title("SmokeRing");
+    
 
     CommonViews::ShaderParameter(settings->radius, settings->radiusOscillator);
     CommonViews::ShaderParameter(settings->colorFactor, settings->colorFactorOscillator);

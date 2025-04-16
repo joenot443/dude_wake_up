@@ -92,17 +92,22 @@ void OscillationService::loadConfig(json data) {
   if (data.is_object()) {  
     std::map<std::string, std::map<std::string, float>> itemsMap = data;
     
-    
-    for (auto & [id, osc] : oscillators) {
-      if (itemsMap.count(id) == 0) { continue; }
-      
-      std::map<std::string, float> oscMap = itemsMap[id];
-      
-      std::shared_ptr<WaveformOscillator> wOsc = std::dynamic_pointer_cast<WaveformOscillator>(osc);
-      wOsc->frequency->value = oscMap["freq"];
-      wOsc->shift->value = oscMap["shift"];
-      wOsc->amplitude->value = oscMap["amp"];
-      wOsc->enabled->setBoolValue(true);
+    for (auto & [id, values] : itemsMap) {
+      std::string paramId = id;
+      if (oscillators.count(paramId) != 0) {
+        std::shared_ptr<Oscillator> osc = oscillators[id];
+        
+        if (osc->type() == OscillatorType_waveform) {
+          std::shared_ptr<WaveformOscillator> wOsc = std::dynamic_pointer_cast<WaveformOscillator>(osc);
+          
+          wOsc->frequency->value = values["freq"];
+          wOsc->shift->value = values["shift"];
+          wOsc->amplitude->value = values["amp"];
+          osc->enabled->boolValue = true;
+        }
+      } else {
+        log("Couldn't find %s", paramId.c_str());
+      }
     }
   }
 }

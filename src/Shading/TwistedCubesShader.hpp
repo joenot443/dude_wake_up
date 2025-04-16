@@ -70,7 +70,7 @@ struct TwistedCubesShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("TwistedCubes");
+    
 
     CommonViews::ShaderParameter(settings->spacing, settings->spacingOscillator);
     CommonViews::ShaderParameter(settings->shape, settings->shapeOscillator);

@@ -35,6 +35,7 @@ public:
   void drawSettings() override;
   json serialize() override;
   void load(json j) override;
+  void teardown() override;
   
   void runSetupOnMainThread(ofEventArgs & args);
 };

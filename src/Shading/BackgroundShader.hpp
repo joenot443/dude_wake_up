@@ -65,7 +65,7 @@ struct BackgroundShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Background");
+    
 
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
   }

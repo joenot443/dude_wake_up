@@ -16,6 +16,8 @@ public:
   StrandBrowserWindow recentBrowserWindow;
   StrandBrowserWindow templateBrowserWindow;
   
+  ofVideoPlayer player;
+  
   WelcomeScreenView() : recentBrowserWindow(StrandBrowserWindow(StrandBrowserType_Recent)), templateBrowserWindow(StrandBrowserWindow(StrandBrowserType_Template)) {
     
   };

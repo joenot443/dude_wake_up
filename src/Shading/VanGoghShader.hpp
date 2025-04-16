@@ -58,7 +58,7 @@ ShaderType type() override {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("VanGogh");
+    
 
   }
 };

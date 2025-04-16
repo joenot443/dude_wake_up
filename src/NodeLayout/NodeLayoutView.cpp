@@ -344,6 +344,7 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
     } else {
       selectorNodeId = node->id;
     }
+    ed::SelectNode(node->id);
     
     if (!hasSelectorOpen) {
       if (isShader) {
@@ -848,10 +849,6 @@ void NodeLayoutView::handleRightClick()
     {
       handleUploadChain(node);
     }
-    if (ImGui::MenuItem("Publish to Syphon"))
-    {
-//      SyphonService::getService()->publishFbo(node->connectable->frame());
-    }
     int selectedNodeCount = ed::GetSelectedObjectCount();
     if (selectedNodeCount == 2) {
       ed::NodeId selectedNodes[2];
@@ -860,6 +857,14 @@ void NodeLayoutView::handleRightClick()
       if (ImGui::MenuItem("Blend")) {
         createBlendShaderForSelectedNodes(selectedNodes[0], selectedNodes[1]);
       }
+    }
+    if (ImGui::BeginMenu("Break Connections")) {
+      for (auto connection: node->connectable->connections()) {
+        if (ImGui::MenuItem(formatString("%s → %s", connection->start->name().c_str(), connection->end->name().c_str()).c_str())) {
+          ShaderChainerService::getService()->breakConnectionForConnectionId(connection->id);
+        }
+      }
+      ImGui::EndMenu();
     }
     ImGui::EndPopup();
   }
@@ -1274,26 +1279,25 @@ void NodeLayoutView::drawActionButtons()
 {
   ImVec2 pos = ImGui::GetCursorPos();
   int buttonCount = 7;
-  float buttonWidth = 48.0;
-  float buttonHeight = 48.0;
-  ImVec2 imageSize = ImVec2(buttonWidth, buttonHeight);
+  float buttonWidth = 32.0;
+  ImVec2 imageSize = ImVec2(buttonWidth, buttonWidth);
   ImVec2 imageRatio = ImVec2(1.5, 1.5);
   float shaderInfoPaneWidth = LayoutStateService::getService()->shouldDrawShaderInfo() ? LayoutStateService::getService()->browserSize().x : 0;
   
   // Position for either the collapsed or expanded action bar
-  float yPos = getScaledWindowHeight() - LayoutStateService::getService()->audioSettingsViewHeight() - 100.0;
+  float yPos = getScaledWindowHeight() - LayoutStateService::getService()->audioSettingsViewHeight() - 64.0;
   
   if (!LayoutStateService::getService()->actionBarExpanded) {
     // Draw collapsed state with single button
-    ImVec2 collapsedPos = ImVec2(getScaledWindowWidth() - 70.0 - shaderInfoPaneWidth, yPos);
+    ImVec2 collapsedPos = ImVec2(getScaledWindowWidth() - 42 - shaderInfoPaneWidth, yPos);
     ImGui::SetCursorPos(collapsedPos);
     
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
     ImGui::PushStyleColor(ImGuiCol_ChildBg, Colors::ActionBarBackgroundColor.Value);
-    ImGui::BeginChild("##CollapsedActionBar", ImVec2(64.0, 64.0), ImGuiChildFlags_AlwaysUseWindowPadding, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+    ImGui::BeginChild("##CollapsedActionBar", ImVec2(32.0, 32.0), ImGuiChildFlags_None, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration);
     
-    if (CommonViews::ImageButton("expand", "back.png", ImVec2(48.0, 48.0), imageRatio, true)) {
+    if (CommonViews::ImageButton("expand", "back.png", imageSize, imageRatio, true)) {
       LayoutStateService::getService()->actionBarExpanded = true;
     }
     
@@ -1305,17 +1309,19 @@ void NodeLayoutView::drawActionButtons()
   }
 
   // Draw expanded action bar
-  float actionBarWidth = buttonWidth * buttonCount * imageRatio.x + shaderInfoPaneWidth + 20.0;
-  ImGui::SetCursorPos(ImVec2(getScaledWindowWidth() - actionBarWidth, yPos));
+  float actionBarWidth = buttonWidth * buttonCount * imageRatio.x + shaderInfoPaneWidth + 30.0;
+  ImGui::SetCursorPos(ImVec2(getScaledWindowWidth() - actionBarWidth - 12.0, yPos));
   
   ImGui::PushStyleColor(ImGuiCol_ChildBg, Colors::ActionBarBackgroundColor.Value);
   ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
   ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
   ImGui::SetNextItemAllowOverlap();
-  ImGui::BeginChild("##ActionButtons", ImVec2(actionBarWidth, 64.0), ImGuiChildFlags_AlwaysUseWindowPadding, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+  
+  
+  ImGui::BeginChild("##ActionButtons", ImVec2(actionBarWidth, 32), ImGuiChildFlags_None, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize);
 
   // Collapse button
-  if (CommonViews::ImageButton("collapse", "forward.png", ImVec2(48.0, 48.0), imageRatio, true)) {
+  if (CommonViews::ImageButton("collapse", "forward.png", imageSize, imageRatio, true)) {
     LayoutStateService::getService()->actionBarExpanded = false;
   }
   ImGui::SameLine(0, 10);

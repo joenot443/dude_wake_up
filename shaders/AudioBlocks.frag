@@ -1,7 +1,8 @@
 #version 150
 
 uniform sampler2D tex;
-uniform float audio[256];
+uniform float audioLow;
+uniform float audioHigh;
 uniform vec2 dimensions;
 uniform float time;
 uniform float size;
@@ -32,7 +33,7 @@ float box(vec2 p, vec2 b, float r)
 
 float sampleMusic()
 {
-  return 0.5 * audio[int(0.15 * 256.)] + audio[int(0.3 * 256.)];
+  return 0.5 * audioLow + 0.5 * audioHigh;
 }
 
 void main(  )

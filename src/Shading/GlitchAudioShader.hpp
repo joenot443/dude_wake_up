@@ -71,7 +71,7 @@ struct GlitchAudioShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("GlitchAudio");
+    
 
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
   }

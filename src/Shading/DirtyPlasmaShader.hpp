@@ -77,7 +77,7 @@ struct DirtyPlasmaShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("DirtyPlasma");
+    
     if (CommonViews::ShaderOption(settings->texture, settings->textureOptions))
     {
       if (settings->texture->value != 0) {

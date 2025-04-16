@@ -83,7 +83,7 @@ struct StarryPlanesShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("StarryPlanes");
+    
 
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
   }

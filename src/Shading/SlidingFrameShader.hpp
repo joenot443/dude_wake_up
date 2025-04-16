@@ -84,7 +84,7 @@ ShaderType type() override {
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("SlidingFrame");
+    
     
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     CommonViews::ShaderParameter(settings->angle, settings->angleOscillator);

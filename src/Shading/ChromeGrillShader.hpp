@@ -72,7 +72,7 @@ struct ChromeGrillShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("ChromeGrill");
+    
 
     CommonViews::ShaderParameter(settings->color, settings->colorOscillator);
     CommonViews::ShaderParameter(settings->warp, settings->warpOscillator);

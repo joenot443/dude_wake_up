@@ -72,7 +72,7 @@ ShaderType type() override { return ShaderTypeSlider; }
 
   void drawSettings() override {
     
-    CommonViews::H3Title("Slider");
+    
 
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     CommonViews::ShaderCheckbox(settings->vertical);

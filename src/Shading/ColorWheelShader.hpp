@@ -80,7 +80,7 @@ struct ColorWheelShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("ColorWheel");
+    
 
     CommonViews::ShaderCheckbox(settings->enableAudio);
     CommonViews::ShaderParameter(settings->ballDistance, settings->ballDistanceOscillator);

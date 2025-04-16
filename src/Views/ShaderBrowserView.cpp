@@ -81,6 +81,7 @@ void ShaderBrowserView::setCurrentTab(int tabIndex) {
 }
 
 void ShaderBrowserView::drawSelectedBrowser() {
+  ImGui::BeginChild("##selectedBrowser", ImVec2(ImGui::GetWindowWidth() - 20.0, ImGui::GetWindowHeight() - 80.0), ImGuiChildFlags_None);
   switch (currentTab) {
     case 0: // Favorites
       favoritesTileBrowserView->draw();
@@ -104,6 +105,7 @@ void ShaderBrowserView::drawSelectedBrowser() {
       maskTileBrowserView->draw();
       break;
   }
+  ImGui::EndChild();
 }
 
 void ShaderBrowserView::draw()

@@ -64,7 +64,7 @@ ShaderType type() override {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Limbo");
+    
 
     CommonViews::ShaderParameter(settings->colorWarp, settings->colorWarpOscillator);
   }

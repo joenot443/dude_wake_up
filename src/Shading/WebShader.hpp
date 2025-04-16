@@ -66,7 +66,7 @@ struct WebShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("Web");
+    
 
     CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
   }

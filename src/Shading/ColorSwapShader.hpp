@@ -78,7 +78,7 @@ struct ColorSwapShader: Shader {
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("ColorSwap");
+    
     CommonViews::ShaderIntParameter(settings->mainRGB);
     CommonViews::ShaderIntParameter(settings->auxRGB);
     CommonViews::ShaderParameter(settings->blend, settings->blendOscillator);

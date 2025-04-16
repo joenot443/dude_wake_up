@@ -17,7 +17,14 @@ enum WaveShape {
   Sine,
   Square,
   Sawtooth,
-  Triangle
+  Triangle,
+  PulseTrain,
+  ExponentialSine,
+  HarmonicStack,
+  RectifiedSine,
+  NoiseModulatedSine,
+  BitcrushedSine,
+  MoireOscillation
 };
 
 struct WaveformOscillator: public Oscillator {
@@ -37,7 +44,7 @@ struct WaveformOscillator: public Oscillator {
   amplitude(std::make_shared<Parameter>("amp", 1.0, 0.0, v->max * 2.0, ParameterType_Hidden)),
   shift(std::make_shared<Parameter>("shift", v->max / 2.0 - v->defaultValue, v->min * -3.0, v->max * 3.0, ParameterType_Hidden)),
   frequency(std::make_shared<Parameter>("freq", 1.0, 0.0, 3.0, ParameterType_Hidden)),
-  waveShape(std::make_shared<Parameter>("Wave Shape", Sine, 0, 3)),
+  waveShape(std::make_shared<Parameter>("Wave Shape", Sine, 0, 10)),
   Oscillator(v) {
     parameters = {amplitude, frequency, shift};
   }

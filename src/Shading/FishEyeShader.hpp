@@ -64,7 +64,7 @@ public:
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("Fish Eye");
+    
     CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
   }
 };

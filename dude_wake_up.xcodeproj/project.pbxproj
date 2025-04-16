@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		024FAE752DA0207D00DE3197 /* ffmpeg.exe in Resources */ = {isa = PBXBuildFile; fileRef = 024FAE682DA0207D00DE3197 /* ffmpeg.exe */; };
+		024FAE762DA0207D00DE3197 /* ffmpeg in Resources */ = {isa = PBXBuildFile; fileRef = 024FAE662DA0207D00DE3197 /* ffmpeg */; };
+		024FAE772DA0207D00DE3197 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 024FAE5B2DA0207D00DE3197 /* .gitignore */; };
+		024FAE792DA0207D00DE3197 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 024FAE702DA0207D00DE3197 /* README.md */; };
+		024FAE7D2DA0207D00DE3197 /* ofxFFmpegRecorder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024FAE6E2DA0207D00DE3197 /* ofxFFmpegRecorder.cpp */; };
+		024FAE812DA0207D00DE3197 /* ofxFastFboReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024FAE592DA0207D00DE3197 /* ofxFastFboReader.cpp */; };
+		024FAE8D2DA02CF600DE3197 /* AVFRecorderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 024FAE8B2DA02CF600DE3197 /* AVFRecorderWrapper.mm */; };
+		024FAE8E2DA02CF600DE3197 /* AVFRecorder.m in Sources */ = {isa = PBXBuildFile; fileRef = 024FAE892DA02CF600DE3197 /* AVFRecorder.m */; };
 		02864DF12D94611B000CE0D4 /* MSABPMTapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02864DEF2D94611B000CE0D4 /* MSABPMTapper.cpp */; };
 		028651332D94652E000CE0D4 /* VideoRecorder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028651322D94652E000CE0D4 /* VideoRecorder.cpp */; };
 		028651362D94673B000CE0D4 /* ofxAudioFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028651352D94673B000CE0D4 /* ofxAudioFile.cpp */; };
@@ -171,7 +179,22 @@
 		"01771929-4D11-4D13-9112-FE25FF6A46D6" /* PsycurvesShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PsycurvesShader.hpp; sourceTree = "<group>"; };
 		"018EA4E1-F2EA-4702-9A7F-DBF6ED73664D" /* BookmarkService.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BookmarkService.hpp; sourceTree = "<group>"; };
 		"01F7D881-9877-4747-9718-9FE1BED26EF7" /* HelpService.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = HelpService.hpp; sourceTree = "<group>"; };
+		021A59222DAD815500CAA5E3 /* Font.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Font.hpp; sourceTree = "<group>"; };
+		021A59232DB06B3C00CAA5E3 /* StrangeScreen.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = StrangeScreen.frag; sourceTree = "<group>"; };
+		021A59242DB06B3C00CAA5E3 /* StrangeScreen.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = StrangeScreen.vert; sourceTree = "<group>"; };
 		"023ECAF6-5671-4C7D-89EB-33526DA42A8B" /* IsoFractShader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IsoFractShader.cpp; sourceTree = "<group>"; };
+		024FAE582DA0207D00DE3197 /* ofxFastFboReader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ofxFastFboReader.h; sourceTree = "<group>"; };
+		024FAE592DA0207D00DE3197 /* ofxFastFboReader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ofxFastFboReader.cpp; sourceTree = "<group>"; };
+		024FAE5B2DA0207D00DE3197 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		024FAE662DA0207D00DE3197 /* ffmpeg */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = ffmpeg; sourceTree = "<group>"; };
+		024FAE682DA0207D00DE3197 /* ffmpeg.exe */ = {isa = PBXFileReference; lastKnownFileType = file; path = ffmpeg.exe; sourceTree = "<group>"; };
+		024FAE6D2DA0207D00DE3197 /* ofxFFmpegRecorder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ofxFFmpegRecorder.h; sourceTree = "<group>"; };
+		024FAE6E2DA0207D00DE3197 /* ofxFFmpegRecorder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ofxFFmpegRecorder.cpp; sourceTree = "<group>"; };
+		024FAE702DA0207D00DE3197 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		024FAE882DA02CF600DE3197 /* AVFRecorder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AVFRecorder.h; sourceTree = "<group>"; };
+		024FAE892DA02CF600DE3197 /* AVFRecorder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AVFRecorder.m; sourceTree = "<group>"; };
+		024FAE8A2DA02CF600DE3197 /* AVFRecorderWrapper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AVFRecorderWrapper.hpp; sourceTree = "<group>"; };
+		024FAE8B2DA02CF600DE3197 /* AVFRecorderWrapper.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = AVFRecorderWrapper.mm; sourceTree = "<group>"; };
 		"0265D595-A18D-41DE-BCDF-9B6017808CC8" /* AudioSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AudioSource.cpp; sourceTree = "<group>"; };
 		02864DEE2D94611B000CE0D4 /* MSABPMTapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSABPMTapper.h; sourceTree = "<group>"; };
 		02864DEF2D94611B000CE0D4 /* MSABPMTapper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MSABPMTapper.cpp; sourceTree = "<group>"; };
@@ -242,6 +265,553 @@
 		0286518D2D946D96000CE0D4 /* imgui_markdown.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imgui_markdown.h; sourceTree = "<group>"; };
 		028651AE2D95E0EE000CE0D4 /* nottawa - live visuals (Debug).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "nottawa - live visuals (Debug).app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		028651AF2D95E208000CE0D4 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
+		028651B22D9893A7000CE0D4 /* 4-steps-stairs.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "4-steps-stairs.png"; sourceTree = "<group>"; };
+		028651B32D9893A7000CE0D4 /* abstract-alien-metal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "abstract-alien-metal.png"; sourceTree = "<group>"; };
+		028651B42D9893A7000CE0D4 /* agedplanks1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = agedplanks1.png; sourceTree = "<group>"; };
+		028651B52D9893A7000CE0D4 /* alien-carniverous-plant.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "alien-carniverous-plant.png"; sourceTree = "<group>"; };
+		028651B62D9893A7000CE0D4 /* alien-metal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "alien-metal.png"; sourceTree = "<group>"; };
+		028651B72D9893A7000CE0D4 /* alien-panels.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "alien-panels.png"; sourceTree = "<group>"; };
+		028651B82D9893A7000CE0D4 /* alien-slime1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "alien-slime1.png"; sourceTree = "<group>"; };
+		028651B92D9893A7000CE0D4 /* ancient-sewer-stonework.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ancient-sewer-stonework.png"; sourceTree = "<group>"; };
+		028651BA2D9893A7000CE0D4 /* angled-blocks-vegetation.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "angled-blocks-vegetation.png"; sourceTree = "<group>"; };
+		028651BB2D9893A7000CE0D4 /* angled-shale-cliff.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "angled-shale-cliff.png"; sourceTree = "<group>"; };
+		028651BC2D9893A7000CE0D4 /* angled-tiled-floor.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "angled-tiled-floor.png"; sourceTree = "<group>"; };
+		028651BD2D9893A7000CE0D4 /* antique-grate1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "antique-grate1.png"; sourceTree = "<group>"; };
+		028651BE2D9893A7000CE0D4 /* armored-dragon-scales.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "armored-dragon-scales.png"; sourceTree = "<group>"; };
+		028651BF2D9893A7000CE0D4 /* art-deco-scales-wallpaper.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "art-deco-scales-wallpaper.png"; sourceTree = "<group>"; };
+		028651C02D9893A7000CE0D4 /* badlands-boulders.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "badlands-boulders.png"; sourceTree = "<group>"; };
+		028651C12D9893A7000CE0D4 /* bamboo-wood-semigloss.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bamboo-wood-semigloss.png"; sourceTree = "<group>"; };
+		028651C22D9893A7000CE0D4 /* bark1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bark1.png; sourceTree = "<group>"; };
+		028651C32D9893A7000CE0D4 /* barred-weave.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "barred-weave.png"; sourceTree = "<group>"; };
+		028651C42D9893A7000CE0D4 /* base-white-tile.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "base-white-tile.png"; sourceTree = "<group>"; };
+		028651C52D9893A7000CE0D4 /* beaten-down-brick.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "beaten-down-brick.png"; sourceTree = "<group>"; };
+		028651C62D9893A7000CE0D4 /* beige-carpet-worn1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "beige-carpet-worn1.png"; sourceTree = "<group>"; };
+		028651C72D9893A7000CE0D4 /* beige-stonework.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "beige-stonework.png"; sourceTree = "<group>"; };
+		028651C82D9893A7000CE0D4 /* bird-feathers-2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bird-feathers-2.png"; sourceTree = "<group>"; };
+		028651C92D9893A7000CE0D4 /* black-streaked-rock1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "black-streaked-rock1.png"; sourceTree = "<group>"; };
+		028651CA2D9893A7000CE0D4 /* black-white-tile.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "black-white-tile.png"; sourceTree = "<group>"; };
+		028651CB2D9893A7000CE0D4 /* blackrock.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = blackrock.png; sourceTree = "<group>"; };
+		028651CC2D9893A7000CE0D4 /* blocky-rockface1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "blocky-rockface1.png"; sourceTree = "<group>"; };
+		028651CD2D9893A7000CE0D4 /* bog.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bog.png; sourceTree = "<group>"; };
+		028651CE2D9893A7000CE0D4 /* branches_twisted.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = branches_twisted.png; sourceTree = "<group>"; };
+		028651CF2D9893A7000CE0D4 /* bricks-mortar.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bricks-mortar.png"; sourceTree = "<group>"; };
+		028651D02D9893A7000CE0D4 /* broken_down_concrete1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = broken_down_concrete1.png; sourceTree = "<group>"; };
+		028651D12D9893A7000CE0D4 /* broken-down-stonework.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "broken-down-stonework.png"; sourceTree = "<group>"; };
+		028651D22D9893A7000CE0D4 /* brown-leather.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "brown-leather.png"; sourceTree = "<group>"; };
+		028651D32D9893A7000CE0D4 /* brushed-metal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "brushed-metal.png"; sourceTree = "<group>"; };
+		028651D42D9893A7000CE0D4 /* bumpy_worn_ground.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bumpy_worn_ground.png; sourceTree = "<group>"; };
+		028651D52D9893A7000CE0D4 /* bumpy-rockface1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bumpy-rockface1.png"; sourceTree = "<group>"; };
+		028651D62D9893A7000CE0D4 /* burlap-stained1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "burlap-stained1.png"; sourceTree = "<group>"; };
+		028651D72D9893A7000CE0D4 /* carpet1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = carpet1.png; sourceTree = "<group>"; };
+		028651D82D9893A7000CE0D4 /* cave-floor-rock.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cave-floor-rock.png"; sourceTree = "<group>"; };
+		028651D92D9893A7000CE0D4 /* cavern-walls.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cavern-walls.png"; sourceTree = "<group>"; };
+		028651DA2D9893A7000CE0D4 /* cement_arcing_pattern1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cement_arcing_pattern1.png; sourceTree = "<group>"; };
+		028651DB2D9893A7000CE0D4 /* cheap_old_linoleum1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cheap_old_linoleum1.png; sourceTree = "<group>"; };
+		028651DC2D9893A7000CE0D4 /* cheap_plywood1r.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cheap_plywood1r.png; sourceTree = "<group>"; };
+		028651DD2D9893A7000CE0D4 /* cherry-wood-veneer2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cherry-wood-veneer2.png"; sourceTree = "<group>"; };
+		028651DE2D9893A7000CE0D4 /* chipped-paint-metal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "chipped-paint-metal.png"; sourceTree = "<group>"; };
+		028651DF2D9893A7000CE0D4 /* chipped-stonework.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "chipped-stonework.png"; sourceTree = "<group>"; };
+		028651E02D9893A7000CE0D4 /* chipping-painted-wall.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "chipping-painted-wall.png"; sourceTree = "<group>"; };
+		028651E12D9893A7000CE0D4 /* chiseled-cobble.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "chiseled-cobble.png"; sourceTree = "<group>"; };
+		028651E22D9893A7000CE0D4 /* circle-textured-metal1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "circle-textured-metal1.png"; sourceTree = "<group>"; };
+		028651E32D9893A7000CE0D4 /* classy-art-deco-wallpaper.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "classy-art-deco-wallpaper.png"; sourceTree = "<group>"; };
+		028651E42D9893A7000CE0D4 /* clay-shingles1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "clay-shingles1.png"; sourceTree = "<group>"; };
+		028651E52D9893A7000CE0D4 /* cliff-rockface1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cliff-rockface1.png"; sourceTree = "<group>"; };
+		028651E62D9893A7000CE0D4 /* coarse-couch-fabric.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "coarse-couch-fabric.png"; sourceTree = "<group>"; };
+		028651E72D9893A7000CE0D4 /* coarse-loose-fabric.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "coarse-loose-fabric.png"; sourceTree = "<group>"; };
+		028651E82D9893A7000CE0D4 /* coarse-old-fabric.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "coarse-old-fabric.png"; sourceTree = "<group>"; };
+		028651E92D9893A7000CE0D4 /* cobblestylized.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cobblestylized.png; sourceTree = "<group>"; };
+		028651EA2D9893A7000CE0D4 /* cobblestylized3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cobblestylized3.png; sourceTree = "<group>"; };
+		028651EB2D9893A7000CE0D4 /* cog-patterned-metal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cog-patterned-metal.png"; sourceTree = "<group>"; };
+		028651EC2D9893A7000CE0D4 /* colored-concrete-wall.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "colored-concrete-wall.png"; sourceTree = "<group>"; };
+		028651ED2D9893A7000CE0D4 /* columned-lava-rock.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "columned-lava-rock.png"; sourceTree = "<group>"; };
+		028651EE2D9893A7000CE0D4 /* concrete2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = concrete2.png; sourceTree = "<group>"; };
+		028651EF2D9893A7000CE0D4 /* concrete3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = concrete3.png; sourceTree = "<group>"; };
+		028651F02D9893A7000CE0D4 /* coral1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = coral1.png; sourceTree = "<group>"; };
+		028651F12D9893A7000CE0D4 /* corkboard3b.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = corkboard3b.png; sourceTree = "<group>"; };
+		028651F22D9893A7000CE0D4 /* cracking_painted_asphalt.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cracking_painted_asphalt.png; sourceTree = "<group>"; };
+		028651F32D9893A7000CE0D4 /* cratered-rock.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cratered-rock.png"; sourceTree = "<group>"; };
+		028651F42D9893A7000CE0D4 /* crisscross-foam.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "crisscross-foam.png"; sourceTree = "<group>"; };
+		028651F52D9893A7000CE0D4 /* curved-wet-cobble.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "curved-wet-cobble.png"; sourceTree = "<group>"; };
+		028651F62D9893A7000CE0D4 /* damp-dungeon-floor.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "damp-dungeon-floor.png"; sourceTree = "<group>"; };
+		028651F72D9893A7000CE0D4 /* damp-mossy-boulders.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "damp-mossy-boulders.png"; sourceTree = "<group>"; };
+		028651F82D9893A7000CE0D4 /* damp-rocky-ground1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "damp-rocky-ground1.png"; sourceTree = "<group>"; };
+		028651F92D9893A7000CE0D4 /* dark_rough_rock1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dark_rough_rock1.png; sourceTree = "<group>"; };
+		028651FA2D9893A7000CE0D4 /* dash-lined-metal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dash-lined-metal.png"; sourceTree = "<group>"; };
+		028651FB2D9893A7000CE0D4 /* dented-metal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dented-metal.png"; sourceTree = "<group>"; };
+		028651FC2D9893A7000CE0D4 /* desert-cliff1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "desert-cliff1.png"; sourceTree = "<group>"; };
+		028651FD2D9893A7000CE0D4 /* desert-rocks1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "desert-rocks1.png"; sourceTree = "<group>"; };
+		028651FE2D9893A7000CE0D4 /* diagonal-stripe-weave.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "diagonal-stripe-weave.png"; sourceTree = "<group>"; };
+		028651FF2D9893A7000CE0D4 /* diamond-inlay-tile1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "diamond-inlay-tile1.png"; sourceTree = "<group>"; };
+		028652002D9893A7000CE0D4 /* diamond-metal-siding.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "diamond-metal-siding.png"; sourceTree = "<group>"; };
+		028652012D9893A7000CE0D4 /* dirty-flat-stonework.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dirty-flat-stonework.png"; sourceTree = "<group>"; };
+		028652022D9893A7000CE0D4 /* dirty-office-fabric.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dirty-office-fabric.png"; sourceTree = "<group>"; };
+		028652032D9893A7000CE0D4 /* dirty-padded-leather.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dirty-padded-leather.png"; sourceTree = "<group>"; };
+		028652042D9893A7000CE0D4 /* dirty-red-bricks.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dirty-red-bricks.png"; sourceTree = "<group>"; };
+		028652052D9893A7000CE0D4 /* dirty-tile.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dirty-tile.png"; sourceTree = "<group>"; };
+		028652062D9893A7000CE0D4 /* dirty-wicker-weave1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dirty-wicker-weave1.png"; sourceTree = "<group>"; };
+		028652072D9893A7000CE0D4 /* dragon-scales.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dragon-scales.png"; sourceTree = "<group>"; };
+		028652082D9893A7000CE0D4 /* fancy-brass-pattern1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fancy-brass-pattern1.png"; sourceTree = "<group>"; };
+		028652092D9893A7000CE0D4 /* fancy-diamond-metal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fancy-diamond-metal.png"; sourceTree = "<group>"; };
+		0286520A2D9893A7000CE0D4 /* fancy-metal1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fancy-metal1.png"; sourceTree = "<group>"; };
+		0286520B2D9893A7000CE0D4 /* faux-rock-stucco.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "faux-rock-stucco.png"; sourceTree = "<group>"; };
+		0286520C2D9893A7000CE0D4 /* feathers.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = feathers.png; sourceTree = "<group>"; };
+		0286520D2D9893A7000CE0D4 /* filthy-space-panels.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "filthy-space-panels.png"; sourceTree = "<group>"; };
+		0286520E2D9893A7000CE0D4 /* fine-particles-concrete1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fine-particles-concrete1.png"; sourceTree = "<group>"; };
+		0286520F2D9893A7000CE0D4 /* flaking-limestone1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "flaking-limestone1.png"; sourceTree = "<group>"; };
+		028652102D9893A7000CE0D4 /* flaking-plaster.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "flaking-plaster.png"; sourceTree = "<group>"; };
+		028652112D9893A7000CE0D4 /* flat-cobble-moss.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "flat-cobble-moss.png"; sourceTree = "<group>"; };
+		028652122D9893A7000CE0D4 /* fleshy_granite1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fleshy_granite1.png; sourceTree = "<group>"; };
+		028652132D9893A7000CE0D4 /* floral-embossed-wallpaper1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "floral-embossed-wallpaper1.png"; sourceTree = "<group>"; };
+		028652142D9893A7000CE0D4 /* foam-grip1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "foam-grip1.png"; sourceTree = "<group>"; };
+		028652152D9893A7000CE0D4 /* forest_floor.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = forest_floor.png; sourceTree = "<group>"; };
+		028652162D9893A7000CE0D4 /* forest-trail1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "forest-trail1.png"; sourceTree = "<group>"; };
+		028652172D9893A7000CE0D4 /* forest-wallpaper.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "forest-wallpaper.png"; sourceTree = "<group>"; };
+		028652182D9893A7000CE0D4 /* futuristic-cube-metal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "futuristic-cube-metal.png"; sourceTree = "<group>"; };
+		028652192D9893A7000CE0D4 /* futuristic-panels1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "futuristic-panels1.png"; sourceTree = "<group>"; };
+		0286521A2D9893A7000CE0D4 /* geyser-rock1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "geyser-rock1.png"; sourceTree = "<group>"; };
+		0286521B2D9893A7000CE0D4 /* glossy-marble-tile.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glossy-marble-tile.png"; sourceTree = "<group>"; };
+		0286521C2D9893A7000CE0D4 /* glossy-stylized-blocks.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glossy-stylized-blocks.png"; sourceTree = "<group>"; };
+		0286521D2D9893A7000CE0D4 /* grainy_stucco.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = grainy_stucco.png; sourceTree = "<group>"; };
+		0286521E2D9893A7000CE0D4 /* granite-gray-white.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "granite-gray-white.png"; sourceTree = "<group>"; };
+		0286521F2D9893A7000CE0D4 /* granite-grey.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "granite-grey.png"; sourceTree = "<group>"; };
+		028652202D9893A7000CE0D4 /* granite-tile.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "granite-tile.png"; sourceTree = "<group>"; };
+		028652212D9893A7000CE0D4 /* granite5.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = granite5.png; sourceTree = "<group>"; };
+		028652222D9893A7000CE0D4 /* granitesmooth1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = granitesmooth1.png; sourceTree = "<group>"; };
+		028652232D9893A7000CE0D4 /* grassy-meadow1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "grassy-meadow1.png"; sourceTree = "<group>"; };
+		028652242D9893A7000CE0D4 /* gravel_path.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gravel_path.png; sourceTree = "<group>"; };
+		028652252D9893A7000CE0D4 /* gray-bricks1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "gray-bricks1.png"; sourceTree = "<group>"; };
+		028652262D9893A7000CE0D4 /* gray-granite-flecks.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "gray-granite-flecks.png"; sourceTree = "<group>"; };
+		028652272D9893A7000CE0D4 /* greasy-metal-pan1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "greasy-metal-pan1.png"; sourceTree = "<group>"; };
+		028652282D9893A7000CE0D4 /* greasy-pan-2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "greasy-pan-2.png"; sourceTree = "<group>"; };
+		028652292D9893A7000CE0D4 /* green-shower-tile1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "green-shower-tile1.png"; sourceTree = "<group>"; };
+		0286522A2D9893A7000CE0D4 /* grime-alley-bricks_1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "grime-alley-bricks_1.png"; sourceTree = "<group>"; };
+		0286522B2D9893A7000CE0D4 /* grime-alley-bricks_2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "grime-alley-bricks_2.png"; sourceTree = "<group>"; };
+		0286522C2D9893A7000CE0D4 /* grimy-metal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "grimy-metal.png"; sourceTree = "<group>"; };
+		0286522D2D9893A7000CE0D4 /* grip-rusted-steel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "grip-rusted-steel.png"; sourceTree = "<group>"; };
+		0286522E2D9893A7000CE0D4 /* haystack1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = haystack1.png; sourceTree = "<group>"; };
+		0286522F2D9893A7000CE0D4 /* herringbone-flooring.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "herringbone-flooring.png"; sourceTree = "<group>"; };
+		028652302D9893A7000CE0D4 /* hex-stones1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hex-stones1.png"; sourceTree = "<group>"; };
+		028652312D9893A7000CE0D4 /* hexagon-pavers1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hexagon-pavers1.png"; sourceTree = "<group>"; };
+		028652322D9893A7000CE0D4 /* holey-rock1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "holey-rock1.png"; sourceTree = "<group>"; };
+		028652332D9893A7000CE0D4 /* houndstooth-fabric-weave.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "houndstooth-fabric-weave.png"; sourceTree = "<group>"; };
+		028652342D9893A7000CE0D4 /* ice_field.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ice_field.png; sourceTree = "<group>"; };
+		028652352D9893A7000CE0D4 /* iced-over-ground7.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iced-over-ground7.png"; sourceTree = "<group>"; };
+		028652362D9893A7000CE0D4 /* industrial-narrow-brick.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "industrial-narrow-brick.png"; sourceTree = "<group>"; };
+		028652372D9893A7000CE0D4 /* industrial-tile1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "industrial-tile1.png"; sourceTree = "<group>"; };
+		028652382D9893A7000CE0D4 /* industrial-walls.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "industrial-walls.png"; sourceTree = "<group>"; };
+		028652392D9893A7000CE0D4 /* jagged-cliff1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "jagged-cliff1.png"; sourceTree = "<group>"; };
+		0286523A2D9893A7000CE0D4 /* jagged-rockface1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "jagged-rockface1.png"; sourceTree = "<group>"; };
+		0286523B2D9893A7000CE0D4 /* jagged-rocky-ground.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "jagged-rocky-ground.png"; sourceTree = "<group>"; };
+		0286523C2D9893A7000CE0D4 /* knotty-plywood.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "knotty-plywood.png"; sourceTree = "<group>"; };
+		0286523D2D9893A7000CE0D4 /* laminate-flooring-brown.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "laminate-flooring-brown.png"; sourceTree = "<group>"; };
+		0286523E2D9893A7000CE0D4 /* layered-fungus1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "layered-fungus1.png"; sourceTree = "<group>"; };
+		0286523F2D9893A7000CE0D4 /* layered-planetary.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "layered-planetary.png"; sourceTree = "<group>"; };
+		028652402D9893A7000CE0D4 /* layered-rock1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "layered-rock1.png"; sourceTree = "<group>"; };
+		028652412D9893A7000CE0D4 /* leaf-fall1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "leaf-fall1.png"; sourceTree = "<group>"; };
+		028652422D9893A7000CE0D4 /* leafy-grass2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "leafy-grass2.png"; sourceTree = "<group>"; };
+		028652432D9893A7000CE0D4 /* light-bumped-rock1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "light-bumped-rock1.png"; sourceTree = "<group>"; };
+		028652442D9893A7000CE0D4 /* limestone5.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = limestone5.png; sourceTree = "<group>"; };
+		028652452D9893A7000CE0D4 /* limestone6.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = limestone6.png; sourceTree = "<group>"; };
+		028652462D9893A7000CE0D4 /* limestonemarked2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = limestonemarked2.png; sourceTree = "<group>"; };
+		028652472D9893A7000CE0D4 /* Lined-Cement-.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Lined-Cement-.png"; sourceTree = "<group>"; };
+		028652482D9893A7000CE0D4 /* lumpy-wet-concrete.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "lumpy-wet-concrete.png"; sourceTree = "<group>"; };
+		028652492D9893A7000CE0D4 /* lunar_rock2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = lunar_rock2.png; sourceTree = "<group>"; };
+		0286524A2D9893A7000CE0D4 /* lunar-rock.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "lunar-rock.png"; sourceTree = "<group>"; };
+		0286524B2D9893A7000CE0D4 /* luxury-vinyl-plank_light.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "luxury-vinyl-plank_light.png"; sourceTree = "<group>"; };
+		0286524C2D9893A7000CE0D4 /* marble-speckled.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "marble-speckled.png"; sourceTree = "<group>"; };
+		0286524D2D9893A7000CE0D4 /* matted_old_shaggy_rug1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = matted_old_shaggy_rug1.png; sourceTree = "<group>"; };
+		0286524E2D9893A7000CE0D4 /* mature-oak-tree.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "mature-oak-tree.png"; sourceTree = "<group>"; };
+		0286524F2D9893A7000CE0D4 /* mesh-covered-metal1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "mesh-covered-metal1.png"; sourceTree = "<group>"; };
+		028652502D9893A7000CE0D4 /* metal-compartments.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "metal-compartments.png"; sourceTree = "<group>"; };
+		028652512D9893A7000CE0D4 /* metal-grate1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "metal-grate1.png"; sourceTree = "<group>"; };
+		028652522D9893A7000CE0D4 /* metal-siding-base.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "metal-siding-base.png"; sourceTree = "<group>"; };
+		028652532D9893A7000CE0D4 /* metal-ventilation1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "metal-ventilation1.png"; sourceTree = "<group>"; };
+		028652542D9893A7000CE0D4 /* metal-with-leaks.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "metal-with-leaks.png"; sourceTree = "<group>"; };
+		028652552D9893A7000CE0D4 /* middle-eastern-wall.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "middle-eastern-wall.png"; sourceTree = "<group>"; };
+		028652562D9893A7000CE0D4 /* middle-eastern-wall-dirty.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "middle-eastern-wall-dirty.png"; sourceTree = "<group>"; };
+		028652572D9893A7000CE0D4 /* military-panel1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "military-panel1.png"; sourceTree = "<group>"; };
+		028652582D9893A7000CE0D4 /* modern-blocky.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "modern-blocky.png"; sourceTree = "<group>"; };
+		028652592D9893A7000CE0D4 /* modern-brick1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "modern-brick1.png"; sourceTree = "<group>"; };
+		0286525A2D9893A7000CE0D4 /* modern-fractured-wallpaper.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "modern-fractured-wallpaper.png"; sourceTree = "<group>"; };
+		0286525B2D9893A7000CE0D4 /* modern-metal-wall.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "modern-metal-wall.png"; sourceTree = "<group>"; };
+		0286525C2D9893A7000CE0D4 /* modern-shattered-wallpaper.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "modern-shattered-wallpaper.png"; sourceTree = "<group>"; };
+		0286525D2D9893A7000CE0D4 /* narrow-rough-brick.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "narrow-rough-brick.png"; sourceTree = "<group>"; };
+		0286525E2D9893A7000CE0D4 /* narrowbrick1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = narrowbrick1.png; sourceTree = "<group>"; };
+		0286525F2D9893A7000CE0D4 /* ocean-rock.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ocean-rock.png"; sourceTree = "<group>"; };
+		028652602D9893A7000CE0D4 /* orbed-plastic.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "orbed-plastic.png"; sourceTree = "<group>"; };
+		028652612D9893A7000CE0D4 /* ornate-brass.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ornate-brass.png"; sourceTree = "<group>"; };
+		028652622D9893A7000CE0D4 /* ornate-brass2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ornate-brass2.png"; sourceTree = "<group>"; };
+		028652632D9893A7000CE0D4 /* ornate-brass3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ornate-brass3.png"; sourceTree = "<group>"; };
+		028652642D9893A7000CE0D4 /* ornate-celtic-gold.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ornate-celtic-gold.png"; sourceTree = "<group>"; };
+		028652652D9893A7000CE0D4 /* oxidized-copper.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "oxidized-copper.png"; sourceTree = "<group>"; };
+		028652662D9893A7000CE0D4 /* paint-peeling.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "paint-peeling.png"; sourceTree = "<group>"; };
+		028652672D9893A7000CE0D4 /* painted_metal_shed.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = painted_metal_shed.png; sourceTree = "<group>"; };
+		028652682D9893A7000CE0D4 /* painted-worn-asphalt.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "painted-worn-asphalt.png"; sourceTree = "<group>"; };
+		028652692D9893A7000CE0D4 /* peacock-ore.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "peacock-ore.png"; sourceTree = "<group>"; };
+		0286526A2D9893A7000CE0D4 /* pirate-gold.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "pirate-gold.png"; sourceTree = "<group>"; };
+		0286526B2D9893A7000CE0D4 /* pitted-metal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "pitted-metal.png"; sourceTree = "<group>"; };
+		0286526C2D9893A7000CE0D4 /* pitted-rusted-metal1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "pitted-rusted-metal1.png"; sourceTree = "<group>"; };
+		0286526D2D9893A7000CE0D4 /* preschool-tile.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "preschool-tile.png"; sourceTree = "<group>"; };
+		0286526E2D9893A7000CE0D4 /* red-coral2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "red-coral2.png"; sourceTree = "<group>"; };
+		0286526F2D9893A7000CE0D4 /* red-scifi-metal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "red-scifi-metal.png"; sourceTree = "<group>"; };
+		028652702D9893A7000CE0D4 /* redbricks2b.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = redbricks2b.png; sourceTree = "<group>"; };
+		028652712D9893A7000CE0D4 /* ribbed-chipped-metal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ribbed-chipped-metal.png"; sourceTree = "<group>"; };
+		028652722D9893A7000CE0D4 /* rich-brown-tile.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "rich-brown-tile.png"; sourceTree = "<group>"; };
+		028652732D9893A7000CE0D4 /* rich-brown-tile-variation.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "rich-brown-tile-variation.png"; sourceTree = "<group>"; };
+		028652742D9893A7000CE0D4 /* river_rock1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = river_rock1.png; sourceTree = "<group>"; };
+		028652752D9893A7000CE0D4 /* rock-slab-wall.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "rock-slab-wall.png"; sourceTree = "<group>"; };
+		028652762D9893A7000CE0D4 /* rocky_asphalt1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = rocky_asphalt1.png; sourceTree = "<group>"; };
+		028652772D9893A7000CE0D4 /* rocky_dirt1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = rocky_dirt1.png; sourceTree = "<group>"; };
+		028652782D9893A7000CE0D4 /* rocky-shoreline1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "rocky-shoreline1.png"; sourceTree = "<group>"; };
+		028652792D9893A7000CE0D4 /* rocky-worn-ground.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "rocky-worn-ground.png"; sourceTree = "<group>"; };
+		0286527A2D9893A7000CE0D4 /* rough-brick1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "rough-brick1.png"; sourceTree = "<group>"; };
+		0286527B2D9893A7000CE0D4 /* rough-wet-cobble.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "rough-wet-cobble.png"; sourceTree = "<group>"; };
+		0286527C2D9893A7000CE0D4 /* rounded-brick1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "rounded-brick1.png"; sourceTree = "<group>"; };
+		0286527D2D9893A7000CE0D4 /* rust-covered-metal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "rust-covered-metal.png"; sourceTree = "<group>"; };
+		0286527E2D9893A7000CE0D4 /* rust-panel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "rust-panel.png"; sourceTree = "<group>"; };
+		0286527F2D9893A7000CE0D4 /* rusted-panels.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "rusted-panels.png"; sourceTree = "<group>"; };
+		028652802D9893A7000CE0D4 /* saloon-wood-floor.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "saloon-wood-floor.png"; sourceTree = "<group>"; };
+		028652812D9893A7000CE0D4 /* sand-dunes1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sand-dunes1.png"; sourceTree = "<group>"; };
+		028652822D9893A7000CE0D4 /* sand1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = sand1.png; sourceTree = "<group>"; };
+		028652832D9893A7000CE0D4 /* sandstonecliff.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = sandstonecliff.png; sourceTree = "<group>"; };
+		028652842D9893A7000CE0D4 /* shades-tile.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "shades-tile.png"; sourceTree = "<group>"; };
+		028652852D9893A7000CE0D4 /* simple-basket-weave1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "simple-basket-weave1.png"; sourceTree = "<group>"; };
+		028652862D9893A7000CE0D4 /* slatecliffrock.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = slatecliffrock.png; sourceTree = "<group>"; };
+		028652872D9893A7000CE0D4 /* slimy-slippery-rock1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "slimy-slippery-rock1.png"; sourceTree = "<group>"; };
+		028652882D9893A7000CE0D4 /* smooth-stucco.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "smooth-stucco.png"; sourceTree = "<group>"; };
+		028652892D9893A7000CE0D4 /* snowdrift1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = snowdrift1.png; sourceTree = "<group>"; };
+		0286528A2D9893A7000CE0D4 /* soft-blanket.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "soft-blanket.png"; sourceTree = "<group>"; };
+		0286528B2D9893A7000CE0D4 /* stacked-rock-cliff.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stacked-rock-cliff.png"; sourceTree = "<group>"; };
+		0286528C2D9893A7000CE0D4 /* steelplate1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = steelplate1.png; sourceTree = "<group>"; };
+		0286528D2D9893A7000CE0D4 /* stone-block-wall.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stone-block-wall.png"; sourceTree = "<group>"; };
+		0286528E2D9893A7000CE0D4 /* stonewall.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = stonewall.png; sourceTree = "<group>"; };
+		0286528F2D9893A7000CE0D4 /* stonework-wall.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stonework-wall.png"; sourceTree = "<group>"; };
+		028652902D9893A7000CE0D4 /* strata-rock-2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "strata-rock-2.png"; sourceTree = "<group>"; };
+		028652912D9893A7000CE0D4 /* strata-rock1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "strata-rock1.png"; sourceTree = "<group>"; };
+		028652922D9893A7000CE0D4 /* streaked-metal1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "streaked-metal1.png"; sourceTree = "<group>"; };
+		028652932D9893A7000CE0D4 /* streakedmetal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = streakedmetal.png; sourceTree = "<group>"; };
+		028652942D9893A7000CE0D4 /* streakedstone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = streakedstone.png; sourceTree = "<group>"; };
+		028652952D9893A7000CE0D4 /* streaky-plywood.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "streaky-plywood.png"; sourceTree = "<group>"; };
+		028652962D9893A7000CE0D4 /* stringy_marble.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = stringy_marble.png; sourceTree = "<group>"; };
+		028652972D9893A7000CE0D4 /* stylized-animal-fur.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stylized-animal-fur.png"; sourceTree = "<group>"; };
+		028652982D9893A7000CE0D4 /* stylized-beast-fur.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stylized-beast-fur.png"; sourceTree = "<group>"; };
+		028652992D9893A7000CE0D4 /* stylized-cave-wall1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stylized-cave-wall1.png"; sourceTree = "<group>"; };
+		0286529A2D9893A7000CE0D4 /* stylized-chunky-rockface.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stylized-chunky-rockface.png"; sourceTree = "<group>"; };
+		0286529B2D9893A7000CE0D4 /* stylized-cliff1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stylized-cliff1.png"; sourceTree = "<group>"; };
+		0286529C2D9893A7000CE0D4 /* stylized-cliff2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stylized-cliff2.png"; sourceTree = "<group>"; };
+		0286529D2D9893A7000CE0D4 /* stylized-columned-cliff.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stylized-columned-cliff.png"; sourceTree = "<group>"; };
+		0286529E2D9893A7000CE0D4 /* stylized-grass1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stylized-grass1.png"; sourceTree = "<group>"; };
+		0286529F2D9893A7000CE0D4 /* stylized-ice-cave-walls.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stylized-ice-cave-walls.png"; sourceTree = "<group>"; };
+		028652A02D9893A7000CE0D4 /* sulphuric-rock.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sulphuric-rock.png"; sourceTree = "<group>"; };
+		028652A12D9893A7000CE0D4 /* synth-rubber.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "synth-rubber.png"; sourceTree = "<group>"; };
+		028652A22D9893A7000CE0D4 /* tavern-wood-planks1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tavern-wood-planks1.png"; sourceTree = "<group>"; };
+		028652A32D9893A7000CE0D4 /* tidal-pool1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tidal-pool1.png"; sourceTree = "<group>"; };
+		028652A42D9893A7000CE0D4 /* tidalpool2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tidalpool2.png; sourceTree = "<group>"; };
+		028652A52D9893A7000CE0D4 /* tight-weave-carpet.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tight-weave-carpet.png"; sourceTree = "<group>"; };
+		028652A62D9893A7000CE0D4 /* vines.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = vines.png; sourceTree = "<group>"; };
+		028652A72D9893A7000CE0D4 /* vintage-tile1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "vintage-tile1.png"; sourceTree = "<group>"; };
+		028652A82D9893A7000CE0D4 /* wedged-cobblestone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "wedged-cobblestone.png"; sourceTree = "<group>"; };
+		028652A92D9893A7000CE0D4 /* wet-arc-cobble.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "wet-arc-cobble.png"; sourceTree = "<group>"; };
+		028652AA2D9893A7000CE0D4 /* wet-cave-wall1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "wet-cave-wall1.png"; sourceTree = "<group>"; };
+		028652AB2D9893A7000CE0D4 /* wet-mossy-rocks.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "wet-mossy-rocks.png"; sourceTree = "<group>"; };
+		028652AC2D9893A7000CE0D4 /* white-spruce-tree-bark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "white-spruce-tree-bark.png"; sourceTree = "<group>"; };
+		028652AD2D9893A7000CE0D4 /* windswept-wasteland.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "windswept-wasteland.png"; sourceTree = "<group>"; };
+		028652AE2D9893A7000CE0D4 /* wood-veneer1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "wood-veneer1.png"; sourceTree = "<group>"; };
+		028652AF2D9893A7000CE0D4 /* woodframe1b.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = woodframe1b.png; sourceTree = "<group>"; };
+		028652B02D9893A7000CE0D4 /* worn_metal4.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = worn_metal4.png; sourceTree = "<group>"; };
+		028652B12D9893A7000CE0D4 /* worn-blue-burlap.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "worn-blue-burlap.png"; sourceTree = "<group>"; };
+		028652B22D9893A7000CE0D4 /* worn-braided-carpet.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "worn-braided-carpet.png"; sourceTree = "<group>"; };
+		028652B32D9893A7000CE0D4 /* worn-bumpy-rock.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "worn-bumpy-rock.png"; sourceTree = "<group>"; };
+		028652B42D9893A7000CE0D4 /* worn-factory-siding.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "worn-factory-siding.png"; sourceTree = "<group>"; };
+		028652B52D9893A7000CE0D4 /* wornpaintedcement.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = wornpaintedcement.png; sourceTree = "<group>"; };
+		028652B62D9893A7000CE0D4 /* wornpaintedwoodsiding.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = wornpaintedwoodsiding.png; sourceTree = "<group>"; };
+		028652B82D9893A7000CE0D4 /* 16bit.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = 16bit.frag; sourceTree = "<group>"; };
+		028652B92D9893A7000CE0D4 /* 16bit.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = 16bit.vert; sourceTree = "<group>"; };
+		028652BA2D9893A7000CE0D4 /* Aerogel.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Aerogel.frag; sourceTree = "<group>"; };
+		028652BB2D9893A7000CE0D4 /* Aerogel.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Aerogel.vert; sourceTree = "<group>"; };
+		028652BC2D9893A7000CE0D4 /* AlphaMix.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = AlphaMix.frag; sourceTree = "<group>"; };
+		028652BD2D9893A7000CE0D4 /* AlphaMix.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = AlphaMix.vert; sourceTree = "<group>"; };
+		028652BE2D9893A7000CE0D4 /* Ascii.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Ascii.frag; sourceTree = "<group>"; };
+		028652BF2D9893A7000CE0D4 /* Ascii.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Ascii.vert; sourceTree = "<group>"; };
+		028652C02D9893A7000CE0D4 /* AudioBlocks.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = AudioBlocks.frag; sourceTree = "<group>"; };
+		028652C12D9893A7000CE0D4 /* AudioBlocks.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = AudioBlocks.vert; sourceTree = "<group>"; };
+		028652C22D9893A7000CE0D4 /* AudioBumper.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = AudioBumper.frag; sourceTree = "<group>"; };
+		028652C32D9893A7000CE0D4 /* AudioBumper.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = AudioBumper.vert; sourceTree = "<group>"; };
+		028652C42D9893A7000CE0D4 /* AudioCircle.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = AudioCircle.frag; sourceTree = "<group>"; };
+		028652C52D9893A7000CE0D4 /* AudioCircle.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = AudioCircle.vert; sourceTree = "<group>"; };
+		028652C62D9893A7000CE0D4 /* AudioMountains.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = AudioMountains.frag; sourceTree = "<group>"; };
+		028652C72D9893A7000CE0D4 /* AudioMountains.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = AudioMountains.vert; sourceTree = "<group>"; };
+		028652C82D9893A7000CE0D4 /* AudioWaveform.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = AudioWaveform.frag; sourceTree = "<group>"; };
+		028652C92D9893A7000CE0D4 /* AudioWaveform.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = AudioWaveform.vert; sourceTree = "<group>"; };
+		028652CA2D9893A7000CE0D4 /* Autotangent.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Autotangent.frag; sourceTree = "<group>"; };
+		028652CB2D9893A7000CE0D4 /* Autotangent.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Autotangent.vert; sourceTree = "<group>"; };
+		028652CC2D9893A7000CE0D4 /* Background.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Background.frag; sourceTree = "<group>"; };
+		028652CD2D9893A7000CE0D4 /* Background.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Background.vert; sourceTree = "<group>"; };
+		028652CE2D9893A7000CE0D4 /* Blend.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Blend.frag; sourceTree = "<group>"; };
+		028652CF2D9893A7000CE0D4 /* Blend.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Blend.vert; sourceTree = "<group>"; };
+		028652D02D9893A7000CE0D4 /* Blur.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Blur.frag; sourceTree = "<group>"; };
+		028652D12D9893A7000CE0D4 /* Blur.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Blur.vert; sourceTree = "<group>"; };
+		028652D22D9893A7000CE0D4 /* BlurryTrail.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = BlurryTrail.frag; sourceTree = "<group>"; };
+		028652D32D9893A7000CE0D4 /* BlurryTrail.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = BlurryTrail.vert; sourceTree = "<group>"; };
+		028652D42D9893A7000CE0D4 /* Bounce.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Bounce.frag; sourceTree = "<group>"; };
+		028652D52D9893A7000CE0D4 /* Bounce.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Bounce.vert; sourceTree = "<group>"; };
+		028652D62D9893A7000CE0D4 /* Breathe.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Breathe.frag; sourceTree = "<group>"; };
+		028652D72D9893A7000CE0D4 /* Breathe.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Breathe.vert; sourceTree = "<group>"; };
+		028652D82D9893A7000CE0D4 /* Canny.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Canny.frag; sourceTree = "<group>"; };
+		028652D92D9893A7000CE0D4 /* Canny.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Canny.vert; sourceTree = "<group>"; };
+		028652DA2D9893A7000CE0D4 /* ChromeGrill.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = ChromeGrill.frag; sourceTree = "<group>"; };
+		028652DB2D9893A7000CE0D4 /* ChromeGrill.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = ChromeGrill.vert; sourceTree = "<group>"; };
+		028652DC2D9893A7000CE0D4 /* Circle.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Circle.frag; sourceTree = "<group>"; };
+		028652DD2D9893A7000CE0D4 /* Circle.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Circle.vert; sourceTree = "<group>"; };
+		028652DE2D9893A7000CE0D4 /* CirclePath.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = CirclePath.frag; sourceTree = "<group>"; };
+		028652DF2D9893A7000CE0D4 /* CirclePath.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = CirclePath.vert; sourceTree = "<group>"; };
+		028652E02D9893A7000CE0D4 /* Clouds.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Clouds.frag; sourceTree = "<group>"; };
+		028652E12D9893A7000CE0D4 /* Clouds.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Clouds.vert; sourceTree = "<group>"; };
+		028652E22D9893A7000CE0D4 /* CloudyShapes.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = CloudyShapes.frag; sourceTree = "<group>"; };
+		028652E32D9893A7000CE0D4 /* CloudyShapes.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = CloudyShapes.vert; sourceTree = "<group>"; };
+		028652E42D9893A7000CE0D4 /* ColoredDrops.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = ColoredDrops.frag; sourceTree = "<group>"; };
+		028652E52D9893A7000CE0D4 /* ColoredDrops.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = ColoredDrops.vert; sourceTree = "<group>"; };
+		028652E62D9893A7000CE0D4 /* ColorKeyMaskMaker.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = ColorKeyMaskMaker.frag; sourceTree = "<group>"; };
+		028652E72D9893A7000CE0D4 /* ColorKeyMaskMaker.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = ColorKeyMaskMaker.vert; sourceTree = "<group>"; };
+		028652E82D9893A7000CE0D4 /* ColorOverlay.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = ColorOverlay.frag; sourceTree = "<group>"; };
+		028652E92D9893A7000CE0D4 /* ColorOverlay.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = ColorOverlay.vert; sourceTree = "<group>"; };
+		028652EA2D9893A7000CE0D4 /* ColorPass.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = ColorPass.frag; sourceTree = "<group>"; };
+		028652EB2D9893A7000CE0D4 /* ColorPass.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = ColorPass.vert; sourceTree = "<group>"; };
+		028652EC2D9893A7000CE0D4 /* ColorStepper.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = ColorStepper.frag; sourceTree = "<group>"; };
+		028652ED2D9893A7000CE0D4 /* ColorStepper.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = ColorStepper.vert; sourceTree = "<group>"; };
+		028652EE2D9893A7000CE0D4 /* ColorSwap.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = ColorSwap.frag; sourceTree = "<group>"; };
+		028652EF2D9893A7000CE0D4 /* ColorSwap.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = ColorSwap.vert; sourceTree = "<group>"; };
+		028652F02D9893A7000CE0D4 /* ColorWheel.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = ColorWheel.frag; sourceTree = "<group>"; };
+		028652F12D9893A7000CE0D4 /* ColorWheel.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = ColorWheel.vert; sourceTree = "<group>"; };
+		028652F22D9893A7000CE0D4 /* Comicbook.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Comicbook.frag; sourceTree = "<group>"; };
+		028652F32D9893A7000CE0D4 /* Comicbook.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Comicbook.vert; sourceTree = "<group>"; };
+		028652F42D9893A7000CE0D4 /* Core.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Core.frag; sourceTree = "<group>"; };
+		028652F52D9893A7000CE0D4 /* Core.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Core.vert; sourceTree = "<group>"; };
+		028652F62D9893A7000CE0D4 /* Cosmos.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Cosmos.frag; sourceTree = "<group>"; };
+		028652F72D9893A7000CE0D4 /* Cosmos.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Cosmos.vert; sourceTree = "<group>"; };
+		028652F82D9893A7000CE0D4 /* Crosshatch.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Crosshatch.frag; sourceTree = "<group>"; };
+		028652F92D9893A7000CE0D4 /* Crosshatch.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Crosshatch.vert; sourceTree = "<group>"; };
+		028652FA2D9893A7000CE0D4 /* Cubify.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Cubify.frag; sourceTree = "<group>"; };
+		028652FB2D9893A7000CE0D4 /* Cubify.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Cubify.vert; sourceTree = "<group>"; };
+		028652FC2D9893A7000CE0D4 /* CurlySquares.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = CurlySquares.frag; sourceTree = "<group>"; };
+		028652FD2D9893A7000CE0D4 /* CurlySquares.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = CurlySquares.vert; sourceTree = "<group>"; };
+		028652FE2D9893A7000CE0D4 /* DancingSquares.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = DancingSquares.frag; sourceTree = "<group>"; };
+		028652FF2D9893A7000CE0D4 /* DancingSquares.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = DancingSquares.vert; sourceTree = "<group>"; };
+		028653002D9893A7000CE0D4 /* Diffractor.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Diffractor.frag; sourceTree = "<group>"; };
+		028653012D9893A7000CE0D4 /* Diffractor.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Diffractor.vert; sourceTree = "<group>"; };
+		028653022D9893A7000CE0D4 /* DirtyPlasma.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = DirtyPlasma.frag; sourceTree = "<group>"; };
+		028653032D9893A7000CE0D4 /* DirtyPlasma.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = DirtyPlasma.vert; sourceTree = "<group>"; };
+		028653042D9893A7000CE0D4 /* Disco.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Disco.frag; sourceTree = "<group>"; };
+		028653052D9893A7000CE0D4 /* Disco.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Disco.vert; sourceTree = "<group>"; };
+		028653062D9893A7000CE0D4 /* DiscoAudio.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = DiscoAudio.frag; sourceTree = "<group>"; };
+		028653072D9893A7000CE0D4 /* DiscoAudio.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = DiscoAudio.vert; sourceTree = "<group>"; };
+		028653082D9893A7000CE0D4 /* Dither.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Dither.frag; sourceTree = "<group>"; };
+		028653092D9893A7000CE0D4 /* Dither.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Dither.vert; sourceTree = "<group>"; };
+		0286530A2D9893A7000CE0D4 /* DoubleBlur.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = DoubleBlur.frag; sourceTree = "<group>"; };
+		0286530B2D9893A7000CE0D4 /* DoubleBlur.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = DoubleBlur.vert; sourceTree = "<group>"; };
+		0286530C2D9893A7000CE0D4 /* DoubleSwirl.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = DoubleSwirl.frag; sourceTree = "<group>"; };
+		0286530D2D9893A7000CE0D4 /* DoubleSwirl.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = DoubleSwirl.vert; sourceTree = "<group>"; };
+		0286530E2D9893A7000CE0D4 /* download.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = download.png; sourceTree = "<group>"; };
+		0286530F2D9893A7000CE0D4 /* Empty.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Empty.frag; sourceTree = "<group>"; };
+		028653102D9893A7000CE0D4 /* Empty.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Empty.vert; sourceTree = "<group>"; };
+		028653112D9893A7000CE0D4 /* Feedback.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Feedback.frag; sourceTree = "<group>"; };
+		028653122D9893A7000CE0D4 /* Feedback.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Feedback.vert; sourceTree = "<group>"; };
+		028653132D9893A7000CE0D4 /* Fibers.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Fibers.frag; sourceTree = "<group>"; };
+		028653142D9893A7000CE0D4 /* Fibers.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Fibers.vert; sourceTree = "<group>"; };
+		028653152D9893A7000CE0D4 /* FishEye.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = FishEye.frag; sourceTree = "<group>"; };
+		028653162D9893A7000CE0D4 /* FishEye.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = FishEye.vert; sourceTree = "<group>"; };
+		028653172D9893A7000CE0D4 /* FlickerAudio.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = FlickerAudio.frag; sourceTree = "<group>"; };
+		028653182D9893A7000CE0D4 /* FlickerAudio.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = FlickerAudio.vert; sourceTree = "<group>"; };
+		028653192D9893A7000CE0D4 /* FloatingSparks.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = FloatingSparks.frag; sourceTree = "<group>"; };
+		0286531A2D9893A7000CE0D4 /* FloatingSparks.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = FloatingSparks.vert; sourceTree = "<group>"; };
+		0286531B2D9893A7000CE0D4 /* Fractal.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Fractal.frag; sourceTree = "<group>"; };
+		0286531C2D9893A7000CE0D4 /* Fractal.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Fractal.vert; sourceTree = "<group>"; };
+		0286531D2D9893A7000CE0D4 /* FractalAudio.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = FractalAudio.frag; sourceTree = "<group>"; };
+		0286531E2D9893A7000CE0D4 /* FractalAudio.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = FractalAudio.vert; sourceTree = "<group>"; };
+		0286531F2D9893A7000CE0D4 /* FrequencyVisualizer.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = FrequencyVisualizer.frag; sourceTree = "<group>"; };
+		028653202D9893A7000CE0D4 /* FrequencyVisualizer.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = FrequencyVisualizer.vert; sourceTree = "<group>"; };
+		028653212D9893A7000CE0D4 /* Fuji.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Fuji.frag; sourceTree = "<group>"; };
+		028653222D9893A7000CE0D4 /* Fuji.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Fuji.vert; sourceTree = "<group>"; };
+		028653232D9893A7000CE0D4 /* FullHouse.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = FullHouse.frag; sourceTree = "<group>"; };
+		028653242D9893A7000CE0D4 /* FullHouse.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = FullHouse.vert; sourceTree = "<group>"; };
+		028653252D9893A7000CE0D4 /* Galaxy.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Galaxy.frag; sourceTree = "<group>"; };
+		028653262D9893A7000CE0D4 /* Galaxy.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Galaxy.vert; sourceTree = "<group>"; };
+		028653272D9893A7000CE0D4 /* Gameboy.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Gameboy.frag; sourceTree = "<group>"; };
+		028653282D9893A7000CE0D4 /* Gameboy.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Gameboy.vert; sourceTree = "<group>"; };
+		028653292D9893A7000CE0D4 /* Glitch.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Glitch.frag; sourceTree = "<group>"; };
+		0286532A2D9893A7000CE0D4 /* Glitch.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Glitch.vert; sourceTree = "<group>"; };
+		0286532B2D9893A7000CE0D4 /* GlitchAudio.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = GlitchAudio.frag; sourceTree = "<group>"; };
+		0286532C2D9893A7000CE0D4 /* GlitchAudio.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = GlitchAudio.vert; sourceTree = "<group>"; };
+		0286532D2D9893A7000CE0D4 /* GlitchDigital.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = GlitchDigital.frag; sourceTree = "<group>"; };
+		0286532E2D9893A7000CE0D4 /* GlitchDigital.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = GlitchDigital.vert; sourceTree = "<group>"; };
+		0286532F2D9893A7000CE0D4 /* GlitchRGB.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = GlitchRGB.frag; sourceTree = "<group>"; };
+		028653302D9893A7000CE0D4 /* GlitchRGB.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = GlitchRGB.vert; sourceTree = "<group>"; };
+		028653312D9893A7000CE0D4 /* GodRay.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = GodRay.frag; sourceTree = "<group>"; };
+		028653322D9893A7000CE0D4 /* GodRay.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = GodRay.vert; sourceTree = "<group>"; };
+		028653332D9893A7000CE0D4 /* GridRun.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = GridRun.frag; sourceTree = "<group>"; };
+		028653342D9893A7000CE0D4 /* GridRun.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = GridRun.vert; sourceTree = "<group>"; };
+		028653352D9893A7000CE0D4 /* Gyroids.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Gyroids.frag; sourceTree = "<group>"; };
+		028653362D9893A7000CE0D4 /* Gyroids.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Gyroids.vert; sourceTree = "<group>"; };
+		028653372D9893A7000CE0D4 /* HalfTone.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = HalfTone.frag; sourceTree = "<group>"; };
+		028653382D9893A7000CE0D4 /* HalfTone.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = HalfTone.vert; sourceTree = "<group>"; };
+		028653392D9893A7000CE0D4 /* Heptagons.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Heptagons.frag; sourceTree = "<group>"; };
+		0286533A2D9893A7000CE0D4 /* Heptagons.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Heptagons.vert; sourceTree = "<group>"; };
+		0286533B2D9893A7000CE0D4 /* Hilbert.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Hilbert.frag; sourceTree = "<group>"; };
+		0286533C2D9893A7000CE0D4 /* Hilbert.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Hilbert.vert; sourceTree = "<group>"; };
+		0286533D2D9893A7000CE0D4 /* Hsb.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Hsb.frag; sourceTree = "<group>"; };
+		0286533E2D9893A7000CE0D4 /* Hsb.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Hsb.vert; sourceTree = "<group>"; };
+		0286533F2D9893A7000CE0D4 /* IsoFract.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = IsoFract.frag; sourceTree = "<group>"; };
+		028653402D9893A7000CE0D4 /* IsoFract.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = IsoFract.vert; sourceTree = "<group>"; };
+		028653412D9893A7000CE0D4 /* Kaleidoscope.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Kaleidoscope.frag; sourceTree = "<group>"; };
+		028653422D9893A7000CE0D4 /* Kaleidoscope.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Kaleidoscope.vert; sourceTree = "<group>"; };
+		028653432D9893A7000CE0D4 /* Limbo.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Limbo.frag; sourceTree = "<group>"; };
+		028653442D9893A7000CE0D4 /* Limbo.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Limbo.vert; sourceTree = "<group>"; };
+		028653452D9893A7000CE0D4 /* Liquid.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Liquid.frag; sourceTree = "<group>"; };
+		028653462D9893A7000CE0D4 /* Liquid.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Liquid.vert; sourceTree = "<group>"; };
+		028653472D9893A7000CE0D4 /* LumaFeedback.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = LumaFeedback.frag; sourceTree = "<group>"; };
+		028653482D9893A7000CE0D4 /* LumaFeedback.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = LumaFeedback.vert; sourceTree = "<group>"; };
+		028653492D9893A7000CE0D4 /* LumaMaskMaker.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = LumaMaskMaker.frag; sourceTree = "<group>"; };
+		0286534A2D9893A7000CE0D4 /* LumaMaskMaker.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = LumaMaskMaker.vert; sourceTree = "<group>"; };
+		0286534B2D9893A7000CE0D4 /* Mask.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Mask.frag; sourceTree = "<group>"; };
+		0286534C2D9893A7000CE0D4 /* Mask.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Mask.vert; sourceTree = "<group>"; };
+		0286534D2D9893A7000CE0D4 /* Md.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = Md.sh; sourceTree = "<group>"; };
+		0286534E2D9893A7000CE0D4 /* Melt.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Melt.frag; sourceTree = "<group>"; };
+		0286534F2D9893A7000CE0D4 /* Melt.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Melt.vert; sourceTree = "<group>"; };
+		028653502D9893A7000CE0D4 /* MinMixer.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = MinMixer.frag; sourceTree = "<group>"; };
+		028653512D9893A7000CE0D4 /* MinMixer.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = MinMixer.vert; sourceTree = "<group>"; };
+		028653522D9893A7000CE0D4 /* Mirror.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Mirror.frag; sourceTree = "<group>"; };
+		028653532D9893A7000CE0D4 /* Mirror.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Mirror.vert; sourceTree = "<group>"; };
+		028653542D9893A7000CE0D4 /* Mist.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Mist.frag; sourceTree = "<group>"; };
+		028653552D9893A7000CE0D4 /* Mist.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Mist.vert; sourceTree = "<group>"; };
+		028653562D9893A7000CE0D4 /* Mix.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Mix.frag; sourceTree = "<group>"; };
+		028653572D9893A7000CE0D4 /* Mix.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Mix.vert; sourceTree = "<group>"; };
+		028653582D9893A7000CE0D4 /* MotionBlurTexture.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = MotionBlurTexture.frag; sourceTree = "<group>"; };
+		028653592D9893A7000CE0D4 /* MotionBlurTexture.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = MotionBlurTexture.vert; sourceTree = "<group>"; };
+		0286535A2D9893A7000CE0D4 /* Mountains.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Mountains.frag; sourceTree = "<group>"; };
+		0286535B2D9893A7000CE0D4 /* Mountains.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Mountains.vert; sourceTree = "<group>"; };
+		0286535C2D9893A7000CE0D4 /* MultiMix.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = MultiMix.frag; sourceTree = "<group>"; };
+		0286535D2D9893A7000CE0D4 /* MultiMix.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = MultiMix.vert; sourceTree = "<group>"; };
+		0286535E2D9893A7000CE0D4 /* Octagrams.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Octagrams.frag; sourceTree = "<group>"; };
+		0286535F2D9893A7000CE0D4 /* Octagrams.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Octagrams.vert; sourceTree = "<group>"; };
+		028653602D9893A7000CE0D4 /* Octahedron.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Octahedron.frag; sourceTree = "<group>"; };
+		028653612D9893A7000CE0D4 /* Octahedron.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Octahedron.vert; sourceTree = "<group>"; };
+		028653622D9893A7000CE0D4 /* OldTV.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = OldTV.frag; sourceTree = "<group>"; };
+		028653632D9893A7000CE0D4 /* OldTV.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = OldTV.vert; sourceTree = "<group>"; };
+		028653642D9893A7000CE0D4 /* OneBitDither.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = OneBitDither.frag; sourceTree = "<group>"; };
+		028653652D9893A7000CE0D4 /* OneBitDither.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = OneBitDither.vert; sourceTree = "<group>"; };
+		028653662D9893A7000CE0D4 /* Outline.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Outline.frag; sourceTree = "<group>"; };
+		028653672D9893A7000CE0D4 /* Outline.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Outline.vert; sourceTree = "<group>"; };
+		028653682D9893A7000CE0D4 /* Paint.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Paint.frag; sourceTree = "<group>"; };
+		028653692D9893A7000CE0D4 /* Paint.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Paint.vert; sourceTree = "<group>"; };
+		0286536A2D9893A7000CE0D4 /* Perplexion.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Perplexion.frag; sourceTree = "<group>"; };
+		0286536B2D9893A7000CE0D4 /* Perplexion.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Perplexion.vert; sourceTree = "<group>"; };
+		0286536C2D9893A7000CE0D4 /* PieSplit.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = PieSplit.frag; sourceTree = "<group>"; };
+		0286536D2D9893A7000CE0D4 /* PieSplit.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = PieSplit.vert; sourceTree = "<group>"; };
+		0286536E2D9893A7000CE0D4 /* Pixel.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Pixel.frag; sourceTree = "<group>"; };
+		0286536F2D9893A7000CE0D4 /* Pixel.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Pixel.vert; sourceTree = "<group>"; };
+		028653702D9893A7000CE0D4 /* PixelPlay.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = PixelPlay.frag; sourceTree = "<group>"; };
+		028653712D9893A7000CE0D4 /* PixelPlay.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = PixelPlay.vert; sourceTree = "<group>"; };
+		028653722D9893A7000CE0D4 /* Plasma.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Plasma.frag; sourceTree = "<group>"; };
+		028653732D9893A7000CE0D4 /* Plasma.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Plasma.vert; sourceTree = "<group>"; };
+		028653742D9893A7000CE0D4 /* PlasmaTwo.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = PlasmaTwo.frag; sourceTree = "<group>"; };
+		028653752D9893A7000CE0D4 /* PlasmaTwo.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = PlasmaTwo.vert; sourceTree = "<group>"; };
+		028653762D9893A7000CE0D4 /* Plasmor.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Plasmor.frag; sourceTree = "<group>"; };
+		028653772D9893A7000CE0D4 /* Plasmor.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Plasmor.vert; sourceTree = "<group>"; };
+		028653782D9893A7000CE0D4 /* Psycurves.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Psycurves.frag; sourceTree = "<group>"; };
+		028653792D9893A7000CE0D4 /* Psycurves.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Psycurves.vert; sourceTree = "<group>"; };
+		0286537A2D9893A7000CE0D4 /* RainbowRotator.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = RainbowRotator.frag; sourceTree = "<group>"; };
+		0286537B2D9893A7000CE0D4 /* RainbowRotator.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = RainbowRotator.vert; sourceTree = "<group>"; };
+		0286537C2D9893A7000CE0D4 /* Reflector.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Reflector.frag; sourceTree = "<group>"; };
+		0286537D2D9893A7000CE0D4 /* Reflector.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Reflector.vert; sourceTree = "<group>"; };
+		0286537E2D9893A7000CE0D4 /* Resize.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Resize.frag; sourceTree = "<group>"; };
+		0286537F2D9893A7000CE0D4 /* Resize.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Resize.vert; sourceTree = "<group>"; };
+		028653802D9893A7000CE0D4 /* RGBShift.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = RGBShift.frag; sourceTree = "<group>"; };
+		028653812D9893A7000CE0D4 /* RGBShift.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = RGBShift.vert; sourceTree = "<group>"; };
+		028653822D9893A7000CE0D4 /* Rings.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Rings.frag; sourceTree = "<group>"; };
+		028653832D9893A7000CE0D4 /* Rings.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Rings.vert; sourceTree = "<group>"; };
+		028653842D9893A7000CE0D4 /* Rotate.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Rotate.frag; sourceTree = "<group>"; };
+		028653852D9893A7000CE0D4 /* Rotate.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Rotate.vert; sourceTree = "<group>"; };
+		028653862D9893A7000CE0D4 /* Rubiks.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Rubiks.frag; sourceTree = "<group>"; };
+		028653872D9893A7000CE0D4 /* Rubiks.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Rubiks.vert; sourceTree = "<group>"; };
+		028653882D9893A7000CE0D4 /* Scratchy.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Scratchy.frag; sourceTree = "<group>"; };
+		028653892D9893A7000CE0D4 /* Scratchy.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Scratchy.vert; sourceTree = "<group>"; };
+		0286538A2D9893A7000CE0D4 /* Shader_glitch.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Shader_glitch.frag; sourceTree = "<group>"; };
+		0286538B2D9893A7000CE0D4 /* Shader_glitch.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Shader_glitch.vert; sourceTree = "<group>"; };
+		0286538C2D9893A7000CE0D4 /* SimpleBars.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = SimpleBars.frag; sourceTree = "<group>"; };
+		0286538D2D9893A7000CE0D4 /* SimpleBars.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = SimpleBars.vert; sourceTree = "<group>"; };
+		0286538E2D9893A7000CE0D4 /* SimplePath.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = SimplePath.frag; sourceTree = "<group>"; };
+		0286538F2D9893A7000CE0D4 /* SimplePath.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = SimplePath.vert; sourceTree = "<group>"; };
+		028653902D9893A7000CE0D4 /* Slider.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Slider.frag; sourceTree = "<group>"; };
+		028653912D9893A7000CE0D4 /* Slider.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Slider.vert; sourceTree = "<group>"; };
+		028653922D9893A7000CE0D4 /* SlidingFrame.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = SlidingFrame.frag; sourceTree = "<group>"; };
+		028653932D9893A7000CE0D4 /* SlidingFrame.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = SlidingFrame.vert; sourceTree = "<group>"; };
+		028653942D9893A7000CE0D4 /* SmokeRing.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = SmokeRing.frag; sourceTree = "<group>"; };
+		028653952D9893A7000CE0D4 /* SmokeRing.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = SmokeRing.vert; sourceTree = "<group>"; };
+		028653962D9893A7000CE0D4 /* Snowfall.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Snowfall.frag; sourceTree = "<group>"; };
+		028653972D9893A7000CE0D4 /* Snowfall.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Snowfall.vert; sourceTree = "<group>"; };
+		028653982D9893A7000CE0D4 /* Sobel.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Sobel.frag; sourceTree = "<group>"; };
+		028653992D9893A7000CE0D4 /* Sobel.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Sobel.vert; sourceTree = "<group>"; };
+		0286539A2D9893A7000CE0D4 /* SolidColor.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = SolidColor.frag; sourceTree = "<group>"; };
+		0286539B2D9893A7000CE0D4 /* SolidColor.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = SolidColor.vert; sourceTree = "<group>"; };
+		0286539C2D9893A7000CE0D4 /* SpaceRings.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = SpaceRings.frag; sourceTree = "<group>"; };
+		0286539D2D9893A7000CE0D4 /* SpaceRings.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = SpaceRings.vert; sourceTree = "<group>"; };
+		0286539E2D9893A7000CE0D4 /* Spiral.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Spiral.frag; sourceTree = "<group>"; };
+		0286539F2D9893A7000CE0D4 /* Spiral.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Spiral.vert; sourceTree = "<group>"; };
+		028653A02D9893A7000CE0D4 /* StarryPlanes.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = StarryPlanes.frag; sourceTree = "<group>"; };
+		028653A12D9893A7000CE0D4 /* StarryPlanes.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = StarryPlanes.vert; sourceTree = "<group>"; };
+		028653A22D9893A7000CE0D4 /* StaticFrame.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = StaticFrame.frag; sourceTree = "<group>"; };
+		028653A32D9893A7000CE0D4 /* StaticFrame.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = StaticFrame.vert; sourceTree = "<group>"; };
+		028653A42D9893A7000CE0D4 /* Stellar.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Stellar.frag; sourceTree = "<group>"; };
+		028653A52D9893A7000CE0D4 /* Stellar.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Stellar.vert; sourceTree = "<group>"; };
+		028653A62D9893A7000CE0D4 /* Stroke.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Stroke.frag; sourceTree = "<group>"; };
+		028653A72D9893A7000CE0D4 /* Stroke.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Stroke.vert; sourceTree = "<group>"; };
+		028653A82D9893A7000CE0D4 /* Swirl.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Swirl.frag; sourceTree = "<group>"; };
+		028653A92D9893A7000CE0D4 /* Swirl.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Swirl.vert; sourceTree = "<group>"; };
+		028653AA2D9893A7000CE0D4 /* SwirlingSoul.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = SwirlingSoul.frag; sourceTree = "<group>"; };
+		028653AB2D9893A7000CE0D4 /* SwirlingSoul.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = SwirlingSoul.vert; sourceTree = "<group>"; };
+		028653AC2D9893A7000CE0D4 /* Switcher.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Switcher.frag; sourceTree = "<group>"; };
+		028653AD2D9893A7000CE0D4 /* Switcher.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Switcher.vert; sourceTree = "<group>"; };
+		028653AE2D9893A7000CE0D4 /* TextureMask.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = TextureMask.frag; sourceTree = "<group>"; };
+		028653AF2D9893A7000CE0D4 /* TextureMask.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = TextureMask.vert; sourceTree = "<group>"; };
+		028653B02D9893A7000CE0D4 /* Tile.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Tile.frag; sourceTree = "<group>"; };
+		028653B12D9893A7000CE0D4 /* Tile.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Tile.vert; sourceTree = "<group>"; };
+		028653B22D9893A7000CE0D4 /* Tissue.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Tissue.frag; sourceTree = "<group>"; };
+		028653B32D9893A7000CE0D4 /* Tissue.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Tissue.vert; sourceTree = "<group>"; };
+		028653B42D9893A7000CE0D4 /* TraceAudio.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = TraceAudio.frag; sourceTree = "<group>"; };
+		028653B52D9893A7000CE0D4 /* TraceAudio.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = TraceAudio.vert; sourceTree = "<group>"; };
+		028653B62D9893A7000CE0D4 /* TriangleMap.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = TriangleMap.frag; sourceTree = "<group>"; };
+		028653B72D9893A7000CE0D4 /* TriangleMap.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = TriangleMap.vert; sourceTree = "<group>"; };
+		028653B82D9893A7000CE0D4 /* Triple.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Triple.frag; sourceTree = "<group>"; };
+		028653B92D9893A7000CE0D4 /* Triple.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Triple.vert; sourceTree = "<group>"; };
+		028653BA2D9893A7000CE0D4 /* TwistedCubes.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = TwistedCubes.frag; sourceTree = "<group>"; };
+		028653BB2D9893A7000CE0D4 /* TwistedCubes.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = TwistedCubes.vert; sourceTree = "<group>"; };
+		028653BC2D9893A7000CE0D4 /* TwistedTrip.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = TwistedTrip.frag; sourceTree = "<group>"; };
+		028653BD2D9893A7000CE0D4 /* TwistedTrip.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = TwistedTrip.vert; sourceTree = "<group>"; };
+		028653BE2D9893A7000CE0D4 /* UnknownPleasures.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = UnknownPleasures.frag; sourceTree = "<group>"; };
+		028653BF2D9893A7000CE0D4 /* UnknownPleasures.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = UnknownPleasures.vert; sourceTree = "<group>"; };
+		028653C02D9893A7000CE0D4 /* unnamed.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = unnamed.frag; sourceTree = "<group>"; };
+		028653C12D9893A7000CE0D4 /* unnamed.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = unnamed.vert; sourceTree = "<group>"; };
+		028653C22D9893A7000CE0D4 /* VanGogh.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = VanGogh.frag; sourceTree = "<group>"; };
+		028653C32D9893A7000CE0D4 /* VanGogh.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = VanGogh.vert; sourceTree = "<group>"; };
+		028653C42D9893A7000CE0D4 /* Vertex.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Vertex.frag; sourceTree = "<group>"; };
+		028653C52D9893A7000CE0D4 /* Vertex.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Vertex.vert; sourceTree = "<group>"; };
+		028653C62D9893A7000CE0D4 /* VHS.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = VHS.frag; sourceTree = "<group>"; };
+		028653C72D9893A7000CE0D4 /* VHS.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = VHS.vert; sourceTree = "<group>"; };
+		028653C82D9893A7000CE0D4 /* VHS2.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = VHS2.frag; sourceTree = "<group>"; };
+		028653C92D9893A7000CE0D4 /* VHS2.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = VHS2.vert; sourceTree = "<group>"; };
+		028653CA2D9893A7000CE0D4 /* VoronoiColumns.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = VoronoiColumns.frag; sourceTree = "<group>"; };
+		028653CB2D9893A7000CE0D4 /* VoronoiColumns.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = VoronoiColumns.vert; sourceTree = "<group>"; };
+		028653CC2D9893A7000CE0D4 /* Warp.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Warp.frag; sourceTree = "<group>"; };
+		028653CD2D9893A7000CE0D4 /* Warp.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Warp.vert; sourceTree = "<group>"; };
+		028653CE2D9893A7000CE0D4 /* Warpspeed.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Warpspeed.frag; sourceTree = "<group>"; };
+		028653CF2D9893A7000CE0D4 /* Warpspeed.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Warpspeed.vert; sourceTree = "<group>"; };
+		028653D02D9893A7000CE0D4 /* Web.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Web.frag; sourceTree = "<group>"; };
+		028653D12D9893A7000CE0D4 /* Web.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Web.vert; sourceTree = "<group>"; };
+		028653D22D9893A7000CE0D4 /* WelcomeRings.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = WelcomeRings.frag; sourceTree = "<group>"; };
+		028653D32D9893A7000CE0D4 /* WelcomeRings.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = WelcomeRings.vert; sourceTree = "<group>"; };
+		028653D42D9893A7000CE0D4 /* Wobble.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Wobble.frag; sourceTree = "<group>"; };
+		028653D52D9893A7000CE0D4 /* Wobble.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Wobble.vert; sourceTree = "<group>"; };
 		"032514A0-BDF2-4207-8C2E-4E219F57DDB7" /* ShaderType.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ShaderType.hpp; sourceTree = "<group>"; };
 		"035910F8-2281-4AB1-BC6E-A929EF8696B3" /* DiffractorShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DiffractorShader.hpp; sourceTree = "<group>"; };
 		"04688250-5838-4B1B-92ED-5B96B4C2ED1D" /* EngineGLFW.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = EngineGLFW.h; sourceTree = "<group>"; };
@@ -456,8 +1026,6 @@
 		"8A86B903-6BB0-4B9C-840D-F7BCA32C183F" /* MaskShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MaskShader.hpp; sourceTree = "<group>"; };
 		"8ACF587F-7953-4FA2-88C1-9B3771E04139" /* ValueOscillator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ValueOscillator.hpp; sourceTree = "<group>"; };
 		"8B48D91A-B331-41C7-86E3-55F107D8E0CA" /* LayoutStateService.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = LayoutStateService.hpp; sourceTree = "<group>"; };
-		"8BE922E1-7DF1-4414-A8E4-21B599317D26" /* TraceAudioShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TraceAudioShader.hpp; sourceTree = "<group>"; };
-		"8D2F8A1C-09C8-4459-9D0E-24FDCA9E5F90" /* GodRayShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GodRayShader.hpp; sourceTree = "<group>"; };
 		"8F352EFB-9B56-401F-816B-E95D0A4467C3" /* MarkdownView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MarkdownView.hpp; sourceTree = "<group>"; };
 		"906945BE-FBAE-4184-86AB-E64196F7B47B" /* AvailableShaderConfig.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AvailableShaderConfig.hpp; sourceTree = "<group>"; };
 		"908D5E1F-9C55-492B-B413-92DACD7E1073" /* ofxRtMidiIn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ofxRtMidiIn.h; sourceTree = "<group>"; };
@@ -648,7 +1216,6 @@
 		"F8A3A827-0794-473D-8F41-EE36B01B4974" /* imgui_tables.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_tables.cpp; sourceTree = "<group>"; };
 		"FA01FF2F-C520-4AA5-AC95-BE3A36992FC7" /* ofxMidiClock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ofxMidiClock.h; sourceTree = "<group>"; };
 		"FAB19008-CE87-4037-B0E7-BA9EC8F76835" /* MicrophoneAudioSource.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MicrophoneAudioSource.hpp; sourceTree = "<group>"; };
-		"FAF3224F-C242-437A-909F-3F2F1F32ACD5" /* VoronoiColumnsShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VoronoiColumnsShader.hpp; sourceTree = "<group>"; };
 		"FB65B537-B9E5-4D67-876C-85EB230B8531" /* macro_scope.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = macro_scope.hpp; sourceTree = "<group>"; };
 		"FBE0ED10-9BAC-4A9D-AFCE-BD4D9AFA1F1B" /* Backblaze.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Backblaze.hpp; sourceTree = "<group>"; };
 		"FC160E05-F2DF-4918-8C97-DEA02D05D3EA" /* FavoriteParameter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FavoriteParameter.cpp; sourceTree = "<group>"; };
@@ -685,6 +1252,95 @@
 				"D4C1505A-2364-4233-9F21-AA6F0ED79435" /* LibraryService.hpp */,
 			);
 			path = Network;
+			sourceTree = "<group>";
+		};
+		024FAE5A2DA0207D00DE3197 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				024FAE582DA0207D00DE3197 /* ofxFastFboReader.h */,
+				024FAE592DA0207D00DE3197 /* ofxFastFboReader.cpp */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		024FAE5C2DA0207D00DE3197 /* ofxFastFboReader */ = {
+			isa = PBXGroup;
+			children = (
+				024FAE5A2DA0207D00DE3197 /* src */,
+				024FAE5B2DA0207D00DE3197 /* .gitignore */,
+			);
+			path = ofxFastFboReader;
+			sourceTree = "<group>";
+		};
+		024FAE672DA0207D00DE3197 /* osx */ = {
+			isa = PBXGroup;
+			children = (
+				024FAE662DA0207D00DE3197 /* ffmpeg */,
+			);
+			path = osx;
+			sourceTree = "<group>";
+		};
+		024FAE692DA0207D00DE3197 /* vs */ = {
+			isa = PBXGroup;
+			children = (
+				024FAE682DA0207D00DE3197 /* ffmpeg.exe */,
+			);
+			path = vs;
+			sourceTree = "<group>";
+		};
+		024FAE6A2DA0207D00DE3197 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				024FAE672DA0207D00DE3197 /* osx */,
+				024FAE692DA0207D00DE3197 /* vs */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
+		024FAE6B2DA0207D00DE3197 /* ffmpeg */ = {
+			isa = PBXGroup;
+			children = (
+				024FAE6A2DA0207D00DE3197 /* lib */,
+			);
+			path = ffmpeg;
+			sourceTree = "<group>";
+		};
+		024FAE6C2DA0207D00DE3197 /* libs */ = {
+			isa = PBXGroup;
+			children = (
+				024FAE6B2DA0207D00DE3197 /* ffmpeg */,
+			);
+			path = libs;
+			sourceTree = "<group>";
+		};
+		024FAE6F2DA0207D00DE3197 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				024FAE6D2DA0207D00DE3197 /* ofxFFmpegRecorder.h */,
+				024FAE6E2DA0207D00DE3197 /* ofxFFmpegRecorder.cpp */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		024FAE712DA0207D00DE3197 /* ofxFFmpegRecorder */ = {
+			isa = PBXGroup;
+			children = (
+				024FAE6C2DA0207D00DE3197 /* libs */,
+				024FAE6F2DA0207D00DE3197 /* src */,
+				024FAE702DA0207D00DE3197 /* README.md */,
+			);
+			path = ofxFFmpegRecorder;
+			sourceTree = "<group>";
+		};
+		024FAE8C2DA02CF600DE3197 /* Recording */ = {
+			isa = PBXGroup;
+			children = (
+				024FAE882DA02CF600DE3197 /* AVFRecorder.h */,
+				024FAE892DA02CF600DE3197 /* AVFRecorder.m */,
+				024FAE8A2DA02CF600DE3197 /* AVFRecorderWrapper.hpp */,
+				024FAE8B2DA02CF600DE3197 /* AVFRecorderWrapper.mm */,
+			);
+			path = Recording;
 			sourceTree = "<group>";
 		};
 		0286513B2D9468C8000CE0D4 /* node-editor */ = {
@@ -783,6 +1439,570 @@
 			path = observable;
 			sourceTree = "<group>";
 		};
+		028652B72D9893A7000CE0D4 /* textures */ = {
+			isa = PBXGroup;
+			children = (
+				028651B22D9893A7000CE0D4 /* 4-steps-stairs.png */,
+				028651B32D9893A7000CE0D4 /* abstract-alien-metal.png */,
+				028651B42D9893A7000CE0D4 /* agedplanks1.png */,
+				028651B52D9893A7000CE0D4 /* alien-carniverous-plant.png */,
+				028651B62D9893A7000CE0D4 /* alien-metal.png */,
+				028651B72D9893A7000CE0D4 /* alien-panels.png */,
+				028651B82D9893A7000CE0D4 /* alien-slime1.png */,
+				028651B92D9893A7000CE0D4 /* ancient-sewer-stonework.png */,
+				028651BA2D9893A7000CE0D4 /* angled-blocks-vegetation.png */,
+				028651BB2D9893A7000CE0D4 /* angled-shale-cliff.png */,
+				028651BC2D9893A7000CE0D4 /* angled-tiled-floor.png */,
+				028651BD2D9893A7000CE0D4 /* antique-grate1.png */,
+				028651BE2D9893A7000CE0D4 /* armored-dragon-scales.png */,
+				028651BF2D9893A7000CE0D4 /* art-deco-scales-wallpaper.png */,
+				028651C02D9893A7000CE0D4 /* badlands-boulders.png */,
+				028651C12D9893A7000CE0D4 /* bamboo-wood-semigloss.png */,
+				028651C22D9893A7000CE0D4 /* bark1.png */,
+				028651C32D9893A7000CE0D4 /* barred-weave.png */,
+				028651C42D9893A7000CE0D4 /* base-white-tile.png */,
+				028651C52D9893A7000CE0D4 /* beaten-down-brick.png */,
+				028651C62D9893A7000CE0D4 /* beige-carpet-worn1.png */,
+				028651C72D9893A7000CE0D4 /* beige-stonework.png */,
+				028651C82D9893A7000CE0D4 /* bird-feathers-2.png */,
+				028651C92D9893A7000CE0D4 /* black-streaked-rock1.png */,
+				028651CA2D9893A7000CE0D4 /* black-white-tile.png */,
+				028651CB2D9893A7000CE0D4 /* blackrock.png */,
+				028651CC2D9893A7000CE0D4 /* blocky-rockface1.png */,
+				028651CD2D9893A7000CE0D4 /* bog.png */,
+				028651CE2D9893A7000CE0D4 /* branches_twisted.png */,
+				028651CF2D9893A7000CE0D4 /* bricks-mortar.png */,
+				028651D02D9893A7000CE0D4 /* broken_down_concrete1.png */,
+				028651D12D9893A7000CE0D4 /* broken-down-stonework.png */,
+				028651D22D9893A7000CE0D4 /* brown-leather.png */,
+				028651D32D9893A7000CE0D4 /* brushed-metal.png */,
+				028651D42D9893A7000CE0D4 /* bumpy_worn_ground.png */,
+				028651D52D9893A7000CE0D4 /* bumpy-rockface1.png */,
+				028651D62D9893A7000CE0D4 /* burlap-stained1.png */,
+				028651D72D9893A7000CE0D4 /* carpet1.png */,
+				028651D82D9893A7000CE0D4 /* cave-floor-rock.png */,
+				028651D92D9893A7000CE0D4 /* cavern-walls.png */,
+				028651DA2D9893A7000CE0D4 /* cement_arcing_pattern1.png */,
+				028651DB2D9893A7000CE0D4 /* cheap_old_linoleum1.png */,
+				028651DC2D9893A7000CE0D4 /* cheap_plywood1r.png */,
+				028651DD2D9893A7000CE0D4 /* cherry-wood-veneer2.png */,
+				028651DE2D9893A7000CE0D4 /* chipped-paint-metal.png */,
+				028651DF2D9893A7000CE0D4 /* chipped-stonework.png */,
+				028651E02D9893A7000CE0D4 /* chipping-painted-wall.png */,
+				028651E12D9893A7000CE0D4 /* chiseled-cobble.png */,
+				028651E22D9893A7000CE0D4 /* circle-textured-metal1.png */,
+				028651E32D9893A7000CE0D4 /* classy-art-deco-wallpaper.png */,
+				028651E42D9893A7000CE0D4 /* clay-shingles1.png */,
+				028651E52D9893A7000CE0D4 /* cliff-rockface1.png */,
+				028651E62D9893A7000CE0D4 /* coarse-couch-fabric.png */,
+				028651E72D9893A7000CE0D4 /* coarse-loose-fabric.png */,
+				028651E82D9893A7000CE0D4 /* coarse-old-fabric.png */,
+				028651E92D9893A7000CE0D4 /* cobblestylized.png */,
+				028651EA2D9893A7000CE0D4 /* cobblestylized3.png */,
+				028651EB2D9893A7000CE0D4 /* cog-patterned-metal.png */,
+				028651EC2D9893A7000CE0D4 /* colored-concrete-wall.png */,
+				028651ED2D9893A7000CE0D4 /* columned-lava-rock.png */,
+				028651EE2D9893A7000CE0D4 /* concrete2.png */,
+				028651EF2D9893A7000CE0D4 /* concrete3.png */,
+				028651F02D9893A7000CE0D4 /* coral1.png */,
+				028651F12D9893A7000CE0D4 /* corkboard3b.png */,
+				028651F22D9893A7000CE0D4 /* cracking_painted_asphalt.png */,
+				028651F32D9893A7000CE0D4 /* cratered-rock.png */,
+				028651F42D9893A7000CE0D4 /* crisscross-foam.png */,
+				028651F52D9893A7000CE0D4 /* curved-wet-cobble.png */,
+				028651F62D9893A7000CE0D4 /* damp-dungeon-floor.png */,
+				028651F72D9893A7000CE0D4 /* damp-mossy-boulders.png */,
+				028651F82D9893A7000CE0D4 /* damp-rocky-ground1.png */,
+				028651F92D9893A7000CE0D4 /* dark_rough_rock1.png */,
+				028651FA2D9893A7000CE0D4 /* dash-lined-metal.png */,
+				028651FB2D9893A7000CE0D4 /* dented-metal.png */,
+				028651FC2D9893A7000CE0D4 /* desert-cliff1.png */,
+				028651FD2D9893A7000CE0D4 /* desert-rocks1.png */,
+				028651FE2D9893A7000CE0D4 /* diagonal-stripe-weave.png */,
+				028651FF2D9893A7000CE0D4 /* diamond-inlay-tile1.png */,
+				028652002D9893A7000CE0D4 /* diamond-metal-siding.png */,
+				028652012D9893A7000CE0D4 /* dirty-flat-stonework.png */,
+				028652022D9893A7000CE0D4 /* dirty-office-fabric.png */,
+				028652032D9893A7000CE0D4 /* dirty-padded-leather.png */,
+				028652042D9893A7000CE0D4 /* dirty-red-bricks.png */,
+				028652052D9893A7000CE0D4 /* dirty-tile.png */,
+				028652062D9893A7000CE0D4 /* dirty-wicker-weave1.png */,
+				028652072D9893A7000CE0D4 /* dragon-scales.png */,
+				028652082D9893A7000CE0D4 /* fancy-brass-pattern1.png */,
+				028652092D9893A7000CE0D4 /* fancy-diamond-metal.png */,
+				0286520A2D9893A7000CE0D4 /* fancy-metal1.png */,
+				0286520B2D9893A7000CE0D4 /* faux-rock-stucco.png */,
+				0286520C2D9893A7000CE0D4 /* feathers.png */,
+				0286520D2D9893A7000CE0D4 /* filthy-space-panels.png */,
+				0286520E2D9893A7000CE0D4 /* fine-particles-concrete1.png */,
+				0286520F2D9893A7000CE0D4 /* flaking-limestone1.png */,
+				028652102D9893A7000CE0D4 /* flaking-plaster.png */,
+				028652112D9893A7000CE0D4 /* flat-cobble-moss.png */,
+				028652122D9893A7000CE0D4 /* fleshy_granite1.png */,
+				028652132D9893A7000CE0D4 /* floral-embossed-wallpaper1.png */,
+				028652142D9893A7000CE0D4 /* foam-grip1.png */,
+				028652152D9893A7000CE0D4 /* forest_floor.png */,
+				028652162D9893A7000CE0D4 /* forest-trail1.png */,
+				028652172D9893A7000CE0D4 /* forest-wallpaper.png */,
+				028652182D9893A7000CE0D4 /* futuristic-cube-metal.png */,
+				028652192D9893A7000CE0D4 /* futuristic-panels1.png */,
+				0286521A2D9893A7000CE0D4 /* geyser-rock1.png */,
+				0286521B2D9893A7000CE0D4 /* glossy-marble-tile.png */,
+				0286521C2D9893A7000CE0D4 /* glossy-stylized-blocks.png */,
+				0286521D2D9893A7000CE0D4 /* grainy_stucco.png */,
+				0286521E2D9893A7000CE0D4 /* granite-gray-white.png */,
+				0286521F2D9893A7000CE0D4 /* granite-grey.png */,
+				028652202D9893A7000CE0D4 /* granite-tile.png */,
+				028652212D9893A7000CE0D4 /* granite5.png */,
+				028652222D9893A7000CE0D4 /* granitesmooth1.png */,
+				028652232D9893A7000CE0D4 /* grassy-meadow1.png */,
+				028652242D9893A7000CE0D4 /* gravel_path.png */,
+				028652252D9893A7000CE0D4 /* gray-bricks1.png */,
+				028652262D9893A7000CE0D4 /* gray-granite-flecks.png */,
+				028652272D9893A7000CE0D4 /* greasy-metal-pan1.png */,
+				028652282D9893A7000CE0D4 /* greasy-pan-2.png */,
+				028652292D9893A7000CE0D4 /* green-shower-tile1.png */,
+				0286522A2D9893A7000CE0D4 /* grime-alley-bricks_1.png */,
+				0286522B2D9893A7000CE0D4 /* grime-alley-bricks_2.png */,
+				0286522C2D9893A7000CE0D4 /* grimy-metal.png */,
+				0286522D2D9893A7000CE0D4 /* grip-rusted-steel.png */,
+				0286522E2D9893A7000CE0D4 /* haystack1.png */,
+				0286522F2D9893A7000CE0D4 /* herringbone-flooring.png */,
+				028652302D9893A7000CE0D4 /* hex-stones1.png */,
+				028652312D9893A7000CE0D4 /* hexagon-pavers1.png */,
+				028652322D9893A7000CE0D4 /* holey-rock1.png */,
+				028652332D9893A7000CE0D4 /* houndstooth-fabric-weave.png */,
+				028652342D9893A7000CE0D4 /* ice_field.png */,
+				028652352D9893A7000CE0D4 /* iced-over-ground7.png */,
+				028652362D9893A7000CE0D4 /* industrial-narrow-brick.png */,
+				028652372D9893A7000CE0D4 /* industrial-tile1.png */,
+				028652382D9893A7000CE0D4 /* industrial-walls.png */,
+				028652392D9893A7000CE0D4 /* jagged-cliff1.png */,
+				0286523A2D9893A7000CE0D4 /* jagged-rockface1.png */,
+				0286523B2D9893A7000CE0D4 /* jagged-rocky-ground.png */,
+				0286523C2D9893A7000CE0D4 /* knotty-plywood.png */,
+				0286523D2D9893A7000CE0D4 /* laminate-flooring-brown.png */,
+				0286523E2D9893A7000CE0D4 /* layered-fungus1.png */,
+				0286523F2D9893A7000CE0D4 /* layered-planetary.png */,
+				028652402D9893A7000CE0D4 /* layered-rock1.png */,
+				028652412D9893A7000CE0D4 /* leaf-fall1.png */,
+				028652422D9893A7000CE0D4 /* leafy-grass2.png */,
+				028652432D9893A7000CE0D4 /* light-bumped-rock1.png */,
+				028652442D9893A7000CE0D4 /* limestone5.png */,
+				028652452D9893A7000CE0D4 /* limestone6.png */,
+				028652462D9893A7000CE0D4 /* limestonemarked2.png */,
+				028652472D9893A7000CE0D4 /* Lined-Cement-.png */,
+				028652482D9893A7000CE0D4 /* lumpy-wet-concrete.png */,
+				028652492D9893A7000CE0D4 /* lunar_rock2.png */,
+				0286524A2D9893A7000CE0D4 /* lunar-rock.png */,
+				0286524B2D9893A7000CE0D4 /* luxury-vinyl-plank_light.png */,
+				0286524C2D9893A7000CE0D4 /* marble-speckled.png */,
+				0286524D2D9893A7000CE0D4 /* matted_old_shaggy_rug1.png */,
+				0286524E2D9893A7000CE0D4 /* mature-oak-tree.png */,
+				0286524F2D9893A7000CE0D4 /* mesh-covered-metal1.png */,
+				028652502D9893A7000CE0D4 /* metal-compartments.png */,
+				028652512D9893A7000CE0D4 /* metal-grate1.png */,
+				028652522D9893A7000CE0D4 /* metal-siding-base.png */,
+				028652532D9893A7000CE0D4 /* metal-ventilation1.png */,
+				028652542D9893A7000CE0D4 /* metal-with-leaks.png */,
+				028652552D9893A7000CE0D4 /* middle-eastern-wall.png */,
+				028652562D9893A7000CE0D4 /* middle-eastern-wall-dirty.png */,
+				028652572D9893A7000CE0D4 /* military-panel1.png */,
+				028652582D9893A7000CE0D4 /* modern-blocky.png */,
+				028652592D9893A7000CE0D4 /* modern-brick1.png */,
+				0286525A2D9893A7000CE0D4 /* modern-fractured-wallpaper.png */,
+				0286525B2D9893A7000CE0D4 /* modern-metal-wall.png */,
+				0286525C2D9893A7000CE0D4 /* modern-shattered-wallpaper.png */,
+				0286525D2D9893A7000CE0D4 /* narrow-rough-brick.png */,
+				0286525E2D9893A7000CE0D4 /* narrowbrick1.png */,
+				0286525F2D9893A7000CE0D4 /* ocean-rock.png */,
+				028652602D9893A7000CE0D4 /* orbed-plastic.png */,
+				028652612D9893A7000CE0D4 /* ornate-brass.png */,
+				028652622D9893A7000CE0D4 /* ornate-brass2.png */,
+				028652632D9893A7000CE0D4 /* ornate-brass3.png */,
+				028652642D9893A7000CE0D4 /* ornate-celtic-gold.png */,
+				028652652D9893A7000CE0D4 /* oxidized-copper.png */,
+				028652662D9893A7000CE0D4 /* paint-peeling.png */,
+				028652672D9893A7000CE0D4 /* painted_metal_shed.png */,
+				028652682D9893A7000CE0D4 /* painted-worn-asphalt.png */,
+				028652692D9893A7000CE0D4 /* peacock-ore.png */,
+				0286526A2D9893A7000CE0D4 /* pirate-gold.png */,
+				0286526B2D9893A7000CE0D4 /* pitted-metal.png */,
+				0286526C2D9893A7000CE0D4 /* pitted-rusted-metal1.png */,
+				0286526D2D9893A7000CE0D4 /* preschool-tile.png */,
+				0286526E2D9893A7000CE0D4 /* red-coral2.png */,
+				0286526F2D9893A7000CE0D4 /* red-scifi-metal.png */,
+				028652702D9893A7000CE0D4 /* redbricks2b.png */,
+				028652712D9893A7000CE0D4 /* ribbed-chipped-metal.png */,
+				028652722D9893A7000CE0D4 /* rich-brown-tile.png */,
+				028652732D9893A7000CE0D4 /* rich-brown-tile-variation.png */,
+				028652742D9893A7000CE0D4 /* river_rock1.png */,
+				028652752D9893A7000CE0D4 /* rock-slab-wall.png */,
+				028652762D9893A7000CE0D4 /* rocky_asphalt1.png */,
+				028652772D9893A7000CE0D4 /* rocky_dirt1.png */,
+				028652782D9893A7000CE0D4 /* rocky-shoreline1.png */,
+				028652792D9893A7000CE0D4 /* rocky-worn-ground.png */,
+				0286527A2D9893A7000CE0D4 /* rough-brick1.png */,
+				0286527B2D9893A7000CE0D4 /* rough-wet-cobble.png */,
+				0286527C2D9893A7000CE0D4 /* rounded-brick1.png */,
+				0286527D2D9893A7000CE0D4 /* rust-covered-metal.png */,
+				0286527E2D9893A7000CE0D4 /* rust-panel.png */,
+				0286527F2D9893A7000CE0D4 /* rusted-panels.png */,
+				028652802D9893A7000CE0D4 /* saloon-wood-floor.png */,
+				028652812D9893A7000CE0D4 /* sand-dunes1.png */,
+				028652822D9893A7000CE0D4 /* sand1.png */,
+				028652832D9893A7000CE0D4 /* sandstonecliff.png */,
+				028652842D9893A7000CE0D4 /* shades-tile.png */,
+				028652852D9893A7000CE0D4 /* simple-basket-weave1.png */,
+				028652862D9893A7000CE0D4 /* slatecliffrock.png */,
+				028652872D9893A7000CE0D4 /* slimy-slippery-rock1.png */,
+				028652882D9893A7000CE0D4 /* smooth-stucco.png */,
+				028652892D9893A7000CE0D4 /* snowdrift1.png */,
+				0286528A2D9893A7000CE0D4 /* soft-blanket.png */,
+				0286528B2D9893A7000CE0D4 /* stacked-rock-cliff.png */,
+				0286528C2D9893A7000CE0D4 /* steelplate1.png */,
+				0286528D2D9893A7000CE0D4 /* stone-block-wall.png */,
+				0286528E2D9893A7000CE0D4 /* stonewall.png */,
+				0286528F2D9893A7000CE0D4 /* stonework-wall.png */,
+				028652902D9893A7000CE0D4 /* strata-rock-2.png */,
+				028652912D9893A7000CE0D4 /* strata-rock1.png */,
+				028652922D9893A7000CE0D4 /* streaked-metal1.png */,
+				028652932D9893A7000CE0D4 /* streakedmetal.png */,
+				028652942D9893A7000CE0D4 /* streakedstone.png */,
+				028652952D9893A7000CE0D4 /* streaky-plywood.png */,
+				028652962D9893A7000CE0D4 /* stringy_marble.png */,
+				028652972D9893A7000CE0D4 /* stylized-animal-fur.png */,
+				028652982D9893A7000CE0D4 /* stylized-beast-fur.png */,
+				028652992D9893A7000CE0D4 /* stylized-cave-wall1.png */,
+				0286529A2D9893A7000CE0D4 /* stylized-chunky-rockface.png */,
+				0286529B2D9893A7000CE0D4 /* stylized-cliff1.png */,
+				0286529C2D9893A7000CE0D4 /* stylized-cliff2.png */,
+				0286529D2D9893A7000CE0D4 /* stylized-columned-cliff.png */,
+				0286529E2D9893A7000CE0D4 /* stylized-grass1.png */,
+				0286529F2D9893A7000CE0D4 /* stylized-ice-cave-walls.png */,
+				028652A02D9893A7000CE0D4 /* sulphuric-rock.png */,
+				028652A12D9893A7000CE0D4 /* synth-rubber.png */,
+				028652A22D9893A7000CE0D4 /* tavern-wood-planks1.png */,
+				028652A32D9893A7000CE0D4 /* tidal-pool1.png */,
+				028652A42D9893A7000CE0D4 /* tidalpool2.png */,
+				028652A52D9893A7000CE0D4 /* tight-weave-carpet.png */,
+				028652A62D9893A7000CE0D4 /* vines.png */,
+				028652A72D9893A7000CE0D4 /* vintage-tile1.png */,
+				028652A82D9893A7000CE0D4 /* wedged-cobblestone.png */,
+				028652A92D9893A7000CE0D4 /* wet-arc-cobble.png */,
+				028652AA2D9893A7000CE0D4 /* wet-cave-wall1.png */,
+				028652AB2D9893A7000CE0D4 /* wet-mossy-rocks.png */,
+				028652AC2D9893A7000CE0D4 /* white-spruce-tree-bark.png */,
+				028652AD2D9893A7000CE0D4 /* windswept-wasteland.png */,
+				028652AE2D9893A7000CE0D4 /* wood-veneer1.png */,
+				028652AF2D9893A7000CE0D4 /* woodframe1b.png */,
+				028652B02D9893A7000CE0D4 /* worn_metal4.png */,
+				028652B12D9893A7000CE0D4 /* worn-blue-burlap.png */,
+				028652B22D9893A7000CE0D4 /* worn-braided-carpet.png */,
+				028652B32D9893A7000CE0D4 /* worn-bumpy-rock.png */,
+				028652B42D9893A7000CE0D4 /* worn-factory-siding.png */,
+				028652B52D9893A7000CE0D4 /* wornpaintedcement.png */,
+				028652B62D9893A7000CE0D4 /* wornpaintedwoodsiding.png */,
+			);
+			path = textures;
+			sourceTree = "<group>";
+		};
+		028653D62D9893A7000CE0D4 /* shaders */ = {
+			isa = PBXGroup;
+			children = (
+				028652B72D9893A7000CE0D4 /* textures */,
+				028652B82D9893A7000CE0D4 /* 16bit.frag */,
+				028652B92D9893A7000CE0D4 /* 16bit.vert */,
+				028652BA2D9893A7000CE0D4 /* Aerogel.frag */,
+				028652BB2D9893A7000CE0D4 /* Aerogel.vert */,
+				028652BC2D9893A7000CE0D4 /* AlphaMix.frag */,
+				028652BD2D9893A7000CE0D4 /* AlphaMix.vert */,
+				028652BE2D9893A7000CE0D4 /* Ascii.frag */,
+				028652BF2D9893A7000CE0D4 /* Ascii.vert */,
+				028652C02D9893A7000CE0D4 /* AudioBlocks.frag */,
+				028652C12D9893A7000CE0D4 /* AudioBlocks.vert */,
+				028652C22D9893A7000CE0D4 /* AudioBumper.frag */,
+				028652C32D9893A7000CE0D4 /* AudioBumper.vert */,
+				028652C42D9893A7000CE0D4 /* AudioCircle.frag */,
+				028652C52D9893A7000CE0D4 /* AudioCircle.vert */,
+				028652C62D9893A7000CE0D4 /* AudioMountains.frag */,
+				028652C72D9893A7000CE0D4 /* AudioMountains.vert */,
+				028652C82D9893A7000CE0D4 /* AudioWaveform.frag */,
+				028652C92D9893A7000CE0D4 /* AudioWaveform.vert */,
+				028652CA2D9893A7000CE0D4 /* Autotangent.frag */,
+				028652CB2D9893A7000CE0D4 /* Autotangent.vert */,
+				028652CC2D9893A7000CE0D4 /* Background.frag */,
+				028652CD2D9893A7000CE0D4 /* Background.vert */,
+				028652CE2D9893A7000CE0D4 /* Blend.frag */,
+				028652CF2D9893A7000CE0D4 /* Blend.vert */,
+				028652D02D9893A7000CE0D4 /* Blur.frag */,
+				028652D12D9893A7000CE0D4 /* Blur.vert */,
+				028652D22D9893A7000CE0D4 /* BlurryTrail.frag */,
+				028652D32D9893A7000CE0D4 /* BlurryTrail.vert */,
+				028652D42D9893A7000CE0D4 /* Bounce.frag */,
+				028652D52D9893A7000CE0D4 /* Bounce.vert */,
+				028652D62D9893A7000CE0D4 /* Breathe.frag */,
+				028652D72D9893A7000CE0D4 /* Breathe.vert */,
+				028652D82D9893A7000CE0D4 /* Canny.frag */,
+				028652D92D9893A7000CE0D4 /* Canny.vert */,
+				028652DA2D9893A7000CE0D4 /* ChromeGrill.frag */,
+				028652DB2D9893A7000CE0D4 /* ChromeGrill.vert */,
+				028652DC2D9893A7000CE0D4 /* Circle.frag */,
+				028652DD2D9893A7000CE0D4 /* Circle.vert */,
+				028652DE2D9893A7000CE0D4 /* CirclePath.frag */,
+				028652DF2D9893A7000CE0D4 /* CirclePath.vert */,
+				028652E02D9893A7000CE0D4 /* Clouds.frag */,
+				028652E12D9893A7000CE0D4 /* Clouds.vert */,
+				028652E22D9893A7000CE0D4 /* CloudyShapes.frag */,
+				028652E32D9893A7000CE0D4 /* CloudyShapes.vert */,
+				028652E42D9893A7000CE0D4 /* ColoredDrops.frag */,
+				028652E52D9893A7000CE0D4 /* ColoredDrops.vert */,
+				028652E62D9893A7000CE0D4 /* ColorKeyMaskMaker.frag */,
+				028652E72D9893A7000CE0D4 /* ColorKeyMaskMaker.vert */,
+				028652E82D9893A7000CE0D4 /* ColorOverlay.frag */,
+				028652E92D9893A7000CE0D4 /* ColorOverlay.vert */,
+				028652EA2D9893A7000CE0D4 /* ColorPass.frag */,
+				028652EB2D9893A7000CE0D4 /* ColorPass.vert */,
+				028652EC2D9893A7000CE0D4 /* ColorStepper.frag */,
+				028652ED2D9893A7000CE0D4 /* ColorStepper.vert */,
+				028652EE2D9893A7000CE0D4 /* ColorSwap.frag */,
+				028652EF2D9893A7000CE0D4 /* ColorSwap.vert */,
+				028652F02D9893A7000CE0D4 /* ColorWheel.frag */,
+				028652F12D9893A7000CE0D4 /* ColorWheel.vert */,
+				028652F22D9893A7000CE0D4 /* Comicbook.frag */,
+				028652F32D9893A7000CE0D4 /* Comicbook.vert */,
+				028652F42D9893A7000CE0D4 /* Core.frag */,
+				028652F52D9893A7000CE0D4 /* Core.vert */,
+				028652F62D9893A7000CE0D4 /* Cosmos.frag */,
+				028652F72D9893A7000CE0D4 /* Cosmos.vert */,
+				028652F82D9893A7000CE0D4 /* Crosshatch.frag */,
+				028652F92D9893A7000CE0D4 /* Crosshatch.vert */,
+				028652FA2D9893A7000CE0D4 /* Cubify.frag */,
+				028652FB2D9893A7000CE0D4 /* Cubify.vert */,
+				028652FC2D9893A7000CE0D4 /* CurlySquares.frag */,
+				028652FD2D9893A7000CE0D4 /* CurlySquares.vert */,
+				028652FE2D9893A7000CE0D4 /* DancingSquares.frag */,
+				028652FF2D9893A7000CE0D4 /* DancingSquares.vert */,
+				028653002D9893A7000CE0D4 /* Diffractor.frag */,
+				028653012D9893A7000CE0D4 /* Diffractor.vert */,
+				028653022D9893A7000CE0D4 /* DirtyPlasma.frag */,
+				028653032D9893A7000CE0D4 /* DirtyPlasma.vert */,
+				028653042D9893A7000CE0D4 /* Disco.frag */,
+				028653052D9893A7000CE0D4 /* Disco.vert */,
+				028653062D9893A7000CE0D4 /* DiscoAudio.frag */,
+				028653072D9893A7000CE0D4 /* DiscoAudio.vert */,
+				028653082D9893A7000CE0D4 /* Dither.frag */,
+				028653092D9893A7000CE0D4 /* Dither.vert */,
+				0286530A2D9893A7000CE0D4 /* DoubleBlur.frag */,
+				0286530B2D9893A7000CE0D4 /* DoubleBlur.vert */,
+				0286530C2D9893A7000CE0D4 /* DoubleSwirl.frag */,
+				0286530D2D9893A7000CE0D4 /* DoubleSwirl.vert */,
+				0286530E2D9893A7000CE0D4 /* download.png */,
+				0286530F2D9893A7000CE0D4 /* Empty.frag */,
+				028653102D9893A7000CE0D4 /* Empty.vert */,
+				028653112D9893A7000CE0D4 /* Feedback.frag */,
+				028653122D9893A7000CE0D4 /* Feedback.vert */,
+				028653132D9893A7000CE0D4 /* Fibers.frag */,
+				028653142D9893A7000CE0D4 /* Fibers.vert */,
+				028653152D9893A7000CE0D4 /* FishEye.frag */,
+				028653162D9893A7000CE0D4 /* FishEye.vert */,
+				028653172D9893A7000CE0D4 /* FlickerAudio.frag */,
+				028653182D9893A7000CE0D4 /* FlickerAudio.vert */,
+				028653192D9893A7000CE0D4 /* FloatingSparks.frag */,
+				0286531A2D9893A7000CE0D4 /* FloatingSparks.vert */,
+				0286531B2D9893A7000CE0D4 /* Fractal.frag */,
+				0286531C2D9893A7000CE0D4 /* Fractal.vert */,
+				0286531D2D9893A7000CE0D4 /* FractalAudio.frag */,
+				0286531E2D9893A7000CE0D4 /* FractalAudio.vert */,
+				0286531F2D9893A7000CE0D4 /* FrequencyVisualizer.frag */,
+				028653202D9893A7000CE0D4 /* FrequencyVisualizer.vert */,
+				028653212D9893A7000CE0D4 /* Fuji.frag */,
+				028653222D9893A7000CE0D4 /* Fuji.vert */,
+				028653232D9893A7000CE0D4 /* FullHouse.frag */,
+				028653242D9893A7000CE0D4 /* FullHouse.vert */,
+				028653252D9893A7000CE0D4 /* Galaxy.frag */,
+				028653262D9893A7000CE0D4 /* Galaxy.vert */,
+				028653272D9893A7000CE0D4 /* Gameboy.frag */,
+				028653282D9893A7000CE0D4 /* Gameboy.vert */,
+				028653292D9893A7000CE0D4 /* Glitch.frag */,
+				0286532A2D9893A7000CE0D4 /* Glitch.vert */,
+				0286532B2D9893A7000CE0D4 /* GlitchAudio.frag */,
+				0286532C2D9893A7000CE0D4 /* GlitchAudio.vert */,
+				0286532D2D9893A7000CE0D4 /* GlitchDigital.frag */,
+				0286532E2D9893A7000CE0D4 /* GlitchDigital.vert */,
+				0286532F2D9893A7000CE0D4 /* GlitchRGB.frag */,
+				028653302D9893A7000CE0D4 /* GlitchRGB.vert */,
+				028653312D9893A7000CE0D4 /* GodRay.frag */,
+				028653322D9893A7000CE0D4 /* GodRay.vert */,
+				028653332D9893A7000CE0D4 /* GridRun.frag */,
+				028653342D9893A7000CE0D4 /* GridRun.vert */,
+				028653352D9893A7000CE0D4 /* Gyroids.frag */,
+				028653362D9893A7000CE0D4 /* Gyroids.vert */,
+				028653372D9893A7000CE0D4 /* HalfTone.frag */,
+				028653382D9893A7000CE0D4 /* HalfTone.vert */,
+				028653392D9893A7000CE0D4 /* Heptagons.frag */,
+				0286533A2D9893A7000CE0D4 /* Heptagons.vert */,
+				0286533B2D9893A7000CE0D4 /* Hilbert.frag */,
+				0286533C2D9893A7000CE0D4 /* Hilbert.vert */,
+				0286533D2D9893A7000CE0D4 /* Hsb.frag */,
+				0286533E2D9893A7000CE0D4 /* Hsb.vert */,
+				0286533F2D9893A7000CE0D4 /* IsoFract.frag */,
+				028653402D9893A7000CE0D4 /* IsoFract.vert */,
+				028653412D9893A7000CE0D4 /* Kaleidoscope.frag */,
+				028653422D9893A7000CE0D4 /* Kaleidoscope.vert */,
+				028653432D9893A7000CE0D4 /* Limbo.frag */,
+				028653442D9893A7000CE0D4 /* Limbo.vert */,
+				028653452D9893A7000CE0D4 /* Liquid.frag */,
+				028653462D9893A7000CE0D4 /* Liquid.vert */,
+				028653472D9893A7000CE0D4 /* LumaFeedback.frag */,
+				028653482D9893A7000CE0D4 /* LumaFeedback.vert */,
+				028653492D9893A7000CE0D4 /* LumaMaskMaker.frag */,
+				0286534A2D9893A7000CE0D4 /* LumaMaskMaker.vert */,
+				0286534B2D9893A7000CE0D4 /* Mask.frag */,
+				0286534C2D9893A7000CE0D4 /* Mask.vert */,
+				0286534D2D9893A7000CE0D4 /* Md.sh */,
+				0286534E2D9893A7000CE0D4 /* Melt.frag */,
+				0286534F2D9893A7000CE0D4 /* Melt.vert */,
+				028653502D9893A7000CE0D4 /* MinMixer.frag */,
+				028653512D9893A7000CE0D4 /* MinMixer.vert */,
+				028653522D9893A7000CE0D4 /* Mirror.frag */,
+				028653532D9893A7000CE0D4 /* Mirror.vert */,
+				028653542D9893A7000CE0D4 /* Mist.frag */,
+				028653552D9893A7000CE0D4 /* Mist.vert */,
+				028653562D9893A7000CE0D4 /* Mix.frag */,
+				028653572D9893A7000CE0D4 /* Mix.vert */,
+				028653582D9893A7000CE0D4 /* MotionBlurTexture.frag */,
+				028653592D9893A7000CE0D4 /* MotionBlurTexture.vert */,
+				0286535A2D9893A7000CE0D4 /* Mountains.frag */,
+				0286535B2D9893A7000CE0D4 /* Mountains.vert */,
+				0286535C2D9893A7000CE0D4 /* MultiMix.frag */,
+				0286535D2D9893A7000CE0D4 /* MultiMix.vert */,
+				0286535E2D9893A7000CE0D4 /* Octagrams.frag */,
+				0286535F2D9893A7000CE0D4 /* Octagrams.vert */,
+				028653602D9893A7000CE0D4 /* Octahedron.frag */,
+				028653612D9893A7000CE0D4 /* Octahedron.vert */,
+				028653622D9893A7000CE0D4 /* OldTV.frag */,
+				028653632D9893A7000CE0D4 /* OldTV.vert */,
+				028653642D9893A7000CE0D4 /* OneBitDither.frag */,
+				028653652D9893A7000CE0D4 /* OneBitDither.vert */,
+				028653662D9893A7000CE0D4 /* Outline.frag */,
+				028653672D9893A7000CE0D4 /* Outline.vert */,
+				028653682D9893A7000CE0D4 /* Paint.frag */,
+				028653692D9893A7000CE0D4 /* Paint.vert */,
+				0286536A2D9893A7000CE0D4 /* Perplexion.frag */,
+				0286536B2D9893A7000CE0D4 /* Perplexion.vert */,
+				0286536C2D9893A7000CE0D4 /* PieSplit.frag */,
+				0286536D2D9893A7000CE0D4 /* PieSplit.vert */,
+				0286536E2D9893A7000CE0D4 /* Pixel.frag */,
+				0286536F2D9893A7000CE0D4 /* Pixel.vert */,
+				028653702D9893A7000CE0D4 /* PixelPlay.frag */,
+				028653712D9893A7000CE0D4 /* PixelPlay.vert */,
+				028653722D9893A7000CE0D4 /* Plasma.frag */,
+				028653732D9893A7000CE0D4 /* Plasma.vert */,
+				028653742D9893A7000CE0D4 /* PlasmaTwo.frag */,
+				028653752D9893A7000CE0D4 /* PlasmaTwo.vert */,
+				028653762D9893A7000CE0D4 /* Plasmor.frag */,
+				028653772D9893A7000CE0D4 /* Plasmor.vert */,
+				028653782D9893A7000CE0D4 /* Psycurves.frag */,
+				028653792D9893A7000CE0D4 /* Psycurves.vert */,
+				0286537A2D9893A7000CE0D4 /* RainbowRotator.frag */,
+				0286537B2D9893A7000CE0D4 /* RainbowRotator.vert */,
+				0286537C2D9893A7000CE0D4 /* Reflector.frag */,
+				0286537D2D9893A7000CE0D4 /* Reflector.vert */,
+				0286537E2D9893A7000CE0D4 /* Resize.frag */,
+				0286537F2D9893A7000CE0D4 /* Resize.vert */,
+				028653802D9893A7000CE0D4 /* RGBShift.frag */,
+				028653812D9893A7000CE0D4 /* RGBShift.vert */,
+				028653822D9893A7000CE0D4 /* Rings.frag */,
+				028653832D9893A7000CE0D4 /* Rings.vert */,
+				028653842D9893A7000CE0D4 /* Rotate.frag */,
+				028653852D9893A7000CE0D4 /* Rotate.vert */,
+				028653862D9893A7000CE0D4 /* Rubiks.frag */,
+				028653872D9893A7000CE0D4 /* Rubiks.vert */,
+				028653882D9893A7000CE0D4 /* Scratchy.frag */,
+				028653892D9893A7000CE0D4 /* Scratchy.vert */,
+				0286538A2D9893A7000CE0D4 /* Shader_glitch.frag */,
+				0286538B2D9893A7000CE0D4 /* Shader_glitch.vert */,
+				0286538C2D9893A7000CE0D4 /* SimpleBars.frag */,
+				0286538D2D9893A7000CE0D4 /* SimpleBars.vert */,
+				0286538E2D9893A7000CE0D4 /* SimplePath.frag */,
+				0286538F2D9893A7000CE0D4 /* SimplePath.vert */,
+				028653902D9893A7000CE0D4 /* Slider.frag */,
+				028653912D9893A7000CE0D4 /* Slider.vert */,
+				028653922D9893A7000CE0D4 /* SlidingFrame.frag */,
+				028653932D9893A7000CE0D4 /* SlidingFrame.vert */,
+				028653942D9893A7000CE0D4 /* SmokeRing.frag */,
+				028653952D9893A7000CE0D4 /* SmokeRing.vert */,
+				028653962D9893A7000CE0D4 /* Snowfall.frag */,
+				028653972D9893A7000CE0D4 /* Snowfall.vert */,
+				028653982D9893A7000CE0D4 /* Sobel.frag */,
+				028653992D9893A7000CE0D4 /* Sobel.vert */,
+				0286539A2D9893A7000CE0D4 /* SolidColor.frag */,
+				0286539B2D9893A7000CE0D4 /* SolidColor.vert */,
+				0286539C2D9893A7000CE0D4 /* SpaceRings.frag */,
+				0286539D2D9893A7000CE0D4 /* SpaceRings.vert */,
+				0286539E2D9893A7000CE0D4 /* Spiral.frag */,
+				0286539F2D9893A7000CE0D4 /* Spiral.vert */,
+				028653A02D9893A7000CE0D4 /* StarryPlanes.frag */,
+				028653A12D9893A7000CE0D4 /* StarryPlanes.vert */,
+				028653A22D9893A7000CE0D4 /* StaticFrame.frag */,
+				028653A32D9893A7000CE0D4 /* StaticFrame.vert */,
+				028653A42D9893A7000CE0D4 /* Stellar.frag */,
+				028653A52D9893A7000CE0D4 /* Stellar.vert */,
+				021A59232DB06B3C00CAA5E3 /* StrangeScreen.frag */,
+				021A59242DB06B3C00CAA5E3 /* StrangeScreen.vert */,
+				028653A62D9893A7000CE0D4 /* Stroke.frag */,
+				028653A72D9893A7000CE0D4 /* Stroke.vert */,
+				028653A82D9893A7000CE0D4 /* Swirl.frag */,
+				028653A92D9893A7000CE0D4 /* Swirl.vert */,
+				028653AA2D9893A7000CE0D4 /* SwirlingSoul.frag */,
+				028653AB2D9893A7000CE0D4 /* SwirlingSoul.vert */,
+				028653AC2D9893A7000CE0D4 /* Switcher.frag */,
+				028653AD2D9893A7000CE0D4 /* Switcher.vert */,
+				028653AE2D9893A7000CE0D4 /* TextureMask.frag */,
+				028653AF2D9893A7000CE0D4 /* TextureMask.vert */,
+				028653B02D9893A7000CE0D4 /* Tile.frag */,
+				028653B12D9893A7000CE0D4 /* Tile.vert */,
+				028653B22D9893A7000CE0D4 /* Tissue.frag */,
+				028653B32D9893A7000CE0D4 /* Tissue.vert */,
+				028653B42D9893A7000CE0D4 /* TraceAudio.frag */,
+				028653B52D9893A7000CE0D4 /* TraceAudio.vert */,
+				028653B62D9893A7000CE0D4 /* TriangleMap.frag */,
+				028653B72D9893A7000CE0D4 /* TriangleMap.vert */,
+				028653B82D9893A7000CE0D4 /* Triple.frag */,
+				028653B92D9893A7000CE0D4 /* Triple.vert */,
+				028653BA2D9893A7000CE0D4 /* TwistedCubes.frag */,
+				028653BB2D9893A7000CE0D4 /* TwistedCubes.vert */,
+				028653BC2D9893A7000CE0D4 /* TwistedTrip.frag */,
+				028653BD2D9893A7000CE0D4 /* TwistedTrip.vert */,
+				028653BE2D9893A7000CE0D4 /* UnknownPleasures.frag */,
+				028653BF2D9893A7000CE0D4 /* UnknownPleasures.vert */,
+				028653C02D9893A7000CE0D4 /* unnamed.frag */,
+				028653C12D9893A7000CE0D4 /* unnamed.vert */,
+				028653C22D9893A7000CE0D4 /* VanGogh.frag */,
+				028653C32D9893A7000CE0D4 /* VanGogh.vert */,
+				028653C42D9893A7000CE0D4 /* Vertex.frag */,
+				028653C52D9893A7000CE0D4 /* Vertex.vert */,
+				028653C62D9893A7000CE0D4 /* VHS.frag */,
+				028653C72D9893A7000CE0D4 /* VHS.vert */,
+				028653C82D9893A7000CE0D4 /* VHS2.frag */,
+				028653C92D9893A7000CE0D4 /* VHS2.vert */,
+				028653CA2D9893A7000CE0D4 /* VoronoiColumns.frag */,
+				028653CB2D9893A7000CE0D4 /* VoronoiColumns.vert */,
+				028653CC2D9893A7000CE0D4 /* Warp.frag */,
+				028653CD2D9893A7000CE0D4 /* Warp.vert */,
+				028653CE2D9893A7000CE0D4 /* Warpspeed.frag */,
+				028653CF2D9893A7000CE0D4 /* Warpspeed.vert */,
+				028653D02D9893A7000CE0D4 /* Web.frag */,
+				028653D12D9893A7000CE0D4 /* Web.vert */,
+				028653D22D9893A7000CE0D4 /* WelcomeRings.frag */,
+				028653D32D9893A7000CE0D4 /* WelcomeRings.vert */,
+				028653D42D9893A7000CE0D4 /* Wobble.frag */,
+				028653D52D9893A7000CE0D4 /* Wobble.vert */,
+			);
+			path = shaders;
+			sourceTree = "<group>";
+		};
 		"1D39EA5E-9C49-4456-8318-43E5762584E5" /* Commands */ = {
 			isa = PBXGroup;
 			children = (
@@ -836,6 +2056,7 @@
 		"2AD1EDFA-DEA4-4943-963D-7FE2FB36F435" /* Video */ = {
 			isa = PBXGroup;
 			children = (
+				024FAE8C2DA02CF600DE3197 /* Recording */,
 				"79354DE8-7C04-4DEA-9956-69113F7BC799" /* AvailableVideoSource.cpp */,
 				"2240761B-A954-4B26-8F83-BB2F5CAF6FD0" /* AvailableVideoSource.hpp */,
 				"C9927FA0-1983-4A65-B903-432C39D44284" /* FileSource.cpp */,
@@ -1140,6 +2361,8 @@
 		BB4B014C10F69532006C3DED /* addons */ = {
 			isa = PBXGroup;
 			children = (
+				024FAE5C2DA0207D00DE3197 /* ofxFastFboReader */,
+				024FAE712DA0207D00DE3197 /* ofxFFmpegRecorder */,
 				"CBE0DD0F-9841-4EB7-A141-F8FBF06A5B09" /* ofxImGui */,
 				"89346EEF-7CC3-4348-86F5-74721337B567" /* ofxMidi */,
 			);
@@ -1209,7 +2432,6 @@
 				"D7ABE7B6-3771-469E-B209-FDCB3491827D" /* GlitchDigitalShader.hpp */,
 				"A8F57A4A-F7AB-43D8-B626-430A52845052" /* GlitchRGBShader.hpp */,
 				"6BA048B3-894F-4125-A533-C743BB4440D9" /* GlitchShader.hpp */,
-				"8D2F8A1C-09C8-4459-9D0E-24FDCA9E5F90" /* GodRayShader.hpp */,
 				"70692B66-25D5-479B-AA10-E6851EBE9EAD" /* GridRunShader.hpp */,
 				"E9CF16FF-4C41-4F95-BE95-4A6B7CFBE700" /* GyroidsShader.hpp */,
 				"8259C4E4-EE3C-43AD-9A07-8431DF99AB84" /* HSBShader.hpp */,
@@ -1280,7 +2502,6 @@
 				"750456A0-01E4-4DFF-A8FD-4D1E072339D4" /* TextureMaskShader.hpp */,
 				"95089A32-6140-4FDD-B414-2AD7DEA8A8E5" /* TileShader.hpp */,
 				"52F363D4-B133-4945-8DED-D207F20639A9" /* TissueShader.hpp */,
-				"8BE922E1-7DF1-4414-A8E4-21B599317D26" /* TraceAudioShader.hpp */,
 				"C303289E-35DA-4917-80E0-02C3B95EADE2" /* TransformShader.hpp */,
 				"A4F43008-A018-4964-B53F-C919353D09F6" /* TriangleMapShader.hpp */,
 				"0BF4D56D-1E5E-471F-8028-22C8569B2135" /* TripleShader.hpp */,
@@ -1290,7 +2511,6 @@
 				"FCF788BC-55D8-4CC8-844A-57EE7821C21A" /* VHSShader.hpp */,
 				"D7C28F01-D896-4FBC-BEEE-2FAABBD6B36F" /* VanGoghShader.hpp */,
 				"AF8FD029-3215-4BD9-97E8-EE0D7FF555DE" /* VertexShader.hpp */,
-				"FAF3224F-C242-437A-909F-3F2F1F32ACD5" /* VoronoiColumnsShader.hpp */,
 				"761FF635-8D06-4F37-B75D-0F70421A7481" /* WarpShader.hpp */,
 				"F09CD1B4-2D86-4CB2-BA8B-F1C749819FA6" /* WarpspeedShader.hpp */,
 				"D37107F5-5351-4A35-B2F0-3E43CF98782B" /* WebShader.hpp */,
@@ -1342,6 +2562,7 @@
 				"895CC39E-AE4E-4313-A366-F70460DC220E" /* Texture.hpp */,
 				"A4148F37-2FA0-42FF-A743-7685D6FD5580" /* TileItem.hpp */,
 				"6654A5D3-F261-47F7-B490-9F262B0FD8C8" /* Workspace.hpp */,
+				021A59222DAD815500CAA5E3 /* Font.hpp */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1399,6 +2620,7 @@
 				191CD6FA2847E21E0085CBB6 /* of.entitlements */,
 				E4B6FCAD0C3E899E008CF71C /* openFrameworks-Info.plist */,
 				E4EB6923138AFD0F00A09F29 /* Project.xcconfig */,
+				028653D62D9893A7000CE0D4 /* shaders */,
 				E4B69E1C0A3A1BDC003C02F2 /* src */,
 				191EF70929D778A400F35F26 /* openFrameworks */,
 				BB4B014C10F69532006C3DED /* addons */,
@@ -1525,6 +2747,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				024FAE752DA0207D00DE3197 /* ffmpeg.exe in Resources */,
+				024FAE762DA0207D00DE3197 /* ffmpeg in Resources */,
+				024FAE772DA0207D00DE3197 /* .gitignore in Resources */,
+				024FAE792DA0207D00DE3197 /* README.md in Resources */,
 				028651B12D95E331000CE0D4 /* icon.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1600,6 +2826,8 @@
 				"A0BBE0F2-0ED9-44F9-97A1-46E639579F0B" /* AudioSourceService.cpp in Sources */,
 				"91E0E9A7-70FE-4C51-BD57-EB473B0BCA7D" /* BookmarkService.cpp in Sources */,
 				"490D2AA0-72C3-4FBF-A054-652CAB6089DD" /* ConfigService.cpp in Sources */,
+				024FAE7D2DA0207D00DE3197 /* ofxFFmpegRecorder.cpp in Sources */,
+				024FAE812DA0207D00DE3197 /* ofxFastFboReader.cpp in Sources */,
 				"24B5DF02-1F3E-489D-B35B-BD8D3F822727" /* FontService.cpp in Sources */,
 				0286514C2D9468F8000CE0D4 /* crude_json.cpp in Sources */,
 				"912A58AE-8DD4-4B5B-82C4-85E44708C835" /* IconService.cpp in Sources */,
@@ -1617,6 +2845,8 @@
 				"A3B6C49A-FDFA-4B94-8B68-F5304511942A" /* VideoSourceService.cpp in Sources */,
 				"2987286D-D5D8-4C62-BF41-954D098CE626" /* FeedbackShader.cpp in Sources */,
 				"BACC44F3-4998-44C2-B2A6-DBAB1170A60F" /* ImageTexture.cpp in Sources */,
+				024FAE8D2DA02CF600DE3197 /* AVFRecorderWrapper.mm in Sources */,
+				024FAE8E2DA02CF600DE3197 /* AVFRecorder.m in Sources */,
 				"522DAC64-183B-4131-852C-1DC95FA2DE79" /* OptionalShadersHelper.cpp in Sources */,
 				"BD30B747-77F0-463B-98DB-98DD809A658A" /* Shader.cpp in Sources */,
 				"16985793-8C39-4F12-BF84-E3615EA51B00" /* CommonStrings.cpp in Sources */,
@@ -1762,6 +2992,11 @@
 				DEVELOPMENT_TEAM = 7VUCELU5PL;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"$(USER_PREPROCESSOR_DEFINITIONS)",
+					"CPPHTTPLIB_OPENSSL_SUPPORT=1",
+				);
 				HEADER_SEARCH_PATHS = (
 					"$(OF_CORE_HEADERS)",
 					src,
@@ -1860,6 +3095,11 @@
 				COPY_PHASE_STRIP = YES;
 				DEVELOPMENT_TEAM = 7VUCELU5PL;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"$(USER_PREPROCESSOR_DEFINITIONS)",
+					"CPPHTTPLIB_OPENSSL_SUPPORT=1",
+				);
 				HEADER_SEARCH_PATHS = (
 					"$(OF_CORE_HEADERS)",
 					src,

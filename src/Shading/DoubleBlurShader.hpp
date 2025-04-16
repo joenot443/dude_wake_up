@@ -84,7 +84,7 @@ struct DoubleBlurShader: Shader {
   }
   
   void drawSettings() override {
-    CommonViews::H3Title("DoubleBlur");
+    
     
     CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
   }

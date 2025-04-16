@@ -70,7 +70,7 @@ struct CommonViews
   
   static void ShaderColor(std::shared_ptr<Parameter> param);
   
-  static void ShaderIntParameter(std::shared_ptr<Parameter> param);
+  static bool ShaderIntParameter(std::shared_ptr<Parameter> param);
   
   static bool ShaderOption(std::shared_ptr<Parameter> param, std::vector<std::string> options, bool drawTitle = true);
   
@@ -103,6 +103,8 @@ struct CommonViews
   static void OscillateButton(std::string id, std::shared_ptr<Oscillator> o, std::shared_ptr<Parameter> param, ImVec2 size = ImVec2(105.0, 50.0));
   
   static bool Slider(std::string title, std::string id, std::shared_ptr<Parameter> param, float width = 200.0f);
+  
+  static bool IntSlider(std::string title, std::string id, std::shared_ptr<Parameter> param, float width = 200.0f);
   
   static void MultiSlider(std::string title, std::string id, std::shared_ptr<Parameter> param1, std::shared_ptr<Parameter> param2,
                           std::shared_ptr<Oscillator> param1Oscillator,
@@ -156,9 +158,22 @@ struct CommonViews
   
   static bool ShaderDropdownButton(std::shared_ptr<Parameter> param);
 
-  static bool FlipButton(std::string id, std::shared_ptr<Parameter> param, ImVec2 size = ImVec2(40.0, 40.0));
+  static bool FlipButton(std::string id, std::shared_ptr<Parameter> param, ImVec2 size = ImVec2(30.0, 30.0));
 
   static bool PlayPauseButton(std::string id, bool playing, ImVec2 size = ImVec2(40.0, 40.0), ImVec2 padding = ImVec2(7.5, 7.5));
+
+    static bool ImageButtonNew(const char* id, 
+                           const char* imageName, 
+                           ImVec2 buttonSize, 
+                           ImVec2 imageRatio = ImVec2(3.0f, 3.0f),
+                           float rounding = 8.0f,
+                           bool useNodeEditorContext = false);
+
+  static bool TitledButtonNew(const char* id,
+                            const char* title,
+                            ImVec2 buttonSize,
+                            float rounding = 8.0f,
+                            bool useNodeEditorContext = false);
 };
 
 static ImVec2 getScaledWindowSize() {

@@ -46,3 +46,20 @@ void FontService::addFontToGui(ofxImGui::Gui *gui) {
   unsigned char* pixels = NULL;
   io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 }
+
+void FontService::loadFonts() {
+  ofDirectory fontsDir = ofDirectory("fonts/editor");
+  fontsDir.listDir();
+  // Collect font names
+  for (auto& file : fontsDir.getFiles()) {
+    fonts.push_back(Font(removeFileExtension(file.getFileName()), file.getAbsolutePath()));
+  }
+  // Sort by name
+  std::sort(fonts.begin(), fonts.end(), [](const Font& a, const Font& b) {
+    return a.name < b.name;
+  });
+  
+  for (auto font : fonts) {
+   fontNames.push_back(font.name);
+  }
+}

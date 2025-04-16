@@ -2,15 +2,18 @@
 #define TileItem_hpp
 
 #include "ofMain.h"
+#include "Console.hpp"
 #include "ShaderType.hpp"
 #include "ofxImGui.h"
 #include "AvailableShader.hpp"
+#include "UUID.hpp"
 #include <stdio.h>
 
 enum TileType {
   TileType_Shader,
   TileType_Source,
   TileType_Library,
+  TileType_Strand,
   TileType_File,
 };
 
@@ -19,6 +22,7 @@ public:
   virtual ~TileItem() {} 
   std::string name;
   std::string category = "";
+  std::string id;
   ImTextureID textureID;
   int index;
   ShaderType shaderType;
@@ -28,7 +32,7 @@ public:
 
   TileItem(std::string name, ImTextureID textureID, int index,
            std::function<void()> dragCallback, std::string category = "", TileType tileType = TileType_Shader, ShaderType type = ShaderTypeNone)
-      : name(name), textureID(textureID), index(index), shaderType(type), category(category), tileType(tileType),
+  : name(name), textureID(textureID), index(index), shaderType(type), category(category), tileType(tileType), id(UUID::generateUUID()),
         dragCallback(dragCallback){};
 };
 
@@ -54,6 +58,10 @@ static std::vector<std::shared_ptr<TileItem>> tileItemsForShaders(std::vector<st
   std::vector<std::shared_ptr<TileItem>> tileItems = {};
   for (auto shader : shaders)
   {
+    if (shader == nullptr) {
+      log("Null shader in config, discarding");
+      continue;
+    }
     std::shared_ptr<TileItem> tileItem = tileItemForShader(shader);
     if (tileItem == nullptr) {
       continue;

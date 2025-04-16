@@ -7,6 +7,7 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "StrangeScreenShader.hpp"
 #include "StellarShader.hpp"
 #include "WebShader.hpp"
 #include "SpiralShader.hpp"
@@ -49,7 +50,6 @@
 #include "OnOffShader.hpp"
 #include "IsoFractShader.hpp"
 #include "SwirlShader.hpp"
-#include "TraceAudioShader.hpp"
 #include "PixelPlayShader.hpp"
 #include "DirtyPlasmaShader.hpp"
 #include "OneBitDitherShader.hpp"
@@ -57,8 +57,6 @@
 #include "TwistedTripShader.hpp"
 #include "TwistedCubesShader.hpp"
 #include "CoreShader.hpp"
-#include "VoronoiColumnsShader.hpp"
-#include "GodRayShader.hpp"
 #include "WarpspeedShader.hpp"
 #include "ReflectorShader.hpp"
 #include "BlendShader.hpp"
@@ -303,6 +301,10 @@ void ShaderChainerService::processFrame()
       toErase.push_back(connectionPair.first);
       continue;
     }
+    if (connectionPair.second->start == nullptr || connectionPair.second->end == nullptr) {
+      log("Bad connection found, deleting - %s", connectionPair.second->id.c_str());
+      toErase.push_back(connectionPair.first);
+    }
     if (connectionPair.second->type == ConnectionTypeSource)
     {
       sourceConnections.push_back(connectionPair.second);
@@ -324,7 +326,6 @@ void ShaderChainerService::processFrame()
     std::shared_ptr<Shader> shader = std::dynamic_pointer_cast<Shader>(connection->end);
     
     if (videoSource == nullptr || shader == nullptr) {
-      
       breakConnectionForConnectionId(connection->id);
     }
     
@@ -551,31 +552,61 @@ void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader, bool fro
     return;
   }
   
+
+  if (shader->feedbackDestination)
+  {
+    // Call the corresponding unregister function on the service
+    // We assume the service has a method like this, taking the shared_ptr
+    // that was originally registered.
+    FeedbackSourceService::getService()->removeFeedbackSource(shader->feedbackDestination->id);
+     shader->feedbackDestination = nullptr;
+  }
+  else
+  {
+    // Log a warning if the feedbackDestination was unexpectedly null
+    log("Warning: Shader %s (%s) did not have a feedbackDestination pointer during removal.",
+        shader->name().c_str(), shader->shaderId.c_str());
+  }
+  // --- END FIX ---
+  
+  // Remove associated oscillators
   OscillationService::getService()->removeOscillatorsFor(shader->settings->parameters);
   
+  // Remove all connections associated with this shader
+  // This internally calls breakConnectionForConnectionId, which removes
+  // the connections from the connectionMap and updates neighbours.
   removeConnectable(shader);
   
+  // Remove any favorited parameters belonging to this shader
   for (auto param : shader->settings->parameters) {
     if (param->favorited) {
       ParameterService::getService()->removeFavoriteParameter(param);
     }
   }
   
+  // Remove the shader from the main map if requested
   if (fromMap)
   {
+    // Note: If iterating and calling removeShader, 'fromMap' should be false,
+    // and the map removal handled by the calling loop (like in clear()).
     shadersMap.erase(shader->shaderId);
   }
   
+  // Deselect if it was the selected connectable
   if (selectedConnectable == shader) {
     selectedConnectable = nullptr;
   }
   
+  // Remove from stage parameter tracking
   ParameterService::getService()->removeStageShaderId(shader->shaderId);
   
+  // Explicitly reset the shared_ptr passed in, decrementing its use count.
+  // The caller's shared_ptr will also go out of scope or be reassigned.
   shader.reset();
+  
+  // Save configuration changes
   ConfigService::getService()->saveDefaultConfigFile();
 }
-
 std::vector<std::shared_ptr<Connectable>> ShaderChainerService::pasteConnectables(const std::vector<std::shared_ptr<Connectable>>& connectables) {
   std::map<std::shared_ptr<Connectable>, std::shared_ptr<Connectable>> originalToNewMap;
   std::vector<std::shared_ptr<Connectable>> newConnectables;
@@ -627,6 +658,12 @@ std::vector<std::shared_ptr<Connectable>> ShaderChainerService::pasteConnectable
           newSource = VideoSourceService::getService()->makeLibraryVideoSource(librarySource->libraryFile);
           break;
         }
+        case VideoSource_shader: {
+          auto shaderSource = std::dynamic_pointer_cast<ShaderSource>(originalSource);
+          newSource = VideoSourceService::getService()->makeShaderVideoSource(shaderSource->shaderSourceType);
+          newSource->load(shaderSource->serialize());
+          break;
+        }
         // Add other VideoSourceTypes as needed
         default:
           break;
@@ -651,14 +688,15 @@ std::vector<std::shared_ptr<Connectable>> ShaderChainerService::pasteConnectable
 
     // Copy input connections
     for (const auto& [slot, conn] : original->inputs) {
-      auto newStart = originalToNewMap.count(conn->start) ? originalToNewMap[conn->start] : conn->start;
+      auto newStart = originalToNewMap.count(conn->start) > 0 ? originalToNewMap[conn->start] : conn->start;
       makeConnection(newStart, newConnectable, conn->type, conn->outputSlot, conn->inputSlot, true);
     }
 
     // Copy output connections
     for (const auto& [slot, connections] : original->outputs) {
       for (const auto& conn : connections) {
-        auto newEnd = originalToNewMap.count(conn->end) ? originalToNewMap[conn->end] : conn->end;
+        auto newEnd = originalToNewMap.count(conn->end) > 0 ? originalToNewMap[conn->end] : conn->end;
+        if (newEnd == nullptr)
         makeConnection(newConnectable, newEnd, conn->type, conn->outputSlot, conn->inputSlot, true);
       }
     }
@@ -739,7 +777,8 @@ void ShaderChainerService::copyConnections(std::shared_ptr<Connectable> source, 
   }
 
   for (auto [slot, conn] : sourceOutputs) {
-    makeConnection(dest, conn->end, conn->type, slot, conn->inputSlot, true);
+    ConnectionType type = conn->start->connectableType() == ConnectableTypeShader ? ConnectionTypeShader : ConnectionTypeSource;
+    makeConnection(dest, conn->end, type, slot, conn->inputSlot, true);
   }
 }
 
@@ -897,6 +936,12 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeStrangeScreen: {
+      auto settings = new StrangeScreenSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<StrangeScreenShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeStellar: {
       auto settings = new StellarSettings(shaderId, shaderJson);
       auto shader = std::make_shared<StellarShader>(settings);
@@ -1149,12 +1194,6 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
       shader->setup();
       return shader;
     }
-    case ShaderTypeTraceAudio: {
-      auto settings = new TraceAudioSettings(shaderId, shaderJson);
-      auto shader = std::make_shared<TraceAudioShader>(settings);
-      shader->setup();
-      return shader;
-    }
     case ShaderTypePixelPlay: {
       auto settings = new PixelPlaySettings(shaderId, shaderJson);
       auto shader = std::make_shared<PixelPlayShader>(settings);
@@ -1194,18 +1233,6 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
     case ShaderTypeCore: {
       auto settings = new CoreSettings(shaderId, shaderJson);
       auto shader = std::make_shared<CoreShader>(settings);
-      shader->setup();
-      return shader;
-    }
-    case ShaderTypeVoronoiColumns: {
-      auto settings = new VoronoiColumnsSettings(shaderId, shaderJson);
-      auto shader = std::make_shared<VoronoiColumnsShader>(settings);
-      shader->setup();
-      return shader;
-    }
-    case ShaderTypeGodRay: {
-      auto settings = new GodRaySettings(shaderId, shaderJson);
-      auto shader = std::make_shared<GodRayShader>(settings);
       shader->setup();
       return shader;
     }

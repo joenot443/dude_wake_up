@@ -66,7 +66,7 @@ struct CloudyShapesShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("CloudyShapes");
+    
 
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
   }

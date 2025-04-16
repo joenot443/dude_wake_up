@@ -170,7 +170,7 @@ void FeedbackShader::clearFrameBuffer()
 
 void FeedbackShader::drawSettings()
 {
-  CommonViews::H3Title("Feedback Settings");
+  
   
   ImGui::Checkbox(settings->lumaKeyEnabled->name.c_str(), &settings->lumaKeyEnabled->boolValue);
   ImGui::Checkbox(settings->priority->name.c_str(), &settings->priority->boolValue);
@@ -192,7 +192,8 @@ void FeedbackShader::drawSettings()
                                settings->delayAmountOscillator);
   
   CommonViews::ShaderParameter(settings->scale, settings->scaleOscillator);
-  CommonViews::H3Title("Position", false);
+  
+  ImGui::Text("Position");
   ImGui::SameLine();
   if (CommonViews::ShaderDropdownButton(settings->positionDropdown)) {
     settings->positionDropdown->buttonsVisible = !settings->positionDropdown->buttonsVisible;

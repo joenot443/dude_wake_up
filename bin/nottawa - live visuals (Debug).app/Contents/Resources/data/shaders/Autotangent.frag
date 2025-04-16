@@ -4,6 +4,7 @@ uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
 uniform float brightness;
+uniform vec3 color;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -28,8 +29,7 @@ void main()
   // Modify color based on texture and apply a tan function for color warping
   col = temp.rgb * brightness
   + vec3(tan((temp.rgb * vec3(3.0, 5.0, 50.0)
-              + (time / 135.0) * 100.0) * 3.1415)) * vec3(1.0, 0.1, 1.0);
+              + (time / 135.0) * 100.0) * 3.1415)) * color;
   
-  // Output the final color with alpha set to 1
   outputColor = vec4(col, 1.0);
 }

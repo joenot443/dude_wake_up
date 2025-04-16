@@ -75,7 +75,7 @@ bool CommonViews::ShaderParameter(std::shared_ptr<Parameter> param,
   bool ret = Slider(param->name, param->paramId, param, sliderWidth);
   float endYPos = ImGui::GetCursorPosY();
   ImGui::SameLine();
-  ResetButton(param->paramId, param, ImVec2(30.0, 30.0), ImVec2(7.5, 7.5));
+  ResetButton(param->paramId, param, ImVec2(30.0, 30.0), ImVec2(6., 6.));
   ImGui::SameLine();
   if (ShaderDropdownButton(param)) {
     param->buttonsVisible = !param->buttonsVisible;
@@ -91,10 +91,6 @@ bool CommonViews::ShaderParameter(std::shared_ptr<Parameter> param,
       MidiSelector(param, ImVec2(buttonWidth, 36.0));
       ImGui::SameLine();
     }
-    if (AudioSourceService::getService()->selectedAudioSource != nullptr) {
-      AudioParameterSelector(param, ImVec2(buttonWidth, 36.0));
-      ImGui::SameLine();
-    }
     
     FavoriteButton(param, ImVec2(buttonWidth, 36.0));
     
@@ -105,15 +101,23 @@ bool CommonViews::ShaderParameter(std::shared_ptr<Parameter> param,
         return ret;
       }
     }
+    
+    if (AudioSourceService::getService()->selectedAudioSource != nullptr) {
+      ImGui::SameLine();
+      AudioParameterSelector(param, ImVec2(buttonWidth, 36.0));
+    }
   }
   
   return ret;
 }
 
 bool CommonViews::MiniSlider(std::shared_ptr<Parameter> param, bool sameLine) {
+  auto startPos = ImGui::GetCursorPos();
+  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 6.0);
   ImGui::Text("%s", param->name.c_str());
   if (sameLine) ImGui::SameLine();
   ImGui::PushItemWidth(70.0);
+  ImGui::SetCursorPosY(startPos.y);
   return ImGui::SliderFloat(idString(param->paramId).c_str(), &param->value, param->min, param->max);
 }
 
@@ -206,12 +210,12 @@ void CommonViews::H1Title(std::string title, bool padding)
 void CommonViews::H2Title(std::string title, bool padding)
 {
   if (padding)
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + FontService::getService()->paddingH2.y);
+    CommonViews::Spacing(1);
   ImGui::PushFont(FontService::getService()->h2);
   ImGui::TextWrapped("%s", title.c_str());
   ImGui::PopFont();
   if (padding)
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + FontService::getService()->paddingH2.y);
+    CommonViews::Spacing(1);
 }
 
 void CommonViews::H3Title(std::string title, bool padding)
@@ -262,6 +266,18 @@ bool CommonViews::Slider(std::string title, std::string id,
   return ret;
 }
 
+bool CommonViews::IntSlider(std::string title, std::string id,
+                         std::shared_ptr<Parameter> param,
+                         float width)
+{
+  ImGui::SetNextItemWidth(width);
+  bool ret = ImGui::SliderInt(idString(id + "sliderInt").c_str(), &param->intValue, static_cast<int>(param->min), static_cast<int>(param->max), "%d", ImGuiSliderFlags_None);
+  if (ret) {
+    param->affirmIntValue();
+  }
+  return ret;
+}
+
 void CommonViews::ColorShaderStageParameter(std::shared_ptr<Parameter> param) {
   H3Title(param->name);
   H4Title(param->ownerName);
@@ -269,7 +285,7 @@ void CommonViews::ColorShaderStageParameter(std::shared_ptr<Parameter> param) {
   ImGui::ColorEdit4(idString(param->paramId).c_str(), param->color->data());
   // BUTTONS
   ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetContentRegionAvail().y - 25);
-  ResetButton(param->paramId, param, ImVec2(40.0, 40.0), ImVec2(7.5, 7.5));
+  ResetButton(param->paramId, param, ImVec2(30.0, 30.0), ImVec2(6., 6.));
   ImGui::SameLine();
   FavoriteButton(param);
 }
@@ -281,7 +297,7 @@ void CommonViews::CheckboxShaderStageParameter(std::shared_ptr<Parameter> param)
   CommonViews::ShaderCheckbox(param);
   // BUTTONS
   ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetContentRegionAvail().y - 25);
-  ResetButton(param->paramId, param, ImVec2(40.0, 40.0), ImVec2(7.5, 7.5));
+  ResetButton(param->paramId, param, ImVec2(30.0, 30.0), ImVec2(6., 6.));
   ImGui::SameLine();
   FavoriteButton(param);
 }
@@ -328,7 +344,7 @@ void CommonViews::IntShaderStageParameter(std::shared_ptr<Parameter> param) {
   
   // BUTTONS
   ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetContentRegionAvail().y - 25);
-  ResetButton(param->paramId, param, ImVec2(40.0, 40.0), ImVec2(7.5, 7.5));
+  ResetButton(param->paramId, param, ImVec2(30.0, 30.0), ImVec2(6., 6.));
   ImGui::SameLine();
   FavoriteButton(param);
 
@@ -393,7 +409,7 @@ void CommonViews::ShaderStageParameter(std::shared_ptr<Parameter> param, std::sh
   
   // BUTTONS
   ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetContentRegionAvail().y - 25);
-  ResetButton(param->paramId, param, ImVec2(40.0, 40.0), ImVec2(7.5, 7.5));
+  ResetButton(param->paramId, param, ImVec2(30.0, 30.0), ImVec2(6., 6.));
   ImGui::SameLine();
   OscillateButton(param->paramId, osc, param);
   ImGui::SameLine();
@@ -406,84 +422,134 @@ bool CommonViews::AreaSlider(std::string id,
                              std::shared_ptr<Parameter> minY, std::shared_ptr<Parameter> maxY,
                              std::shared_ptr<Oscillator> minXOscillator, std::shared_ptr<Oscillator> maxXOscillator,
                              std::shared_ptr<Oscillator> minYOscillator, std::shared_ptr<Oscillator> maxYOscillator)  {
-  
-  static ImVec2 selectionCanvas = ImVec2(256.0, 144.0);
-  
-  ImVec2 start = ImVec2(minX->value, minY->value);
-  ImVec2 end = ImVec2(maxX->value, maxY->value);
-  auto screenPos = ImGui::GetCursorScreenPos() + ImVec2(200.0, 100.0);
-  auto endPos = screenPos + selectionCanvas;
-  
-  ImDrawList* draw_list = ImGui::GetForegroundDrawList();
-  // Full canvas
-  draw_list->AddRectFilled(ImGui::GetCursorScreenPos(), ImGui::GetCursorScreenPos() + selectionCanvas, ImGui::GetColorU32(IM_COL32(0, 130, 216, 50)));
-  
-  // Selection window
-  draw_list->AddRectFilled(ImGui::GetCursorScreenPos() + ImVec2(start.x * selectionCanvas.x, start.y * selectionCanvas.y), ImGui::GetCursorScreenPos() + ImVec2(end.x * selectionCanvas.x, end.y * selectionCanvas.y), ImGui::GetColorU32(IM_COL32(215, 30, 0, 100)));
-  
-  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + selectionCanvas.y);
-  
-  if (IsMouseWithin(screenPos, endPos, ImVec2(200.0, 100.0)) && ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-    
-    // Call the selection rectangle and handle interactions.
-    bool selectionModified = CommonViews::SelectionRect(&start, &end, screenPos, endPos);
-    
-    ImVec2 size = ImVec2(endPos.x - screenPos.x, endPos.y - screenPos.y);
-    
-    // Mapping back the normalized coordinates to parameter space.
-    minX->value = start.x;
-    maxX->value = end.x;
-    minY->value = start.y;
-    maxY->value = end.y;
-    ImGui::Text("%s", formatString("(%.2f, %.2f)", minX->value, minY->value).c_str());
-    ImGui::Text("%s", formatString("(%.2f, %.2f)", maxX->value, maxY->value).c_str());
-    
-    return selectionModified;
-  }
-  
-  return false;
-}
 
-bool CommonViews::SelectionRect(ImVec2 *start_pos, ImVec2 *end_pos, ImVec2 topLeft, ImVec2 bottomRight) {
-  IM_ASSERT(start_pos != NULL);
-  IM_ASSERT(end_pos != NULL);
-  
-  ImVec2 size = ImVec2(bottomRight.x - topLeft.x, bottomRight.y - topLeft.y);
-  
-  if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-    ImVec2 mousePos = getScaledMouseLocation() + ImVec2(200.0, 100.0);
-    start_pos->x = (mousePos.x - topLeft.x) / size.x;
-    start_pos->y = (mousePos.y - topLeft.y) / size.y;
+  static ImVec2 selectionCanvas = ImVec2(256.0, 144.0);
+
+  // Static variables to store drag state - shared across calls but distinguished by active_slider_id
+  static ImGuiID active_slider_id = 0; // ID of the slider currently being dragged
+  static ImVec2 drag_start_norm;      // Where the drag started for the active slider (normalized 0-1)
+  static ImVec2 drag_end_norm;        // Current end point during drag (normalized 0-1)
+
+  // Get parameters for drawing the static background representation
+  ImVec2 startNormParam = ImVec2(minX->value, minY->value);
+  ImVec2 endNormParam = ImVec2(maxX->value, maxY->value);
+
+  auto screenPos = ImGui::GetCursorScreenPos(); // Top-left of the Dummy control
+  auto endDrawPos = screenPos + selectionCanvas; // Bottom-right of the Dummy control
+
+  ImDrawList* draw_list_bg = ImGui::GetWindowDrawList(); // Background draw list
+
+  // Draw the full canvas background
+  draw_list_bg->AddRectFilled(screenPos, endDrawPos, ImGui::GetColorU32(IM_COL32(0, 130, 216, 50)));
+
+  // Draw the current selection window based on parameter values (static representation)
+  draw_list_bg->AddRectFilled(screenPos + ImVec2(fmin(startNormParam.x, endNormParam.x) * selectionCanvas.x, fmin(startNormParam.y, endNormParam.y) * selectionCanvas.y),
+                           screenPos + ImVec2(fmax(startNormParam.x, endNormParam.x) * selectionCanvas.x, fmax(startNormParam.y, endNormParam.y) * selectionCanvas.y),
+                           ImGui::GetColorU32(IM_COL32(215, 30, 0, 100)));
+
+  // --- Interaction Widget ---
+  ImGui::Dummy(selectionCanvas); // The interactive area
+  bool valueChanged = false;
+  ImGuiID current_slider_id = ImGui::GetID(id.c_str()); // Get ID for *this* specific AreaSlider instance
+
+  // --- Interaction State Logic ---
+  bool is_mouse_clicked_on_item = ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left);
+  // Check IsMouseDragging without checking active ID yet, as we might need to capture it
+  bool is_mouse_dragging = ImGui::IsMouseDragging(ImGuiMouseButton_Left);
+  bool is_mouse_released = ImGui::IsMouseReleased(ImGuiMouseButton_Left);
+
+  if (is_mouse_clicked_on_item) {
+      // --- Start Drag ---
+      ImGui::SetActiveID(current_slider_id, ImGui::GetCurrentWindow()); // Capture mouse focus
+      active_slider_id = current_slider_id; // Mark this slider as the one being dragged
+
+      // Calculate initial normalized position based *directly on the click position*
+      ImVec2 mousePosAbsolute = ImGui::GetIO().MousePos;
+      drag_start_norm.x = std::max(0.0f, std::min(1.0f, (mousePosAbsolute.x - screenPos.x) / selectionCanvas.x));
+      drag_start_norm.y = std::max(0.0f, std::min(1.0f, (mousePosAbsolute.y - screenPos.y) / selectionCanvas.y));
+      drag_end_norm = drag_start_norm; // Start and end are the same initially
   }
-  
-  if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-    ImVec2 mousePos = getScaledMouseLocation() + ImVec2(200.0, 100.0);
-    end_pos->x = (mousePos.x - topLeft.x) / size.x;
-    end_pos->y = (mousePos.y - topLeft.y) / size.y;
-    
-    ImDrawList* draw_list = ImGui::GetForegroundDrawList();
-    ImVec2 actual_start_pos = ImVec2(topLeft.x + start_pos->x * size.x, topLeft.y + start_pos->y * size.y) - ImVec2(200.0, 100.0);;
-    ImVec2 actual_end_pos = ImVec2(topLeft.x + end_pos->x * size.x, topLeft.y + end_pos->y * size.y) - ImVec2(200.0, 100.0);;
-    
-    draw_list->AddRect(actual_start_pos, actual_end_pos, ImGui::GetColorU32(IM_COL32(0, 130, 216, 255))); // Border
-    draw_list->AddRectFilled(actual_start_pos, actual_end_pos, ImGui::GetColorU32(IM_COL32(0, 130, 216, 50))); // Background
+
+  // Process dragging only if this slider is the active one
+  if (is_mouse_dragging && active_slider_id == current_slider_id) {
+      // --- Continue Drag ---
+      // Update end position based on current mouse position, clamped to canvas
+      ImVec2 mousePosAbsolute = ImGui::GetIO().MousePos;
+      drag_end_norm.x = std::max(0.0f, std::min(1.0f, (mousePosAbsolute.x - screenPos.x) / selectionCanvas.x));
+      drag_end_norm.y = std::max(0.0f, std::min(1.0f, (mousePosAbsolute.y - screenPos.y) / selectionCanvas.y));
+
+      // --- Draw the *live interaction* rectangle and text (foreground) ---
+      ImDrawList* draw_list_fg = ImGui::GetForegroundDrawList();
+
+      // Calculate absolute screen coordinates for drawing the live rectangle
+      ImVec2 start_draw_abs = screenPos + ImVec2(fmin(drag_start_norm.x, drag_end_norm.x) * selectionCanvas.x, fmin(drag_start_norm.y, drag_end_norm.y) * selectionCanvas.y);
+      ImVec2 end_draw_abs = screenPos + ImVec2(fmax(drag_start_norm.x, drag_end_norm.x) * selectionCanvas.x, fmax(drag_start_norm.y, drag_end_norm.y) * selectionCanvas.y);
+
+      // Draw Rectangles
+      draw_list_fg->AddRect(start_draw_abs, end_draw_abs, ImGui::GetColorU32(IM_COL32(0, 130, 216, 255)), 0.0f, 0, 1.0f); // Border
+      draw_list_fg->AddRectFilled(start_draw_abs, end_draw_abs, ImGui::GetColorU32(IM_COL32(0, 130, 216, 50)));   // Fill
+
+      // Draw Text Inside Rectangle
+      std::string startText = formatString("(%.2f, %.2f)", drag_start_norm.x, drag_start_norm.y); // Use persisted start
+      std::string endText = formatString("(%.2f, %.2f)", drag_end_norm.x, drag_end_norm.y); // Use current end
+      ImVec2 startTextSize = ImGui::CalcTextSize(startText.c_str());
+      ImVec2 endTextSize = ImGui::CalcTextSize(endText.c_str());
+
+      // Calculate center based on the *drawing* coordinates
+      float centerX = start_draw_abs.x + (end_draw_abs.x - start_draw_abs.x) / 2.0f;
+      float centerY = start_draw_abs.y + (end_draw_abs.y - start_draw_abs.y) / 2.0f;
+
+      // Calculate text positions to be centered, one above the other
+      ImVec2 startTextPos = ImVec2(centerX - startTextSize.x / 2.0f, centerY - startTextSize.y); // Start text just above center line
+      ImVec2 endTextPos = ImVec2(centerX - endTextSize.x / 2.0f, centerY);                      // End text starting at center line
+
+      // Add text to the foreground draw list
+      draw_list_fg->AddText(startTextPos, IM_COL32_WHITE, startText.c_str());
+      draw_list_fg->AddText(endTextPos, IM_COL32_WHITE, endText.c_str());
   }
-  
-  return ImGui::IsMouseReleased(ImGuiMouseButton_Left);
+
+  // Process mouse release only if this slider was the active one
+  if (is_mouse_released && active_slider_id == current_slider_id) {
+      // --- End Drag ---
+      // Determine final min/max normalized values from the persisted drag state
+      float finalMinX = fmin(drag_start_norm.x, drag_end_norm.x);
+      float finalMaxX = fmax(drag_start_norm.x, drag_end_norm.x);
+      float finalMinY = fmin(drag_start_norm.y, drag_end_norm.y);
+      float finalMaxY = fmax(drag_start_norm.y, drag_end_norm.y);
+
+      // Update parameters only if values actually changed
+      if (minX->value != finalMinX || maxX->value != finalMaxX || minY->value != finalMinY || maxY->value != finalMaxY) {
+          minX->setValue(finalMinX);
+          maxX->setValue(finalMaxX);
+          minY->setValue(finalMinY);
+          maxY->setValue(finalMaxY);
+          // Optionally affirm values if needed:
+          // minX->affirmValue(); maxX->affirmValue(); minY->affirmValue(); maxY->affirmValue();
+          valueChanged = true; // Signal that parameters were updated
+      }
+
+      ImGui::ClearActiveID(); // Release mouse focus
+      active_slider_id = 0; // Clear the active slider tracking state
+  }
+
+  return valueChanged; // Return true only on the frame the selection finished and values changed
 }
 
 void CommonViews::MultiSlider(std::string title, std::string id, std::shared_ptr<Parameter> param1, std::shared_ptr<Parameter> param2,
                               std::shared_ptr<Oscillator> param1Oscillator,
                               std::shared_ptr<Oscillator> param2Oscillator) {
   CommonViews::H4Title(title);
-  ImGui::BeginChild("position2D", ImVec2(200.0, 200.0), ImGuiWindowFlags_NoScrollbar);
+  ImGui::BeginChild("position2D", ImVec2(200.0, 200.0), ImGuiChildFlags_None, ImGuiWindowFlags_NoScrollbar);
   ImGui::SetNextItemWidth(150.0);
   ImGuiExtensions::Slider2DFloat("", &param1->value,
                                  &param2->value,
                                  param1->min, param1->max, param2->min, param2->max, 1.0);
   ImGui::EndChild();
-  CommonViews::ShaderParameter(param1, param2Oscillator);
+  ImGui::SameLine();
+  ImGui::BeginChild("position2DParams", ImVec2(200.0, 200.0), ImGuiChildFlags_None, ImGuiWindowFlags_NoScrollbar);
+  CommonViews::ShaderParameter(param1, param1Oscillator);
   CommonViews::ShaderParameter(param2, param2Oscillator);
+  ImGui::EndChild();
 }
 
 bool CommonViews::TextureFieldAndBrowser(std::shared_ptr<Parameter> param) {
@@ -571,7 +637,8 @@ bool CommonViews::IconFieldAndBrowser(std::shared_ptr<Parameter> param) {
 
 void CommonViews::ShaderColor(std::shared_ptr<Parameter> param)
 {
-  H4Title(param->name);
+  H3Title(param->name);
+  ImGui::SameLine();
   ImGui::SetNextItemWidth(200.0);
   ImGui::ColorEdit4(idString(param->paramId).c_str(), param->color->data());
   
@@ -652,13 +719,39 @@ bool CommonViews::PlaybackSlider(std::shared_ptr<Parameter> param, float length)
   return ret || ResetButton(param->paramId, param, ImVec2(25.0, 25.0), ImVec2(5.0, 5.0));
 }
 
-void CommonViews::ShaderIntParameter(std::shared_ptr<Parameter> param)
+bool CommonViews::ShaderIntParameter(std::shared_ptr<Parameter> param)
 {
-  H4Title(param->name);
-  ImGui::SetNextItemWidth(200.0);
-  if (ImGui::SliderInt(formatString("##%s", param->paramId.c_str()).c_str(), &param->intValue, param->min, param->max, "%d")) {
-    param->setValue(static_cast<float>(param->intValue));
+  H3Title(param->name, false);
+  ImGui::SameLine();
+  float sliderWidth = ImGui::GetContentRegionAvail().x - 80.0;
+  bool ret = IntSlider(param->name, param->paramId, param, sliderWidth);
+  float endYPos = ImGui::GetCursorPosY();
+  ImGui::SameLine();
+  ResetButton(param->paramId, param, ImVec2(30.0, 30.0), ImVec2(6., 6.));
+  ImGui::SameLine();
+  if (ShaderDropdownButton(param)) {
+    param->buttonsVisible = !param->buttonsVisible;
   }
+  ImGui::NewLine();
+  ImGui::SetCursorPosY(endYPos);
+  
+  if (param->buttonsVisible) {
+    int buttonCount = 3;
+    float buttonSpacing = 8.0;
+    float buttonWidth = (ImGui::GetContentRegionAvail().x - 8.0 - buttonSpacing * (buttonCount - 1)) / buttonCount;
+    if (LayoutStateService::getService()->midiEnabled) {
+      MidiSelector(param, ImVec2(buttonWidth, 36.0));
+      ImGui::SameLine();
+    }
+    if (AudioSourceService::getService()->selectedAudioSource != nullptr) {
+      AudioParameterSelector(param, ImVec2(buttonWidth, 36.0));
+      ImGui::SameLine();
+    }
+    
+    FavoriteButton(param, ImVec2(buttonWidth, 36.0));
+  }
+  
+  return ret;
 }
 
 bool CommonViews::ResetButton(std::string id,
@@ -669,15 +762,14 @@ bool CommonViews::ResetButton(std::string id,
   auto pos = ImGui::GetCursorPos();
   auto screenPos = ImGui::GetCursorScreenPos();
   
-  bool ret = ImGui::InvisibleButton(idString(id).c_str(), size);
   ImGui::SameLine();
   auto endPos = ImGui::GetCursorPos();
   
   ImDrawList* drawList = ImGui::GetWindowDrawList();
   ImColor rectColor;
-  if (ImGui::IsItemActive()) {
+  if (param->buttonHoverMap["reset"] == ButtonHoverState_Active) {
     rectColor = Colors::Secondary200;
-  } else if (ImGui::IsItemHovered()) {
+  } else if (param->buttonHoverMap["reset"] == ButtonHoverState_Hovered) {
     rectColor = Colors::Secondary300;
   } else {
     rectColor = Colors::SecondaryDark;
@@ -691,7 +783,16 @@ bool CommonViews::ResetButton(std::string id,
   
   ImGui::SetCursorPos(pos + padding);
   ImageNamedNew("reset.png", size.x - padding.x * 2, size.y - padding.y * 2);
-  ImGui::SetCursorPos(endPos);
+  ImGui::SetCursorPos(pos);
+  bool ret = ImGui::InvisibleButton(formatString("%s-reset", id.c_str()).c_str(), size);
+  
+  if (ImGui::IsItemActive()) {
+    param->buttonHoverMap["reset"] = ButtonHoverState_Active;
+  } else if (ImGui::IsItemHovered()) {
+    param->buttonHoverMap["reset"] = ButtonHoverState_Hovered;
+  } else {
+    param->buttonHoverMap["reset"] = ButtonHoverState_None;
+  }
   
   if (ret)
   {
@@ -914,7 +1015,7 @@ void CommonViews::BlendModeSelector(std::shared_ptr<Parameter> blendMode, std::s
   };
   
   // Draw a combo selector
-  float comboWidth = ImGui::GetContentRegionAvail().x - 80.0;
+  float comboWidth = ImGui::GetContentRegionAvail().x - 100.0;
   ImGui::PushItemWidth(comboWidth);
   // Convert the strings to C strings
   std::vector<const char *> blendModeNamesC;
@@ -1153,30 +1254,38 @@ bool CommonViews::ShaderDropdownButton(std::shared_ptr<Parameter> param) {
   auto pos = ImGui::GetCursorPos();
   auto screenPos = ImGui::GetCursorScreenPos();
   
-  bool ret = ImGui::InvisibleButton(param->paramId.c_str(), ImVec2(30.0, 30.0));
   ImGui::SameLine();
   auto endPos = ImGui::GetCursorPos();
   
-  ImGui::SetCursorPos(pos + ImVec2(5.0, 5.0));
-  
   ImDrawList* drawList = ImGui::GetWindowDrawList();
   ImColor rectColor;
-  if (ImGui::IsItemActive()) {
+  if (param->buttonHoverMap["dropdown"] == ButtonHoverState_Active) {
     rectColor = Colors::Secondary200;
-  } else if (ImGui::IsItemHovered()) {
+  } else if (param->buttonHoverMap["dropdown"] == ButtonHoverState_Hovered) {
     rectColor = Colors::Secondary300;
   } else {
     rectColor = Colors::SecondaryDark;
   }
   
-  drawList->AddRectFilled(ImVec2(screenPos.x + 5.0, screenPos.y + 5.0),
-                          ImVec2(screenPos.x + 35.0, screenPos.y + 35.0),
+  drawList->AddRectFilled(ImVec2(screenPos.x, screenPos.y),
+                          ImVec2(screenPos.x + 30.0, screenPos.y + 30.0),
                           rectColor,
                           8.0);
   
-  ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2(10.0, 10.0));
+  ImGui::SetCursorPos(pos + ImVec2(10.0, 10.0));
   ImageNamedNew(param->buttonsVisible ? "up.png" : "down.png", 10.0, 10.0);
-  ImGui::SetCursorPos(endPos);
+  ImGui::SetCursorPos(pos);
+  
+  bool ret = ImGui::InvisibleButton(formatString("%s-dd", param->paramId.c_str()).c_str(), ImVec2(30.0, 30.0));
+  
+  if (ImGui::IsItemActive()) {
+    param->buttonHoverMap["dropdown"] = ButtonHoverState_Active;
+  } else if (ImGui::IsItemHovered()) {
+    param->buttonHoverMap["dropdown"] = ButtonHoverState_Hovered;
+  } else {
+    param->buttonHoverMap["dropdown"] = ButtonHoverState_None;
+  }
+  
   return ret;
 }
 
@@ -1219,36 +1328,44 @@ bool CommonViews::FlipButton(std::string id, std::shared_ptr<Parameter> param, I
   auto pos = ImGui::GetCursorPos();
   auto screenPos = ImGui::GetCursorScreenPos();
   
-  bool ret = ImGui::InvisibleButton(idString(id).c_str(), size);
   ImGui::SameLine();
   auto endPos = ImGui::GetCursorPos();
-  
-  ImGui::SetCursorPos(pos + ImVec2(5.0, 5.0));
-  
+    
   ImDrawList* drawList = ImGui::GetWindowDrawList();
   ImColor rectColor;
-  if (ImGui::IsItemActive()) {
-    rectColor = param->boolValue ? Colors::SecondaryDark : Colors::Secondary200;
-  } else if (ImGui::IsItemHovered()) {
+  if (param->buttonHoverMap["flip"] == ButtonHoverState_Active) {
+    rectColor = Colors::Secondary200;
+  } else if (param->buttonHoverMap["flip"] == ButtonHoverState_Hovered) {
     rectColor = Colors::Secondary300;
   } else {
     rectColor = param->boolValue ? Colors::Secondary200 : Colors::SecondaryDark;
   }
   
-  // Center the 30x30 rect within the button
+  // Center the rect within the button
   drawList->AddRectFilled(ImVec2(screenPos.x, screenPos.y),
-                         ImVec2(screenPos.x + size.x - 5.0, screenPos.y + size.y - 5.0),
+                         ImVec2(screenPos.x + size.x, screenPos.y + size.y),
                          rectColor,
                          8.0);
   
-  ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2(7.5, 7.5));
-  ImageNamedNew("flip.png", size.x - 25.0, size.y - 25.0);
-  ImGui::SetCursorPos(endPos);
+  ImGui::SetCursorPos(pos + ImVec2(7.5, 7.5));
+  ImageNamedNew("flip.png", size.x - 15.0, size.y - 15.0);
+  ImGui::SetCursorPos(pos);
   
-  if (ret)
-  {
+  bool ret = ImGui::InvisibleButton(idString(id).c_str(), size);
+  
+  if (ImGui::IsItemActive()) {
+    param->buttonHoverMap["flip"] = ButtonHoverState_Active;
+  } else if (ImGui::IsItemHovered()) {
+    param->buttonHoverMap["flip"] = ButtonHoverState_Hovered;
+  } else {
+    param->buttonHoverMap["flip"] = ButtonHoverState_None;
+  }
+  
+  if (ret) {
     param->setBoolValue(!param->boolValue);
   }
+  
+  ImGui::SetCursorPos(endPos);
   return ret;
 }
 
@@ -1278,11 +1395,14 @@ void CommonViews::PushRedesignStyle() {
   
   ImGui::PushStyleVar(ImGuiStyleVar_TabRounding, 4.0f);
   ImGui::PushStyleVar(ImGuiStyleVar_TabBorderSize, 1.0f);
+  ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 3.0f);
 
   // Colors
   ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Colors::ButtonHovered.Value);
-  ImGui::PushStyleColor(ImGuiCol_SliderGrab, Colors::ButtonSelected.Value);
-  ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, Colors::ButtonSelected.Value);
+  ImGui::PushStyleColor(ImGuiCol_SliderGrab, Colors::AccentColor.Value);
+  ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, Colors::AccentColor.Value);
+  ImGui::PushStyleColor(ImGuiCol_ScrollbarGrab, Colors::AccentColor.Value);
+  ImGui::PushStyleColor(ImGuiCol_ScrollbarBg, Colors::InnerChildBackgroundColor.Value);
 
   ImGui::PushStyleColor(ImGuiCol_FrameBg, Colors::ChildBackgroundColor.Value);
   ImGui::PushStyleColor(ImGuiCol_WindowBg, Colors::ChildBackgroundColor.Value);
@@ -1299,9 +1419,9 @@ void CommonViews::PushRedesignStyle() {
 void CommonViews::PopRedesignStyle() {
   ImGui::PopFont();
  
-  ImGui::PopStyleColor(13);
+  ImGui::PopStyleColor(15);
   
-  ImGui::PopStyleVar(12);
+  ImGui::PopStyleVar(13);
 }
 
 void CommonViews::PushNodeRedesignStyle() {

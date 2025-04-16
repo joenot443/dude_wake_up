@@ -75,7 +75,7 @@ shader.load("shaders/Rings");
 
   void drawSettings() override {
     
-    CommonViews::H3Title("Rings");
+    
     CommonViews::ShaderParameter(settings->ringSize, settings->ringSizeOscillator);
     CommonViews::ShaderColor(settings->color);
   }

@@ -25,12 +25,12 @@ public:
   std::shared_ptr<Oscillator> sizeOscillator;
   
   PixelSettings(std::string shaderId, json j, std::string name)
-  : size(std::make_shared<Parameter>("pixel_size", 24.1, 1.0,
+  : size(std::make_shared<Parameter>("Size", 24.1, 1.0,
                                      200.0)),
   sizeOscillator(std::make_shared<WaveformOscillator>(size)),
   ShaderSettings(shaderId, j, name) {
-    parameters = {size};
-    oscillators = {sizeOscillator};
+    parameters = { size };
+    oscillators = { sizeOscillator };
     audioReactiveParameter = size;
     load(j);
     registerParameters();

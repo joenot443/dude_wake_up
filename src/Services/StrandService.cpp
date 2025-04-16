@@ -3,17 +3,25 @@
 
 std::shared_ptr<AvailableStrand> StrandService::availableStrandForId(std::string id)
 {
-  if (strandMap.count(id) == 0)
+  if (strandMap.count(id) != 0)
   {
-    return nullptr;
+    return strandMap[id];
   }
-  return strandMap[id];
+  if (folderMap.count(id) != 0)
+  {
+    return folderMap[id];
+  }
+  return nullptr;
 }
 
 std::vector<std::shared_ptr<AvailableStrand>> StrandService::availableStrands()
 {
   std::vector<std::shared_ptr<AvailableStrand>> strands;
   for (auto const &[key, val] : strandMap)
+  {
+    strands.push_back(val);
+  }
+  for (auto const &[key, val] : folderMap)
   {
     strands.push_back(val);
   }
@@ -136,14 +144,14 @@ void StrandService::loadConfig(json j)
   }
 }
 
-// Adds all strands in the nottawa folder to the strandMap
+// Adds all strands in the nottawa/strands folder to the strandMap
 void StrandService::populate()
 {
-  std::string nottawaFolder = ConfigService::getService()->nottawaFolderFilePath();
+  std::string nottawaFolder = ConfigService::getService()->strandsFolderFilePath();
   std::string templatesFolder = ConfigService::getService()->templatesFolderFilePath();
   
   populateMapFromFolder(&templateMap, templatesFolder);
-  populateMapFromFolder(&strandMap, nottawaFolder);
+  populateMapFromFolder(&folderMap, nottawaFolder);
 }
 
 void StrandService::populateMapFromFolder(std::map<std::string, std::shared_ptr<AvailableStrand>> *map, std::string folder) {

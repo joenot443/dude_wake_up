@@ -10,20 +10,11 @@
 #include "Parameter.hpp"
 #include "WaveformOscillator.hpp"
 #include "ConfigService.hpp"
+#include "FontService.hpp"
 #include "Settings.hpp"
+#include "Font.hpp"
 #include "UUID.hpp"
 #include "Strings.hpp"
-
-struct Font {
-  std::string name = "";
-  
-  std::string path() {
-    return formatString("fonts/editor/%s.ttf", name.c_str());
-  }
-  
-  Font(std::string name) : name(name) {};
-};
-
 
 class DisplayText: public Settings {
 public:
@@ -35,7 +26,7 @@ public:
   std::shared_ptr<Parameter> strokeEnabled;
 
   int fontSize = 36;
-  Font font = Font("");
+  Font font = FontService::getService()->fonts[0];
     
   std::shared_ptr<Parameter> xPosition;
   std::shared_ptr<Parameter> yPosition;
@@ -45,7 +36,7 @@ public:
   
   std::shared_ptr<Parameter> fontSelector;
   
-  DisplayText() : font(Font("")),
+  DisplayText() : font(Font("", "")),
   id(UUID::generateUUID()),
   xPosition(std::make_shared<Parameter>("xPosition", 0.1, 0.0, 1.0)),
   yPosition(std::make_shared<Parameter>("yPosition", 0.1, 0.0, 1.0)),
@@ -66,6 +57,8 @@ public:
     for (auto& file : fontsDir.getFiles()) {
       fontNames.push_back(removeFileExtension(file.getFileName()));
     }
+    
+    color->setColor({1.0, 1.0, 1.0, 1.0});
     fontSelector->options = fontNames;
     oscillators = {xPositionOscillator, yPositionOscillator};
     parameters = {xPosition, yPosition, strokeEnabled, fontSelector};
