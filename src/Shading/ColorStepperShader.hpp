@@ -22,15 +22,19 @@ struct ColorStepperSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> speedOscillator;
   std::shared_ptr<Parameter> smoothness;
   std::shared_ptr<WaveformOscillator> smoothnessOscillator;
+  std::shared_ptr<Parameter> amount;
+  std::shared_ptr<WaveformOscillator> amountOscillator;
 
   ColorStepperSettings(std::string shaderId, json j) :
-  speed(std::make_shared<Parameter>("Speed", 1.0, 0.1, 5.0)),
+  speed(std::make_shared<Parameter>("Speed", 1.0, 0.1, 10.0)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   smoothness(std::make_shared<Parameter>("Smoothness", 0.5, 0.0, 1.0)),
   smoothnessOscillator(std::make_shared<WaveformOscillator>(smoothness)),
+  amount(std::make_shared<Parameter>("Amount", 1.0, 0.0, 1.0)),
+  amountOscillator(std::make_shared<WaveformOscillator>(amount)),
   ShaderSettings(shaderId, j, "ColorStepper") {
-    parameters = { speed };
-    oscillators = { speedOscillator };
+    parameters = { speed, smoothness, amount };
+    oscillators = { speedOscillator, smoothnessOscillator, amountOscillator };
     audioReactiveParameter = speed;
     load(j);
     registerParameters();
@@ -54,6 +58,7 @@ struct ColorStepperShader: Shader {
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("speed", settings->speed->max - settings->speed->value);
     shader.setUniform1f("smoothness", settings->smoothness->value);
+    shader.setUniform1f("amount", settings->amount->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
@@ -75,6 +80,7 @@ ShaderType type() override {
   void drawSettings() override {
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     CommonViews::ShaderParameter(settings->smoothness, settings->smoothnessOscillator);
+    CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
   }
 };
 

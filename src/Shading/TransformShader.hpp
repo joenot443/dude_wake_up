@@ -94,6 +94,8 @@ public:
     float cropHeight = (settings->maxY->value - settings->minY->value) * frameHeight * (1 / settings->scale->value);
     float scaleX = cropWidth;
     float scaleY = cropHeight;
+    float translateX = 0;
+    float translateY = 0;
     
     // Calculate scaling based on mode
     float canvasAspect = canvas->getWidth() / (float)canvas->getHeight();
@@ -127,21 +129,21 @@ public:
         }
         break;
       default: // Standard (manual scaling)
-        scaleX *= settings->scale->value * settings->scale->value;
-        scaleY *= settings->scale->value * settings->scale->value;
+        float s = settings->scale->value;
+        scaleX *= s;   // correct factor
+        scaleY *= s;
+        
+        // Calculate the position to center the scaled texture
+        translateX = settings->center->boolValue ? (canvas->getWidth() - scaleX) / 2 : settings->minX->value * canvas->getWidth();
+        translateY = settings->center->boolValue ? (canvas->getHeight() - scaleY) / 2 : settings->minY->value * canvas->getHeight();
         break;
     }
     
     ofClear(0, 0, 0, 0);
     ofPushMatrix();
     
-    // Calculate the position to center the scaled texture
-    float translateX = settings->center->boolValue ? (canvas->getWidth() - scaleX) / 2 : settings->minX->value * canvas->getWidth();
-    float translateY = settings->center->boolValue ? (canvas->getHeight() - scaleY) / 2 : settings->minY->value * canvas->getHeight();
-    
     // Translate to center the scaled image on the canvas
-    ofTranslate(
-                translateX + settings->translateX->value * canvas->getWidth(),
+    ofTranslate(translateX + settings->translateX->value * canvas->getWidth(),
                 translateY + settings->translateY->value * canvas->getHeight());
     
     // Draw the cropped and scaled texture

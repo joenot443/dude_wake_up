@@ -20,6 +20,7 @@ struct Colors {
   constexpr static ImColor ChildBackgroundColor = ImColor(47, 50, 50);
   constexpr static ImColor InnerChildBackgroundColor = ImColor(22, 22, 24);
   
+  constexpr static ImColor BorderColor = ImColor(40, 43, 43);
   constexpr static ImColor NodeBackgroundColor = ImColor(32, 32, 35);
   constexpr static ImColor ActionBarBackgroundColor = IM_COL32(32, 32, 35, 180);
   constexpr static ImColor NodeBorderColor = ImColor(86, 86, 89);

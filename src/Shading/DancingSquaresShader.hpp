@@ -17,7 +17,7 @@
 #include <stdio.h>
 
 struct DancingSquaresSettings: public ShaderSettings {
-	public:
+public:
   DancingSquaresSettings(std::string shaderId, json j, std::string name) :
   ShaderSettings(shaderId, j, name) {
     parameters = {};
@@ -31,11 +31,11 @@ class DancingSquaresShader: public Shader {
 public:
   DancingSquaresSettings *settings;
   DancingSquaresShader(DancingSquaresSettings *settings) : settings(settings), Shader(settings) {};
-
+  
   void setup() override {
-    shader.load("shaders/DancingSquares");
+    shader.load("shaders/Dancing Squares");
   }
-
+  
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
@@ -49,18 +49,18 @@ public:
     shader.end();
     canvas->end();
   }
-
+  
   void clear() override {
     
   }
-
-    int inputCount() override {
+  
+  int inputCount() override {
     return 1;
   }
-ShaderType type() override {
+  ShaderType type() override {
     return ShaderTypeDancingSquares;
   }
-
+  
   void drawSettings() override {
     
   }

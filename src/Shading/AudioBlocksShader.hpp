@@ -27,11 +27,11 @@ struct AudioBlocksSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> ySpreadOscillator;
 
   AudioBlocksSettings(std::string shaderId, json j) :
-    size(std::make_shared<Parameter>("size", 1.0, 0.0, 4.0)),
+    size(std::make_shared<Parameter>("Size", 1.0, 0.0, 4.0)),
     sizeOscillator(std::make_shared<WaveformOscillator>(size)),
-    speed(std::make_shared<Parameter>("speed", 1.0, 0.0, 10.0)),
+    speed(std::make_shared<Parameter>("Speed", 1.0, 0.0, 10.0)),
     speedOscillator(std::make_shared<WaveformOscillator>(speed)),
-    ySpread(std::make_shared<Parameter>("ySpread", 0.5, 0.0, 2.0)),
+    ySpread(std::make_shared<Parameter>("Y Spread", 0.5, 0.0, 2.0)),
     ySpreadOscillator(std::make_shared<WaveformOscillator>(ySpread)),
     
     ShaderSettings(shaderId, j, "AudioBlocks") {

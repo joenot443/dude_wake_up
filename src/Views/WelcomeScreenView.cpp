@@ -26,63 +26,144 @@ void WelcomeScreenView::update() {
   player.update();
 }
 
-void WelcomeScreenView::draw() {
-  ImVec2 helpSize = ImVec2(ImGui::GetWindowWidth() / 2.0, ImGui::GetWindowHeight() / 2.0);
-  ImVec2 helpPos = ImVec2(ImGui::GetWindowWidth() / 4.0, ImGui::GetWindowHeight() / 4.0);
+
+void WelcomeScreenView::draw()
+{
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(24.0, 24.0));
+  /* ---------- 1. Modal placement ---------- */
+  float windowW = ImGui::GetWindowWidth() * 0.60f;
+  float windowH = ImGui::GetWindowHeight() * 0.80f;
   
-  ImGui::SetNextWindowPos(helpPos);
-  ImGui::SetNextItemWidth(helpSize.x);
+  const ImVec2 centre{
+    (ImGui::GetWindowWidth()  - windowW) * 0.5f,
+    (ImGui::GetWindowHeight() - windowH) * 0.5f
+  };
   
+  ImGui::SetNextWindowPos(centre);
+  ImGui::SetNextWindowSize({static_cast<float>(windowW + 48.0), static_cast<float>(windowH + 48.0)});
   ImGui::OpenPopup("##welcomeScreen");
   
-  if (ImGui::BeginPopupModal("##welcomeScreen", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration)) {
-    ImVec2 containerSize = ImVec2(ImGui::GetContentRegionAvail().x * 0.8, ImGui::GetContentRegionAvail().y * 0.2);
-    float containerOffset = ImGui::GetContentRegionAvail().x * 0.1;
-    ImTextureID texID = (ImTextureID)(uintptr_t)player.getTexture().getTextureData().textureID;
-    ImGui::Image(texID, ImVec2(helpSize.x, helpSize.x * 0.304));
+  if (!ImGui::BeginPopupModal("##welcomeScreen", nullptr,
+                              ImGuiWindowFlags_NoDecoration |
+                              ImGuiWindowFlags_AlwaysAutoResize))
+    return;
+  
+  /* ---------- 2. Header video -------------- */
+  ImTextureID texID = (ImTextureID)(uintptr_t)player.getTexture()
+    .getTextureData().textureID;
+  const float headerH = windowW * 0.30f;                       // 16:5‑ish ratio
+  
+  // Remember where the image will be drawn so we can overlay later.
+  const ImVec2 imgTL = ImGui::GetCursorScreenPos();            // top‑left
+  const ImVec2 imgBR = {static_cast<float>(imgTL.x + windowW), imgTL.y + headerH}; // bottom‑right
+  
+  ImGui::Image(texID, {windowW, headerH});
+  
+  /* ---------- 3. Toggle overlay ------------ */
+  {
+    // position about 10 px inset from the bottom‑left of the image
+    const float inset      = 10.0f;
+    const ImVec2 overlayPos{imgTL.x + inset,
+      imgBR.y - inset - 28.0f};        // 28‑px tall pill
     
-    ImGui::PushFont(FontService::getService()->h3);
+    ImGui::SetCursorScreenPos(overlayPos);
     
-    if (ImGui::Button("Resume Workspace", ImVec2(150, 50))) {
-      LayoutStateService::getService()->showWelcomeScreen = false;
-    }
+    // Semi‑translucent pill background & rounded corners
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImColor(0, 0, 0, 128).Value);
+    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
     
-    ImGui::SameLine(0, 50);
+    // Make the child exactly wide enough for the text + checkbox
+    ImGui::BeginChild("##welcomeToggle", ImVec2(260, 34),
+                      /*border=*/false, ImGuiWindowFlags_NoScrollbar |
+                      ImGuiWindowFlags_NoDecoration);
     
-    if (ImGui::Button("New Workspace", ImVec2(150, 50))) {
-      newWorkspace();
-    }
+    ImGui::PushStyleColor(ImGuiCol_Text, ImColor(255, 255, 255, 220).Value);
+    ImGui::Checkbox(" Always show at launch",
+                    &LayoutStateService::getService()->welcomeScreenEnabled);
+    ImGui::PopStyleColor();
     
-    ImGui::SameLine(0, 50);
-    
-    if (ImGui::Button("Open Workspace", ImVec2(150, 50))) {
-      openWorkspace();
-    }
-    ImGui::PopFont();
-    
-    ImGui::SetCursorPosX(containerOffset);
-    // Templates container
-    CommonViews::H3Title("Templates", false);
-    ImGui::SetCursorPosX(containerOffset);
-    ImGui::BeginChild("##templatesContainer", containerSize);
-    templateBrowserWindow.draw();
     ImGui::EndChild();
-    
-    ImGui::SetCursorPosX(containerOffset);
-    // Recent container
-    CommonViews::H3Title("Recent", false);
-    ImGui::SetCursorPosX(containerOffset);
-    ImGui::BeginChild("##recentsContainer", containerSize, ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar);
-    recentBrowserWindow.draw();
-    ImGui::EndChild();
-    
-    CommonViews::H4Title("Always show welcome screen at launch?", false);
-    ImGui::SameLine();
-    ImGui::Checkbox("##welcome", &LayoutStateService::getService()->welcomeScreenEnabled);
-    
-    ImGui::EndPopup();
+    ImGui::PopStyleVar();
+    ImGui::PopStyleColor();
   }
+  
+  /* ---------- 3a. Demo Button Overlay ------------ */
+  {
+    // position about 10 px inset from the bottom‑right of the image
+    const float inset = 10.0f;
+    const ImVec2 buttonSize = {120.0f, 34.0f}; // Button size
+    const ImVec2 buttonPos = {imgBR.x - inset - buttonSize.x,
+                              imgBR.y - inset - buttonSize.y};
+                              
+    ImGui::SetCursorScreenPos(buttonPos);
+    
+    // Style: 70% Opaque white border
+    ImGui::PushStyleColor(ImGuiCol_Border, ImColor(255, 255, 255, (int)(255 * 0.7)).Value);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f); // Match pill rounding
+
+    if (ImGui::Button("Try this out", buttonSize)) {
+        openDemo();
+    }
+
+    ImGui::PopStyleVar(2); // Pop FrameBorderSize and FrameRounding
+    ImGui::PopStyleColor(); // Pop Border color
+  }
+  
+  ImGui::Spacing();   // breathing room below the video
+  
+  /* ---------- 4. Action buttons ------------ */
+  constexpr float BTN_W = 180.f, BTN_H = 48.f, GAP = 32.f;
+  ImGui::PushFont(FontService::getService()->h3);
+  
+  const float rowW = 3 * BTN_W + 2 * GAP;
+  ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - rowW) * 0.5f);
+  
+  ImGui::BeginGroup();
+  if (ImGui::Button("Resume Workspace", {BTN_W, BTN_H}))
+    LayoutStateService::getService()->showWelcomeScreen = false;
+  ImGui::SameLine(0, GAP);
+  if (ImGui::Button("New Workspace", {BTN_W, BTN_H}))
+    newWorkspace();
+  ImGui::SameLine(0, GAP);
+  if (ImGui::Button("Open Workspace", {BTN_W, BTN_H}))
+    openWorkspace();
+  ImGui::EndGroup();
+  
+  ImGui::PopFont();
+  ImGui::Spacing(); ImGui::Spacing();
+  
+  /* ---------- 5. Two‑column browsers -------- */
+  const float colGap    = ImGui::GetStyle().ItemSpacing.x * 2.0f;
+  const float colWidth  = (ImGui::GetContentRegionAvail().x - colGap) * 0.5f;
+  const float colHeight = ImGui::GetContentRegionAvail().y - 30.0f;
+  
+  // Templates
+  ImGui::BeginGroup();
+  CommonViews::H3Title("Templates", false);
+  
+  ImGui::BeginChild("##templatesContainer",
+                    {colWidth, colHeight}, false);
+  templateBrowserWindow.draw();
+  ImGui::EndChild();
+  ImGui::EndGroup();
+  
+  // Recents
+  ImGui::SameLine(0, colGap);
+  ImGui::BeginGroup();
+  CommonViews::H3Title("Recent", false);
+  ImGui::BeginChild("##recentsContainer",
+                    {colWidth, colHeight}, false);
+  recentBrowserWindow.draw();
+  ImGui::EndChild();
+  ImGui::EndGroup();
+  
+  /* ---------- 6. Close modal --------------- */
+  ImGui::EndPopup();
+  ImGui::PopStyleVar();
 }
+
+
 
 
 void WelcomeScreenView::newWorkspace() {
@@ -94,4 +175,12 @@ void WelcomeScreenView::openWorkspace() {
   if (ConfigService::getService()->loadWorkspaceDialogue()) {
     LayoutStateService::getService()->showWelcomeScreen = false;
   }
+}
+
+void WelcomeScreenView::openDemo() {
+  // TODO: Implement loading the demo workspace
+  log("Opening demo workspace...");
+  NodeLayoutView::getInstance()->clear();
+  ConfigService::getService()->loadStrandFile(StrandService::getService()->demoStrand->path);
+  LayoutStateService::getService()->showWelcomeScreen = false;
 }

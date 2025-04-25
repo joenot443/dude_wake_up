@@ -4,6 +4,7 @@ uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
 uniform bool invert;
+uniform bool drawMiss;
 uniform float hue1;
 uniform float hue2;
 
@@ -27,8 +28,10 @@ void main() {
     outputColor = texColor;
   else if (invert && (hsv.r < hue1 || hsv.r > hue2))
     outputColor = texColor;
-  else
+  else if (drawMiss)
     outputColor = grayMask;
+  else
+    outputColor = vec4(0.0);
 }
 
 vec4 rgb_to_hsv(vec4 color) {

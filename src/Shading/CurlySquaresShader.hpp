@@ -31,7 +31,7 @@ public:
   CurlySquaresSettings(std::string shaderId, json j, std::string name) :
   color(std::make_shared<Parameter>("Color", 1.0, -1.0, 2.0)),
   size(std::make_shared<Parameter>("Size", 1.0, 0.0, 2.0)),
-  alpha(std::make_shared<Parameter>("Alpha", 1.0, 0.0, 2.0)),
+  alpha(std::make_shared<Parameter>("Delta", 1.0, 0.0, 2.0)),
   beta(std::make_shared<Parameter>("Beta", 1.0, 0.0, 2.0)),
   gamma(std::make_shared<Parameter>("Gamma", 4.0, 0.0, 20.0)),
   sizeOscillator(std::make_shared<WaveformOscillator>(size)),
@@ -85,8 +85,8 @@ public:
     
     CommonViews::ShaderColor(settings->color);
     CommonViews::ShaderParameter(settings->size, settings->sizeOscillator);
-    CommonViews::ShaderParameter(settings->alpha, nullptr);
     CommonViews::ShaderParameter(settings->beta, nullptr);
+    CommonViews::ShaderParameter(settings->alpha, nullptr);
     CommonViews::ShaderParameter(settings->gamma, nullptr);
   }
 };

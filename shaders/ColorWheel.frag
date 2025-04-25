@@ -4,6 +4,7 @@ uniform float audio[256];
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float ballDistance;
+uniform float amount;
 uniform float time;
 in vec2 coord;
 out vec4 outputColor;
@@ -80,7 +81,7 @@ void main()
     
     float fftVal = min(0.5, fft(x / (3.14159265359 * 2.0)));  // Placeholder for fft value
     
-    outputColor += color * vec4(fftVal * x / 2.0 * 0.008 / len1);
-    outputColor += color * vec4(fftVal * x / 2.0 * 0.008 / len2);
+    outputColor += color * vec4(amount * fftVal * x / 2.0 * 0.008 / len1);
+    outputColor += color * vec4(amount * fftVal * x / 2.0 * 0.008 / len2);
   }
 }

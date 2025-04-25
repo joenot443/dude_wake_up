@@ -18,7 +18,7 @@
 #include <stdio.h>
 
 class AudioWaveformSettings: public ShaderSettings {
-	public:
+public:
   std::string shaderId;
   
   AudioWaveformSettings(std::string shaderId, json j, std::string name) :
@@ -27,25 +27,22 @@ class AudioWaveformSettings: public ShaderSettings {
     parameters = {};
     oscillators = {};
     load(j);
-  registerParameters();
+    registerParameters();
   };
 };
 
 class AudioWaveformShader: public Shader {
 public:
-
+  
   AudioWaveformSettings *settings;
   AudioWaveformShader(AudioWaveformSettings *settings) :
   settings(settings),
   Shader(settings) {};
-
-
-
+  
   void setup() override {
-shader.load("shaders/AudioWaveform");
-shader.load("shaders/AudioWaveform");
+    shader.load("shaders/AudioWaveform");
   }
-
+  
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     auto source = AudioSourceService::getService()->selectedAudioSource;
     canvas->begin();
@@ -58,18 +55,18 @@ shader.load("shaders/AudioWaveform");
     shader.end();
     canvas->end();
   }
-
+  
   void clear() override {
-
+    
   }
-
-    int inputCount() override {
+  
+  int inputCount() override {
     return 1;
   }
-ShaderType type() override {
+  ShaderType type() override {
     return ShaderTypeAudioWaveform;
   }
-
+  
   void drawSettings() override {
     
   }

@@ -20,6 +20,8 @@ struct ColorPassSettings : public ShaderSettings {
 public:
   std::shared_ptr<Parameter> lowHue;
   std::shared_ptr<Parameter> highHue;
+
+  std::shared_ptr<Parameter> drawMiss;
   
   std::shared_ptr<Oscillator> lowHueOsc;
   std::shared_ptr<Oscillator> highHueOsc;
@@ -28,10 +30,11 @@ public:
   : lowHue(std::make_shared<Parameter>("Low Hue", 0.0, 0.0, 1.0)),
   highHue(
           std::make_shared<Parameter>("High Hue", 0.5, 0.0, 1.0)),
+  drawMiss(std::make_shared<Parameter>("Draw Miss", 0.0, 0.0, 1.0, ParameterType_Bool)),
   lowHueOsc(std::make_shared<WaveformOscillator>(lowHue)),
   highHueOsc(std::make_shared<WaveformOscillator>(highHue)),
   ShaderSettings(shaderId, j, name){
-    parameters = { lowHue, highHue };
+    parameters = { lowHue, highHue, drawMiss };
     oscillators = { lowHueOsc, highHueOsc };
     load(j);
     registerParameters();
@@ -47,8 +50,6 @@ public:
 
   void setup() override {
     shader.load("shaders/ColorPass");
-    shader.load("shaders/ColorPass");
-    
   }
   
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -60,6 +61,7 @@ public:
     shader.setUniform1f("hue1", settings->lowHue->value);
     shader.setUniform1f("hue2", settings->highHue->value);
     shader.setUniform1i("invert", 0);
+    shader.setUniform1i("drawMiss", settings->drawMiss->value);
     frame->draw(0, 0);
     shader.end();
     canvas->end();
@@ -74,9 +76,8 @@ public:
   ShaderType type() override { return ShaderTypeColorPass; }
   
   void drawSettings() override {
-    
-    
     CommonViews::RangeSlider("Hue", settings->lowHue->paramId, settings->lowHue, settings->highHue, "Threshold", false);
+    CommonViews::ShaderCheckbox(settings->drawMiss);
   }
 };
 

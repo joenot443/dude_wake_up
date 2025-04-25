@@ -107,7 +107,8 @@ void StageModeView::drawAllParams(int itemsPerRow) {
   int colorIndex = -1;
   std::string lastSettingsId = "";
   int rowCount = 0;
-  for (int idx = 0; idx < allParams.size(); ++idx)
+  std::set<std::shared_ptr<Parameter>> params = std::set<std::shared_ptr<Parameter>>(allParams.begin(), allParams.end());
+  for (auto param : params)
   {
     if (rowCount <= itemsPerRow) {
       ImGui::SameLine();
@@ -116,14 +117,14 @@ void StageModeView::drawAllParams(int itemsPerRow) {
       rowCount = 0;
     }
     
-    if (lastSettingsId != allParams[idx]->ownerSettingsId) {
-      lastSettingsId = allParams[idx]->ownerSettingsId;
+    if (lastSettingsId != param->ownerSettingsId) {
+      lastSettingsId = param->ownerSettingsId;
       colorIndex++;
     }
     
     // Draw item
     ImGui::PushStyleColor(ImGuiCol_ChildBg, colorScaledBy(colorFromInt(colorIndex), 0.7).Value);
-    StageParameterView::draw(allParams[idx]);
+    StageParameterView::draw(param);
     ImGui::PopStyleColor();
     
     rowCount += 1;

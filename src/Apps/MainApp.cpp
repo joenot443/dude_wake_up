@@ -175,6 +175,10 @@ void MainApp::runMainThreadTasks() {
 
 void MainApp::resetState() {}
 
+void MainApp::keyPressed(int key) {
+  mainStageView->keyPressed(key);
+}
+
 void MainApp::keyReleased(int key) {
   mainStageView->keyReleased(key);
 }

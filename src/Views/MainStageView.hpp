@@ -28,6 +28,7 @@ private:
   std::shared_ptr<VideoSource> selectedVideoSource;
   ShaderType selectedShaderType;
   msa::BPMTapper bpmTapper;
+  bool drawFPS = false;
   
   VideoSourceBrowserView videoSourceBrowserView = VideoSourceBrowserView();
   ShaderBrowserView shaderBrowserView = ShaderBrowserView();
@@ -49,6 +50,7 @@ public:
   void update();
   void draw();
   void keyReleased(int key);
+  void keyPressed(int key);
   
   void loadDirectory(std::string directory);
 };

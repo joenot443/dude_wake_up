@@ -18,7 +18,7 @@
 #include <stdio.h>
 
 struct AudioMountainsSettings: public ShaderSettings {
-	public:
+public:
   AudioMountainsSettings(std::string shaderId, json j, std::string name) :
   ShaderSettings(shaderId, j, name) {
     
@@ -27,15 +27,14 @@ struct AudioMountainsSettings: public ShaderSettings {
 
 class AudioMountainsShader: public Shader {
 public:
-
+  
   AudioMountainsSettings *settings;
   AudioMountainsShader(AudioMountainsSettings *settings) : settings(settings), Shader(settings) {};
-
+  
   void setup() override {
-shader.load("shaders/AudioMountains");
-shader.load("shaders/AudioMountains");
+    shader.load("shaders/AudioMountains");
   }
-
+  
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     auto source = AudioSourceService::getService()->selectedAudioSource;
     canvas->begin();
@@ -46,18 +45,18 @@ shader.load("shaders/AudioMountains");
     shader.end();
     canvas->end();
   }
-
+  
   void clear() override {
     
   }
-
-    int inputCount() override {
+  
+  int inputCount() override {
     return 1;
   }
-ShaderType type() override {
+  ShaderType type() override {
     return ShaderTypeAudioMountains;
   }
-
+  
   void drawSettings() override {
   }
 };

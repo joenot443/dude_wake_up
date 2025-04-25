@@ -210,10 +210,13 @@ void StrandService::populateMapFromFolder(std::map<std::string, std::shared_ptr<
       imagePath = "";
     }
     
-    auto strand = std::make_shared<AvailableStrand>(file.getFileName(), file.getAbsolutePath(), imagePath, UUID::generateUUID());
+    auto strand = std::make_shared<AvailableStrand>(removeFileExtension(file.getFileName()), file.getAbsolutePath(), imagePath, UUID::generateUUID());
     if (strandNames.count(strand->name) != 0) {
       log("Adding Strand %s which already exists", strand->name.c_str());
       continue;
+    }
+    if (strand->name == "nottawa_final") {
+      demoStrand = strand;
     }
     strandNames.insert(strand->name);
     (*map)[strand->id] = strand;

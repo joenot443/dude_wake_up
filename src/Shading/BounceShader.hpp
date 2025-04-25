@@ -42,6 +42,7 @@ struct BounceShader: Shader {
   BounceSettings *settings;
   glm::vec2 position;
   glm::vec2 velocity;
+  bool changedVelocity;
   
   BounceShader(BounceSettings *settings) : settings(settings), Shader(settings), position(0, 0) {
     // Initialize velocity with a static speed in the down-right direction
@@ -57,6 +58,10 @@ struct BounceShader: Shader {
     ofClear(0,0,0, 255);
     ofClear(0,0,0, 0);
     
+    if (changedVelocity) {
+      changedVelocity = false;
+      position = ImVec2(0, 0);
+    }
     // Update position based on velocity
     position.x += velocity.x * settings->speed->value;
     position.y += velocity.y * settings->speed->value;
@@ -88,7 +93,9 @@ ShaderType type() override {
   
   void drawSettings() override {
     
-    CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
+    if (CommonViews::ShaderParameter(settings->speed, settings->speedOscillator)) {
+      changedVelocity = true;
+    }
     CommonViews::ShaderParameter(settings->scale, settings->speedOscillator);
     
     if (ImGui::Button("Reset")) {

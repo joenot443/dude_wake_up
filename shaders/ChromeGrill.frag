@@ -81,12 +81,12 @@ void main(  )
   //rotate
   uv = rotate2D(uv,time/10.1);
   
-  //uv = rotate2D(uv, PI/2.);
+  uv = rotate2D(uv, PI/2.);
   
   //uv.y += time/6.;
   
   //sin warp on mouse X
-  uv.y = uv.y + sin(uv.x * 6. + time * 6. )*warp/3.;
+  uv.y = uv.y + sin(uv.x * 6. + time * 6. )*warp/3. + cos(uv.x * 3. + time / 2.)*warp/6.0;
   
   //white background
   vec3 col = vec3(1.);

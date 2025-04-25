@@ -7,11 +7,13 @@
 
 #include "ShaderChainerService.hpp"
 #include "AsciiShader.hpp"
+#include "PixelAudioPartyShader.hpp"
+#include "WavyShader.hpp"
+#include "CompanionsShader.hpp"
 #include "StrangeScreenShader.hpp"
 #include "StellarShader.hpp"
 #include "WebShader.hpp"
 #include "SpiralShader.hpp"
-#include "BlurryTrailShader.hpp"
 #include "SimpleBarsShader.hpp"
 #include "ComicbookShader.hpp"
 #include "BackgroundShader.hpp"
@@ -73,7 +75,6 @@
 #include "CubifyShader.hpp"
 #include "SwirlingSoulShader.hpp"
 #include "SmokeRingShader.hpp"
-#include "AudioCircleShader.hpp"
 #include "LimboShader.hpp"
 #include "TextureMaskShader.hpp"
 #include "SnowfallShader.hpp"
@@ -752,8 +753,8 @@ void ShaderChainerService::insert(std::shared_ptr<Connectable> start, std::share
   for (auto &originalConnection : originalConnections) {
     auto newConnection = makeConnection(start, connectable, originalConnection->type, slot, InputSlotMain);
     connectable->inputs[InputSlotMain] = newConnection;
- 
-    auto continuationConnection = std::make_shared<Connection>(connectable, originalConnection->end, originalConnection->type, OutputSlotMain, originalConnection->inputSlot);
+    ConnectionType type = connectable->connectableType() == ConnectableTypeSource ? ConnectionTypeSource : ConnectionTypeShader;
+    auto continuationConnection = std::make_shared<Connection>(connectable, originalConnection->end, type, OutputSlotMain, originalConnection->inputSlot);
     connectable->outputs[OutputSlotMain].push_back(continuationConnection); // Add to vector
     originalConnection->end->inputs[originalConnection->inputSlot] = continuationConnection;
   }
@@ -936,6 +937,24 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypePixelAudioParty: {
+      auto settings = new PixelAudioPartySettings(shaderId, shaderJson);
+      auto shader = std::make_shared<PixelAudioPartyShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeWavy: {
+      auto settings = new WavySettings(shaderId, shaderJson);
+      auto shader = std::make_shared<WavyShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeCompanions: {
+      auto settings = new CompanionsSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<CompanionsShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeStrangeScreen: {
       auto settings = new StrangeScreenSettings(shaderId, shaderJson);
       auto shader = std::make_shared<StrangeScreenShader>(settings);
@@ -957,12 +976,6 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
     case ShaderTypeSpiral: {
       auto settings = new SpiralSettings(shaderId, shaderJson);
       auto shader = std::make_shared<SpiralShader>(settings);
-      shader->setup();
-      return shader;
-    }
-    case ShaderTypeBlurryTrail: {
-      auto settings = new BlurryTrailSettings(shaderId, shaderJson);
-      auto shader = std::make_shared<BlurryTrailShader>(settings);
       shader->setup();
       return shader;
     }
@@ -1329,12 +1342,6 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
     case ShaderTypeSmokeRing: {
       auto settings = new SmokeRingSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<SmokeRingShader>(settings);
-      shader->setup();
-      return shader;
-    }
-    case ShaderTypeAudioCircle: {
-      auto settings = new AudioCircleSettings(shaderId, shaderJson, shaderTypeName(shaderType));
-      auto shader = std::make_shared<AudioCircleShader>(settings);
       shader->setup();
       return shader;
     }

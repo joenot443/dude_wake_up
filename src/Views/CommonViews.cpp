@@ -357,7 +357,9 @@ void CommonViews::ShaderStageParameter(std::shared_ptr<Parameter> param, std::sh
   ImGui::SetColumnWidth(1, 135);
   ImGui::PushStyleColor(ImGuiCol_SliderGrab, White90.Value);
   ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3);
+  ImGui::PushID(formatString("stageParam%s", idString(param->paramId).c_str()).c_str());
   bool ret = ImGui::VSliderFloat(idString(param->paramId).c_str(), ImVec2(20, ImGui::GetContentRegionAvail().y - 10), &param->value, param->min, param->max, "");
+  ImGui::PopID();
   if (ret) {
     param->affirmValue();
   }
@@ -411,9 +413,9 @@ void CommonViews::ShaderStageParameter(std::shared_ptr<Parameter> param, std::sh
   ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetContentRegionAvail().y - 25);
   ResetButton(param->paramId, param, ImVec2(30.0, 30.0), ImVec2(6., 6.));
   ImGui::SameLine();
-  OscillateButton(param->paramId, osc, param);
+  OscillateButton(param->paramId, osc, param, ImVec2(30.0, 30.0), ImVec2(1.5, 1.5));
   ImGui::SameLine();
-  FavoriteButton(param);
+  FavoriteButton(param, ImVec2(30.0, 30.0), ImVec2(1.5, 1.5));
   ImGui::Columns(1, formatString("%s_param_columns", param->paramId.c_str()).c_str());
 }
 
@@ -897,7 +899,7 @@ bool CommonViews::XLargeIconButton(const char *icon, std::string id)
 }
 
 void CommonViews::OscillateButton(std::string id, std::shared_ptr<Oscillator> o,
-                                  std::shared_ptr<Parameter> p, ImVec2 size)
+                                  std::shared_ptr<Parameter> p, ImVec2 size, ImVec2 imageRatio)
 {
   if (o == nullptr) { return; }
   ImGui::PushFont(FontService::getService()->icon);
@@ -906,7 +908,7 @@ void CommonViews::OscillateButton(std::string id, std::shared_ptr<Oscillator> o,
   std::string buttonTitle;
   std::string icon = o->enabled->boolValue ? "pause.png" : "sine.png";
   
-  if (ImageButton(formatString("##%s_osc_button", id.c_str()).c_str(), icon, size))
+  if (ImageButton(formatString("##%s_osc_button", id.c_str()).c_str(), icon, size, imageRatio))
   {
     if (ImGui::IsPopupOpen(p->oscPopupId().c_str()))
     {
@@ -981,13 +983,13 @@ void CommonViews::MidiSelector(std::shared_ptr<Parameter> videoParam, ImVec2 siz
   }
 }
 
-void CommonViews::FavoriteButton(std::shared_ptr<Parameter> param, ImVec2 size) {
+void CommonViews::FavoriteButton(std::shared_ptr<Parameter> param, ImVec2 size, ImVec2 imageRatio) {
   if (param == nullptr) {
     return;
   }
   bool hasFavorite = ParameterService::getService()->hasFavoriteParameterFor(param);
   std::string icon = hasFavorite ? "heart-fill.png" : "heart.png";
-  if (ImageButton(param->paramId, icon, size)) {
+  if (ImageButton(param->paramId, icon, size, imageRatio)) {
     if (!hasFavorite) {
       ParameterService::getService()->addFavoriteParameter(param);
     } else {
@@ -1105,12 +1107,12 @@ void CommonViews::PaddedText(std::string text, ImVec2 padding)
 
 /// Redesign Implementations
 
-bool CommonViews::SelectorTitleButton(std::string title, float width) {
+bool CommonViews::SelectorTitleButton(std::string title, std::string id, float width) {
   ImVec2 textSize = ImGui::CalcTextSize(title.c_str());
   
   auto pos = ImGui::GetCursorPos();
   // Draw an InvisibleButton of size 400x50 with the shader name and asterisk inside
-  bool result = ImGui::InvisibleButton(idString(title).c_str(), ImVec2(width, 50.0));
+  bool result = ImGui::InvisibleButton(idString(id).c_str(), ImVec2(width, 50.0));
   ImGui::SameLine();
   auto endPos = ImGui::GetCursorPos();
     
@@ -1398,6 +1400,7 @@ void CommonViews::PushRedesignStyle() {
   ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 3.0f);
 
   // Colors
+  ImGui::PushStyleColor(ImGuiCol_Border, Colors::BorderColor.Value);
   ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Colors::ButtonHovered.Value);
   ImGui::PushStyleColor(ImGuiCol_SliderGrab, Colors::AccentColor.Value);
   ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, Colors::AccentColor.Value);
@@ -1419,7 +1422,7 @@ void CommonViews::PushRedesignStyle() {
 void CommonViews::PopRedesignStyle() {
   ImGui::PopFont();
  
-  ImGui::PopStyleColor(15);
+  ImGui::PopStyleColor(16);
   
   ImGui::PopStyleVar(13);
 }

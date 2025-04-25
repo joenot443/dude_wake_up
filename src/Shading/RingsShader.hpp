@@ -21,9 +21,9 @@ struct RingsSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> ringSizeOscillator;
   
   std::shared_ptr<Parameter> color;
-
   
-	public:
+  
+public:
   RingsSettings(std::string shaderId, json j, std::string name) :
   ringSize(std::make_shared<Parameter>("Ring Size", 5.0, 0.1, 10.0)),
   color(std::make_shared<Parameter>("Color", 1.0, -1.0, 2.0)),
@@ -39,18 +39,17 @@ struct RingsSettings: public ShaderSettings {
 
 class RingsShader: public Shader {
 public:
-
+  
   RingsSettings *settings;
   RingsShader(RingsSettings *settings) : settings(settings), Shader(settings) {};
-
+  
   void setup() override {
-shader.load("shaders/Rings");
-shader.load("shaders/Rings");
+    shader.load("shaders/Rings");
   }
-
+  
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
-    shader.begin(); 
+    shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("time", ofGetElapsedTimef());
@@ -60,22 +59,20 @@ shader.load("shaders/Rings");
     shader.end();
     canvas->end();
   }
-
+  
   void clear() override {
     
   }
-
+  
   int inputCount() override {
     return 0;
   }
   
-	ShaderType type() override {
+  ShaderType type() override {
     return ShaderTypeRings;
   }
-
+  
   void drawSettings() override {
-    
-    
     CommonViews::ShaderParameter(settings->ringSize, settings->ringSizeOscillator);
     CommonViews::ShaderColor(settings->color);
   }

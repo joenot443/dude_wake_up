@@ -18,23 +18,23 @@
 #include <stdio.h>
 
 struct BreatheSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> pulseIntensity; // New parameter
-  std::shared_ptr<Parameter> warpSpeed;      // New parameter
-  std::shared_ptr<Parameter> colorShift;     // New parameter
-  std::shared_ptr<WaveformOscillator> pulseIntensityOscillator; // New oscillator
-  std::shared_ptr<WaveformOscillator> warpSpeedOscillator;      // New oscillator
-  std::shared_ptr<WaveformOscillator> colorShiftOscillator;     // New oscillator
-
+  std::shared_ptr<Parameter> pulseIntensity;
+  std::shared_ptr<Parameter> warpSpeed;
+  std::shared_ptr<Parameter> colorShift;
+  std::shared_ptr<WaveformOscillator> pulseIntensityOscillator;
+  std::shared_ptr<WaveformOscillator> warpSpeedOscillator;
+  std::shared_ptr<WaveformOscillator> colorShiftOscillator;
+  
   BreatheSettings(std::string shaderId, json j) :
-  pulseIntensity(std::make_shared<Parameter>("Zoom", 1.0, 0.1, 2.0)), // Initialize new parameter
-  warpSpeed(std::make_shared<Parameter>("Warp Speed", 1.0, 0.1, 10.0)),           // Initialize new parameter
-  colorShift(std::make_shared<Parameter>("Color Shift", 0.0, -1.0, 1.0)),        // Initialize new parameter
-  pulseIntensityOscillator(std::make_shared<WaveformOscillator>(pulseIntensity)), // Initialize new oscillator
-  warpSpeedOscillator(std::make_shared<WaveformOscillator>(warpSpeed)),           // Initialize new oscillator
-  colorShiftOscillator(std::make_shared<WaveformOscillator>(colorShift)),         // Initialize new oscillator
+  pulseIntensity(std::make_shared<Parameter>("Zoom", 1.0, 0.1, 2.0)),
+  warpSpeed(std::make_shared<Parameter>("Warp Speed", 1.0, 0.1, 30.0)),
+  colorShift(std::make_shared<Parameter>("Color Shift", 0.0, -1.0, 1.0)),
+  pulseIntensityOscillator(std::make_shared<WaveformOscillator>(pulseIntensity)),
+  warpSpeedOscillator(std::make_shared<WaveformOscillator>(warpSpeed)),
+  colorShiftOscillator(std::make_shared<WaveformOscillator>(colorShift)),
   ShaderSettings(shaderId, j, "Breathe") {
-    parameters = { pulseIntensity, warpSpeed, colorShift }; // Add new parameters
-    oscillators = { pulseIntensityOscillator, warpSpeedOscillator, colorShiftOscillator }; // Add new oscillators
+    parameters = { pulseIntensity, warpSpeed, colorShift };
+    oscillators = { pulseIntensityOscillator, warpSpeedOscillator, colorShiftOscillator };
     load(j);
     registerParameters();
   };
@@ -48,39 +48,37 @@ struct BreatheShader: Shader {
   void setup() override {
     shader.load("shaders/Breathe");
   }
-
+  
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("pulseIntensity", settings->pulseIntensity->value); // Set uniform for pulseIntensity
-    shader.setUniform1f("warpSpeed", settings->warpSpeed->value);           // Set uniform for warpSpeed
-    shader.setUniform1f("colorShift", settings->colorShift->value);         // Set uniform for colorShift
+    shader.setUniform1f("pulseIntensity", settings->pulseIntensity->value);
+    shader.setUniform1f("warpSpeed", settings->warpSpeed->value);
+    shader.setUniform1f("colorShift", settings->colorShift->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
     shader.end();
     canvas->end();
   }
-
+  
   void clear() override {
-
+    
   }
-
+  
   int inputCount() override {
     return 1;
   }
-
+  
   ShaderType type() override {
     return ShaderTypeBreathe;
   }
-
+  
   void drawSettings() override {
-    
-
-    CommonViews::ShaderParameter(settings->pulseIntensity, settings->pulseIntensityOscillator); // Add pulseIntensity to drawSettings
-    CommonViews::ShaderParameter(settings->warpSpeed, settings->warpSpeedOscillator);           // Add warpSpeed to drawSettings
-    CommonViews::ShaderParameter(settings->colorShift, settings->colorShiftOscillator);         // Add colorShift to drawSettings
+    CommonViews::ShaderParameter(settings->pulseIntensity, settings->pulseIntensityOscillator);
+    CommonViews::ShaderParameter(settings->warpSpeed, settings->warpSpeedOscillator);
+    CommonViews::ShaderParameter(settings->colorShift, settings->colorShiftOscillator);
   }
 };
 

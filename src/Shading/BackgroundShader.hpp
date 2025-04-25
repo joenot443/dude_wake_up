@@ -20,7 +20,7 @@
 struct BackgroundSettings: public ShaderSettings {
   std::shared_ptr<Parameter> shaderValue;
   std::shared_ptr<WaveformOscillator> shaderValueOscillator;
-
+  
   BackgroundSettings(std::string shaderId, json j) :
   shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
   shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
@@ -39,7 +39,7 @@ struct BackgroundShader: Shader {
   void setup() override {
     shader.load("shaders/Background");
   }
-
+  
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
@@ -51,22 +51,22 @@ struct BackgroundShader: Shader {
     shader.end();
     canvas->end();
   }
-
+  
   void clear() override {
-
+    
   }
-
+  
   int inputCount() override {
     return 1;
   }
-
+  
   ShaderType type() override {
     return ShaderTypeBackground;
   }
-
+  
   void drawSettings() override {
     
-
+    
     CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
   }
 };

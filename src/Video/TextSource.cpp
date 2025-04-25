@@ -19,7 +19,12 @@ void TextSource::setup() {
   font.load(displayText->font.path, displayText->fontSize);
   fontPath = displayText->font.path;
   strokeShader.load("shaders/Stroke");
+  
   tempFbo.allocate(fbo->getWidth(), fbo->getHeight());
+  if (displayText->font.name != FontService::getService()->fonts[displayText->fontSelector->intValue].name) {
+    displayText->font = FontService::getService()->fonts[displayText->fontSelector->intValue];
+    font.load(displayText->font.path, displayText->fontSize);
+  }
 }
 
 void TextSource::saveFrame() {

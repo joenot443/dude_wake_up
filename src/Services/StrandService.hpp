@@ -63,6 +63,8 @@ public:
   std::string strandPreviewPath(std::string name);
   void clear();
 
+  
+  std::shared_ptr<AvailableStrand> demoStrand;
   json config() override;
   void loadConfig(json j) override;
 };

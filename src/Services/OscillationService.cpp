@@ -121,3 +121,14 @@ void OscillationService::removeOscillatorsFor(std::vector<std::shared_ptr<Parame
     }
   }
 }
+
+std::set<std::shared_ptr<Oscillator>> OscillationService::activeOscillators() {
+  std::set<std::shared_ptr<Oscillator>> activeOscillators;
+  
+  for (const auto& [key, osc] : oscillators) {
+    if (osc->enabled->boolValue) {
+      activeOscillators.insert(osc);
+    }
+  }
+  return activeOscillators;
+}

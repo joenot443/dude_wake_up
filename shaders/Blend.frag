@@ -51,15 +51,13 @@ void main() {
   vec4 tex2_color = texture(tex2, coord);
   
   // If either texture is fully transparent, return the other
-  if (blendWithEmpty == 0) {
-    if (tex_color.a < 0.1) {
-      outputColor = tex2_color;
-      return;
-    }
-    if (tex2_color.a < 0.1) {
-      outputColor = tex_color;
-      return;
-    }
+  if (tex_color.a < 0.1) {
+    outputColor = tex2_color;
+    return;
+  }
+  if (tex2_color.a < 0.1) {
+    outputColor = tex_color;
+    return;
   }
   // If our alpha is low, just return our tex1
   if (alpha < 0.03) {

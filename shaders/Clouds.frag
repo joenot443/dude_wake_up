@@ -6,13 +6,13 @@ uniform float time;
 uniform vec2 dimensions;
 out vec4 outputColor;
 
-const float cloudscale = 1.1;
-const float speed = 0.03;
-const float clouddark = 0.5;
-const float cloudlight = 0.3;
-const float cloudcover = 0.2;
-const float cloudalpha = 8.0;
-const float skytint = 0.5;
+uniform float cloudscale; // = 1.1;
+const float speed = 0.03; // Controlled via time uniform in C++
+uniform float clouddark; // = 0.5;
+uniform float cloudlight; // = 0.3;
+uniform float cloudcover; // = 0.2;
+uniform float cloudalpha; // = 8.0;
+uniform float skytint; // = 0.5;
 const vec3 skycolour1 = vec3(0.2, 0.4, 0.6);
 const vec3 skycolour2 = vec3(0.4, 0.7, 1.0);
 

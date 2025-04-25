@@ -28,11 +28,9 @@
 #include "LayoutStateService.hpp"
 #include "HelpService.hpp"
 #include "BookmarkService.hpp"
-//#include "SyphonService.hpp"
 #include "StrandService.hpp"
 #include "ParameterService.hpp"
 #include "IconService.hpp"
-#include "ofxFFmpegRecorder.h"
 #include "ofxFastFboReader.h"
 
 

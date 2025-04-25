@@ -26,6 +26,7 @@ public:
   void openWorkspace();
   
   void setup();
+  void openDemo();
   void draw();
   void update();
 };

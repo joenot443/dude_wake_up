@@ -184,11 +184,10 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
         
         // Beats
         bool isSampleTrack = source->type() == AudioSourceType_File;
-        
+        ImGui::Text("BPM");
         if (LayoutStateService::getService()->abletonLinkEnabled) {
           //        ImGui::Text("%s", formatString("Ableton BPM: %f", AudioSourceService::getService()->link.captureAppSessionState().tempo()).c_str());
         } else if (!isSampleTrack) {
-          ImGui::Text("BPM");
           ImGui::SameLine();
           // Note: Pushing FramePadding here is fine, it affects individual widgets like the Slider
           ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8.0, 2.0));

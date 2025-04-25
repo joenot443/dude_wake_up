@@ -338,7 +338,7 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
   selectorWidth = selectorWidth - (ImGui::GetCursorPosX() - pos.x);
   
   // Selector
-  if (CommonViews::SelectorTitleButton(node->connectable->name().substr(0, 30), selectorWidth)) {
+  if (CommonViews::SelectorTitleButton(node->connectable->name().substr(0, 30), node->connectable->connId(), selectorWidth)) {
     if (hasSelectorOpen) {
       selectorNodeId = 0;
     } else {
@@ -784,6 +784,9 @@ void NodeLayoutView::handleUnplacedNodes()
   if (unplacedNodeIds.size() == 0) return;
   
   auto node = idNodeMap[unplacedNodeIds[unplacedNodeIds.size() - 1]];
+  
+  if (node == nullptr) return;
+  
   if (fileDropInProgress) {
     nodeDropLocation = std::make_unique<ImVec2>(ed::ScreenToCanvas(*nodeDropLocation.get()));
     fileDropInProgress = false;

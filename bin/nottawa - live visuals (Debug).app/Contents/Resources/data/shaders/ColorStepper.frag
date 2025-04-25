@@ -3,6 +3,7 @@
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
+uniform float amount;
 uniform float speed;
 uniform float smoothness;
 in vec2 coord;
@@ -16,7 +17,7 @@ void main(  )
 {
   // Normalized pixel coordinates (from 0 to 1)
   vec2 uv = coord/dimensions.xy;
-  vec4 col = 0.5 + 0.5*cos(time / speed+uv.xyxy+vec4(0,2,4,1.0));
+  vec4 col = 0.5 + 0.5*cos(time/speed + uv.xyxy+vec4(0,2,4,1.0));
   vec4 text = texture(tex, uv);
   
   col *= text;
@@ -29,5 +30,5 @@ void main(  )
   col /= stepSize;
   
   // Output to screen
-  outputColor = vec4(col.xyz, text.a);
+  outputColor = mix(text, vec4(col.xyz, text.a), amount);
 }

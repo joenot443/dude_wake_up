@@ -36,7 +36,7 @@ struct ComicbookShader: Shader {
   void setup() override {
     shader.load("shaders/Comicbook");
   }
-
+  
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
@@ -47,21 +47,19 @@ struct ComicbookShader: Shader {
     shader.end();
     canvas->end();
   }
-
+  
   void clear() override {
-
   }
-
+  
   int inputCount() override {
     return 1;
   }
-
+  
   ShaderType type() override {
     return ShaderTypeComicbook;
   }
-
+  
   void drawSettings() override {
-    
   }
 };
 

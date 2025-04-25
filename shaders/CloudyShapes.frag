@@ -87,9 +87,9 @@ float map( in vec3 p )
 
 float jitter;
 
-#define MAX_STEPS 48
-#define SHADOW_STEPS 8
-#define VOLUME_LENGTH 15.
+#define MAX_STEPS 24
+#define SHADOW_STEPS 4
+#define VOLUME_LENGTH 20.
 #define SHADOW_LENGTH 2.
 
 // Reference

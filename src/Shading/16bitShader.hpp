@@ -22,7 +22,7 @@ struct SixteenBitSettings : public ShaderSettings
   std::shared_ptr<Parameter> pixelFactor;
   std::shared_ptr<WaveformOscillator> pixelFactorOscillator;
 
-  SixteenBitSettings(std::string shaderId, json j, std::string name) : pixelFactor(std::make_shared<Parameter>("pixelFactor", 150.0, 100.0, 400.0)),
+  SixteenBitSettings(std::string shaderId, json j, std::string name) : pixelFactor(std::make_shared<Parameter>("Pixel Factor", 150.0, 100.0, 400.0)),
                                                      pixelFactorOscillator(std::make_shared<WaveformOscillator>(pixelFactor)),
                                                      ShaderSettings(shaderId, j, name)
   {

@@ -56,6 +56,10 @@ void MainStageView::update()
   if (LayoutStateService::getService()->showWelcomeScreen) {
     welcomeScreenView.update();
   }
+  
+  if (drawFPS) {
+    ofSetWindowTitle(formatString("%.2f FPS", ofGetFrameRate()));
+  }
 }
 
 void MainStageView::draw()
@@ -387,5 +391,20 @@ void MainStageView::keyReleased(int key)
       ActionService::getService()->paste();
     }
   }
+  
+  if (key == OF_KEY_SHIFT) {
+    drawFPS = false;
+    ofSetWindowTitle("");
+  }
+  
+  if (key == OF_KEY_ESC) {
+    LayoutStateService::getService()->showWelcomeScreen = false;
+  }
 }
 
+
+void MainStageView::keyPressed(int key) {
+  if (key == OF_KEY_SHIFT) {
+    drawFPS = true;
+  }
+}

@@ -58,5 +58,17 @@ void StrandBrowserView::update()
 
 void StrandBrowserView::draw()
 {
+  // Begin a child window that fills the remaining space and allows vertical scrolling.
+  // The 'true' argument adds a border around the child window.
+  ImGui::BeginChild("##StrandBrowserScrollingRegion", ImVec2(0, 0), true, ImGuiWindowFlags_AlwaysVerticalScrollbar);
+
+  // Draw the tile browser within this scrollable region.
+  // Note: The layout (e.g., 2 columns, tile height) is typically handled
+  // within the TileBrowserView::draw() method itself. You might need to
+  // adjust TileBrowserView to achieve the desired 2x2 grid effect
+  // where tiles are half the height of this scrolling region.
   tileBrowserView.draw();
+
+  // End the child window.
+  ImGui::EndChild();
 }

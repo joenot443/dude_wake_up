@@ -77,10 +77,10 @@ void main(  ) {
 	ray.yz = ray.yz * rot(sin(time * .05) * .2);
 	float t = 0.1;
 	vec3 col = vec3(0.);
-	float ac = 0.0;
+	float ac = 0.0 ;
 
 
-	for (int i = 0; i < 99; i++){
+	for (int i = 0; i < 33; i++){
 		vec3 pos = ro + ray * t;
 		pos = mod(pos-2., 4.) -2.;
 		gTime = time -float(i) * 0.01;
@@ -100,11 +100,3 @@ void main(  ) {
 
 	outputColor = vec4(col ,1.0 - t * (0.02 + 0.02 * sin (time)));
 }
-
-/** SHADERDATA
-{
-	"title": "Octgrams",
-	"description": "Lorem ipsum dolor",
-	"model": "person"
-}
-*/

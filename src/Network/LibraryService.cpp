@@ -105,7 +105,10 @@ void LibraryService::fetchLibraryFiles()
   }
   else
   {
-    std::cout << "Error: Failed to fetch library files " << res->status << std::endl;
+    if (res) {
+      log(res->body);
+    }
+    log("Failed to fetch library files");
   }
 }
 

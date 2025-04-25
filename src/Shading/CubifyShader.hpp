@@ -20,7 +20,7 @@
 struct CubifySettings: public ShaderSettings {
   std::shared_ptr<Parameter> cubeSize;
   std::shared_ptr<WaveformOscillator> cubeSizeOscillator;
-
+  
   CubifySettings(std::string shaderId, json j, std::string name) :
   cubeSize(std::make_shared<Parameter>("Cube Size", 1.0, 0.0, 10.0)),
   cubeSizeOscillator(std::make_shared<WaveformOscillator>(cubeSize)),
@@ -36,11 +36,11 @@ struct CubifySettings: public ShaderSettings {
 struct CubifyShader: Shader {
   CubifySettings *settings;
   CubifyShader(CubifySettings *settings) : settings(settings), Shader(settings) {};
-
+  
   void setup() override {
     shader.load("shaders/Cubify");
   }
-
+  
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
@@ -54,21 +54,19 @@ struct CubifyShader: Shader {
     shader.end();
     canvas->end();
   }
-
+  
   void clear() override {
     
   }
-
+  
   int inputCount() override {
     return 1;
   }
-ShaderType type() override {
+  ShaderType type() override {
     return ShaderTypeCubify;
   }
-
+  
   void drawSettings() override {
-    
-
     CommonViews::ShaderParameter(settings->cubeSize, settings->cubeSizeOscillator);
   }
 };

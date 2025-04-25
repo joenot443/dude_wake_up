@@ -38,7 +38,6 @@ static std::vector<std::string> BlendModeNames = {
 
 struct BlendSettings: public ShaderSettings {
   std::shared_ptr<Parameter> mode;
-  std::shared_ptr<Parameter> blendWithEmpty;
   std::shared_ptr<Parameter> flip;
   std::shared_ptr<Parameter> alpha;
   
@@ -46,13 +45,12 @@ struct BlendSettings: public ShaderSettings {
   
   BlendSettings(std::string shaderId, json j) :
   mode(std::make_shared<Parameter>("Mode", 6.0, 0.0, 13.0, ParameterType_Int)),
-  blendWithEmpty(std::make_shared<Parameter>("Blend With Empty", 0.0, 0.0, 1.0, ParameterType_Bool)),
   flip(std::make_shared<Parameter>("Flip", 0.0, 0.0, 1.0, ParameterType_Bool)),
   alpha(std::make_shared<Parameter>("Alpha", 1.0, 0.0, 1.0)),
   alphaOscillator(std::make_shared<WaveformOscillator>(alpha)),
   ShaderSettings(shaderId, j, "Blend") {
     mode->options = BlendModeNames;
-    parameters = { mode, blendWithEmpty, flip, alpha };
+    parameters = { mode, flip, alpha };
     oscillators = { alphaOscillator };
     audioReactiveParameter = alpha;
     load(j);
@@ -125,8 +123,6 @@ struct BlendShader: Shader {
 
       // Use the specific blendModeIndex for the preview
       shader.setUniform1i("mode", blendModeIndex);
-      // Use current shader settings for other parameters
-      shader.setUniform1i("blendWithEmpty", settings->blendWithEmpty->intValue);
       shader.setUniform1f("time", ofGetElapsedTimef());
       shader.setUniform1f("alpha", settings->alpha->value);
       shader.setUniform2f("dimensions", destFbo->getWidth(), destFbo->getHeight());
@@ -239,7 +235,6 @@ struct BlendShader: Shader {
       destFbo->begin();
       shader.begin();
       shader.setUniform1i("mode", settings->mode->intValue);
-      shader.setUniform1i("blendWithEmpty", settings->blendWithEmpty->intValue);
       shader.setUniform1f("time", ofGetElapsedTimef());
       shader.setUniform1f("alpha", settings->alpha->value);
       shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());

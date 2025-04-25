@@ -25,9 +25,9 @@ struct ChromeGrillSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> warpOscillator;
 
   ChromeGrillSettings(std::string shaderId, json j) :
-  color(std::make_shared<Parameter>("color", 0.5, 0.0, 1.0)),
+  color(std::make_shared<Parameter>("Color", 0.5, 0.0, 1.0)),
   colorOscillator(std::make_shared<WaveformOscillator>(color)),
-  warp(std::make_shared<Parameter>("warp", 0.5, 0.0, 1.0)),
+  warp(std::make_shared<Parameter>("Warp", 0.5, 0.0, 3.0)),
   warpOscillator(std::make_shared<WaveformOscillator>(warp)),
   ShaderSettings(shaderId, j, "ChromeGrill") {
     parameters = { color, warp };
@@ -52,6 +52,7 @@ struct ChromeGrillShader: Shader {
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("color", settings->color->value);
+    shader.setUniform1f("warp", settings->warp->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);

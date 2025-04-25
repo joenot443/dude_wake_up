@@ -32,6 +32,7 @@ struct WaveformOscillator: public Oscillator {
   std::shared_ptr<Parameter> shift;
   std::shared_ptr<Parameter> frequency;
   std::shared_ptr<Parameter> waveShape;
+  bool showMinMax = true;
   
   void tick() override;
   

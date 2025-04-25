@@ -124,10 +124,36 @@ void WaveformOscillator::tick()
 
 float WaveformOscillator::max()
 {
-  return amplitude->value + shift->value;
+  float baseMax = 1.0f;
+  switch (static_cast<WaveShape>(waveShape->intValue)) {
+    case ExponentialSine:
+      // sin(x) * exp(sin(x)) max value occurs at sin(x) = 1, which is exp(1) = e
+      baseMax = M_E; // ~2.71828
+      break;
+    // Add other cases here if they don't have a base range of [-1, 1]
+    default:
+      baseMax = 1.0f;
+      break;
+  }
+  // Ensure amplitude is non-negative for calculation, though it should be based on constructor constraints
+  float currentAmplitude = fmax(0.0f, amplitude->value);
+  return OscillatorDampen * currentAmplitude * baseMax + shift->value;
 }
 
 float WaveformOscillator::min()
 {
-  return -amplitude->value + shift->value;
+  float baseMin = -1.0f;
+   switch (static_cast<WaveShape>(waveShape->intValue)) {
+    case ExponentialSine:
+      // sin(x) * exp(sin(x)) min value occurs at sin(x) = -1, which is -1 * exp(-1) = -1/e
+      baseMin = -1.0f / M_E; // ~-0.36788
+      break;
+    // Add other cases here if they don't have a base range of [-1, 1]
+    default:
+      baseMin = -1.0f;
+      break;
+  }
+  // Ensure amplitude is non-negative for calculation
+  float currentAmplitude = fmax(0.0f, amplitude->value);
+  return OscillatorDampen * currentAmplitude * baseMin + shift->value;
 }

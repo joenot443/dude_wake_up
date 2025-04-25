@@ -32,6 +32,7 @@ private:
   void drawStream(ofEventArgs &args);
   void exitStream(ofEventArgs &args);
   void dragEvent(ofDragInfo dragInfo);
+  void keyPressed(int key);
   void keyReleased(int key);
 
   void drawMainStage();
@@ -45,6 +46,8 @@ private:
   MainStageView *mainStageView = new MainStageView();
   int streamDrawIndex;
   bool isSetup = false;
+  
+
   
   // Threading
   

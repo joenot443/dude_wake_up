@@ -44,6 +44,7 @@ public:
     
   }
   std::map<std::string, std::shared_ptr<Oscillator>> oscillators;
+  std::set<std::shared_ptr<Oscillator>> activeOscillators();
 
   void selectOscillator(std::shared_ptr<Oscillator>, std::shared_ptr<Parameter>);
   void addOscillator(std::shared_ptr<Oscillator> o);

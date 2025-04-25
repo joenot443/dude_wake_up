@@ -6,6 +6,8 @@ uniform vec2 dimensions;        // The dimensions of the screen or texture
 uniform float time;             // Time variable used for animation
 uniform float brightness;             // Time variable used for animation
 uniform float zoom;
+uniform vec3 color1;
+uniform vec3 color2;
 
 // Inputs and outputs for the shader
 in vec2 coord;                  // The input texture coordinates
@@ -32,11 +34,8 @@ vec2 getOrigin(vec2 id, float t) {
 vec3 getColor(vec2 id, float t) {
     // Creates a gradient factor based on the sine of the ID and time
     float gradientFactor = 0.5 + 0.5 * sin(id.x + id.y + t);
-    // Defines two colors: purple and blue
-    vec3 purple = vec3(0.6, 0.0, 1.0);
-    vec3 blue = vec3(0.0, 0.0, 1.0);
-    // Returns a color that transitions between purple and blue based on the gradient factor
-    return mix(purple, blue, gradientFactor);
+    // Returns a color that transitions between color1 and color2 based on the gradient factor
+    return mix(color1, color2, gradientFactor);
 }
 
 // Function that generates the metaball effect by iterating through multiple metaballs

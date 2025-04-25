@@ -5,6 +5,8 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "PixelAudioPartyShader.hpp"
+#include "CompanionsShader.hpp"
 #include "SpiralShader.hpp"
 #include "SimpleBarsShader.hpp"
 #include "SimpleShapeShader.hpp"
@@ -47,7 +49,6 @@
 #include "GyroidsShader.hpp"
 #include "SwirlingSoulShader.hpp"
 #include "SmokeRingShader.hpp"
-#include "AudioCircleShader.hpp"
 #include "LimboShader.hpp"
 #include "VertexShader.hpp"
 #include "SolidColorShader.hpp"
@@ -154,6 +155,8 @@ enum ShaderSourceType {
   ShaderSource_SimpleShape, //source enum,
   ShaderSource_SimpleBars, //source enum,
   ShaderSource_Spiral, //source enum,
+  ShaderSource_Companions, //source enum,
+  ShaderSource_PixelAudioParty, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -192,6 +195,7 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_Reflector, // Available
   ShaderSource_Warpspeed, // Available
   ShaderSource_Core, // Available
+  ShaderSource_CloudyShapes,
   ShaderSource_TwistedCubes, // Available
   ShaderSource_TwistedTrip, // Available
   ShaderSource_DirtyPlasma, // Available
@@ -223,11 +227,17 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_SimpleShape, // Available
   ShaderSource_SimpleBars, // Available
   ShaderSource_Spiral, // Available
+  ShaderSource_Companions, // Available
+  ShaderSource_PixelAudioParty, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
       // shaderTypeForShaderSourceType
+  case ShaderSource_PixelAudioParty: //type enum
+    return ShaderTypePixelAudioParty;
+  case ShaderSource_Companions: //type enum
+    return ShaderTypeCompanions;
   case ShaderSource_Spiral: //type enum
     return ShaderTypeSpiral;
   case ShaderSource_SimpleBars: //type enum
@@ -308,8 +318,6 @@ static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
       return ShaderTypeSwirlingSoul;
     case ShaderSource_SmokeRing: //type enum
       return ShaderTypeSmokeRing;
-    case ShaderSource_AudioCircle: //type enum
-      return ShaderTypeAudioCircle;
     case ShaderSource_Limbo: //type enum
       return ShaderTypeLimbo;
     case ShaderSource_Vertex: //type enum
@@ -454,8 +462,6 @@ static ShaderSourceType shaderSourceTypeForShaderType(ShaderType type) {
       return ShaderSource_SwirlingSoul;
     case ShaderTypeSmokeRing:
       return ShaderSource_SmokeRing;
-    case ShaderTypeAudioCircle:
-      return ShaderSource_AudioCircle;
     case ShaderTypeLimbo:
       return ShaderSource_Limbo;
     case ShaderTypeVertex:
@@ -529,10 +535,10 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     case ShaderSource_FlickerAudio:
     case ShaderSource_GlitchAudio:
     case ShaderSource_DiscoAudio:
+    case ShaderSource_PixelAudioParty:
       return "Audio Reactive";
       
       // Simple
-    case ShaderSource_SolidColor: // Name
     case ShaderSource_Octahedron: // Name
     case ShaderSource_empty:
     case ShaderSource_ColorWheel:
@@ -575,6 +581,7 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
       return "Textured";
       
     // Shapes & Solids
+    case ShaderSource_SolidColor: // Name
     case ShaderSource_SimpleBars:
     case ShaderSource_Spiral:
     case ShaderSource_SimpleShape:
@@ -628,6 +635,18 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
         // Shader Settings
+    case ShaderSource_PixelAudioParty: { // Settings
+      auto settings = new PixelAudioPartySettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<PixelAudioPartyShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Companions: { // Settings
+      auto settings = new CompanionsSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<CompanionsShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_Spiral: { // Settings
       auto settings = new SpiralSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<SpiralShader>(settings);
@@ -868,12 +887,6 @@ public:
         shader->setup();
         return;
       }
-      case ShaderSource_AudioCircle: { // Settings
-        auto settings = new AudioCircleSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
-        shader = std::make_shared<AudioCircleShader>(settings);
-        shader->setup();
-        return;
-      }
       case ShaderSource_Limbo: { // Settings
         auto settings = new LimboSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<LimboShader>(settings);
@@ -1080,7 +1093,7 @@ public:
   
   void draw();
   
-  json serialize();
+  json serialize() override;
 };
 
 #endif /* ShaderSource_hpp */

@@ -62,8 +62,9 @@ struct SpiralShader: Shader {
     shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("time", ofGetElapsedTimef() * settings->speed->value);
     shader.setUniform1f("size", settings->size->value);
+    shader.setUniform1f("speed", 1.0);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
-    shader.setUniform3f("mainColor", 
+    shader.setUniform3f("mainColor",
       settings->mainColor->color->data()[0],
       settings->mainColor->color->data()[1],
       settings->mainColor->color->data()[2]);

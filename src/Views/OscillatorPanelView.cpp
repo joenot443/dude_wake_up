@@ -20,11 +20,11 @@ void OscillatorPanelView::update() {
 }
 
 void OscillatorPanelView::draw() {
-  auto oscillators = OscillationService::getService()->oscillators;
+  auto oscillators = OscillationService::getService()->activeOscillators();
   
   ImGui::BeginChild("##oscillatorPanel", ImVec2(0, 0), true, ImGuiWindowFlags_AlwaysVerticalScrollbar);
   
-  for (const auto& [key, oscillator] : oscillators) {
+  for (const auto& oscillator : oscillators) {
     if (oscillator->enabled->boolValue) {
       CommonViews::H3Title(formatString("%s - %s", oscillator->value->name.c_str(), oscillator->value->ownerName.c_str()));
       OscillatorView::draw(oscillator, oscillator->value);
