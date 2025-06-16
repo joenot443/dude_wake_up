@@ -18,8 +18,6 @@
 #include <stdio.h>
 
 struct PerplexionSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
   std::shared_ptr<Parameter> speed;
   std::shared_ptr<WaveformOscillator> speedOscillator;
   std::shared_ptr<Parameter> alpha;
@@ -30,8 +28,6 @@ struct PerplexionSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> gammaOscillator;
   
   PerplexionSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   speed(std::make_shared<Parameter>("Speed", 1.0, 0.0, 10.0)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   alpha(std::make_shared<Parameter>("Alpha", 1.0, 0.0, 5.0)),
@@ -42,8 +38,8 @@ struct PerplexionSettings: public ShaderSettings {
   gammaOscillator(std::make_shared<WaveformOscillator>(gamma)),
   ShaderSettings(shaderId, j, "Perplexion") {
     
-    parameters = { shaderValue, speed, alpha, beta, gamma };
-    oscillators = { shaderValueOscillator, speedOscillator, alphaOscillator, betaOscillator, gammaOscillator };
+    parameters = { speed, alpha, beta, gamma };
+    oscillators = { speedOscillator, alphaOscillator, betaOscillator, gammaOscillator };
     load(j);
     registerParameters();
   };
@@ -61,7 +57,6 @@ struct PerplexionShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform1f("speed", settings->speed->value);
     shader.setUniform1f("alpha", settings->alpha->value);
@@ -86,9 +81,6 @@ struct PerplexionShader: Shader {
   }
   
   void drawSettings() override {
-    
-    
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     CommonViews::ShaderParameter(settings->alpha, settings->alphaOscillator);
     CommonViews::ShaderParameter(settings->beta, settings->betaOscillator);

@@ -49,8 +49,7 @@ void MainApp::setup()
   ImGui::CreateContext();
   ImPlot::CreateContext();
   setupStyle(); // Apply the style
-  FontService::getService()->addFontToGui(&gui);
-  FontService::getService()->loadFonts();
+  FontService::getService()->setup();
   VideoSourceService::getService();
   MarkdownService::getService();
   ConfigService::getService()->loadDefaultConfigFile();
@@ -58,6 +57,7 @@ void MainApp::setup()
   ImageService::getService()->setup();
   mainStageView->setup();
   LibraryService::getService()->backgroundFetchLibraryFiles();
+  LibraryService::getService()->backgroundFetchShaderCredits();
   ParameterService::getService()->setup();
   StringManager::loadStrings();
 }
@@ -74,6 +74,7 @@ void MainApp::update()
   AudioSourceService::getService()->update();
   mainStageView->update();
   affirmWindowSize();
+  affirmScale();
 }
 
 void MainApp::draw()
@@ -97,7 +98,7 @@ void MainApp::drawMainStage()
   
   CommonViews::PushRedesignStyle();
   ImGui::Begin("Main Stage", NULL, windowFlags);
-  ImGui::PushFont(FontService::getService()->p);
+  ImGui::PushFont(FontService::getService()->current->p);
   mainStageView->draw();
   ImGui::PopFont();
   ImGui::End();
@@ -196,4 +197,17 @@ void MainApp::affirmWindowSize() {
   if (ofGetWindowWidth() < 500) {
     ofSetWindowShape(500, ofGetWindowHeight());
   }
+}
+
+void MainApp::affirmScale() {
+  auto windowPtr = dynamic_cast<ofAppGLFWWindow*>(ofGetWindowPtr());
+  float newScale = windowPtr ? windowPtr->getPixelScreenCoordScale() : 1.0f;
+  
+  if (currentPixelScale == newScale) return;
+  
+  log("Switching font scale: %.1f → %.1f", currentPixelScale, newScale);
+  currentPixelScale = newScale;
+  FontService::getService()->useFontSetForScale(currentPixelScale);
+  gui.setup();
+  ImGui::GetStyle().ScaleAllSizes(currentPixelScale);
 }

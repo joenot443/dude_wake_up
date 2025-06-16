@@ -35,12 +35,12 @@ struct PlasmaSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> deltaOscillator;
 
   PlasmaSettings(std::string shaderId, json j, std::string name) :
-  speed(std::make_shared<Parameter>("speed", 1.0,  0.0, 5.0)),
-  color(std::make_shared<Parameter>("color", 1.0,  0.0, 1.0)),
-  alpha(std::make_shared<Parameter>("alpha", 1.0, 0.0, 1.0)),
-  gamma(std::make_shared<Parameter>("gamma", 1.0, 0.0, 3.0)),
-  beta(std::make_shared<Parameter>("beta", 1.0, 0.0, 3.0)),
-  delta(std::make_shared<Parameter>("delta", 1.0, 0.0, 3.0)),
+  speed(std::make_shared<Parameter>("Speed", 1.0,  0.0, 5.0)),
+  color(std::make_shared<Parameter>("Color", 1.0,  0.0, 1.0)),
+  alpha(std::make_shared<Parameter>("Alpha", 0.5, 0.0, 1.0)),
+  gamma(std::make_shared<Parameter>("Gamma", 1.0, 0.0, 3.0)),
+  beta(std::make_shared<Parameter>("Beta", 1.0, 0.0, 3.0)),
+  delta(std::make_shared<Parameter>("Delta", 1.0, 0.0, 3.0)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   colorOscillator(std::make_shared<WaveformOscillator>(color)),
   alphaOscillator(std::make_shared<WaveformOscillator>(alpha)),
@@ -86,8 +86,7 @@ public:
   };
 
   void setup() override {
-shader.load("shaders/plasma");
-shader.load("shaders/plasma");
+    shader.load("shaders/Plasma");
   };
   
   int inputCount() override {

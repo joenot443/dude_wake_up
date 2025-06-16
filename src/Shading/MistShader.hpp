@@ -18,15 +18,15 @@
 #include <stdio.h>
 
 struct MistSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> color;
-  std::shared_ptr<WaveformOscillator> colorOscillator;
-
+  std::shared_ptr<Parameter> mainColor;
+  std::shared_ptr<Parameter> secondaryColor;
   MistSettings(std::string shaderId, json j) :
-  color(std::make_shared<Parameter>("color", 0.5, 0.0, 1.0)),
-  colorOscillator(std::make_shared<WaveformOscillator>(color)),
+  mainColor(std::make_shared<Parameter>("Main Color", ParameterType_Color)),
+  secondaryColor(std::make_shared<Parameter>("Secondary Color", ParameterType_Color)),
   ShaderSettings(shaderId, j, "Mist") {
-    parameters = { color };
-    oscillators = { colorOscillator };
+    mainColor->setColor({.9, .8, .6, 1.0});
+    secondaryColor->setColor({.1, .1, .2});
+    parameters = { mainColor, secondaryColor };
     load(j);
     registerParameters();
   };
@@ -35,7 +35,6 @@ struct MistSettings: public ShaderSettings {
 struct MistShader: Shader {
   MistSettings *settings;
   MistShader(MistSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   
   void setup() override {
     shader.load("shaders/Mist");
@@ -45,7 +44,8 @@ struct MistShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("color", settings->color->value);
+    shader.setUniform3f("mainColor", settings->mainColor->color->data()[0], settings->mainColor->color->data()[1], settings->mainColor->color->data()[2]);
+    shader.setUniform3f("secondaryColor", settings->secondaryColor->color->data()[0], settings->secondaryColor->color->data()[1], settings->secondaryColor->color->data()[2]);
     shader.setUniform1f("v_time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
@@ -66,9 +66,8 @@ struct MistShader: Shader {
   }
 
   void drawSettings() override {
-    
-
-    CommonViews::ShaderParameter(settings->color, settings->colorOscillator);
+    CommonViews::ShaderColor(settings->mainColor);
+    CommonViews::ShaderColor(settings->secondaryColor);
   }
 };
 

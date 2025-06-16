@@ -6,6 +6,7 @@
 //
 
 #include "OscillationService.hpp"
+#include "WaveformOscillator.hpp"
 #include "ConfigService.hpp"
 #include "ParameterService.hpp"
 #include "Console.hpp"

@@ -9,7 +9,11 @@
 #define WelcomeScreenView_hpp
 
 #include <stdio.h>
+#include "StrandBrowserView.hpp"
 #include "StrandBrowserWindow.hpp"
+#include "Models/Strand.hpp"
+
+class ofVideoPlayer;
 
 class WelcomeScreenView {
 public:

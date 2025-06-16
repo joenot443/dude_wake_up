@@ -21,9 +21,10 @@ public:
   void refreshSources();
   void update();
   void draw();
-  
+  void drawSearchView();
   void loadDirectory(std::string directory);
   void drawLibraryHeader();
+
   void setCallback(std::function<void(std::shared_ptr<TileItem>)> callback);
 
   // New public method to set the current tab
@@ -40,12 +41,13 @@ private:
   FileBrowserView fileBrowserView = FileBrowserView(FileBrowserType_Source);
   std::vector<std::shared_ptr<TileItem>> webcamItems;
   std::vector<std::shared_ptr<TileItem>> shaderItems;
+  std::vector<std::shared_ptr<TileItem>> searchItems;
   std::vector<std::shared_ptr<LibraryTileItem>> libraryItems;
 
   std::string searchQuery;
   bool searchDirty = false;
   std::vector<std::shared_ptr<TileItem>> searchTileItems = {};
-  TileBrowserView searchResultsTileBrowserView = TileBrowserView({});
+  TileBrowserView searchResultsTileBrowserView = TileBrowserView({}, true);
 
   int currentTab = 0;
 };

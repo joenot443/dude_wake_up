@@ -28,8 +28,8 @@
 #include "OscillatorView.hpp"
 #include "Strings.hpp"
 #include "imgui.h"
-#include <imgui_node_editor.h>
-#include <imgui_node_editor_internal.h>
+#include "imgui_node_editor.h"
+#include "imgui_node_editor_internal.h"
 
 
 void CommonViews::xsSpacing() { Spacing(4); }
@@ -84,9 +84,13 @@ bool CommonViews::ShaderParameter(std::shared_ptr<Parameter> param,
   ImGui::SetCursorPosY(endYPos);
   
   if (param->buttonsVisible) {
-    int buttonCount = osc != nullptr ? 4 : 3;
+    int buttonCount = 2;
+    if (LayoutStateService::getService()->midiEnabled) buttonCount++;
+    if (osc != nullptr) buttonCount++;
+    
     float buttonSpacing = 8.0;
     float buttonWidth = (ImGui::GetContentRegionAvail().x - 8.0 - buttonSpacing * (buttonCount - 1)) / buttonCount;
+    
     if (LayoutStateService::getService()->midiEnabled) {
       MidiSelector(param, ImVec2(buttonWidth, 36.0));
       ImGui::SameLine();
@@ -198,7 +202,7 @@ void CommonViews::H1Title(std::string title, bool padding)
 {
   if (padding)
     CommonViews::Spacing(1);
-  ImGui::PushFont(FontService::getService()->h1);
+  ImGui::PushFont(FontService::getService()->current->h1);
   ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.0, 5.0));
   ImGui::Text("%s", title.c_str());
   if (padding)
@@ -211,7 +215,7 @@ void CommonViews::H2Title(std::string title, bool padding)
 {
   if (padding)
     CommonViews::Spacing(1);
-  ImGui::PushFont(FontService::getService()->h2);
+  ImGui::PushFont(FontService::getService()->current->h2);
   ImGui::TextWrapped("%s", title.c_str());
   ImGui::PopFont();
   if (padding)
@@ -221,7 +225,7 @@ void CommonViews::H2Title(std::string title, bool padding)
 void CommonViews::H3Title(std::string title, bool padding)
 {
   
-  ImGui::PushFont(FontService::getService()->h3);
+  ImGui::PushFont(FontService::getService()->current->h3);
   ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.0, 5.0));
   ImGui::TextWrapped("%s", title.c_str());
   if (padding)
@@ -234,7 +238,7 @@ void CommonViews::H3BTitle(std::string title, bool padding)
 {
   if (padding)
     CommonViews::Spacing(1);
-  ImGui::PushFont(FontService::getService()->h3b);
+  ImGui::PushFont(FontService::getService()->current->h3b);
   ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.0, 5.0));
   ImGui::TextWrapped("%s", title.c_str());
   if (padding)
@@ -247,7 +251,7 @@ void CommonViews::H4Title(std::string title, bool padding)
 {
   if (padding)
     CommonViews::Spacing(1);
-  ImGui::PushFont(FontService::getService()->h4);
+  ImGui::PushFont(FontService::getService()->current->h4);
   ImGui::TextWrapped("%s", title.c_str());
   if (padding)
     CommonViews::Spacing(1);
@@ -539,16 +543,18 @@ bool CommonViews::AreaSlider(std::string id,
 
 void CommonViews::MultiSlider(std::string title, std::string id, std::shared_ptr<Parameter> param1, std::shared_ptr<Parameter> param2,
                               std::shared_ptr<Oscillator> param1Oscillator,
-                              std::shared_ptr<Oscillator> param2Oscillator) {
+                              std::shared_ptr<Oscillator> param2Oscillator,
+                              float aspectRatio) {
   CommonViews::H4Title(title);
-  ImGui::BeginChild("position2D", ImVec2(200.0, 200.0), ImGuiChildFlags_None, ImGuiWindowFlags_NoScrollbar);
+  float controlWidth = ImGui::GetContentRegionAvail().x / 2.0f;
+  ImGui::BeginChild("position2D", ImVec2(controlWidth, controlWidth * aspectRatio), ImGuiChildFlags_None, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
   ImGui::SetNextItemWidth(150.0);
-  ImGuiExtensions::Slider2DFloat("", &param1->value,
+  ImGuiExtensions::Slider2DFloat(id.c_str(), &param1->value,
                                  &param2->value,
-                                 param1->min, param1->max, param2->min, param2->max, 1.0);
+                                 param1->min, param1->max, param2->min, param2->max, aspectRatio);
   ImGui::EndChild();
   ImGui::SameLine();
-  ImGui::BeginChild("position2DParams", ImVec2(200.0, 200.0), ImGuiChildFlags_None, ImGuiWindowFlags_NoScrollbar);
+  ImGui::BeginChild("position2DParams", ImVec2(controlWidth, controlWidth * aspectRatio), ImGuiChildFlags_None, ImGuiWindowFlags_NoScrollbar);
   CommonViews::ShaderParameter(param1, param1Oscillator);
   CommonViews::ShaderParameter(param2, param2Oscillator);
   ImGui::EndChild();
@@ -838,7 +844,7 @@ bool CommonViews::InvisibleIconButton(std::string id)
 bool CommonViews::IconButton(const char *icon, std::string id)
 {
   auto buttonId = formatString("%s##%s", icon, id.c_str());
-  ImGui::PushFont(FontService::getService()->icon);
+  ImGui::PushFont(FontService::getService()->current->icon);
   ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
   ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0., 0.));
   auto button = ImGui::Button(buttonId.c_str(), ImVec2(16., 16.));
@@ -851,7 +857,7 @@ bool CommonViews::IconButton(const char *icon, std::string id)
 
 void CommonViews::IconTitle(const char *icon)
 {
-  ImGui::PushFont(FontService::getService()->icon);
+  ImGui::PushFont(FontService::getService()->current->icon);
   ImGui::Text(icon);
   ImGui::PopFont();
 }
@@ -859,7 +865,7 @@ void CommonViews::IconTitle(const char *icon)
 void CommonViews::XLargeIconTitle(const char *icon)
 {
   auto buttonId = formatString("%s", icon);
-  ImGui::PushFont(FontService::getService()->xLargeIcon);
+  ImGui::PushFont(FontService::getService()->current->xLargeIcon);
   ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(24.0, 24.0));
   ImGui::Text(buttonId.c_str());
   ImGui::PopStyleVar();
@@ -869,7 +875,7 @@ void CommonViews::XLargeIconTitle(const char *icon)
 bool CommonViews::LargeIconButton(const char *icon, std::string id, bool enabled)
 {
   auto buttonId = formatString("%s##%s", icon, id.c_str());
-  ImGui::PushFont(FontService::getService()->largeIcon);
+  ImGui::PushFont(FontService::getService()->current->largeIcon);
   ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32_BLACK_TRANS);
   ImGui::PushStyleColor(ImGuiCol_Text, enabled ? IM_COL32_WHITE : IM_COL32(100, 100, 100, 255));
   ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0., 0.));
@@ -887,7 +893,7 @@ bool CommonViews::LargeIconButton(const char *icon, std::string id, bool enabled
 bool CommonViews::XLargeIconButton(const char *icon, std::string id)
 {
   auto buttonId = formatString("%s##%s", icon, id.c_str());
-  ImGui::PushFont(FontService::getService()->xLargeIcon);
+  ImGui::PushFont(FontService::getService()->current->xLargeIcon);
   ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32_BLACK_TRANS);
   ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0., 0.));
   auto button = ImGui::Button(buttonId.c_str(), ImVec2(100.0, 100.0));
@@ -902,7 +908,7 @@ void CommonViews::OscillateButton(std::string id, std::shared_ptr<Oscillator> o,
                                   std::shared_ptr<Parameter> p, ImVec2 size, ImVec2 imageRatio)
 {
   if (o == nullptr) { return; }
-  ImGui::PushFont(FontService::getService()->icon);
+  ImGui::PushFont(FontService::getService()->current->icon);
   ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
   
   std::string buttonTitle;
@@ -998,9 +1004,10 @@ void CommonViews::FavoriteButton(std::shared_ptr<Parameter> param, ImVec2 size, 
   }
 }
 
-void CommonViews::BlendModeSelector(std::shared_ptr<Parameter> blendMode, std::shared_ptr<Parameter> flip, std::shared_ptr<Parameter> alpha, std::shared_ptr<Oscillator> alphaOscillator, std::shared_ptr<Parameter> blendWithEmpty)
+void CommonViews::BlendModeSelector(std::shared_ptr<Parameter> blendMode, std::shared_ptr<Parameter> flip, std::shared_ptr<Parameter> alpha, std::shared_ptr<Oscillator> alphaOscillator, std::shared_ptr<Parameter> amount, std::shared_ptr<Oscillator> amountOscillator, std::shared_ptr<Parameter> blendWithEmpty)
 {
   static std::vector<std::string> BlendModeNames = {
+    "Mix",
     "Multiply",
     "Screen",
     "Darken",
@@ -1038,10 +1045,11 @@ void CommonViews::BlendModeSelector(std::shared_ptr<Parameter> blendMode, std::s
     }
   }
 
-  if (blendMode->buttonsVisible && alpha != nullptr) {
+  if (blendMode->buttonsVisible && alpha != nullptr && amount != nullptr) {
     ImGui::NewLine();
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15.0);
-    CommonViews::ShaderParameter(alpha, alphaOscillator);
+    // Use amount if we're on Mix
+    blendMode->intValue == 0 ? CommonViews::ShaderParameter(amount, amountOscillator) : CommonViews::ShaderParameter(alpha, alphaOscillator);
     ImGui::NewLine();
   }
 }
@@ -1152,6 +1160,7 @@ void CommonViews::NodePin(std::shared_ptr<Node> node, bool active) {
   const float circleRadius = 15.0;
   const float innerRectSize = 15.0;
   const float innerRectCornerRadius = 2.0;
+//  ImGui::SetNextItemAllowOverlap();
   ImGui::Dummy(ImVec2(dummySize, dummySize));
   auto pos = ImGui::GetCursorPos();
   pos -= ImVec2(5.0, dummySize + 5.0);
@@ -1181,6 +1190,11 @@ void CommonViews::NodePin(std::shared_ptr<Node> node, bool active) {
 void CommonViews::ImageNamedNew(std::string name, float width, float height) {
   auto image = ImageService::getService()->imageWithName(name);
   ImGui::Image(image->textureID, ImVec2(width, height));
+}
+
+void CommonViews::ImageNamedNew(std::string name, ImVec2 size) {
+  auto image = ImageService::getService()->imageWithName(name);
+  ImGui::Image(image->textureID, size);
 }
 
 bool CommonViews::ImageButton(std::string id, std::string imageName, ImVec2 size, ImVec2 imageRatio, bool forceImGuiContext) {
@@ -1372,7 +1386,7 @@ bool CommonViews::FlipButton(std::string id, std::shared_ptr<Parameter> param, I
 }
 
 void CommonViews::PushRedesignStyle() {
-  ImGui::PushFont(FontService::getService()->p);
+  ImGui::PushFont(FontService::getService()->current->p);
 
   // Paddings
   
@@ -1428,7 +1442,7 @@ void CommonViews::PopRedesignStyle() {
 }
 
 void CommonViews::PushNodeRedesignStyle() {
-  ImGui::PushFont(FontService::getService()->pN);
+  ImGui::PushFont(FontService::getService()->current->pN);
   
   // Nodes
   
@@ -1481,4 +1495,26 @@ bool CommonViews::PlayPauseButton(std::string id, bool playing, ImVec2 size, ImV
     playing = !playing;
   }
   return ret;
+}
+
+bool CommonViews::SearchBar(std::string& searchQuery, bool& searchDirty, std::string id) {
+  float width = ImGui::GetContentRegionAvail().x - 100.0f;
+  ImGui::PushItemWidth(width);
+  char buffer[256];
+  strncpy(buffer, searchQuery.c_str(), sizeof(buffer));
+  bool changed = ImGui::InputText("##search", buffer, sizeof(buffer));
+  if (changed) {
+    searchQuery = std::string(buffer);
+    searchDirty = true;
+  }
+  ImGui::PopItemWidth();
+  ImGui::SameLine();
+  ImGui::Text("Search");
+  ImGui::SameLine();
+  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+  if (ImageButton(id, "x.png", ImVec2(16.0, 16.0), ImVec2(1.0, 1.0))) {
+    changed = true;
+    searchQuery = "";
+  }
+  return changed;
 }

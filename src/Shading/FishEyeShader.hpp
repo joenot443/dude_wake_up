@@ -22,10 +22,13 @@ public:
   std::shared_ptr<Oscillator> amountOscillator;
   
   FishEyeSettings(std::string shaderId, json j, std::string name) :
-  amount(std::make_shared<Parameter>("amount", 0.5, 0.0, 1.0)),
+  amount(std::make_shared<Parameter>("Amount", 0.5, 0.1, 1.0)),
   amountOscillator(std::make_shared<WaveformOscillator>(amount)),
   ShaderSettings(shaderId, j, name) {
-    
+    parameters = { amount };
+    oscillators = { amountOscillator };
+    registerParameters();
+    load(j);
   };
 };
 

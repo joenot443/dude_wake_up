@@ -22,21 +22,17 @@ struct BlurSettings : public ShaderSettings
 {
 public:
   std::string shaderId;
-  std::shared_ptr<Parameter> mix;
   std::shared_ptr<Parameter> radius;
-  std::shared_ptr<Oscillator> mixOscillator;
   std::shared_ptr<Oscillator> radiusOscillator;
   
   BlurSettings(std::string shaderId, json j, std::string name)
-  : mix(std::make_shared<Parameter>("blur_mix", 0.5, 0.0, 1.0)),
-  radius(std::make_shared<Parameter>("Amount", 0.01, 0.0,
-                                     50.0)),
-  mixOscillator(std::make_shared<WaveformOscillator>(mix)),
+  : radius(std::make_shared<Parameter>("Amount", 0.01, 0.0,
+                                     10.0)),
   radiusOscillator(std::make_shared<WaveformOscillator>(radius)),
   shaderId(shaderId), ShaderSettings(shaderId, j, name)
   {
-    parameters = {mix, radius};
-    oscillators = {mixOscillator, radiusOscillator};
+    parameters = {radius};
+    oscillators = {radiusOscillator};
     audioReactiveParameter = radius;
     load(j);
     registerParameters();
@@ -80,7 +76,6 @@ public:
   
   void drawSettings() override
   {
-    // Radius
     CommonViews::ShaderParameter(settings->radius, settings->radiusOscillator);
   }
 };

@@ -1,3 +1,0 @@
-# Plasmor
-
-Information about Plasmor

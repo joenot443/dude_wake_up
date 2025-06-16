@@ -1,3 +1,0 @@
-# WelcomeRings
-
-Information about WelcomeRings

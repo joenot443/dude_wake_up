@@ -1,3 +1,0 @@
-# Cubify
-
-Information about Cubify

@@ -12,6 +12,8 @@
 #include "ofMain.h"
 #include "Feedback.hpp"
 #include "LibraryFile.hpp"
+#include "ShaderType.hpp"
+#include "Credit.hpp"
 #include "observable.hpp"
 #include <future>
 
@@ -58,11 +60,20 @@ public:
 
   bool hasMediaOnDisk(std::shared_ptr<LibraryFile> file);
 
+  // Credits functionality
+  void fetchShaderCredits();
+  void backgroundFetchShaderCredits();
+  Credit* getShaderCredit(ShaderType type);
+  bool hasCredit(ShaderType type);
+
   observable::subject<void()> libraryThumbnailUpdateSubject;
 
   std::map<std::string, std::shared_ptr<LibraryFile>> libraryFiles;
   
   std::map<std::string, bool> libraryFileIdDownloadedMap;
+
+  // Shader credits data
+  std::map<ShaderType, Credit> shaderCredits;
 
   std::vector<std::future<void>> downloadFutures;
 

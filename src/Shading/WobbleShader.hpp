@@ -27,8 +27,8 @@ struct WobbleSettings: public ShaderSettings {
   std::shared_ptr<Oscillator> amountOscillator;
 
   WobbleSettings(std::string shaderId, json j, std::string name) :
-  speed(std::make_shared<Parameter>("speed", 1.0, 0.0, 2.0)),
-  amount(std::make_shared<Parameter>("amount", 1.0, 0.0, 2.0)),
+  speed(std::make_shared<Parameter>("Speed", 1.0, 0.0, 2.0)),
+  amount(std::make_shared<Parameter>("Amount", 1.0, 0.0, 2.0)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   amountOscillator(std::make_shared<WaveformOscillator>(amount)),
   ShaderSettings(shaderId, j, name) {
@@ -45,8 +45,7 @@ public:
   WobbleShader(WobbleSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-shader.load("shaders/Wobble");
-shader.load("shaders/Wobble");
+    shader.load("shaders/Wobble");
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {

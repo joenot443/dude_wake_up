@@ -1,3 +1,0 @@
-# DiscoAudio
-
-Information about DiscoAudio

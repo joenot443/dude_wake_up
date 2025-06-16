@@ -56,7 +56,7 @@ struct LibraryFile
 
 class LibraryTileItem : public TileItem {
 public:
-  LibraryTileItem(std::string name, ImTextureID textureID, int index, std::shared_ptr<LibraryFile> libraryFile, std::function<void()> dragCallback, std::string category) :
+  LibraryTileItem(std::string name, ImTextureID textureID, int index, std::shared_ptr<LibraryFile> libraryFile, std::function<void(std::string)> dragCallback, std::string category) :
   TileItem(name, textureID, index, dragCallback, category, TileType_Library), libraryFile(libraryFile) {};
   
   std::shared_ptr<LibraryFile> libraryFile;

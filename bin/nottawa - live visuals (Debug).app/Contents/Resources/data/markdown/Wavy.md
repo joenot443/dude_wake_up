@@ -1,3 +1,0 @@
-# Wavy
-
-Information about Wavy

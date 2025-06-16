@@ -1,3 +1,0 @@
-# MultiMix
-
-Information about MultiMix

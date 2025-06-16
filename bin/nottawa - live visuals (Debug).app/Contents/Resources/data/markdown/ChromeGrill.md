@@ -1,3 +1,0 @@
-# ChromeGrill
-
-Information about ChromeGrill

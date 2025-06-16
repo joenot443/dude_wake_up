@@ -28,7 +28,7 @@ struct SpaceRingsSettings: public ShaderSettings {
   SpaceRingsSettings(std::string shaderId, json j) :
   particleSize(std::make_shared<Parameter>("Particle Size", 0.03, 0.01, 0.1)),
   particleSizeOscillator(std::make_shared<WaveformOscillator>(particleSize)),
-  ringCount(std::make_shared<Parameter>("Ring Count", 5.0, 1.0, 10.0)),
+  ringCount(std::make_shared<Parameter>("Ring Count", 5.0, 1.0, 10.0, ParameterType_Int)),
   ringCountOscillator(std::make_shared<WaveformOscillator>(ringCount)),
   colorVariation(std::make_shared<Parameter>("Color Variation", 0.5, 0.0, 1.0)),
   colorVariationOscillator(std::make_shared<WaveformOscillator>(colorVariation)),
@@ -76,10 +76,8 @@ struct SpaceRingsShader: Shader {
   }
 
   void drawSettings() override {
-    
-
     CommonViews::ShaderParameter(settings->particleSize, settings->particleSizeOscillator);
-    CommonViews::ShaderParameter(settings->ringCount, settings->ringCountOscillator);
+    CommonViews::ShaderIntParameter(settings->ringCount);
     CommonViews::ShaderParameter(settings->colorVariation, settings->colorVariationOscillator);
   }
 };

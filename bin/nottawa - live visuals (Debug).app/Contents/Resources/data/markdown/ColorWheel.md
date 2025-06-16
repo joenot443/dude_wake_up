@@ -1,3 +1,0 @@
-# ColorWheel
-
-Information about ColorWheel

@@ -1,3 +1,0 @@
-# Companions
-
-Information about Companions

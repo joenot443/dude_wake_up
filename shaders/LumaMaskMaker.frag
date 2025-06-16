@@ -42,13 +42,13 @@ void main()
   
   vec3 texColorHsb = rgb2hsb(texColor.rgb);
   
-bool inBounds = texColorHsb.z >= lower && texColorHsb.z <= upper;
+  bool inBounds = texColorHsb.z >= lower && texColorHsb.z <= upper;
   if (flip == 1) {
     inBounds = !inBounds;
   }
   
   if (inBounds) {
-    outputColor = drawTex == 1 ? texColor : vec4(1.0);
+    outputColor = drawTex == 1 ? texColor : vec4(0.0);
   } else {
     outputColor = vec4(0.0);
   }

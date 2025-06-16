@@ -56,7 +56,7 @@ bool  ParameterTileBrowserView::draw(std::vector<std::shared_ptr<ParameterTileIt
     
     // TITLE
     // Push a smaller font size
-    ImGui::PushFont(FontService::getService()->sm);
+    ImGui::PushFont(FontService::getService()->current->sm);
     std::string buttonTitle = drawNames ? tile->name : "##" + tile->name;
     if (ImGui::Button(buttonTitle.c_str(), TileSize)) {
       ret = true;

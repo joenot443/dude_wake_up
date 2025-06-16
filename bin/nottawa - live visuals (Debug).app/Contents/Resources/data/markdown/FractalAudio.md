@@ -1,3 +1,0 @@
-# FractalAudio
-
-Information about FractalAudio

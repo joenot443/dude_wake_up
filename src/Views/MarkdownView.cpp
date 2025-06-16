@@ -14,9 +14,9 @@ static ImGui::MarkdownConfig mdConfig;
 
 void MarkdownView::setup() {
   item = MarkdownService::getService()->itemNamed(name);
-  mdConfig.headingFormats[0] = {FontService::getService()->h1, true};
-  mdConfig.headingFormats[1] = {FontService::getService()->h2, true};
-  mdConfig.headingFormats[2] = {FontService::getService()->h3, true};
+  mdConfig.headingFormats[0] = {FontService::getService()->current->h1, true};
+  mdConfig.headingFormats[1] = {FontService::getService()->current->h2, true};
+  mdConfig.headingFormats[2] = {FontService::getService()->current->h3, true};
 }
 
 void MarkdownView::update() {

@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include "FavoriteParameter.hpp"
 #include "Shader.hpp"
+#include "VideoSource.hpp"
 
 class StageModeView {
 private:
@@ -23,10 +24,12 @@ public:
   void draw();
   void drawHelp();
   
-  void drawActionButtons();
+  void drawActionBar();
   void drawAllParams(int itemsPerRow);
   void drawFavoriteParams(int itemsPerRow);
-  void drawOutput(std::shared_ptr<Shader> output);
+  void drawOutputShader(std::shared_ptr<Shader> output);
+  void drawOutputVideoSource(std::shared_ptr<VideoSource> output);
+  void clear();
 };
 
 

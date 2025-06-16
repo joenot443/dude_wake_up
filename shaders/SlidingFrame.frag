@@ -10,13 +10,14 @@ out vec4 outputColor;
 uniform float lineWidth;
 uniform float speed;
 uniform float angle; // Angle for the line
+uniform float position; // Static position when speed is 0
 
 void main()
 {
   vec2 uv = coord.xy / dimensions.xy;
   
-  // Calculate the moving line's position independently of the angle
-  float linePosition = mod(time * speed, dimensions.x);
+  // Calculate the moving line's position based on speed
+  float linePosition = speed == 0.0 ? position : mod(time * speed, dimensions.x);
   
   // Calculate pivot for rotation based on current line position
   vec2 pivot = vec2(0.0, dimensions.y * 0.5); // Pivot in the middle of the height
@@ -41,9 +42,8 @@ void main()
   }
   else
   {
-    // Corrected texture sampling:
-    // Decide based on original uv and linePosition, not the rotated coordinates.
-    if (coord.x <= linePosition)
+    // Use rotated coordinates to determine which texture to sample
+    if (rotatedCoord.x <= 0.0)
     {
       outputColor = texture(tex, uv); // Sample from tex
     }

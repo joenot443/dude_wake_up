@@ -1,3 +1,0 @@
-# GlitchDigital
-
-Information about GlitchDigital

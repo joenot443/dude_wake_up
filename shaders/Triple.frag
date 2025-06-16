@@ -87,7 +87,6 @@ void main()
     if (count == 0.0) {
         outputColor = vec4(0.0);
     } else {
-        colorSum /= count;
         outputColor = vec4(colorSum.rgb, 1.0);
     }
 }

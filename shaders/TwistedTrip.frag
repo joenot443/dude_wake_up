@@ -4,35 +4,56 @@ uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
 uniform float speed;
+uniform float patternDensity;
+uniform float twistAmount;
+uniform float colorShift;
+uniform float patternScale;
+
 in vec2 coord;
 out vec4 outputColor;
 
+// Helper macro for sine wave normalization
+#define normalizeSine(a) (sin(a) * 0.5 + 0.5)
+#define timeOffset (time * 0.5 * speed)
 
-#define c(a) (sin(a)*.5+.5)
-#define g    (time*.5*speed)
-
-float b(vec3 p, vec3 s) { // box sdf
-  vec3 q = abs(p) - s; return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.);
+// Box signed distance field function
+float boxSDF(vec3 point, vec3 size) {
+  vec3 q = abs(point) - size;
+  return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0);
 }
 
 void main() {
-    float a = 3.;
-    float r = 3.;
-    float t = 3.;
+    float iteration = 3.0;
+    float radius = 3.0;
+    float displacement = 3.0;
     
-    vec2 n = dimensions.xy;
+    vec2 normalizedCoord = dimensions.xy;
     
-    for (a = 0.; a < 150. && t > .002*r && r < 50.; a++) {
-        vec3 p = normalize(vec3((coord - n * .5) / n.y * 1.4, 1.)) * r;
-        p.z += g;
+    // Ray marching loop
+    for (iteration = 0.0; iteration < 150.0 && displacement > 0.002 * radius && radius < 50.0; iteration++) {
+        // Calculate ray position with pattern scale
+        vec3 rayPos = normalize(vec3((coord - normalizedCoord * 0.5) / normalizedCoord.y * (1.4 * patternScale), 1.0)) * radius;
+        rayPos.z += timeOffset;
         
-        float angle = mix(c(g), -c(g), c((g - 3.14) / 2.)) * r * .75;
-        p.xy *= mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
+        // Calculate rotation angle based on time and twist amount
+        float rotationAngle = mix(normalizeSine(timeOffset), 
+                                -normalizeSine(timeOffset), 
+                                normalizeSine((timeOffset - 3.14) / 2.0)) * radius * twistAmount;
         
-        float displacement = max(b(fract(p + .5) - .5, vec3(mix(.2, .45, c(g)))), -b(p, vec2(1.1, 1e9).xxy)) * .85;
-        r += t = displacement;
+        // Apply rotation matrix
+        rayPos.xy *= mat2(cos(rotationAngle), sin(rotationAngle), 
+                         -sin(rotationAngle), cos(rotationAngle));
+        
+        // Calculate displacement using box SDF with pattern density
+        float boxSize = mix(0.2, 0.45, normalizeSine(timeOffset)) * patternDensity;
+        displacement = max(boxSDF(fract(rayPos + 0.5) - 0.5, vec3(boxSize)), 
+                         -boxSDF(rayPos, vec2(1.1, 1e9).xxy)) * 0.85;
+        radius += displacement;
     }
     
-    vec3 color = cos(vec3(mix(2.05, 1.85, c(g)), 2.1, 2.15) * r - g) * exp(-r * .06);
+    // Calculate final color based on radius, time, and color shift
+    vec3 baseFreq = vec3(mix(2.05, 1.85, normalizeSine(timeOffset)), 2.1, 2.15);
+    vec3 shiftedFreq = baseFreq + colorShift;
+    vec3 color = cos(shiftedFreq * radius - timeOffset) * exp(-radius * 0.06);
     outputColor = vec4(color, 1.0);
 }

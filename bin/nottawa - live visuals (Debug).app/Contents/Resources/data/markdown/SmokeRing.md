@@ -1,3 +1,0 @@
-# SmokeRing
-
-Information about SmokeRing

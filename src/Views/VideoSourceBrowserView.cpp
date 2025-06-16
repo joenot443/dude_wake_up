@@ -9,21 +9,23 @@
 #include "AvailableVideoSource.hpp"
 #include "FontService.hpp"
 #include "LibraryService.hpp"
+#include "imgui.h"
 #include "ofMain.h"
 #include "TileBrowserView.hpp"
 #include "VideoSourceService.hpp"
+#include "CommonViews.hpp"
 
 void VideoSourceBrowserView::setup()
 {
   VideoSourceService::getService()->subscribeToAvailableVideoSourceUpdates(
-      [this]()
-      { refreshSources(); });
+                                                                           [this]()
+                                                                           { refreshSources(); });
   ofAddListener(LibraryService::getService()->thumbnailNotification, this, &VideoSourceBrowserView::refreshSources);
-
+  
   refreshSources();
-
+  
   // Initialize the search results view
-  searchResultsTileBrowserView = TileBrowserView(searchTileItems);
+  searchResultsTileBrowserView = TileBrowserView(searchTileItems, true);
 }
 
 void VideoSourceBrowserView::loadDirectory(std::string directory) {
@@ -43,9 +45,9 @@ void VideoSourceBrowserView::refreshSources()
     {
       source->generatePreview();
     }
-
+    
     // Create a closure which will be called when the tile is clicked
-    std::function<void()> dragCallback = [source]()
+    std::function<void(std::string tileId)> dragCallback = [source](std::string tileId)
     {
       // Create a payload to carry the video source
       if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
@@ -54,6 +56,7 @@ void VideoSourceBrowserView::refreshSources()
         ImGui::SetDragDropPayload("VideoSource", &source.get()->availableVideoSourceId,
                                   sizeof(std::string));
         ImGui::Text("%s", source->sourceName.c_str());
+        if (source->hasPreview) ImGui::Image(source->preview->texData.textureID, ImVec2(128.0, 80.0));
         ImGui::EndDragDropSource();
       }
     };
@@ -63,8 +66,8 @@ void VideoSourceBrowserView::refreshSources()
       type = shaderTypeForShaderSourceType(std::dynamic_pointer_cast<AvailableVideoSourceShader>(source)->shaderType);
     }
     auto tileItem = std::make_shared<TileItem>(source->sourceName, textureId, 0, dragCallback, source->category, TileType_Source, type);
-
-    if (source->type == VideoSource_shader || 
+    
+    if (source->type == VideoSource_shader ||
         source->type == VideoSource_text ||
         source->type == VideoSource_multi ||
         source->type == VideoSource_icon)
@@ -120,12 +123,12 @@ void VideoSourceBrowserView::refreshSources()
     // If counts are equal, compare categories alphabetically
     return a->category < b->category;
   });
-
+  
   // Sort the webcam items by name
   std::sort(webcamItems.begin(), webcamItems.end(),
             [](std::shared_ptr<TileItem> a, std::shared_ptr<TileItem> b)
             { return a->name < b->name; });
-
+  
   tileBrowserView = TileBrowserView(shaderItems);
   tileBrowserView.size = size;
   fileBrowserView.setup();
@@ -133,32 +136,49 @@ void VideoSourceBrowserView::refreshSources()
 
 void VideoSourceBrowserView::update()
 {
-//  fileBrowserView.update();
-//  if (searchDirty) {
-//    // Filter tileItems based on searchQuery
-//    auto sources = VideoSourceService::getService()->availableVideoSources();
-//    std::vector<std::shared_ptr<TileItem>> filteredItems;
-//
-//    // Convert the searchQuery to lowercase for case-insensitive comparison
-//    std::string searchQueryLower = searchQuery;
-//    std::transform(searchQueryLower.begin(), searchQueryLower.end(), searchQueryLower.begin(),
-//                   [](unsigned char c){ return std::tolower(c); });
-//
-//    for (auto& source : sources) {
-//        // Convert source name to lowercase for case-insensitive comparison
-//        std::string sourceNameLower = source->sourceName;
-//        std::transform(sourceNameLower.begin(), sourceNameLower.end(), sourceNameLower.begin(),
-//                       [](unsigned char c){ return std::tolower(c); });
-//
-//        if (sourceNameLower.find(searchQueryLower) != std::string::npos) {
-//            ImTextureID textureId = (ImTextureID)(uint64_t) source->preview->texData.textureID;
-//            auto tileItem = std::make_shared<TileItem>(source->sourceName, textureId, 0, nullptr, source->category);
-//            filteredItems.push_back(tileItem);
-//        }
-//    }
-//    searchResultsTileBrowserView.setTileItems(filteredItems);
-//    searchDirty = false;
-//  }
+  //  fileBrowserView.update();
+  if (searchDirty) {
+    // Filter tileItems based on searchQuery
+    auto sources = VideoSourceService::getService()->availableVideoSources();
+    searchTileItems.clear();
+    
+    // Convert the searchQuery to lowercase for case-insensitive comparison
+    std::string searchQueryLower = searchQuery;
+    std::transform(searchQueryLower.begin(), searchQueryLower.end(), searchQueryLower.begin(),
+                   [](unsigned char c){ return std::tolower(c); });
+    
+    for (auto& source : sources) {
+      // Convert source name to lowercase for case-insensitive comparison
+      std::string sourceNameLower = source->sourceName;
+      std::transform(sourceNameLower.begin(), sourceNameLower.end(), sourceNameLower.begin(),
+                     [](unsigned char c){ return std::tolower(c); });
+      
+      if (sourceNameLower.find(searchQueryLower) != std::string::npos) {
+        ImTextureID textureId = (ImTextureID)(uint64_t) source->preview->texData.textureID;
+        // Create a closure which will be called when the tile is clicked
+        std::function<void(std::string tileId)> dragCallback = [source](std::string tileId)
+        {
+          // Create a payload to carry the video source
+          if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+          {
+            // Set payload to carry the index of our item (could be anything)
+            ImGui::SetDragDropPayload("VideoSource", &source.get()->availableVideoSourceId,
+                                      sizeof(std::string));
+            ImGui::Text("%s", source->sourceName.c_str());
+            ImGui::EndDragDropSource();
+          }
+        };
+        ShaderType shaderType = ShaderTypeNone;
+        if (source->type == VideoSource_shader) {
+          shaderType = shaderTypeForShaderSourceType(std::dynamic_pointer_cast<AvailableVideoSourceShader>(source)->shaderType);
+        }
+        auto tileItem = std::make_shared<TileItem>(source->sourceName, textureId, 0, dragCallback, "Results", TileType_Source, shaderType);
+        searchTileItems.push_back(tileItem);
+      }
+    }
+    searchResultsTileBrowserView.setTileItems(searchTileItems);
+    searchDirty = false;
+  }
 }
 
 void VideoSourceBrowserView::drawLibraryHeader() {}
@@ -168,9 +188,9 @@ void VideoSourceBrowserView::setCurrentTab(int tabIndex) {
 }
 
 void VideoSourceBrowserView::drawSelectedBrowser() {
-  static int lastTab = -1;  // Track the last tab we were on
-  ImGui::BeginChild("##selectedBrowser", ImVec2(ImGui::GetWindowWidth() - 10.0, ImGui::GetWindowHeight()), ImGuiChildFlags_None);
-  if (currentTab != lastTab) {  // Only update tiles if we've changed tabs
+  static int lastTab = 0;
+  ImGui::BeginChild("VideoSourceBrowserInner", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), ImGuiChildFlags_None, ImGuiWindowFlags_AlwaysVerticalScrollbar);
+  if (currentTab != lastTab) {
     switch (currentTab) {
       case 0: // Generated Tab
         tileBrowserView.setTileItems(shaderItems);
@@ -195,7 +215,24 @@ void VideoSourceBrowserView::drawSelectedBrowser() {
   ImGui::EndChild();
 }
 
+void VideoSourceBrowserView::drawSearchView() {
+  ImGui::BeginChild("##sourceSearchView", ImVec2(ImGui::GetWindowWidth() - 10.0, 30.0), ImGuiChildFlags_AlwaysAutoResize | ImGuiChildFlags_AutoResizeY, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+  CommonViews::SearchBar(searchQuery, searchDirty, "SourceSearch");
+  ImGui::EndChild();
+  
+  if (searchQuery.length() != 0 && searchTileItems.size() > 0) {
+    searchResultsTileBrowserView.draw();
+  } else if (searchQuery.length() > 0) {
+    ImGui::Dummy(ImVec2(1.0, 5.0));
+    ImGui::Dummy(ImVec2(5.0, 1.0));
+    ImGui::SameLine();
+    ImGui::Text("No results.");
+    ImGui::Dummy(ImVec2(1.0, 5.0));
+  }
+}
+
 void VideoSourceBrowserView::draw() {
+  drawSearchView();
   if (ImGui::BeginTabBar("VideoSourceBrowser", ImGuiTabBarFlags_None)) {
     if (ImGui::BeginTabItem("Generated", nullptr, currentTab == 0 ? ImGuiTabItemFlags_SetSelected : 0)) {
       drawSelectedBrowser();
@@ -204,7 +241,7 @@ void VideoSourceBrowserView::draw() {
     if (ImGui::IsItemClicked()) {
       currentTab = 0;  // Update local tab state on click
     }
-
+    
     if (ImGui::BeginTabItem("Webcam", nullptr, currentTab == 1 ? ImGuiTabItemFlags_SetSelected : 0)) {
       drawSelectedBrowser();
       ImGui::EndTabItem();
@@ -212,7 +249,7 @@ void VideoSourceBrowserView::draw() {
     if (ImGui::IsItemClicked()) {
       currentTab = 1;  // Update local tab state on click
     }
-
+    
     if (ImGui::BeginTabItem("Library", nullptr, currentTab == 2 ? ImGuiTabItemFlags_SetSelected : 0)) {
       drawSelectedBrowser();
       ImGui::EndTabItem();
@@ -220,7 +257,7 @@ void VideoSourceBrowserView::draw() {
     if (ImGui::IsItemClicked()) {
       currentTab = 2;  // Update local tab state on click
     }
-
+    
     if (ImGui::BeginTabItem("Local Files", nullptr, currentTab == 3 ? ImGuiTabItemFlags_SetSelected : 0)) {
       drawSelectedBrowser();
       ImGui::EndTabItem();
@@ -228,7 +265,7 @@ void VideoSourceBrowserView::draw() {
     if (ImGui::IsItemClicked()) {
       currentTab = 3;  // Update local tab state on click
     }
-
+    
     ImGui::EndTabBar();
   }
 }

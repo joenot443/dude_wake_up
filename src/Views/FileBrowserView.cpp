@@ -59,14 +59,15 @@ void FileBrowserView::refresh()
       // Open the file and get the first frame
       sources.push_back(availableSource);
       // Create a closure which will be called when the tile is clicked
-      std::function<void()> dragCallback = [availableSource]()
+      std::function<void(std::string)> dragCallback = [availableSource](std::string tileId)
       {
-        // Create a payload to carry the video source
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
         {
-          ImGui::SetDragDropPayload("VideoSource", &availableSource->availableVideoSourceId,
+          ImGui::SetDragDropPayload("VideoSource", &availableSource.get()->availableVideoSourceId,
                                     sizeof(std::string));
+          ImGui::PushID(tileId.c_str());
           ImGui::Text("%s", availableSource->sourceName.c_str());
+          ImGui::PopID();
           ImGui::EndDragDropSource();
         }
       };
@@ -95,7 +96,7 @@ void FileBrowserView::refresh()
           ConfigService::getService()->availableStrandFromPath(file.path);
 
       // Create a closure which will be called when the tile is dragged
-      std::function<void()> dragCallback = [availableStrand]()
+      std::function<void(std::string)> dragCallback = [availableStrand](std::string tileId)
       {
         // Create a payload to carry the video source
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
@@ -103,7 +104,9 @@ void FileBrowserView::refresh()
           // Set payload to carry the index of our item (could be anything)
           ImGui::SetDragDropPayload("AvailableStrand", &availableStrand,
                                     sizeof(availableStrand));
+          ImGui::PushID(tileId.c_str());
           ImGui::Text("%s", availableStrand.name.c_str());
+          ImGui::PopID();
           ImGui::EndDragDropSource();
         }
       };

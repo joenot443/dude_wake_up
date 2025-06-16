@@ -1,26 +1,40 @@
 #version 150
 
-uniform sampler2D tex;
-uniform vec2 dimensions;
-uniform float time;
-uniform float speed;
-in vec2 coord;
-out vec4 outputColor;
-
+// Input uniforms
+uniform sampler2D tex;        // Source texture
+uniform vec2 dimensions;      // Screen dimensions
+uniform float time;          // Current time
+uniform float speed;         // Animation speed multiplier
+uniform float redMultiplier;
+uniform float greenMultiplier;
+uniform float blueMultiplier;
+in vec2 coord;               // UV coordinates
+out vec4 outputColor;        // Final output color
 
 void main()
 {
-  float time = time * 0.20;
-  vec2 uv = coord.xy / dimensions.xy;
-  vec2 p = uv;
-  float d, a = atan(p.y, p.x) + time * speed;
-  d = sqrt(dot(p,p));
-  p = vec2(cos(a), sin(a)) * d;
-  vec4 col = texture(tex, p + vec2(time * 0.01, 0.0));
-  col.r = sin(col.r * 25.0 + time * 15.0);
-  col.g = sin(col.g * 30.0 + time * 30.0);
-  col.b = sin(col.b * 30.0 + time * 10.0);
+  // Scale time for slower animation
+  float scaledTime = time * 0.20;
   
-  outputColor = col;
+  // Convert coordinates to UV space
+  vec2 uv = coord.xy / dimensions.xy;
+  vec2 position = uv;
+  
+  // Calculate polar coordinates
+  float radius = sqrt(dot(position, position));
+  float angle = atan(position.y, position.x) + scaledTime * speed;
+  
+  // Convert back to cartesian with rotation
+  vec2 rotatedPos = vec2(cos(angle), sin(angle)) * radius;
+  
+  // Sample texture with slight time-based offset
+  vec4 color = texture(tex, rotatedPos + vec2(scaledTime * 0.01, 0.0));
+  
+  // Apply color channel oscillations
+  color.r = sin(color.r * 25.0 * redMultiplier + scaledTime * 15.0);
+  color.g = sin(color.g * 30.0 * greenMultiplier + scaledTime * 30.0);
+  color.b = sin(color.b * 30.0 * blueMultiplier + scaledTime * 10.0);
+  
+  outputColor = color;
 }
 

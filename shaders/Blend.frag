@@ -6,6 +6,7 @@ uniform int mode;
 uniform int blendWithEmpty;
 uniform int flip;
 uniform float alpha;
+uniform float amount;
 
 in vec2 coord;
 out vec4 outputColor;
@@ -13,31 +14,33 @@ out vec4 outputColor;
 // Function to implement various blending modes
 vec4 blend(vec4 a, vec4 b, int mode) {
   vec4 result;
-  if (mode == 0) { // Multiply
+  if (mode == 0) { // Mix
+    result = mix(a, b, amount);
+  } else if (mode == 1) { // Multiply
     result = a * b;
-  } else if (mode == 1) { // Screen
+  } else if (mode == 2) { // Screen
     result = 1.0 - (1.0 - a) * (1.0 - b);
-  } else if (mode == 2) { // Darken
+  } else if (mode == 3) { // Darken
     result = min(a, b);
-  } else if (mode == 3) { // Lighten
+  } else if (mode == 4) { // Lighten
     result = max(a, b);
-  } else if (mode == 4) { // Difference
+  } else if (mode == 5) { // Difference
     result = abs(a - b);
-  } else if (mode == 5) { // Exclusion
+  } else if (mode == 6) { // Exclusion
     result = a + b - 2.0 * a * b;
-  } else if (mode == 6) { // Overlay
+  } else if (mode == 7) { // Overlay
     result = a.r < 0.5 ? (2.0 * a * b) : (1.0 - 2.0 * (1.0 - a) * (1.0 - b));
-  } else if (mode == 7) { // Hard light
+  } else if (mode == 8) { // Hard light
     result = b.r < 0.5 ? (2.0 * a * b) : (1.0 - 2.0 * (1.0 - a) * (1.0 - b));
-  } else if (mode == 8) { // Soft light
+  } else if (mode == 9) { // Soft light
     result = b.r < 0.5 ? (2.0 * a * b + a * a * (1.0 - 2.0 * b)) : (sqrt(a) * (2.0 * b - 1.0) + (2.0 * a) * (1.0 - b));
-  } else if (mode == 9) { // Color dodge
+  } else if (mode == 10) { // Color dodge
     result = a / (1.0 - b);
-  } else if (mode == 10) { // Linear dodge (Add)
+  } else if (mode == 11) { // Linear dodge (Add)
     result = a + b;
-  } else if (mode == 11) { // Burn
+  } else if (mode == 12) { // Burn
     result = 1.0 - (1.0 - a) / b;
-  } else if (mode == 12) { // Linear burn
+  } else if (mode == 13) { // Linear burn
     result = a + b - 1.0;
   } else {
     result = a; // Default fallback
@@ -66,5 +69,10 @@ void main() {
   }
   
   vec4 result = blend(tex_color, tex2_color, mode);
+  // Mix
+  if (mode == 0) {
+    outputColor = result;
+    return;
+  }
 	outputColor = mix(tex_color, result, alpha);
 }

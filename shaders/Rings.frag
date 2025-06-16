@@ -4,6 +4,7 @@ uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform vec3 color;
 uniform float time;
+uniform int ringCount;
 uniform float ringSize;
 
 #define M_PI 3.1415926535897932384626433832795
@@ -19,7 +20,7 @@ void main() {
 
   vec2 ratio = vec2(width, height) / width;
   vec2 pos = vTextureCoord * ratio;
-  float scale = (ringSize + sin(t / 25000.0)) / 5.0;
+  float scale = (ringSize + sin(t / 25000.0)) / float(ringCount);
   pos += vec2(sin(t / 3500.0), sin(t / 3650.0)) * 0.1;
   vec2 centre = vec2(0.1 * scale, 0.1 * scale);
 

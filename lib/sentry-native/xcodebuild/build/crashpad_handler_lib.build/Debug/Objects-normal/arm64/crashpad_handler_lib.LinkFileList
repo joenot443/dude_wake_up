@@ -1,8 +1,0 @@
-/Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/build/crashpad_handler_lib.build/Debug/Objects-normal/arm64/crash_report_upload_thread.o
-/Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/build/crashpad_handler_lib.build/Debug/Objects-normal/arm64/handler_main.o
-/Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/build/crashpad_handler_lib.build/Debug/Objects-normal/arm64/crash_report_exception_handler.o
-/Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/build/crashpad_handler_lib.build/Debug/Objects-normal/arm64/exception_handler_server.o
-/Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/build/crashpad_handler_lib.build/Debug/Objects-normal/arm64/file_limit_annotation.o
-/Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/build/crashpad_handler_lib.build/Debug/Objects-normal/arm64/minidump_to_upload_parameters.o
-/Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/build/crashpad_handler_lib.build/Debug/Objects-normal/arm64/prune_crash_reports_thread.o
-/Users/jcrozier/Downloads/sentry-nativeee/xcodebuild/build/crashpad_handler_lib.build/Debug/Objects-normal/arm64/user_stream_data_source.o

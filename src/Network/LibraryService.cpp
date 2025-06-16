@@ -8,19 +8,52 @@
 #include "LibraryService.hpp"
 #include "VideoSourceService.hpp"
 #include "ConfigService.hpp"
+#include "Credit.hpp"
 #include "MainApp.h"
 #include "Console.hpp"
 #include "httplib.h"
 #include "base64.h"
+#include "json.hpp"
 //#include <sentry.h>
 #include <fstream>
 #include <iostream>
 
-const static std::string API_URL = "165.227.44.1";
-//const static std::string API_URL = "localhost:6000";
+using json = nlohmann::json;
+
+// Helper function to parse HTTPS URL into host and path
+// Returns false if parsing fails
+inline bool parseHttpsUrl(const std::string& url_str, std::string& host, std::string& path) {
+    const std::string scheme = "https://";
+    if (url_str.rfind(scheme, 0) != 0) {
+        log("Error: URL does not start with https:// : %s", url_str.c_str());
+        return false; // Not an HTTPS URL
+    }
+    size_t scheme_end = scheme.length();
+    size_t host_end = url_str.find('/', scheme_end);
+
+    if (host_end != std::string::npos) {
+        host = url_str.substr(scheme_end, host_end - scheme_end);
+        path = url_str.substr(host_end);
+    } else {
+        // URL is just "https://hostname"
+        host = url_str.substr(scheme_end);
+        path = "/"; // Default path
+    }
+
+    if (host.empty()) {
+       log("Error: Could not parse host from HTTPS URL: %s", url_str.c_str());
+       return false;
+    }
+    return true;
+}
+
+const static std::string API_URL = "https://nottawa.app";
+//const static std::string API_URL = "localhost";
 
 void LibraryService::setup()
 {
+  // Automatically fetch shader credits on startup
+  backgroundFetchShaderCredits();
 }
 
 //void LibraryService::uploadChainer(const std::string &name, const std::string &author, const std::shared_ptr<ShaderChainer> chainer, std::function<void()> success_callback, std::function<void(const std::string &)> error_callback)
@@ -77,8 +110,38 @@ void LibraryService::repopulateVideoSourcesFromMainThread() {
 // }
 void LibraryService::fetchLibraryFiles()
 {
-  httplib::Client cli(API_URL, 6000);
-  auto res = cli.Get("/api/media");
+  std::string host, path;
+
+  // Parse the HTTPS URL
+  if (!parseHttpsUrl(API_URL, host, path)) {
+    log("Error: Could not parse API HTTPS URL: %s", API_URL.c_str());
+    return;
+  }
+
+  #ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+    log("Error: HTTPS URL provided but httplib not compiled with SSL support for library files.");
+    std::cerr << "Error: HTTPS URL provided but httplib not compiled with SSL support for library files." << std::endl;
+    return;
+  #endif
+
+  // Create SSL client directly
+  httplib::SSLClient cli(host);
+  
+  // Disable SSL certificate verification (insecure but matches other methods)
+  log("Warning: Disabling SSL server certificate verification! This is insecure.");
+  cli.enable_server_certificate_verification(false);
+  
+  // Set reasonable timeouts
+  cli.set_connection_timeout(10, 0);
+  cli.set_read_timeout(30, 0);
+  cli.set_follow_location(true);
+
+  // Add a User-Agent header
+  httplib::Headers headers = {
+    { "User-Agent", "dude_wake_up_downloader/1.0" }
+  };
+
+  auto res = cli.Get("/api/media", headers);
 
   if (res && res->status == 200)
   {
@@ -106,9 +169,12 @@ void LibraryService::fetchLibraryFiles()
   else
   {
     if (res) {
-      log(res->body);
+      log("Failed to fetch library files. Status: %d", res->status);
+      log("Response body: %s", res->body.c_str());
+    } else {
+      auto err = res.error();
+      log("Failed to fetch library files - connection error: %s (%d)", httplib::to_string(err).c_str(), static_cast<int>(err));
     }
-    log("Failed to fetch library files");
   }
 }
 
@@ -120,33 +186,6 @@ bool LibraryService::hasThumbnailOnDisk(std::shared_ptr<LibraryFile> file)
 bool LibraryService::hasMediaOnDisk(std::shared_ptr<LibraryFile> file)
 {
   return ofFile::doesFileExist(file->videoPath());
-}
-
-// Helper function to parse HTTPS URL into host and path
-// Returns false if parsing fails
-inline bool parseHttpsUrl(const std::string& url_str, std::string& host, std::string& path) {
-    const std::string scheme = "https://";
-    if (url_str.rfind(scheme, 0) != 0) {
-        log("Error: URL does not start with https:// : %s", url_str.c_str());
-        return false; // Not an HTTPS URL
-    }
-    size_t scheme_end = scheme.length();
-    size_t host_end = url_str.find('/', scheme_end);
-
-    if (host_end != std::string::npos) {
-        host = url_str.substr(scheme_end, host_end - scheme_end);
-        path = url_str.substr(host_end);
-    } else {
-        // URL is just "https://hostname"
-        host = url_str.substr(scheme_end);
-        path = "/"; // Default path
-    }
-
-    if (host.empty()) {
-       log("Error: Could not parse host from HTTPS URL: %s", url_str.c_str());
-       return false;
-    }
-    return true;
 }
 
 // Downloads the .jpg stored at file.thumbnailUrl, then stores it in
@@ -350,4 +389,124 @@ std::shared_ptr<LibraryFile> LibraryService::libraryFileForId(std::string id)
     return libraryFiles[id];
   }
   return nullptr;
+}
+
+// Helper function to convert shader name string to ShaderType enum
+ShaderType shaderTypeFromName(const std::string& name) {
+  // Build a map of all possible shader names to their enum values
+  static std::map<std::string, ShaderType> nameToTypeMap;
+  if (nameToTypeMap.empty()) {
+    // Populate the map by iterating through all shader types
+    std::vector<ShaderType> allTypes = AllShaderTypes();
+    for (ShaderType type : allTypes) {
+      nameToTypeMap[shaderTypeName(type)] = type;
+    }
+    // Also add the additional shader types not in AllShaderTypes()
+    for (int i = static_cast<int>(ShaderTypeNone); i <= static_cast<int>(ShaderTypeGodRay); i++) {
+      ShaderType type = static_cast<ShaderType>(i);
+      nameToTypeMap[shaderTypeName(type)] = type;
+    }
+  }
+  
+  auto it = nameToTypeMap.find(name);
+  if (it != nameToTypeMap.end()) {
+    return it->second;
+  }
+  return ShaderTypeNone; // Return None if name not found
+}
+
+// Fetches the shader credits from the server at /api/credits.
+// This is a GET request that returns a JSON object of the form:
+/*{[
+  {
+  "name": "Aerogel",
+  "credit": "Joe Crozier",
+  "description": "A shader that looks like aerogel"
+  }
+]
+}
+ */
+void LibraryService::fetchShaderCredits()
+{
+  std::string host, path;
+
+  // Parse the HTTPS URL
+  if (!parseHttpsUrl(API_URL, host, path)) {
+    log("Error: Could not parse API HTTPS URL: %s", API_URL.c_str());
+    return;
+  }
+
+  #ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+    log("Error: HTTPS URL provided but httplib not compiled with SSL support for shader credits.");
+    std::cerr << "Error: HTTPS URL provided but httplib not compiled with SSL support for shader credits." << std::endl;
+    return;
+  #endif
+
+  // Create SSL client directly
+  httplib::SSLClient cli(host);
+  
+  // Disable SSL certificate verification (insecure but matches other methods)
+  log("Warning: Disabling SSL server certificate verification! This is insecure.");
+  cli.enable_server_certificate_verification(false);
+  
+  // Set reasonable timeouts
+  cli.set_connection_timeout(10, 0);
+  cli.set_read_timeout(30, 0);
+  cli.set_follow_location(true);
+
+  // Add a User-Agent header
+  httplib::Headers headers = {
+    { "User-Agent", "dude_wake_up_downloader/1.0" }
+  };
+
+  auto res = cli.Get("/api/credits", headers);
+
+  if (res && res->status == 200)
+  {
+    json json_body = json::parse(res->body);
+    shaderCredits.clear();
+
+    for (auto& shader : json_body) {
+      std::string shaderName = shader["name"];
+      std::string credit = shader["credit"];
+      std::string description = shader["description"];
+      ShaderType type = shaderTypeFromName(shaderName);
+      if (type != ShaderTypeNone) {
+        shaderCredits.emplace(type, Credit(shaderName, credit, description));
+      } else {
+//        log("Warning: Unknown shader type name in credits: %s", shaderName.c_str());
+      }
+    }
+
+    log("Successfully fetched %zu shader credits", shaderCredits.size());
+  }
+  else
+  {
+    if (res) {
+      log("Failed to fetch shader credits. Status: %d", res->status);
+      log("Response body: %s", res->body.c_str());
+    } else {
+      auto err = res.error();
+      log("Failed to fetch shader credits - connection error: %s (%d)", httplib::to_string(err).c_str(), static_cast<int>(err));
+    }
+  }
+}
+
+void LibraryService::backgroundFetchShaderCredits()
+{
+  downloadFutures.push_back(std::async(std::launch::async, &LibraryService::fetchShaderCredits, this));
+}
+
+Credit* LibraryService::getShaderCredit(ShaderType type)
+{
+  auto it = shaderCredits.find(type);
+  if (it != shaderCredits.end()) {
+    return &it->second;
+  }
+  return nullptr; // Return nullptr if no credit found
+}
+
+bool LibraryService::hasCredit(ShaderType type)
+{
+  return shaderCredits.find(type) != shaderCredits.end();
 }

@@ -38,15 +38,11 @@ struct MixSettings : public ShaderSettings {
 
 class MixShader : public Shader {
 public:
-
-
   MixSettings *settings;
-
   MixShader(MixSettings *settings) : settings(settings), Shader(settings) {};
   
   void setup() override {
-shader.load("shaders/Mix");
-shader.load("shaders/Mix");
+    shader.load("shaders/Mix");
   }
   
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {

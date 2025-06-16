@@ -1,3 +1,0 @@
-# Fibers
-
-Information about Fibers

@@ -27,10 +27,10 @@ struct LumaMaskMakerSettings: public ShaderSettings {
   std::shared_ptr<Parameter> drawInput;
   
   LumaMaskMakerSettings(std::string shaderId, json j, std::string name) :
-  upper(std::make_shared<Parameter>("upper", 1.0, 0.0, 1.0)),
-  lower(std::make_shared<Parameter>("lower", 0.5, 0.0, 1.0)),
-  flip(std::make_shared<Parameter>("invert", ParameterType_Bool)),
-  drawInput(std::make_shared<Parameter>("drawInput", ParameterType_Bool)),
+  upper(std::make_shared<Parameter>("Upper", 1.0, 0.0, 1.0)),
+  lower(std::make_shared<Parameter>("Lower", 0.5, 0.0, 1.0)),
+  flip(std::make_shared<Parameter>("Invert", ParameterType_Bool)),
+  drawInput(std::make_shared<Parameter>("Draw Input", ParameterType_Bool)),
   upperOscillator(std::make_shared<WaveformOscillator>(upper)),
   lowerOscillator(std::make_shared<WaveformOscillator>(lower)),
   ShaderSettings(shaderId, 0, "LumaMaskMaker") {
@@ -80,8 +80,7 @@ ShaderType type() override {
   }
 
   void drawSettings() override {
-    
-    CommonViews::RangeSlider("Luma Mask Range", shaderId, settings->upper, settings->lower, formatString("%.2f - %.2f", settings->lower->value, settings->upper->value));
+    CommonViews::RangeSlider("Luma Mask Range", settings->upper->paramId, settings->upper, settings->lower, formatString("%.2f - %.2f", settings->lower->value, settings->upper->value));
     CommonViews::ShaderCheckbox(settings->drawInput);
     CommonViews::ShaderCheckbox(settings->flip);
   }

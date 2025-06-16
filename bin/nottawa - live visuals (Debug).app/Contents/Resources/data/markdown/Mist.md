@@ -1,3 +1,0 @@
-# Mist
-
-Information about Mist

@@ -1,3 +1,0 @@
-# GridRun
-
-Information about GridRun

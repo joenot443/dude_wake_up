@@ -25,8 +25,8 @@ struct BounceSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> scaleOscillator;
   
   BounceSettings(std::string shaderId, json j, std::string name) :
-  speed(std::make_shared<Parameter>("speed", 1.0, 0.0, 10.0)),
-  scale(std::make_shared<Parameter>("scale", 0.1, 0.0, 1.0)),
+  speed(std::make_shared<Parameter>("Speed", 1.0, 0.0, 10.0)),
+  scale(std::make_shared<Parameter>("Scale", 0.1, 0.0, 1.0)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
   ShaderSettings(shaderId, j, name) {

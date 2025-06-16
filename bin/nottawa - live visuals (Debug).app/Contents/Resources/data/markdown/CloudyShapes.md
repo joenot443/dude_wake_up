@@ -1,3 +1,0 @@
-# CloudyShapes
-
-Information about CloudyShapes

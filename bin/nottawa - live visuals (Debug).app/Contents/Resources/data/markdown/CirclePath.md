@@ -1,3 +1,0 @@
-# CirclePath
-
-Information about CirclePath

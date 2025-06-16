@@ -8,10 +8,10 @@
 #ifndef ShaderChainerService_hpp
 #define ShaderChainerService_hpp
 
+#include "Models/Strand.hpp"
 #include "AvailableShader.hpp"
 #include "AvailableVideoSource.hpp"
 #include "ConfigurableService.hpp"
-#include "Strand.hpp"
 #include "Shader.hpp"
 #include "AvailableStrand.hpp"
 #include "Connection.hpp"

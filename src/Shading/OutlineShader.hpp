@@ -18,15 +18,23 @@
 #include <stdio.h>
 
 struct OutlineSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
+  std::shared_ptr<Parameter> weight;
+  std::shared_ptr<WaveformOscillator> weightOscillator;
+
+  std::shared_ptr<Parameter> fineness;
+  std::shared_ptr<WaveformOscillator> finenessOscillator;
+
+  std::shared_ptr<Parameter> color;
 
   OutlineSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
+  weight(std::make_shared<Parameter>("Weight", 10.0, 0.0, 100.0)),
+  color(std::make_shared<Parameter>("Color", ParameterType_Color)),
+  fineness(std::make_shared<Parameter>("Fineness", 64.0, 1.0, 300.0)),
+  weightOscillator(std::make_shared<WaveformOscillator>(weight)),
+  finenessOscillator(std::make_shared<WaveformOscillator>(fineness)),
   ShaderSettings(shaderId, j, "Outline") {
-    parameters = { shaderValue };
-    oscillators = { shaderValueOscillator };
+    parameters = { weight, color, fineness };
+    oscillators = { weightOscillator, finenessOscillator };
     load(j);
     registerParameters();
   };
@@ -38,16 +46,22 @@ struct OutlineShader: Shader {
   ofShader shader;
   
   void setup() override {
-    shader.load("shaders/Outline");
+    shader.load("shaders/Stroke");
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
+    shader.setUniform1f("weight", settings->weight->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
+    shader.setUniform1f("fineness", settings->fineness->value);
+    shader.setUniform4f("strokeColor", 
+      settings->color->color->data()[0],
+      settings->color->color->data()[1],
+      settings->color->color->data()[2],
+      1.0); // Full opacity for the stroke
     frame->draw(0, 0);
     shader.end();
     canvas->end();
@@ -66,9 +80,9 @@ struct OutlineShader: Shader {
   }
 
   void drawSettings() override {
-    
-
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
+    CommonViews::ShaderParameter(settings->weight, settings->weightOscillator);
+    CommonViews::ShaderParameter(settings->fineness, settings->finenessOscillator);
+    CommonViews::ShaderColor(settings->color);
   }
 };
 

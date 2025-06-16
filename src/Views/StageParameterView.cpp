@@ -36,7 +36,7 @@ void StageParameterView::draw(std::shared_ptr<Parameter> param) {
       ImGui::BeginChild(param->paramId.c_str(), StageParameterViewSize, ImGuiChildFlags_AlwaysUseWindowPadding, ImGuiWindowFlags_NoDecoration);
       CommonViews::H3Title(param->name);
       CommonViews::H4Title(param->ownerName);
-      ImGui::PushFont(FontService::getService()->h3);
+      ImGui::PushFont(FontService::getService()->current->h3);
       bool old = param->boolValue;
       ImGui::Checkbox(idString(param->paramId).c_str(), &param->boolValue);
       bool ret = false;

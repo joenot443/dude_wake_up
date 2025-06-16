@@ -271,7 +271,7 @@ void OscillatorView::drawMini(std::shared_ptr<Oscillator> oscillator, std::share
                         -value->max * 2, value->max * 2, "S", ImGuiSliderFlags_Logarithmic);
 
     if (drawExtras) {
-      ImGui::PushFont(FontService::getService()->sm);
+      ImGui::PushFont(FontService::getService()->current->sm);
       ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 50);
       ImGui::Text("%s", formatString("%.2f", waveformOscillator->frequency->value).c_str());
       ImGui::SameLine(0, 5);

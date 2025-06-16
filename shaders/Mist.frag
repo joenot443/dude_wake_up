@@ -3,7 +3,9 @@
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float v_time;
-uniform float color;
+uniform vec3 mainColor;
+uniform vec3 secondaryColor;
+
 in vec2 coord;
 out vec4 outputColor;
 
@@ -209,7 +211,7 @@ vec3 raymarch_lsdlive(vec3 ro, vec3 rd, vec2 uv) {
   }
 
   // Shading: uv, iteration & glow:
-  vec3 c = mix(vec3(.9, .8, .6), vec3(.1, .1, .2), length(uv) + ri);
+  vec3 c = mix(mainColor, secondaryColor, length(uv) + ri);
   c.r += sin(p.z * .1) * .2;
   c += g * .035; // glow trick from balkhan https://www.shadertoy.com/view/4t2yW1
 

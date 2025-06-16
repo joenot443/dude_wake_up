@@ -1,3 +1,0 @@
-# Circle
-
-Information about Circle

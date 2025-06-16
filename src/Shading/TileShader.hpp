@@ -48,10 +48,10 @@ public:
   
   void setup() override {
     shader.load("shaders/Tile");
-    shader.load("shaders/Tile");
   }
   
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
+    frame->getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
     canvas->begin();
     shader.begin();
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());

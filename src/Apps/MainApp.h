@@ -21,7 +21,8 @@ public:
   void draw();
   void executeOnMainThread(const std::function<void()>& task);
   void runMainThreadTasks();
-  
+  void drawMainStage();
+
   MainApp(std::shared_ptr<ofAppBaseWindow> window) : window(window){
     app = this;
   };
@@ -35,11 +36,11 @@ private:
   void keyPressed(int key);
   void keyReleased(int key);
 
-  void drawMainStage();
   void setupStyle();
   void drawMainSettings();
   void resetState();
   void affirmWindowSize();
+  void affirmScale();
 
   std::shared_ptr<ofAppBaseWindow> window;
   ofxImGui::Gui gui;
@@ -53,6 +54,8 @@ private:
   
   std::queue<std::function<void()>> mainThreadTasks;
   std::mutex mainThreadTasksMutex;
+  
+  float currentPixelScale = 0.0f;
 
   struct Style {
     float alpha = 1.0f;

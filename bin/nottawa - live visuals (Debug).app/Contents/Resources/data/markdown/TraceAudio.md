@@ -1,3 +1,0 @@
-# TraceAudio
-
-Information about TraceAudio

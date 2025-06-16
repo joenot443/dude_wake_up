@@ -1,3 +1,0 @@
-# DoubleBlur
-
-Information about DoubleBlur

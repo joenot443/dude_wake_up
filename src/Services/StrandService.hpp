@@ -9,7 +9,8 @@
 #define StrandService_hpp
 
 #include <stdio.h>
-#include "Strand.hpp"
+#include "Connection.hpp"
+#include "Models/Strand.hpp"
 #include "observable.hpp"
 #include "ConfigurableService.hpp"
 #include "AvailableStrand.hpp"

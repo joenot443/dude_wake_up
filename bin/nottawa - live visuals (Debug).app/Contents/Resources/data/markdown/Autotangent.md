@@ -1,3 +1,0 @@
-# Autotangent
-
-Information about Autotangent

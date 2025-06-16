@@ -35,7 +35,6 @@ struct OctagramsSettings: public ShaderSettings {
 struct OctagramsShader: Shader {
   OctagramsSettings *settings;
   OctagramsShader(OctagramsSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   
   void setup() override {
     shader.load("shaders/Octagrams");

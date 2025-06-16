@@ -63,16 +63,22 @@ void ShaderBrowserView::setup()
 }
 
 void ShaderBrowserView::drawSearchView() {
-  char buffer[256];
-  strncpy(buffer, searchQuery.c_str(), sizeof(buffer));
-  if (ImGui::InputText("Search", buffer, sizeof(buffer))) {
-    searchQuery = std::string(buffer);
-    searchDirty = true;
-  }
+  ImGui::BeginChild("##shaderSearchView", ImVec2(ImGui::GetWindowWidth() - 10.0, 30.0), ImGuiChildFlags_AlwaysAutoResize | ImGuiChildFlags_AutoResizeY, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+  CommonViews::SearchBar(searchQuery, searchDirty, "ShaderSearch");
+  ImGui::EndChild();
   
   if (searchQuery.length() != 0) {
     searchResultsTileBrowserView->draw();
-    return;
+  }
+  
+  if (searchQuery.length() != 0 && searchTileItems.size() > 0) {
+    searchResultsTileBrowserView->draw();
+  } else if (searchQuery.length() > 0) {
+    ImGui::Dummy(ImVec2(1.0, 5.0));
+    ImGui::Dummy(ImVec2(5.0, 1.0));
+    ImGui::SameLine();
+    ImGui::Text("No results.");
+    ImGui::Dummy(ImVec2(1.0, 5.0));
   }
 }
 
@@ -81,7 +87,7 @@ void ShaderBrowserView::setCurrentTab(int tabIndex) {
 }
 
 void ShaderBrowserView::drawSelectedBrowser() {
-  ImGui::BeginChild("##selectedBrowser", ImVec2(ImGui::GetWindowWidth() - 20.0, ImGui::GetWindowHeight() - 80.0), ImGuiChildFlags_None);
+  ImGui::BeginChild("##selectedBrowser", ImVec2(ImGui::GetWindowWidth() - 20.0, ImGui::GetWindowHeight() - 80.0), ImGuiChildFlags_None, ImGuiWindowFlags_AlwaysVerticalScrollbar);
   switch (currentTab) {
     case 0: // Favorites
       favoritesTileBrowserView->draw();

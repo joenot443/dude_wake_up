@@ -8,6 +8,7 @@
 #include "AudioSourceService.hpp"
 #include "LayoutStateService.hpp"
 #include "FileAudioSource.hpp"
+#include "Console.hpp"
 #include "MicrophoneAudioSource.hpp"
 #include "ConfigService.hpp"
 #include "UUID.hpp"
@@ -47,7 +48,7 @@ void AudioSourceService::populateTracks() {
     if (bpm == 0) {
       continue;
     }
-    std::string trackName = name.substr(4);
+    std::string trackName = name.substr(3);
     audioTracks.push_back(std::make_shared<AudioTrack>(trackName, path, bpm));
   }
   // Sort by name
@@ -58,7 +59,7 @@ void AudioSourceService::populateTracks() {
 }
 
 void AudioSourceService::populateSources() {
-//  link.enable(true);
+  link.enable(true);
   
   // Get every input audio device
   auto devices = ofSoundStream().getDeviceList();
@@ -112,11 +113,10 @@ void AudioSourceService::update() {
   
   if (LayoutStateService::getService()->abletonLinkEnabled) {
     selectedAudioSource->audioAnalysis.bpmEnabled = true;
-//    selectedAudioSource->audioAnalysis.bpm->setValue(link.captureAppSessionState().tempo());
+    selectedAudioSource->audioAnalysis.bpm->setValue(link.captureAppSessionState().tempo());
     
-//    double beatCount = link.captureAppSessionState().beatAtTime(link.clock().micros(), 4.);
-    // Only use the fractional component of the beatCount
-//    selectedAudioSource->audioAnalysis.updateBeat(beatCount - floor(beatCount));
+    double beatCount = link.captureAppSessionState().beatAtTime(link.clock().micros(), 4.);
+    selectedAudioSource->audioAnalysis.updateBeat(beatCount - floor(beatCount));
   } else if (selectedAudioSource->type() == AudioSourceType_Microphone) { // Don't update for the samples
     selectedAudioSource->audioAnalysis.bpm->value = AudioSourceService::getService()->tapper.bpm();
     selectedAudioSource->audioAnalysis.updateBeat(selectedAudioSource->audioAnalysis.bpmPct());

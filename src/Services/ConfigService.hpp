@@ -11,11 +11,14 @@
 #include <stdio.h>
 
 #include "AvailableStrand.hpp"
-#include "Strand.hpp"
+#include "Models/Strand.hpp"
 #include "AvailableShaderConfig.hpp"
 #include "observable.hpp"
 #include "ShaderType.hpp"
 #include "Workspace.hpp"
+
+class Shader;
+class Parameter;
 
 using json = nlohmann::json;
 static const std::string ConfigFolderName = "shader_configs";

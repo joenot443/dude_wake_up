@@ -64,6 +64,8 @@ public:
   // Shaders which can be optionally applied to an existing Shader.
   std::vector<std::shared_ptr<Shader>> optionalShaders;
   
+  std::shared_ptr<ofFbo> parentFrame() override;
+  
   // Timestamp for the last time the Shader file was modified
   unsigned int lastModified;
   
@@ -87,6 +89,7 @@ public:
   virtual std::string name() { return shaderTypeName(type()); };
   virtual bool enabled() { return true; };
   virtual bool hasFrameBuffer() { return false; };
+  virtual std::string fileName() { return name(); };
   void saveFrame(ofFbo *frame){};
   
   void checkForFileChanges();

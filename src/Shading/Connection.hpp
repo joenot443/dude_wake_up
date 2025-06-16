@@ -14,12 +14,18 @@
 #include <set>
 #include <vector>
 #include <string>
+#include "JSONSerializable.hpp"
+#include "imgui_node_editor.h"
 #include "VideoSourceSettings.hpp"
 #include "ShaderType.hpp"
 #include "UUID.hpp"
 
+using json = nlohmann::json;
+
 class Connection;
 class Connectable;
+
+namespace ed = ax::NodeEditor;
 
 enum ConnectableType
 {
@@ -102,6 +108,7 @@ public:
   ConnectionType type;
   InputSlot inputSlot;
   OutputSlot outputSlot;
+  ed::LinkId linkId;
   
   Connection(std::shared_ptr<Connectable> start,
              std::shared_ptr<Connectable> end,
@@ -118,7 +125,7 @@ class Connectable : public std::enable_shared_from_this<Connectable>
 {
 public:
   virtual ~Connectable() = default;
-
+  
   std::map<InputSlot, std::shared_ptr<Connection>> inputs;
   std::map<OutputSlot, std::vector<std::shared_ptr<Connection>>> outputs; // Changed to vector
   
@@ -131,13 +138,16 @@ public:
   // The settings for the underlying Shader or VideoSource
   virtual std::shared_ptr<Settings> settingsRef() = 0;
   
+  // Returns the first parent's current frame
+  virtual std::shared_ptr<ofFbo> parentFrame() = 0;
+  
   // The max number of inputs supported.
   virtual int inputCount() = 0;
   
   virtual void drawSettings() = 0;
   
   virtual void drawOptionalSettings() = 0;
-    
+  
   // The settings for the VideoSource itself, or the parent VideoSource,
   // or the defaultVideoSource if the Connectable has no VideoSource parent.
   virtual std::shared_ptr<VideoSourceSettings> sourceSettings() = 0;
@@ -164,7 +174,7 @@ public:
   {
     return outputs.find(slot) != outputs.end() && !outputs[slot].empty();
   }
-
+  
   bool hasOutputForType(ConnectionType type)
   {
     for (auto const& [key, connections] : outputs)
@@ -192,6 +202,42 @@ public:
     return slots;
   }
   
+  std::vector<std::shared_ptr<Connectable> > outputConnectables() {
+    std::vector<std::shared_ptr<Connectable> > connectables;
+    for (auto const& [key, connections] : outputs) {
+      for (auto const& connection : connections) {
+        connectables.push_back(connection->end);
+      }
+    }
+    return connectables;
+  }
+  
+  std::vector<std::shared_ptr<Connection> > outputConnections() {
+    std::vector<std::shared_ptr<Connection> > outputConnections;
+    for (auto const& [key, connections] : outputs) {
+      for (auto const& connection : connections) {
+        outputConnections.push_back(connection);
+      }
+    }
+    return outputConnections;
+  }
+  
+  std::vector<std::shared_ptr<Connectable> > inputConnectables() {
+    std::vector<std::shared_ptr<Connectable> > connectables;
+    for (auto const& [key, connection] : inputs) {
+      connectables.push_back(connection->start);
+    }
+    return connectables;
+  }
+  
+  std::vector<std::shared_ptr<Connection> > inputConnections() {
+    std::vector<std::shared_ptr<Connection> > inputConnections;
+    for (auto const& [key, connection] : inputs) {
+      inputConnections.push_back(connection);
+    }
+    return inputConnections;
+  }
+  
   OutputSlot nextAvailableOutputSlot()
   {
     for (OutputSlot slot : StandardOutputSlots) {
@@ -206,7 +252,7 @@ public:
   {
     return inputs.at(slot)->start;
   }
-
+  
   std::shared_ptr<Connectable> outputAtSlot(OutputSlot slot)
   {
     if (outputs.find(slot) != outputs.end() && !outputs[slot].empty()) {
@@ -333,7 +379,7 @@ public:
     }
     return idsToRemove;
   }
-
+  
   std::vector<std::string> removeOutputConnections(ConnectionType type)
   {
     std::vector<std::string> idsToRemove;
@@ -348,14 +394,6 @@ public:
       }
     }
     return idsToRemove;
-  }
-  
-  // Returns the first parent's current frame
-  std::shared_ptr<ofFbo> parentFrame() {
-    for (auto const& [key, connection] : inputs) {
-      return connection->start->frame();
-    }
-    return nullptr;
   }
   
   void removeConnection(std::shared_ptr<Connection> conn)
@@ -397,24 +435,24 @@ public:
       }
     }
   }
-
+  
   // Method to gather all connections
   std::vector<std::shared_ptr<Connection>> connections() {
     std::vector<std::shared_ptr<Connection>> allConnections;
-
+    
     // Add all input connections
     for (const auto& [slot, connection] : inputs) {
       allConnections.push_back(connection);
     }
-
+    
     // Add all output connections
     for (const auto& [slot, connectionList] : outputs) {
       allConnections.insert(allConnections.end(), connectionList.begin(), connectionList.end());
     }
-
+    
     return allConnections;
   }
-
+  
   std::shared_ptr<Connection> connectionAt(InputSlot slot)
   {
     auto it = inputs.find(slot);

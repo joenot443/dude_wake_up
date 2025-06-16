@@ -1,3 +1,0 @@
-# Diffractor
-
-Information about Diffractor

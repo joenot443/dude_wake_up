@@ -8,6 +8,8 @@
 #ifndef JSONSerializable_h
 #define JSONSerializable_h
 
+#include "json.hpp"
+
 using json = nlohmann::json;
 
 class JSONSerializable {

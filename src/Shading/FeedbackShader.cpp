@@ -199,7 +199,7 @@ void FeedbackShader::drawSettings()
     settings->positionDropdown->buttonsVisible = !settings->positionDropdown->buttonsVisible;
   }
   if (settings->positionDropdown->buttonsVisible) {
-    CommonViews::MultiSlider("", formatString("##position%s", shaderId.c_str()), settings->xPosition, settings->yPosition, settings->xPositionOscillator, settings->yPositionOscillator);
+    CommonViews::MultiSlider("", formatString("##position%s", shaderId.c_str()), settings->xPosition, settings->yPosition, settings->xPositionOscillator, settings->yPositionOscillator, 0.5625);
   }
   ImGui::NewLine();
   

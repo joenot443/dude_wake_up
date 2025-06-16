@@ -20,20 +20,27 @@
 struct RotateSettings: public ShaderSettings {
   std::shared_ptr<Parameter> rotate;
   std::shared_ptr<Parameter> autoRotate;
+  std::shared_ptr<Parameter> center;
   std::shared_ptr<Parameter> scale;
+  std::shared_ptr<Parameter> verticalFlip;
+  std::shared_ptr<Parameter> horizontalFlip;
+  
   std::shared_ptr<Oscillator> scaleOscillator;
   std::shared_ptr<Oscillator> rotateOscillator;
   std::shared_ptr<Oscillator> autoRotateOscillator;
   
   RotateSettings(std::string shaderId, json j) :
   rotate(std::make_shared<Parameter>("Rotate", 0.0, 0.0, 360.0)),
+  verticalFlip(std::make_shared<Parameter>("Vertical Flip", 0.0, 0.0, 1.0, ParameterType_Bool)),
+  horizontalFlip(std::make_shared<Parameter>("Horizontal Flip", 0.0, 0.0, 1.0, ParameterType_Bool)),
+  center(std::make_shared<Parameter>("Center", 0.0, 0.0, 1.0, ParameterType_Bool)),
   scale(std::make_shared<Parameter>("Scale", 1.0, 0.0, 5.0)),
   autoRotate(std::make_shared<Parameter>("Auto-Rotate", 0.0, 0.0, 2.0, ParameterType_Bool)),
   rotateOscillator(std::make_shared<WaveformOscillator>(rotate)),
   scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
   autoRotateOscillator(std::make_shared<WaveformOscillator>(autoRotate)),
   ShaderSettings(shaderId, j, "Rotate") {
-    parameters = {rotate, scale, autoRotate};
+    parameters = {rotate, scale, autoRotate, center};
     oscillators = {rotateOscillator, scaleOscillator, autoRotateOscillator};
     audioReactiveParameter = rotate;
     load(j);
@@ -63,21 +70,31 @@ struct RotateShader: Shader {
     if (settings->autoRotate->value > 0) {
         rotate += ofGetElapsedTimef() * settings->autoRotate->value * 50;
     }
-    // Set the origin of transformations to the center of the frame
-    ofTranslate(frame->getWidth() / 2, frame->getHeight() / 2);
-    
-    // Apply rotation
-    ofRotateDeg(rotate);
-    
-    // Set the scale
-    ofScale(settings->scale->value, settings->scale->value);
-    
-    // Move the origin back to the top-left corner before drawing
-    ofTranslate(-frame->getWidth() / 2, -frame->getHeight() / 2);
 
-    // Draw the frame at origin (which has been adjusted to the center)
-    frame->draw(0, 0);
-    
+    // Apply scale
+    ofScale(settings->scale->value, settings->scale->value);
+
+    // Apply rotation with the correct pivot point
+    if (settings->center->value) {
+      // Move origin to where you want the center of the frame to be (e.g. (0,0) or wherever you want the frame's center)
+      ofTranslate(frame->getWidth() / 2, frame->getHeight() / 2);
+      ofRotateDeg(rotate);
+      // Draw the frame centered at the origin
+      frame->draw(-frame->getWidth() / 2, -frame->getHeight() / 2);
+    } else {
+      // Rotate about top-left
+      ofRotateDeg(rotate);
+      frame->draw(0, 0);
+    }
+
+    if (settings->verticalFlip->value) {
+      ofScale(1, -1);
+    }
+
+    if (settings->horizontalFlip->value) {
+      ofScale(-1, 1);
+    }
+
     // Restore the original transformation matrix
     ofPopMatrix();
     canvas->end();
@@ -96,11 +113,12 @@ struct RotateShader: Shader {
   }
 
   void drawSettings() override {
-    
-
     CommonViews::ShaderParameter(settings->scale, settings->scaleOscillator);
     CommonViews::ShaderParameter(settings->rotate, settings->rotateOscillator);
     CommonViews::ShaderParameter(settings->autoRotate, settings->autoRotateOscillator);
+    CommonViews::ShaderCheckbox(settings->center);
+    CommonViews::ShaderCheckbox(settings->verticalFlip);
+    CommonViews::ShaderCheckbox(settings->horizontalFlip);
   }
 };
 

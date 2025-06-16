@@ -18,7 +18,6 @@
 #include <stdio.h>
 
 struct SpiralSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
   std::shared_ptr<Parameter> mainColor;
   std::shared_ptr<Parameter> secondaryColor;
   std::shared_ptr<Parameter> speed;
@@ -28,20 +27,18 @@ struct SpiralSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> sizeOscillator;
 
   SpiralSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
   mainColor(std::make_shared<Parameter>("Main Color", 1.0, -1.0, 2.0)),
   secondaryColor(std::make_shared<Parameter>("Secondary Color", 1.0, -1.0, 2.0)),
   speed(std::make_shared<Parameter>("Speed", 1.0, 0.0, 5.0)),
   size(std::make_shared<Parameter>("Size", 2.5, 0.1, 10.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   sizeOscillator(std::make_shared<WaveformOscillator>(size)),
   ShaderSettings(shaderId, j, "Spiral") {
     // Default colors
     mainColor->setColor({1.0, 1.0, 1.0, 1.0});     // White
     secondaryColor->setColor({0.0, 0.0, 0.0, 1.0}); // Black
-    parameters = { shaderValue, speed, size };
-    oscillators = { shaderValueOscillator, speedOscillator, sizeOscillator };
+    parameters = { speed, size };
+    oscillators = { speedOscillator, sizeOscillator };
     load(j);
     registerParameters();
   };
@@ -59,7 +56,6 @@ struct SpiralShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("time", ofGetElapsedTimef() * settings->speed->value);
     shader.setUniform1f("size", settings->size->value);
     shader.setUniform1f("speed", 1.0);
@@ -90,8 +86,6 @@ struct SpiralShader: Shader {
   }
 
   void drawSettings() override {
-    
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     CommonViews::ShaderParameter(settings->size, settings->sizeOscillator);
     CommonViews::ShaderColor(settings->mainColor);

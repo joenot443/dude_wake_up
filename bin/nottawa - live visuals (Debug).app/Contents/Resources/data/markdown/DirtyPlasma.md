@@ -1,3 +1,0 @@
-# DirtyPlasma
-
-Information about DirtyPlasma

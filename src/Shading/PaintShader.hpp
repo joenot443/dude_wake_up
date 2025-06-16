@@ -22,7 +22,7 @@ struct PaintSettings: public ShaderSettings {
   
   PaintSettings(std::string shaderId, json j, std::string name) :
   paintOver(std::make_shared<Parameter>("Paint Over", ParameterType_Bool)),
-
+  
   ShaderSettings(shaderId, j, name) {
     parameters = { };
     oscillators = { };
@@ -36,12 +36,12 @@ struct PaintShader: Shader {
   ofFbo lastFrame;
   bool shouldClear;
   PaintShader(PaintSettings *settings) : settings(settings), Shader(settings) {};
-
+  
   void setup() override {
     shader.load("shaders/Paint");
     shouldClear = true;
   }
-
+  
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     if (!lastFrame.isAllocated() || lastFrame.getWidth() != frame->getWidth() || lastFrame.getHeight() != frame->getHeight()) {
       lastFrame.allocate(frame->getWidth(), frame->getHeight());
@@ -74,22 +74,20 @@ struct PaintShader: Shader {
     }
     canvas->end();
   }
-
+  
   void clear() override {
     
   }
-
-    int inputCount() override {
+  
+  int inputCount() override {
     return 1;
   }
-ShaderType type() override {
+  ShaderType type() override {
     return ShaderTypePaint;
   }
-
+  
   void drawSettings() override {
-    
-
-    if (ImGui::Button("Clear Buffer")) {
+    if (ImGui::Button("Clear")) {
       shouldClear = true;
     }
   }

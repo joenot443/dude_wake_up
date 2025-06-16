@@ -1,3 +1,0 @@
-# TwistedCubes
-
-Information about TwistedCubes

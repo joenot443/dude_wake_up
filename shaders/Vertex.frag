@@ -1,145 +1,145 @@
 #version 150
 
 #define S(a, b, t) smoothstep(a, b, t)
-#define NUM_LAYERS 4.
 
-// #define SIMPLE
+// Uniforms
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform vec3 color;
 uniform float time;
+
+// New uniforms for user control
+uniform float layerCount;      // Number of net layers
+uniform float netSpeed;        // Net animation speed
+uniform float sparkleIntensity;// Sparkle effect strength
+uniform float lineThickness;   // Net line thickness
+uniform float netRotation;     // Manual net rotation
+uniform float glowStrength;    // Glow effect strength
+uniform int colorMode;         // Colorization mode
+uniform float pulseFrequency;  // Node pulse frequency
+uniform float netScale;        // Net pattern scale
+uniform float edgeFade;        // Edge vignette strength
+
+// Varyings
 in vec2 coord;
 out vec4 outputColor;
 
-
-float N21(vec2 p) {
+// Hash function for pseudo-randomness
+float hash21(vec2 p) {
   vec3 a = fract(vec3(p.xyx) * vec3(213.897, 653.453, 253.098));
   a += dot(a, a.yzx + 79.76);
   return fract((a.x + a.y) * a.z);
 }
 
-vec2 GetPos(vec2 id, vec2 offs, float t) {
-  float n = N21(id+offs);
-  float n1 = fract(n*10.);
-  float n2 = fract(n*100.);
-  float a = t+n;
-  return offs + vec2(sin(a*n1), cos(a*n2))*.4;
+// Get animated position for a grid point
+vec2 getPos(vec2 id, vec2 offset, float t) {
+  float n = hash21(id + offset);
+  float n1 = fract(n * 10.);
+  float n2 = fract(n * 100.);
+  float a = t + n;
+  return offset + vec2(sin(a * n1), cos(a * n2)) * 0.4;
 }
 
-float GetT(vec2 ro, vec2 rd, vec2 p) {
-  return dot(p-ro, rd);
-}
-
-float LineDist(vec3 a, vec3 b, vec3 p) {
-  return length(cross(b-a, p-a))/length(p-a);
-}
-
-float df_line( in vec2 a, in vec2 b, in vec2 p)
-{
+// Distance from point p to line segment ab
+float distToLine(vec2 a, vec2 b, vec2 p) {
   vec2 pa = p - a, ba = b - a;
-  float h = clamp(dot(pa,ba) / dot(ba,ba), 0., 1.);
+  float h = clamp(dot(pa, ba) / dot(ba, ba), 0., 1.);
   return length(pa - ba * h);
 }
 
-float line(vec2 a, vec2 b, vec2 uv) {
-  float r1 = .04;
-  float r2 = .01;
-  
-  float d = df_line(a, b, uv);
-  float d2 = length(a-b);
-  float fade = S(1.5, .5, d2);
-  
-  fade += S(.05, .02, abs(d2-.75));
-  return S(r1, r2, d)*fade;
+// Draw a line with smooth edge
+float drawLine(vec2 a, vec2 b, vec2 uv) {
+  float r1 = 0.04 * lineThickness;
+  float r2 = 0.01 * lineThickness;
+  float d = distToLine(a, b, uv);
+  float d2 = length(a - b);
+  float fade = S(1.5, 0.5, d2);
+  fade += S(0.05, 0.02, abs(d2 - 0.75));
+  return S(r1, r2, d) * fade;
 }
 
-float NetLayer(vec2 st, float n, float t) {
-  vec2 id = floor(st)+n;
-  
-  st = fract(st)-.5;
-  
-  vec2 p[9];
-  int i=0;
-  for(float y=-1.; y<=1.; y++) {
-    for(float x=-1.; x<=1.; x++) {
-      p[i++] = GetPos(id, vec2(x,y), t);
+// Draw a single net layer
+float netLayer(vec2 st, float layerIdx, float t) {
+  vec2 id = floor(st) + layerIdx;
+  st = fract(st) - 0.5;
+
+  vec2 points[9];
+  int i = 0;
+  for (float y = -1.; y <= 1.; y++) {
+    for (float x = -1.; x <= 1.; x++) {
+      points[i++] = getPos(id, vec2(x, y), t);
     }
   }
-  
+
   float m = 0.;
   float sparkle = 0.;
-  
-  for(int i=0; i<9; i++) {
-    m += line(p[4], p[i], st);
-    
-    float d = length(st-p[i]);
-    
-    float s = (.005/(d*d));
-    s *= S(1., .7, d);
-    float pulse = sin((fract(p[i].x)+fract(p[i].y)+t)*5.)*.4+.6;
+
+  for (int j = 0; j < 9; j++) {
+    m += drawLine(points[4], points[j], st);
+    float d = length(st - points[j]);
+    float s = (0.005 / (d * d));
+    s *= S(1., 0.7, d);
+    float pulse = sin((fract(points[j].x) + fract(points[j].y) + t) * pulseFrequency) * 0.4 + 0.6;
     pulse = pow(pulse, 20.);
-    
     s *= pulse;
-    sparkle += s;
+    sparkle += s * sparkleIntensity;
   }
-  
-  m += line(p[1], p[3], st);
-  m += line(p[1], p[5], st);
-  m += line(p[7], p[5], st);
-  m += line(p[7], p[3], st);
-  
-  float sPhase = (sin(t+n)+sin(t*.1))*.25+.5;
-  sPhase += pow(sin(t*.1)*.5+.5, 50.)*5.;
-  m += sparkle*sPhase;//(*.5+.5);
-  
+
+  // Draw cross lines
+  m += drawLine(points[1], points[3], st);
+  m += drawLine(points[1], points[5], st);
+  m += drawLine(points[7], points[5], st);
+  m += drawLine(points[7], points[3], st);
+
+  float sPhase = (sin(t + layerIdx) + sin(t * 0.1)) * 0.25 + 0.5;
+  sPhase += pow(sin(t * 0.1) * 0.5 + 0.5, 50.) * 5.;
+  m += sparkle * sPhase;
+
   return m;
 }
 
-void main(  )
-{
-  vec2 uv = (coord-dimensions.xy*.5)/dimensions.y;
-  vec2 M = vec2(0.1,0.1);
-  
-  float t = time*.1;
-  
-  float s = sin(t);
-  float c = cos(t);
+void main() {
+  // Centered and normalized coordinates
+  vec2 uv = (coord - dimensions.xy * 0.5) / dimensions.y;
+  vec2 mouse = vec2(0.1, 0.1); // Unused, but kept for future use
+
+  float t = time * netSpeed;
+  float s = sin(t + netRotation);
+  float c = cos(t + netRotation);
   mat2 rot = mat2(c, -s, s, c);
-  vec2 st = uv*rot;
-  M *= rot*2.;
-  
+  vec2 st = uv * rot;
+  mouse *= rot * 2.;
+
   float m = 0.;
-  for(float i=0.; i<1.; i+=1./NUM_LAYERS) {
-    float z = fract(t+i);
-    float size = mix(15., 1., z);
-    float fade = S(0., .6, z)*S(1., .8, z);
-    
-    m += fade * NetLayer(st*size-M*z, i, time);
+  for (float i = 0.; i < 1.; i += 1. / layerCount) {
+    float z = fract(t + i);
+    float size = mix(15. * netScale, 1. * netScale, z);
+    float fade = S(0., 0.6, z) * S(1., 0.8, z);
+    m += fade * netLayer(st * size - mouse * z, i, time);
   }
-  
-  float fft  = texelFetch( tex, ivec2(.7,0), 0 ).x;
-  float glow = -uv.y*fft*2.;
-  
-  vec3 baseCol = vec3(0.0);
-  if (color.x != 0.0 && color.y != 0.0 && color.z != 0.0) {
-    baseCol = color;
+
+  float fft = texelFetch(tex, ivec2(0.7, 0), 0).x;
+  float glow = -uv.y * fft * glowStrength;
+
+  // Color selection
+  vec3 baseCol;
+  if (colorMode == 0) {
+    baseCol = (color.x != 0.0 && color.y != 0.0 && color.z != 0.0)
+      ? color
+      : vec3(s, cos(t * 0.4), -sin(t * 0.24)) * 0.4 + 0.6;
+  } else if (colorMode == 1) {
+    baseCol = vec3(sin(t), cos(t * 0.5), sin(t * 0.2)) * 0.5 + 0.5;
   } else {
-    baseCol = vec3(s, cos(t*.4), -sin(t*.24))*.4+.6;
+    baseCol = vec3(1.0, 1.0, 1.0);
   }
-  
-  vec3 col = baseCol*m;
-  col += baseCol*glow;
-  
-#ifdef SIMPLE
-  uv *= 10.;
-  col = vec3(1)*NetLayer(uv, 0., time);
-  uv = fract(uv);
-  //if(uv.x>.98 || uv.y>.98) col += 1.;
-#else
-  col *= 1.-dot(uv,uv);
+
+  vec3 col = baseCol * m;
+  col += baseCol * glow;
+
+  // Edge fade
+  col *= 1. - dot(uv, uv) * edgeFade;
   t = mod(time, 230.);
-  col *= S(0., 20., t)*S(224., 200., t);
-#endif
-  
-  outputColor = vec4(col,1);
+  col *= S(0., 20., t) * S(224., 200., t);
+
+  outputColor = vec4(col, 1);
 }

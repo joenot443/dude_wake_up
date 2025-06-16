@@ -22,16 +22,17 @@ struct RingsSettings: public ShaderSettings {
   
   std::shared_ptr<Parameter> color;
   
-  
+  std::shared_ptr<Parameter> ringCount;
 public:
   RingsSettings(std::string shaderId, json j, std::string name) :
   ringSize(std::make_shared<Parameter>("Ring Size", 5.0, 0.1, 10.0)),
-  color(std::make_shared<Parameter>("Color", 1.0, -1.0, 2.0)),
+  color(std::make_shared<Parameter>("Color", ParameterType_Color)),
+  ringCount(std::make_shared<Parameter>("Ring Count", 10.0, 1.0, 100.0, ParameterType_Int)),
   ringSizeOscillator(std::make_shared<WaveformOscillator>(ringSize)),
   ShaderSettings(shaderId, j, name) {
     // Default to yellow
     color->setColor({1.0, 1.0, 0.0, 1.0});
-    parameters = { ringSize };
+    parameters = { ringSize, ringCount };
     oscillators = { ringSizeOscillator };
     registerParameters();
   };
@@ -54,6 +55,7 @@ public:
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform1f("ringSize", settings->ringSize->value);
+    shader.setUniform1i("ringCount", settings->ringCount->intValue);
     shader.setUniform3f("color", settings->color->color->data()[0], settings->color->color->data()[1], settings->color->color->data()[2]);
     frame->draw(0, 0);
     shader.end();
@@ -74,6 +76,7 @@ public:
   
   void drawSettings() override {
     CommonViews::ShaderParameter(settings->ringSize, settings->ringSizeOscillator);
+    CommonViews::ShaderIntParameter(settings->ringCount);
     CommonViews::ShaderColor(settings->color);
   }
 };

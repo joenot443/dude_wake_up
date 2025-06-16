@@ -24,6 +24,7 @@ struct SimpleShapeSettings: public ShaderSettings {
   std::shared_ptr<Parameter> xPosition;
   std::shared_ptr<Parameter> yPosition;
   std::shared_ptr<Parameter> fillColor;
+  std::shared_ptr<Parameter> backgroundColor;
   std::shared_ptr<Parameter> strokeColor;
   std::shared_ptr<Parameter> strokeWidth;
   std::shared_ptr<Parameter> rotate;
@@ -38,12 +39,13 @@ struct SimpleShapeSettings: public ShaderSettings {
   
   SimpleShapeSettings(std::string shaderId, json j) :
   shape(std::make_shared<Parameter>("Shape", 0, 0, 2)), // 0: Square, 1: Triangle, 2: Circle
-  scale(std::make_shared<Parameter>("Scale", 1.0, 0.1, 5.0)),
+  scale(std::make_shared<Parameter>("Scale", 3.0, 0.1, 100.0)),
   xPosition(std::make_shared<Parameter>("X Position", 0.5, 0.0, 1.0)),
   yPosition(std::make_shared<Parameter>("Y Position", 0.5, 0.0, 1.0)),
   fillColor(std::make_shared<Parameter>("FillColor", ParameterType_Color)),
+  backgroundColor(std::make_shared<Parameter>("Background Color", ParameterType_Color)),
   strokeColor(std::make_shared<Parameter>("StrokeColor", ParameterType_Color)),
-  strokeWidth(std::make_shared<Parameter>("Stroke Width", 5.0, 0.0, 50.0)),
+  strokeWidth(std::make_shared<Parameter>("Stroke Width", 10.0, 0.0, 50.0)),
   rotate(std::make_shared<Parameter>("Rotate", 0.0, 0.0, 360.0)),
   autoRotate(std::make_shared<Parameter>("Auto-Rotate", 0.0, 0.0, 2.0)),
   xPositionOscillator(std::make_shared<WaveformOscillator>(xPosition)),
@@ -53,9 +55,10 @@ struct SimpleShapeSettings: public ShaderSettings {
   rotateOscillator(std::make_shared<WaveformOscillator>(rotate)),
   autoRotateOscillator(std::make_shared<WaveformOscillator>(autoRotate)),
   ShaderSettings(shaderId, j, "SimpleShape") {
-    parameters = { shape, scale, xPosition, yPosition, fillColor, strokeColor, strokeWidth, rotate, autoRotate };
+    parameters = { shape, scale, xPosition, yPosition, fillColor, backgroundColor, strokeColor, strokeWidth, rotate, autoRotate };
     oscillators = { yPositionOscillator, xPositionOscillator, strokeWidthOscillator, rotateOscillator, autoRotateOscillator };
-    strokeColor->setColor({1.0, 1.0, 0.0, 1.0});
+    strokeColor->setColor({1.0, 0.5, 0.0, 1.0});
+    backgroundColor->setColor({0.0, 0.0, 0.0, 1.0});
     load(j);
     registerParameters();
   };
@@ -70,7 +73,8 @@ struct SimpleShapeShader: Shader {
   
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
-    ofClear(0, 0, 0, 0); // Clear the canvas
+    ofClear(0, 0, 0, 0);
+    ofClear(settings->backgroundColor->color->data()[0] * 255, settings->backgroundColor->color->data()[1] * 255, settings->backgroundColor->color->data()[2] * 255, settings->backgroundColor->color->data()[3] * 255); // Clear the canvas
     
     float x = settings->xPosition->value * frame->getWidth();
     float y = settings->yPosition->value * frame->getHeight();
@@ -140,9 +144,10 @@ struct SimpleShapeShader: Shader {
     
     CommonViews::Selector(settings->shape, {"Square", "Triangle", "Circle"});
     CommonViews::ShaderParameter(settings->scale, nullptr);
-    CommonViews::MultiSlider("Position", settings->xPosition->paramId, settings->xPosition, settings->yPosition, settings->xPositionOscillator, settings->yPositionOscillator);
+    CommonViews::MultiSlider("Position", settings->xPosition->paramId, settings->xPosition, settings->yPosition, settings->xPositionOscillator, settings->yPositionOscillator, 0.5625);
     CommonViews::ShaderColor(settings->fillColor);
     CommonViews::ShaderColor(settings->strokeColor);
+    CommonViews::ShaderColor(settings->backgroundColor);
     CommonViews::ShaderParameter(settings->strokeWidth, settings->strokeWidthOscillator);
     CommonViews::ShaderParameter(settings->rotate, settings->rotateOscillator);
     CommonViews::ShaderParameter(settings->autoRotate, settings->autoRotateOscillator);

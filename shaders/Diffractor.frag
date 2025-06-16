@@ -6,6 +6,9 @@ uniform float time;
 uniform float spacing;
 uniform float speed;
 uniform float scramble;
+uniform float red;
+uniform float green;
+uniform float blue;
 uniform float scale; // New uniform
 uniform int count; // New uniform
 
@@ -41,6 +44,7 @@ vec3 colormap(float x)
                         cos(6.283 * (t - .3333)),
                         cos(6.283 * (t - .6667))
                         );
+  tone *= vec3(red, green, blue);
   
   x = smoothstep(0., 1., x);
   vec3 c = vec3(

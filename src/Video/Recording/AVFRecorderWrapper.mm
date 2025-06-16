@@ -314,7 +314,6 @@ void AVFRecorderWrapper::stop(std::function<void(bool success)> completionCallba
     }];
   }
 }
-
 bool AVFRecorderWrapper::isRecording() const {
   if (!recorderInstance) {
     return false;

@@ -22,7 +22,8 @@ void TextureService::populateTextures()
   for (int i = 0; i < dir.size(); i++)
   {
     std::string path = dir.getPath(i);
-    std::string name = dir.getName(i);
+    // Strip the .png from the name
+    std::string name = dir.getName(i).substr(0, dir.getName(i).size() - 4);
     textures.push_back(std::make_shared<Texture>(name, path));
   }
   // Sort by name

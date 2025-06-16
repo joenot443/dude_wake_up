@@ -29,6 +29,7 @@ json LayoutStateService::config() {
   j[AbletonLinkEnabledJsonKey] = abletonLinkEnabled;
   j[OutputWindowUpdatesAutomaticallyJsonKey] = outputWindowUpdatesAutomatically;
   j[ActionBarExpandedJsonKey] = actionBarExpanded;
+  j[FlowEnabledJsonKey] = flowEnabled;
   return j;
 }
 
@@ -51,6 +52,7 @@ void LayoutStateService::loadConfig(json j) {
   resolutionSetting = j[ResolutionJsonKey];
   abletonLinkEnabled = j[AbletonLinkEnabledJsonKey];
   actionBarExpanded = j[ActionBarExpandedJsonKey];
+  flowEnabled = j[FlowEnabledJsonKey];
 }
 
 void LayoutStateService::updateLibraryPath(std::string path) {
@@ -66,7 +68,7 @@ void LayoutStateService::pushColor(std::shared_ptr<std::array<float, 4>> color) 
 
 float LayoutStateService::audioSettingsViewHeight() {
   if (!AudioSourceService::getService()->selectedAudioSource->active) {
-    return 60.0;
+    return 30.0;
   }
   return 250.0;
 }

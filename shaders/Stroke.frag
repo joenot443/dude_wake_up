@@ -5,6 +5,7 @@ uniform vec2 dimensions;
 uniform float time;
 uniform float weight;
 uniform vec4 strokeColor;
+uniform float fineness;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -13,7 +14,7 @@ void main() {
   
   const float targetAlpha = 0.0;
   const float TAU = 6.28318530;
-  const float steps = 32.0;
+  float steps = fineness;
   
   float radius = weight;
   vec2 uv = coord / dimensions.xy;

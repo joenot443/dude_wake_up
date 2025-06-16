@@ -13,14 +13,17 @@ struct Image {
   ImTextureID textureID;
 
   Image(std::string name, std::string path) : name(name), path(path) {
-    image.load(path);
     image.getTexture().setTextureMinMagFilter(GL_LINEAR, GL_LINEAR);
-    fbo.allocate(image.getWidth(), image.getHeight(), GL_RGBA);
-    fbo.begin();
-    image.draw(0, 0);
-    fbo.end();
-    fbo.getTexture().setTextureMinMagFilter(GL_LINEAR, GL_LINEAR);
-    textureID = (ImTextureID)(uintptr_t)fbo.getTexture().getTextureData().textureID;
+    image.load(path);
+    textureID = (ImTextureID)(uintptr_t)image.getTexture().getTextureData().textureID;
+    // after you’ve uploaded/allocated the texture once
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glGenerateMipmap(GL_TEXTURE_2D);                       // build full pyramid
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                    GL_LINEAR_MIPMAP_LINEAR);              // trilinear minification
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+                    GL_LINEAR);                            // keep bilinear for up-scales
+    glBindTexture(GL_TEXTURE_2D, 0);
   }
 };
 

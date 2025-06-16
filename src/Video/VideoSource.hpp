@@ -99,9 +99,13 @@ public:
     return ConnectableTypeSource;
   }
   
+  std::shared_ptr<ofFbo> parentFrame() override {
+    return frame();
+  }
+  
   void drawPreview(ImVec2 pos, float scale);
   
-  void drawPreviewSized(ImVec2 size);
+  virtual void drawPreviewSized(ImVec2 size);
 
   void saveFeedbackFrame() {
     if (fbo != nullptr) {

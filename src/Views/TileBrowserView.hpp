@@ -28,13 +28,14 @@ public:
   float widthFraction = 0.2;
   std::string tileBrowserId;
   int tileCount = 0;
+  bool singleCategory;
   
   template <typename T>
-  TileBrowserView(const std::vector<std::shared_ptr<T>>& items) : tileBrowserId(UUID::generateUUID()) {
+  TileBrowserView(const std::vector<std::shared_ptr<T>>& items, bool singleCategory = false) : tileBrowserId(UUID::generateUUID()), singleCategory(singleCategory) {
     setTileItems(std::vector<std::shared_ptr<TileItem>>(items.begin(), items.end()));
   }
 
-  TileBrowserView(std::vector<std::shared_ptr<TileItem>> items) : tileBrowserId(UUID::generateUUID()) {
+  TileBrowserView(std::vector<std::shared_ptr<TileItem>> items, bool singleCategory = false) : tileBrowserId(UUID::generateUUID()), singleCategory(singleCategory) {
     setTileItems(items);
   }
   
@@ -42,6 +43,7 @@ private:
   std::map<std::string, std::vector<std::shared_ptr<TileItem>>> categoryMap;
   std::vector<std::string> categories;  // To maintain category order
   std::string activeCategory = "";
+  std::string emptyCategoryId = idString("emptyCategory");
   std::function<void(std::shared_ptr<TileItem>)> tileClickCallback;
   void drawTile(std::shared_ptr<TileItem> tile, const ImVec2& size, const ImVec2& tileSize);
   void applyHeaderStyles(bool isSelected);

@@ -99,7 +99,7 @@ void NodeVideoSourceBrowserView::refreshSources()
     }
 
     // Create a closure which will be called when the tile is clicked
-    std::function<void()> dragCallback = [source]()
+    std::function<void(std::string)> dragCallback = [source](std::string tileId)
     {
       // Create a payload to carry the video source
       if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
@@ -107,8 +107,10 @@ void NodeVideoSourceBrowserView::refreshSources()
         // Set payload to carry the index of our item (could be anything)
         ImGui::SetDragDropPayload("VideoSource", &source.get()->availableVideoSourceId,
                                   sizeof(std::string));
+        ImGui::PushID(tileId.c_str());
         ImGui::Text("%s", source->sourceName.c_str());
         ImGui::EndDragDropSource();
+        ImGui::PopID();
       }
     };
     ImTextureID textureId = (ImTextureID)(uint64_t) source->preview->texData.textureID;

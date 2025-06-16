@@ -6,15 +6,14 @@
 //
 
 #include "NodeLayoutView.hpp"
+#include "Models/Strand.hpp"
 #include "FontService.hpp"
 #include "ImGuiExtensions.hpp"
-//#include "SyphonService.hpp"
 #include "ActionService.hpp"
 #include "HelpService.hpp"
 #include "LibraryService.hpp"
 #include "MarkdownView.hpp"
 #include "Fonts.hpp"
-#include "VideoRecorder.hpp"
 #include "UploadChainerView.h"
 #include "LayoutStateService.hpp"
 #include "ShaderChainerService.hpp"
@@ -26,8 +25,8 @@
 #include "ofMain.h"
 #include <imgui.h>
 #include <future>
-#include <imgui_node_editor.h>
-#include <imgui_node_editor_internal.h>
+#include "imgui_node_editor.h"
+#include "imgui_node_editor_internal.h"
 
 static const float NodeWidth = 100.0f;
 static const float NodeSettingsWidth = 350.0f;
@@ -42,10 +41,10 @@ void NodeLayoutView::setup()
   config = new ed::Config;
   config->SettingsFile = "NodeLayout.json";
   config->EnableSmoothZoom = true;
-
+  
   ImVector<float> zooms = ImVector<float>();
-    zooms.push_back(1.0f);
-//    config->CustomZoomLevels = zooms;
+  zooms.push_back(1.0f);
+  //    config->CustomZoomLevels = zooms;
   
   context = ed::CreateEditor(config);
   ofAddListener(LibraryService::getService()->downloadNotification, this, &NodeLayoutView::haveDownloadedAvailableLibraryFile);
@@ -110,7 +109,6 @@ void NodeLayoutView::draw()
   nodes = {};
   ed::SetCurrentEditor(context);
   CommonViews::PushNodeRedesignStyle();
-
   
   bool showAudio = LayoutStateService::getService()->showAudioSettings;
   
@@ -127,13 +125,14 @@ void NodeLayoutView::draw()
   linksMap.clear();
   nodeIdNodeMap.clear();
   pinIdNodeMap.clear();
+  pinIdConnectionMap.clear();
   terminalNodes.clear();
   
   int count = 0;
   // Loop over Shaders, creating a ShaderNode for each
   for (std::shared_ptr<Shader> shader : shaders)
   {
-//    log("Drawing node: %d - %s", count, shader->name().c_str());
+    //    log("Drawing node: %d - %s", count, shader->name().c_str());
     auto shaderNode = nodeForShaderSourceId(shader->shaderId, NodeTypeShader, shader->name(), shader);
     shaderNode->shader = shader;
     drawNodeNew(shaderNode);
@@ -153,7 +152,7 @@ void NodeLayoutView::draw()
   // Create VideoSource Nodes
   for (std::shared_ptr<VideoSource> source : sources)
   {
-//    log("Drawing node: %d - %s", count, source->name().c_str());
+    //    log("Drawing node: %d - %s", count, source->name().c_str());
     // Create a Link to the front shader, if it exists
     // Make source node
     std::shared_ptr<Connectable> conn = source;
@@ -193,7 +192,9 @@ void NodeLayoutView::draw()
           ed::PinId outputPinId = 0;
           outputPinId = startNode->outputIds[connection->outputSlot];
           inputPinId = nextNode->inputIds[connection->inputSlot];
-          
+          pinIdConnectionMap[inputPinId.Get()].push_back(shaderLink);
+          pinIdConnectionMap[outputPinId.Get()].push_back(shaderLink);
+          connection->linkId = nextShaderLinkId;
           ed::Link(nextShaderLinkId,
                    outputPinId,
                    inputPinId);
@@ -222,12 +223,15 @@ void NodeLayoutView::draw()
   // Selects or deletes shaders which are selected
   
   ed::GetSelectedNodes(selectedNodesIds.data(), (int)selectedNodesIds.size());
+  std::vector<ed::NodeId> deletedNodeIds;
+  
   for (auto selectedNodeId : selectedNodesIds)
   {
     std::shared_ptr<Node> node = nodeIdNodeMap[selectedNodeId.Get()];
     if (node == nullptr)
     {
       nodeIdNodeMap.erase(selectedNodeId.Get());
+      deletedNodeIds.push_back(selectedNodeId);
       continue;
     }
     
@@ -240,10 +244,21 @@ void NodeLayoutView::draw()
     }
   }
   
+  for (auto nodeId : deletedNodeIds) {
+    ed::DeselectNode(nodeId);
+  }
+  
   if (selectedNodesIds.empty()) {
     ShaderChainerService::getService()->deselectConnectable();
   }
   
+  // Flow through the active VideoSources
+  if (LayoutStateService::getService()->flowEnabled) {
+    for (auto source : sources) {
+      drawFlow(source);
+    }
+  }
+    
   handleUnplacedNodes();
   
   if (ed::BeginCreate())
@@ -263,12 +278,12 @@ void NodeLayoutView::draw()
   handleUnplacedDownloadedLibraryFile();
   populateNodePositions();
   populateSelectedNodes();
+  drawPinHoverView();
   ed::End();
   
   handleDropZone();
-    
-//  drawDebugWindow();
-    
+  
+  
   drawNodeWindows();
   
   drawUploadChainerWindow();
@@ -280,6 +295,176 @@ void NodeLayoutView::draw()
   drawSaveDialog();
   
   shouldDelete = false;
+}
+
+void NodeLayoutView::drawPinHoverView() {
+  // Layout constants
+  const float buttonSize = 30.0f;
+  const float padding = 12.0f;
+  const float rowHeight = buttonSize + 4.0f;
+  const float wiggle = 24.0f;
+  const float buttonCornerRounding = 6.0f;
+  const float tooltipCornerRounding = 12.0f;
+  const float tooltipAlpha = 230.0f;
+  const float tooltipBorderAlpha = 230.0f;
+  const float tooltipYOffset = 10.0f;
+  const float buttonTextPadding = 10.0f;
+  const float symbolPadding = 8.0f;
+  const float textSizeScale = 0.75f;
+
+  static ed::PinId lastHoveredPin;
+  static ImVec2 lastPinPosition;
+  static bool isHovering = false;
+  static ImVec2 lastTooltipMin, lastTooltipMax;
+  
+  ed::PinId hoveredPin = ed::GetHoveredPin();
+  ImVec2 mousePos = ImGui::GetMousePos();
+  
+  // If we're hovering over a pin, update our tracking variables
+  if (hoveredPin.Get() != 0) {
+    lastHoveredPin = hoveredPin;
+    lastPinPosition = ed::GetPinPosition(hoveredPin);
+    isHovering = true;
+  }
+  
+  // Get all ShaderLinks for this pin
+  long pinKey = lastHoveredPin.Get();
+  if (!isHovering || pinIdConnectionMap.find(pinKey) == pinIdConnectionMap.end()) return;
+  const auto& links = pinIdConnectionMap[pinKey];
+  if (links.empty()) return;
+  
+  // Calculate the widest text width for all clipped node names
+  float widestTextWidth = 0.0f;
+  std::vector<std::string> clippedNames;
+  for (size_t i = 0; i < links.size(); ++i) {
+    std::shared_ptr<Node> thisNode = nullptr;
+    std::shared_ptr<Node> otherNode = nullptr;
+    if (links[i]->input->id == pinIdNodeMap[pinKey]->id) {
+      thisNode = links[i]->input;
+      otherNode = links[i]->output;
+    } else {
+      thisNode = links[i]->output;
+      otherNode = links[i]->input;
+    }
+    const char* nodeName = otherNode ? otherNode->name.c_str() : "?";
+    std::string clippedNodeName = nodeName;
+    if (clippedNodeName.length() > 15) {
+      clippedNodeName = clippedNodeName.substr(0, 15) + "…";
+    }
+    clippedNames.push_back(clippedNodeName);
+    ImVec2 textSize = ImGui::CalcTextSize(clippedNodeName.c_str());
+    if (textSize.x > widestTextWidth) widestTextWidth = textSize.x;
+  }
+  const float maxTooltipWidth = 320.0f;
+  const float tooltipWidth = std::min(maxTooltipWidth, buttonSize + buttonTextPadding + 2 * padding + widestTextWidth);
+
+  float tooltipHeight = links.size() * rowHeight + padding * 2;
+  // Position tooltip so its bottom edge is tooltipYOffset px above the pin
+  ImVec2 tooltipCenter = lastPinPosition - ImVec2(0, tooltipHeight + tooltipYOffset);
+  ImVec2 tooltipMin = tooltipCenter - ImVec2(tooltipWidth/2, 0);
+  ImVec2 tooltipMax = tooltipCenter + ImVec2(tooltipWidth/2, tooltipHeight);
+  lastTooltipMin = tooltipMin;
+  lastTooltipMax = tooltipMax;
+  
+  // Hover logic: keep open if mouse is within tooltip bounds plus wiggle room
+  ImVec2 hoverMin = tooltipMin - ImVec2(wiggle, wiggle);
+  ImVec2 hoverMax = tooltipMax + ImVec2(wiggle, wiggle);
+  bool mouseInTooltip = mousePos.x >= hoverMin.x && mousePos.x <= hoverMax.x && mousePos.y >= hoverMin.y && mousePos.y <= hoverMax.y;
+  if (!mouseInTooltip && hoveredPin.Get() == 0) {
+    isHovering = false;
+    lastHoveredPin = ed::PinId();
+    return;
+  }
+  
+  // Use the foreground draw list to ensure the popover is always on top
+  ImDrawList* drawList = ImGui::GetWindowDrawList();
+  drawList->AddRectFilled(tooltipMin, tooltipMax, IM_COL32(40, 40, 40, tooltipAlpha), tooltipCornerRounding);
+  drawList->AddRect(tooltipMin, tooltipMax, IM_COL32(60, 60, 60, tooltipBorderAlpha), tooltipCornerRounding);
+  
+  for (size_t i = 0; i < links.size(); ++i) {
+    ImVec2 rowTopLeft = tooltipMin + ImVec2(padding, padding + i * rowHeight);
+    float centerY = rowTopLeft.y + rowHeight / 2.0f;
+
+    // X button: center vertically on centerY
+    ImVec2 buttonMin = ImVec2(rowTopLeft.x, centerY - buttonSize / 2.0f);
+    ImVec2 buttonMax = buttonMin + ImVec2(buttonSize, buttonSize);
+
+    // Draw X button hover/click
+    bool isOverButton = ImGui::IsMouseHoveringRect(buttonMin, buttonMax);
+    ImU32 buttonColor = isOverButton ? IM_COL32(200, 50, 50, 255) : IM_COL32(150, 50, 50, 255);
+    drawList->AddRectFilled(buttonMin, buttonMax, buttonColor, buttonCornerRounding);
+
+    // Draw X symbol
+    drawList->AddLine(
+      buttonMin + ImVec2(symbolPadding, symbolPadding),
+      buttonMax - ImVec2(symbolPadding, symbolPadding),
+      IM_COL32(255, 255, 255, 255), 2.0f
+    );
+    drawList->AddLine(
+      ImVec2(buttonMax.x - symbolPadding, buttonMin.y + symbolPadding),
+      ImVec2(buttonMin.x + symbolPadding, buttonMax.y - symbolPadding),
+      IM_COL32(255, 255, 255, 255), 2.0f
+    );
+
+    // Draw node name on the other side of the connection, vertically centered
+    std::shared_ptr<Node> thisNode = nullptr;
+    std::shared_ptr<Node> otherNode = nullptr;
+    if (links[i]->input->id == pinIdNodeMap[pinKey]->id) {
+      thisNode = links[i]->input;
+      otherNode = links[i]->output;
+    } else {
+      thisNode = links[i]->output;
+      otherNode = links[i]->input;
+    }
+    const char* nodeName = otherNode ? otherNode->name.c_str() : "?";
+    std::string clippedNodeName = nodeName;
+    if (clippedNodeName.length() > 15) {
+      clippedNodeName = clippedNodeName.substr(0, 15) + "…";
+    }
+    float textMaxWidth = tooltipWidth - (buttonSize + buttonTextPadding + 2 * padding);
+    ImVec2 textBlockSize = ImGui::CalcTextSize(clippedNodeName.c_str(), nullptr, false, textMaxWidth);
+    float smallTextSize = ImGui::GetFontSize() * textSizeScale;
+    ImVec2 textPos = ImVec2(
+      buttonMax.x + buttonTextPadding,
+      centerY - textBlockSize.y / 2.0f
+    );
+
+    ImVec2 titleMin = textPos;
+    ImVec2 titleMax = ImVec2(textPos.x + textMaxWidth, centerY + rowHeight / 2.0f);
+    bool isOverTitle = ImGui::IsMouseHoveringRect(titleMin, titleMax);
+    // Only draw a single selection indicator for the whole row
+    ImVec2 selectionMin = buttonMin;
+    ImVec2 selectionMax = ImVec2(textPos.x + textMaxWidth, buttonMax.y > (centerY + rowHeight / 2.0f) ? buttonMax.y : (centerY + rowHeight / 2.0f));
+    bool isOverSelection = isOverButton || isOverTitle || ImGui::IsMouseHoveringRect(selectionMin, selectionMax);
+    ImU32 selectionBgColor = isOverSelection ? IM_COL32(80, 80, 120, 180) : 0;
+    if (isOverSelection) {
+      drawList->AddRectFilled(selectionMin, selectionMax, selectionBgColor, buttonCornerRounding);
+    }
+
+    // Draw X button (on top of highlight)
+    drawList->AddRectFilled(buttonMin, buttonMax, buttonColor, buttonCornerRounding);
+    drawList->AddLine(
+      buttonMin + ImVec2(symbolPadding, symbolPadding),
+      buttonMax - ImVec2(symbolPadding, symbolPadding),
+      IM_COL32(255, 255, 255, 255), 2.0f
+    );
+    drawList->AddLine(
+      ImVec2(buttonMax.x - symbolPadding, buttonMin.y + symbolPadding),
+      ImVec2(buttonMin.x + symbolPadding, buttonMax.y - symbolPadding),
+      IM_COL32(255, 255, 255, 255), 2.0f
+    );
+
+    // Center the text vertically in the row using centerY
+    drawList->AddText(NULL, smallTextSize, textPos, IM_COL32(255,255,255,255), clippedNodeName.c_str(), nullptr, textMaxWidth);
+    
+    // Handle row click (anywhere in the selection area)
+    if (isOverSelection && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+      ShaderChainerService::getService()->breakConnectionForConnectionId(links[i]->connectionId);
+      isHovering = false;
+      lastHoveredPin = ed::PinId();
+      break;
+    }
+  }
 }
 
 void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
@@ -306,10 +491,9 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
   }
   
   /*
-  20 - 50   -    360   - 50  - 20
-    [Input] - Selector - [Output]
-   
-  */
+   20 - 50   -    360   - 50  - 20
+   [Input] - Selector - [Output]
+   */
   pos = ImGui::GetCursorPos();
   // Input Pin
   
@@ -389,7 +573,7 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
   if (node->hasAudioReactiveParameter()) {
     buttonCount++; // Add audio reactive button if available
   }
-
+  
   // Calculate dynamic button size based on total width and spacing
   float buttonSize = (totalWidth - (buttonSpacing * (buttonCount - 1))) / buttonCount;
   float buttonHeight = 48.0;
@@ -398,7 +582,7 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
   
   if (node->hasAudioReactiveParameter()) {
     const char* buttonImage = node->isAudioReactiveParameterActive() ? "no-music.png" : "music.png";
-
+    
     if (CommonViews::ImageButton(node->connectable->connId(), buttonImage, ImVec2(buttonSize,  buttonHeight))) {
       toggleAudioReactiveParameter(node);
     }
@@ -420,10 +604,16 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
     VideoSourceService::getService()->addOutputWindow(node->connectable);
   }
   ImGui::Dummy(ImVec2(500.0, 20.0));
-
+  
   ed::EndNode();
 }
 
+void NodeLayoutView::drawFlow(std::shared_ptr<Connectable> connectable) {
+  for (std::shared_ptr<Connection> connection : connectable->outputConnections()) {
+    ed::Flow(connection->linkId);
+    drawFlow(connection->end);
+  }
+}
 
 void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
 {
@@ -509,7 +699,7 @@ void NodeLayoutView::drawNode(std::shared_ptr<Node> node)
   CommonViews::mSpacing();
   
   // Node Title
-  ImGui::PushFont(FontService::getService()->h1);
+  ImGui::PushFont(FontService::getService()->current->h1);
   // Add some frame padding
   CommonViews::PaddedText(node->name, ImVec2(0.0, 0.0));
   ImGui::PopFont();
@@ -701,17 +891,17 @@ void NodeLayoutView::populateSelectedNodes()
 {
   // Clear the current selection
   selectedConnectables.clear();
-
+  
   // Get the count of selected nodes
   int selectedCount = ed::GetSelectedObjectCount();
   if (selectedCount == 0) return;
-
+  
   // Create a vector to hold the selected node IDs
   std::vector<ed::NodeId> selectedNodeIds(selectedCount);
-
+  
   // Retrieve the selected node IDs
   ed::GetSelectedNodes(selectedNodeIds.data(), selectedCount);
-
+  
   // Iterate over the selected node IDs
   for (auto nodeId : selectedNodeIds)
   {
@@ -751,16 +941,15 @@ ImVec2 NodeLayoutView::coordinatesForNode(std::string id)
 void NodeLayoutView::handleUpdatedSourceNode(std::shared_ptr<Node> node, std::shared_ptr<TileItem> tile) {
   selectorNodeId = 0;
   std::shared_ptr<VideoSource> newSource = nullptr;
-  switch (node->source->type) {
-      case VideoSource_shader:
-        newSource = VideoSourceService::getService()->replaceShaderVideoSource(std::dynamic_pointer_cast<ShaderSource>(node->source),  shaderSourceTypeForShaderType(tile->shaderType));
-        break;
-    case VideoSource_webcam:
-      
+  if (node->source->type == VideoSource_shader) {
+    newSource = VideoSourceService::getService()->replaceShaderVideoSource(std::dynamic_pointer_cast<ShaderSource>(node->source),  shaderSourceTypeForShaderType(tile->shaderType));
+  } else {
+    return;
   }
   idNodeMap.erase(node->source->id);
   auto newNode = nodeForShaderSourceId(node->source->id, NodeTypeSource, newSource->name(), newSource);
   ed::SetNodePosition(newNode->id, node->position);
+  ed::SelectNode(newNode->id);
 }
 
 void NodeLayoutView::handleUpdatedShaderNode(std::shared_ptr<Node> node, std::shared_ptr<TileItem> tile) {
@@ -771,6 +960,9 @@ void NodeLayoutView::handleUpdatedShaderNode(std::shared_ptr<Node> node, std::sh
   idNodeMap.erase(node->shader->shaderId);
   auto newNode = nodeForShaderSourceId(newShader->shaderId, NodeTypeShader, newShader->name(), newShader);
   ed::SetNodePosition(newNode->id, node->position);
+  ShaderChainerService::getService()->selectedConnectable = nullptr;
+  ed::ClearSelection();
+  ed::SelectNode(newNode->id);
 }
 
 void NodeLayoutView::handleUnplacedNodes()
@@ -877,14 +1069,14 @@ void NodeLayoutView::handleRightClick()
 void NodeLayoutView::createBlendShaderForSelectedNodes(ed::NodeId firstNodeId, ed::NodeId secondNodeId) {
   auto firstNodeIt = nodeIdNodeMap.find(firstNodeId.Get());
   auto secondNodeIt = nodeIdNodeMap.find(secondNodeId.Get());
-
+  
   if (firstNodeIt == nodeIdNodeMap.end() || secondNodeIt == nodeIdNodeMap.end()) {
     return; // Ensure nodes are valid
   }
-
+  
   auto topNode = firstNodeIt->second->position.y < secondNodeIt->second->position.y ? firstNodeIt->second : secondNodeIt->second;
   auto bottomNode = firstNodeIt->second->position.y < secondNodeIt->second->position.y ? secondNodeIt->second : firstNodeIt->second;
-
+  
   ImVec2 firstPos = topNode->position;
   ImVec2 secondPos = bottomNode->position;
   
@@ -896,15 +1088,15 @@ void NodeLayoutView::createBlendShaderForSelectedNodes(ed::NodeId firstNodeId, e
   nodeDropLocation = std::make_unique<ImVec2>(pos);
   
   unplacedNodeIds.push_back(blendShader->shaderId);
-
-  // Always use OutputSlotMain since we allow multiple connections from the same output
-  ActionService::getService()->makeConnection(topNode->connectable, blendShader, 
-    topNode->type == NodeTypeShader ? ConnectionTypeShader : ConnectionTypeSource, 
-    OutputSlotMain, InputSlotMain, false);
   
-  ActionService::getService()->makeConnection(bottomNode->connectable, blendShader, 
-    bottomNode->type == NodeTypeShader ? ConnectionTypeShader : ConnectionTypeSource, 
-    OutputSlotMain, InputSlotTwo, true);
+  // Always use OutputSlotMain since we allow multiple connections from the same output
+  ActionService::getService()->makeConnection(topNode->connectable, blendShader,
+                                              topNode->type == NodeTypeShader ? ConnectionTypeShader : ConnectionTypeSource,
+                                              OutputSlotMain, InputSlotMain, false);
+  
+  ActionService::getService()->makeConnection(bottomNode->connectable, blendShader,
+                                              bottomNode->type == NodeTypeShader ? ConnectionTypeShader : ConnectionTypeSource,
+                                              OutputSlotMain, InputSlotTwo, true);
 }
 
 void NodeLayoutView::handleUploadChain(std::shared_ptr<Node> node)
@@ -917,6 +1109,7 @@ void NodeLayoutView::handleDeleteNode(std::shared_ptr<Node> node)
   switch (node->type)
   {
     case NodeTypeShader:
+      if (!hasDeletedBlend && node->shader->type() == ShaderTypeBlend) hasDeletedBlend = true;
       ActionService::getService()->removeShader(node->shader);
       break;
     case NodeTypeSource:
@@ -1050,30 +1243,30 @@ void NodeLayoutView::handleDropZone()
         }
         case VideoSource_multi:
         {
-//          source = VideoSourceService::getService()->addMultiVideoSource(availableSource->sourceName);
-//          unplacedNodeIds.push_back(source->id);
+          //          source = VideoSourceService::getService()->addMultiVideoSource(availableSource->sourceName);
+          //          unplacedNodeIds.push_back(source->id);
           break;
         }
         case VideoSource_empty:
           break;
       }
-  
+      
       
       // Multisource implementation, not needed for now
       
-//      auto within = nodeAtPosition(ed::ScreenToCanvas(getScaledMouseLocation()));
-//      if (within != nullptr && within->type == NodeTypeSource && source != nullptr) {
-//        // Remove the pending source from unplaced
-//        unplacedNodeIds.pop_back();
-//        
-//        std::shared_ptr<MultiSource> multiSource = VideoSourceService::getService()->addMultiVideoSource(within->name);
-//        multiSource->addSource(source);
-//        multiSource->addSource(within->source);
-//        unplacedNodeIds.push_back(multiSource->id);
-//        
-//        ShaderChainerService::getService()->copyConnections(within->source, multiSource);
-//        ActionService::getService()->removeVideoSource(within->source->id);
-//      }
+      //      auto within = nodeAtPosition(ed::ScreenToCanvas(getScaledMouseLocation()));
+      //      if (within != nullptr && within->type == NodeTypeSource && source != nullptr) {
+      //        // Remove the pending source from unplaced
+      //        unplacedNodeIds.pop_back();
+      //
+      //        std::shared_ptr<MultiSource> multiSource = VideoSourceService::getService()->addMultiVideoSource(within->name);
+      //        multiSource->addSource(source);
+      //        multiSource->addSource(within->source);
+      //        unplacedNodeIds.push_back(multiSource->id);
+      //
+      //        ShaderChainerService::getService()->copyConnections(within->source, multiSource);
+      //        ActionService::getService()->removeVideoSource(within->source->id);
+      //      }
       
       auto canvasPos = ed::ScreenToCanvas(getScaledMouseLocation());
       nodeDropLocation = std::make_unique<ImVec2>(canvasPos);
@@ -1147,6 +1340,7 @@ void NodeLayoutView::queryNewLinks()
       
       std::shared_ptr<Node> sourceNode = pinIdNodeMap[outputPinId.Get()];
       std::shared_ptr<Node> destNode = pinIdNodeMap[inputPinId.Get()];
+      
       InputSlot inputSlot = InputSlotNone;
       OutputSlot outputSlot = OutputSlotNone;
       
@@ -1281,8 +1475,8 @@ void NodeLayoutView::drawPreviewWindow(std::shared_ptr<Node> node)
 void NodeLayoutView::drawActionButtons()
 {
   ImVec2 pos = ImGui::GetCursorPos();
-  int buttonCount = 7;
-  float buttonWidth = 32.0;
+  int buttonCount = 6;
+  float buttonWidth = 30.0;
   ImVec2 imageSize = ImVec2(buttonWidth, buttonWidth);
   ImVec2 imageRatio = ImVec2(1.5, 1.5);
   float shaderInfoPaneWidth = LayoutStateService::getService()->shouldDrawShaderInfo() ? LayoutStateService::getService()->browserSize().x : 0;
@@ -1298,7 +1492,7 @@ void NodeLayoutView::drawActionButtons()
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
     ImGui::PushStyleColor(ImGuiCol_ChildBg, Colors::ActionBarBackgroundColor.Value);
-    ImGui::BeginChild("##CollapsedActionBar", ImVec2(32.0, 32.0), ImGuiChildFlags_None, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration);
+    ImGui::BeginChild("##CollapsedActionBar", ImVec2(buttonWidth, buttonWidth), ImGuiChildFlags_None, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration);
     
     if (CommonViews::ImageButton("expand", "back.png", imageSize, imageRatio, true)) {
       LayoutStateService::getService()->actionBarExpanded = true;
@@ -1310,7 +1504,7 @@ void NodeLayoutView::drawActionButtons()
     ImGui::SetCursorPos(pos);
     return;
   }
-
+  
   // Draw expanded action bar
   float actionBarWidth = buttonWidth * buttonCount * imageRatio.x + shaderInfoPaneWidth + 30.0;
   ImGui::SetCursorPos(ImVec2(getScaledWindowWidth() - actionBarWidth - 12.0, yPos));
@@ -1321,14 +1515,14 @@ void NodeLayoutView::drawActionButtons()
   ImGui::SetNextItemAllowOverlap();
   
   
-  ImGui::BeginChild("##ActionButtons", ImVec2(actionBarWidth, 32), ImGuiChildFlags_None, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize);
-
+  ImGui::BeginChild("##ActionButtons", ImVec2(actionBarWidth, buttonWidth), ImGuiChildFlags_None, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize);
+  
   // Collapse button
   if (CommonViews::ImageButton("collapse", "forward.png", imageSize, imageRatio, true)) {
     LayoutStateService::getService()->actionBarExpanded = false;
   }
   ImGui::SameLine(0, 10);
-
+  
   // Draw the undo button
   if (CommonViews::ImageButton("undo", "undo.png", imageSize, imageRatio, true)) {
     if (ActionService::getService()->canUndo()) {
@@ -1338,7 +1532,7 @@ void NodeLayoutView::drawActionButtons()
   if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
     ImGui::SetTooltip("Undo the last action (Cmd+Z)");
   ImGui::SameLine(0, 10);
-
+  
   // Draw the redo button
   if (CommonViews::ImageButton("redo", "redo.png", imageSize, imageRatio, true)) {
     if (ActionService::getService()->canRedo()) {
@@ -1348,7 +1542,7 @@ void NodeLayoutView::drawActionButtons()
   if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
     ImGui::SetTooltip("Redo the last undone action (Cmd+Y)");
   ImGui::SameLine(0, 10);
-
+  
   // Draw the capture screenshot button
   if (CommonViews::ImageButton("capture", "camera.png", imageSize, imageRatio, true)) {
     VideoSourceService::getService()->captureOutputWindowScreenshot();
@@ -1356,16 +1550,16 @@ void NodeLayoutView::drawActionButtons()
   if (ImGui::IsItemHovered())
     ImGui::SetTooltip("Capture a screenshot of the output window");
   ImGui::SameLine(0, 10);
-
+  
   // Draw the help button
-  std::string helpImage = LayoutStateService::getService()->helpEnabled ? "help.png" : "help-outline.png";
+  std::string helpImage = LayoutStateService::getService()->helpEnabled ? "help-outline.png" : "help.png";
   if (CommonViews::ImageButton("help", helpImage, imageSize, imageRatio, true)) {
     LayoutStateService::getService()->helpEnabled = !LayoutStateService::getService()->helpEnabled;
   }
   if (ImGui::IsItemHovered())
     ImGui::SetTooltip("Toggle help overlay");
   ImGui::SameLine(0, 10);
-
+  
   // Draw the reset button
   if (CommonViews::ImageButton("reset", "delete.png", imageSize, imageRatio, true)) {
     clear();
@@ -1373,7 +1567,7 @@ void NodeLayoutView::drawActionButtons()
   if (ImGui::IsItemHovered())
     ImGui::SetTooltip("Remove all nodes and connections (Cmd+N)");
   ImGui::SameLine(0, 10);
-
+  
   // Draw the navigate to content button
   if (CommonViews::ImageButton("navigate", "focus.png", imageSize, imageRatio, true)) {
     ed::SetCurrentEditor(context);
@@ -1383,26 +1577,26 @@ void NodeLayoutView::drawActionButtons()
   if (ImGui::IsItemHovered())
     ImGui::SetTooltip("Scale to fit content (100\%)");
   ImGui::SameLine(0, 10);
-
-  // Draw the stage mode button
-  if (CommonViews::ImageButton("stage", "stage.png", imageSize, imageRatio, true)) {
-    LayoutStateService::getService()->stageModeEnabled = true;
-  }
-  if (ImGui::IsItemHovered())
-    ImGui::SetTooltip("Enable stage mode (Cmd+B)");
+  
+//  // Draw the stage mode button
+//  if (CommonViews::ImageButton("stage", "stage.png", imageSize, imageRatio, true)) {
+//    LayoutStateService::getService()->stageModeEnabled = true;
+//  }
+//  if (ImGui::IsItemHovered())
+//    ImGui::SetTooltip("Enable stage mode (Cmd+B)");
   ImGui::SameLine(0, 10);
-
+  
   // Draw the random strand button
   if (CommonViews::ImageButton("random", "dice.png", imageSize, imageRatio, true)) {
     clear();
     ShaderChainerService::getService()->randomStrand(
-      VideoSourceService::getService()->availableShaderSources,
-      ShaderChainerService::getService()->availableFilterShaders
-    );
+                                                     VideoSourceService::getService()->availableShaderSources,
+                                                     ShaderChainerService::getService()->availableFilterShaders
+                                                     );
   }
   if (ImGui::IsItemHovered())
     ImGui::SetTooltip("Create Random Filter Chain");
-
+  
   ImGui::EndChild();
   ImGui::PopStyleVar(2);
   ImGui::PopStyleColor();
@@ -1431,9 +1625,9 @@ void NodeLayoutView::drawMetrics()
   // Set the cursor to the bottom left of the node layout
   auto cursorPos = ImGui::GetCursorPos();
   ImGui::SetCursorPos(ImVec2(LayoutStateService::getService()->browserSize().x, getScaledWindowHeight() - 100));
-
+  
   ed::SetCurrentEditor(context);
-//  ed::ShowMetrics();
+  //  ed::ShowMetrics();
 }
 
 void NodeLayoutView::drawDebugWindow()
@@ -1474,29 +1668,29 @@ void NodeLayoutView::drawSaveDialog() {
   if (showSaveDialog)
   {
     ImGui::OpenPopup("Save Strand");
-
+    
     if (ImGui::BeginPopupModal("Save Strand", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
       ImGui::Text("Enter the filename:");
       ImGui::InputText("##saveFileName", saveFileName, IM_ARRAYSIZE(saveFileName));
-
+      
       if (ImGui::Button("Save", ImVec2(120, 0)))
       {
         // Close the popup
         ImGui::CloseCurrentPopup();
         showSaveDialog = false;
-
+        
         // Proceed with saving the strand
         saveStrand();
       }
-
+      
       ImGui::SameLine();
       if (ImGui::Button("Cancel", ImVec2(120, 0)))
       {
         ImGui::CloseCurrentPopup();
         showSaveDialog = false;
       }
-
+      
       ImGui::EndPopup();
     }
   }
@@ -1504,28 +1698,28 @@ void NodeLayoutView::drawSaveDialog() {
 
 void NodeLayoutView::saveStrand()
 {
-	  Strand strand = ShaderChainerService::getService()->strandForConnectable(nodeToSave->connectable);
-
-    // Trim extension from saveFileName if needed
-    std::string fileName(saveFileName);
-    auto dotPos = fileName.find_last_of('.');
-    if (dotPos != std::string::npos)
-    {
-        fileName = fileName.substr(0, dotPos);
-    }
-    strand.name = fileName;
-    
-    // Use the fileName for saving operations
-    std::string previewPath = StrandService::getService()->savePreview(fileName, nodeToSave->connectable);
-    ConfigService::getService()->saveStrandFile(strand, ConfigService::getService()->strandsFolderFilePath() + fileName + ".json", previewPath);
+  Strand strand = ShaderChainerService::getService()->strandForConnectable(nodeToSave->connectable);
+  
+  // Trim extension from saveFileName if needed
+  std::string fileName(saveFileName);
+  auto dotPos = fileName.find_last_of('.');
+  if (dotPos != std::string::npos)
+  {
+    fileName = fileName.substr(0, dotPos);
+  }
+  strand.name = fileName;
+  
+  // Use the fileName for saving operations
+  std::string previewPath = StrandService::getService()->savePreview(fileName, nodeToSave->connectable);
+  ConfigService::getService()->saveStrandFile(strand, ConfigService::getService()->strandsFolderFilePath() + fileName + ".json", previewPath);
 }
 
 void NodeLayoutView::drawHelp()
 {
   if (!LayoutStateService::getService()->helpEnabled) return;
-
+  
   ImVec2 cursorPos = ImGui::GetCursorPos();
-
+  
   if (!HelpService::getService()->placedSource())
   {
     bool hasPayload = ImGui::GetDragDropPayload();
@@ -1537,16 +1731,16 @@ void NodeLayoutView::drawHelp()
       HelpService::getService()->drawSourceView();
       ImGui::NewLine();
     }
-
+    
     // Reset our cursor and return without drawing additional help
     ImGui::SetCursorPos(cursorPos);
     return;
   }
-
+  
   if (!HelpService::getService()->placedEffect())
   {
     bool hasPayload = ImGui::GetDragDropPayload();
-    ImGui::SetCursorPos(ImVec2(LayoutStateService::getService()->browserSize().x + 20.0, getScaledWindowHeight() / 3.0 + 30.0));
+    ImGui::SetCursorPos(ImVec2(LayoutStateService::getService()->browserSize().x + 20.0, getScaledWindowHeight() / 3.0 + 200.0));
     if (hasPayload) {
       HelpService::getService()->drawEffect2View();
     } else {
@@ -1557,7 +1751,7 @@ void NodeLayoutView::drawHelp()
     ImGui::SetCursorPos(cursorPos);
     return;
   }
-
+  
   if (!HelpService::getService()->madeConnection())
   {
     if (!ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
@@ -1578,16 +1772,16 @@ void NodeLayoutView::drawHelp()
         ImGui::SetCursorPos(cursorPos);
         return;
       };
-
+      
       std::shared_ptr<Node> node = idNodeMap[shader->shaderId];
       HelpService::getService()->drawConnection2View(ed::CanvasToScreen(node->position), ed::GetNodeSize(node->id), ed::GetCurrentZoom());
     }
-
+    
     // Reset our cursor and return without drawing additional help
     ImGui::SetCursorPos(cursorPos);
     return;
   }
-
+  
   if (!HelpService::getService()->placedSecondSource())
   {
     bool hasPayload = ImGui::GetDragDropPayload();
@@ -1599,17 +1793,17 @@ void NodeLayoutView::drawHelp()
       HelpService::getService()->drawSecondSourceView();
       ImGui::NewLine();
     }
-
+    
     // Reset our cursor and return without drawing additional help
     ImGui::SetCursorPos(cursorPos);
     return;
   }
-
-  if (!HelpService::getService()->placedBlendEffect())
+  
+  if (!HelpService::getService()->placedBlendEffect() && !HelpService::getService()->deletedFirstBlendNode())
   {
     bool hasPayload = ImGui::GetDragDropPayload();
-    ImGui::SetCursorPos(ImVec2(LayoutStateService::getService()->browserSize().x + 20.0, getScaledWindowHeight() / 3.0 + 30.0));
-
+    ImGui::SetCursorPos(ImVec2(LayoutStateService::getService()->browserSize().x + 20.0, getScaledWindowHeight() / 3.0 + 100.0));
+    
     // Check if our payload is a Blend shader
     auto payload = ImGui::GetDragDropPayload();
     bool isShader = payload && payload->IsDataType("NewShader");
@@ -1619,7 +1813,7 @@ void NodeLayoutView::drawHelp()
       ShaderType shaderType = (ShaderType)n;
       isBlend = shaderType == ShaderTypeBlend;
     }
-
+    
     if (hasPayload && isBlend) {
       HelpService::getService()->drawBlendEffect2View();
     } else if (hasPayload && !isBlend) {
@@ -1632,11 +1826,11 @@ void NodeLayoutView::drawHelp()
     ImGui::SetCursorPos(cursorPos);
     return;
   }
-
+  
   // Making a connection to our Blend shader
-  if (!HelpService::getService()->madeFirstBlendConnection()) {
+  if (!HelpService::getService()->madeFirstBlendConnection() && !HelpService::getService()->deletedFirstBlendNode()) {
     if (!ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
-
+      
       // Get a terminal node
       std::shared_ptr<Node> terminalNode;
       for (auto node : terminalNodes) {
@@ -1650,7 +1844,7 @@ void NodeLayoutView::drawHelp()
         ImGui::SetCursorPos(cursorPos);
         return;
       }
-
+      
       HelpService::getService()->drawBlendConnectionView(ed::CanvasToScreen(terminalNode->position), ed::GetNodeSize(terminalNode->id), ed::GetCurrentZoom());
     } else {
       // Get a Blend node
@@ -1660,19 +1854,20 @@ void NodeLayoutView::drawHelp()
           blendNode = node;
         };
       }
-
+      
       HelpService::getService()->drawBlendConnection2View(ed::CanvasToScreen(blendNode->position), ed::GetNodeSize(blendNode->id), ed::GetCurrentZoom());
     }
-
+    
     // Reset our cursor and return without drawing additional help
     ImGui::SetCursorPos(cursorPos);
     return;
   }
-
+  
   // Making a second connection to our Blend shader
-  if (!HelpService::getService()->madeSecondBlendConnection()) {
+  if (!HelpService::getService()->madeSecondBlendConnection() &&
+      !HelpService::getService()->deletedFirstBlendNode()) {
     if (!ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
-
+      
       // Get a terminal node
       std::shared_ptr<Node> terminalNode;
       for (auto node : terminalNodes) {
@@ -1681,12 +1876,12 @@ void NodeLayoutView::drawHelp()
           break;
         }
       }
-
+      
       if (terminalNode == nullptr) {
         ImGui::SetCursorPos(cursorPos);
         return;
       }
-
+      
       HelpService::getService()->drawSecondBlendConnectionView(ed::CanvasToScreen(terminalNode->position), ed::GetNodeSize(terminalNode->id), ed::GetCurrentZoom());
     } else {
       // Get a Blend node
@@ -1696,17 +1891,17 @@ void NodeLayoutView::drawHelp()
           blendNode = node;
         };
       }
-
+      
       HelpService::getService()->drawSecondBlendConnection2View(ed::CanvasToScreen(blendNode->position), ed::GetNodeSize(blendNode->id), ed::GetCurrentZoom());
     }
-
+    
     // Reset our cursor and return without drawing additional help
     ImGui::SetCursorPos(cursorPos);
     return;
   }
-
+  
   // Open the ShaderInfo pane
-  if (!HelpService::getService()->openedShaderInfo()) {
+  if (!HelpService::getService()->openedShaderInfo() && !HelpService::getService()->deletedFirstBlendNode()) {
     // Get a Blend node
     std::shared_ptr<Node> blendNode;
     for (auto node : nodes) {
@@ -1714,103 +1909,81 @@ void NodeLayoutView::drawHelp()
         blendNode = node;
       };
     }
-
+    
     if (blendNode == nullptr) {
       ImGui::SetCursorPos(cursorPos);
       return;
     }
-
+    
     HelpService::getService()->drawOpenShaderInfoView(ed::CanvasToScreen(blendNode->position), ed::GetNodeSize(blendNode->id), ed::GetCurrentZoom());
-
+    
     // Reset our cursor and return without drawing additional help
     ImGui::SetCursorPos(cursorPos);
     return;
   }
-
-  if (!HelpService::getService()->editedBlendParameter()) {
+  
+  if (!HelpService::getService()->editedBlendModeParameter() || !HelpService::getService()->editedAlphaParameter()) {
     HelpService::getService()->drawEditParametersShaderInfoPane();
-
+    
     // Reset our cursor and return without drawing additional help
     ImGui::SetCursorPos(cursorPos);
     return;
   }
+  
+  if (!HelpService::getService()->deletedFirstBlendNode()) {
+    HelpService::getService()->drawDeleteBlendShader();
+    
+    // Reset our cursor and return without drawing additional help
+    ImGui::SetCursorPos(cursorPos);
+    return;
+  }
+  
+  // Made a new Blend shader by connecting two outputs
+  if (!HelpService::getService()->placedBlendEffect()) {
+    std::shared_ptr<Node> terminalNode;
 
-  if (!HelpService::getService()->openedStageMode() && !HelpService::getService()->hasOpenedStageMode) {
+    for (auto node : terminalNodes) {
+      if (node->type == NodeTypeShader && !ShaderChainerService::getService()->isShaderType(node->connectable, ShaderTypeBlend)) {
+        terminalNode = node;
+        break;
+      }
+    }
+      if (terminalNode == nullptr) {
+        // Reset our cursor and return without drawing additional help
+        ImGui::SetCursorPos(cursorPos);
+        return;
+      }
+      if (ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
+        HelpService::getService()->drawBlendNodeShortcut2(ed::CanvasToScreen(terminalNode->position), ed::GetNodeSize(terminalNode->id), ed::GetCurrentZoom());
+        
+        ImGui::SetCursorPos(cursorPos);
+        return;
+      } else {
+        std::shared_ptr<Node> secondNode;
+        
+        for (auto node : terminalNodes) {
+          if (node != terminalNode) secondNode = node;
+        }
+        HelpService::getService()->drawBlendNodeShortcut(ed::CanvasToScreen(secondNode->position), ed::GetNodeSize(secondNode->id), ed::GetCurrentZoom());
+        
+        ImGui::SetCursorPos(cursorPos);
+        return;
+    }
+  }
+  if (!HelpService::getService()->showPopup && !HelpService::getService()->completed) {
     HelpService::getService()->drawActionButtons();
-
     // Reset our cursor and return without drawing additional help
     ImGui::SetCursorPos(cursorPos);
     return;
   }
-
-  if (HelpService::getService()->hasOpenedStageMode && !HelpService::getService()->completed ) {
+  
+  if (HelpService::getService()->showPopup) {
     HelpService::getService()->drawCompletionPopup();
     // Reset our cursor and return without drawing additional help
     ImGui::SetCursorPos(cursorPos);
     return;
   }
 }
-
-//void NodeLayoutView::drawShaderBrowserView()
-//{
-//  if (selectorNodeId.Get() != 0) // Check if a node is selected
-//  {
-//    auto node = nodeIdNodeMap[selectorNodeId.Get()];
-//    if (node != nullptr)
-//    {
-//      // Get the position of the selected node
-//      ImVec2 pos = ed::GetNodePosition(node->id);
-//      pos = ed::CanvasToScreen(pos);
-//      
-//      // Set the position for the shader browser view window
-//      pos.y += ed::GetNodeSize(node->id).y / ed::GetCurrentZoom() + 20; // Position it below the node
-//      
-//      // Set window properties
-//      ImGui::SetNextWindowPos(pos);
-//      ImGui::SetNextWindowSize(ImVec2(500.0, 500.0));
-//      
-//      // Begin the window for shader browser view
-//      if (ImGui::Begin("Shader Browser", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize)) {
-//        
-//        if (node->type == NodeTypeShader) {
-//          nodeShaderBrowserView->draw();
-//        } else {
-//          switch (node->source->type) {
-//            case VideoSource_webcam:
-//              nodeVideoSourceBrowserView->setCurrentTab(1);
-//              break;
-//            case VideoSource_file:
-//              nodeVideoSourceBrowserView->setCurrentTab(3);
-//              break;
-//            case VideoSource_image:
-//              nodeVideoSourceBrowserView->setCurrentTab(3);
-//              break;
-//            case VideoSource_text:
-//              nodeVideoSourceBrowserView->setCurrentTab(0);
-//              break;
-//            case VideoSource_icon:
-//              nodeVideoSourceBrowserView->setCurrentTab(3);
-//              break;
-//            case VideoSource_shader:
-//              nodeVideoSourceBrowserView->setCurrentTab(0);
-//              break;
-//            case VideoSource_library:
-//              nodeVideoSourceBrowserView->setCurrentTab(2);
-//              break;
-//            case VideoSource_multi:
-//              break;
-//            case VideoSource_empty:
-//              break;
-//            default:
-//              break;
-//          }
-//          nodeVideoSourceBrowserView->drawSelectedBrowser();
-//        }
-//        ImGui::End();
-//      }
-//    }
-//  }
-//}
 
 void NodeLayoutView::toggleAudioReactiveParameter(std::shared_ptr<Node> node) {
   if (node->isAudioReactiveParameterActive()) {

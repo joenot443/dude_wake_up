@@ -1,3 +1,0 @@
-# GlitchAudio
-
-Information about GlitchAudio

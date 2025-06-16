@@ -8,6 +8,8 @@
 #ifndef AvailableShaderConfig_h
 #define AvailableShaderConfig_h
 
+#include "json.hpp"
+
 using json = nlohmann::json;
 
 struct AvailableShaderConfig {

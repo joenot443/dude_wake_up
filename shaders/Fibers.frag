@@ -20,7 +20,7 @@ const float PI2 = PI * 2.;
 const float BPM = 138.;
 
 // If you have a strong GPU, make it bigger. GPUの処理能力に余裕がある場合、大きな値にしてください
-const int nS = 8; // Number of samples. モーションブラーとDOF（被写界深度）のサンプル数
+const int nS = 2; // Number of samples. モーションブラーとDOF（被写界深度）のサンプル数
 
 const float width = 0.03; // Width of the fiber. 円柱の半径
 

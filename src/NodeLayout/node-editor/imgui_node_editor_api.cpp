@@ -407,6 +407,11 @@ ImVec2 ax::NodeEditor::GetNodePosition(NodeId nodeId)
     return s_Editor->GetNodePosition(nodeId);
 }
 
+ImVec2 ax::NodeEditor::GetPinPosition(PinId pinId)
+{
+  return s_Editor->GetPinPosition(pinId);
+}
+
 ImVec2 ax::NodeEditor::GetNodeSize(NodeId nodeId)
 {
     return s_Editor->GetNodeSize(nodeId);

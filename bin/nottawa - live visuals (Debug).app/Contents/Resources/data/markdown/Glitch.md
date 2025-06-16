@@ -1,3 +1,0 @@
-# Glitch
-
-Information about Glitch

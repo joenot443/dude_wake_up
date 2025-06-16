@@ -108,7 +108,8 @@ struct CommonViews
   
   static void MultiSlider(std::string title, std::string id, std::shared_ptr<Parameter> param1, std::shared_ptr<Parameter> param2,
                           std::shared_ptr<Oscillator> param1Oscillator,
-                          std::shared_ptr<Oscillator> param2Oscillator);
+                          std::shared_ptr<Oscillator> param2Oscillator,
+                          float aspectRatio = 0.5625);
   
   static bool AreaSlider(std::string id,
                          std::shared_ptr<Parameter> minX, std::shared_ptr<Parameter> maxX,
@@ -124,7 +125,7 @@ struct CommonViews
   
   static bool SelectionRect(ImVec2* start_pos, ImVec2* end_pos, ImVec2 topLeft, ImVec2 bottomRight);
   
-  static void BlendModeSelector(std::shared_ptr<Parameter> param, std::shared_ptr<Parameter> flip = nullptr, std::shared_ptr<Parameter> alpha = nullptr, std::shared_ptr<Oscillator> alphaOscillator = nullptr, std::shared_ptr<Parameter> blendWithEmpty = nullptr);
+  static void BlendModeSelector(std::shared_ptr<Parameter> param, std::shared_ptr<Parameter> flip = nullptr, std::shared_ptr<Parameter> alpha = nullptr, std::shared_ptr<Oscillator> alphaOscillator = nullptr, std::shared_ptr<Parameter> amount = nullptr, std::shared_ptr<Oscillator> amountOscillator = nullptr, std::shared_ptr<Parameter> blendWithEmpty = nullptr);
   
   static bool ResetButton(std::string id, std::shared_ptr<Parameter> param, ImVec2 size = ImVec2(25.0, 25.0), ImVec2 padding = ImVec2(7.5, 7.5));
   
@@ -149,6 +150,7 @@ struct CommonViews
   static ed::PinId OutputNodePin(std::shared_ptr<Node> node, OutputSlot slot);
   
   static void ImageNamedNew(std::string name, float width, float height);
+  static void ImageNamedNew(std::string name, ImVec2 size);
   
   static bool ImageButton(std::string id, std::string imageName, ImVec2 size = ImVec2(105.0, 50.0), ImVec2 imageRatio = ImVec2(3.0, 2.0), bool forceImGuiContext = false);
   
@@ -161,6 +163,8 @@ struct CommonViews
   static bool FlipButton(std::string id, std::shared_ptr<Parameter> param, ImVec2 size = ImVec2(30.0, 30.0));
 
   static bool PlayPauseButton(std::string id, bool playing, ImVec2 size = ImVec2(40.0, 40.0), ImVec2 padding = ImVec2(7.5, 7.5));
+
+  static bool SearchBar(std::string& searchQuery, bool& searchDirty, std::string id);
 };
 
 static ImVec2 getScaledWindowSize() {

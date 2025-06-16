@@ -17,15 +17,15 @@
 #include <stdio.h>
 
 struct DitherSettings : public ShaderSettings {
-	public:
+public:
   std::shared_ptr<Parameter> shape;
-
+  
   std::shared_ptr<Oscillator> shapeOscillator;
-
+  
   DitherSettings(std::string shaderId, json j, std::string name)
-      : shape(std::make_shared<Parameter>("shape", 0.0, 0.0, 1.0)),
-        shapeOscillator(std::make_shared<WaveformOscillator>(shape)),
-        ShaderSettings(shaderId, j, name) {
+  : shape(std::make_shared<Parameter>("shape", 0.0, 0.0, 1.0)),
+  shapeOscillator(std::make_shared<WaveformOscillator>(shape)),
+  ShaderSettings(shaderId, j, name) {
     parameters = {shape};
     oscillators = {shapeOscillator};
   };
@@ -33,17 +33,15 @@ struct DitherSettings : public ShaderSettings {
 
 class DitherShader : public Shader {
 public:
-
+  
   DitherSettings *settings;
   DitherShader(DitherSettings *settings)
-      : settings(settings), Shader(settings){};
-
+  : settings(settings), Shader(settings){};
+  
   void setup() override {
-shader.load("shaders/Dither");
-shader.load("shaders/Dither");
-    
+    shader.load("shaders/Dither");
   }
-
+  
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
@@ -55,14 +53,14 @@ shader.load("shaders/Dither");
     shader.end();
     canvas->end();
   }
-
+  
   void clear() override {}
-
-    int inputCount() override {
+  
+  int inputCount() override {
     return 1;
   }
-ShaderType type() override { return ShaderTypeDither; }
-
+  ShaderType type() override { return ShaderTypeDither; }
+  
   void drawSettings() override {
     
     CommonViews::ShaderParameter(settings->shape, settings->shapeOscillator);

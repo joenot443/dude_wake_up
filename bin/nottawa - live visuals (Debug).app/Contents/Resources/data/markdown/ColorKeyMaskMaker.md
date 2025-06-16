@@ -1,3 +1,0 @@
-# ColorKeyMaskMaker
-
-Information about ColorKeyMaskMaker

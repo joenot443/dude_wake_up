@@ -52,8 +52,9 @@ void VideoSourceService::populateAvailableVideoSources()
   auto textSource = std::make_shared<AvailableVideoSourceText>("Basic Text");
   availableSourceMap[textSource->availableVideoSourceId] = textSource;
   
-  auto iconSource = std::make_shared<AvailableVideoSourceIcon>("Icon");
-  availableSourceMap[iconSource->availableVideoSourceId] = iconSource;
+  // TODO: Readd IconSource with better icons
+//  auto iconSource = std::make_shared<AvailableVideoSourceIcon>("Icon");
+//  availableSourceMap[iconSource->availableVideoSourceId] = iconSource;
   
   for (auto const &file : LibraryService::getService()->libraryFiles)
   {

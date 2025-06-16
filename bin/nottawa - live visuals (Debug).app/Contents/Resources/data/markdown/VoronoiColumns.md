@@ -1,3 +1,0 @@
-# VoronoiColumns
-
-Information about VoronoiColumns

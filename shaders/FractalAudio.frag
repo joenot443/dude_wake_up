@@ -2,7 +2,7 @@
 
 uniform vec2 dimensions;
 uniform float time;
-uniform float audio[256];
+uniform float audio[14];
 in vec2 coord;
 out vec4 outputColor;
 
@@ -21,7 +21,7 @@ vec3 pow3(vec3 x, int y) {
 
 float fft(float x) {
   // Fixed length of the audio array
-  const int audioLength = 256;
+  const int audioLength = 14;
   
   // Scale x to fit the range of the array (0 to audioLength - 1)
   float scaledX = x * float(audioLength - 1);
@@ -55,10 +55,7 @@ void main()
   vec2 r=dimensions;
   vec3 d=normalize(vec3((bass*2.+coord-.5*r.xy)/r.y,1));
   
-  for(
-      float i=0.,g=0.,e,s;
-      ++i<99.;
-      outputColor.rgb+=mix(vec3(1) ,H(log(s)),.7)*.08*exp(-i*i*e))
+  for(float i=0.,g=0.,e,s; ++i<99.; outputColor.rgb+=mix(vec3(1) ,H(log(s)),.7)*.08*exp(-i*i*e))
   {
     
     p=g*d;

@@ -2,19 +2,11 @@
 
 namespace msa {
 	BPMTapper::BPMTapper():_tapCount(0), _bpm(60), _lengthOfBeat(1), _beatTime(0) {startFresh();}
-	
-#define kBeatLerpSeconds	1		// it takes this many seconds to fully lerp to beat (to smoothen transition)
-	
     //--------------------------------------------------------------
 	void BPMTapper::startFresh() {
 		printf("BPM::startFresh\n");
 		_tapCount		= 1;
 		_timer.start();
-		
-//		float iBeatTime;
-//		float fBeatTime;
-//		fBeatTime = modf(_beatTime, &fBeatTime);
-//		_beatTime = (int)iBeatTime % 16 + fBeatTime;
 	}
 	
     //--------------------------------------------------------------
@@ -25,8 +17,8 @@ namespace msa {
 		_beatPerc			= _beatTime - static_cast<int>(_beatTime);
 		
 		float lerpSpeed;
-		if(beatStartTime < kBeatLerpSeconds) {
-			lerpSpeed = ofNormalize(beatStartTime, 0, kBeatLerpSeconds);
+		if(beatStartTime < 1) {
+			lerpSpeed = ofNormalize(beatStartTime, 0, 1);
 			printf("lerpSpeed: %f\n", lerpSpeed);
 		} else {
 			lerpSpeed = 1;

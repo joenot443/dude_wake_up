@@ -8,9 +8,11 @@
 #ifndef LayoutStateService_hpp
 #define LayoutStateService_hpp
 
-#include <stdio.h>
+#include <string>
+#include <vector>
 #include "ConfigService.hpp"
 #include "ConfigurableService.hpp"
+#include "imgui.h"
 
 static const std::string PortraitJsonKey = "portrait";
 static const std::string ShowAudioSettingsJsonKey = "showAudioSettings";
@@ -26,12 +28,13 @@ static const std::string HelpEnabledJsonKey = "helpEnabled";
 static const std::string WelcomeScreenEnabledJsonKey = "welcomeScreenEnabled";
 static const std::string AbletonLinkEnabledJsonKey = "abletonBPMEnabled";
 static const std::string ActionBarExpandedJsonKey = "actionBarExpanded";
+static const std::string FlowEnabledJsonKey = "flowEnabled";
 
 static const std::vector<std::string> ResolutionOptions = {"240p", "360p", "480p", "720p", "1080p", "1440p", "4k"};
 static const float MenuBarHeight = 50.0f;
 static const float TabBarHeight = 15.0f;
 
-class LayoutStateService: public ConfigurableService {
+class LayoutStateService : public ConfigurableService {
 public:
   LayoutStateService(){};
 
@@ -51,6 +54,8 @@ public:
   bool portrait = false;
   
   bool abletonLinkEnabled = false;
+  
+  bool flowEnabled = true;
   
   bool outputWindowUpdatesAutomatically = true;
   

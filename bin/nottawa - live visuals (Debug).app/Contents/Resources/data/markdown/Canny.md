@@ -1,3 +1,0 @@
-# Canny
-
-Information about Canny

@@ -13,149 +13,151 @@
 #include <vector>
 
 enum ShaderType {
-  ShaderTypeNone,         
-  ShaderTypeHSB,         
-  ShaderTypeBlur,        
-  ShaderTypePixelate,    
-  ShaderTypeGlitch,      
-  ShaderTypeMirror,      
-  ShaderTypeTransform,   
-  ShaderTypeFeedback,    
-  ShaderTypeAscii,       
-  ShaderTypeKaleidoscope,
-  ShaderTypeTile,        
-  ShaderTypeMix,
-  ShaderTypeRGBShift,
-  ShaderTypeWobble,
-  ShaderTypeSlider,
-  ShaderTypeRings,
-  ShaderTypeAudioWaveform,
-  ShaderTypeAudioBumper,
-  ShaderTypeAudioMountains,
-  ShaderTypeGalaxy,
-  ShaderTypeMountains,
-  ShaderTypeDither,
-  ShaderTypeRainbowRotator,
-  ShaderTypeRubiks,
-  ShaderTypePlasma,
-  ShaderTypeVanGogh,
-  ShaderTypeFuji,
-  ShaderTypeFractal,
-  ShaderTypeClouds,
-  ShaderTypeMelter,
-  ShaderTypeOctahedron,
-  ShaderTypeDisco,
-  ShaderTypeLiquid,
-  ShaderTypeTriangleMap,
-  ShaderTypeSobel,
-  ShaderTypeColorPass,
-  ShaderTypeFishEye,
-  ShaderTypePsycurves,
-  ShaderTypeTissue,
-  ShaderTypeHalfTone,
-  ShaderTypeCrosshatch,
-  ShaderTypeMask,
-  ShaderTypeLumaMaskMaker,
-  ShaderTypeDancingSquares,
-  ShaderTypePlasmaTwo,
-  ShaderTypeCurlySquares,
-  ShaderTypeColorKeyMaskMaker,
-  ShaderTypeFrequencyVisualizer,
-  ShaderTypeWarp,
-  ShaderTypeHilbert,
-  ShaderType16bit,
-  ShaderTypeSolidColor,
-  ShaderTypeMinMixer,
-  ShaderTypeSlidingFrame,
-  ShaderTypeStaticFrame,
-  ShaderTypeGameboy,
-  ShaderTypePaint,
-  ShaderTypeTriple,
-  ShaderTypeVertex,
-  ShaderTypeBounce,
-  ShaderTypeCirclePath,
-  ShaderTypeVHS,
-  ShaderTypeCanny,
-  ShaderTypeSnowfall,
-  ShaderTypeTextureMask,
-  ShaderTypeLimbo,
-  ShaderTypeAudioCircle,
-  ShaderTypeSmokeRing,
-  ShaderTypeSwirlingSoul,
-  ShaderTypeCubify,
-  ShaderTypeGyroids,
-  ShaderTypeAlphaMix,
-  ShaderTypeColorSwap,
-  ShaderTypeGridRun,
-  ShaderTypeColorStepper,
-  ShaderTypeMultiMix,
-  ShaderTypeRotate,
-  ShaderTypeSwitcher,
-  ShaderTypeOverlay,
-  ShaderTypePieSplit,
-  ShaderTypeFullHouse,
-  ShaderTypeBlend,
-  ShaderTypeReflector,
-  ShaderTypeWarpspeed,
-  ShaderTypeCore,
-  ShaderTypeTwistedCubes,
-  ShaderTypeTwistedTrip,
-  ShaderTypeOldTV,
-  ShaderTypeOneBitDither,
-  ShaderTypeDirtyPlasma,
-  ShaderTypePixelPlay,
-  ShaderTypeSwirl,
-  ShaderTypeIsoFract,
-  ShaderTypeOnOff,
-  ShaderTypeMotionBlurTexture,
-  ShaderTypeGlitchDigital,
-  ShaderTypeGlitchRGB,
-  ShaderTypeWelcomeRings,
-  ShaderTypeMist,
-  ShaderTypeFibers,
-  ShaderTypeChromeGrill,
-  ShaderTypeGlitchAudio,
-  ShaderTypeDoubleBlur,
-  ShaderTypeOutline,
-  ShaderTypeCosmos,
-  ShaderTypeFloatingSparks,
-  ShaderTypeAudioBlocks,
-  ShaderTypeCloudyShapes,
-  ShaderTypeSpaceRings,
-  ShaderTypeUnknownPleasures,
-  ShaderTypeStarryPlanes,
-  ShaderTypeFractalAudio,
-  ShaderTypeFlickerAudio,
-  ShaderTypeDiscoAudio,
-  ShaderTypeColorWheel,
-  ShaderTypePerplexion,
-  ShaderTypeOctagrams,
-  ShaderTypeHeptagons,
-  ShaderTypeBreathe,
-  ShaderTypeAerogel,
-  ShaderTypeScratchy,
-  ShaderTypeDiffractor,
-  ShaderTypeAutotangent,
-  ShaderTypePlasmor,
-  ShaderTypeColoredDrops,
-  ShaderTypeSimpleShape,
-  ShaderTypeBackground,
-  ShaderTypeComicbook,
-  ShaderTypeSimpleBars,
-  ShaderTypeSpiral,
-  ShaderTypeWeb,
-  ShaderTypeStellar,
-  ShaderTypeSpiralWhirlpool,
-  ShaderTypeStrangeScreen,
-  ShaderTypeCompanions,
-  ShaderTypeWavy,
-  ShaderTypePixelAudioParty,
+  ShaderTypeNone, // 0
+  ShaderTypeHSB, // 1
+  ShaderTypeBlur, // 2
+  ShaderTypePixelate, // 3
+  ShaderTypeGlitch, // 4
+  ShaderTypeMirror, // 5
+  ShaderTypeTransform, // 6
+  ShaderTypeFeedback, // 7
+  ShaderTypeAscii, // 8
+  ShaderTypeKaleidoscope, // 9
+  ShaderTypeTile, // 10
+  ShaderTypeMix, // 11
+  ShaderTypeRGBShift, // 12
+  ShaderTypeWobble, // 13
+  ShaderTypeSlider, // 14
+  ShaderTypeRings, // 15
+  ShaderTypeAudioWaveform, // 16
+  ShaderTypeAudioBumper, // 17
+  ShaderTypeAudioMountains, // 18
+  ShaderTypeGalaxy, // 19
+  ShaderTypeMountains, // 20
+  ShaderTypeDither, // 21
+  ShaderTypeRainbowRotator, // 22
+  ShaderTypeRubiks, // 23
+  ShaderTypePlasma, // 24
+  ShaderTypeFuji, // 25
+  ShaderTypeFractal, // 26
+  ShaderTypeClouds, // 27
+  ShaderTypeMelter, // 28
+  ShaderTypeOctahedron, // 29
+  ShaderTypeDisco, // 30
+  ShaderTypeLiquid, // 31
+  ShaderTypeTriangleMap, // 32
+  ShaderTypeSobel, // 33
+  ShaderTypeColorPass, // 34
+  ShaderTypeFishEye, // 35
+  ShaderTypePsycurves, // 36
+  ShaderTypeTissue, // 37
+  ShaderTypeHalfTone, // 38
+  ShaderTypeCrosshatch, // 39
+  ShaderTypeMask, // 40
+  ShaderTypeLumaMaskMaker, // 41
+  ShaderTypeDancingSquares, // 42
+  ShaderTypePlasmaTwo, // 43
+  ShaderTypeCurlySquares, // 44
+  ShaderTypeColorKeyMaskMaker, // 45
+  ShaderTypeFrequencyVisualizer, // 46
+  ShaderTypeWarp, // 47
+  ShaderTypeHilbert, // 48
+  ShaderType16bit, // 49
+  ShaderTypeSolidColor, // 50
+  ShaderTypeMinMixer, // 51
+  ShaderTypeSlidingFrame, // 52
+  ShaderTypeStaticFrame, // 53
+  ShaderTypeGameboy, // 54
+  ShaderTypePaint, // 55
+  ShaderTypeTriple, // 56
+  ShaderTypeVertex, // 57
+  ShaderTypeBounce, // 58
+  ShaderTypeCirclePath, // 59
+  ShaderTypeVHS, // 60
+  ShaderTypeCanny, // 61
+  ShaderTypeSnowfall, // 62
+  ShaderTypeTextureMask, // 63
+  ShaderTypeLimbo, // 64
+  ShaderTypeAudioCircle, // 65
+  ShaderTypeSmokeRing, // 66
+  ShaderTypeSwirlingSoul, // 67
+  ShaderTypeCubify, // 68
+  ShaderTypeGyroids, // 69
+  ShaderTypeAlphaMix, // 70
+  ShaderTypeColorSwap, // 71
+  ShaderTypeGridRun, // 72
+  ShaderTypeColorStepper, // 73
+  ShaderTypeMultiMix, // 74
+  ShaderTypeRotate, // 75
+  ShaderTypeSwitcher, // 76
+  ShaderTypeOverlay, // 77
+  ShaderTypePieSplit, // 78
+  ShaderTypeFullHouse, // 79
+  ShaderTypeBlend, // 80
+  ShaderTypeReflector, // 81
+  ShaderTypeWarpspeed, // 82
+  ShaderTypeCore, // 83
+  ShaderTypeTwistedCubes, // 84
+  ShaderTypeTwistedTrip, // 85
+  ShaderTypeOldTV, // 86
+  ShaderTypeOneBitDither, // 87
+  ShaderTypeDirtyPlasma, // 88
+  ShaderTypePixelPlay, // 89
+  ShaderTypeSwirl, // 90
+  ShaderTypeIsoFract, // 91
+  ShaderTypeOnOff, // 92
+  ShaderTypeMotionBlurTexture, // 93
+  ShaderTypeGlitchDigital, // 94
+  ShaderTypeGlitchRGB, // 95
+  ShaderTypeWelcomeRings, // 96
+  ShaderTypeMist, // 97
+  ShaderTypeFibers, // 98
+  ShaderTypeChromeGrill, // 99
+  ShaderTypeGlitchAudio, // 100
+  ShaderTypeDoubleBlur, // 101
+  ShaderTypeOutline, // 102
+  ShaderTypeCosmos, // 103
+  ShaderTypeFloatingSparks, // 104
+  ShaderTypeAudioBlocks, // 105
+  ShaderTypeCloudyShapes, // 106
+  ShaderTypeSpaceRings, // 107
+  ShaderTypeUnknownPleasures, // 108
+  ShaderTypeFractalAudio, // 109
+  ShaderTypeFlickerAudio, // 110
+  ShaderTypeDiscoAudio, // 111
+  ShaderTypeColorWheel, // 112
+  ShaderTypePerplexion, // 113
+  ShaderTypeOctagrams, // 114
+  ShaderTypeHeptagons, // 115
+  ShaderTypeBreathe, // 116
+  ShaderTypeAerogel, // 117
+  ShaderTypeScratchy, // 118
+  ShaderTypeDiffractor, // 119
+  ShaderTypeAutotangent, // 120
+  ShaderTypePlasmor, // 121
+  ShaderTypeColoredDrops, // 122
+  ShaderTypeSimpleShape, // 123
+  ShaderTypeBackground, // 124
+  ShaderTypeComicbook, // 125
+  ShaderTypeSimpleBars, // 126
+  ShaderTypeSpiral, // 127
+  ShaderTypeWeb, // 128
+  ShaderTypeStellar, // 129
+  ShaderTypeSpiralWhirlpool, // 130
+  ShaderTypeStrangeScreen, // 131
+  ShaderTypeCompanions, // 132
+  ShaderTypeWavy, // 133
+  ShaderTypePixelAudioParty, // 134
+  ShaderTypeCloudyTunnel, // 135
+  ShaderTypeFireflies, // 136
+  ShaderTypeGodRay, // 137
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
   ShaderTypeHSB,
   ShaderTypeSolidColor,
   ShaderTypeDoubleBlur,
+  ShaderTypeBlur,
   ShaderTypePixelate,
   ShaderTypeMirror,
   ShaderType16bit,
@@ -172,7 +174,6 @@ static const ShaderType AvailableMixShaderTypes[] = {
   ShaderTypeSwitcher,
   ShaderTypeColorSwap,
   ShaderTypeMix,
-  ShaderTypeMinMixer,
   ShaderTypeMultiMix,
   ShaderTypeSlidingFrame,
   ShaderTypeStaticFrame,
@@ -191,6 +192,7 @@ static const ShaderType AvailableGlitchShaderTypes[] = {
   ShaderTypeGlitchRGB,
   ShaderTypePixelPlay,
   ShaderTypeGlitchDigital,
+  ShaderTypeGlitchAudio,
   ShaderTypeWeb,
   ShaderTypeScratchy,
   ShaderTypeAutotangent
@@ -204,7 +206,6 @@ static const ShaderType AvailableTransformShaderTypes[] = {
   ShaderTypeCirclePath,
   ShaderTypeWobble,
   ShaderTypeTriple,
-  ShaderTypeWavy,
   ShaderTypeFishEye, // Generated
   ShaderTypeTile,
   ShaderTypeKaleidoscope,
@@ -216,6 +217,7 @@ static const ShaderType AvailableTransformShaderTypes[] = {
 static const ShaderType AvailableFilterShaderTypes[] = {
   ShaderTypeCubify,
   ShaderTypeCanny,
+  ShaderTypeStellar,
   ShaderTypeStrangeScreen,
   ShaderTypeComicbook,
   ShaderTypeGameboy,
@@ -279,6 +281,12 @@ static std::vector<ShaderType> AllShaderTypes() {
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) { // ShaderNames
+    case ShaderTypeGodRay:
+      return "GodRay";
+    case ShaderTypeFireflies:
+      return "Fireflies";
+    case ShaderTypeCloudyTunnel:
+      return "CloudyTunnel";
     case ShaderTypePixelAudioParty:
       return "PixelAudioParty";
     case ShaderTypeWavy:
@@ -296,13 +304,13 @@ static std::string shaderTypeName(ShaderType type) {
     case ShaderTypeSpiral:
       return "Spiral";
     case ShaderTypeSimpleBars:
-      return "SimpleBars";
+      return "Simple Bars";
     case ShaderTypeComicbook:
       return "Comicbook";
     case ShaderTypeBackground:
       return "Background";
     case ShaderTypeSimpleShape:
-      return "SimpleShape";
+      return "Simple Shape";
     case ShaderTypeColoredDrops:
       return "Colored Drops";
     case ShaderTypePlasmor:
@@ -326,13 +334,11 @@ static std::string shaderTypeName(ShaderType type) {
     case ShaderTypeColorWheel:
       return "ColorWheel";
     case ShaderTypeDiscoAudio:
-      return "Disco";
+      return "Disco Audio";
     case ShaderTypeFlickerAudio:
-      return "Flicker";
+      return "Flicker Audio";
     case ShaderTypeFractalAudio:
       return "Fractal";
-    case ShaderTypeStarryPlanes:
-      return "Stars";
     case ShaderTypeUnknownPleasures:
       return "Britpop";
     case ShaderTypeSpaceRings:
@@ -342,7 +348,7 @@ static std::string shaderTypeName(ShaderType type) {
     case ShaderTypeAudioBlocks:
       return "Blocks";
     case ShaderTypeFloatingSparks:
-      return "Sparks";
+      return "Floating Sparks";
     case ShaderTypeCosmos:
       return "Cosmos";
     case ShaderTypeOutline:
@@ -350,7 +356,7 @@ static std::string shaderTypeName(ShaderType type) {
     case ShaderTypeDoubleBlur:
       return "Blur";
     case ShaderTypeGlitchAudio:
-      return "Glitchy";
+      return "Glitch Audio";
     case ShaderTypeChromeGrill:
       return "Chrome Grill";
     case ShaderTypeFibers:
@@ -358,15 +364,15 @@ static std::string shaderTypeName(ShaderType type) {
     case ShaderTypeMist:
       return "Mist";
     case ShaderTypeWelcomeRings:
-      return "WelcomeRings";
+      return "Glowing Rings";
     case ShaderTypeGlitchRGB:
-      return "RGB";
+      return "Glitch RGB";
     case ShaderTypeGlitchDigital:
       return "Digital";
     case ShaderTypeMotionBlurTexture:
       return "Motion Blur";
     case ShaderTypeOnOff:
-      return "OnOff";
+      return "On Off";
     case ShaderTypeIsoFract:
       return "Isofractal";
     case ShaderTypeSwirl:
@@ -420,7 +426,7 @@ static std::string shaderTypeName(ShaderType type) {
     case ShaderTypeLimbo:
       return "Limbo";
     case ShaderTypeTextureMask:
-      return "Texture Mask";
+      return "Texture Masker";
     case ShaderTypeSnowfall:
       return "Snowfall";
     case ShaderTypeCanny:
@@ -443,8 +449,6 @@ static std::string shaderTypeName(ShaderType type) {
       return "Static Frame";
     case ShaderTypeSlidingFrame:
       return "Sliding Frame";
-    case ShaderTypeMinMixer:
-      return "Min-Mixer";
     case ShaderTypeSolidColor:
       return "Color Overlay";
     case ShaderType16bit:
@@ -454,9 +458,9 @@ static std::string shaderTypeName(ShaderType type) {
     case ShaderTypeWarp:
       return "Warp";
     case ShaderTypeFrequencyVisualizer:
-      return "Visualizer";
+      return "Frequency Visualizer";
     case ShaderTypeColorKeyMaskMaker:
-      return "ColorMask";
+      return "Color Mask";
     case ShaderTypeCurlySquares:
       return "Curly";
     case ShaderTypePlasmaTwo:
@@ -464,9 +468,9 @@ static std::string shaderTypeName(ShaderType type) {
     case ShaderTypeDancingSquares:
       return "Dancing Squares";
     case ShaderTypeLumaMaskMaker:
-      return "LumaMask";
+      return "Luma Mask";
     case ShaderTypeMask:
-      return "Mask";
+      return "Masker";
     case ShaderTypeCrosshatch:
       return "Crosshatch";
     case ShaderTypeHalfTone:
@@ -489,8 +493,6 @@ static std::string shaderTypeName(ShaderType type) {
       return "Disco";
     case ShaderTypeOctahedron:
       return "Octahedron";
-    case ShaderTypeVanGogh:
-      return "VanGogh";
     case ShaderTypeRubiks:
       return "Rubiks";
     case ShaderTypeRainbowRotator:
@@ -520,7 +522,7 @@ static std::string shaderTypeName(ShaderType type) {
     case ShaderTypeHSB:
       return "HSB";
     case ShaderTypeBlur:
-      return "Blur";
+      return "Retro Blur";
     case ShaderTypePixelate:
       return "Pixelate";
     case ShaderTypeGlitch:
@@ -559,8 +561,7 @@ static bool shaderTypeSupportsAux(ShaderType type) {
       type == ShaderTypeFeedback ||
       type == ShaderTypeSlidingFrame ||
       type == ShaderTypeStaticFrame ||
-      type == ShaderTypeColorSwap || 
-      type == ShaderTypeMinMixer)
+      type == ShaderTypeColorSwap)
   {return true;}
   return false;
 }

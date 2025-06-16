@@ -1,3 +1,0 @@
-# SpaceRings
-
-Information about SpaceRings

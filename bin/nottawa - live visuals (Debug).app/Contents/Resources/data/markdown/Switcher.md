@@ -1,3 +1,0 @@
-# Switcher
-
-Information about Switcher

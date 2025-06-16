@@ -38,11 +38,11 @@ struct TripleSettings : public ShaderSettings
 
   TripleSettings(std::string shaderId, json j, std::string name) : scale(std::make_shared<Parameter>("scale", 1.0, 0.0, 5.0)),
                                                  scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
-                                                 xShift(std::make_shared<Parameter>("xShift", 0.0, -2.0, 2.0)),
+                                                 xShift(std::make_shared<Parameter>("xShift", 0.4, -2.0, 2.0)),
                                                  xShiftOscillator(std::make_shared<WaveformOscillator>(xShift)),
                                                  yShift(std::make_shared<Parameter>("yShift", 0.0, -2.0, 2.0)),
                                                  yShiftOscillator(std::make_shared<WaveformOscillator>(yShift)),
-                                                 drawOriginal(std::make_shared<Parameter>("drawOriginal", 1.0, ParameterType_Bool)),
+                                                 drawOriginal(std::make_shared<Parameter>("drawOriginal", 0.0, ParameterType_Bool)),
                                                  drawLeft(std::make_shared<Parameter>("drawLeft", 1.0, ParameterType_Bool)),
                                                  drawRight(std::make_shared<Parameter>("drawRight", 1.0, ParameterType_Bool)),
                                                  drawCenter(std::make_shared<Parameter>("drawCenter", ParameterType_Bool)),

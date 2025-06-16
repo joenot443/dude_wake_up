@@ -1,3 +1,0 @@
-# Background
-
-Information about Background

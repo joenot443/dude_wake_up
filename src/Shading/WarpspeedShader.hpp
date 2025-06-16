@@ -52,7 +52,7 @@ struct WarpspeedShader: Shader {
     canvas->end();
   }
 
-  void clear() override {
+  void clear() override { 
     
   }
 

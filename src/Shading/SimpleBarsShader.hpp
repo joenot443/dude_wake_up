@@ -32,7 +32,7 @@ struct SimpleBarsSettings: public ShaderSettings {
   SimpleBarsSettings(std::string shaderId, json j) :
   orientation(std::make_shared<Parameter>("Orientation", 0, 0, 1)), // 0: Horizontal, 1: Vertical
   barCount(std::make_shared<Parameter>("Bar Count", 10, 1, 100)),
-  barWidth(std::make_shared<Parameter>("Bar Width", 100.0, 1.0, 500.0)),
+  barWidth(std::make_shared<Parameter>("Bar Width", 25.0, 1.0, 500.0)),
   barSpacing(std::make_shared<Parameter>("Bar Spacing", 20.0, 0.0, 200.0)),
   fillColor(std::make_shared<Parameter>("FillColor", ParameterType_Color)),
   barCountOscillator(std::make_shared<WaveformOscillator>(barCount)),
@@ -41,7 +41,7 @@ struct SimpleBarsSettings: public ShaderSettings {
   ShaderSettings(shaderId, j, "SimpleBars") {
     parameters = { orientation, barCount, barWidth, barSpacing, fillColor };
     oscillators = { barCountOscillator, barWidthOscillator, barSpacingOscillator };
-    fillColor->setColor({0.0, 1.0, 0.0, 1.0});
+    fillColor->setColor({0.1, 0.5, 0.2, 1.0});
     load(j);
     registerParameters();
   };

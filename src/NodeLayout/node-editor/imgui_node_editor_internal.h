@@ -475,6 +475,7 @@ struct Link final: Object
     float  m_Thickness;
     ImVec2 m_Start;
     ImVec2 m_End;
+  bool m_IsActive;
 
     Link(EditorContext* editor, LinkId id)
         : Object(editor)
@@ -1339,6 +1340,9 @@ struct EditorContext
 
     void SetNodeZPosition(NodeId nodeId, float z);
     float GetNodeZPosition(NodeId nodeId);
+  
+    ImVec2 GetPinPosition(PinId pinId);
+
 
     void MarkNodeToRestoreState(Node* node);
     void UpdateNodeState(Node* node);

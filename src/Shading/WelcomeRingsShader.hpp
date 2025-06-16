@@ -24,9 +24,9 @@ struct WelcomeRingsSettings: public ShaderSettings {
   std::shared_ptr<Parameter> palette;
 
   WelcomeRingsSettings(std::string shaderId, json j) :
-  cycles(std::make_shared<Parameter>("cycles", 4.0, 1.0, 8.0)),
+  cycles(std::make_shared<Parameter>("Cycles", 4.0, 1.0, 8.0)),
   cyclesOscillator(std::make_shared<WaveformOscillator>(cycles)),
-  palette(std::make_shared<Parameter>("palette", 0.0, 0.0, 7.0, ParameterType_Int)),
+  palette(std::make_shared<Parameter>("Palette", 0.0, 0.0, 7.0, ParameterType_Int)),
   ShaderSettings(shaderId, j, "WelcomeRings") {
     parameters = { cycles };
     oscillators = { cyclesOscillator };
@@ -70,8 +70,6 @@ struct WelcomeRingsShader: Shader {
   }
 
   void drawSettings() override {
-    
-
     CommonViews::ShaderParameter(settings->cycles, settings->cyclesOscillator);
     CommonViews::ShaderIntParameter(settings->palette);
   }

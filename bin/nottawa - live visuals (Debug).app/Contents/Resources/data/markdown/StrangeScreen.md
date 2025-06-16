@@ -1,3 +1,0 @@
-# StrangeScreen
-
-Information about StrangeScreen

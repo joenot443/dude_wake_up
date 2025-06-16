@@ -74,10 +74,7 @@ ShaderType type() override {
   }
 
   void drawSettings() override {
-    
-
-    CommonViews::ShaderParameter(settings->centerX, settings->centerXOscillator);
-    CommonViews::ShaderParameter(settings->centerY, settings->centerYOscillator);
+    CommonViews::MultiSlider("Position", settings->centerX->paramId, settings->centerX, settings->centerY, settings->centerXOscillator, settings->centerYOscillator);
     CommonViews::ShaderParameter(settings->size, settings->sizeOscillator);
   }
 };

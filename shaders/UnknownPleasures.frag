@@ -1,54 +1,71 @@
 #version 150
 
+// Required uniforms for OpenFrameworks
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
 uniform float height;
+
+// New control parameters
+uniform float lineDensity;    // Controls spacing between lines
+uniform float noiseIntensity; // Controls the amount of noise in the waveform
+uniform float waveFrequency;  // Controls the frequency of the base wave
+uniform float timeScale;      // Controls the speed of the animation
+
 in vec2 coord;
 out vec4 outputColor;
 
-float hash( uint n )
-{   // integer hash copied from Hugo Elias
-  n = (n<<13U)^n;
-  n = n*(n*n*15731U+789221U)+1376312589U;
-  return float(n&uvec3(0x0fffffffU))/float(0x0fffffff);
+// Integer hash function for generating pseudo-random values
+float hash(uint n) {
+  n = (n << 13U) ^ n;
+  n = n * (n * n * 15731U + 789221U) + 1376312589U;
+  return float(n & uvec3(0x0fffffffU)) / float(0x0fffffff);
 }
 
-float bnoise( in float x )
-{// Basic noise copied from iq
+// Basic noise function for smooth interpolation
+float basicNoise(float x) {
   float i = floor(x);
   float f = fract(x);
-  float k = fract(i*.1731);
-  return f*(f-1.0)*((18.0*k-4.0)*f*(f-1.0)-1.0);
+  float k = fract(i * 0.1731);
+  return f * (f - 1.0) * ((18.0 * k - 4.0) * f * (f - 1.0) - 1.0);
 }
 
-
-float dist(vec2 uv){
-  float w = 0.007; //width of each line
-  uvec2 m = uvec2((0.27/w), (0.71/w)); //uv.y min and max
-  uint id = uint(uv.y /w); //id of each line to get a random hash
-  for(uint i = max(m.x, id-10u); i <=min(id, m.y); ++i)
-  {
-    float h = hash(i);
-    float s = 2.0*h*time + h;
-    float x = uv.x*10.0;
-    float ob = bnoise(x*1.5 + s);
-    float od = bnoise(x*8. + 4.0*s);
-    float f = max(sin(x*1.5+0.3),0.);
-    float o =w + f*0.06*h*(f-ob-0.2*od) +0.002*od;
-    float nd = uv.y - (float(i) * w) - o;
-    if(nd < 0.001) return nd;
+// Calculate distance field for the waveform visualization
+float calculateDistance(vec2 uv) {
+  float lineWidth = 0.007 / lineDensity;  // Adjust line width based on density
+  uvec2 bounds = uvec2((0.27 / lineWidth), (0.71 / lineWidth));  // Min/max line bounds
+  uint lineId = uint(uv.y / lineWidth);  // Current line index
+  
+  // Check nearby lines for intersection
+  for (uint i = max(bounds.x, lineId - 10u); i <= min(lineId, bounds.y); ++i) {
+    float randomValue = hash(i);
+    float timeOffset = 2.0 * randomValue * time * timeScale + randomValue;
+    float xPos = uv.x * 10.0;
+    
+    // Calculate noise-based offsets with intensity control
+    float baseNoise = basicNoise(xPos * 1.5 + timeOffset) * noiseIntensity;
+    float detailNoise = basicNoise(xPos * 8.0 + 4.0 * timeOffset) * noiseIntensity;
+    float waveFactor = max(sin(xPos * waveFrequency + 0.3), 0.0) * height;
+    
+    // Combine noise and wave factors for final offset
+    float offset = lineWidth + waveFactor * 0.06 * randomValue * (waveFactor - baseNoise - 0.2 * detailNoise) + 0.002 * detailNoise;
+    float distance = uv.y - (float(i) * lineWidth) - offset;
+    
+    if (distance < 0.001) return distance;
   }
   return 1.0;
 }
 
-
-void main(  )
-{
-  vec2 uv = (coord -0.5*dimensions.xy)/min(dimensions.y, dimensions.x);
-  uv = (uv + 1.0)/2.0;
-  float a = float(uv.x > 0.3 && uv.x < 0.7);
-  a*= float(abs(dist(uv)) <= 0.0008);
-  outputColor = vec4(mix(0.1, 0.9, a));
+void main() {
+  // Normalize coordinates to [-1, 1] range and flip y-axis
+  vec2 uv = (coord - 0.5 * dimensions.xy) / min(dimensions.y, dimensions.x);
+  uv.y = -uv.y;  // Flip y-axis
+  uv = (uv + 1.0) / 2.0;
   
+  // Calculate visibility based on x-position and distance field
+  float isVisible = float(uv.x > 0.3 && uv.x < 0.7);
+  isVisible *= float(abs(calculateDistance(uv)) <= 0.0008);
+  
+  // Output final color
+  outputColor = vec4(mix(0.1, 0.9, isVisible));
 }

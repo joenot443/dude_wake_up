@@ -225,7 +225,7 @@ void TextEditorView::draw() {
     font.load(displayText->font.path, displayText->fontSize);
   }
   
-  CommonViews::MultiSlider("Position", displayText->id, displayText->xPosition, displayText->yPosition, displayText->xPositionOscillator, displayText->yPositionOscillator);
+  CommonViews::MultiSlider("Position", displayText->id, displayText->xPosition, displayText->yPosition, displayText->xPositionOscillator, displayText->yPositionOscillator, 0.5625);
   
   if (displayText->font.name != FontService::getService()->fonts[displayText->fontSelector->intValue].name) {
     displayText->font = FontService::getService()->fonts[displayText->fontSelector->intValue];

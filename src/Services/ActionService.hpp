@@ -70,7 +70,6 @@ public:
   // Methods to manage copied connectables
   void setCopiedConnectables(const std::vector<std::shared_ptr<Connectable>>& connectables);
   std::vector<std::shared_ptr<Connectable>> getCopiedConnectables() const;
-  
 private:
   // Private constructor to prevent instantiation
   ActionService() = default;

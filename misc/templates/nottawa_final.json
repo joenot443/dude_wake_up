@@ -1,92 +1,92 @@
 {
     "configType": "strand",
     "connections": {
-        "1d50f583-6a3d-bbc8-b05b-82b5eb0c78f9": {
-            "end": "06cb7298-b171-94ea-bb23-a52ea1f0e6f3",
-            "id": "1d50f583-6a3d-bbc8-b05b-82b5eb0c78f9",
+        "1120e206-d400-e6ae-084a-89593493c15f": {
+            "end": "b43eaa77-53db-00c2-868a-9b03b242330a",
+            "id": "1120e206-d400-e6ae-084a-89593493c15f",
             "inputSlot": 0,
             "outputSlot": 0,
-            "start": "526fecf3-5b7b-1e81-f192-fda452a8c142",
-            "type": 1
-        },
-        "2d6767cd-42ac-535a-1ce2-e8e3b3ef5a77": {
-            "end": "d5b93be6-2e83-e85f-4c4a-4777150040ca",
-            "id": "2d6767cd-42ac-535a-1ce2-e8e3b3ef5a77",
-            "inputSlot": 1,
-            "outputSlot": 0,
-            "start": "7306bf11-202c-0039-151b-1efb7afb4a76",
-            "type": 1
-        },
-        "3afb1ffc-c813-b679-f457-8f56642dbc03": {
-            "end": "f4e5e885-3aae-db20-4023-5ed2c9fd8e4f",
-            "id": "3afb1ffc-c813-b679-f457-8f56642dbc03",
-            "inputSlot": 0,
-            "outputSlot": 0,
-            "start": "0ce03629-140f-cc97-6107-51b5a39cb62f",
+            "start": "4201f3c8-f4b9-470f-21c5-046ad0ad1070",
             "type": 0
         },
-        "433bd342-fe94-0d19-6ec4-f27bfd8d37d5": {
-            "end": "0ce03629-140f-cc97-6107-51b5a39cb62f",
-            "id": "433bd342-fe94-0d19-6ec4-f27bfd8d37d5",
-            "inputSlot": 0,
-            "outputSlot": 0,
-            "start": "b43eaa77-53db-00c2-868a-9b03b242330a",
-            "type": 0
-        },
-        "56c1b9f1-7cb8-f014-0626-ef9ba1757f3e": {
-            "end": "4201f3c8-f4b9-470f-21c5-046ad0ad1070",
-            "id": "56c1b9f1-7cb8-f014-0626-ef9ba1757f3e",
-            "inputSlot": 0,
-            "outputSlot": 0,
-            "start": "7fcca27e-83df-1d12-3c59-65222486cb7f",
-            "type": 0
-        },
-        "7f652a88-344c-0036-ee4b-3f70cfd98d59": {
-            "end": "d5b93be6-2e83-e85f-4c4a-4777150040ca",
-            "id": "7f652a88-344c-0036-ee4b-3f70cfd98d59",
-            "inputSlot": 0,
-            "outputSlot": 0,
-            "start": "8e605f95-dea9-fc87-023e-acafb3f122c5",
-            "type": 0
-        },
-        "8cd4e1fb-93c3-5eb8-ecf9-b7c04ffd2f9f": {
-            "end": "7fcca27e-83df-1d12-3c59-65222486cb7f",
-            "id": "8cd4e1fb-93c3-5eb8-ecf9-b7c04ffd2f9f",
-            "inputSlot": 0,
-            "outputSlot": 0,
-            "start": "526fecf3-5b7b-1e81-f192-fda452a8c142",
-            "type": 1
-        },
-        "b2df737b-6483-7585-4ea7-b9d87bb38d0d": {
-            "end": "4201f3c8-f4b9-470f-21c5-046ad0ad1070",
-            "id": "b2df737b-6483-7585-4ea7-b9d87bb38d0d",
-            "inputSlot": 1,
-            "outputSlot": 0,
-            "start": "b1332de0-0f85-0d44-a702-9016952eb543",
-            "type": 0
-        },
-        "c7798025-93ef-4250-1409-4a8aa53133be": {
-            "end": "8e605f95-dea9-fc87-023e-acafb3f122c5",
-            "id": "c7798025-93ef-4250-1409-4a8aa53133be",
-            "inputSlot": 0,
-            "outputSlot": 0,
-            "start": "f4e5e885-3aae-db20-4023-5ed2c9fd8e4f",
-            "type": 0
-        },
-        "ddc32236-abd6-0ebe-82f9-fe5f0084cbb2": {
+        "2ecb5449-d758-5ea1-4878-984a20ddbab6": {
             "end": "b1332de0-0f85-0d44-a702-9016952eb543",
-            "id": "ddc32236-abd6-0ebe-82f9-fe5f0084cbb2",
+            "id": "2ecb5449-d758-5ea1-4878-984a20ddbab6",
             "inputSlot": 0,
             "outputSlot": 0,
             "start": "06cb7298-b171-94ea-bb23-a52ea1f0e6f3",
             "type": 0
         },
-        "e42f6f53-f349-93f0-69d3-570d3641797b": {
-            "end": "b43eaa77-53db-00c2-868a-9b03b242330a",
-            "id": "e42f6f53-f349-93f0-69d3-570d3641797b",
+        "41cc7565-c814-f586-1e4e-c0e34f9ea271": {
+            "end": "d5b93be6-2e83-e85f-4c4a-4777150040ca",
+            "id": "41cc7565-c814-f586-1e4e-c0e34f9ea271",
+            "inputSlot": 1,
+            "outputSlot": 0,
+            "start": "7306bf11-202c-0039-151b-1efb7afb4a76",
+            "type": 1
+        },
+        "7d7afa4a-116c-5919-afb7-6b24ed0ecfb1": {
+            "end": "0ce03629-140f-cc97-6107-51b5a39cb62f",
+            "id": "7d7afa4a-116c-5919-afb7-6b24ed0ecfb1",
             "inputSlot": 0,
             "outputSlot": 0,
-            "start": "4201f3c8-f4b9-470f-21c5-046ad0ad1070",
+            "start": "b43eaa77-53db-00c2-868a-9b03b242330a",
+            "type": 0
+        },
+        "7ff9a18e-16eb-a255-f1aa-c6cb79338932": {
+            "end": "4201f3c8-f4b9-470f-21c5-046ad0ad1070",
+            "id": "7ff9a18e-16eb-a255-f1aa-c6cb79338932",
+            "inputSlot": 1,
+            "outputSlot": 0,
+            "start": "b1332de0-0f85-0d44-a702-9016952eb543",
+            "type": 0
+        },
+        "8cdfd00f-06a0-3ade-14d2-9aadf124db0c": {
+            "end": "06cb7298-b171-94ea-bb23-a52ea1f0e6f3",
+            "id": "8cdfd00f-06a0-3ade-14d2-9aadf124db0c",
+            "inputSlot": 0,
+            "outputSlot": 0,
+            "start": "526fecf3-5b7b-1e81-f192-fda452a8c142",
+            "type": 1
+        },
+        "8dc623cf-7431-32da-ed21-5111f4c500e2": {
+            "end": "f4e5e885-3aae-db20-4023-5ed2c9fd8e4f",
+            "id": "8dc623cf-7431-32da-ed21-5111f4c500e2",
+            "inputSlot": 0,
+            "outputSlot": 0,
+            "start": "0ce03629-140f-cc97-6107-51b5a39cb62f",
+            "type": 0
+        },
+        "b9aa24e8-e662-e326-80a6-2c9214d4bd2d": {
+            "end": "d5b93be6-2e83-e85f-4c4a-4777150040ca",
+            "id": "b9aa24e8-e662-e326-80a6-2c9214d4bd2d",
+            "inputSlot": 0,
+            "outputSlot": 0,
+            "start": "8e605f95-dea9-fc87-023e-acafb3f122c5",
+            "type": 0
+        },
+        "ee737790-c266-6c05-7290-4ac03ddef121": {
+            "end": "7fcca27e-83df-1d12-3c59-65222486cb7f",
+            "id": "ee737790-c266-6c05-7290-4ac03ddef121",
+            "inputSlot": 0,
+            "outputSlot": 0,
+            "start": "526fecf3-5b7b-1e81-f192-fda452a8c142",
+            "type": 1
+        },
+        "f29fb9b7-a84f-2a6e-a2d9-92d39ccb4485": {
+            "end": "4201f3c8-f4b9-470f-21c5-046ad0ad1070",
+            "id": "f29fb9b7-a84f-2a6e-a2d9-92d39ccb4485",
+            "inputSlot": 0,
+            "outputSlot": 0,
+            "start": "7fcca27e-83df-1d12-3c59-65222486cb7f",
+            "type": 0
+        },
+        "fdb5db80-bea5-8969-347d-24ecf0a9aafd": {
+            "end": "8e605f95-dea9-fc87-023e-acafb3f122c5",
+            "id": "fdb5db80-bea5-8969-347d-24ecf0a9aafd",
+            "inputSlot": 0,
+            "outputSlot": 0,
+            "start": "f4e5e885-3aae-db20-4023-5ed2c9fd8e4f",
             "type": 0
         }
     },
@@ -95,34 +95,25 @@
         "favoriteShaders": [],
         "stageShaders": []
     },
-    "preview": "./misc/templates/nottawa_final.png",
+    "preview": "/Users/jcrozier/Library/Containers/com.joecrozier.nottawa/Data/nottawa/strands/nottawa_final_4.png",
     "shaders": {
         "06cb7298-b171-94ea-bb23-a52ea1f0e6f3": {
             "osc": {},
             "param": {
-                "Speed": {
+                "Amount": {
                     "a": 1.0,
                     "b": 0.0,
                     "boolValue": true,
                     "favorited": false,
                     "g": 0.0,
-                    "intValue": 4,
+                    "intValue": 1,
                     "midiDescriptor": "",
-                    "name": "Speed",
-                    "paramId": "Speed-f04f6ab4",
+                    "name": "Amount",
+                    "paramId": "Amount-95d83844",
                     "r": 0.0,
-                    "value": 4.406000137329102
-                }
-            },
-            "shaderId": "06cb7298-b171-94ea-bb23-a52ea1f0e6f3",
-            "shaderType": 74,
-            "x": -3026.0,
-            "y": 200.0
-        },
-        "0ce03629-140f-cc97-6107-51b5a39cb62f": {
-            "osc": {},
-            "param": {
-                "scale": {
+                    "value": 1.0
+                },
+                "Smoothness": {
                     "a": 1.0,
                     "b": 0.0,
                     "boolValue": true,
@@ -130,12 +121,47 @@
                     "g": 0.0,
                     "intValue": 0,
                     "midiDescriptor": "",
-                    "name": "scale",
+                    "name": "Smoothness",
+                    "paramId": "Smoothness-e063cc17",
+                    "r": 0.0,
+                    "value": 0.5
+                },
+                "Speed": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 9,
+                    "midiDescriptor": "",
+                    "name": "Speed",
+                    "paramId": "Speed-f04f6ab4",
+                    "r": 0.0,
+                    "value": 9.720000267028809
+                }
+            },
+            "shaderId": "06cb7298-b171-94ea-bb23-a52ea1f0e6f3",
+            "shaderType": 73,
+            "x": -3026.0,
+            "y": 200.0
+        },
+        "0ce03629-140f-cc97-6107-51b5a39cb62f": {
+            "osc": {},
+            "param": {
+                "Scale": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Scale",
                     "paramId": "scale-bad616d5",
                     "r": 0.0,
                     "value": 0.5830000042915344
                 },
-                "speed": {
+                "Speed": {
                     "a": 1.0,
                     "b": 0.0,
                     "boolValue": true,
@@ -143,20 +169,33 @@
                     "g": 0.0,
                     "intValue": 2,
                     "midiDescriptor": "",
-                    "name": "speed",
+                    "name": "Speed",
                     "paramId": "speed-0a1717f2",
                     "r": 0.0,
                     "value": 2.8499999046325684
                 }
             },
             "shaderId": "0ce03629-140f-cc97-6107-51b5a39cb62f",
-            "shaderType": 59,
+            "shaderType": 58,
             "x": -348.0,
             "y": 1320.0
         },
         "4201f3c8-f4b9-470f-21c5-046ad0ad1070": {
             "osc": {},
             "param": {
+                "Alpha": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 1,
+                    "midiDescriptor": "",
+                    "name": "Alpha",
+                    "paramId": "Alpha-4b9a6223",
+                    "r": 0.0,
+                    "value": 1.0
+                },
                 "Flip": {
                     "a": 1.0,
                     "b": 0.0,
@@ -172,7 +211,7 @@
                 }
             },
             "shaderId": "4201f3c8-f4b9-470f-21c5-046ad0ad1070",
-            "shaderType": 78,
+            "shaderType": 77,
             "x": -924.0,
             "y": 440.0
         },
@@ -192,6 +231,19 @@
                     "r": 0.0,
                     "value": 0.0
                 },
+                "Horizontal Flip": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": false,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Horizontal Flip",
+                    "paramId": "Horizontal Flip-c4752244",
+                    "r": 0.0,
+                    "value": 0.0
+                },
                 "Max X": {
                     "a": 1.0,
                     "b": 0.0,
@@ -203,7 +255,7 @@
                     "name": "Max X",
                     "paramId": "Max X-1b781d58",
                     "r": 0.0,
-                    "value": 0.4921875
+                    "value": 0.484375
                 },
                 "Max Y": {
                     "a": 1.0,
@@ -216,7 +268,7 @@
                     "name": "Max Y",
                     "paramId": "Max Y-9dde4425",
                     "r": 0.0,
-                    "value": 0.3263888955116272
+                    "value": 0.5625
                 },
                 "Min X": {
                     "a": 1.0,
@@ -242,7 +294,7 @@
                     "name": "Min Y",
                     "paramId": "Min Y-421cf7e0",
                     "r": 0.0,
-                    "value": 0.1388888955116272
+                    "value": 0.4097222089767456
                 },
                 "Mode": {
                     "a": 1.0,
@@ -270,7 +322,7 @@
                     "r": 0.0,
                     "value": 1.0
                 },
-                "Translate X": {
+                "Vertical Flip": {
                     "a": 1.0,
                     "b": 0.0,
                     "boolValue": false,
@@ -278,12 +330,12 @@
                     "g": 0.0,
                     "intValue": 0,
                     "midiDescriptor": "",
-                    "name": "Translate X",
-                    "paramId": "Translate X-0d1525d5",
+                    "name": "Vertical Flip",
+                    "paramId": "Vertical Flip-dfbd2f62",
                     "r": 0.0,
                     "value": 0.0
                 },
-                "Translate Y": {
+                "X": {
                     "a": 1.0,
                     "b": 0.0,
                     "boolValue": false,
@@ -291,10 +343,23 @@
                     "g": 0.0,
                     "intValue": 0,
                     "midiDescriptor": "",
-                    "name": "Translate Y",
-                    "paramId": "Translate Y-8b13684a",
+                    "name": "X",
+                    "paramId": "X-5c0cf8d9",
                     "r": 0.0,
                     "value": 0.0
+                },
+                "Y": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Y",
+                    "paramId": "Y-9dc87b4a",
+                    "r": 0.0,
+                    "value": 0.4097222089767456
                 }
             },
             "shaderId": "7fcca27e-83df-1d12-3c59-65222486cb7f",
@@ -522,6 +587,19 @@
                     "r": 0.0,
                     "value": 0.0
                 },
+                "Horizontal Flip": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": false,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Horizontal Flip",
+                    "paramId": "Horizontal Flip-4ae75e36",
+                    "r": 0.0,
+                    "value": 0.0
+                },
                 "Max X": {
                     "a": 1.0,
                     "b": 0.0,
@@ -533,7 +611,7 @@
                     "name": "Max X",
                     "paramId": "Max X-b73e7492",
                     "r": 0.0,
-                    "value": 0.86328125
+                    "value": 0.859375
                 },
                 "Max Y": {
                     "a": 1.0,
@@ -546,7 +624,7 @@
                     "name": "Max Y",
                     "paramId": "Max Y-97594024",
                     "r": 0.0,
-                    "value": 0.3263888955116272
+                    "value": 0.5694444179534912
                 },
                 "Min X": {
                     "a": 1.0,
@@ -559,7 +637,7 @@
                     "name": "Min X",
                     "paramId": "Min X-79b96936",
                     "r": 0.0,
-                    "value": 0.50390625
+                    "value": 0.5078125
                 },
                 "Min Y": {
                     "a": 1.0,
@@ -572,7 +650,7 @@
                     "name": "Min Y",
                     "paramId": "Min Y-e6a1af95",
                     "r": 0.0,
-                    "value": 0.1875
+                    "value": 0.4236111044883728
                 },
                 "Mode": {
                     "a": 1.0,
@@ -600,7 +678,7 @@
                     "r": 0.0,
                     "value": 1.0
                 },
-                "Translate X": {
+                "Vertical Flip": {
                     "a": 1.0,
                     "b": 0.0,
                     "boolValue": false,
@@ -608,23 +686,36 @@
                     "g": 0.0,
                     "intValue": 0,
                     "midiDescriptor": "",
-                    "name": "Translate X",
-                    "paramId": "Translate X-bf5947ad",
+                    "name": "Vertical Flip",
+                    "paramId": "Vertical Flip-8e8557fb",
                     "r": 0.0,
                     "value": 0.0
                 },
-                "Translate Y": {
+                "X": {
                     "a": 1.0,
                     "b": 0.0,
-                    "boolValue": false,
+                    "boolValue": true,
                     "favorited": false,
                     "g": 0.0,
                     "intValue": 0,
                     "midiDescriptor": "",
-                    "name": "Translate Y",
-                    "paramId": "Translate Y-1ee4c12f",
+                    "name": "X",
+                    "paramId": "X-faee7728",
                     "r": 0.0,
-                    "value": 0.0
+                    "value": 0.5078125
+                },
+                "Y": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Y",
+                    "paramId": "Y-5cb8045b",
+                    "r": 0.0,
+                    "value": 0.4236111044883728
                 }
             },
             "shaderId": "b1332de0-0f85-0d44-a702-9016952eb543",
@@ -647,6 +738,19 @@
                     "paramId": "Center-bc533937",
                     "r": 0.0,
                     "value": 1.0
+                },
+                "Horizontal Flip": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": false,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Horizontal Flip",
+                    "paramId": "Horizontal Flip-41587a08",
+                    "r": 0.0,
+                    "value": 0.0
                 },
                 "Max X": {
                     "a": 1.0,
@@ -672,7 +776,7 @@
                     "name": "Max Y",
                     "paramId": "Max Y-84ccb2ce",
                     "r": 0.0,
-                    "value": 0.3402777910232544
+                    "value": 0.5902777910232544
                 },
                 "Min X": {
                     "a": 1.0,
@@ -698,7 +802,7 @@
                     "name": "Min Y",
                     "paramId": "Min Y-e16292ee",
                     "r": 0.0,
-                    "value": 0.1388888955116272
+                    "value": 0.3958333432674408
                 },
                 "Mode": {
                     "a": 1.0,
@@ -726,7 +830,7 @@
                     "r": 0.0,
                     "value": 1.0
                 },
-                "Translate X": {
+                "Vertical Flip": {
                     "a": 1.0,
                     "b": 0.0,
                     "boolValue": false,
@@ -734,12 +838,12 @@
                     "g": 0.0,
                     "intValue": 0,
                     "midiDescriptor": "",
-                    "name": "Translate X",
-                    "paramId": "Translate X-424754d3",
+                    "name": "Vertical Flip",
+                    "paramId": "Vertical Flip-a02f0119",
                     "r": 0.0,
                     "value": 0.0
                 },
-                "Translate Y": {
+                "X": {
                     "a": 1.0,
                     "b": 0.0,
                     "boolValue": false,
@@ -747,10 +851,23 @@
                     "g": 0.0,
                     "intValue": 0,
                     "midiDescriptor": "",
-                    "name": "Translate Y",
-                    "paramId": "Translate Y-e42a5958",
+                    "name": "X",
+                    "paramId": "X-55a92320",
                     "r": 0.0,
                     "value": 0.0
+                },
+                "Y": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Y",
+                    "paramId": "Y-19211e1b",
+                    "r": 0.0,
+                    "value": 0.3958333432674408
                 }
             },
             "shaderId": "b43eaa77-53db-00c2-868a-9b03b242330a",
@@ -761,6 +878,19 @@
         "d5b93be6-2e83-e85f-4c4a-4777150040ca": {
             "osc": {},
             "param": {
+                "Alpha": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 1,
+                    "midiDescriptor": "",
+                    "name": "Alpha",
+                    "paramId": "Alpha-f5f561e3",
+                    "r": 0.0,
+                    "value": 1.0
+                },
                 "Flip": {
                     "a": 1.0,
                     "b": 0.0,
@@ -776,7 +906,7 @@
                 }
             },
             "shaderId": "d5b93be6-2e83-e85f-4c4a-4777150040ca",
-            "shaderType": 78,
+            "shaderType": 77,
             "x": 2213.0,
             "y": 274.0
         },
@@ -796,18 +926,18 @@
                     "r": 0.0,
                     "value": 1.0
                 },
-                "Blend With Empty": {
+                "Amount": {
                     "a": 1.0,
                     "b": 0.0,
-                    "boolValue": false,
+                    "boolValue": true,
                     "favorited": false,
                     "g": 0.0,
                     "intValue": 0,
                     "midiDescriptor": "",
-                    "name": "Blend With Empty",
-                    "paramId": "Blend With Empty-a76bdb22",
+                    "name": "Amount",
+                    "paramId": "Amount-5199320a",
                     "r": 0.0,
-                    "value": 0.0
+                    "value": 0.5
                 },
                 "Flip": {
                     "a": 1.0,
@@ -837,7 +967,7 @@
                 }
             },
             "shaderId": "f4e5e885-3aae-db20-4023-5ed2c9fd8e4f",
-            "shaderType": 81,
+            "shaderType": 80,
             "x": 580.0,
             "y": 296.0
         }
@@ -852,7 +982,7 @@
                 "g": 1.0,
                 "intValue": 0,
                 "midiDescriptor": "",
-                "name": "color",
+                "name": "Color",
                 "paramId": "color-705ab782",
                 "r": 1.0,
                 "value": 0.0
@@ -941,7 +1071,7 @@
                 "g": 0.294460654258728,
                 "intValue": 0,
                 "midiDescriptor": "",
-                "name": "strokeColor",
+                "name": "Stroke Color",
                 "paramId": "strokeColor-39ea8894",
                 "r": 0.294460654258728,
                 "value": 0.0
@@ -963,16 +1093,16 @@
                         "boolValue": true,
                         "favorited": false,
                         "g": 0.0,
-                        "intValue": 0,
+                        "intValue": 1,
                         "midiDescriptor": "",
                         "name": "speed",
-                        "paramId": "speed-9c509430",
+                        "paramId": "speed-4109c45d",
                         "r": 0.0,
-                        "value": 0.17000000178813934
+                        "value": 1.0
                     }
                 }
             },
-            "shaderSourceType": 35,
+            "shaderSourceType": 34,
             "videoSourceType": 4,
             "x": 1108.0,
             "y": 1000.0

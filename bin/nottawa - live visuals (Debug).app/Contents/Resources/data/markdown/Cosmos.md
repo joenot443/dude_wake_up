@@ -1,3 +1,0 @@
-# Cosmos
-
-Information about Cosmos

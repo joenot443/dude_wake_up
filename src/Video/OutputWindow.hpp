@@ -10,10 +10,15 @@
 
 #include <stdio.h>
 #include "ofMain.h"
-#include "ofxImGui.h"
 #include "Connection.hpp"
 #include "ofxFastFboReader.h"
 #include "AVFRecorderWrapper.hpp"
+
+#ifdef __OBJC__
+@class NSMenu;
+@class NSMenuItem;
+@class OutputWindowDelegate;
+#endif
 
 struct OutputWindow : public ofBaseApp, std::enable_shared_from_this<OutputWindow>
 {
@@ -27,6 +32,10 @@ struct OutputWindow : public ofBaseApp, std::enable_shared_from_this<OutputWindo
   void keyReleased(int key);
   void keyPressed(int key);
   void updateResolution();
+  void startRecording();
+  void stopRecording();
+  void setupNativeMenu();
+  void updateMenuState();
   bool drawFPS;
   bool needsResolutionUpdate = true;
   
@@ -35,6 +44,20 @@ struct OutputWindow : public ofBaseApp, std::enable_shared_from_this<OutputWindo
   ofPixels recordPixels;
   ofxFastFboReader reader;
   bool loggedPixelFormat = false;
+
+#ifdef __OBJC__
+  // Objective-C++ menu variables
+  NSMenu* recordMenu;
+  NSMenuItem* startRecordingItem;
+  NSMenuItem* stopRecordingItem;
+  OutputWindowDelegate* menuDelegate;
+#else
+  // Placeholder for non-Objective-C++ builds
+  void* recordMenu;
+  void* startRecordingItem;
+  void* stopRecordingItem;
+  void* menuDelegate;
+#endif
 
 public:
   std::shared_ptr<ofFbo> fbo;

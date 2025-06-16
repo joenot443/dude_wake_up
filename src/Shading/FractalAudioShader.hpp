@@ -48,11 +48,11 @@ struct FractalAudioShader: Shader {
     shader.begin();
     auto source = AudioSourceService::getService()->selectedAudioSource;
     if (settings->enableAudio->boolValue && source != nullptr && source->audioAnalysis.smoothSpectrum.size() > 0)
-      shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0],
-                           256);
+      shader.setUniform1fv("audio", &source->audioAnalysis.smoothMelSpectrum[0],
+                           14);
     else {
-      shader.setUniform1fv("audio", &Vectors::vectorFilled(256, 0.0)[0],
-                           256);
+      shader.setUniform1fv("audio", &Vectors::vectorFilled(14, 0.0)[0],
+                           14);
     }
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("enableAudio", settings->enableAudio->value);

@@ -6,7 +6,11 @@
 //
 
 #include "ShaderChainerService.hpp"
+#include "Models/Strand.hpp"
 #include "AsciiShader.hpp"
+#include "GodRayShader.hpp"
+#include "FirefliesShader.hpp"
+#include "CloudyTunnelShader.hpp"
 #include "PixelAudioPartyShader.hpp"
 #include "WavyShader.hpp"
 #include "CompanionsShader.hpp"
@@ -32,7 +36,6 @@
 #include "DiscoAudioShader.hpp"
 #include "FlickerAudioShader.hpp"
 #include "FractalAudioShader.hpp"
-#include "StarryPlanesShader.hpp"
 #include "UnknownPleasuresShader.hpp"
 #include "SpaceRingsShader.hpp"
 #include "CloudyShapesShader.hpp"
@@ -88,7 +91,6 @@
 #include "GameboyShader.hpp"
 #include "StaticFrameShader.hpp"
 #include "SlidingFrameShader.hpp"
-#include "MinMixerShader.hpp"
 #include "SolidColorShader.hpp"
 #include "16BitShader.hpp"
 #include "HilbertShader.hpp"
@@ -140,7 +142,6 @@
 #include "TissueShader.hpp"
 #include "TransformShader.hpp"
 #include "TriangleMapShader.hpp"
-#include "VanGoghShader.hpp"
 #include "VideoSourceService.hpp"
 #include "WobbleShader.hpp"
 #include "WebcamSource.hpp"
@@ -235,7 +236,7 @@ void ShaderChainerService::setup()
     availableAuxillaryShadersMap[shaderType] = auxShader;
   }
   
-  for (auto const shaderType : { ShaderTypeBlend, ShaderTypeTransform, ShaderTypeFeedback, ShaderTypeRotate, ShaderTypeMirror, ShaderTypeHSB, ShaderTypeVHS, ShaderType16bit, ShaderTypePixelate, ShaderTypeAutotangent }) {
+  for (auto const shaderType : { ShaderTypeBlend, ShaderTypeTransform, ShaderTypeFeedback, ShaderTypeRotate, ShaderTypeKaleidoscope, ShaderTypeMirror, ShaderTypeHSB, ShaderTypeVHS, ShaderType16bit, ShaderTypePixelate, ShaderTypeAutotangent }) {
     auto availableShader = availableShadersMap[shaderType];
     availableDefaultFavoriteShaders.push_back(availableShader);
     
@@ -937,6 +938,24 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeGodRay: {
+      auto settings = new GodRaySettings(shaderId, shaderJson);
+      auto shader = std::make_shared<GodRayShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeFireflies: {
+      auto settings = new FirefliesSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<FirefliesShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeCloudyTunnel: {
+      auto settings = new CloudyTunnelSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<CloudyTunnelShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypePixelAudioParty: {
       auto settings = new PixelAudioPartySettings(shaderId, shaderJson);
       auto shader = std::make_shared<PixelAudioPartyShader>(settings);
@@ -1084,12 +1103,6 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
     case ShaderTypeFractalAudio: {
       auto settings = new FractalAudioSettings(shaderId, shaderJson);
       auto shader = std::make_shared<FractalAudioShader>(settings);
-      shader->setup();
-      return shader;
-    }
-    case ShaderTypeStarryPlanes: {
-      auto settings = new StarryPlanesSettings(shaderId, shaderJson);
-      auto shader = std::make_shared<StarryPlanesShader>(settings);
       shader->setup();
       return shader;
     }
@@ -1436,13 +1449,6 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
       shader->setup();
       return shader;
     }
-    case ShaderTypeMinMixer:
-    {
-      auto settings = new MinMixerSettings(shaderId, shaderJson, shaderTypeName(shaderType));
-      auto shader = std::make_shared<MinMixerShader>(settings);
-      shader->setup();
-      return shader;
-    }
     case ShaderTypeSolidColor:
     {
       auto settings = new SolidColorSettings(shaderId, shaderJson, shaderTypeName(shaderType));
@@ -1594,13 +1600,6 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
     {
       auto settings = new OctahedronSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<OctahedronShader>(settings);
-      shader->setup();
-      return shader;
-    }
-    case ShaderTypeVanGogh:
-    {
-      auto settings = new VanGoghSettings(shaderId, shaderJson, shaderTypeName(shaderType));
-      auto shader = std::make_shared<VanGoghShader>(settings);
       shader->setup();
       return shader;
     }

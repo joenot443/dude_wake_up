@@ -22,6 +22,7 @@ public:
   uint64_t currentSample = 0;
   size_t frameSize = 512;
   ofSoundStream soundStream;
+  float volume = 1.0;
   
   void loadFile(std::shared_ptr<AudioTrack> audioTrack);
   void setup() override;
@@ -34,6 +35,7 @@ public:
   // Playback control methods
   void pausePlayback();
   void resumePlayback();
+  void setVolume(float vol);
   
   // New members
   std::atomic<bool> isPaused{false}; // Pause flag

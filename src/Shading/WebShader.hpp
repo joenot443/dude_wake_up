@@ -22,7 +22,7 @@ struct WebSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> amountOscillator;
 
   WebSettings(std::string shaderId, json j) :
-  amount(std::make_shared<Parameter>("amount", 1.0, 0.0, 3.0)),
+  amount(std::make_shared<Parameter>("Amount", 1.0, 0.0, 3.0)),
   amountOscillator(std::make_shared<WaveformOscillator>(amount)),
   ShaderSettings(shaderId, j, "Web") {
     parameters = { amount };

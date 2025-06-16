@@ -24,8 +24,8 @@ struct CompanionsSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> positionYOscillator;
 
   CompanionsSettings(std::string shaderId, json j) :
-  positionX(std::make_shared<Parameter>("positionX", 0.5, 0.0, 1.0)),
-  positionY(std::make_shared<Parameter>("positionY", 0.5, 0.0, 1.0)),
+  positionX(std::make_shared<Parameter>("Position X", 0.5, 0.0, 1.0)),
+  positionY(std::make_shared<Parameter>("Position Y", 0.5, 0.0, 1.0)),
   positionXOscillator(std::make_shared<WaveformOscillator>(positionX)),
   positionYOscillator(std::make_shared<WaveformOscillator>(positionY)),
   ShaderSettings(shaderId, j, "Companions") {
@@ -70,7 +70,7 @@ struct CompanionsShader: Shader {
 
   void drawSettings() override {
     CommonViews::H3Title("Companions");
-    CommonViews::MultiSlider("Position", formatString("##position%s", shaderId.c_str()), settings->positionX, settings->positionY, settings->positionXOscillator, settings->positionYOscillator);
+    CommonViews::MultiSlider("Position", formatString("##position%s", shaderId.c_str()), settings->positionX, settings->positionY, settings->positionXOscillator, settings->positionYOscillator, 0.5625);
   }
 };
 

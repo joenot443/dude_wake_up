@@ -15,8 +15,11 @@
 class HelpService {
 
 public:
-  bool completed;
+  bool completed = false;
+  bool showPopup = false;
   bool hasOpenedStageMode = false;
+  bool hasEditedBlendMode = false;
+  bool hasEditedAlpha = false;
   
   HelpService() {};
   
@@ -28,7 +31,9 @@ public:
   bool madeFirstBlendConnection();
   bool madeSecondBlendConnection();
   bool openedShaderInfo();
-  bool editedBlendParameter();
+  bool editedBlendModeParameter();
+  bool editedAlphaParameter();
+  bool deletedFirstBlendNode();
   bool openedStageMode();
   
   // Drop Source
@@ -66,6 +71,13 @@ public:
   // Change parameters on the ShaderInfo pane
   void drawEditParametersShaderInfoPane();
   
+  // Delete the Blend shader
+  void drawDeleteBlendShader();
+  
+  // Create Blend node shortcut
+  void drawBlendNodeShortcut(ImVec2 nodePosition, ImVec2 nodeSize, float scale);
+  void drawBlendNodeShortcut2(ImVec2 nodePosition, ImVec2 nodeSize, float scale);
+  
   // Open the Stage view
   void drawActionButtons();
   
@@ -79,6 +91,7 @@ public:
 
   void drawRightArrowView();
   void drawLeftArrowView();
+  void drawUpArrowView();
   
   static HelpService *service;
 

@@ -7,7 +7,9 @@
 
 #include "TileBrowserView.hpp"
 #include "LibraryService.hpp"
+#include "imgui.h"
 #include "ofxImGui.h"
+#include "CreditView.hpp"
 #include "Strings.hpp"
 #include "FontService.hpp"
 #include "LibraryFile.hpp"
@@ -47,6 +49,10 @@ void TileBrowserView::setTileItems(std::vector<std::shared_ptr<TileItem>> items)
       return a->name < b->name;
     });
   }
+  
+  if (categories.size() > 0) {
+    activeCategory = categories.front();
+  }
 }
 
 void TileBrowserView::setCallback(std::function<void(std::shared_ptr<TileItem>)> callback) {
@@ -74,7 +80,7 @@ void TileBrowserView::draw() {
   float tileHeight = tileWidth * (55.0f/88.0f);
   ImVec2 tileSize(tileWidth, tileHeight);
   
-  if (categories.size() == 1) {
+  if (categories.size() == 1 || singleCategory) {
     drawSingleCategory(categories[0], tileSize);
   } else {
     drawCategories(tileSize);
@@ -107,7 +113,7 @@ void TileBrowserView::drawSingleCategory(const std::string& category, const ImVe
 void TileBrowserView::drawCategories(const ImVec2& tileSize) {
   // Draw each category as a collapsable header
   for (const auto& category : categories) {
-    ImGui::PushFont(FontService::getService()->h4);
+    ImGui::PushFont(FontService::getService()->current->h4);
     
     bool isOpen = activeCategory == category;
     ImGui::SetNextItemOpen(isOpen);
@@ -137,7 +143,7 @@ void TileBrowserView::drawTile(std::shared_ptr<TileItem> tile, const ImVec2& til
     ImVec2 startPos = ImGui::GetCursorScreenPos();
     
     // Create a child frame to contain everything
-    ImGui::BeginChild(formatString("##tile_%s", tile->id.c_str()).c_str(), tileSize, ImGuiChildFlags_None, ImGuiWindowFlags_NoDecoration);
+    ImGui::BeginChild(formatString("##tile_%s_%s", tile->id.c_str(), tileBrowserId.c_str()).c_str(), tileSize, ImGuiChildFlags_None, ImGuiWindowFlags_NoDecoration);
     
     ImGui::SetNextItemAllowOverlap();
     
@@ -153,7 +159,7 @@ void TileBrowserView::drawTile(std::shared_ptr<TileItem> tile, const ImVec2& til
     
     // Draw the clickable button with same size as image
     ImGui::SetCursorScreenPos(startPos);
-    ImGui::PushFont(FontService::getService()->p);
+    ImGui::PushFont(FontService::getService()->current->p);
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0, 1.0, 1.0, 0.6));
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1, 1, 1, 0.1));
@@ -168,23 +174,22 @@ void TileBrowserView::drawTile(std::shared_ptr<TileItem> tile, const ImVec2& til
     ImGui::PopStyleColor(4);
     ImGui::PopFont();
     
-    tile->dragCallback();
+    if (tile->dragCallback != NULL) {
+      tile->dragCallback(tile->id);
+    }
     
     // Draw info button in top-left
     ImGui::SetCursorScreenPos(ImVec2(startPos.x + 4, startPos.y + 4));
-    if (MarkdownService::getService()->hasItemForName(tile->name)) {
-      auto popupId = formatString("##%s_tilepopup", tile->name.c_str());
-      if (ImGui::BeginPopupModal(popupId.c_str(), nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
-        MarkdownView(tile->name).draw();
-        ImGui::EndPopup();
-      }
+    if (LibraryService::getService()->hasCredit(tile->shaderType)) {
+      auto popupId = formatString("##%s_tilepopup", tile->id.c_str());
+      CreditView::draw(popupId, LibraryService::getService()->getShaderCredit(tile->shaderType));
       ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0, 1.0, 1.0, 0.5));
-      if (CommonViews::IconButton(ICON_MD_INFO, tile->name.c_str())) {
+      if (CommonViews::IconButton(ICON_MD_INFO, tile->id.c_str())) {
         ImGui::OpenPopup(popupId.c_str());
       }
       ImGui::PopStyleColor();
     } else {
-      CommonViews::InvisibleIconButton(formatString("##%s_invisible_icon", tile->name.c_str()));
+      CommonViews::InvisibleIconButton(formatString("##%s_invisible_icon", tile->id.c_str()));
     }
     
     ImGui::SetNextItemAllowOverlap();
@@ -216,19 +221,23 @@ void TileBrowserView::drawTile(std::shared_ptr<TileItem> tile, const ImVec2& til
     ImGui::EndChild();
   } else {
     // Simple button for items without texture
+    ImGui::BeginChild(formatString("##tile_%s_%s", tile->id.c_str(), tileBrowserId.c_str()).c_str(), tileSize, ImGuiChildFlags_None, ImGuiWindowFlags_NoDecoration);
     if (tile->name.size() > 10) {
-      ImGui::PushFont(FontService::getService()->sm);
+      ImGui::PushFont(FontService::getService()->current->sm);
     }
     ImGui::PushID(tile->id.c_str());
     if (ImGui::Button(idAppendedToString(tile->name.c_str(), tile->id).c_str(), tileSize)) {
-      if (tileClickCallback != NULL)
+      if (tileClickCallback != NULL) {
         tileClickCallback(tile);
+      }
     }
     ImGui::PopID();
+
     if (tile->name.size() > 10) {
       ImGui::PopFont();
     }
-    tile->dragCallback();
+    tile->dragCallback(tile->id);
+    ImGui::EndChild();
   }
 
   // Handle tile layout - this is now managed by the draw() method

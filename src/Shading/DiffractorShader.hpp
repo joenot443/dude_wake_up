@@ -23,24 +23,30 @@ struct DiffractorSettings: public ShaderSettings {
   std::shared_ptr<Parameter> scale;
   std::shared_ptr<Parameter> count;
   std::shared_ptr<Parameter> scramble;
+  std::shared_ptr<Parameter> red;
+  std::shared_ptr<Parameter> green;
+  std::shared_ptr<Parameter> blue;
   std::shared_ptr<WaveformOscillator> spacingOscillator;
   std::shared_ptr<WaveformOscillator> speedOscillator;
   std::shared_ptr<WaveformOscillator> scaleOscillator;
   std::shared_ptr<WaveformOscillator> scrambleOscillator;
   
   DiffractorSettings(std::string shaderId, json j) :
-  spacing(std::make_shared<Parameter>("spacing", 0.2, 0.0, 1.0)),
-  speed(std::make_shared<Parameter>("speed", 5.0, 0.0, 10.0)),
-  scale(std::make_shared<Parameter>("scale", 1.0, 0.1, 10.0)),
-  count(std::make_shared<Parameter>("count", 5, 1, 10)),
-  scramble(std::make_shared<Parameter>("scramble", 0.5, 0.0, 1.0)), // Initialize new parameter
+  spacing(std::make_shared<Parameter>("Spacing", 0.2, 0.0, 1.0)),
+  speed(std::make_shared<Parameter>("Speed", 5.0, 0.0, 10.0)),
+  scale(std::make_shared<Parameter>("Scale", 1.0, 0.1, 10.0)),
+  count(std::make_shared<Parameter>("Count", 5, 1, 10)),
+  scramble(std::make_shared<Parameter>("Scramble", 0.5, 0.0, 1.0)),
+  red(std::make_shared<Parameter>("Red", 1.0, 0.0, 1.0)),
+  green(std::make_shared<Parameter>("Green", 1.0, 0.0, 1.0)),
+  blue(std::make_shared<Parameter>("Blue", 1.0, 0.0, 1.0)),
   spacingOscillator(std::make_shared<WaveformOscillator>(spacing)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
-  scrambleOscillator(std::make_shared<WaveformOscillator>(scramble)), // Initialize new oscillator
+  scrambleOscillator(std::make_shared<WaveformOscillator>(scramble)),
   ShaderSettings(shaderId, j, "Diffractor") {
-    parameters = { spacing, speed, scale, count, scramble }; // Add new parameter
-    oscillators = { spacingOscillator, speedOscillator, scaleOscillator, scrambleOscillator }; // Add new oscillator
+    parameters = { spacing, speed, scale, count, scramble, red, green, blue };
+    oscillators = { spacingOscillator, speedOscillator, scaleOscillator, scrambleOscillator }; 
     load(j);
     registerParameters();
   };
@@ -66,6 +72,9 @@ struct DiffractorShader: Shader {
     shader.setUniform1f("scramble", settings->scramble->value); // Set uniform for scramble
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
+    shader.setUniform1f("red", settings->red->value);
+    shader.setUniform1f("green", settings->green->value);
+    shader.setUniform1f("blue", settings->blue->value);
     frame->draw(0, 0);
     shader.end();
     canvas->end();
@@ -89,6 +98,9 @@ struct DiffractorShader: Shader {
     CommonViews::ShaderParameter(settings->scale, settings->scaleOscillator);
     CommonViews::ShaderIntParameter(settings->count);
     CommonViews::ShaderParameter(settings->scramble, settings->scrambleOscillator); // Add scramble to drawSettings
+    CommonViews::ShaderParameter(settings->red, nullptr);
+    CommonViews::ShaderParameter(settings->green, nullptr);
+    CommonViews::ShaderParameter(settings->blue, nullptr);
   }
 };
 

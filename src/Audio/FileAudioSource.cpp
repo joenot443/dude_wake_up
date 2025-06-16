@@ -68,6 +68,11 @@ void FileAudioSource::resumePlayback() {
   audioAnalysis.bpmEnabled = true;
 }
 
+void FileAudioSource::setVolume(float vol) {
+  std::lock_guard<std::mutex> lock(audioMutex);
+  volume = vol;
+}
+
 void FileAudioSource::audioOut(ofSoundBuffer &outputBuffer) {
   std::lock_guard<std::mutex> lock(audioMutex);
   
@@ -124,13 +129,13 @@ void FileAudioSource::audioOut(ofSoundBuffer &outputBuffer) {
     }
     float averagedSample = sampleSum / numChannels;
     
-    // Set the averaged sample to each output channel in the output buffer
+    // Set the averaged sample to each output channel in the output buffer, applying volume
     for (unsigned int c = 0; c < outputChannels; ++c) {
       size_t index = i * outputChannels + c;
-      outputBufferData[index] = averagedSample;
+      outputBufferData[index] = averagedSample * volume; // Apply volume here
     }
     
-    // Store the averaged sample in the analysis buffer
+    // Store the original averaged sample in the analysis buffer (unaffected by volume)
     analysisBufferData[i] = averagedSample;
   }
   

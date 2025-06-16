@@ -1,3 +1,0 @@
-# Mask
-
-Information about Mask

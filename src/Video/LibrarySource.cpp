@@ -8,6 +8,7 @@
 #include "LibrarySource.hpp"
 #include "LibraryService.hpp"
 #include "LayoutStateService.hpp"
+#include "FontService.hpp"
 #include "NodeLayoutView.hpp"
 #include "ofMain.h" // For main thread utilities
 
@@ -18,7 +19,7 @@ void LibrarySource::load(json j)
     log("Error hydrating LibrarySource from json");
     return;
   }
-
+  
   path = j["path"];
   id = j["id"];
   sourceName = j["sourceName"];
@@ -56,7 +57,7 @@ json LibrarySource::serialize()
 
 void LibrarySource::setup() {
   fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
-
+  
   
   // Check if the libraryFileId has been downloaded already
   if (LibraryService::getService()->libraryFileIdDownloadedMap[libraryFile->id]) {
@@ -72,10 +73,10 @@ void LibrarySource::setup() {
       ofAddListener(ofEvents().update, this, &LibrarySource::runSetupOnMainThread);
     };
     state = LibrarySourceState_Downloading;
-
+    
     // Pass the callback to downloadFile
     LibraryService::getService()->downloadFutures.push_back(
-      std::async(std::launch::async, &LibraryService::downloadFile, LibraryService::getService(), libraryFile, onComplete));
+                                                            std::async(std::launch::async, &LibraryService::downloadFile, LibraryService::getService(), libraryFile, onComplete));
   }
 }
 
@@ -96,13 +97,29 @@ void LibrarySource::drawSettings()
 // Method to be called on the main thread
 void LibrarySource::runSetupOnMainThread(ofEventArgs & args)
 {
-    // Remove the listener to avoid repeated calls
-    ofRemoveListener(ofEvents().update, this, &LibrarySource::runSetupOnMainThread);
-
-    // Now it's safe to call FileSource::setup on the main thread
-    FileSource::setup();
+  // Remove the listener to avoid repeated calls
+  ofRemoveListener(ofEvents().update, this, &LibrarySource::runSetupOnMainThread);
+  
+  // Now it's safe to call FileSource::setup on the main thread
+  FileSource::setup();
 }
 
 void LibrarySource::teardown() {
   FileSource::teardown();
 }
+
+void LibrarySource::drawPreviewSized(ImVec2 size) {
+  if (libraryFile->isDownloading) {
+    ImGui::PushFont(FontService::getService()->current->h1);
+    ImGui::Dummy(ImVec2(1.0, size.y / 2.0 - 10.0f));
+    ImGui::Dummy(ImVec2(size.x / 2.0 - 10.0f, 1.0)); ImGui::SameLine();
+    ImGui::Text("%.1f%%", libraryFile->progress * 100.0f);
+    
+    ImGui::PopFont();
+    return;
+  }
+  
+  FileSource::drawPreviewSized(size);
+}
+
+

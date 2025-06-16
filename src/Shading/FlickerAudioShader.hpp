@@ -34,10 +34,9 @@ struct FlickerAudioSettings: public ShaderSettings {
 struct FlickerAudioShader: Shader {
   FlickerAudioSettings *settings;
   FlickerAudioShader(FlickerAudioSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   
   void setup() override {
-    shader.load("shaders/FlickerAudio");
+    shader.load("shaders/Flicker Audio");
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -48,7 +47,7 @@ struct FlickerAudioShader: Shader {
       shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0],
                            256);
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("enableAudio", settings->enableAudio->value);
+    shader.setUniform1i("enableAudio", settings->enableAudio->intValue);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);

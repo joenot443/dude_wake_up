@@ -20,14 +20,25 @@ struct LiquidSettings : public ShaderSettings {
 public:
   std::shared_ptr<Parameter> intensity;
   std::shared_ptr<WaveformOscillator> intensityOscillator;
+  
+  // New parameters for advanced liquid effects
+  std::shared_ptr<Parameter> flowSpeed;
+  std::shared_ptr<WaveformOscillator> flowSpeedOscillator;
+  
+  std::shared_ptr<Parameter> turbulence;
+  std::shared_ptr<WaveformOscillator> turbulenceOscillator;
 
   LiquidSettings(std::string shaderId, json j, std::string name) :
     ShaderSettings(shaderId, j, name),
-    intensity(std::make_shared<Parameter>("Intensity", 1.0, 0.0, 2.0)), // Default, Min, Max
-    intensityOscillator(std::make_shared<WaveformOscillator>(intensity))
+    intensity(std::make_shared<Parameter>("Intensity", 0.2, 0.0, 1.0)),
+    flowSpeed(std::make_shared<Parameter>("Flow Speed", 0.8, 0.1, 2.0)),
+    turbulence(std::make_shared<Parameter>("Turbulence", 1.0, 0.0, 3.0)),
+    intensityOscillator(std::make_shared<WaveformOscillator>(intensity)),
+    flowSpeedOscillator(std::make_shared<WaveformOscillator>(flowSpeed)),
+    turbulenceOscillator(std::make_shared<WaveformOscillator>(turbulence))
   {
-    parameters = {intensity};
-    oscillators = {intensityOscillator};
+    parameters = {intensity, flowSpeed, turbulence};
+    oscillators = {intensityOscillator, flowSpeedOscillator, turbulenceOscillator};
     load(j);
     registerParameters();
   }
@@ -35,12 +46,10 @@ public:
 
 class LiquidShader: public Shader {
 public:
-
   LiquidSettings *settings;
   LiquidShader(LiquidSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    shader.load("shaders/Liquid");
     shader.load("shaders/Liquid");
   }
   
@@ -58,15 +67,18 @@ public:
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
-    shader.setUniform1f("intensity", settings->intensity->value);  // Apply the intensity parameter
+    shader.setUniform1f("intensity", settings->intensity->value);
+    shader.setUniform1f("flowSpeed", settings->flowSpeed->value);
+    shader.setUniform1f("turbulence", settings->turbulence->value);
     frame->draw(0, 0);
     shader.end();
     canvas->end();
   }
 
   void drawSettings() override {
-    
     CommonViews::ShaderParameter(settings->intensity, settings->intensityOscillator);
+    CommonViews::ShaderParameter(settings->flowSpeed, settings->flowSpeedOscillator);
+    CommonViews::ShaderParameter(settings->turbulence, settings->turbulenceOscillator);
   }
 };
 

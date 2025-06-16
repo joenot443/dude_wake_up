@@ -24,9 +24,9 @@ struct RainbowRotatorSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> heightOscillator;
   
   RainbowRotatorSettings(std::string shaderId, json j, std::string name) :
-  frequency(std::make_shared<Parameter>("frequency", 1.0, 0.0, 5.0)),
+  frequency(std::make_shared<Parameter>("Frequency", 1.0, 0.0, 5.0)),
   frequencyOscillator(std::make_shared<WaveformOscillator>(frequency)),
-  height(std::make_shared<Parameter>("height", 1.0, 0.0, 2.0)),
+  height(std::make_shared<Parameter>("Height", 1.0, 0.0, 2.0)),
   heightOscillator(std::make_shared<WaveformOscillator>(height)),
   ShaderSettings(shaderId, j, name) {
     
@@ -40,7 +40,6 @@ public:
   RainbowRotatorShader(RainbowRotatorSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-shader.load("shaders/RainbowRotator");
 shader.load("shaders/RainbowRotator");
   }
 

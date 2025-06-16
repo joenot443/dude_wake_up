@@ -59,6 +59,7 @@ public:
     // Clear the frame
     ofClear(0,0,0, 255);
     ofClear(0,0,0, 0);
+    frame->getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("sides", settings->sides->value);
     shader.setUniform1f("shift", settings->shift->value);

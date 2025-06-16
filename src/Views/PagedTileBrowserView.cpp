@@ -66,7 +66,7 @@ void PagedTileBrowserView::draw() {
 
           ImGui::SetCursorPos(startPos);
           
-          ImGui::PushFont(FontService::getService()->p);
+          ImGui::PushFont(FontService::getService()->current->p);
           ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0, 1.0, 1.0, 0.8));
           ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0, 0.0, 0.0, 0.0));
           ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0, 0.0, 0.0, 0.0));
@@ -89,12 +89,12 @@ void PagedTileBrowserView::draw() {
           ImGui::PopStyleColor(4);
           ImGui::PopFont();
           
-          tile->dragCallback();
+          tile->dragCallback(tile->id);
         } else {
           if (ImGui::Button(tile->name.c_str(), tileSize)) {
             if (tileClickCallback) tileClickCallback(tile);
           }
-          tile->dragCallback();
+          tile->dragCallback(tile->id);
         }
       } else {
         // Empty tile placeholder

@@ -10,6 +10,7 @@
 
 #include <CoreFoundation/CoreFoundation.h>
 #include "AudioSourceBrowserView.hpp"
+#include <ableton/Link.hpp>
 #include "NodeLayoutView.hpp"
 #include "OscillatorView.hpp"
 #include "ShaderBrowserView.hpp"

@@ -7,10 +7,14 @@
 
 #ifndef Strand_h
 #define Strand_h
+
+#include <ableton/Link.hpp>
+#include <string>
 #include "Connection.hpp"
 #include "json.hpp"
 #include "Shader.hpp"
 #include "VideoSource.hpp"
+#include "JSONSerializable.hpp"
 
 using json = nlohmann::json;
 

@@ -14,6 +14,10 @@
 #include "StageParameterView.hpp"
 #include "CommonViews.hpp"
 #include "Fonts.hpp"
+#include "VideoSourceService.hpp"
+#include "ActionService.hpp"
+#include "Colors.hpp"
+#include "OscillationService.hpp"
 
 static const float ImGuiWindowTitleBarHeight = 30.0f;
 
@@ -72,10 +76,13 @@ void StageModeView::draw() {
   ImGui::NewLine();
   // OUTPUT
   std::vector<std::string> shaderIdsToRemove = {};
+  bool hasOutput = false;
+  
   for (auto shaderId : ParameterService::getService()->stageShaderIds) {
     auto shader = ShaderChainerService::getService()->shaderForId(shaderId);
     if (shader == nullptr) { shaderIdsToRemove.push_back(shaderId); continue; }
-    drawOutput(shader);
+    drawOutputShader(shader);
+    hasOutput = true;
   }
   
   for (auto shaderId : shaderIdsToRemove) {
@@ -89,7 +96,19 @@ void StageModeView::draw() {
     if (shader == nullptr) {
       ParameterService::getService()->defaultStageShaderIdDepth = std::pair<std::string, int>("", -1);
     } else {
-      drawOutput(shader);
+      drawOutputShader(shader);
+      hasOutput = true;
+    }
+  }
+  
+  // NEW: If no shaders available, fall back to video sources
+  if (!hasOutput) {
+    auto videoSources = VideoSourceService::getService()->videoSources();
+    if (!videoSources.empty()) {
+      // Use the last video source in the array as requested
+      auto videoSource = videoSources.back();
+      drawOutputVideoSource(videoSource);
+      hasOutput = true;
     }
   }
   
@@ -97,7 +116,8 @@ void StageModeView::draw() {
     HelpService::getService()->drawStageModeActionButtonsHelp();
   }
   
-  drawActionButtons();
+  // NEW: Draw the action bar instead of the old action buttons
+  drawActionBar();
   ImGui::EndChild();
   ImGui::EndChild();
   ImGui::PopStyleVar();
@@ -132,7 +152,7 @@ void StageModeView::drawAllParams(int itemsPerRow) {
   
   if (allParams.empty()) {
     ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2(5, 5));
-    ImGui::PushFont(FontService::getService()->h3);
+    ImGui::PushFont(FontService::getService()->current->h3);
     ImGui::Text("Parameters for all effects will appear here.");
     ImGui::PopFont();
   }
@@ -152,44 +172,148 @@ void StageModeView::drawFavoriteParams(int itemsPerRow) {
   
   if (favoriteParams.empty()) {
     ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2(5, 5));
-    ImGui::PushFont(FontService::getService()->h3);
+    ImGui::PushFont(FontService::getService()->current->h3);
     ImGui::Text("Parameters you select with a heart appear here.");
     ImGui::PopFont();
   }
   
 }
 
-void StageModeView::drawOutput(std::shared_ptr<Shader> output) {
-
+void StageModeView::drawOutputShader(std::shared_ptr<Shader> output) {
   float width = ImGui::GetContentRegionAvail().x;
   ImTextureID texID = (ImTextureID)(uintptr_t)output->frame()->getTexture().getTextureData().textureID;
   ImGui::Image(texID, ImVec2(width, (9. / 16.) * width));
 }
 
-void StageModeView::drawActionButtons()
+void StageModeView::drawOutputVideoSource(std::shared_ptr<VideoSource> output) {
+  float width = ImGui::GetContentRegionAvail().x;
+  ImTextureID texID = (ImTextureID)(uintptr_t)output->frame()->getTexture().getTextureData().textureID;
+  ImGui::Image(texID, ImVec2(width, (9. / 16.) * width));
+}
+
+void StageModeView::drawActionBar()
 {
-  auto pos = ImGui::GetCursorScreenPos();
+  ImVec2 pos = ImGui::GetCursorPos();
+  int buttonCount = 7;
+  float buttonWidth = 30.0;
+  ImVec2 imageSize = ImVec2(buttonWidth, buttonWidth);
+  ImVec2 imageRatio = ImVec2(1.5, 1.5);
   
-  // Set the cursor to the bottom right of the window
-  ImGui::SetCursorScreenPos(ImVec2(getScaledWindowWidth() - 82.0, getScaledWindowHeight() - LayoutStateService::getService()->audioSettingsViewHeight() - 100.0));
+  // Position for either the collapsed or expanded action bar
+  float yPos = getScaledWindowHeight() - LayoutStateService::getService()->audioSettingsViewHeight() - 200.0;
   
-  // Draw the node mode button
-  if (CommonViews::LargeIconButton(ICON_MD_HUB, "stageModeDisable"))
-  {
+  if (!LayoutStateService::getService()->actionBarExpanded) {
+    // Draw collapsed state with single button
+    ImVec2 collapsedPos = ImVec2(getScaledWindowWidth() - 42, yPos);
+    ImGui::SetCursorPos(collapsedPos);
+    
+    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, Colors::ActionBarBackgroundColor.Value);
+    ImGui::BeginChild("##CollapsedActionBar", ImVec2(buttonWidth, buttonWidth), ImGuiChildFlags_None, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration);
+    
+    if (CommonViews::ImageButton("expand", "back.png", imageSize, imageRatio, true)) {
+      LayoutStateService::getService()->actionBarExpanded = true;
+    }
+    
+    ImGui::EndChild();
+    ImGui::PopStyleVar(2);
+    ImGui::PopStyleColor();
+    ImGui::SetCursorPos(pos);
+    return;
+  }
+  
+  // Draw expanded action bar
+  float actionBarWidth = buttonWidth * buttonCount * imageRatio.x + 30.0;
+  ImGui::SetCursorPos(ImVec2(ImGui::GetContentRegionAvail().x - actionBarWidth - 12.0, yPos));
+  
+  ImGui::PushStyleColor(ImGuiCol_ChildBg, Colors::ActionBarBackgroundColor.Value);
+  ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
+  ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
+  ImGui::SetNextItemAllowOverlap();
+  
+  
+  ImGui::BeginChild("##ActionButtons", ImVec2(actionBarWidth, buttonWidth), ImGuiChildFlags_None, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize);
+  ImGui::Text("Wtf");
+  // Collapse button
+  if (CommonViews::ImageButton("collapse", "forward.png", imageSize, imageRatio, true)) {
+    LayoutStateService::getService()->actionBarExpanded = false;
+  }
+  ImGui::SameLine(0, 10);
+  
+  // Draw the undo button
+  if (CommonViews::ImageButton("undo", "undo.png", imageSize, imageRatio, true)) {
+    if (ActionService::getService()->canUndo()) {
+      ActionService::getService()->undo();
+    }
+  }
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+    ImGui::SetTooltip("Undo the last action (Cmd+Z)");
+  ImGui::SameLine(0, 10);
+  
+  // Draw the redo button
+  if (CommonViews::ImageButton("redo", "redo.png", imageSize, imageRatio, true)) {
+    if (ActionService::getService()->canRedo()) {
+      ActionService::getService()->redo();
+    }
+  }
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+    ImGui::SetTooltip("Redo the last undone action (Cmd+Y)");
+  ImGui::SameLine(0, 10);
+  
+  // Draw the capture screenshot button
+  if (CommonViews::ImageButton("capture", "camera.png", imageSize, imageRatio, true)) {
+    VideoSourceService::getService()->captureOutputWindowScreenshot();
+  }
+  if (ImGui::IsItemHovered())
+    ImGui::SetTooltip("Capture a screenshot of the output window");
+  ImGui::SameLine(0, 10);
+  
+  // Draw the help button
+  std::string helpImage = LayoutStateService::getService()->helpEnabled ? "help-outline.png" : "help.png";
+  if (CommonViews::ImageButton("help", helpImage, imageSize, imageRatio, true)) {
+    LayoutStateService::getService()->helpEnabled = !LayoutStateService::getService()->helpEnabled;
+  }
+  if (ImGui::IsItemHovered())
+    ImGui::SetTooltip("Toggle help overlay");
+  ImGui::SameLine(0, 10);
+  
+  // Draw the reset button
+  if (CommonViews::ImageButton("reset", "delete.png", imageSize, imageRatio, true)) {
+    clear();
+  }
+  if (ImGui::IsItemHovered())
+    ImGui::SetTooltip("Remove all nodes and connections (Cmd+N)");
+  ImGui::SameLine(0, 10);
+  
+  // Draw the node layout mode button (instead of stage mode since we're already in stage mode)
+  if (CommonViews::ImageButton("nodemode", "nodes.png", imageSize, imageRatio, true)) {
     LayoutStateService::getService()->stageModeEnabled = false;
   }
-  ImGui::SameLine();
-  CommonViews::HSpacing(2);
-  ImGui::SameLine();
+  if (ImGui::IsItemHovered())
+    ImGui::SetTooltip("Switch to node layout mode (Cmd+B)");
+  ImGui::SameLine(0, 10);
   
-  // Draw the Favorite/All button
-  auto icon = LayoutStateService::getService()->allParametersInStageModeEnabled ? ICON_MD_FAVORITE : ICON_MD_FAVORITE_OUTLINE;
-  if (CommonViews::LargeIconButton(icon, "stageModeDisable"))
-  {
+  // Draw the Favorite/All button (from the old action buttons)
+  auto icon = LayoutStateService::getService()->allParametersInStageModeEnabled ? "heart-fill.png" : "heart.png";
+  if (CommonViews::ImageButton("favoriteAll", icon, imageSize, imageRatio, true)) {
     LayoutStateService::getService()->allParametersInStageModeEnabled = !LayoutStateService::getService()->allParametersInStageModeEnabled;
   }
+  if (ImGui::IsItemHovered())
+    ImGui::SetTooltip("Toggle between favorite and all parameters");
   
+  ImGui::EndChild();
+  ImGui::PopStyleVar(2);
+  ImGui::PopStyleColor();
   ImGui::SetCursorPos(pos);
+}
+
+void StageModeView::clear() {
+  ShaderChainerService::getService()->clear();
+  VideoSourceService::getService()->clear();
+  ParameterService::getService()->clear();
+  ActionService::getService()->clear();
+  OscillationService::getService()->clear();
 }
 
 void StageModeView::drawHelp()

@@ -1,3 +1,0 @@
-# Outline
-
-Information about Outline

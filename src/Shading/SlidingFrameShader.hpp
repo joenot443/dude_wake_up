@@ -17,6 +17,7 @@
 #include "Shader.hpp"
 #include <stdio.h>
 
+
 struct SlidingFrameSettings: public ShaderSettings {
   std::shared_ptr<Parameter> speed;
   std::shared_ptr<WaveformOscillator> speedOscillator;
@@ -27,17 +28,22 @@ struct SlidingFrameSettings: public ShaderSettings {
   std::shared_ptr<Parameter> angle;
   std::shared_ptr<WaveformOscillator> angleOscillator;
   
+  std::shared_ptr<Parameter> position;
+  std::shared_ptr<WaveformOscillator> positionOscillator;
+  
   SlidingFrameSettings(std::string shaderId, json j, std::string name) :
-  speed(std::make_shared<Parameter>("Speed", 100.0, 0.0, 500.0)),
+  speed(std::make_shared<Parameter>("Speed", 0.0, 0.0, 500.0)),
   lineWidth(std::make_shared<Parameter>("Line Width", 10.0, 0.0, 50.0)),
   angle(std::make_shared<Parameter>("Angle", 0.0, 0.0, M_PI)),
+  position(std::make_shared<Parameter>("Position", 300.0, 0.0, 1920.0)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   lineWidthOscillator(std::make_shared<WaveformOscillator>(lineWidth)),
   angleOscillator(std::make_shared<WaveformOscillator>(angle)),
+  positionOscillator(std::make_shared<WaveformOscillator>(position)),
 
   ShaderSettings(shaderId, j, name) {
-    parameters = { speed, lineWidth, angle };
-    oscillators = { speedOscillator, lineWidthOscillator, angleOscillator };
+    parameters = { speed, lineWidth, angle, position };
+    oscillators = { speedOscillator, lineWidthOscillator, angleOscillator, positionOscillator };
     load(j);
     registerParameters();
   };
@@ -66,6 +72,7 @@ struct SlidingFrameShader: Shader {
     shader.setUniform1f("lineWidth", settings->lineWidth->value);
     shader.setUniform1f("speed", settings->speed->value);
     shader.setUniform1f("angle", settings->angle->value);
+    shader.setUniform1f("position", settings->position->value);
     shader.setUniform2f("dimensions", SlidingFrame->getWidth(), SlidingFrame->getHeight());
     SlidingFrame->draw(0, 0);
     shader.end();
@@ -84,8 +91,7 @@ ShaderType type() override {
   }
   
   void drawSettings() override {
-    
-    
+    CommonViews::ShaderParameter(settings->position, settings->positionOscillator);
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     CommonViews::ShaderParameter(settings->angle, settings->angleOscillator);
     CommonViews::ShaderParameter(settings->lineWidth, settings->lineWidthOscillator);

@@ -1,45 +1,92 @@
 #version 150
 
+// Input uniforms
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
 uniform float tolerance;
+uniform float width;  // Controls edge width (1.0 = default, higher = wider)
+
+// Vertex shader outputs
 in vec2 coord;
 out vec4 outputColor;
 
 void main() {
+  // Normalize coordinates to [0,1] range
   vec2 uv = coord.xy / dimensions.xy;
-  vec3 col;
+  vec3 finalColor;
 
-  /*** Sobel kernels ***/
-  // Note: GLSL's mat3 is COLUMN-major ->  mat3[col][row]
-  mat3 sobelX = mat3(-1.0, -2.0, -1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 1.0) * tolerance;
-  mat3 sobelY = mat3(-1.0, 0.0, 1.0, -2.0, 0.0, 2.0, -1.0, 0.0, 1.0) * tolerance;
+  // Sobel edge detection kernels
+  // Note: GLSL's mat3 is COLUMN-major -> mat3[col][row]
+  mat3 sobelX = mat3(
+    -1.0, -2.0, -1.0,
+     0.0,  0.0,  0.0,
+     1.0,  2.0,  1.0
+  ) * tolerance;
 
-  float sumX = 0.0; // x-axis change
-  float sumY = 0.0; // y-axis change
+  mat3 sobelY = mat3(
+    -1.0,  0.0,  1.0,
+    -2.0,  0.0,  2.0,
+    -1.0,  0.0,  1.0
+  ) * tolerance;
 
-  for (int i = -1; i <= 1; i++) {
-    for (int j = -1; j <= 1; j++) {
-      // texture coordinates should be between 0.0 and 1.0
-      float x = (coord.x + float(i)) / dimensions.x;
-      float y = (coord.y + float(j)) / dimensions.y;
+  float gradientX = 0.0;  // Horizontal edge strength
+  float gradientY = 0.0;  // Vertical edge strength
 
-      // Convolve kernels with image
-      sumX += length(texture(tex, vec2(x, y)).xyz) *
-              float(sobelX[1 + i][1 + j]);
-      sumY += length(texture(tex, vec2(x, y)).xyz) *
-              float(sobelY[1 + i][1 + j]);
+  // Apply convolution
+  for (int y = -1; y <= 1; y++) {
+    for (int x = -1; x <= 1; x++) {
+      // Calculate texture coordinates for current kernel position
+      float texX = (coord.x + float(x)) / dimensions.x;
+      float texY = (coord.y + float(y)) / dimensions.y;
+      
+      // Sample and apply kernel weights
+      vec3 sampleColor = texture(tex, vec2(texX, texY)).xyz;
+      float luminance = length(sampleColor);
+      
+      gradientX += luminance * float(sobelX[1 + x][1 + y]);
+      gradientY += luminance * float(sobelY[1 + x][1 + y]);
     }
   }
 
-  float g = abs(sumX) + abs(sumY);
-  // g = sqrt((sumX*sumX) + (sumY*sumY));
+  // Calculate final edge strength
+  float edgeStrength = abs(gradientX) + abs(gradientY);
+  // Alternative: edgeStrength = sqrt(gradientX * gradientX + gradientY * gradientY);
 
-  if (g > 1.0)
-    col = vec3(1.0, 1.0, 1.0);
-  else
-    col = col * 0.0;
+  // Threshold the result
+  float edge = (edgeStrength > 1.0) ? 1.0 : 0.0;
+  
+  // Dilate edges based on width parameter
+  float maxEdge = edge;
+  if (width > 1.0) {
+    int radius = int(width);
+    for (int y = -radius; y <= radius; y++) {
+      for (int x = -radius; x <= radius; x++) {
+        float texX = (coord.x + float(x)) / dimensions.x;
+        float texY = (coord.y + float(y)) / dimensions.y;
+        
+        // Calculate gradient at neighboring pixel
+        float neighborGradientX = 0.0;
+        float neighborGradientY = 0.0;
+        
+        for (int ky = -1; ky <= 1; ky++) {
+          for (int kx = -1; kx <= 1; kx++) {
+            float sampleX = texX + float(kx) / dimensions.x;
+            float sampleY = texY + float(ky) / dimensions.y;
+            vec3 sampleColor = texture(tex, vec2(sampleX, sampleY)).xyz;
+            float luminance = length(sampleColor);
+            
+            neighborGradientX += luminance * float(sobelX[1 + kx][1 + ky]);
+            neighborGradientY += luminance * float(sobelY[1 + kx][1 + ky]);
+          }
+        }
+        
+        float neighborEdge = (abs(neighborGradientX) + abs(neighborGradientY) > 1.0) ? 1.0 : 0.0;
+        maxEdge = max(maxEdge, neighborEdge);
+      }
+    }
+  }
 
-  outputColor.xyz = col;
+  finalColor = vec3(maxEdge);
+  outputColor.xyz = finalColor;
 }

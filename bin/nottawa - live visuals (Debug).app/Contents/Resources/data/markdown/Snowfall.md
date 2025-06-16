@@ -1,3 +1,0 @@
-# Snowfall
-
-Information about Snowfall

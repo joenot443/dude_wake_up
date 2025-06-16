@@ -35,8 +35,7 @@ struct FibersSettings: public ShaderSettings {
 struct FibersShader: Shader {
   FibersSettings *settings;
   FibersShader(FibersSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
-  
+ 
   void setup() override {
     shader.load("shaders/Fibers");
   }

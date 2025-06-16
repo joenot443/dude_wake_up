@@ -36,6 +36,7 @@ public:
   json serialize() override;
   void load(json j) override;
   void teardown() override;
+  void drawPreviewSized(ImVec2 size) override;
   
   void runSetupOnMainThread(ofEventArgs & args);
 };

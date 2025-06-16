@@ -6,14 +6,14 @@
 //
 
 #include <stdio.h>
-#include "Colors.hpp"
 #include "Shader.hpp"
+#include "NodeLayoutView.hpp"
+#include "Colors.hpp"
 #include "LayoutStateService.hpp"
 #include "Console.hpp"
 #include "ShaderChainerService.hpp"
 #include "VideoSourceService.hpp"
 #include "FeedbackSourceService.hpp"
-#include "NodeLayoutView.hpp"
 #include "LayoutStateService.hpp"
 
 
@@ -119,12 +119,17 @@ void Shader::disableAudioAutoReactivity() {
   settings->audioReactiveParameter->removeDriver();
 }
 
+std::shared_ptr<ofFbo> Shader::parentFrame() {
+    for (auto const& [key, connection] : inputs) {
+      return connection->start->frame();
+    }
+    return nullptr;
+}
+
 void Shader::checkForFileChanges() {
   if (!AllowShaderMonitoring) return;
   
-  std::string shaderName = name();
-  // Remove any spaces from the name
-  shaderName.erase(std::remove(shaderName.begin(), shaderName.end(), ' '), shaderName.end());
+  std::string shaderName = fileName();
   auto path = "shaders/" + shaderName + ".frag";
   
   auto shaderFile = ofFile(path);

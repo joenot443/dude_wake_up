@@ -1,3 +1,0 @@
-# Frame
-
-Information about Frame

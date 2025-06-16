@@ -31,5 +31,13 @@ void OscillatorPanelView::draw() {
     }
   }
   
+  if (oscillators.empty()) {
+    ImGui::Dummy(ImVec2(1.0, 5.0));
+    ImGui::Dummy(ImVec2(5.0, 1.0));
+    ImGui::SameLine();
+    ImGui::Text("No active Oscillators");
+    ImGui::Dummy(ImVec2(1.0, 5.0));
+  }
+  
   ImGui::EndChild();
 }

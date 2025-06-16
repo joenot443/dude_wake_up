@@ -5,6 +5,8 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "FirefliesShader.hpp"
+#include "CloudyTunnelShader.hpp"
 #include "PixelAudioPartyShader.hpp"
 #include "CompanionsShader.hpp"
 #include "SpiralShader.hpp"
@@ -22,7 +24,6 @@
 #include "DiscoAudioShader.hpp"
 #include "FlickerAudioShader.hpp"
 #include "FractalAudioShader.hpp"
-#include "StarryPlanesShader.hpp"
 #include "UnknownPleasuresShader.hpp"
 #include "SpaceRingsShader.hpp"
 #include "CloudyShapesShader.hpp"
@@ -63,7 +64,6 @@
 #include "TriangleMapShader.hpp"
 #include "DiscoShader.hpp"
 #include "OctahedronShader.hpp"
-#include "VanGoghShader.hpp"
 #include "RubiksShader.hpp"
 #include "AudioMountainsShader.hpp"
 #include "AudioWaveformShader.hpp"
@@ -86,77 +86,77 @@
 using json = nlohmann::json;
 
 enum ShaderSourceType {
-  ShaderSource_FrequencyVisualizer, //source enum,
-  ShaderSource_CurlySquares, //source enum,
-  ShaderSource_PlasmaTwo, //source enum,
-  ShaderSource_DancingSquares, //source enum,
-  ShaderSource_Tissue, //source enum,
-  ShaderSource_Psycurves,
-  ShaderSource_TriangleMap,
-  ShaderSource_Disco,
-  ShaderSource_Octahedron,
-  ShaderSource_VanGogh,
-  ShaderSource_Rubiks,
-  ShaderSource_Mountains,
-  ShaderSource_empty,
-  ShaderSource_plasma,
-  ShaderSource_fractal,
-  ShaderSource_fuji,
-  ShaderSource_clouds,
-  ShaderSource_melter,
-  ShaderSource_rings,
-  ShaderSource_audioWaveform,
-  ShaderSource_audioBumper,
-  ShaderSource_audioMountains,
-  ShaderSource_galaxy,
-  ShaderSource_Warp, //source enum,
-  ShaderSource_Hilbert, //source enum,
-  ShaderSource_SolidColor, //source enum,
-  ShaderSource_Vertex, //source enum,
-  ShaderSource_Limbo, //source enum,
-  ShaderSource_AudioCircle, //source enum,
-  ShaderSource_SmokeRing, //source enum,
-  ShaderSource_SwirlingSoul, //source enum,
-  ShaderSource_Gyroids, //source enum,
-  ShaderSource_GridRun, //source enum,
-  ShaderSource_FullHouse, //source enum,
-  ShaderSource_Reflector, //source enum,
-  ShaderSource_Warpspeed, //source enum,
-  ShaderSource_Core, //source enum,
-  ShaderSource_TwistedCubes, //source enum,
-  ShaderSource_TwistedTrip, //source enum,
-  ShaderSource_DirtyPlasma, //source enum,
-  ShaderSource_IsoFract, //source enum,
-  ShaderSource_MotionBlurTexture, //source enum,
-  ShaderSource_WelcomeRings, //source enum,
-  ShaderSource_Mist, //source enum,
-  ShaderSource_Fibers, //source enum,
-  ShaderSource_ChromeGrill, //source enum,
-  ShaderSource_GlitchAudio, //source enum,
-  ShaderSource_Cosmos, //source enum,
-  ShaderSource_FloatingSparks, //source enum,
-  ShaderSource_AudioBlocks, //source enum,
-  ShaderSource_CloudyShapes, //source enum,
-  ShaderSource_SpaceRings, //source enum,
-  ShaderSource_UnknownPleasures, //source enum,
-  ShaderSource_StarryPlanes, //source enum,
-  ShaderSource_FractalAudio, //source enum,
-  ShaderSource_FlickerAudio, //source enum,
-  ShaderSource_DiscoAudio, //source enum,
-  ShaderSource_ColorWheel, //source enum,
-  ShaderSource_Perplexion, //source enum,
-  ShaderSource_Octagrams, //source enum,
-  ShaderSource_Heptagons, //source enum,
-  ShaderSource_Breathe, //source enum,
-  ShaderSource_Aerogel, //source enum,
-  ShaderSource_Diffractor, //source enum,
-  ShaderSource_Plasmor, //source enum,
-  ShaderSource_ColoredDrops, //source enum,
-  ShaderSource_SimpleShape, //source enum,
-  ShaderSource_SimpleBars, //source enum,
-  ShaderSource_Spiral, //source enum,
-  ShaderSource_Companions, //source enum,
-  ShaderSource_PixelAudioParty, //source enum,
+  ShaderSource_FrequencyVisualizer, // 0
+  ShaderSource_CurlySquares, // 1
+  ShaderSource_PlasmaTwo, // 2
+  ShaderSource_DancingSquares, // 3
+  ShaderSource_Tissue, // 4
+  ShaderSource_Psycurves, // 5
+  ShaderSource_TriangleMap, // 6
+  ShaderSource_Disco, // 7
+  ShaderSource_Octahedron, // 8
+  ShaderSource_Rubiks, // 9
+  ShaderSource_Mountains, // 10
+  ShaderSource_empty, // 11
+  ShaderSource_plasma, // 12
+  ShaderSource_fractal, // 13
+  ShaderSource_fuji, // 14
+  ShaderSource_clouds, // 15
+  ShaderSource_melter, // 16
+  ShaderSource_rings, // 17
+  ShaderSource_audioWaveform, // 18
+  ShaderSource_audioBumper, // 19
+  ShaderSource_audioMountains, // 20
+  ShaderSource_galaxy, // 21
+  ShaderSource_Warp, // 22
+  ShaderSource_Hilbert, // 23
+  ShaderSource_SolidColor, // 24
+  ShaderSource_Vertex, // 25
+  ShaderSource_Limbo, // 26
+  ShaderSource_AudioCircle, // 27
+  ShaderSource_SmokeRing, // 28
+  ShaderSource_SwirlingSoul, // 29
+  ShaderSource_Gyroids, // 30
+  ShaderSource_GridRun, // 31
+  ShaderSource_FullHouse, // 32
+  ShaderSource_Reflector, // 33
+  ShaderSource_Warpspeed, // 34
+  ShaderSource_Core, // 35
+  ShaderSource_TwistedCubes, // 36
+  ShaderSource_TwistedTrip, // 37
+  ShaderSource_DirtyPlasma, // 38
+  ShaderSource_IsoFract, // 39
+  ShaderSource_MotionBlurTexture, // 40
+  ShaderSource_WelcomeRings, // 41
+  ShaderSource_Mist, // 42
+  ShaderSource_Fibers, // 43
+  ShaderSource_ChromeGrill, // 44
+  ShaderSource_GlitchAudio, // 45
+  ShaderSource_Cosmos, // 46
+  ShaderSource_FloatingSparks, // 47
+  ShaderSource_AudioBlocks, // 48
+  ShaderSource_CloudyShapes, // 49
+  ShaderSource_SpaceRings, // 50
+  ShaderSource_UnknownPleasures, // 51
+  ShaderSource_FractalAudio, // 52
+  ShaderSource_FlickerAudio, // 53
+  ShaderSource_DiscoAudio, // 54
+  ShaderSource_ColorWheel, // 55
+  ShaderSource_Perplexion, // 56
+  ShaderSource_Octagrams, // 57
+  ShaderSource_Heptagons, // 58
+  ShaderSource_Breathe, // 59
+  ShaderSource_Aerogel, // 60
+  ShaderSource_Diffractor, // 61
+  ShaderSource_Plasmor, // 62
+  ShaderSource_ColoredDrops, // 63
+  ShaderSource_SimpleShape, // 64
+  ShaderSource_SimpleBars, // 65
+  ShaderSource_Spiral, // 66
+  ShaderSource_Companions, // 67
+  ShaderSource_PixelAudioParty, // 68
+  ShaderSource_CloudyTunnel, // 69
+  ShaderSource_Fireflies, // 70
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -183,7 +183,6 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_audioMountains,
   ShaderSource_galaxy,
   ShaderSource_Warp, // Available
-  ShaderSource_Hilbert, // Available
   ShaderSource_SolidColor, // Available
   ShaderSource_Vertex, // Available
   ShaderSource_Limbo, // Available
@@ -205,13 +204,11 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_Mist, // Available
   ShaderSource_Fibers, // Available
   ShaderSource_ChromeGrill, // Available
-  ShaderSource_GlitchAudio, // Available
   ShaderSource_Cosmos, // Available
   ShaderSource_FloatingSparks, // Available
   ShaderSource_AudioBlocks, // Available
   ShaderSource_SpaceRings, // Available
   ShaderSource_UnknownPleasures, // Available
-  ShaderSource_StarryPlanes, // Available
   ShaderSource_FractalAudio, // Available
   ShaderSource_FlickerAudio, // Available
   ShaderSource_DiscoAudio, // Available
@@ -229,11 +226,17 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_Spiral, // Available
   ShaderSource_Companions, // Available
   ShaderSource_PixelAudioParty, // Available
+  ShaderSource_CloudyTunnel, // Available
+  ShaderSource_Fireflies, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
       // shaderTypeForShaderSourceType
+  case ShaderSource_Fireflies: //type enum
+    return ShaderTypeFireflies;
+  case ShaderSource_CloudyTunnel: //type enum
+    return ShaderTypeCloudyTunnel;
   case ShaderSource_PixelAudioParty: //type enum
     return ShaderTypePixelAudioParty;
   case ShaderSource_Companions: //type enum
@@ -268,8 +271,6 @@ static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
       return ShaderTypeFlickerAudio;
     case ShaderSource_FractalAudio: //type enum
       return ShaderTypeFractalAudio;
-    case ShaderSource_StarryPlanes: //type enum
-      return ShaderTypeStarryPlanes;
     case ShaderSource_UnknownPleasures: //type enum
       return ShaderTypeUnknownPleasures;
     case ShaderSource_SpaceRings: //type enum
@@ -346,8 +347,6 @@ static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
       return ShaderTypeDisco;
     case ShaderSource_Octahedron:
       return ShaderTypeOctahedron;
-    case ShaderSource_VanGogh:
-      return ShaderTypeVanGogh;
     case ShaderSource_Rubiks:
       return ShaderTypeRubiks;
     case ShaderSource_Mountains:
@@ -412,8 +411,6 @@ static ShaderSourceType shaderSourceTypeForShaderType(ShaderType type) {
       return ShaderSource_FlickerAudio;
     case ShaderTypeFractalAudio:
       return ShaderSource_FractalAudio;
-    case ShaderTypeStarryPlanes:
-      return ShaderSource_StarryPlanes;
     case ShaderTypeUnknownPleasures:
       return ShaderSource_UnknownPleasures;
     case ShaderTypeSpaceRings:
@@ -426,8 +423,6 @@ static ShaderSourceType shaderSourceTypeForShaderType(ShaderType type) {
       return ShaderSource_FloatingSparks;
     case ShaderTypeCosmos:
       return ShaderSource_Cosmos;
-    case ShaderTypeGlitchAudio:
-      return ShaderSource_GlitchAudio;
     case ShaderTypeChromeGrill:
       return ShaderSource_ChromeGrill;
     case ShaderTypeFibers:
@@ -490,8 +485,6 @@ static ShaderSourceType shaderSourceTypeForShaderType(ShaderType type) {
       return ShaderSource_Disco;
     case ShaderTypeOctahedron:
       return ShaderSource_Octahedron;
-    case ShaderTypeVanGogh:
-      return ShaderSource_VanGogh;
     case ShaderTypeRubiks:
       return ShaderSource_Rubiks;
     case ShaderTypeMountains:
@@ -533,25 +526,22 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     case ShaderSource_AudioBlocks:
     case ShaderSource_FractalAudio:
     case ShaderSource_FlickerAudio:
-    case ShaderSource_GlitchAudio:
     case ShaderSource_DiscoAudio:
     case ShaderSource_PixelAudioParty:
       return "Audio Reactive";
       
       // Simple
-    case ShaderSource_Octahedron: // Name
     case ShaderSource_empty:
     case ShaderSource_ColorWheel:
     case ShaderSource_FullHouse:
     case ShaderSource_FloatingSparks:
     case ShaderSource_ColoredDrops:
     case ShaderSource_SpaceRings:
-      return "Simple";
+      return "Particles";
       
       // Scenic
     case ShaderSource_Gyroids:
     case ShaderSource_TriangleMap: // Name
-    case ShaderSource_VanGogh: // Name
     case ShaderSource_Mountains: // Name
     case ShaderSource_clouds:
     case ShaderSource_galaxy:
@@ -581,8 +571,9 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
       return "Textured";
       
     // Shapes & Solids
-    case ShaderSource_SolidColor: // Name
+    case ShaderSource_SolidColor: 
     case ShaderSource_SimpleBars:
+    case ShaderSource_Octahedron:
     case ShaderSource_Spiral:
     case ShaderSource_SimpleShape:
       return "Shapes & Solids";
@@ -635,6 +626,18 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
         // Shader Settings
+    case ShaderSource_Fireflies: { // Settings
+      auto settings = new FirefliesSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<FirefliesShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_CloudyTunnel: { // Settings
+      auto settings = new CloudyTunnelSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<CloudyTunnelShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_PixelAudioParty: { // Settings
       auto settings = new PixelAudioPartySettings(UUID::generateUUID(), 0);
       shader = std::make_shared<PixelAudioPartyShader>(settings);
@@ -737,12 +740,6 @@ public:
         shader->setup();
         return;
       }
-      case ShaderSource_StarryPlanes: { // Settings
-        auto settings = new StarryPlanesSettings(UUID::generateUUID(), 0);
-        shader = std::make_shared<StarryPlanesShader>(settings);
-        shader->setup();
-        return;
-      }
       case ShaderSource_UnknownPleasures: { // Settings
         auto settings = new UnknownPleasuresSettings(UUID::generateUUID(), 0);
         shader = std::make_shared<UnknownPleasuresShader>(settings);
@@ -776,12 +773,6 @@ public:
       case ShaderSource_Cosmos: { // Settings
         auto settings = new CosmosSettings(UUID::generateUUID(), 0);
         shader = std::make_shared<CosmosShader>(settings);
-        shader->setup();
-        return;
-      }
-      case ShaderSource_GlitchAudio: { // Settings
-        auto settings = new GlitchAudioSettings(UUID::generateUUID(), 0);
-        shader = std::make_shared<GlitchAudioShader>(settings);
         shader->setup();
         return;
       }
@@ -968,12 +959,6 @@ public:
       case ShaderSource_Octahedron: { // Settings
         auto settings = new OctahedronSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<OctahedronShader>(settings);
-        shader->setup();
-        return;
-      }
-      case ShaderSource_VanGogh: { // Settings
-        auto settings = new VanGoghSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
-        shader = std::make_shared<VanGoghShader>(settings);
         shader->setup();
         return;
       }

@@ -11,6 +11,7 @@
 //------------------------------------------------------------------------------
 # include "imgui_node_editor_internal.h"
 #include "Console.hpp"
+#include "ofMain.h"
 # include <cstdio> // snprintf
 # include <string>
 # include <fstream>
@@ -426,87 +427,66 @@ static void ImDrawList_PolyFillScanFlood(ImDrawList *draw, std::vector<ImVec2>* 
     scanHits.clear();
 }
 */
-
 static void ImDrawList_AddBezierWithArrows(ImDrawList* drawList, const ImCubicBezierPoints& curve, float thickness,
-    float startArrowSize, float startArrowWidth, float endArrowSize, float endArrowWidth,
-    bool fill, ImU32 color, float strokeThickness, const ImVec2* startDirHint = nullptr, const ImVec2* endDirHint = nullptr)
+                                           float startArrowSize, float startArrowWidth, float endArrowSize, float endArrowWidth,
+                                           bool fill, ImU32 color, float strokeThickness, bool active, const ImVec2* startDirHint = nullptr, const ImVec2* endDirHint = nullptr)
 {
-    using namespace ax;
-
-    if ((color >> 24) == 0)
-        return;
-
-    const auto half_thickness = thickness * 0.5f;
-
-    if (fill)
-    {
-        drawList->AddBezierCubic(curve.P0, curve.P1, curve.P2, curve.P3, color, thickness);
-
-        if (startArrowSize > 0.0f)
-        {
-            const auto start_dir  = ImNormalized(startDirHint ? *startDirHint : ImCubicBezierTangent(curve.P0, curve.P1, curve.P2, curve.P3, 0.0f));
-            const auto start_n    = ImVec2(-start_dir.y, start_dir.x);
-            const auto half_width = startArrowWidth * 0.5f;
-            const auto tip        = curve.P0 - start_dir * startArrowSize;
-
-            drawList->PathLineTo(curve.P0 - start_n * ImMax(half_width, half_thickness));
-            drawList->PathLineTo(curve.P0 + start_n * ImMax(half_width, half_thickness));
-            drawList->PathLineTo(tip);
-            drawList->PathFillConvex(color);
-        }
-
-        if (endArrowSize > 0.0f)
-        {
-            const auto    end_dir = ImNormalized(endDirHint ? -*endDirHint : ImCubicBezierTangent(curve.P0, curve.P1, curve.P2, curve.P3, 1.0f));
-            const auto    end_n   = ImVec2(  -end_dir.y,   end_dir.x);
-            const auto half_width = endArrowWidth * 0.5f;
-            const auto tip        = curve.P3 + end_dir * endArrowSize;
-
-            drawList->PathLineTo(curve.P3 + end_n * ImMax(half_width, half_thickness));
-            drawList->PathLineTo(curve.P3 - end_n * ImMax(half_width, half_thickness));
-            drawList->PathLineTo(tip);
-            drawList->PathFillConvex(color);
-        }
+  using namespace ax;
+  
+  if ((color >> 24) == 0)
+    return;
+  
+  const auto half_thickness = thickness * 0.5f;
+  
+  if (fill)
+  {
+    drawList->AddBezierCubic(curve.P0, curve.P1, curve.P2, curve.P3, color, thickness);
+    
+    // Moving Circle Logic
+    if (active) {
+//      float t = fmod(ofGetElapsedTimef(), 3.0f) / 3.0f;
+//      float u = 1.0f - t;
+//      ImVec2 circle_pos =
+//      u * u * u * curve.P0 +
+//      3 * u * u * t * curve.P1 +
+//      3 * u * t * t * curve.P2 +
+//      t * t * t * curve.P3;
+//      
+//      drawList->AddCircleFilled(circle_pos, 10.0f, color);
     }
-    else
+    
+    if (startArrowSize > 0.0f)
     {
-        if (startArrowSize > 0.0f)
-        {
-            const auto start_dir  = ImNormalized(ImCubicBezierTangent(curve.P0, curve.P1, curve.P2, curve.P3, 0.0f));
-            const auto start_n    = ImVec2(-start_dir.y, start_dir.x);
-            const auto half_width = startArrowWidth * 0.5f;
-            const auto tip        = curve.P0 - start_dir * startArrowSize;
-
-            if (half_width > half_thickness)
-                drawList->PathLineTo(curve.P0 - start_n * half_width);
-            drawList->PathLineTo(tip);
-            if (half_width > half_thickness)
-                drawList->PathLineTo(curve.P0 + start_n * half_width);
-        }
-
-        ImDrawList_PathBezierOffset(drawList, half_thickness, curve.P0, curve.P1, curve.P2, curve.P3);
-
-        if (endArrowSize > 0.0f)
-        {
-            const auto    end_dir = ImNormalized(ImCubicBezierTangent(curve.P0, curve.P1, curve.P2, curve.P3, 1.0f));
-            const auto    end_n   = ImVec2(  -end_dir.y,   end_dir.x);
-            const auto half_width = endArrowWidth * 0.5f;
-            const auto tip        = curve.P3 + end_dir * endArrowSize;
-
-            if (half_width > half_thickness)
-                drawList->PathLineTo(curve.P3 + end_n * half_width);
-            drawList->PathLineTo(tip);
-            if (half_width > half_thickness)
-                drawList->PathLineTo(curve.P3 - end_n * half_width);
-        }
-
-        ImDrawList_PathBezierOffset(drawList, half_thickness, curve.P3, curve.P2, curve.P1, curve.P0);
-
-        drawList->PathStroke(color, true, strokeThickness);
+      const auto start_dir  = ImNormalized(startDirHint ? *startDirHint : ImCubicBezierTangent(curve.P0, curve.P1, curve.P2, curve.P3, 0.0f));
+      const auto start_n    = ImVec2(-start_dir.y, start_dir.x);
+      const auto half_width = startArrowWidth * 0.5f;
+      const auto tip        = curve.P0 - start_dir * startArrowSize;
+      
+      drawList->PathLineTo(curve.P0 - start_n * ImMax(half_width, half_thickness));
+      drawList->PathLineTo(curve.P0 + start_n * ImMax(half_width, half_thickness));
+      drawList->PathLineTo(tip);
+      drawList->PathFillConvex(color);
     }
+    
+    if (endArrowSize > 0.0f)
+    {
+      const auto    end_dir = ImNormalized(endDirHint ? -*endDirHint : ImCubicBezierTangent(curve.P0, curve.P1, curve.P2, curve.P3, 1.0f));
+      const auto    end_n   = ImVec2(  -end_dir.y,   end_dir.x);
+      const auto half_width = endArrowWidth * 0.5f;
+      const auto tip        = curve.P3 + end_dir * endArrowSize;
+      
+      drawList->PathLineTo(curve.P3 + end_n * ImMax(half_width, half_thickness));
+      drawList->PathLineTo(curve.P3 - end_n * ImMax(half_width, half_thickness));
+      drawList->PathLineTo(tip);
+      drawList->PathFillConvex(color);
+    }
+  }
+  else
+  {
+    ImDrawList_PathBezierOffset(drawList, half_thickness, curve.P0, curve.P1, curve.P2, curve.P3);
+    drawList->PathStroke(color, true, strokeThickness);
+  }
 }
-
-
 
 
 //------------------------------------------------------------------------------
@@ -882,7 +862,8 @@ void ed::Link::Draw(ImDrawList* drawList, ImU32 color, float extraThickness) con
         m_StartPin && m_StartPin->m_ArrowWidth > 0.0f ? m_StartPin->m_ArrowWidth + extraThickness : 0.0f,
           m_EndPin &&   m_EndPin->m_ArrowSize  > 0.0f ?   m_EndPin->m_ArrowSize  + extraThickness : 0.0f,
           m_EndPin &&   m_EndPin->m_ArrowWidth > 0.0f ?   m_EndPin->m_ArrowWidth + extraThickness : 0.0f,
-        true, color, 1.0f,
+                                   true, color, 1.0f,
+                         m_IsActive,
         m_StartPin && m_StartPin->m_SnapLinkToDir ? &m_StartPin->m_Dir : nullptr,
         m_EndPin   &&   m_EndPin->m_SnapLinkToDir ?   &m_EndPin->m_Dir : nullptr);
 }
@@ -1647,6 +1628,16 @@ ImVec2 ed::EditorContext::GetNodePosition(NodeId nodeId)
 
     return node->m_Bounds.Min;
 }
+
+ImVec2 ed::EditorContext::GetPinPosition(PinId pinId)
+{
+  auto pin = FindPin(pinId);
+  if (!pin)
+    return ImVec2(FLT_MAX, FLT_MAX);
+  
+  return pin->m_Bounds.Min;
+}
+
 
 ImVec2 ed::EditorContext::GetNodeSize(NodeId nodeId)
 {
@@ -3213,9 +3204,9 @@ void ed::FlowAnimationController::Flow(Link* link, FlowDirection direction)
 
     auto animation = GetOrCreate(link);
 
-    float speedDirection = 1.0f;
+    float speedDirection = 0.5f;
     if (direction == FlowDirection::Backward)
-        speedDirection = -1.0f;
+        speedDirection = -0.5f;
 
     animation->Flow(link, editorStyle.FlowMarkerDistance, editorStyle.FlowSpeed * speedDirection, editorStyle.FlowDuration);
 }

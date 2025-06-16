@@ -6,11 +6,11 @@
 //
 
 //#include <sentry.h>
+#include "MainStageView.hpp"
 #include <CoreFoundation/CoreFoundation.h>
 #include "ShaderInfoView.hpp"
 #include "ActionService.hpp"
 #include "CommonStrings.hpp"
-#include "MainStageView.hpp"
 #include "ConfigService.hpp"
 #include "TileBrowserView.hpp"
 #include "ParameterTileBrowserView.hpp"
@@ -40,6 +40,8 @@ void MainStageView::setup()
   strandBrowserView.setup();
   videoSourceBrowserView.setup();
   audioSourceBrowserView.setup();
+  videoSourceBrowserView.setCurrentTab(0);
+  shaderBrowserView.setCurrentTab(0);
   stageModeView.setup();
   welcomeScreenView.setup();
 }
@@ -85,11 +87,11 @@ void MainStageView::draw()
   
   // Sources
   ImGui::PushStyleColor(ImGuiCol_FrameBg, Colors::InnerChildBackgroundColor.Value);
-  ImGui::BeginChild("##sourceBrowser", browserSize, false);
+  ImGui::BeginChild("##sourceBrowser", browserSize, ImGuiChildFlags_None, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollWithMouse);
   drawVideoSourceBrowser();
   ImGui::EndChild();
   
-  ImGui::BeginChild("##shaderBrowser", browserSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
+  ImGui::BeginChild("##shaderBrowser", browserSize, ImGuiChildFlags_None, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollWithMouse);
   drawShaderBrowser();
   ImGui::EndChild();
   ImGui::PopStyleColor();
@@ -280,10 +282,16 @@ void MainStageView::drawMenu()
         LayoutStateService::getService()->midiEnabled = midiEnabled;
       }
       
-      if (ImGui::MenuItem("Toggle Stage Mode", "Cmd+B"))
+      bool flowEnabled = LayoutStateService::getService()->flowEnabled;
+      if (ImGui::MenuItem("Animate Connection Flow", nullptr, &flowEnabled))
       {
-        LayoutStateService::getService()->stageModeEnabled = !LayoutStateService::getService()->stageModeEnabled;
+        LayoutStateService::getService()->flowEnabled = flowEnabled;
       }
+      
+//      if (ImGui::MenuItem("Toggle Stage Mode", "Cmd+B"))
+//      {
+//        LayoutStateService::getService()->stageModeEnabled = !LayoutStateService::getService()->stageModeEnabled;
+//      }
       if (ImGui::MenuItem("Launch Welcome Screen"))
       {
         LayoutStateService::getService()->showWelcomeScreen = true;
@@ -305,11 +313,11 @@ void MainStageView::drawMenu()
       submitFeedbackView.draw();
       ImGui::EndPopup();
     }
-    // Present the submit feedback view in a popup modal when the menu button is pressed
-    if (ImGui::MenuItem("Submit Feedback"))
-    {
-      ImGui::OpenPopup(SubmitFeedbackView::popupId);
-    }
+//    // Present the submit feedback view in a popup modal when the menu button is pressed
+//    if (ImGui::MenuItem("Submit Feedback"))
+//    {
+//      ImGui::OpenPopup(SubmitFeedbackView::popupId);
+//    }
     
     static bool showingMenu = false;
 #ifndef RELEASE

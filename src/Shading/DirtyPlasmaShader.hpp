@@ -22,17 +22,30 @@
 struct DirtyPlasmaSettings: public ShaderSettings {
   std::shared_ptr<Parameter> texture;
   std::vector<std::string> textureOptions;
+
+  std::shared_ptr<Parameter> redMultiplier;
+  std::shared_ptr<Parameter> greenMultiplier;
+  std::shared_ptr<Parameter> blueMultiplier;
+  std::shared_ptr<WaveformOscillator> redMultiplierOscillator;
+  std::shared_ptr<WaveformOscillator> greenMultiplierOscillator;
+  std::shared_ptr<WaveformOscillator> blueMultiplierOscillator;
   
   // Speed Parameter
   std::shared_ptr<Parameter> speed;
   std::shared_ptr<WaveformOscillator> speedOscillator;
   
   DirtyPlasmaSettings(std::string shaderId, json j) :
-  texture(std::make_shared<Parameter>("texture", 0.0, 0.0, 1000.0)),
-  speed(std::make_shared<Parameter>("speed", 1.0, 0.0, 2.0)),
+  texture(std::make_shared<Parameter>("Texture", 0.0, 0.0, 1000.0)),
+  speed(std::make_shared<Parameter>("Speed", 1.0, 0.0, 2.0)),
+  redMultiplier(std::make_shared<Parameter>("Red Multiplier", 1.0, 0.0, 2.0)),
+  greenMultiplier(std::make_shared<Parameter>("Green Multiplier", 1.0, 0.0, 2.0)),
+  blueMultiplier(std::make_shared<Parameter>("Blue Multiplier", 1.0, 0.0, 2.0)),
+  redMultiplierOscillator(std::make_shared<WaveformOscillator>(redMultiplier)),
+  greenMultiplierOscillator(std::make_shared<WaveformOscillator>(greenMultiplier)),
+  blueMultiplierOscillator(std::make_shared<WaveformOscillator>(blueMultiplier)),  
   ShaderSettings(shaderId, j, "DirtyPlasma") {
-    parameters = { texture };
-    oscillators = { };
+    parameters = { texture, redMultiplier, greenMultiplier, blueMultiplier };
+    oscillators = { redMultiplierOscillator, greenMultiplierOscillator, blueMultiplierOscillator };
     load(j);
     registerParameters();
   };
@@ -45,7 +58,7 @@ struct DirtyPlasmaShader: Shader {
   DirtyPlasmaShader(DirtyPlasmaSettings *settings) : settings(settings), Shader(settings) {};
   ofShader shader;
   void setup() override {
-    texture = TextureService::getService()->textureWithName("bark1.png");
+    texture = TextureService::getService()->textureWithName("Granite");
     settings->textureOptions = TextureService::getService()->availableTextureNames();
     shader.load("shaders/DirtyPlasma");
   }
@@ -58,6 +71,9 @@ struct DirtyPlasmaShader: Shader {
     }
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform1f("speed", settings->speed->value);
+    shader.setUniform1f("redMultiplier", settings->redMultiplier->value);
+    shader.setUniform1f("greenMultiplier", settings->greenMultiplier->value);
+    shader.setUniform1f("blueMultiplier", settings->blueMultiplier->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
     shader.end();
@@ -87,6 +103,9 @@ struct DirtyPlasmaShader: Shader {
       }
     }
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
+    CommonViews::ShaderParameter(settings->redMultiplier, settings->redMultiplierOscillator);
+    CommonViews::ShaderParameter(settings->greenMultiplier, settings->greenMultiplierOscillator);
+    CommonViews::ShaderParameter(settings->blueMultiplier, settings->blueMultiplierOscillator);
   }
 };
 

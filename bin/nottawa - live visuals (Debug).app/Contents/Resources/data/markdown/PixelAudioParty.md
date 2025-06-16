@@ -1,3 +1,0 @@
-# PixelAudioParty
-
-Information about PixelAudioParty

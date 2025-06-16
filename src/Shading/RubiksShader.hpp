@@ -17,24 +17,22 @@
 #include <stdio.h>
 
 struct RubiksSettings: public ShaderSettings {
-	public:
+public:
   RubiksSettings(std::string shaderId, json j, std::string name) :
   ShaderSettings(shaderId, j, name) {
-    
   };
 };
 
 class RubiksShader: public Shader {
 public:
-
+  
   RubiksSettings *settings;
   RubiksShader(RubiksSettings *settings) : settings(settings), Shader(settings) {};
-
+  
   void setup() override {
-shader.load("shaders/Rubiks");
-shader.load("shaders/Rubiks");
+    shader.load("shaders/Rubiks");
   }
-
+  
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
@@ -45,18 +43,18 @@ shader.load("shaders/Rubiks");
     shader.end();
     canvas->end();
   }
-
+  
   void clear() override {
     
   }
-
-    int inputCount() override {
+  
+  int inputCount() override {
     return 1;
   }
-ShaderType type() override {
+  ShaderType type() override {
     return ShaderTypeRubiks;
   }
-
+  
   void drawSettings() override {
     
   }

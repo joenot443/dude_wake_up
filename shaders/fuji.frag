@@ -5,13 +5,19 @@ uniform float time;
 uniform vec2 dimensions;
 uniform vec2 cloud1;
 uniform vec2 cloud2;
+uniform float sunSize;
+uniform float snowLevel;
+uniform float gridDensity;
+uniform float fujiSteepness;
+uniform float gridAngle;
+uniform float gridSquareSize;
 in vec2 coord;
 out vec4 outputColor;
 
 
 float sun(vec2 uv, float battery)
 {
- 	float val = smoothstep(0.3, 0.29, length(uv));
+ 	float val = smoothstep(sunSize, sunSize - 0.01, length(uv));
  	float bloom = smoothstep(0.7, 0.0, length(uv));
     float cut = 3.0 * sin((uv.y + time * 0.2 * (battery + 0.02)) * 100.0) 
 				+ clamp(uv.y * 14.0 + 1.0, -6.0, 6.0);
@@ -21,11 +27,14 @@ float sun(vec2 uv, float battery)
 
 float grid(vec2 uv, float battery)
 {
-    vec2 size = vec2(uv.y, uv.y * uv.y * 0.2) * 0.01;
+    vec2 size = vec2(uv.y, uv.y * uv.y * 0.2) * gridDensity;
     uv += vec2(0.0, time * 4.0 * (battery + 0.05));
-    uv = abs(fract(uv) - 0.5);
- 	vec2 lines = smoothstep(size, vec2(0.0), uv);
- 	lines += smoothstep(size * 5.0, vec2(0.0), uv) * 0.4 * battery;
+
+    vec2 scaledUV = uv / max(gridSquareSize, 0.0001);
+
+    vec2 fractUV = abs(fract(scaledUV) - 0.5);
+ 	vec2 lines = smoothstep(size, vec2(0.0), fractUV);
+ 	lines += smoothstep(size * 5.0, vec2(0.0), fractUV) * 0.4 * battery;
     return clamp(lines.x + lines.y, 0.0, 3.0);
 }
 
@@ -94,9 +103,10 @@ void main()
         vec3 col = vec3(0.0, 0.1, 0.2);
         if (uv.y < -0.2)
         {
-            uv.y = 3.0 / (abs(uv.y + 0.2) + 0.05);
-            uv.x *= uv.y * 1.0;
-            float gridVal = grid(uv, battery);
+            vec2 gridUV = uv;
+            gridUV.y = 3.0 / (abs(gridUV.y + 0.2) + 0.05);
+            gridUV.x *= gridUV.y * gridAngle;
+            float gridVal = grid(gridUV, battery);
             col = mix(col, vec3(1.0, 0.5, 1.0), gridVal);
         }
         else
@@ -117,8 +127,8 @@ void main()
             col = mix(vec3(0.0, 0.0, 0.0), col, sunVal);
             
             // fuji
-            float fujiVal = sdTrapezoid( uv  + vec2(-0.75+sunUV.y * 0.0, 0.5), 1.75 + pow(uv.y * uv.y, 2.1), 0.2, 0.5);
-            float waveVal = uv.y + sin(uv.x * 20.0 + time * 2.0) * 0.05 + 0.2;
+            float fujiVal = sdTrapezoid( uv  + vec2(-0.75+sunUV.y * 0.0, 0.5), 1.75 + pow(uv.y * uv.y, 2.1), 0.2, fujiSteepness);
+            float waveVal = uv.y + sin(uv.x * 20.0 + time * 2.0) * 0.05 + snowLevel;
             float wave_width = smoothstep(0.0,0.01,(waveVal));
             
             // fuji color

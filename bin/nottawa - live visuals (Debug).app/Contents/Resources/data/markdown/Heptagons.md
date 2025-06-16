@@ -1,3 +1,0 @@
-# Heptagons
-
-Information about Heptagons

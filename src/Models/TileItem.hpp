@@ -28,25 +28,24 @@ public:
   ShaderType shaderType;
   TileType tileType;
   // Closure which will be called when the tile is clicked
-  std::function<void()> dragCallback;
+  std::function<void(std::string)> dragCallback;
 
   TileItem(std::string name, ImTextureID textureID, int index,
-           std::function<void()> dragCallback, std::string category = "", TileType tileType = TileType_Shader, ShaderType type = ShaderTypeNone)
+           std::function<void(std::string)> dragCallback, std::string category = "", TileType tileType = TileType_Shader, ShaderType type = ShaderTypeNone)
   : name(name), textureID(textureID), index(index), shaderType(type), category(category), tileType(tileType), id(UUID::generateUUID()),
-        dragCallback(dragCallback){};
+        dragCallback(dragCallback) {};
 };
 
 static std::shared_ptr<TileItem> tileItemForShader(std::shared_ptr<AvailableShader> shader) {
   // Create a closure which will be called when the tile is clicked
-  std::function<void()> dragCallback = [shader]()
+  std::function<void(std::string)> dragCallback = [shader](std::string tileId)
   {
-    // Create a payload to carry the video source
     if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
     {
-      // Set payload to carry the index of our item (could be anything)
       ImGui::SetDragDropPayload("NewShader", &shader->type,
                                 sizeof(ShaderType));
       ImGui::Text("%s", shader->name.c_str());
+     ImGui::Image(shader->preview->texData.textureID, ImVec2(128.0, 80.0));
       ImGui::EndDragDropSource();
     }
   };

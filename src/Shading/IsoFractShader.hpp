@@ -18,8 +18,8 @@
 #include <stdio.h>
 
 struct IsoFractSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
+  std::shared_ptr<Parameter> delta;
+  std::shared_ptr<WaveformOscillator> deltaOscillator;
   
   std::shared_ptr<Parameter> alpha;
   std::shared_ptr<WaveformOscillator> alphaOscillator;
@@ -31,8 +31,8 @@ struct IsoFractSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> gammaOscillator;
 
   IsoFractSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
+  delta(std::make_shared<Parameter>("delta", 1.0, 0.1, 2.0)),
+  deltaOscillator(std::make_shared<WaveformOscillator>(delta)),
   alpha(std::make_shared<Parameter>("alpha", 1.0, 0.0, 5.0)),
   alphaOscillator(std::make_shared<WaveformOscillator>(alpha)),
   beta(std::make_shared<Parameter>("beta", 2.0, -2.0, 2.0)),
@@ -40,9 +40,9 @@ struct IsoFractSettings: public ShaderSettings {
   gamma(std::make_shared<Parameter>("gamma", -2.0, -2.0, 2.0)),
   gammaOscillator(std::make_shared<WaveformOscillator>(gamma)),
   
-  ShaderSettings(shaderId, j, "IsoFract") {
-    parameters = { alpha, beta, gamma, shaderValue };
-    oscillators = { alphaOscillator, betaOscillator, gammaOscillator, shaderValueOscillator };
+  ShaderSettings(shaderId, j, "Isofractal") {
+    parameters = { alpha, beta, gamma, delta };
+    oscillators = { alphaOscillator, betaOscillator, gammaOscillator, deltaOscillator };
     load(j);
     audioReactiveParameter = gamma;
     registerParameters();
@@ -55,7 +55,7 @@ struct IsoFractShader: Shader {
 
   
   void setup() override {
-    shader.load("shaders/IsoFract");
+    shader.load("shaders/Isofractal");
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override;
@@ -73,12 +73,10 @@ struct IsoFractShader: Shader {
   }
 
   void drawSettings() override {
-    
-
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
     CommonViews::ShaderParameter(settings->alpha, settings->alphaOscillator);
     CommonViews::ShaderParameter(settings->beta, settings->betaOscillator);
     CommonViews::ShaderParameter(settings->gamma, settings->gammaOscillator);
+    CommonViews::ShaderParameter(settings->delta, settings->deltaOscillator);
   }
 };
 

@@ -1,3 +1,0 @@
-# Triple
-
-Information about Triple

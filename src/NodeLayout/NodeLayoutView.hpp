@@ -8,16 +8,18 @@
 #ifndef NodeLayoutView_hpp
 #define NodeLayoutView_hpp
 
+#include <string>
+#include "json.hpp"
+#include <ableton/Link.hpp>
+#include "Models/Strand.hpp"
 #include "NodeTypes.hpp"
 #include "imgui.h"
-#include "VideoRecorder.hpp"
 #include "NodeShaderBrowserView.hpp"
 #include "VideoSourceBrowserView.hpp"
 #include "NodeVideoSourceBrowserView.hpp"
 #include "LibraryFile.hpp"
 #include "Shader.hpp"
 #include "VideoSource.hpp"
-#include "Shader.hpp"
 #include "imgui_node_editor.h"
 #include <stdio.h>
 
@@ -61,8 +63,6 @@ public:
   /// Returns the x,y coordinates of the Node for the passed ID. If not found, (0,0) is returned.
   ImVec2 coordinatesForNode(std::string id);
   
-  
-  
   void debug();
   void drawDebugWindow();
   
@@ -75,6 +75,8 @@ public:
   void drawPreviewWindow(std::shared_ptr<Node> node);
   void drawActionButtons();
   void drawShaderBrowserView();
+  void drawFlow(std::shared_ptr<Connectable> connectable);
+  void drawPinHoverView();
   void clear();
   void toggleCustomZoom();
   int nodeIdTicker = 1;
@@ -127,6 +129,7 @@ public:
   
   bool debugWindowOpen = false;
   bool firstFrame = true;
+  bool hasDeletedBlend = false;
   bool shouldDelete = false;
   bool makingLink = false;
   bool fileDropInProgress = false;
@@ -137,6 +140,7 @@ public:
   
   std::map<std::string, std::shared_ptr<Node>> idNodeMap;
   std::map<long, std::shared_ptr<Node>> pinIdNodeMap;
+  std::map<long, std::vector<std::shared_ptr<ShaderLink>>> pinIdConnectionMap;
   std::map<long, std::shared_ptr<Node>> nodeIdNodeMap; // Use this map for node lookup
 	
   std::map<long, std::shared_ptr<ShaderLink>> linksMap;
@@ -147,7 +151,6 @@ public:
   ed::NodeId selectorNodeId = 0;
   
   ImVec2 contextMenuLocation;
-  VideoRecorder recorder;
   
   // Node selector browsers
   NodeShaderBrowserView shaderBrowserView = NodeShaderBrowserView();

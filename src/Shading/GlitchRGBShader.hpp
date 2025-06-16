@@ -20,20 +20,25 @@
 #include <stdio.h>
 
 struct GlitchRGBSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
+  std::shared_ptr<Parameter> amplitude;
+  std::shared_ptr<WaveformOscillator> amplitudeOscillator;
+
+  std::shared_ptr<Parameter> speed;
+  std::shared_ptr<WaveformOscillator> speedOscillator;
   
   std::shared_ptr<Parameter> texture;
   std::vector<std::string> textureOptions;
 
   GlitchRGBSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
-  texture(std::make_shared<Parameter>("texture", 0.0, 0.0, 1000.0)),
+  amplitude(std::make_shared<Parameter>("Amplitude", 0.1, 0.0, 1.0)),
+  amplitudeOscillator(std::make_shared<WaveformOscillator>(amplitude)),
+  speed(std::make_shared<Parameter>("Speed", 0.1, 0.0, 1.0)),
+  speedOscillator(std::make_shared<WaveformOscillator>(speed)),
+  texture(std::make_shared<Parameter>("Texture", 0.0, 0.0, 1000.0)),
 
   ShaderSettings(shaderId, j, "GlitchRGB") {
-    parameters = { texture };
-    oscillators = { };
+    parameters = { amplitude, speed, texture };
+    oscillators = { amplitudeOscillator, speedOscillator };
     load(j);
     registerParameters();
   };
@@ -46,9 +51,9 @@ struct GlitchRGBShader: Shader {
 
   
   void setup() override {
-    texture = TextureService::getService()->textureWithName("wornpaintedcement.png");
+    texture = TextureService::getService()->textureWithName("Gravel Path");
     settings->textureOptions = TextureService::getService()->availableTextureNames();
-    shader.load("shaders/GlitchRGB");
+    shader.load("shaders/Glitch RGB");
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -58,7 +63,8 @@ struct GlitchRGBShader: Shader {
     if (texture != nullptr) {
       shader.setUniformTexture("tex2", texture->fbo.getTexture(), 8);
     }
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
+    shader.setUniform1f("amplitude", settings->amplitude->value);
+    shader.setUniform1f("speed", settings->speed->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
@@ -79,9 +85,8 @@ struct GlitchRGBShader: Shader {
   }
 
   void drawSettings() override {
-    
-
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
+    CommonViews::ShaderParameter(settings->amplitude, settings->amplitudeOscillator);
+    CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     if (CommonViews::ShaderOption(settings->texture, settings->textureOptions))
     {
       if (settings->texture->value != 0) {

@@ -1,3 +1,0 @@
-# FullHouse
-
-Information about FullHouse

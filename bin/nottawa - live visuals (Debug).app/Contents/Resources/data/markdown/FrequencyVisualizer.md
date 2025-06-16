@@ -1,3 +1,0 @@
-# FrequencyVisualizer
-
-Information about FrequencyVisualizer

@@ -26,13 +26,26 @@ struct GlitchDigitalSettings: public ShaderSettings {
   std::shared_ptr<Parameter> texture;
   std::vector<std::string> textureOptions;
 
+  std::shared_ptr<Parameter> amount;
+  std::shared_ptr<WaveformOscillator> amountOscillator;
+
+  std::shared_ptr<Parameter> threshold;
+  std::shared_ptr<WaveformOscillator> thresholdOscillator;
+
   GlitchDigitalSettings(std::string shaderId, json j) :
   shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
   shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
+
+  amount(std::make_shared<Parameter>("amount", 0.5, 0.0, 1.0)),
+  amountOscillator(std::make_shared<WaveformOscillator>(amount)),
+
+  threshold(std::make_shared<Parameter>("threshold", 0.5, 0.0, 1.0)),
+  thresholdOscillator(std::make_shared<WaveformOscillator>(threshold)),
+
   texture(std::make_shared<Parameter>("texture", 0.0, 0.0, 1000.0)),
   ShaderSettings(shaderId, j, "GlitchDigital") {
-    parameters = { texture };
-    oscillators = { };
+    parameters = { texture, amount, threshold };
+    oscillators = { amountOscillator, thresholdOscillator };
     load(j);
     registerParameters();
   };
@@ -41,7 +54,6 @@ struct GlitchDigitalSettings: public ShaderSettings {
 struct GlitchDigitalShader: Shader {
   GlitchDigitalSettings *settings;
   GlitchDigitalShader(GlitchDigitalSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   std::shared_ptr<Texture> texture;
   
   void setup() override {
@@ -59,6 +71,8 @@ struct GlitchDigitalShader: Shader {
     }
     shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("amount", settings->amount->value);
+    shader.setUniform1f("threshold", settings->threshold->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
     shader.end();
@@ -78,8 +92,8 @@ struct GlitchDigitalShader: Shader {
   }
 
   void drawSettings() override {
-    
-
+    CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
+    CommonViews::ShaderParameter(settings->threshold, settings->thresholdOscillator);
     if (CommonViews::ShaderOption(settings->texture, settings->textureOptions))
     {
       if (settings->texture->value != 0) {

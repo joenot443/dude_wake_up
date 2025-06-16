@@ -3,6 +3,7 @@
 uniform sampler2D tex;
 in vec2 coord;
 out vec4 outputColor;
+uniform float amount;
 
 uniform vec2 dimensions;
 uniform vec3 hsbScalar;
@@ -39,8 +40,8 @@ void main()
   vec4 col = texture(tex, coord);
   
   vec3 newCol = clamp(TransformHSV(col.xyz, hsbScalar.x * 360.0, hsbScalar.y, hsbScalar.z), 0.0, 1.0);
-  
-  outputColor = vec4(newCol, col.a);
+  vec3 finalCol = mix(col.xyz, newCol, amount);
+  outputColor = vec4(finalCol, col.a);
 }
 
 

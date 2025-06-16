@@ -1,3 +1,0 @@
-# MinMixer
-
-Information about MinMixer

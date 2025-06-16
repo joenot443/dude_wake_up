@@ -1,3 +1,0 @@
-# ColorSwap
-
-Information about ColorSwap

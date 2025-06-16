@@ -1,3 +1,0 @@
-# Octagrams
-
-Information about Octagrams

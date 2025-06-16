@@ -5,11 +5,13 @@
 //  Created by Joe Crozier on 6/28/24.
 //
 
+#include "ofMain.h"
+#include "NodeLayoutView.hpp"
 #include "WelcomeScreenView.hpp"
+#include "StrandBrowserWindow.hpp"
 #include "LayoutStateService.hpp"
 #include "CommonViews.hpp"
 #include "FontService.hpp"
-#include "NodeLayoutView.hpp"
 #include "imgui.h"
 
 void WelcomeScreenView::setup() {
@@ -114,7 +116,7 @@ void WelcomeScreenView::draw()
   
   /* ---------- 4. Action buttons ------------ */
   constexpr float BTN_W = 180.f, BTN_H = 48.f, GAP = 32.f;
-  ImGui::PushFont(FontService::getService()->h3);
+  ImGui::PushFont(FontService::getService()->current->h3);
   
   const float rowW = 3 * BTN_W + 2 * GAP;
   ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - rowW) * 0.5f);
@@ -174,6 +176,7 @@ void WelcomeScreenView::newWorkspace() {
 void WelcomeScreenView::openWorkspace() {
   if (ConfigService::getService()->loadWorkspaceDialogue()) {
     LayoutStateService::getService()->showWelcomeScreen = false;
+    LayoutStateService::getService()->helpEnabled = false;
   }
 }
 

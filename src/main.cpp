@@ -1,7 +1,5 @@
 #define JSON_DIAGNOSTICS 1
 #define IMGUI_DEFINE_MATH_OPERATORS 1
-#define DEBUG 1
-#define RELEASE 1
 
 #include <errno.h>
 #include <CoreFoundation/CoreFoundation.h>
@@ -31,7 +29,6 @@
 #include "StrandService.hpp"
 #include "ParameterService.hpp"
 #include "IconService.hpp"
-#include "ofxFastFboReader.h"
 
 
 const static ofVec2f windowSize = ofVec2f(2400, 1600);
@@ -113,6 +110,8 @@ int main( ){
   auto app = shared_ptr<MainApp>(new MainApp(window));
   ofSetWindowShape(ofGetScreenWidth(), ofGetScreenHeight());
   ofSetFrameRate(60);
+  ofEnableAntiAliasing();
+  ofEnableSmoothing();
   ofSetEscapeQuitsApp(false);
   ofSetWindowTitle("Nottawa");
   ofSetLogLevel(OF_LOG_NOTICE);

@@ -20,13 +20,36 @@
 struct TwistedTripSettings: public ShaderSettings {
   std::shared_ptr<Parameter> speed;
   std::shared_ptr<WaveformOscillator> speedOscillator;
+  
+  // New parameters for geometric control
+  std::shared_ptr<Parameter> patternDensity;  // Controls the density of the geometric pattern
+  std::shared_ptr<WaveformOscillator> patternDensityOscillator;
+  
+  std::shared_ptr<Parameter> twistAmount;     // Controls the intensity of the twisting effect
+  std::shared_ptr<WaveformOscillator> twistAmountOscillator;
+  
+  // New parameters for color control
+  std::shared_ptr<Parameter> colorShift;      // Shifts the color frequencies
+  std::shared_ptr<WaveformOscillator> colorShiftOscillator;
+  
+  std::shared_ptr<Parameter> patternScale;    // Controls the overall scale of the pattern
+  std::shared_ptr<WaveformOscillator> patternScaleOscillator;
 
   TwistedTripSettings(std::string shaderId, json j) :
-  speed(std::make_shared<Parameter>("speed", 1.0, 0.0, 10.0)),
+  speed(std::make_shared<Parameter>("Speed", 1.0, 0.0, 10.0)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
+  patternDensity(std::make_shared<Parameter>("Pattern Density", 1.0, 0.1, 2.0)),
+  patternDensityOscillator(std::make_shared<WaveformOscillator>(patternDensity)),
+  twistAmount(std::make_shared<Parameter>("Twist Amount", 0.75, 0.0, 2.0)),
+  twistAmountOscillator(std::make_shared<WaveformOscillator>(twistAmount)),
+  colorShift(std::make_shared<Parameter>("Color Shift", 0.0, -1.0, 1.0)),
+  colorShiftOscillator(std::make_shared<WaveformOscillator>(colorShift)),
+  patternScale(std::make_shared<Parameter>("Pattern Scale", 1.0, 0.5, 2.0)),
+  patternScaleOscillator(std::make_shared<WaveformOscillator>(patternScale)),
   ShaderSettings(shaderId, j, "TwistedTrip") {
-    parameters = { speed };
-    oscillators = { speedOscillator };
+    parameters = { speed, patternDensity, twistAmount, colorShift, patternScale };
+    oscillators = { speedOscillator, patternDensityOscillator, twistAmountOscillator, 
+                   colorShiftOscillator, patternScaleOscillator };
     load(j);
     registerParameters();
   };
@@ -45,6 +68,10 @@ struct TwistedTripShader: Shader {
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("speed", settings->speed->value);
+    shader.setUniform1f("patternDensity", settings->patternDensity->value);
+    shader.setUniform1f("twistAmount", settings->twistAmount->value);
+    shader.setUniform1f("colorShift", settings->colorShift->value);
+    shader.setUniform1f("patternScale", settings->patternScale->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
@@ -65,9 +92,11 @@ struct TwistedTripShader: Shader {
   }
 
   void drawSettings() override {
-    
-
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
+    CommonViews::ShaderParameter(settings->patternDensity, settings->patternDensityOscillator);
+    CommonViews::ShaderParameter(settings->twistAmount, settings->twistAmountOscillator);
+    CommonViews::ShaderParameter(settings->colorShift, settings->colorShiftOscillator);
+    CommonViews::ShaderParameter(settings->patternScale, settings->patternScaleOscillator);
   }
 };
 

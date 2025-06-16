@@ -1,3 +1,0 @@
-# Swirl
-
-Information about Swirl

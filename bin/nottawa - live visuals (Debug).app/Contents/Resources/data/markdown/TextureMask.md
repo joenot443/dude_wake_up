@@ -1,3 +1,0 @@
-# TextureMask
-
-Information about TextureMask

@@ -2,13 +2,14 @@
 //  SwitcherShader.hpp
 //  dude_wake_up
 //
-//  Created by Joe Crozier on 8/30/22.
+//  Re-written 2025-05-21
 //
 
 #ifndef SwitcherShader_hpp
 #define SwitcherShader_hpp
 
 #include "ofMain.h"
+#include "Colors.hpp"
 #include "ShaderSettings.hpp"
 #include "Fonts.hpp"
 #include "CommonViews.hpp"
@@ -18,146 +19,169 @@
 #include "Shader.hpp"
 #include <stdio.h>
 
-struct SwitcherSettings : public ShaderSettings {
+struct SwitcherSettings : public ShaderSettings
+{
   std::shared_ptr<Parameter> selectedIndex;
-  std::shared_ptr<Parameter> delay;
+  std::shared_ptr<Parameter> length;
   std::shared_ptr<Parameter> transitionDuration;
   std::shared_ptr<Parameter> blendMode;
   
-  SwitcherSettings(std::string shaderId, json j) :
-  selectedIndex(std::make_shared<Parameter>("Output", 0.0, 0.0, 100.0)),
-  delay(std::make_shared<Parameter>("Delay", 0.0, 0.0, 10.0)),
-  transitionDuration(std::make_shared<Parameter>("Transition Duration", 1.0, 0.0, 5.0)),
-  blendMode(std::make_shared<Parameter>("Blend Mode", 0.0, 0.0, 11.0)),
-  ShaderSettings(shaderId, j, "Switcher") {
-    parameters = { selectedIndex, delay, transitionDuration };
+  SwitcherSettings(std::string shaderId, json j)
+  : selectedIndex      (std::make_shared<Parameter>("Output",              0.0, 0.0, 100.0)),
+  length             (std::make_shared<Parameter>("Length",              4.0, 0.0, 10.0)),
+  transitionDuration (std::make_shared<Parameter>("Transition Duration", 1.0, 0.0,  5.0)),
+  blendMode          (std::make_shared<Parameter>("Blend Mode",          0.0, 0.0, 11.0)),
+  ShaderSettings(shaderId, j, "Switcher")
+  {
+    parameters  = { selectedIndex, length, transitionDuration };
     oscillators = {};
     load(j);
     registerParameters();
-  };
+  }
 };
 
-struct SwitcherShader : Shader {
-  SwitcherSettings* settings;
-  std::vector<std::shared_ptr<Connectable>> activeInputs = {};
-
-  double lastSwitchTime;
-  bool isPlaying;
-  float transitionProgress;
-  std::shared_ptr<ofFbo> previousFbo;
+struct SwitcherShader : Shader
+{
+  // ------------------------------------------------------------------ state
+  SwitcherSettings*                                settings;
+  std::vector<std::shared_ptr<Connectable>>         activeInputs;
   
-  SwitcherShader(SwitcherSettings* settings) : settings(settings), Shader(settings) {};
+  bool   isPlaying      = true;
+  bool   transitioning  = false;
+  double lastSwitchTime = 0.0;
+  float  transitionProg = 0.0f;
   
-  void clear() override {
-    
-  }
+  std::shared_ptr<ofFbo> previousFbo;   // now just *points* to the
+  // outgoing input’s FBO
   
-  int inputCount() override {
-    return std::max(2, std::min(10, static_cast<int>(activeInputs.size() + 1)));
-  }
+  // ----------------------------------------------------------- life-cycle
+  SwitcherShader(SwitcherSettings* s) : settings(s), Shader(s) {}
   
-  ShaderType type() override {
-    return ShaderTypeSwitcher;
-  }
+  void clear() override {}
   
-  void setup() override {
+  int inputCount() override
+  { return std::max(2, std::min(10, static_cast<int>(activeInputs.size() + 1))); }
+  
+  ShaderType type() override { return ShaderTypeSwitcher; }
+  
+  void setup() override
+  {
     shader.load("shaders/Mix");
     lastSwitchTime = ofGetElapsedTimef();
-    transitionProgress = 0.0;
-    previousFbo = std::make_shared<ofFbo>();
-    previousFbo->allocate(ofGetWidth(), ofGetHeight(), GL_RGBA);
+    isPlaying      = true;
+    transitioning  = false;
   }
   
-  void drawBlend(std::shared_ptr<ofFbo> fbo1, std::shared_ptr<ofFbo> fbo2, float mix) {
+  // -------------------------------------------------------------- helpers
+  void drawBlend(const std::shared_ptr<ofFbo>& a,
+                 const std::shared_ptr<ofFbo>& b,
+                 float mix)
+  {
     shader.begin();
-    shader.setUniformTexture("tex", fbo1->getTexture(), 0);
-    shader.setUniformTexture("tex2", fbo2->getTexture(), 1);
-    shader.setUniform1f("tex2_mix", mix);
-    fbo1->draw(0, 0);
+    shader.setUniformTexture("tex",  a->getTexture(), 4);
+    shader.setUniformTexture("tex2", b->getTexture(), 8);
+    shader.setUniform1f    ("tex2_mix", 1.0f - mix);
+    b->draw(0, 0, b->getWidth(), b->getHeight());
     shader.end();
   }
   
-  void drawSingle(std::shared_ptr<ofFbo> fbo1) {
-    fbo1->draw(0, 0);
-  }
+  static void drawSingle(const std::shared_ptr<ofFbo>& fbo)
+  { fbo->draw(0, 0); }
   
-  void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
+  // ---------------------------------------------------------------- shade
+  void shade(std::shared_ptr<ofFbo> /*frame*/, std::shared_ptr<ofFbo> canvas) override
+  {
     canvas->begin();
+    
+    // 1. build active input list
     activeInputs.clear();
+    for (auto& [slot, conn] : inputs)
+      if (conn) activeInputs.emplace_back(conn->start);
     
-    // Accumulate the connected inputs
-    for (auto& [slot, conn] : inputs) {
-      if (conn)
-        activeInputs.push_back(conn->start);
-    }
-    
-    // If no active inputs, draw the existing frame
     if (activeInputs.empty()) {
-      frame->draw(0, 0);
+      ofClear(0, 0, 0, 255);
       canvas->end();
       return;
     }
     
-    double currentTime = ofGetElapsedTimef();
-    bool shouldSwitch = (currentTime - lastSwitchTime > settings->delay->value + settings->transitionDuration->value) && isPlaying;
+    // clamp selected index
+    auto& sel = settings->selectedIndex->intValue;
+    sel = (sel + activeInputs.size()) % activeInputs.size();
     
-    // Check if it's time to switch inputs
-    if (shouldSwitch) {
-      previousFbo = activeInputs[settings->selectedIndex->intValue]->frame();
-      int nextIndex = (settings->selectedIndex->intValue + 1) % activeInputs.size();
-      settings->selectedIndex->intValue = nextIndex;
-      lastSwitchTime = currentTime;
-      transitionProgress = 0.0;  // Reset transition progress on switch
+    const double now       = ofGetElapsedTimef();
+    const float  playLen   = settings->length->value;
+    const float  fadeLen   = std::max(0.f, settings->transitionDuration->value);
+    const double phaseTime = now - lastSwitchTime;
+    const double cycleLen  = playLen + fadeLen;
+    
+    // 2. state machine
+    if (isPlaying && !transitioning && phaseTime >= playLen)
+    {   // ---- BEGIN transition ----
+      previousFbo  = activeInputs[sel]->frame();   // live reference
+      sel          = (sel + 1) % activeInputs.size();
+      transitioning = (fadeLen >= 0.01f);
+      if (!transitioning) lastSwitchTime = now;    // hard cut
+    }
+    else if (transitioning && phaseTime >= cycleLen)
+    {   // ---- END transition ----
+      transitioning  = false;
+      lastSwitchTime = now;
     }
     
+    // 3. draw
+    std::shared_ptr<ofFbo> currentFbo = activeInputs[sel]->frame();
     
-    // Check if we're using a transition
-    if (settings->transitionDuration->value <= 0.1f) {
-      std::shared_ptr<ofFbo> currentFbo = activeInputs[settings->selectedIndex->intValue]->frame();
+    if (!transitioning || fadeLen < 0.01f) {
       drawSingle(currentFbo);
-      canvas->end();
-      return;
-    }
-    
-    transitionProgress += ofGetLastFrameTime() / settings->transitionDuration->value;
-    std::shared_ptr<ofFbo> currentFbo = activeInputs[settings->selectedIndex->intValue]->frame();
-    
-    // Handle transition logic
-    if (transitionProgress < 1.0) {
-      drawBlend(previousFbo, currentFbo, transitionProgress);
-    }
-    
-    // Transition is complete
-    if (transitionProgress >= 1.0) {
-      drawSingle(currentFbo);
+    } else {
+      float prog = static_cast<float>((phaseTime - playLen) / fadeLen);
+      prog       = ofClamp(prog, 0.f, 1.f);
+      transitionProg = prog;
+      drawBlend(previousFbo, currentFbo, prog);
     }
     
     canvas->end();
   }
   
-  void drawSettings() override {
+  // -------------------------------------------------------------- UI bits
+  void drawSettings() override
+  {
+    CommonViews::ShaderParameter(settings->length, nullptr);
     
-    CommonViews::ShaderParameter(settings->delay, nullptr);
     ImGui::SameLine();
-    auto playIcon = isPlaying ? ICON_MD_PAUSE : ICON_MD_PLAY_ARROW;
-    if (CommonViews::IconButton(playIcon, shaderId)) {
-      isPlaying = !isPlaying;
-    }
+    const char* icon = isPlaying ? ICON_MD_PAUSE : ICON_MD_PLAY_ARROW;
+    if (CommonViews::IconButton(icon, shaderId)) isPlaying = !isPlaying;
+    
     CommonViews::ShaderParameter(settings->transitionDuration, nullptr);
-    //    CommonViews::BlendModeSelector(settings->blendMode);
     drawSelector();
   }
   
-  void drawSelector() {
+  void drawSelector()
+  {
     if (activeInputs.empty()) return;
     
-    if (ImGui::BeginTable("split1", (int) activeInputs.size(), ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchSame))
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+    if (ImGui::BeginTable("split1",
+                          static_cast<int>(activeInputs.size()),
+                          ImGuiTableFlags_NoSavedSettings |
+                          ImGuiTableFlags_Borders |
+                          ImGuiTableFlags_SizingFixedFit))
     {
-      for (int i = 0; i < activeInputs.size(); i++)
+      for (int i = 0; i < activeInputs.size(); ++i)
       {
         ImGui::TableNextColumn();
-        if (ImGui::Selectable(activeInputs[i]->name().c_str(), settings->selectedIndex->intValue == i)) {
+        if (settings->selectedIndex->intValue == i) {
+          ImGui::PushStyleColor(ImGuiCol_Tab, Colors::TabSelected.Value);
+        }
+        if (ImGui::Selectable(activeInputs[i]->name().c_str(),
+                              settings->selectedIndex->intValue == i))
+        {
           settings->selectedIndex->intValue = i;
+          transitioning  = false;
+          lastSwitchTime = ofGetElapsedTimef();
+        }
+        if (settings->selectedIndex->intValue == i) {
+          ImGui::PopStyleColor();
         }
       }
       ImGui::EndTable();
@@ -165,4 +189,4 @@ struct SwitcherShader : Shader {
   }
 };
 
-#endif
+#endif // SwitcherShader_hpp

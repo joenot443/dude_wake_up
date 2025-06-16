@@ -12,7 +12,6 @@
 		024FAE8D2DA02CF600DE3197 /* AVFRecorderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 024FAE8B2DA02CF600DE3197 /* AVFRecorderWrapper.mm */; };
 		024FAE8E2DA02CF600DE3197 /* AVFRecorder.m in Sources */ = {isa = PBXBuildFile; fileRef = 024FAE892DA02CF600DE3197 /* AVFRecorder.m */; };
 		02864DF12D94611B000CE0D4 /* MSABPMTapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02864DEF2D94611B000CE0D4 /* MSABPMTapper.cpp */; };
-		028651332D94652E000CE0D4 /* VideoRecorder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028651322D94652E000CE0D4 /* VideoRecorder.cpp */; };
 		028651362D94673B000CE0D4 /* ofxAudioFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028651352D94673B000CE0D4 /* ofxAudioFile.cpp */; };
 		028651472D9468DB000CE0D4 /* imgui_canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0286513F2D9468DB000CE0D4 /* imgui_canvas.cpp */; };
 		028651482D9468DB000CE0D4 /* imgui_node_editor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028651432D9468DB000CE0D4 /* imgui_node_editor.cpp */; };
@@ -31,6 +30,7 @@
 		0286516F2D946978000CE0D4 /* implot_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0286516A2D946978000CE0D4 /* implot_demo.cpp */; };
 		028651732D94699B000CE0D4 /* kiss_fft.c in Sources */ = {isa = PBXBuildFile; fileRef = 028651722D94699B000CE0D4 /* kiss_fft.c */; };
 		028651B12D95E331000CE0D4 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 028651AF2D95E208000CE0D4 /* icon.icns */; };
+		02AB2F0F2DE0DA2A004EDB3F /* CreditView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02AB2F0E2DE0DA2A004EDB3F /* CreditView.cpp */; };
 		"02F78074-12C3-4CFB-8B4D-C894E1498010" /* MidiService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "DD20483B-50DE-4F4F-85AC-74CAF3C8F56E" /* MidiService.cpp */; };
 		"049D0DB9-223D-432B-B78A-7CACA8EF4DC2" /* ShaderChainerService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "7AA1FB17-DC75-48A4-A385-A676D62B3120" /* ShaderChainerService.cpp */; };
 		"079B0752-2526-4BBA-9324-CE639AE697AC" /* StrandBrowserWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "2F9BBD61-7014-4808-BAE7-47E7E9C9D814" /* StrandBrowserWindow.cpp */; };
@@ -81,7 +81,6 @@
 		"62A1DBBF-D3A4-4B32-8D5D-F6A7A86DBCA0" /* ofxMidiMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "C9C70BB5-F65F-43CB-8160-A5190E577D10" /* ofxMidiMessage.cpp */; };
 		"62FE47EB-FF35-40B7-9EEA-5BA63F21ECB9" /* NodeVideoSourceBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "B1D53039-B877-4019-B941-4E86FB70764B" /* NodeVideoSourceBrowserView.cpp */; };
 		"64B7AB4A-1741-423B-9912-54C68CA78467" /* PagedTileBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "94C7EEF9-55B5-46D5-A0A4-8FA0970B934E" /* PagedTileBrowserView.cpp */; };
-		"66C5A3AD-3B79-4005-925D-49DBF79618AE" /* VideoRecordingView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "55E82D22-3B86-44F8-8FBE-FA1D4B29A58D" /* VideoRecordingView.cpp */; };
 		"68363D6E-D6F1-4CFD-8AB7-36140854C129" /* MainStageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "42ED44B0-B1D8-4B3E-AC0C-46CE88659031" /* MainStageView.cpp */; };
 		"690390A2-E65E-4CC8-ABDB-7E2E7110F0F3" /* VideoSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "837E3528-6579-423A-B146-4C0FA0F11D6F" /* VideoSource.cpp */; };
 		"6B5C2CB4-112C-42E6-BBBC-6A7072193C5D" /* AvailableVideoSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "79354DE8-7C04-4DEA-9956-69113F7BC799" /* AvailableVideoSource.cpp */; };
@@ -129,7 +128,7 @@
 		"D89C617E-B660-4680-9B12-46560B9A5DDC" /* ofxMidiOut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "35D5FC4B-6CC5-42A5-888A-3174CA2FE706" /* ofxMidiOut.cpp */; };
 		"D9C875C9-6749-4AC4-BEED-B8D9A09D6C77" /* SubmitFeedbackView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "267357EA-AC0C-4763-AD76-9FC586698F80" /* SubmitFeedbackView.cpp */; };
 		"DC518C46-16A7-4897-BE4A-BDA838873EEE" /* BarPlotView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "6AA88847-35AD-4AED-8FA7-DAF1469E1A9C" /* BarPlotView.cpp */; };
-		"DFDBF8BD-CC82-4007-AE4D-955255BAA54A" /* OutputWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "916A4FFE-6D66-4ED1-9195-FBE7721C8A2E" /* OutputWindow.cpp */; };
+		"DFDBF8BD-CC82-4007-AE4D-955255BAA54A" /* OutputWindow.mm in Sources */ = {isa = PBXBuildFile; fileRef = "916A4FFE-6D66-4ED1-9195-FBE7721C8A2E" /* OutputWindow.mm */; };
 		"E15EE7B5-E10E-43A8-A52A-38B76437E87B" /* ShaderSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "517FA119-0D87-4B31-9B75-3F5D6326DC21" /* ShaderSource.cpp */; };
 		E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E4B69E1D0A3A1BDC003C02F2 /* main.cpp */; };
 		"E7B3E01F-1018-43D5-87D9-23BBAFCD1822" /* Pulser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "3B4CF4CC-9D2A-4263-AEDF-7CE75C411C29" /* Pulser.cpp */; };
@@ -189,8 +188,6 @@
 		02864DEE2D94611B000CE0D4 /* MSABPMTapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSABPMTapper.h; sourceTree = "<group>"; };
 		02864DEF2D94611B000CE0D4 /* MSABPMTapper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MSABPMTapper.cpp; sourceTree = "<group>"; };
 		02864DF02D94611B000CE0D4 /* MSATimer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSATimer.h; sourceTree = "<group>"; };
-		028651312D94652E000CE0D4 /* VideoRecorder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = VideoRecorder.hpp; sourceTree = "<group>"; };
-		028651322D94652E000CE0D4 /* VideoRecorder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = VideoRecorder.cpp; sourceTree = "<group>"; };
 		028651342D94673B000CE0D4 /* ofxAudioFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ofxAudioFile.h; sourceTree = "<group>"; };
 		028651352D94673B000CE0D4 /* ofxAudioFile.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ofxAudioFile.cpp; sourceTree = "<group>"; };
 		028651372D946757000CE0D4 /* dr_flac.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dr_flac.h; sourceTree = "<group>"; };
@@ -255,6 +252,12 @@
 		0286518D2D946D96000CE0D4 /* imgui_markdown.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imgui_markdown.h; sourceTree = "<group>"; };
 		028651AE2D95E0EE000CE0D4 /* nottawa - live visuals (Debug).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "nottawa - live visuals (Debug).app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		028651AF2D95E208000CE0D4 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
+		02A74E8A2DCBB70B009A607C /* GodRayShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GodRayShader.hpp; sourceTree = "<group>"; };
+		02AB2F0C2DE0C4D7004EDB3F /* strings.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = strings.json; path = misc/strings.json; sourceTree = "<group>"; };
+		02AB2F0D2DE0DA2A004EDB3F /* CreditView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CreditView.hpp; sourceTree = "<group>"; };
+		02AB2F0E2DE0DA2A004EDB3F /* CreditView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CreditView.cpp; sourceTree = "<group>"; };
+		02D115332DC94674007B87CE /* AudioSettings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AudioSettings.hpp; sourceTree = "<group>"; };
+		02D115342DC94674007B87CE /* AudioTrack.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AudioTrack.hpp; sourceTree = "<group>"; };
 		"032514A0-BDF2-4207-8C2E-4E219F57DDB7" /* ShaderType.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ShaderType.hpp; sourceTree = "<group>"; };
 		"035910F8-2281-4AB1-BC6E-A929EF8696B3" /* DiffractorShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DiffractorShader.hpp; sourceTree = "<group>"; };
 		"04688250-5838-4B1B-92ED-5B96B4C2ED1D" /* EngineGLFW.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = EngineGLFW.h; sourceTree = "<group>"; };
@@ -282,7 +285,6 @@
 		"10278D86-DBB3-488C-A39E-C04AC0E634C7" /* RtMidi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RtMidi.cpp; sourceTree = "<group>"; };
 		"111E7E6F-DA6C-4698-9B3F-C0138F92A95B" /* MountainsShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MountainsShader.hpp; sourceTree = "<group>"; };
 		"11E18B25-B588-4B40-8735-A5EB8544E75D" /* ColorKeyMaskMakerShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ColorKeyMaskMakerShader.hpp; sourceTree = "<group>"; };
-		"11FAED46-E3D2-4466-B2C4-4A155FBE523B" /* MinMixerShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MinMixerShader.hpp; sourceTree = "<group>"; };
 		"12544B4C-75B9-4A27-94D8-0A5C091AB818" /* Shader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Shader.hpp; sourceTree = "<group>"; };
 		"12BEB461-7D62-43DE-BA84-28DF849F508C" /* Icon.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Icon.hpp; sourceTree = "<group>"; };
 		"144F17AF-3FE6-4DF3-A23C-A4BA6D45C4EF" /* Command.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Command.hpp; sourceTree = "<group>"; };
@@ -374,7 +376,6 @@
 		"523A9F92-6D65-4A8C-9743-56ABCD3D4984" /* StageModeView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StageModeView.cpp; sourceTree = "<group>"; };
 		"52F363D4-B133-4945-8DED-D207F20639A9" /* TissueShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TissueShader.hpp; sourceTree = "<group>"; };
 		"54C66E77-9737-482D-A3D5-2FD2CD2A9B4E" /* LumaMaskMakerShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = LumaMaskMakerShader.hpp; sourceTree = "<group>"; };
-		"55E82D22-3B86-44F8-8FBE-FA1D4B29A58D" /* VideoRecordingView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VideoRecordingView.cpp; sourceTree = "<group>"; };
 		"5647A2D2-E8F6-4D37-9424-E13AB6E2DCB7" /* TwistedCubesShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TwistedCubesShader.hpp; sourceTree = "<group>"; };
 		"56AAF1BC-EBAC-4FD3-B7C0-D23C2A8497D5" /* StageParameterView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = StageParameterView.hpp; sourceTree = "<group>"; };
 		"56BEAE56-3996-4B55-A768-2B9603045FDA" /* AddImageVideoSourceCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AddImageVideoSourceCommand.hpp; sourceTree = "<group>"; };
@@ -386,7 +387,6 @@
 		"5B5111E7-FE21-4A34-9529-5D26A19D1179" /* 16bitShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = 16bitShader.hpp; sourceTree = "<group>"; };
 		"5BA75C12-E200-4722-9570-11118DF3DCDB" /* CurlySquaresShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CurlySquaresShader.hpp; sourceTree = "<group>"; };
 		"5EA3A3ED-464B-485A-941D-B6C57ED59D63" /* SliderShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SliderShader.hpp; sourceTree = "<group>"; };
-		"5ECF9A4A-99B2-4594-8B4D-B43C8AFFBD38" /* VideoRecordingView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VideoRecordingView.hpp; sourceTree = "<group>"; };
 		"5F11C9E7-FEA0-4802-9D81-6EB1B1840614" /* MultiSource.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MultiSource.hpp; sourceTree = "<group>"; };
 		"6096167C-6F80-4FC1-A784-475C9401F1CD" /* Image.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Image.hpp; sourceTree = "<group>"; };
 		"60FC8BE0-2713-44AC-920C-C82E11B80302" /* Oscillator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Oscillator.hpp; sourceTree = "<group>"; };
@@ -471,7 +471,7 @@
 		"908D5E1F-9C55-492B-B413-92DACD7E1073" /* ofxRtMidiIn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ofxRtMidiIn.h; sourceTree = "<group>"; };
 		"910A457E-FA0B-4A04-9870-0FD9A8FC816E" /* imgui_impl_glfw_arc_support.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = imgui_impl_glfw_arc_support.h; sourceTree = "<group>"; };
 		"9111962A-FD3F-466B-81B3-469A2DA4462A" /* AudioWaveformShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AudioWaveformShader.hpp; sourceTree = "<group>"; };
-		"916A4FFE-6D66-4ED1-9195-FBE7721C8A2E" /* OutputWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OutputWindow.cpp; sourceTree = "<group>"; };
+		"916A4FFE-6D66-4ED1-9195-FBE7721C8A2E" /* OutputWindow.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = OutputWindow.mm; sourceTree = "<group>"; };
 		"91824D30-9B0A-4CF5-8782-75CDFC1324C4" /* ScratchyShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ScratchyShader.hpp; sourceTree = "<group>"; };
 		"91DE3FEB-1137-4238-98E7-E2DC1B958FB7" /* NodeLayoutView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = NodeLayoutView.hpp; sourceTree = "<group>"; };
 		"91E735FF-FDA3-4403-BEA6-E219909A2C93" /* OscillatorView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OscillatorView.cpp; sourceTree = "<group>"; };
@@ -592,10 +592,8 @@
 		"D5DBC6A6-C775-4A13-BB47-569AF99041D6" /* ofxImGuiLoggerChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ofxImGuiLoggerChannel.h; sourceTree = "<group>"; };
 		"D6256C0A-396F-4604-83EE-22406D60EEDD" /* EmptyShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = EmptyShader.hpp; sourceTree = "<group>"; };
 		"D7ABE7B6-3771-469E-B209-FDCB3491827D" /* GlitchDigitalShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GlitchDigitalShader.hpp; sourceTree = "<group>"; };
-		"D7C28F01-D896-4FBC-BEEE-2FAABBD6B36F" /* VanGoghShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VanGoghShader.hpp; sourceTree = "<group>"; };
 		"D8CB2CB3-6394-4381-B168-B0217634E88C" /* SubmitFeedbackView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SubmitFeedbackView.hpp; sourceTree = "<group>"; };
 		"D94DD336-4C0B-4303-95BA-2BFE32DD949B" /* Parameter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Parameter.hpp; sourceTree = "<group>"; };
-		"DA1610C5-3522-4DDE-8640-2B9F5717068A" /* StarryPlanesShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = StarryPlanesShader.hpp; sourceTree = "<group>"; };
 		"DADA2607-11D3-4EE2-A411-A587CA92727B" /* DiscoShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DiscoShader.hpp; sourceTree = "<group>"; };
 		"DAF586C1-F9A1-4F00-8962-419D506000DF" /* ColorPassShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ColorPassShader.hpp; sourceTree = "<group>"; };
 		"DB5C7133-0647-4499-B6C7-5284A1B5B4A2" /* File.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = File.hpp; sourceTree = "<group>"; };
@@ -625,7 +623,6 @@
 		"E7B963B5-BADB-486F-89DB-26448CC23221" /* TextEditorView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TextEditorView.hpp; sourceTree = "<group>"; };
 		"E7D3D1E3-A87B-4B2B-A36F-96B88831E69F" /* ImageSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ImageSource.cpp; sourceTree = "<group>"; };
 		"E8509A87-F8F5-495C-B00D-27ADF6410BB7" /* SnowfallShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SnowfallShader.hpp; sourceTree = "<group>"; };
-		"E8ABDA85-F1FA-4A4B-9BC2-5ABDA0C6BC2F" /* AudioTrack.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AudioTrack.hpp; sourceTree = "<group>"; };
 		"E8C64843-7699-4637-A9A4-C21FA5289557" /* ShaderInfoView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderInfoView.cpp; sourceTree = "<group>"; };
 		"E8FD8879-0DC2-4802-8D89-FF5E98AE627D" /* UploadChainerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UploadChainerView.h; sourceTree = "<group>"; };
 		"E9CF16FF-4C41-4F95-BE95-4A6B7CFBE700" /* GyroidsShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GyroidsShader.hpp; sourceTree = "<group>"; };
@@ -642,7 +639,6 @@
 		"F186DA34-0207-40EC-90A8-A617F8DC78FF" /* MakeConnectionCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MakeConnectionCommand.hpp; sourceTree = "<group>"; };
 		"F1A00490-98FF-4DE0-A405-556CC53AD7FC" /* CommonViews.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CommonViews.hpp; sourceTree = "<group>"; };
 		"F1B70289-4B57-4B7F-BB42-3B5510552EDA" /* Shader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Shader.cpp; sourceTree = "<group>"; };
-		"F24A64A1-0957-4E2E-9597-F0BB86E2B4CA" /* AudioSettings.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AudioSettings.hpp; sourceTree = "<group>"; };
 		"F26D92D4-0BF5-453C-82F9-870B5A8D0249" /* LayoutStateService.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LayoutStateService.cpp; sourceTree = "<group>"; };
 		"F2F05AD5-1E24-4C15-8233-7165E9CA7BEE" /* imgui_impl_opengl2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = imgui_impl_opengl2.h; sourceTree = "<group>"; };
 		"F4132D3D-2B34-48F5-B23D-08D9C7DC3E3D" /* SwirlingSoulShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SwirlingSoulShader.hpp; sourceTree = "<group>"; };
@@ -671,6 +667,7 @@
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		02421C0D2DB8367200A19C28 /* shaders */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = shaders; sourceTree = "<group>"; };
+		02D1114F2DC42E8B007B87CE /* lib */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = lib; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -889,7 +886,7 @@
 				"9F09B156-D28C-4BC6-8F08-F11A0D7DE851" /* LibrarySource.hpp */,
 				"166E0882-F427-4D90-8DD3-6F8508D27C84" /* MultiSource.cpp */,
 				"5F11C9E7-FEA0-4802-9D81-6EB1B1840614" /* MultiSource.hpp */,
-				"916A4FFE-6D66-4ED1-9195-FBE7721C8A2E" /* OutputWindow.cpp */,
+				"916A4FFE-6D66-4ED1-9195-FBE7721C8A2E" /* OutputWindow.mm */,
 				"399A1778-BFBC-4C97-A938-FC764F8C06AC" /* OutputWindow.hpp */,
 				"517FA119-0D87-4B31-9B75-3F5D6326DC21" /* ShaderSource.cpp */,
 				"7A48EB74-419A-48A1-9EFF-80173D7D9309" /* ShaderSource.hpp */,
@@ -897,8 +894,6 @@
 				"423FAD2D-0653-4B13-80DC-A06359E44DAE" /* TextSource.hpp */,
 				"837E3528-6579-423A-B146-4C0FA0F11D6F" /* VideoSource.cpp */,
 				"B1B857E1-7D93-44EF-B81E-6D60945F0669" /* VideoSource.hpp */,
-				028651312D94652E000CE0D4 /* VideoRecorder.hpp */,
-				028651322D94652E000CE0D4 /* VideoRecorder.cpp */,
 				"16B6C13D-9489-4069-B917-1853B389EA59" /* VideoSourceSettings.hpp */,
 				"76CAB13B-D857-4FC9-BE15-A320CEF0574D" /* WebcamSource.cpp */,
 				"DDC5B81E-37AA-491D-891A-25BBCC3F5958" /* WebcamSource.hpp */,
@@ -935,6 +930,8 @@
 				"63F7E21F-B4FD-4A96-85F2-613DDC51F809" /* BarPlotView.hpp */,
 				"84E8D57B-1E0D-4E8E-A2C5-F15E320B20BE" /* CommonViews.cpp */,
 				"F1A00490-98FF-4DE0-A405-556CC53AD7FC" /* CommonViews.hpp */,
+				02AB2F0D2DE0DA2A004EDB3F /* CreditView.hpp */,
+				02AB2F0E2DE0DA2A004EDB3F /* CreditView.cpp */,
 				"2F0D025E-ADA8-46D3-91CF-FEBAE4407C84" /* FileBrowserView.cpp */,
 				"A89302A6-B5FC-4DB5-ACD2-A6A443B9142D" /* FileBrowserView.hpp */,
 				"B28F8EA4-890C-44E9-BD53-A66E038223D3" /* FramePreview.hpp */,
@@ -982,8 +979,6 @@
 				"7CD0726D-87D5-47A1-AD77-3D83899F4911" /* TileBrowserView.hpp */,
 				"24134E4B-A87F-4390-932F-1E75429E3DC8" /* UploadChainerView.cpp */,
 				"E8FD8879-0DC2-4802-8D89-FF5E98AE627D" /* UploadChainerView.h */,
-				"55E82D22-3B86-44F8-8FBE-FA1D4B29A58D" /* VideoRecordingView.cpp */,
-				"5ECF9A4A-99B2-4594-8B4D-B43C8AFFBD38" /* VideoRecordingView.hpp */,
 				"CA805C31-5499-470F-9AF7-B97303D77AC3" /* VideoSourceBrowserView.cpp */,
 				"070C4165-7F11-4011-AF0F-E966DD18D5F5" /* VideoSourceBrowserView.hpp */,
 				"79F37553-4B76-4BC1-A659-1D5123680B60" /* WelcomeScreenView.cpp */,
@@ -1131,6 +1126,8 @@
 				028651352D94673B000CE0D4 /* ofxAudioFile.cpp */,
 				"0265D595-A18D-41DE-BCDF-9B6017808CC8" /* AudioSource.cpp */,
 				"517BC169-93F0-4478-AC03-000F41D7801A" /* AudioSource.hpp */,
+				02D115332DC94674007B87CE /* AudioSettings.hpp */,
+				02D115342DC94674007B87CE /* AudioTrack.hpp */,
 				"7F50B89F-0348-43F2-A58C-1C5504692393" /* FileAudioSource.cpp */,
 				"847C62FC-F4DB-4D9E-AC52-A7DCA0A4FF8E" /* FileAudioSource.hpp */,
 				"B19D76F5-D648-45E6-A505-7EEDF67F1CC8" /* MicrophoneAudioSource.cpp */,
@@ -1198,11 +1195,13 @@
 				"06ECED71-AADC-440F-9253-3ABD062378E7" /* AudioBlocksShader.hpp */,
 				"294265F5-00E0-4B66-A273-ABDA6D648E4C" /* AudioBumperShader.hpp */,
 				"E0CDB18D-E5DB-4FA3-ADCB-D655B68F7DC6" /* AudioMountainsShader.hpp */,
+				"023ECAF6-5671-4C7D-89EB-33526DA42A8B" /* IsoFractShader.cpp */,
 				"9111962A-FD3F-466B-81B3-469A2DA4462A" /* AudioWaveformShader.hpp */,
 				"0041AC53-F77D-40BC-A6D6-8A2AF14678BB" /* AutotangentShader.hpp */,
 				"B18DB43C-A565-4093-9863-E529241F404E" /* BackgroundShader.hpp */,
 				"4F0A37C4-B40B-40B9-9D29-94486B9E9E93" /* BlendShader.hpp */,
 				"9267A6A8-D1B4-4DAE-B541-A917CF0A27E3" /* BlurShader.hpp */,
+				02A74E8A2DCBB70B009A607C /* GodRayShader.hpp */,
 				"A322577E-9ACA-4EDC-83C2-448958FEAA68" /* BounceShader.hpp */,
 				"CE98F583-41BA-4B8F-B34A-6C1B96E3850E" /* BreatheShader.hpp */,
 				"D129EA6B-751E-4D65-B4EC-A600A18C8C45" /* CannyShader.hpp */,
@@ -1263,7 +1262,6 @@
 				"54C66E77-9737-482D-A3D5-2FD2CD2A9B4E" /* LumaMaskMakerShader.hpp */,
 				"8A86B903-6BB0-4B9C-840D-F7BCA32C183F" /* MaskShader.hpp */,
 				"373626F4-BAFB-41A8-B838-D54F1CFD5B39" /* MelterShader.hpp */,
-				"11FAED46-E3D2-4466-B2C4-4A155FBE523B" /* MinMixerShader.hpp */,
 				"014F3C08-3CA0-45DA-B874-324039E7746F" /* MirrorShader.hpp */,
 				"B8F2741B-9264-4695-A327-CEEBABAE69AA" /* MistShader.hpp */,
 				"C88B1EC7-D61C-4763-8D0F-965F8B4100B3" /* MixShader.hpp */,
@@ -1309,7 +1307,6 @@
 				"F15C62B1-1AB2-49D7-BA2C-904F952AE369" /* SolidColorShader.hpp */,
 				"3C5F3393-03C1-43A5-B29A-3A10529021B1" /* SpaceRingsShader.hpp */,
 				"BCB486A3-08CD-4754-830E-C9AC9D88DC08" /* SpiralShader.hpp */,
-				"DA1610C5-3522-4DDE-8640-2B9F5717068A" /* StarryPlanesShader.hpp */,
 				"F67E386A-489D-4D3F-925E-0EF0FAA12449" /* StaticFrameShader.hpp */,
 				"45BE79E2-E743-4548-88D5-128AEAF95E81" /* StellarShader.hpp */,
 				"0692B4CE-DC5F-4C6F-B9EA-D17BFCD620D0" /* SwirlShader.hpp */,
@@ -1325,7 +1322,6 @@
 				"7FD882B9-5CE1-4AA5-A3AB-C92A7A9EAA77" /* TwistedTripShader.hpp */,
 				"C5FD2B89-CEC8-4FC3-BAA8-EA78968B80E6" /* UnknownPleasuresShader.hpp */,
 				"FCF788BC-55D8-4CC8-844A-57EE7821C21A" /* VHSShader.hpp */,
-				"D7C28F01-D896-4FBC-BEEE-2FAABBD6B36F" /* VanGoghShader.hpp */,
 				"AF8FD029-3215-4BD9-97E8-EE0D7FF555DE" /* VertexShader.hpp */,
 				"761FF635-8D06-4F37-B75D-0F70421A7481" /* WarpShader.hpp */,
 				"F09CD1B4-2D86-4CB2-BA8B-F1C749819FA6" /* WarpspeedShader.hpp */,
@@ -1360,8 +1356,6 @@
 		"D33C3442-A791-4DC3-ABF2-9EF2CCF9033C" /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				"F24A64A1-0957-4E2E-9597-F0BB86E2B4CA" /* AudioSettings.hpp */,
-				"E8ABDA85-F1FA-4A4B-9BC2-5ABDA0C6BC2F" /* AudioTrack.hpp */,
 				"906945BE-FBAE-4184-86AB-E64196F7B47B" /* AvailableShaderConfig.hpp */,
 				"35F87E7F-29E7-4AA7-8B78-05EDF04C5BE4" /* AvailableStrand.hpp */,
 				"34E96EBB-E4ED-4A15-86A8-85B750BAF593" /* Connection.cpp */,
@@ -1433,10 +1427,12 @@
 		E4B69B4A0A3A1720003C02F2 = {
 			isa = PBXGroup;
 			children = (
+				02D1114F2DC42E8B007B87CE /* lib */,
 				028651AF2D95E208000CE0D4 /* icon.icns */,
 				191CD6FA2847E21E0085CBB6 /* of.entitlements */,
 				E4B6FCAD0C3E899E008CF71C /* openFrameworks-Info.plist */,
 				E4EB6923138AFD0F00A09F29 /* Project.xcconfig */,
+				02AB2F0C2DE0C4D7004EDB3F /* strings.json */,
 				02421C0D2DB8367200A19C28 /* shaders */,
 				E4B69E1C0A3A1BDC003C02F2 /* src */,
 				191EF70929D778A400F35F26 /* openFrameworks */,
@@ -1455,7 +1451,6 @@
 				"8B2A8687-BAE9-41C2-A947-2CEA55B9E646" /* Feedback */,
 				"7FE534A8-B397-4F3A-9052-8FB8FBBA14CD" /* HelpService.cpp */,
 				"01F7D881-9877-4747-9718-9FE1BED26EF7" /* HelpService.hpp */,
-				"023ECAF6-5671-4C7D-89EB-33526DA42A8B" /* IsoFractShader.cpp */,
 				"D33C3442-A791-4DC3-ABF2-9EF2CCF9033C" /* Models */,
 				"0211E7A8-500C-4F06-89CD-7E9AD68E5D9F" /* Network */,
 				"CE1A0C21-EF4F-4614-83BC-6A4F4FAB01C7" /* NodeLayout */,
@@ -1526,7 +1521,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1540;
+				LastUpgradeCheck = 1620;
 			};
 			buildConfigurationList = E4B69B4D0A3A1720003C02F2 /* Build configuration list for PBXProject "dude_wake_up" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -1621,7 +1616,6 @@
 				"201BA7D8-7AC0-4851-BA33-523C3122F549" /* MicrophoneAudioSource.cpp in Sources */,
 				"25587D76-FA97-4F2E-8BBA-A4C133F463CF" /* FeedbackSource.cpp in Sources */,
 				"41A33622-C0FD-4318-ACAF-83D8230D1B5E" /* FeedbackSourceService.cpp in Sources */,
-				028651332D94652E000CE0D4 /* VideoRecorder.cpp in Sources */,
 				"EBADD458-BAE7-43C7-8BFF-BE0AFAF9F0D5" /* HelpService.cpp in Sources */,
 				"7E974982-665D-49E8-98AB-0D9D4B26C6F7" /* IsoFractShader.cpp in Sources */,
 				"6D94E3C1-5770-4476-8604-5293607533E1" /* Connection.cpp in Sources */,
@@ -1670,7 +1664,7 @@
 				"7E7EDE83-05FC-4B78-90E1-9F83F7FC7A3A" /* ImageSource.cpp in Sources */,
 				"8EE51117-B3A7-4F95-B891-99B66AB5ED0F" /* LibrarySource.cpp in Sources */,
 				"7AB682D1-3FEB-4225-B47A-9C28A710EFAF" /* MultiSource.cpp in Sources */,
-				"DFDBF8BD-CC82-4007-AE4D-955255BAA54A" /* OutputWindow.cpp in Sources */,
+				"DFDBF8BD-CC82-4007-AE4D-955255BAA54A" /* OutputWindow.mm in Sources */,
 				"E15EE7B5-E10E-43A8-A52A-38B76437E87B" /* ShaderSource.cpp in Sources */,
 				"8F0F540D-E2E8-4EC7-97E3-5193AE965C70" /* TextSource.cpp in Sources */,
 				028651732D94699B000CE0D4 /* kiss_fft.c in Sources */,
@@ -1707,7 +1701,6 @@
 				"2C20D9F0-F824-4311-A3B8-FD95B153FBF4" /* TextEditorView.cpp in Sources */,
 				"272BC713-7A80-44ED-845D-9EE3BC0BC0A3" /* TileBrowserView.cpp in Sources */,
 				"42371A8A-7A76-4D62-B443-FF17A38BE644" /* UploadChainerView.cpp in Sources */,
-				"66C5A3AD-3B79-4005-925D-49DBF79618AE" /* VideoRecordingView.cpp in Sources */,
 				"38353823-B5F9-47F4-A7C1-61C6BC60F9A1" /* VideoSourceBrowserView.cpp in Sources */,
 				"D84822B4-25C2-4055-963F-FE8D6C055B5B" /* WelcomeScreenView.cpp in Sources */,
 				"71CE37AF-928C-4F46-9EE3-CA53B73D1704" /* imgui_impl_glfw.cpp in Sources */,
@@ -1729,6 +1722,7 @@
 				"EDAC7014-A151-4A82-83A8-0161F4447AE2" /* EngineOpenFrameworks.cpp in Sources */,
 				"ED8949F5-517B-4439-BC72-2C6BF3CF9B5D" /* EngineOpenGLES.cpp in Sources */,
 				"249333AA-04EA-440D-9539-A9E1129A3321" /* Gui.cpp in Sources */,
+				02AB2F0F2DE0DA2A004EDB3F /* CreditView.cpp in Sources */,
 				"F0851AF3-D330-475E-94E6-D4CB1CC6B9F3" /* ImHelpers.cpp in Sources */,
 				0286515F2D946945000CE0D4 /* WindowFunctions.cpp in Sources */,
 				028651602D946945000CE0D4 /* CoreFrequencyDomainFeatures.cpp in Sources */,
@@ -1759,9 +1753,12 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E4EB6923138AFD0F00A09F29 /* Project.xcconfig */;
 			buildSettings = {
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CODE_SIGN_ENTITLEMENTS = of.entitlements;
 				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_DEBUG_DYLIB = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_UNUSED_VARIABLE = NO;
@@ -1778,9 +1775,12 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E4EB6923138AFD0F00A09F29 /* Project.xcconfig */;
 			buildSettings = {
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CODE_SIGN_ENTITLEMENTS = of.entitlements;
-				COPY_PHASE_STRIP = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_DEBUG_DYLIB = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = (
@@ -1798,21 +1798,26 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CC = "$(OF_PATH)/scripts/osx/cxx.sh";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 16;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEPLOYMENT_POSTPROCESSING = YES;
 				DEVELOPMENT_TEAM = 7VUCELU5PL;
+				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
-				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"$(USER_PREPROCESSOR_DEFINITIONS)",
 					"CPPHTTPLIB_OPENSSL_SUPPORT=1",
+					"LINK_PLATFORM_MACOSX=1",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(OF_CORE_HEADERS)",
-					src,
 					src,
 					src/Apps,
 					src/Audio,
@@ -1846,46 +1851,19 @@
 					"lib/imgui-node-editor",
 					"lib/observable/**",
 					"lib/gist/**",
-					"lib/ableton/**",
 					"lib/implot/**",
+					"lib/ableton/**",
+					lib/ableton/asio,
 				);
 				INFOPLIST_KEY_CFBundleDisplayName = "nottawa - live visuals";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs to access the camera";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app needs to access the microphone";
 				INFOPLIST_KEY_UILaunchStoryboardName = "";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/Debug",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_handler_lib.build/Debug/Objects-normal/x86_64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/crashpad_build/third_party/mini_chromium/Debug",
-					"$(PROJECT_DIR)/lib/imgui-node-editor/external/DXSDK/lib/x64",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_util.build/Debug/Objects-normal/arm64/Binary",
-					"$(PROJECT_DIR)/lib/imgui-node-editor/external/DXSDK/lib/x86",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/crashpad_build/handler/Debug",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_minidump.build/Debug/Objects-normal/arm64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_handler_lib.build/Debug/Objects-normal/arm64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_tools.build/Debug/Objects-normal/arm64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/crashpad_build/client/Debug",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/crashpad_build/snapshot/Debug",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/sentry.build/Debug/Objects-normal/arm64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/crashpad_build/tools/Debug",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_tools.build/Debug/Objects-normal/x86_64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/crashpad_build/util/Debug",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/EagerLinkingTBDs/Debug",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_client.build/Debug/Objects-normal/x86_64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/mini_chromium.build/Debug/Objects-normal/x86_64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/external/breakpad/src/client/mac/gcov",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_client.build/Debug/Objects-normal/arm64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_util.build/Debug/Objects-normal/x86_64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_minidump.build/Debug/Objects-normal/x86_64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/sentry.build/Debug/Objects-normal/x86_64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_snapshot.build/Debug/Objects-normal/arm64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/mini_chromium.build/Debug/Objects-normal/arm64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_snapshot.build/Debug/Objects-normal/x86_64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/crashpad_build/minidump/Debug",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				OTHER_CFLAGS = "-DofxAddons_ENABLE_IMGUI";
+				OTHER_CPLUSPLUSFLAGS = "-D__MACOSX_CORE__";
 				OTHER_LDFLAGS = (
 					"$(OF_CORE_LIBS)",
 					"$(OF_CORE_FRAMEWORKS)",
@@ -1902,20 +1880,26 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CC = "$(OF_PATH)/scripts/osx/cxx.sh";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				COPY_PHASE_STRIP = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 16;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEPLOYMENT_POSTPROCESSING = YES;
 				DEVELOPMENT_TEAM = 7VUCELU5PL;
+				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"$(USER_PREPROCESSOR_DEFINITIONS)",
 					"CPPHTTPLIB_OPENSSL_SUPPORT=1",
+					"LINK_PLATFORM_MACOSX=1",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(OF_CORE_HEADERS)",
-					src,
 					src,
 					src/Apps,
 					src/Audio,
@@ -1949,46 +1933,19 @@
 					"lib/imgui-node-editor",
 					"lib/observable/**",
 					"lib/gist/**",
-					"lib/ableton/**",
 					"lib/implot/**",
+					"lib/ableton/**",
+					lib/ableton/asio,
 				);
 				INFOPLIST_KEY_CFBundleDisplayName = "nottawa - live visuals";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs to access the camera";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app needs to access the microphone";
 				INFOPLIST_KEY_UILaunchStoryboardName = "";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/Debug",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_handler_lib.build/Debug/Objects-normal/x86_64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/crashpad_build/third_party/mini_chromium/Debug",
-					"$(PROJECT_DIR)/lib/imgui-node-editor/external/DXSDK/lib/x64",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_util.build/Debug/Objects-normal/arm64/Binary",
-					"$(PROJECT_DIR)/lib/imgui-node-editor/external/DXSDK/lib/x86",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/crashpad_build/handler/Debug",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_minidump.build/Debug/Objects-normal/arm64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_handler_lib.build/Debug/Objects-normal/arm64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_tools.build/Debug/Objects-normal/arm64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/crashpad_build/client/Debug",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/crashpad_build/snapshot/Debug",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/sentry.build/Debug/Objects-normal/arm64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/crashpad_build/tools/Debug",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_tools.build/Debug/Objects-normal/x86_64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/crashpad_build/util/Debug",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/EagerLinkingTBDs/Debug",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_client.build/Debug/Objects-normal/x86_64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/mini_chromium.build/Debug/Objects-normal/x86_64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/external/breakpad/src/client/mac/gcov",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_client.build/Debug/Objects-normal/arm64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_util.build/Debug/Objects-normal/x86_64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_minidump.build/Debug/Objects-normal/x86_64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/sentry.build/Debug/Objects-normal/x86_64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_snapshot.build/Debug/Objects-normal/arm64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/mini_chromium.build/Debug/Objects-normal/arm64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/build/crashpad_snapshot.build/Debug/Objects-normal/x86_64/Binary",
-					"$(PROJECT_DIR)/lib/sentry-native/xcodebuild/crashpad_build/minidump/Debug",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				OTHER_CFLAGS = "-DofxAddons_ENABLE_IMGUI";
+				OTHER_CPLUSPLUSFLAGS = "-D__MACOSX_CORE__";
 				OTHER_LDFLAGS = (
 					"$(OF_CORE_LIBS)",
 					"$(OF_CORE_FRAMEWORKS)",

@@ -15,7 +15,7 @@ std::vector<std::shared_ptr<AvailableStrandTileItem>> StrandBrowserView::tileIte
   int n = 0;
   for (auto const &availableStrand : availableStrands)
   {
-    std::function <void()> dragCallback = [availableStrand]()
+    std::function <void(std::string)> dragCallback = [availableStrand](std::string tileId)
     {
       // Create a payload to carry the Strand
       if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
@@ -23,7 +23,9 @@ std::vector<std::shared_ptr<AvailableStrandTileItem>> StrandBrowserView::tileIte
         // Set payload to carry the index of our item (could be anything)
         ImGui::SetDragDropPayload("AvailableStrand", &availableStrand->id,
                                   sizeof(AvailableStrand));
+        ImGui::PushID(tileId.c_str());
         ImGui::Text("%s", availableStrand->name.c_str());
+        ImGui::PopID();
         ImGui::EndDragDropSource();
       }
     };
