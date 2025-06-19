@@ -9,6 +9,12 @@
 # Icon must end with two \r
 Icon
 
+imgui-node-editor
+bin
+build
+lib/ableton
+
+
 # Thumbnails
 ._*
 
