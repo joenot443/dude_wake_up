@@ -14,6 +14,7 @@
 #include "httplib.h"
 #include "base64.h"
 #include "json.hpp"
+#include <memory>
 //#include <sentry.h>
 #include <fstream>
 #include <iostream>
@@ -267,15 +268,6 @@ void LibraryService::downloadAllThumbnails()
   }
 }
 
-void LibraryService::submitFeedback(Feedback feedback, std::function<void()> success_callback, std::function<void(const std::string &)> error_callback)
-{
-  // First create a new sentry event
-//  sentry_uuid_t uuid = sentry_capture_event(sentry_value_new_message_event(
-//      SENTRY_LEVEL_INFO,
-//      "User Feedback",
-//      formatFeedback(feedback).c_str()));
-}
-
 // Downloads the file specified by file->url.
 // Assumes file->url is always HTTPS.
 void LibraryService::downloadFile(std::shared_ptr<LibraryFile> file, std::function<void()> callback)
@@ -472,7 +464,7 @@ void LibraryService::fetchShaderCredits()
       std::string description = shader["description"];
       ShaderType type = shaderTypeFromName(shaderName);
       if (type != ShaderTypeNone) {
-        shaderCredits.emplace(type, Credit(shaderName, credit, description));
+        shaderCredits.emplace(type, std::make_shared<Credit>(shaderName, credit, description));
       } else {
 //        log("Warning: Unknown shader type name in credits: %s", shaderName.c_str());
       }
@@ -497,11 +489,11 @@ void LibraryService::backgroundFetchShaderCredits()
   downloadFutures.push_back(std::async(std::launch::async, &LibraryService::fetchShaderCredits, this));
 }
 
-Credit* LibraryService::getShaderCredit(ShaderType type)
+std::shared_ptr<Credit> LibraryService::getShaderCredit(ShaderType type)
 {
   auto it = shaderCredits.find(type);
   if (it != shaderCredits.end()) {
-    return &it->second;
+    return it->second;
   }
   return nullptr; // Return nullptr if no credit found
 }
@@ -509,4 +501,82 @@ Credit* LibraryService::getShaderCredit(ShaderType type)
 bool LibraryService::hasCredit(ShaderType type)
 {
   return shaderCredits.find(type) != shaderCredits.end();
+}
+
+// MARK: - Feedback Submission
+
+void LibraryService::submitFeedback(const std::string &text,
+                                    const std::string &stateJson,
+                                    const std::string &screenshotData,
+                                    const std::string &author,
+                                    const std::string &email,
+                                    std::function<void(bool success, const std::string &error)> callback)
+{
+  // Launch in background similar to other async operations
+  downloadFutures.push_back(std::async(std::launch::async, [=]() {
+
+    std::string host, dummy;
+    if (!parseHttpsUrl(API_URL, host, dummy)) {
+      if (callback) {
+        MainApp::getApp()->executeOnMainThread([callback]() {
+          callback(false, "Invalid API URL");
+        });
+      }
+      return;
+    }
+
+#ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+    if (callback) {
+      MainApp::getApp()->executeOnMainThread([callback]() {
+        callback(false, "cpp-httplib built without SSL support");
+      });
+    }
+    return;
+#else
+    httplib::SSLClient cli(host.c_str());
+    cli.enable_server_certificate_verification(false);
+    cli.set_connection_timeout(15, 0);
+    cli.set_read_timeout(60, 0);
+    cli.set_follow_location(true);
+
+    httplib::Headers headers = {
+      {"User-Agent", "dude_wake_up_downloader/1.0"}
+    };
+
+    httplib::MultipartFormDataItems items;
+    items.push_back({"text", text, "", "text/plain"});
+    items.push_back({"state", stateJson, "", "application/json"});
+    if (!screenshotData.empty()) {
+      items.push_back({"screenshot", screenshotData, "screenshot.png", "image/png"});
+    }
+    if (!author.empty()) {
+      items.push_back({"author", author, "", "text/plain"});
+    }
+    if (!email.empty()) {
+      items.push_back({"email", email, "", "text/plain"});
+    }
+
+    auto res = cli.Post("/api/feedback/new", headers, items);
+#endif
+
+    bool ok = false;
+    std::string err;
+    if (res && ((res->status == 201) || res->status == 200)) {
+      ok = true;
+    } else {
+      ok = false;
+      if (res) {
+        err = "Server returned status " + std::to_string(res->status);
+      } else {
+        err = "Network error";
+      }
+    }
+
+    // Invoke callback on main thread
+    if (callback) {
+      MainApp::getApp()->executeOnMainThread([callback, ok, err]() {
+        callback(ok, err);
+      });
+    }
+  }));
 }

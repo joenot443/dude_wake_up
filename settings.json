@@ -1,5 +1,0 @@
-{
-  "clangd.arguments": [
-    "--compile-commands-dir=/Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up"
-  ]
-}

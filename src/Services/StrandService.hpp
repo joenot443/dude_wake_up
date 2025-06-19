@@ -64,6 +64,7 @@ public:
   std::string strandPreviewPath(std::string name);
   void clear();
 
+  void renameStrand(std::string id, std::string newName);
   
   std::shared_ptr<AvailableStrand> demoStrand;
   json config() override;

@@ -35,7 +35,9 @@ void OscillatorPanelView::draw() {
     ImGui::Dummy(ImVec2(1.0, 5.0));
     ImGui::Dummy(ImVec2(5.0, 1.0));
     ImGui::SameLine();
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 0.6f));
     ImGui::Text("No active Oscillators");
+    ImGui::PopStyleColor();
     ImGui::Dummy(ImVec2(1.0, 5.0));
   }
   

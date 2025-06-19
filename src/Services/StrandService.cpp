@@ -1,5 +1,6 @@
 #include "StrandService.hpp"
 #include "ConfigService.hpp"
+#include <filesystem>
 
 std::shared_ptr<AvailableStrand> StrandService::availableStrandForId(std::string id)
 {
@@ -81,6 +82,7 @@ void StrandService::removeStrand(std::string id)
   }
   auto strand = strandMap[id];
   strandMap.erase(id);
+  notifyStrandsUpdated();
 }
 
 
@@ -222,4 +224,38 @@ void StrandService::populateMapFromFolder(std::map<std::string, std::shared_ptr<
     (*map)[strand->id] = strand;
     notifyStrandsUpdated();
   }
+}
+
+void StrandService::renameStrand(std::string id, std::string newName)
+{
+  auto strand = availableStrandForId(id);
+  if (strand == nullptr)
+  {
+    log("Tried to rename Strand %s, but it doesn't exist", id.c_str());
+    return;
+  }
+
+  // Determine new file path (same directory, new filename)
+  std::filesystem::path oldPath(strand->path);
+  std::filesystem::path newPath = oldPath.parent_path() / (newName + ".json");
+
+  try
+  {
+    // Rename file on disk
+    if (std::filesystem::exists(oldPath))
+    {
+      std::filesystem::rename(oldPath, newPath);
+    }
+  }
+  catch (const std::exception &e)
+  {
+    log("Failed to rename Strand file: %s", e.what());
+    return;
+  }
+
+  // Update AvailableStrand metadata
+  strand->name = newName;
+  strand->path = newPath.string();
+
+  notifyStrandsUpdated();
 }

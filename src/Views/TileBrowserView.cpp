@@ -18,6 +18,7 @@
 #include "Colors.hpp"
 #include "Fonts.hpp"
 #include "CommonViews.hpp"
+#include <filesystem>
 
 void TileBrowserView::setup() {}
 
@@ -68,6 +69,10 @@ void TileBrowserView::applyHeaderStyles(bool isSelected) {
 
 void TileBrowserView::popHeaderStyles(bool isSelected) {
   ImGui::PopStyleColor(isSelected ? 2 : 0);
+}
+
+void TileBrowserView::setContextMenuItems(const std::vector<TileContextMenuItem> &items) {
+  contextMenuItems = items;
 }
 
 void TileBrowserView::draw() {
@@ -137,13 +142,14 @@ void TileBrowserView::drawCategories(const ImVec2& tileSize) {
 }
 
 void TileBrowserView::drawTile(std::shared_ptr<TileItem> tile, const ImVec2& tileSize) {
+  std::string childId = formatString("##tile_%s_%s", tile->id.c_str(), tileBrowserId.c_str());
+
   if (tile->textureID != 0) {
-    
     // Store initial cursor position
     ImVec2 startPos = ImGui::GetCursorScreenPos();
-    
+
     // Create a child frame to contain everything
-    ImGui::BeginChild(formatString("##tile_%s_%s", tile->id.c_str(), tileBrowserId.c_str()).c_str(), tileSize, ImGuiChildFlags_None, ImGuiWindowFlags_NoDecoration);
+    ImGui::BeginChild(childId.c_str(), tileSize, ImGuiChildFlags_None, ImGuiWindowFlags_NoDecoration);
     
     ImGui::SetNextItemAllowOverlap();
     
@@ -221,7 +227,8 @@ void TileBrowserView::drawTile(std::shared_ptr<TileItem> tile, const ImVec2& til
     ImGui::EndChild();
   } else {
     // Simple button for items without texture
-    ImGui::BeginChild(formatString("##tile_%s_%s", tile->id.c_str(), tileBrowserId.c_str()).c_str(), tileSize, ImGuiChildFlags_None, ImGuiWindowFlags_NoDecoration);
+    std::string noTextureChild = formatString("##tile_%s_%s_no_texture", tile->id.c_str(), tileBrowserId.c_str());
+    ImGui::BeginChild(noTextureChild.c_str(), tileSize, ImGuiChildFlags_None, ImGuiWindowFlags_NoDecoration);
     if (tile->name.size() > 10) {
       ImGui::PushFont(FontService::getService()->current->sm);
     }
@@ -239,7 +246,17 @@ void TileBrowserView::drawTile(std::shared_ptr<TileItem> tile, const ImVec2& til
     tile->dragCallback(tile->id);
     ImGui::EndChild();
   }
-
+  // Handle context menu (right-click) -----------------------------------------------------
+  if (ImGui::BeginPopupContextItem(childId.c_str(), ImGuiMouseButton_Right)) {
+    for (const auto &item : contextMenuItems) {
+      if (ImGui::MenuItem(item.title.c_str())) {
+        if (item.action) {
+          item.action(tile);
+        }
+      }
+    }
+    ImGui::EndPopup();
+  }
   // Handle tile layout - this is now managed by the draw() method
   if (ImGui::GetCursorPosX() + tileSize.x + ImGui::GetStyle().ItemSpacing.x < ImGui::GetWindowContentRegionMax().x) {
     ImGui::SameLine();

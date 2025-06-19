@@ -15,6 +15,17 @@
 #include "UUID.hpp"
 #include "ofxImGui.h"
 #include "AbstractTileBrowserView.hpp"
+#include <functional>
+#include <vector>
+
+struct TileContextMenuItem {
+  std::string title;
+  // Callback invoked when the menu item is selected. The clicked tile is provided.
+  std::function<void(std::shared_ptr<TileItem>)> action;
+  TileContextMenuItem(const std::string &title,
+                      std::function<void(std::shared_ptr<TileItem>)> action)
+      : title(title), action(action) {}
+};
 
 class TileBrowserView : public AbstractTileBrowserView {
 public:
@@ -24,6 +35,7 @@ public:
   void setTileItems(std::vector<std::shared_ptr<TileItem>> items) override;
   void setCallback(std::function<void(std::shared_ptr<TileItem>)> callback) override;
   void drawTile(std::shared_ptr<TileItem> tile, const ImVec2& tileSize);
+  void setContextMenuItems(const std::vector<TileContextMenuItem> &items);
   
   float widthFraction = 0.2;
   std::string tileBrowserId;
@@ -50,6 +62,7 @@ private:
   void popHeaderStyles(bool isSelected);
   void drawCategories(const ImVec2& tileSize);
   void drawSingleCategory(const std::string& category, const ImVec2& tileSize);
+  std::vector<TileContextMenuItem> contextMenuItems;
 };
 
 #endif /* TileBrowserView_hpp */

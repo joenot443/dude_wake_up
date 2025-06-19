@@ -35,8 +35,6 @@ const static ofVec2f windowSize = ofVec2f(2400, 1600);
 
 using json = nlohmann::json;
 
-const char* SubmitFeedbackView::popupId = "Submit Feedback";
-
 NodeLayoutView *NodeLayoutView::instance = 0;
 BookmarkService *BookmarkService::service = 0;
 StrandService *StrandService::service = 0;

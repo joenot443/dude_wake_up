@@ -126,7 +126,6 @@
 		"D6D09C57-5E6D-43CA-BC07-3AA7C5C95681" /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "D5B46A9D-57FE-460F-BDFE-42A63F728A0C" /* imgui_widgets.cpp */; };
 		"D84822B4-25C2-4055-963F-FE8D6C055B5B" /* WelcomeScreenView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "79F37553-4B76-4BC1-A659-1D5123680B60" /* WelcomeScreenView.cpp */; };
 		"D89C617E-B660-4680-9B12-46560B9A5DDC" /* ofxMidiOut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "35D5FC4B-6CC5-42A5-888A-3174CA2FE706" /* ofxMidiOut.cpp */; };
-		"D9C875C9-6749-4AC4-BEED-B8D9A09D6C77" /* SubmitFeedbackView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "267357EA-AC0C-4763-AD76-9FC586698F80" /* SubmitFeedbackView.cpp */; };
 		"DC518C46-16A7-4897-BE4A-BDA838873EEE" /* BarPlotView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "6AA88847-35AD-4AED-8FA7-DAF1469E1A9C" /* BarPlotView.cpp */; };
 		"DFDBF8BD-CC82-4007-AE4D-955255BAA54A" /* OutputWindow.mm in Sources */ = {isa = PBXBuildFile; fileRef = "916A4FFE-6D66-4ED1-9195-FBE7721C8A2E" /* OutputWindow.mm */; };
 		"E15EE7B5-E10E-43A8-A52A-38B76437E87B" /* ShaderSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "517FA119-0D87-4B31-9B75-3F5D6326DC21" /* ShaderSource.cpp */; };
@@ -312,7 +311,6 @@
 		"23A974BF-0D0A-4F59-A86F-B838C087E2FB" /* ReflectorShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ReflectorShader.hpp; sourceTree = "<group>"; };
 		"24134E4B-A87F-4390-932F-1E75429E3DC8" /* UploadChainerView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UploadChainerView.cpp; sourceTree = "<group>"; };
 		"26556B27-4F1E-42F1-8501-890E18013DD1" /* HilbertShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = HilbertShader.hpp; sourceTree = "<group>"; };
-		"267357EA-AC0C-4763-AD76-9FC586698F80" /* SubmitFeedbackView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SubmitFeedbackView.cpp; sourceTree = "<group>"; };
 		"27EBE407-956C-409C-9DE6-C4FE39662D9E" /* AddLibraryVideoSourceCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AddLibraryVideoSourceCommand.hpp; sourceTree = "<group>"; };
 		"2834F2AF-4E8F-48C6-829F-C4AF058CE426" /* JSONSerializable.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = JSONSerializable.hpp; sourceTree = "<group>"; };
 		"294265F5-00E0-4B66-A273-ABDA6D648E4C" /* AudioBumperShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AudioBumperShader.hpp; sourceTree = "<group>"; };
@@ -592,7 +590,6 @@
 		"D5DBC6A6-C775-4A13-BB47-569AF99041D6" /* ofxImGuiLoggerChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ofxImGuiLoggerChannel.h; sourceTree = "<group>"; };
 		"D6256C0A-396F-4604-83EE-22406D60EEDD" /* EmptyShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = EmptyShader.hpp; sourceTree = "<group>"; };
 		"D7ABE7B6-3771-469E-B209-FDCB3491827D" /* GlitchDigitalShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GlitchDigitalShader.hpp; sourceTree = "<group>"; };
-		"D8CB2CB3-6394-4381-B168-B0217634E88C" /* SubmitFeedbackView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SubmitFeedbackView.hpp; sourceTree = "<group>"; };
 		"D94DD336-4C0B-4303-95BA-2BFE32DD949B" /* Parameter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Parameter.hpp; sourceTree = "<group>"; };
 		"DADA2607-11D3-4EE2-A411-A587CA92727B" /* DiscoShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DiscoShader.hpp; sourceTree = "<group>"; };
 		"DAF586C1-F9A1-4F00-8962-419D506000DF" /* ColorPassShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ColorPassShader.hpp; sourceTree = "<group>"; };
@@ -971,8 +968,6 @@
 				"F767D916-AD53-4899-9EB5-E26419A39DCD" /* StrandBrowserWindow.hpp */,
 				"B05203A2-050E-4FEF-9C81-6C1ADE1F512D" /* StrandTileView.cpp */,
 				"619C1470-21C8-408D-8ADA-79AB22B48B62" /* StrandTileView.hpp */,
-				"267357EA-AC0C-4763-AD76-9FC586698F80" /* SubmitFeedbackView.cpp */,
-				"D8CB2CB3-6394-4381-B168-B0217634E88C" /* SubmitFeedbackView.hpp */,
 				"AB1FEA1E-B05D-47B5-A370-6FB26D8B0688" /* TextEditorView.cpp */,
 				"E7B963B5-BADB-486F-89DB-26448CC23221" /* TextEditorView.hpp */,
 				"C0C10A63-424F-4447-B591-0A9CC6766A15" /* TileBrowserView.cpp */,
@@ -1697,7 +1692,6 @@
 				"44BCADD5-3833-4F5F-926C-15CE9849AD6A" /* StrandBrowserView.cpp in Sources */,
 				"079B0752-2526-4BBA-9324-CE639AE697AC" /* StrandBrowserWindow.cpp in Sources */,
 				"13103A3A-343E-4BC8-99E4-12257598EC3F" /* StrandTileView.cpp in Sources */,
-				"D9C875C9-6749-4AC4-BEED-B8D9A09D6C77" /* SubmitFeedbackView.cpp in Sources */,
 				"2C20D9F0-F824-4311-A3B8-FD95B153FBF4" /* TextEditorView.cpp in Sources */,
 				"272BC713-7A80-44ED-845D-9EE3BC0BC0A3" /* TileBrowserView.cpp in Sources */,
 				"42371A8A-7A76-4D62-B443-FF17A38BE644" /* UploadChainerView.cpp in Sources */,
@@ -1807,7 +1801,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEPLOYMENT_POSTPROCESSING = YES;
 				DEVELOPMENT_TEAM = 7VUCELU5PL;
-				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1871,6 +1865,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.joecrozier.nottawa;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				RELEASE = "";
 			};
 			name = Debug;
 		};
@@ -1953,6 +1948,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.joecrozier.nottawa;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				RELEASE = 1;
 				baseConfigurationReference = E4EB6923138AFD0F00A09F29;
 			};
 			name = Release;

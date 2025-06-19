@@ -16,11 +16,11 @@
 #include "ShaderBrowserView.hpp"
 #include "VideoSource.hpp"
 #include "VideoSourceBrowserView.hpp"
-#include "SubmitFeedbackView.hpp"
 #include "WelcomeScreenView.hpp"
 #include "StrandBrowserView.hpp"
 #include "StageModeView.hpp"
 #include "OscillatorPanelView.hpp"
+#include "FeedbackView.hpp"
 #include "ofMain.h"
 #include <stdio.h>
 
@@ -37,9 +37,10 @@ private:
   StrandBrowserView strandBrowserView = StrandBrowserView({});
   OscillatorView oscillatorView = OscillatorView();
   OscillatorPanelView oscillatorPanelView = OscillatorPanelView();
-  SubmitFeedbackView submitFeedbackView = SubmitFeedbackView();
   StageModeView stageModeView = StageModeView();
   WelcomeScreenView welcomeScreenView = WelcomeScreenView();
+  FeedbackView feedbackView = FeedbackView();
+  bool showFeedbackWindow = false;
   
   void drawMenu();
   void drawVideoSourceBrowser();

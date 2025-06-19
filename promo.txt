@@ -1,3 +1,0 @@
-_intro_							* Audio bar visualizer
-nottawa!						* Yellow nottawa title over Core (rings)
-live video is tonnes of fun 	* 

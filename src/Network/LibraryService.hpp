@@ -10,10 +10,10 @@
 
 #include <stdio.h>
 #include "ofMain.h"
-#include "Feedback.hpp"
 #include "LibraryFile.hpp"
 #include "ShaderType.hpp"
 #include "Credit.hpp"
+#include <memory>
 #include "observable.hpp"
 #include <future>
 
@@ -48,8 +48,6 @@ public:
   
   void repopulateVideoSourcesFromMainThread();
 
-  void submitFeedback(Feedback feedback, std::function<void()> success_callback, std::function<void(const std::string &)> error_callback);
-
   void downloadThumbnail(std::shared_ptr<LibraryFile> file);
   void downloadAllThumbnails();
   void downloadFile(std::shared_ptr<LibraryFile> file, std::function<void()>);
@@ -63,8 +61,16 @@ public:
   // Credits functionality
   void fetchShaderCredits();
   void backgroundFetchShaderCredits();
-  Credit* getShaderCredit(ShaderType type);
+  std::shared_ptr<Credit> getShaderCredit(ShaderType type);
   bool hasCredit(ShaderType type);
+
+  // Feedback
+  void submitFeedback(const std::string &text,
+                      const std::string &stateJson,
+                      const std::string &screenshotData,
+                      const std::string &author,
+                      const std::string &email,
+                      std::function<void(bool success, const std::string &error)> callback);
 
   observable::subject<void()> libraryThumbnailUpdateSubject;
 
@@ -73,7 +79,7 @@ public:
   std::map<std::string, bool> libraryFileIdDownloadedMap;
 
   // Shader credits data
-  std::map<ShaderType, Credit> shaderCredits;
+  std::map<ShaderType, std::shared_ptr<Credit>> shaderCredits;
 
   std::vector<std::future<void>> downloadFutures;
 

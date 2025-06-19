@@ -39,6 +39,11 @@ public:
 
   TileBrowserView tileBrowserView;
 
+  // Rename dialog state ------------------------------------------------------------------
+  bool showRenamePopup = false;
+  char renameBuffer[256] = {0};
+  std::string renameStrandId;
+
   StrandBrowserView(std::vector<std::shared_ptr<AvailableStrandTileItem>> tileItems) :                                                                                       tileItems(tileItems),
                                                                                       tileBrowserId(UUID::generateUUID()),
                                                                                       tileBrowserView(tileItems){};

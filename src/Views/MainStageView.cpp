@@ -26,7 +26,6 @@
 #include "ShaderSettings.hpp"
 #include "ShaderType.hpp"
 #include "UUID.hpp"
-#include "SubmitFeedbackView.hpp"
 #include "VideoSourceService.hpp"
 #include "implot.h"
 #include "FramePreview.hpp"
@@ -162,6 +161,10 @@ void MainStageView::draw()
     if (LayoutStateService::getService()->showWelcomeScreen) {
       welcomeScreenView.draw();
     }
+
+  if (showFeedbackWindow) {
+    feedbackView.draw(&showFeedbackWindow);
+  }
 }
 
 void MainStageView::drawMenu()
@@ -299,34 +302,28 @@ void MainStageView::drawMenu()
       ImGui::EndMenu();
     }
     
-    if (ImGui::MenuItem("Save Default Workspace"))
+
+    if (ImGui::MenuItem("Send Feedback"))
     {
-      ConfigService::getService()->saveDefaultConfigFile();
+      showFeedbackWindow = true;
     }
-    if (ImGui::MenuItem("Load Default Workspace"))
-    {
-      ConfigService::getService()->loadDefaultConfigFile();
-    }
-    
-    if (ImGui::BeginPopupModal(SubmitFeedbackView::popupId, nullptr, ImGuiPopupFlags_MouseButtonLeft))
-    {
-      submitFeedbackView.draw();
-      ImGui::EndPopup();
-    }
-//    // Present the submit feedback view in a popup modal when the menu button is pressed
-//    if (ImGui::MenuItem("Submit Feedback"))
-//    {
-//      ImGui::OpenPopup(SubmitFeedbackView::popupId);
-//    }
     
     static bool showingMenu = false;
-#ifndef RELEASE
-    if (ImGui::MenuItem("ImGui Demo") || showingMenu)
-    {
-      ImGui::ShowDemoWindow();
-      showingMenu = true;
-    }
-#endif
+//#ifndef RELEASE
+//    if (ImGui::MenuItem("ImGui Demo") || showingMenu)
+//    {
+//      ImGui::ShowDemoWindow();
+//      showingMenu = true;
+//    }
+//    if (ImGui::MenuItem("Save Default Workspace"))
+//    {
+//      ConfigService::getService()->saveDefaultConfigFile();
+//    }
+//    if (ImGui::MenuItem("Load Default Workspace"))
+//    {
+//      ConfigService::getService()->loadDefaultConfigFile();
+//    }
+//#endif
     ImGui::EndMenuBar();
   }
 }
