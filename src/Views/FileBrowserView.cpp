@@ -19,101 +19,64 @@
 #include "ofxImGui.h"
 
 void FileBrowserView::refresh()
-{  
-  files.clear();
+{
+  if (currentDirectory == nullptr) return;
 
-  currentDirectory.open(currentDirectory.getAbsolutePath());
-  if (!currentDirectory.isDirectory() || !currentDirectory.canRead()) { return; }
-  
+  files.clear();
+  currentDirectory->open(currentDirectory->getAbsolutePath());
+  if (!currentDirectory->isDirectory() || !currentDirectory->canRead()) { return; }
+
   try {
-    currentDirectory.listDir();
+    currentDirectory->listDir();
   } catch (std::exception &) {
     log("Couldn't open directory for FileBrowserView");
     return;
   }
-  
-  currentDirectory.sort();
 
-  for (int i = 0; i < currentDirectory.size(); i++)
+  currentDirectory->sort();
+
+  for (int i = 0; i < currentDirectory->size(); i++)
   {
-    bool isDirectory = currentDirectory.getFile(i).isDirectory();
-    files.push_back(File(currentDirectory.getPath(i), isDirectory));
+    bool isDirectory = currentDirectory->getFile(i).isDirectory();
+    files.push_back(File(currentDirectory->getPath(i), isDirectory));
   }
   std::vector<std::shared_ptr<TileItem>> tileItems = {};
 
   for (auto file : files)
   {
-    if (type == FileBrowserType_Source)
-    {
-      std::shared_ptr<AvailableVideoSource> availableSource;
-      if (isVideoFile(file.path)) {
-        availableSource = std::make_shared<AvailableVideoSourceFile>(
-                                                                     file.name, file.path);
-      } else if (isImageFile(file.path)) {
-        availableSource = std::make_shared<AvailableVideoSourceImage>(file.name, file.path);
-        availableSource->generatePreview();
-      } else {
-        continue;
-      }
-      
-      // Open the file and get the first frame
-      sources.push_back(availableSource);
-      // Create a closure which will be called when the tile is clicked
-      std::function<void(std::string)> dragCallback = [availableSource](std::string tileId)
-      {
-        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
-        {
-          ImGui::SetDragDropPayload("VideoSource", &availableSource.get()->availableVideoSourceId,
-                                    sizeof(std::string));
-          ImGui::PushID(tileId.c_str());
-          ImGui::Text("%s", availableSource->sourceName.c_str());
-          ImGui::PopID();
-          ImGui::EndDragDropSource();
-        }
-      };
-      ImTextureID textureId = (ImTextureID)(uint64_t) availableSource->preview->texData.textureID;
-      std::shared_ptr<TileItem> tileItem = std::make_shared<TileItem>(file.name, textureId, 0, dragCallback, "", TileType_File, ShaderTypeNone);
-      
-      if (isVideoFile(file.path))
-        previewQueue.push(std::make_pair(std::dynamic_pointer_cast<AvailableVideoSourceFile>(availableSource), tileItem));
-      
-      tileItems.push_back(tileItem);
+    std::shared_ptr<AvailableVideoSource> availableSource;
+    if (isVideoFile(file.path)) {
+      availableSource = std::make_shared<AvailableVideoSourceFile>(
+                                                                   file.name, file.path);
+    } else if (isImageFile(file.path)) {
+      availableSource = std::make_shared<AvailableVideoSourceImage>(file.name, file.path);
+      availableSource->generatePreview();
+    } else {
+      continue;
     }
-    else if (type == FileBrowserType_JSON)
+
+    // Open the file and get the first frame
+    sources.push_back(availableSource);
+    // Create a closure which will be called when the tile is clicked
+    std::function<void(std::string)> dragCallback = [availableSource](std::string tileId)
     {
-      // Validate the file is a json file
-      if (file.name.find(".json") == std::string::npos)
+      if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
       {
-        continue;
+        ImGui::SetDragDropPayload("VideoSource", &availableSource.get()->availableVideoSourceId,
+                                  sizeof(std::string));
+        ImGui::PushID(tileId.c_str());
+        ImGui::Text("%s", availableSource->sourceName.c_str());
+        ImGui::PopID();
+        ImGui::EndDragDropSource();
       }
-      // Validate that the file is a valid Strand
-      if (ConfigService::getService()->validateStrandJson(file.path) == false)
-      {
-        continue;
-      }
+    };
+    ImTextureID textureId = (ImTextureID)(uint64_t) availableSource->preview->texData.textureID;
+    std::shared_ptr<TileItem> tileItem = std::make_shared<TileItem>(file.name, textureId, 0, dragCallback, "", TileType_File, ShaderTypeNone);
 
-      auto availableStrand =
-          ConfigService::getService()->availableStrandFromPath(file.path);
+    if (isVideoFile(file.path))
+      previewQueue.push(std::make_pair(std::dynamic_pointer_cast<AvailableVideoSourceFile>(availableSource), tileItem));
 
-      // Create a closure which will be called when the tile is dragged
-      std::function<void(std::string)> dragCallback = [availableStrand](std::string tileId)
-      {
-        // Create a payload to carry the video source
-        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
-        {
-          // Set payload to carry the index of our item (could be anything)
-          ImGui::SetDragDropPayload("AvailableStrand", &availableStrand,
-                                    sizeof(availableStrand));
-          ImGui::PushID(tileId.c_str());
-          ImGui::Text("%s", availableStrand.name.c_str());
-          ImGui::PopID();
-          ImGui::EndDragDropSource();
-        }
-      };
-
-      std::shared_ptr<TileItem> tileItem = std::make_shared<TileItem>(availableStrand.name, (ImTextureID) 0, 0, dragCallback, "", TileType_File, ShaderTypeNone);
-      tileItems.push_back(tileItem);
-    }
+    tileItems.push_back(tileItem);
   }
   VideoSourceService::getService()->addAvailableVideoSources(sources);
   listBrowserView.tileItems = tileItems;
@@ -124,34 +87,26 @@ void FileBrowserView::refresh()
 void FileBrowserView::setup()
 {
   // For our Sources (Video file) browser, let's use the LibraryPath from the LayoutStateService.
-  if (type == FileBrowserType_Source)
-  {
-    currentDirectory = ofDirectory(LayoutStateService::getService()->libraryPath);
+  if (LayoutStateService::getService()->libraryPath.length() > 0) {
+    currentDirectory = std::make_shared<ofDirectory>(LayoutStateService::getService()->libraryPath);
   }
-  else
-  {
-    currentDirectory = ofDirectory(LayoutStateService::getService()->libraryPath);
-    ConfigService::getService()->subscribeToConfigUpdates([this]()
-                                                          { refresh(); });
-  }
-
   refresh();
 }
 
 void FileBrowserView::loadDirectory(std::string directory)
 {
   LayoutStateService::getService()->updateLibraryPath(directory);
-  currentDirectory = ofDirectory(directory);
+  currentDirectory = std::make_shared<ofDirectory>(directory);
   refresh();
 }
 
 void FileBrowserView::update() {
-//  return; 
-  
+  //  return;
+
   if (previewQueue.empty()) return;
-  
+
   auto& [source, tile] = previewQueue.front();
-  
+
   if (!videoPlayer.isLoaded()) {
     if (!videoPlayer.load(source->path)) {
       ofLogError("FileBrowserView") << "Failed to load video file: " << source->path;
@@ -161,14 +116,14 @@ void FileBrowserView::update() {
     videoPlayer.play();
     videoPlayer.setVolume(0.0);
   }
-  
+
   videoPlayer.update();
-  
+
   if (source->hasFailedToLoad(videoPlayer)) {
     previewQueue.pop();
     return;
   }
-  
+
   if (source->canGeneratePreview(videoPlayer)) {
     source->generatePreview(videoPlayer);
     tile->textureID = (ImTextureID) source->preview->texData.textureID;
@@ -181,13 +136,6 @@ void FileBrowserView::update() {
 // If a file is selected, update settings.selectedFile
 void FileBrowserView::draw()
 {
-  // If we're in the JSON browser, just draw the list browser view
-  if (type == FileBrowserType_JSON)
-  {
-    listBrowserView.draw();
-    return;
-  }
-
   // Add a button to open the file browser to choose the current directory
   if (ImGui::Button("Open"))
   {
@@ -196,7 +144,7 @@ void FileBrowserView::draw()
     {
       // Save the new path in LayoutStateService
       LayoutStateService::getService()->updateLibraryPath(result.filePath);
-      currentDirectory = ofDirectory(result.filePath);
+      currentDirectory = std::make_shared<ofDirectory>(result.filePath);
       refresh();
     }
   }
@@ -205,7 +153,7 @@ void FileBrowserView::draw()
   if (ImGui::Button("Show in Finder"))
   {
     // macOS
-    std::string command = "open " + currentDirectory.getAbsolutePath();
+    std::string command = "open " + currentDirectory->getAbsolutePath();
     system(command.c_str());
   }
 
@@ -215,10 +163,14 @@ void FileBrowserView::draw()
   {
     refresh();
   }
-  
-  ImGui::SameLine();
-  
-  ImGui::Text("%s", currentDirectory.getAbsolutePath().c_str());
 
-  tileBrowserView.draw();
+  if (currentDirectory != nullptr) {
+    ImGui::SameLine();
+    ImGui::Text("%s", currentDirectory->getAbsolutePath().c_str());
+    tileBrowserView.draw();
+  } else {
+    ImGui::PushFont(FontService::getService()->current->sm);
+    ImGui::Text("Press Open to choose a source directory");
+    ImGui::PopFont();
+  }
 }

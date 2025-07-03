@@ -167,6 +167,8 @@ std::shared_ptr<std::string> BookmarkService::bookmarkForDirectory(std::string d
 }
 
 void BookmarkService::beginAccessingBookmark(std::string path) {
+  if (path.empty()) return;
+
   // Get the bookmark string for the given path
   auto bookmarkString = bookmarkForPath(path);
   if (!bookmarkString) {
@@ -217,6 +219,7 @@ void BookmarkService::beginAccessingBookmark(std::string path) {
 }
 
 void BookmarkService::endAccessingBookmark(std::string path) {
+  if (path.empty()) return;
   // Get the bookmark string for the given path
   auto bookmarkString = bookmarkForPath(path);
   if (!bookmarkString) {

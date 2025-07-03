@@ -74,9 +74,9 @@ public:
   
   bool showWelcomeScreen = true;
   
-  std::string libraryPath = ConfigService::getService()->nottawaFolderFilePath();
+  std::string libraryPath = "";
   std::vector<std::array<float, 4>> colorHistory = std::vector<std::array<float, 4>>(1, std::array<float, 4>{0.0f, 0.0f, 0.0f, 0.0f});
-  
+
   float audioSettingsViewHeight();
   
   ImVec2 previewSize(float scale);

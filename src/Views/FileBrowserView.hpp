@@ -18,8 +18,6 @@
 #include <vector>
 #include <queue>
 
-enum FileBrowserType { FileBrowserType_JSON, FileBrowserType_Source };
-
 struct File {
   std::string name;
   std::string path;
@@ -37,9 +35,8 @@ struct FileBrowserView {
   std::vector<File> files = {};
   std::vector<std::shared_ptr<AvailableVideoSource>> sources;
   std::shared_ptr<File> selectedFile = nullptr;
-  ofDirectory currentDirectory;
-  FileBrowserType type = FileBrowserType_Source;
-  
+  std::shared_ptr<ofDirectory> currentDirectory;
+
   ofVideoPlayer videoPlayer;
   std::queue<std::pair<std::shared_ptr<AvailableVideoSourceFile>, std::shared_ptr<TileItem>>> previewQueue;
   
@@ -51,7 +48,7 @@ public:
   void refresh();
   void teardown();
   
-  FileBrowserView(FileBrowserType type) : type(type) {};
+  FileBrowserView() {};
 
   ListBrowserView listBrowserView = ListBrowserView({});
   TileBrowserView tileBrowserView = TileBrowserView({});

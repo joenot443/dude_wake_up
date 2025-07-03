@@ -15,8 +15,9 @@ void WebcamSource::setup() {
   grabber.setDeviceID(settings->deviceId->intValue);
   grabber.setDesiredFrameRate(30);
   grabber.setPixelFormat(OF_PIXELS_RGBA);
-  
-  grabber.setup(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
+  if (!grabber.setup(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y)) {
+    return;
+  }
   fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   maskShader.load("shaders/ColorKeyMaskMaker");

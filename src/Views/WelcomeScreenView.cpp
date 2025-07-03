@@ -182,7 +182,7 @@ void WelcomeScreenView::openWorkspace() {
 
 void WelcomeScreenView::openDemo() {
   // TODO: Implement loading the demo workspace
-  log("Opening demo workspace...");
+  LayoutStateService::getService()->helpEnabled = false;
   NodeLayoutView::getInstance()->clear();
   ConfigService::getService()->loadStrandFile(StrandService::getService()->demoStrand->path);
   LayoutStateService::getService()->showWelcomeScreen = false;
