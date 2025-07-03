@@ -18,6 +18,13 @@ void AudioSourceService::setup() {
   populateSources();
 }
 
+void AudioSourceService::setupAbleton() {
+  if (link != nullptr) return;
+  
+  link = std::make_shared<ableton::Link>(120);
+  link->enable(true);
+}
+
 void AudioSourceService::affirmSampleAudioTrack() {
   selectedSampleTrack = sampleTracks[selectedSampleTrackParam->intValue];
   
@@ -59,7 +66,9 @@ void AudioSourceService::populateTracks() {
 }
 
 void AudioSourceService::populateSources() {
-  link.enable(true);
+  if (LayoutStateService::getService()->abletonLinkEnabled) {
+    link->enable(true);
+  }
   
   // Get every input audio device
   auto devices = ofSoundStream().getDeviceList();
@@ -111,11 +120,12 @@ void AudioSourceService::update() {
   // Return if we're not enabled
   if (!selectedAudioSource->active) return;
   
-  if (LayoutStateService::getService()->abletonLinkEnabled) {
+  if (LayoutStateService::getService()->abletonLinkEnabled && link != nullptr) {
     selectedAudioSource->audioAnalysis.bpmEnabled = true;
-    selectedAudioSource->audioAnalysis.bpm->setValue(link.captureAppSessionState().tempo());
+    auto state = link->captureAppSessionState();
+    selectedAudioSource->audioAnalysis.bpm->setValue(link->captureAppSessionState().tempo() * 2.0);
     
-    double beatCount = link.captureAppSessionState().beatAtTime(link.clock().micros(), 4.);
+    double beatCount = link->captureAppSessionState().beatAtTime(link->clock().micros(), 4.);
     selectedAudioSource->audioAnalysis.updateBeat(beatCount - floor(beatCount));
   } else if (selectedAudioSource->type() == AudioSourceType_Microphone) { // Don't update for the samples
     selectedAudioSource->audioAnalysis.bpm->value = AudioSourceService::getService()->tapper.bpm();

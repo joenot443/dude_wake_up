@@ -107,6 +107,21 @@ std::string StrandService::strandPreviewPath(std::string name) {
   return ConfigService::getService()->strandsFolderFilePath() + formatString("%s.png", name.c_str());
 }
 
+// New helper that allows callers to specify exactly where the preview image should be written
+std::string StrandService::savePreviewToPath(std::string fullPath, std::shared_ptr<Connectable> connectable) {
+  // Get the terminal descendant from the Connectable and export its frame() FBO to an image file.
+  auto terminal = connectable == nullptr ? nullptr : connectable->terminalDescendent();
+  if (terminal == nullptr) {
+    return ""; // Nothing to save
+  }
+
+  ofTexture tex = terminal->frame()->getTexture();
+  ofPixels pixels;
+  tex.readToPixels(pixels);
+  ofSaveImage(pixels, fullPath);
+  return fullPath;
+}
+
 void StrandService::clear()
 {
   for (auto it = strandMap.begin(); it != strandMap.end();)

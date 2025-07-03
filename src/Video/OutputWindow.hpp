@@ -45,6 +45,9 @@ struct OutputWindow : public ofBaseApp, std::enable_shared_from_this<OutputWindo
   ofxFastFboReader reader;
   bool loggedPixelFormat = false;
 
+  // Path of the current recording (used to reveal in Finder when finished)
+  std::string recordingPath;
+
 #ifdef __OBJC__
   // Objective-C++ menu variables
   NSMenu* recordMenu;

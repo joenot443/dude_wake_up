@@ -416,7 +416,7 @@ std::vector<std::string> ConfigService::loadStrandFile(std::string path)
   std::fstream fileStream;
   fileStream.open(path, std::ios::in);
   json data;
-  
+  BookmarkService::getService()->beginAccessingBookmark(path);
   
   if (!fileStream.is_open())
   {

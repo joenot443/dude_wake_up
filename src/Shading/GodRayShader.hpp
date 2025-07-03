@@ -67,7 +67,7 @@ struct GodRayShader: Shader {
   void drawSettings() override {
     CommonViews::H3Title("GodRay");
 
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
+    
   }
 };
 

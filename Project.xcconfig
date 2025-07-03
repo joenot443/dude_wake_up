@@ -11,8 +11,8 @@ CLANG_C_LANGUAGE_STANDARD = c17
 MACOSX_DEPLOYMENT_TARGET = 10.15
 
 // App Settings
-PRODUCT_NAME = nottawa - live visuals
-PRODUCT_NAME[config=Debug] = nottawa - live visuals (Debug)
+PRODUCT_NAME = Nottawa
+PRODUCT_NAME[config=Debug] = Nottawa (Debug)
 PRODUCT_BUNDLE_IDENTIFIER = com.joecrozier.nottawa
 //PRODUCT_BUNDLE_IDENTIFIER[config=Debug] = cc.openFrameworks.$(TARGET_NAME)Debug
 DEVELOPMENT_LANGUAGE = English

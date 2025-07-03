@@ -27,6 +27,7 @@
 #include <future>
 #include "imgui_node_editor.h"
 #include "imgui_node_editor_internal.h"
+#include "BookmarkService.hpp"
 
 static const float NodeWidth = 100.0f;
 static const float NodeSettingsWidth = 350.0f;
@@ -1145,8 +1146,8 @@ void NodeLayoutView::handleSaveNode(std::shared_ptr<Node> node)
   saveFileName[sizeof(saveFileName) - 1] = '\0'; // Ensure null termination
   
   // Show the ImGui save dialog popup
-  showSaveDialog = true;
   nodeToSave = node;
+  saveStrand();
 }
 
 void NodeLayoutView::handleDropZone()
@@ -1167,7 +1168,7 @@ void NodeLayoutView::handleDropZone()
         nodeDropLocation = std::make_unique<ImVec2>(canvasPos);
       } else {
         // Dropped on an existing Shader
-        nodeDropLocation = std::make_unique<ImVec2>(ed::GetNodePosition(hovered) + ImVec2(ed::GetNodeSize(hovered).x, 0.0) + ImVec2(400.0, 0.0));
+        nodeDropLocation = std::make_unique<ImVec2>(ed::GetNodePosition(hovered) + ImVec2(ed::GetNodeSize(hovered).x, 0.0) + ImVec2(200.0, 0.0));
         auto startNode = nodeIdNodeMap[hovered.Get()];
         // Check if the existing Shader was already connected to a next node
         std::shared_ptr<Connectable> next = nullptr;
@@ -1709,9 +1710,27 @@ void NodeLayoutView::saveStrand()
   }
   strand.name = fileName;
   
-  // Use the fileName for saving operations
-  std::string previewPath = StrandService::getService()->savePreview(fileName, nodeToSave->connectable);
-  ConfigService::getService()->saveStrandFile(strand, ConfigService::getService()->strandsFolderFilePath() + fileName + ".json", previewPath);
+  // Ask the user for a destination (.json) path using a native save dialog
+  std::string defaultJsonName = fileName + ".json";
+  ofFileDialogResult result = ofSystemSaveDialog(defaultJsonName, "Save Strand");
+  if (!result.bSuccess)
+  {
+    return; // User cancelled the dialog
+  }
+  
+  std::string jsonPath = result.getPath();
+  
+  // Preview image is stored inside the application's strands folder (always writable inside sandbox)
+  std::string previewPath = StrandService::getService()->strandPreviewPath(fileName);
+  
+  // Save the preview image to disk
+  StrandService::getService()->savePreviewToPath(previewPath, nodeToSave->connectable);
+  
+  // Persist security-scoped bookmark ONLY for the user-chosen json file (preview lives in container)
+  BookmarkService::getService()->saveBookmarkForPath(jsonPath);
+  
+  // Finally write the Strand JSON file and register it with the application
+  ConfigService::getService()->saveStrandFile(strand, jsonPath, previewPath);
 }
 
 void NodeLayoutView::drawHelp()
@@ -1962,7 +1981,7 @@ void NodeLayoutView::drawHelp()
         std::shared_ptr<Node> secondNode;
         
         for (auto node : terminalNodes) {
-          if (node != terminalNode) secondNode = node;
+          if (node->type == NodeTypeSource) { secondNode = node; }
         }
         HelpService::getService()->drawBlendNodeShortcut(ed::CanvasToScreen(secondNode->position), ed::GetNodeSize(secondNode->id), ed::GetCurrentZoom());
         

@@ -111,7 +111,7 @@ struct CosmosShader: Shader {
   }
 
   void drawSettings() override {
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
+    
     CommonViews::ShaderParameter(settings->warp, settings->warpOscillator);
     CommonViews::ShaderParameter(settings->sunSize, settings->sunSizeOscillator);
     CommonViews::ShaderParameter(settings->sunColorR, settings->sunColorROscillator);

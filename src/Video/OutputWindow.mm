@@ -157,11 +157,17 @@ void OutputWindow::updateResolution()
 
 void OutputWindow::startRecording()
 {
-  ofFilePath f;
-  string myPath = ConfigService::getService()->exportsFolderFilePath() + "/Recording_" + ofGetTimestampString() + ".mov";
-  ofLogNotice("OutputWindow") << "Attempting to record to: " << myPath;
+  // Present save dialog to choose recording destination
+  std::string defaultName = "Recording_" + ofGetTimestampString() + ".mov";
+  ofFileDialogResult result = ofSystemSaveDialog(defaultName, "Save Recording");
+  if (!result.bSuccess) {
+    return; // User cancelled
+  }
 
-  bool setupOk = vidRecorder.setup(myPath, fbo->getWidth(), fbo->getHeight(), 60.0f, "h264"); 
+  recordingPath = result.getPath();
+  ofLogNotice("OutputWindow") << "Attempting to record to: " << recordingPath;
+
+  bool setupOk = vidRecorder.setup(recordingPath, fbo->getWidth(), fbo->getHeight(), 60.0f, "h264"); 
   
   if (setupOk) {
     loggedPixelFormat = false; // Reset flag before starting
@@ -177,6 +183,11 @@ void OutputWindow::stopRecording()
   vidRecorder.stop([this](bool success){
     ofLogNotice("OutputWindow") << "Recording finished: " << (success ? "Success" : "Failed");
     this->loggedPixelFormat = false; // Reset flag
+    // Reveal recording in Finder if path exists and recording succeeded
+    if (success && !recordingPath.empty()) {
+      std::string command = "open \"" + ofFilePath::getEnclosingDirectory(recordingPath) + "\"";
+      std::system(command.c_str());
+    }
     updateMenuState();
   });
   ofSetWindowTitle("");

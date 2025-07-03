@@ -58,13 +58,13 @@ void FontService::loadFontSet(FontSet& set, float scale) {
   set.h3 = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/Roboto-Medium.ttf").string().c_str(), 20, &cfg);
   set.h3b = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/Roboto-Bold.ttf").string().c_str(), 18, &cfg);
   set.h4 = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/Roboto-Bold.ttf").string().c_str(), 18, &cfg);
-  set.sm = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/Roboto-Regular.ttf").string().c_str(), 14, &cfg);
-  set.b = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/Roboto-Bold.ttf").string().c_str(), 14, &cfg);
-  set.p = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/Roboto-Regular.ttf").string().c_str(), 14, &cfg);
+  set.sm = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/Roboto-Regular.ttf").string().c_str(), 13, &cfg);
+  set.b = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/Roboto-Bold.ttf").string().c_str(), 15, &cfg);
+  set.p = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/Roboto-Regular.ttf").string().c_str(), 15, &cfg);
   set.pN = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/Roboto-Regular.ttf").string().c_str(), 32, &cfg);
   
-  set.audio = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/fontaudio.ttf").string().c_str(), 14, &cfg, audio_icon_range);
-  set.icon = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/MaterialIcons-Regular.ttf").string().c_str(), 14, &mergeConfig, icon_ranges);
+  set.audio = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/fontaudio.ttf").string().c_str(), 15, &cfg, audio_icon_range);
+  set.icon = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/MaterialIcons-Regular.ttf").string().c_str(), 15, &mergeConfig, icon_ranges);
   set.largeIcon = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/MaterialIcons-Regular.ttf").string().c_str(), 24, &mergeConfig, icon_ranges);
   set.xLargeIcon = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/MaterialIcons-Regular.ttf").string().c_str(), 72, &mergeConfig, icon_ranges);
   

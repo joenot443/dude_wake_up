@@ -65,10 +65,7 @@ struct StellarShader: Shader {
   }
 
   void drawSettings() override {
-    
-
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
-  }
+    }
 };
 
 #endif /* StellarShader_hpp */

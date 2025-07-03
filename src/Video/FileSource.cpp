@@ -21,6 +21,7 @@ void FileSource::setup()
   player.play();
   player.setVolume(0.5);
   player.setLoopState(OF_LOOP_NORMAL);
+  playing = true;
   fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   sliderPosition->value = settings->start->value;
@@ -108,6 +109,17 @@ void FileSource::drawSettings()
   CommonViews::Slider("Volume", "##volume", volume);
   ImGui::SameLine();
   
+  // Play / Pause button
+  if (CommonViews::PlayPauseButton("##filePlayPause", playing, ImVec2(25.0, 25.0))) {
+    playing = !playing;
+    // Toggle paused state and update the underlying video player
+    player.setPaused(!playing);
+    if (playing) {
+      player.play();
+    }
+  }
+  ImGui::SameLine();
+  
   auto muteIcon = mute->value > 0.5 ? ICON_MD_VOLUME_MUTE : ICON_MD_VOLUME_UP;
   if (CommonViews::IconButton(muteIcon, "##mute"))
   {
@@ -173,7 +185,7 @@ void FileSource::updatePlaybackPosition()
     return;
   }
   
-  if (!player.isPlaying()) {
+  if (!player.isPlaying() && playing) {
     player.play();
   }
   

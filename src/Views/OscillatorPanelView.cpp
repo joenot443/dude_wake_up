@@ -22,7 +22,7 @@ void OscillatorPanelView::update() {
 void OscillatorPanelView::draw() {
   auto oscillators = OscillationService::getService()->activeOscillators();
   
-  ImGui::BeginChild("##oscillatorPanel", ImVec2(0, 0), true, ImGuiWindowFlags_AlwaysVerticalScrollbar);
+  ImGui::BeginChild("##oscillatorPanel", ImVec2(0, 0), true, ImGuiWindowFlags_NoScrollbar);
   
   for (const auto& oscillator : oscillators) {
     if (oscillator->enabled->boolValue) {

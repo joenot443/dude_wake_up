@@ -72,7 +72,7 @@ struct CloudyShapesShader: Shader {
   void drawSettings() override {
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
 
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
+    
   }
 };
 

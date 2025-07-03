@@ -22,7 +22,7 @@ struct DoubleBlurSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> amountOscillator;
   
   DoubleBlurSettings(std::string shaderId, json j) :
-  amount(std::make_shared<Parameter>("amount", 5.0, 0.0, 100.0)),
+  amount(std::make_shared<Parameter>("Amount", 5.0, 0.0, 100.0)),
   amountOscillator(std::make_shared<WaveformOscillator>(amount)),
   ShaderSettings(shaderId, j, "DoubleBlur") {
     parameters = { amount };

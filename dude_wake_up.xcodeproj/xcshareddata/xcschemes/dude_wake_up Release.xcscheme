@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "E4B69B5A0A3A1756003C02F2"
-               BuildableName = "nottawa - live visuals.app"
+               BuildableName = "Nottawa.app"
                BlueprintName = "dude_wake_up"
                ReferencedContainer = "container:dude_wake_up.xcodeproj">
             </BuildableReference>
@@ -31,7 +31,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E4B69B5A0A3A1756003C02F2"
-            BuildableName = "nottawa - live visuals.app"
+            BuildableName = "Nottawa.app"
             BlueprintName = "dude_wake_up"
             ReferencedContainer = "container:dude_wake_up.xcodeproj">
          </BuildableReference>
@@ -54,7 +54,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E4B69B5A0A3A1756003C02F2"
-            BuildableName = "nottawa - live visuals.app"
+            BuildableName = "Nottawa.app"
             BlueprintName = "dude_wake_up"
             ReferencedContainer = "container:dude_wake_up.xcodeproj">
          </BuildableReference>
@@ -88,7 +88,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E4B69B5A0A3A1756003C02F2"
-            BuildableName = "nottawa - live visuals.app"
+            BuildableName = "Nottawa.app"
             BlueprintName = "dude_wake_up"
             ReferencedContainer = "container:dude_wake_up.xcodeproj">
          </BuildableReference>

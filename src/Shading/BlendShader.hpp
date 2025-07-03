@@ -321,7 +321,7 @@ struct BlendShader: Shader {
                 settings->mode->intValue = i;
                 settings->mode->affirmIntValue(); // Notify that the int value has changed
               }
-              CommonViews::H3Title(modeName);
+              ImGui::Text(modeName.c_str());
             }
             ImGui::EndChild();
             ImGui::PopStyleVar();

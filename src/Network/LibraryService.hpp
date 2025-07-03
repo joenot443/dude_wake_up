@@ -85,6 +85,7 @@ public:
 
   ofEvent<LibraryFile> downloadNotification;
   ofEvent<void> thumbnailNotification;
+  std::mutex shaderCreditsMutex;
 };
 
 #endif /* LibraryService_hpp */

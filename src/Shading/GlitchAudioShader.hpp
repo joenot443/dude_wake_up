@@ -126,7 +126,7 @@ struct GlitchAudioShader: Shader {
   void drawSettings() override {
     
 
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
+    
     // Draw new parameter controls
     CommonViews::ShaderParameter(settings->noiseScale, settings->noiseScaleOscillator);
     CommonViews::ShaderParameter(settings->noiseXOffset, settings->noiseXOffsetOscillator);

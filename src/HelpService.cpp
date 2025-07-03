@@ -115,13 +115,14 @@ void HelpService::drawSourceView() {
   CommonViews::H3Title(StringManager::get("welcome_subtitle"), false);
   CommonViews::xsSpacing();
   ImGui::SetCursorPosX(x);
+  drawLeftArrowView();
+  ImGui::SetCursorPosX(x);
   CommonViews::H3Title(StringManager::get("start_guide"), false);
   CommonViews::xsSpacing();
   ImGui::SetCursorPosX(x);
   CommonViews::H3Title(StringManager::get("source_drag_instruction"), false);
   CommonViews::xsSpacing();
   ImGui::SetCursorPosX(x);
-  drawLeftArrowView();
 }
 
 void HelpService::drawSource2View() {

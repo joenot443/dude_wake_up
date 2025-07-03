@@ -96,8 +96,9 @@ void TileBrowserView::draw() {
 
 void TileBrowserView::drawSingleCategory(const std::string& category, const ImVec2& tileSize) {
   // Start a new group to contain the tiles
-  ImGui::BeginGroup();
   int tileCount = 0;
+  if (categoryMap.count(category) == 0) return;
+  ImGui::BeginGroup();
   
   std::vector<std::shared_ptr<TileItem>> tiles = categoryMap[category];
   

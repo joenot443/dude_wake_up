@@ -39,10 +39,8 @@ void AudioSourceBrowserView::draw() {
   if (source->active) {
     drawSampleTrack();
     drawSelectedAudioSource();
-    ImGui::EndChild();
-  } else {
-    ImGui::EndChild();
   }
+  ImGui::EndChild();
 }
 
 void AudioSourceBrowserView::drawSampleTrack() {
@@ -63,7 +61,7 @@ void AudioSourceBrowserView::drawSampleTrack() {
     source->setPlaybackPosition(samplePlaybackSliderPosition->value);
   }
   ImGui::SameLine();
-  if (CommonViews::PlayPauseButton("##playPause", !source->isPaused, ImVec2(25.0, 25.0))) {
+  if (CommonViews::PlayPauseButton("##playPause", source->isPaused, ImVec2(25.0, 25.0))) {
     if (source->isPaused) {
       source->resumePlayback();
     } else {
@@ -162,9 +160,9 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
     
     // Begin a child window specifically to hold the table and its manual padding, applying the background color
     if (ImGui::BeginChild("##audioAnalysisPaddedArea", ImVec2(0, 0), ImGuiChildFlags_None, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) { // Auto-size
-      ImGui::Dummy(ImVec2(0.0, 2.0));
+//      ImGui::Dummy(ImVec2(0.0, 2.0));
       // Add horizontal space before the table
-      ImGui::Indent(8.0f);
+//      ImGui::Indent(8.0f);
 
       // The table starts here, now manually spaced inside the colored child.
       if (ImGui::BeginTable("##audioAnalysis", 4, ImGuiTableFlags_PadOuterX)) {
@@ -202,10 +200,12 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
           OscillatorView::draw(std::dynamic_pointer_cast<Oscillator>(source->audioAnalysis.beatPulseOscillator), source->audioAnalysis.beatPulse, audioGraphSize, false);
         }
         
-        if (LayoutStateService::getService()->abletonLinkEnabled) {
-          ImGui::Text("%s", formatString("Ableton BPM: %f", AudioSourceService::getService()->link.captureAppSessionState().tempo()).c_str());
+        if (LayoutStateService::getService()->abletonLinkEnabled && AudioSourceService::getService()->link != nullptr) {
+          ImGui::Text("%s", formatString("Ableton BPM: %f", AudioSourceService::getService()->link->captureAppSessionState().tempo()).c_str());
           ImGui::SameLine(0., 5.);
-          ImGui::Checkbox("Link?", &LayoutStateService::getService()->abletonLinkEnabled);
+          if (ImGui::Checkbox("Link?", &LayoutStateService::getService()->abletonLinkEnabled)) {
+            AudioSourceService::getService()->setupAbleton();
+          }
         } else if (!isSampleTrack) {
           if (CommonViews::Slider("BPM", "##bpm", source->audioAnalysis.bpm, ImGui::GetContentRegionAvail().x - 170.0)) {
             AudioSourceService::getService()->tapper.setBpm(source->audioAnalysis.bpm->value);
@@ -225,7 +225,9 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
             source->audioAnalysis.bpmEnabled = !source->audioAnalysis.bpmEnabled;
           }
           ImGui::SameLine(0., 10.);
-          ImGui::Checkbox("Link?", &LayoutStateService::getService()->abletonLinkEnabled);
+          if (ImGui::Checkbox("Link?", &LayoutStateService::getService()->abletonLinkEnabled)) {
+            AudioSourceService::getService()->setupAbleton();
+          }
           if (ImGui::BeginPopupModal("##BPM", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
             MarkdownView("BPM").draw();
             ImGui::EndPopup();
@@ -275,13 +277,6 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
         ImGui::EndChild();
         ImGui::EndTable();
       }
-      // Remove horizontal space after the table
-      ImGui::Unindent(8.0f);
-
-      // Add vertical space after the table
-      ImGui::Dummy(ImVec2(0.0f, 8.0f));
-      // --- End Manual Padding ---
-
       ImGui::EndChild(); // End ##audioAnalysisPaddedArea
     }
     // Pop the zero window padding

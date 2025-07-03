@@ -249,7 +249,7 @@
 		0286518A2D946C48000CE0D4 /* httplib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = httplib.h; sourceTree = "<group>"; };
 		0286518C2D946C5D000CE0D4 /* base64.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = base64.h; sourceTree = "<group>"; };
 		0286518D2D946D96000CE0D4 /* imgui_markdown.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imgui_markdown.h; sourceTree = "<group>"; };
-		028651AE2D95E0EE000CE0D4 /* nottawa - live visuals (Debug).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "nottawa - live visuals (Debug).app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		028651AE2D95E0EE000CE0D4 /* Nottawa (Debug).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Nottawa (Debug).app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		028651AF2D95E208000CE0D4 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
 		02A74E8A2DCBB70B009A607C /* GodRayShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GodRayShader.hpp; sourceTree = "<group>"; };
 		02AB2F0C2DE0C4D7004EDB3F /* strings.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = strings.json; path = misc/strings.json; sourceTree = "<group>"; };
@@ -1433,7 +1433,7 @@
 				191EF70929D778A400F35F26 /* openFrameworks */,
 				BB4B014C10F69532006C3DED /* addons */,
 				"206C875A-443C-40A6-A803-63FD44907689" /* Frameworks */,
-				028651AE2D95E0EE000CE0D4 /* nottawa - live visuals (Debug).app */,
+				028651AE2D95E0EE000CE0D4 /* Nottawa (Debug).app */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1506,7 +1506,7 @@
 			);
 			name = dude_wake_up;
 			productName = myOFApp;
-			productReference = 028651AE2D95E0EE000CE0D4 /* nottawa - live visuals (Debug).app */;
+			productReference = 028651AE2D95E0EE000CE0D4 /* Nottawa (Debug).app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -1849,10 +1849,10 @@
 					"lib/ableton/**",
 					lib/ableton/asio,
 				);
-				INFOPLIST_KEY_CFBundleDisplayName = "nottawa - live visuals";
+				INFOPLIST_KEY_CFBundleDisplayName = Nottawa;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
-				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs to access the camera";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app needs to access the microphone";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Nottawa can use your camera as a video source";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Nottawa can use your microphone for live music analysis";
 				INFOPLIST_KEY_UILaunchStoryboardName = "";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
@@ -1932,10 +1932,10 @@
 					"lib/ableton/**",
 					lib/ableton/asio,
 				);
-				INFOPLIST_KEY_CFBundleDisplayName = "nottawa - live visuals";
+				INFOPLIST_KEY_CFBundleDisplayName = Nottawa;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
-				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs to access the camera";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app needs to access the microphone";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Nottawa can use your camera as a video source";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Nottawa can use your microphone for live music analysis";
 				INFOPLIST_KEY_UILaunchStoryboardName = "";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				MACOSX_DEPLOYMENT_TARGET = 13.5;

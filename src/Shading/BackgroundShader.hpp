@@ -67,7 +67,7 @@ struct BackgroundShader: Shader {
   void drawSettings() override {
     
     
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
+    
   }
 };
 

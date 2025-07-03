@@ -18,34 +18,35 @@
 //#include <sentry.h>
 #include <fstream>
 #include <iostream>
+#include <mutex>
 
 using json = nlohmann::json;
 
 // Helper function to parse HTTPS URL into host and path
 // Returns false if parsing fails
 inline bool parseHttpsUrl(const std::string& url_str, std::string& host, std::string& path) {
-    const std::string scheme = "https://";
-    if (url_str.rfind(scheme, 0) != 0) {
-        log("Error: URL does not start with https:// : %s", url_str.c_str());
-        return false; // Not an HTTPS URL
-    }
-    size_t scheme_end = scheme.length();
-    size_t host_end = url_str.find('/', scheme_end);
-
-    if (host_end != std::string::npos) {
-        host = url_str.substr(scheme_end, host_end - scheme_end);
-        path = url_str.substr(host_end);
-    } else {
-        // URL is just "https://hostname"
-        host = url_str.substr(scheme_end);
-        path = "/"; // Default path
-    }
-
-    if (host.empty()) {
-       log("Error: Could not parse host from HTTPS URL: %s", url_str.c_str());
-       return false;
-    }
-    return true;
+  const std::string scheme = "https://";
+  if (url_str.rfind(scheme, 0) != 0) {
+    log("Error: URL does not start with https:// : %s", url_str.c_str());
+    return false; // Not an HTTPS URL
+  }
+  size_t scheme_end = scheme.length();
+  size_t host_end = url_str.find('/', scheme_end);
+  
+  if (host_end != std::string::npos) {
+    host = url_str.substr(scheme_end, host_end - scheme_end);
+    path = url_str.substr(host_end);
+  } else {
+    // URL is just "https://hostname"
+    host = url_str.substr(scheme_end);
+    path = "/"; // Default path
+  }
+  
+  if (host.empty()) {
+    log("Error: Could not parse host from HTTPS URL: %s", url_str.c_str());
+    return false;
+  }
+  return true;
 }
 
 const static std::string API_URL = "https://nottawa.app";
@@ -112,19 +113,19 @@ void LibraryService::repopulateVideoSourcesFromMainThread() {
 void LibraryService::fetchLibraryFiles()
 {
   std::string host, path;
-
+  
   // Parse the HTTPS URL
   if (!parseHttpsUrl(API_URL, host, path)) {
     log("Error: Could not parse API HTTPS URL: %s", API_URL.c_str());
     return;
   }
-
-  #ifndef CPPHTTPLIB_OPENSSL_SUPPORT
-    log("Error: HTTPS URL provided but httplib not compiled with SSL support for library files.");
-    std::cerr << "Error: HTTPS URL provided but httplib not compiled with SSL support for library files." << std::endl;
-    return;
-  #endif
-
+  
+#ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+  log("Error: HTTPS URL provided but httplib not compiled with SSL support for library files.");
+  std::cerr << "Error: HTTPS URL provided but httplib not compiled with SSL support for library files." << std::endl;
+  return;
+#endif
+  
   // Create SSL client directly
   httplib::SSLClient cli(host);
   
@@ -136,19 +137,19 @@ void LibraryService::fetchLibraryFiles()
   cli.set_connection_timeout(10, 0);
   cli.set_read_timeout(30, 0);
   cli.set_follow_location(true);
-
+  
   // Add a User-Agent header
   httplib::Headers headers = {
     { "User-Agent", "dude_wake_up_downloader/1.0" }
   };
-
+  
   auto res = cli.Get("/api/media", headers);
-
+  
   if (res && res->status == 200)
   {
     nlohmann::json json_body = nlohmann::json::parse(res->body);
     libraryFiles.clear();
-
+    
     for (auto &library_file : json_body)
     {
       LibraryFile file;
@@ -159,12 +160,12 @@ void LibraryService::fetchLibraryFiles()
       file.thumbnailUrl = library_file["thumbnailUrl"];
       file.filename = library_file["filename"];
       file.category = library_file["category"];
-
+      
       auto shared = std::make_shared<LibraryFile>(file);
       libraryFileIdDownloadedMap[file.id] = hasMediaOnDisk(shared);
       libraryFiles[file.id] = shared;
     }
-
+    
     didFetchLibraryFiles();
   }
   else
@@ -195,76 +196,84 @@ bool LibraryService::hasMediaOnDisk(std::shared_ptr<LibraryFile> file)
 void LibraryService::downloadThumbnail(std::shared_ptr<LibraryFile> file)
 {
   std::string host, path;
-
+  
   // Parse the HTTPS URL
   if (!parseHttpsUrl(file->thumbnailUrl, host, path)) {
     log("Error: Could not parse thumbnail HTTPS URL: %s", file->thumbnailUrl.c_str());
     std::cerr << "Error: Could not parse thumbnail HTTPS URL: " << file->thumbnailUrl << std::endl;
     return; // Stop if URL is invalid
   }
-
-  #ifndef CPPHTTPLIB_OPENSSL_SUPPORT
-    log("Error: HTTPS URL provided but httplib not compiled with SSL support for thumbnail download.");
-    std::cerr << "Error: HTTPS URL provided but httplib not compiled with SSL support for thumbnail download." << std::endl;
-    return; // Stop if SSL support is missing
-  #endif
-
+  
+#ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+  log("Error: HTTPS URL provided but httplib not compiled with SSL support for thumbnail download.");
+  std::cerr << "Error: HTTPS URL provided but httplib not compiled with SSL support for thumbnail download." << std::endl;
+  return; // Stop if SSL support is missing
+#endif
+  
   // Create SSL client directly
   httplib::SSLClient cli(host);
-
+  
   // --- Option 2: Disable Verification (Insecure) ---
   log("Warning: Disabling SSL server certificate verification! This is insecure.");
   cli.enable_server_certificate_verification(false);
   // --- End Option 2 ---
-
-
+  
+  
   // Common settings
   cli.set_follow_location(true);
   cli.set_connection_timeout(10, 0);
   cli.set_read_timeout(30, 0); // Thumbnails should be smaller
-
+  
   httplib::Headers headers = {
     { "User-Agent", "dude_wake_up_downloader/1.0" } // Add a user agent
   };
-
+  
   // Send GET request
   auto res = cli.Get(path.c_str(), headers);
-
+  
   if (res && res->status == 200)
   {
     std::string file_path = ConfigService::getService()->libraryFolderFilePath() + "/" + file->thumbnailFilename;
     std::ofstream file_stream(file_path, std::ios::binary);
     if (file_stream.is_open()) {
-        file_stream.write(res->body.data(), res->body.size());
-        file_stream.close();
-        log("Successfully downloaded thumbnail %s", file->thumbnailFilename.c_str());
+      file_stream.write(res->body.data(), res->body.size());
+      file_stream.close();
+      log("Successfully downloaded thumbnail %s", file->thumbnailFilename.c_str());
     } else {
       
-        log("Error: Failed to open thumbnail file %s for writing.", file_path.c_str());
-        std::cerr << "Error: Failed to open thumbnail file " << file_path << " for writing." << std::endl;
+      log("Error: Failed to open thumbnail file %s for writing.", file_path.c_str());
+      std::cerr << "Error: Failed to open thumbnail file " << file_path << " for writing." << std::endl;
     }
   }
   else
   {
     if (res) {
-        log("Error: Failed to download thumbnail %s. Status: %d", file->thumbnailFilename.c_str(), res->status);
-        std::cerr << "Error: Failed to download thumbnail " << file->thumbnailFilename << ". Status: " << res->status << std::endl;
+      log("Error: Failed to download thumbnail %s. Status: %d", file->thumbnailFilename.c_str(), res->status);
+      std::cerr << "Error: Failed to download thumbnail " << file->thumbnailFilename << ". Status: " << res->status << std::endl;
     } else {
-        auto err = res.error();
-        log("Error: Failed to download thumbnail %s. Error: %s (%d)", file->thumbnailFilename.c_str(), httplib::to_string(err).c_str(), static_cast<int>(err));
-        std::cerr << "Error: Failed to download thumbnail " << file->thumbnailFilename << ". Connection/request error: " << httplib::to_string(err) << std::endl;
+      auto err = res.error();
+      log("Error: Failed to download thumbnail %s. Error: %s (%d)", file->thumbnailFilename.c_str(), httplib::to_string(err).c_str(), static_cast<int>(err));
+      std::cerr << "Error: Failed to download thumbnail " << file->thumbnailFilename << ". Connection/request error: " << httplib::to_string(err) << std::endl;
     }
   }
 }
 
 void LibraryService::downloadAllThumbnails()
 {
+  // Perform thumbnail downloads sequentially to avoid spawning a large number
+  // of threads. This method is already executed on a background thread (see
+  // didFetchLibraryFiles), so blocking here will not stall the main/UI
+  // thread. Downloading one at a time also prevents excessive resource
+  // consumption that previously led to crashes.
   for (const auto &file : libraryFiles)
   {
-    if (hasThumbnailOnDisk(file.second))
-      continue;
+    if (hasThumbnailOnDisk(file.second)) {
+      continue;  // Skip if thumbnail already exists on disk
+    }
 
-    downloadFutures.push_back(std::async(std::launch::async, &LibraryService::downloadThumbnail, this, file.second));
+    // Download the thumbnail synchronously. The method handles its own error
+    // reporting and will block until the download completes (or fails).
+    downloadThumbnail(file.second);
   }
 }
 
@@ -273,7 +282,7 @@ void LibraryService::downloadAllThumbnails()
 void LibraryService::downloadFile(std::shared_ptr<LibraryFile> file, std::function<void()> callback)
 {
   std::string host, path;
-
+  
   // Parse the HTTPS URL
   if (!parseHttpsUrl(file->url, host, path)) {
     log("Error: Could not parse file HTTPS URL: %s", file->url.c_str());
@@ -281,53 +290,53 @@ void LibraryService::downloadFile(std::shared_ptr<LibraryFile> file, std::functi
     file->isDownloading = false; // Ensure flag is reset on parse error
     return; // Stop if URL is invalid
   }
-
-  #ifndef CPPHTTPLIB_OPENSSL_SUPPORT
-      log("Error: HTTPS URL provided but httplib not compiled with SSL support.");
-      std::cerr << "Error: HTTPS URL provided but httplib not compiled with SSL support." << std::endl;
-      file->isDownloading = false; // Ensure flag is reset
-      return; // Cannot proceed without SSL support
-  #endif
-
+  
+#ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+  log("Error: HTTPS URL provided but httplib not compiled with SSL support.");
+  std::cerr << "Error: HTTPS URL provided but httplib not compiled with SSL support." << std::endl;
+  file->isDownloading = false; // Ensure flag is reset
+  return; // Cannot proceed without SSL support
+#endif
+  
   // Create SSL client directly
   httplib::SSLClient cli(host);
   log("Using SSLClient for host: %s", host.c_str());
-
+  
   // --- Option 2: Disable Verification (Insecure) ---
   log("Warning: Disabling SSL server certificate verification! This is insecure.");
   cli.enable_server_certificate_verification(false);
   // --- End Option 2 ---
-
+  
   // Set reasonable timeouts to prevent hangs
   cli.set_connection_timeout(15, 0); // Increased connection timeout slightly
   cli.set_read_timeout(120, 0);      // Increased read timeout for potentially larger files
   cli.set_follow_location(true);     // Automatically follow redirects (e.g., HTTP 301/302)
-
+  
   // Add a User-Agent header - some servers require this
   httplib::Headers headers = {
     { "User-Agent", "dude_wake_up_downloader/1.0" }
   };
-
+  
   // Send GET request using the parsed path
   auto res = cli.Get(path.c_str(), headers,
-                      // Progress callback lambda
-                      [file](uint64_t current, uint64_t total) {
-                        // Log progress. Handle cases where server doesn't send total size (total == 0)
-                        if (!file->isDownloading) file->isDownloading = true; // Set flag on first progress update
-                        if (total > 0) {
-                          log("Download Progress: %llu / %llu", current, total);
-                          // Update progress only if total is known
-                          file->progress = (static_cast<double>(current) / static_cast<double>(total));
-                        } else {
-                          // Log bytes downloaded when total size is unknown
-                          log("Download Progress: %llu bytes / Unknown total", current);
-                          file->progress = -1.0f; // Indicate unknown/indeterminate progress
-                        }
-
-                        // Return true to continue the download, false to abort.
-                        return true;
-                      });
-
+                     // Progress callback lambda
+                     [file](uint64_t current, uint64_t total) {
+    // Log progress. Handle cases where server doesn't send total size (total == 0)
+    if (!file->isDownloading) file->isDownloading = true; // Set flag on first progress update
+    if (total > 0) {
+      log("Download Progress: %llu / %llu", current, total);
+      // Update progress only if total is known
+      file->progress = (static_cast<double>(current) / static_cast<double>(total));
+    } else {
+      // Log bytes downloaded when total size is unknown
+      log("Download Progress: %llu bytes / Unknown total", current);
+      file->progress = -1.0f; // Indicate unknown/indeterminate progress
+    }
+    
+    // Return true to continue the download, false to abort.
+    return true;
+  });
+  
   // Check the result of the GET request
   if (res && res->status == 200)
   {
@@ -335,36 +344,36 @@ void LibraryService::downloadFile(std::shared_ptr<LibraryFile> file, std::functi
     std::string file_path = ConfigService::getService()->libraryFolderFilePath() + "/" + file->filename;
     std::ofstream file_stream(file_path, std::ios::binary);
     if (file_stream.is_open()) {
-        file_stream.write(res->body.data(), res->body.size());
-        file_stream.close();
-        libraryFileIdDownloadedMap[file->id] = true;
-        log("Successfully downloaded file %s", file->filename.c_str());
-        file->isDownloading = false; // Reset flag on success
-        if (callback) {
-          MainApp::getApp()->executeOnMainThread([callback](){ 
-             callback();
-          });
-        }
+      file_stream.write(res->body.data(), res->body.size());
+      file_stream.close();
+      libraryFileIdDownloadedMap[file->id] = true;
+      log("Successfully downloaded file %s", file->filename.c_str());
+      file->isDownloading = false; // Reset flag on success
+      if (callback) {
+        MainApp::getApp()->executeOnMainThread([callback](){ 
+          callback();
+        });
+      }
     } else {
-        log("Error: Failed to open file %s for writing.", file_path.c_str());
-        std::cerr << "Error: Failed to open file " << file_path << " for writing." << std::endl;
-        file->isDownloading = false; // Reset flag on file error
-        // Consider adding error reporting or callback here
+      log("Error: Failed to open file %s for writing.", file_path.c_str());
+      std::cerr << "Error: Failed to open file " << file_path << " for writing." << std::endl;
+      file->isDownloading = false; // Reset flag on file error
+      // Consider adding error reporting or callback here
     }
   }
   else
   {
     // Handle HTTP errors or connection failures
     if (res) {
-       // Request completed but received an error status code (e.g., 404 Not Found, 500 Server Error)
-       log("Error: Failed to download file %s. URL: %s. Status: %d", file->filename.c_str(), file->url.c_str(), res->status);
-       std::cerr << "Error: Failed to download file " << file->filename << ". URL: " << file->url << ". Status: " << res->status << std::endl;
+      // Request completed but received an error status code (e.g., 404 Not Found, 500 Server Error)
+      log("Error: Failed to download file %s. URL: %s. Status: %d", file->filename.c_str(), file->url.c_str(), res->status);
+      std::cerr << "Error: Failed to download file " << file->filename << ". URL: " << file->url << ". Status: " << res->status << std::endl;
     } else {
-       // res is null, meaning the request failed at a lower level (e.g., connection timeout, DNS error, SSL handshake)
-       auto err = res.error();
-       // Log the error even without the explicit logger
-       log("Error: Failed to download file %s. URL: %s. Error: %s (%d)", file->filename.c_str(), file->url.c_str(), httplib::to_string(err).c_str(), static_cast<int>(err));
-       std::cerr << "Error: Failed to download file " << file->filename << ". URL: " << file->url << ". Connection/request error: " << httplib::to_string(err) << std::endl;
+      // res is null, meaning the request failed at a lower level (e.g., connection timeout, DNS error, SSL handshake)
+      auto err = res.error();
+      // Log the error even without the explicit logger
+      log("Error: Failed to download file %s. URL: %s. Error: %s (%d)", file->filename.c_str(), file->url.c_str(), httplib::to_string(err).c_str(), static_cast<int>(err));
+      std::cerr << "Error: Failed to download file " << file->filename << ". URL: " << file->url << ". Connection/request error: " << httplib::to_string(err) << std::endl;
     }
     file->isDownloading = false; // Reset downloading flag on failure
     // Consider adding error reporting or callback here
@@ -410,30 +419,30 @@ ShaderType shaderTypeFromName(const std::string& name) {
 // Fetches the shader credits from the server at /api/credits.
 // This is a GET request that returns a JSON object of the form:
 /*{[
-  {
-  "name": "Aerogel",
-  "credit": "Joe Crozier",
-  "description": "A shader that looks like aerogel"
-  }
-]
-}
+ {
+ "name": "Aerogel",
+ "credit": "Joe Crozier",
+ "description": "A shader that looks like aerogel"
+ }
+ ]
+ }
  */
 void LibraryService::fetchShaderCredits()
 {
   std::string host, path;
-
+  
   // Parse the HTTPS URL
   if (!parseHttpsUrl(API_URL, host, path)) {
     log("Error: Could not parse API HTTPS URL: %s", API_URL.c_str());
     return;
   }
-
-  #ifndef CPPHTTPLIB_OPENSSL_SUPPORT
-    log("Error: HTTPS URL provided but httplib not compiled with SSL support for shader credits.");
-    std::cerr << "Error: HTTPS URL provided but httplib not compiled with SSL support for shader credits." << std::endl;
-    return;
-  #endif
-
+  
+#ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+  log("Error: HTTPS URL provided but httplib not compiled with SSL support for shader credits.");
+  std::cerr << "Error: HTTPS URL provided but httplib not compiled with SSL support for shader credits." << std::endl;
+  return;
+#endif
+  
   // Create SSL client directly
   httplib::SSLClient cli(host);
   
@@ -445,32 +454,41 @@ void LibraryService::fetchShaderCredits()
   cli.set_connection_timeout(10, 0);
   cli.set_read_timeout(30, 0);
   cli.set_follow_location(true);
-
+  
   // Add a User-Agent header
   httplib::Headers headers = {
     { "User-Agent", "dude_wake_up_downloader/1.0" }
   };
-
+  
   auto res = cli.Get("/api/credits", headers);
-
+  
   if (res && res->status == 200)
   {
     json json_body = json::parse(res->body);
-    shaderCredits.clear();
-
+    {
+      std::lock_guard<std::mutex> lock(shaderCreditsMutex);
+      shaderCredits.clear();
+    }
+    
     for (auto& shader : json_body) {
       std::string shaderName = shader["name"];
       std::string credit = shader["credit"];
       std::string description = shader["description"];
       ShaderType type = shaderTypeFromName(shaderName);
       if (type != ShaderTypeNone) {
-        shaderCredits.emplace(type, std::make_shared<Credit>(shaderName, credit, description));
+        {
+          std::lock_guard<std::mutex> lock(shaderCreditsMutex);
+          shaderCredits.emplace(type, std::make_shared<Credit>(shaderName, credit, description));
+        }
       } else {
-//        log("Warning: Unknown shader type name in credits: %s", shaderName.c_str());
+        //        log("Warning: Unknown shader type name in credits: %s", shaderName.c_str());
       }
     }
-
-    log("Successfully fetched %zu shader credits", shaderCredits.size());
+    
+    {
+      std::lock_guard<std::mutex> lock(shaderCreditsMutex);
+      log("Successfully fetched %zu shader credits", shaderCredits.size());
+    }
   }
   else
   {
@@ -491,15 +509,17 @@ void LibraryService::backgroundFetchShaderCredits()
 
 std::shared_ptr<Credit> LibraryService::getShaderCredit(ShaderType type)
 {
+  std::lock_guard<std::mutex> lock(shaderCreditsMutex);
   auto it = shaderCredits.find(type);
   if (it != shaderCredits.end()) {
     return it->second;
   }
-  return nullptr; // Return nullptr if no credit found
+  return nullptr;
 }
 
 bool LibraryService::hasCredit(ShaderType type)
 {
+  std::lock_guard<std::mutex> lock(shaderCreditsMutex);
   return shaderCredits.find(type) != shaderCredits.end();
 }
 
@@ -514,7 +534,7 @@ void LibraryService::submitFeedback(const std::string &text,
 {
   // Launch in background similar to other async operations
   downloadFutures.push_back(std::async(std::launch::async, [=]() {
-
+    
     std::string host, dummy;
     if (!parseHttpsUrl(API_URL, host, dummy)) {
       if (callback) {
@@ -524,7 +544,7 @@ void LibraryService::submitFeedback(const std::string &text,
       }
       return;
     }
-
+    
 #ifndef CPPHTTPLIB_OPENSSL_SUPPORT
     if (callback) {
       MainApp::getApp()->executeOnMainThread([callback]() {
@@ -538,11 +558,11 @@ void LibraryService::submitFeedback(const std::string &text,
     cli.set_connection_timeout(15, 0);
     cli.set_read_timeout(60, 0);
     cli.set_follow_location(true);
-
+    
     httplib::Headers headers = {
       {"User-Agent", "dude_wake_up_downloader/1.0"}
     };
-
+    
     httplib::MultipartFormDataItems items;
     items.push_back({"text", text, "", "text/plain"});
     items.push_back({"state", stateJson, "", "application/json"});
@@ -555,10 +575,10 @@ void LibraryService::submitFeedback(const std::string &text,
     if (!email.empty()) {
       items.push_back({"email", email, "", "text/plain"});
     }
-
+    
     auto res = cli.Post("/api/feedback/new", headers, items);
 #endif
-
+    
     bool ok = false;
     std::string err;
     if (res && ((res->status == 201) || res->status == 200)) {
@@ -571,7 +591,7 @@ void LibraryService::submitFeedback(const std::string &text,
         err = "Network error";
       }
     }
-
+    
     // Invoke callback on main thread
     if (callback) {
       MainApp::getApp()->executeOnMainThread([callback, ok, err]() {

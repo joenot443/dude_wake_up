@@ -27,10 +27,9 @@ public:
   std::shared_ptr<AudioSource> selectedAudioSource;
   std::shared_ptr<AudioTrack> selectedSampleTrack;
   std::shared_ptr<Parameter> selectedSampleTrackParam;
-  ableton::Link link;
+  std::shared_ptr<ableton::Link> link;
 
-  AudioSourceService() : selectedSampleTrackParam(std::make_shared<Parameter>("Sample Track", ParameterType_Int)),
-  link(120)
+  AudioSourceService() : selectedSampleTrackParam(std::make_shared<Parameter>("Sample Track", ParameterType_Int))
   {};
   
   static AudioSourceService *getService() {
@@ -57,6 +56,8 @@ public:
   std::shared_ptr<AudioSource> audioSourceForParamId(std::string paramId);
 
   void removeParamMapping(std::string paramId);
+  
+  void setupAbleton();
 
   json config() override;
   void loadConfig(json j) override;

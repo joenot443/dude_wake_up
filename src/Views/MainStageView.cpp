@@ -97,32 +97,33 @@ void MainStageView::draw()
   
   if (ImGui::GetContentRegionAvail().x < 10) { return; }
   
-  ImGui::BeginChild("##libraryOscillatorBrowser", browserSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
-  
-  if (ImGui::BeginTabBar("##LibraryOscillatorTabBar")) {
+  if (ImGui::BeginChild("##libraryOscillatorBrowser", browserSize, ImGuiChildFlags_None, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
     
-    // My Strands Tab
-    if (ImGui::BeginTabItem("My Strands", 0, LayoutStateService::getService()->utilityPanelTab == 0 ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
-      // Set the tab if user clicks manually
-      strandBrowserView.draw();
-      ImGui::EndTabItem();
-    }
-    if (ImGui::IsItemClicked()) {
-      LayoutStateService::getService()->utilityPanelTab = 0;
-    }
-    
-    // Oscillators Tab
-    if (ImGui::BeginTabItem("Oscillators", 0, LayoutStateService::getService()->utilityPanelTab == 1 ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
-      // Set the tab if user clicks manually
-      oscillatorPanelView.draw();
+    if (ImGui::BeginTabBar("##LibraryOscillatorTabBar")) {
       
-      ImGui::EndTabItem();
+      // My Strands Tab
+      if (ImGui::BeginTabItem("My Strands", 0, LayoutStateService::getService()->utilityPanelTab == 0 ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
+        // Set the tab if user clicks manually
+        strandBrowserView.draw();
+        ImGui::EndTabItem();
+      }
+      if (ImGui::IsItemClicked()) {
+        LayoutStateService::getService()->utilityPanelTab = 0;
+      }
+      
+      // Oscillators Tab
+      if (ImGui::BeginTabItem("Oscillators", 0, LayoutStateService::getService()->utilityPanelTab == 1 ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
+        // Set the tab if user clicks manually
+        oscillatorPanelView.draw();
+        
+        ImGui::EndTabItem();
+      }
+      if (ImGui::IsItemClicked()) {
+        LayoutStateService::getService()->utilityPanelTab = 1;
+      }
+      
+      ImGui::EndTabBar();
     }
-    if (ImGui::IsItemClicked()) {
-      LayoutStateService::getService()->utilityPanelTab = 1;
-    }
-    
-    ImGui::EndTabBar();
   }
   
   ImGui::EndChild();

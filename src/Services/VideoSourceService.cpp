@@ -318,7 +318,9 @@ std::shared_ptr<VideoSource> VideoSourceService::makeFileVideoSource(std::string
   }
   
   // At this point, we have successfully resolved the bookmark and accessed the resource
-  videoSource = std::make_shared<FileSource>(id, name, path);
+  // Trim the extension from the name
+  std::string nameWithoutExtension = name.substr(0, name.find_last_of('.'));
+  videoSource = std::make_shared<FileSource>(id, nameWithoutExtension, path);
   videoSource->origin = origin;
   
   // Release CF objects
@@ -619,6 +621,14 @@ void VideoSourceService::captureOutputWindowScreenshot()
   
   std::shared_ptr<ofFbo> fbo = lastOutputWindow->fbo;
   
+  // Present a save dialog to the user
+  std::string defaultName = "nottawa_" + ofGetTimestampString() + ".jpg";
+  ofFileDialogResult result = ofSystemSaveDialog(defaultName, "Save Screenshot");
+  if (!result.bSuccess) {
+    return; // user cancelled
+  }
+  std::string filePath = result.getPath();
+  
   // Create an ofImage to store the pixels
   ofImage image;
   
@@ -630,14 +640,12 @@ void VideoSourceService::captureOutputWindowScreenshot()
   fbo->readToPixels(image.getPixels());
   fbo->unbind();
   
-  // Construct the full file path for the screenshot
-  std::string filePath = ConfigService::getService()->exportsFolderFilePath() + "/nottawa_" + ofGetTimestampString() + ".jpg";
-  
   // Save the image to the specified file path
   if (ofSaveImage(image.getPixels(), filePath)) {
     ofLog() << "Screenshot saved to " << filePath;
     
-    std::string command = "open " + ConfigService::getService()->exportsFolderFilePath();
+    // Open the destination folder in Finder (macOS only)
+    std::string command = "open \"" + ofFilePath::getEnclosingDirectory(filePath) + "\"";
     std::system(command.c_str());
   } else {
     ofLog() << "Failed";

@@ -34,6 +34,7 @@ public:
   std::shared_ptr<Parameter> boomerang;
   std::shared_ptr<Parameter> speed;
   std::shared_ptr<Parameter> mute;
+  bool playing = false; 
   void setup() override;
   void updateSettings();
   void saveFrame() override;

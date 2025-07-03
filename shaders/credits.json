@@ -2,733 +2,733 @@
   "credits": [
     {
       "name": "16bit",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "abelcamarena",
+      "description": ""
     },
     {
       "name": "Aerogel",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "DerShade",
+      "description": ""
     },
     {
       "name": "AlphaMix",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Ascii",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "movAX13h",
+      "description": ""
     },
     {
-      "name": "AudioBlocks",
-      "credit": "Credit",
-      "description": "Description"
+      "name": "Blocks",
+      "credit": "movAX13h",
+      "description": ""
     },
     {
-      "name": "AudioBumper",
-      "credit": "Credit",
-      "description": "Description"
+      "name": "Bumper",
+      "credit": "",
+      "description": ""
     },
     {
       "name": "AudioCircle",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "AudioMountains",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "AudioWaveform",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Autotangent",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Background",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Blend",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Blur",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "BlurryTrail",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Bounce",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Breathe",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Canny",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "ChromeGrill",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Circle",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "CirclePath",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Clouds",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "CloudyShapes",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "CloudyTunnel",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "ColorKeyMaskMaker",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "ColorOverlay",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "ColorPass",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "ColorStepper",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "ColorSwap",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "ColorWheel",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "ColoredDrops",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Comicbook",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Companions",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Core",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Cosmos",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Crosshatch",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Cubify",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "CurlySquares",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Cyber Run",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Dancing Squares",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Diffractor",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "DirtyPlasma",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Disco Audio",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Disco",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Dither",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "DoubleBlur",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Empty",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Feedback",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Fibers",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Fireflies",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "FishEye",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Flicker Audio",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Floating Sparks",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Fractal",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "FractalAudio",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Frequency Visualizer",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "FrequencyVisualizer",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Fuji",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "FullHouse",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Galaxy",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Gameboy",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Glitch Audio",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Glitch RGB",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Glitch",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "GlitchDigital",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "GodRay",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Gyroids",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Half Tone",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Heptagons",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Hilbert",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Hsb",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Isofractal",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Kaleidoscope",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Limbo",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Liquid",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "LumaFeedback",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "LumaMaskMaker",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Mask",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Melt",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "MinMixer",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Mirror",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Mist",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "Mix",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "MotionBlurTexture",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Mountains",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "mi_ku",
+      "description": ""
     },
     {
-      "name": "MultiMix",
-      "credit": "Credit",
-      "description": "Description"
+      "name": "Waveform",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Autotangent",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Background",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Blend",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Blur",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "BlurryTrail",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Bounce",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Breathe",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Canny",
+      "credit": "starea",
+      "description": ""
+    },
+    {
+      "name": "Chrome Grill",
+      "credit": "airtight",
+      "description": ""
+    },
+    {
+      "name": "Circle",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "CirclePath",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Clouds",
+      "credit": "drift",
+      "description": ""
+    },
+    {
+      "name": "Cloudy Shapes",
+      "credit": "Kaneta",
+      "description": ""
+    },
+    {
+      "name": "CloudyTunnel",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "ColorKeyMaskMaker",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Color Overlay",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "ColorPass",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "ColorStepper",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "ColorSwap",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "ColorWheel",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Colored Drops",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Comicbook",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Companions",
+      "credit": "pb",
+      "description": ""
+    },
+    {
+      "name": "Core",
+      "credit": "kishimisu",
+      "description": ""
+    },
+    {
+      "name": "Cosmos",
+      "credit": "berelium",
+      "description": ""
+    },
+    {
+      "name": "Crosshatch",
+      "credit": "morgan3d",
+      "description": ""
+    },
+    {
+      "name": "Cubify",
+      "credit": "starmole2",
+      "description": ""
+    },
+    {
+      "name": "Curly",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Cyber Run",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Dancing Squares",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Diffractor",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "DirtyPlasma",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Disco Audio",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Disco",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Dither",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "DoubleBlur",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Empty",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Feedback",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Fibers",
+      "credit": "Kamoshika",
+      "description": ""
+    },
+    {
+      "name": "Fireflies",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "FishEye",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Flicker Audio",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Floating Sparks",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Fractal",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "FractalAudio",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Frequency Visualizer",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "FrequencyVisualizer",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Fuji",
+      "credit": "kaiware007",
+      "description": ""
+    },
+    {
+      "name": "Full House",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Galaxy",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Gameboy",
+      "credit": "iq",
+      "description": ""
+    },
+    {
+      "name": "Glitch Audio",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Glitch RGB",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Glitch",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Digital",
+      "credit": "int_45h",
+      "description": ""
+    },
+    {
+      "name": "GodRay",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Gyroids",
+      "credit": "tubeman",
+      "description": ""
+    },
+    {
+      "name": "Half Tone",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Heptagons",
+      "credit": "Shane",
+      "description": ""
+    },
+    {
+      "name": "Hilbert",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "HSB",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Isofractal",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Kaleidoscope",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Limbo",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Liquid",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "LumaFeedback",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "LumaMaskMaker",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Mask",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Melter",
+      "credit": "tomorrowevening",
+      "description": ""
+    },
+    {
+      "name": "MinMixer",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Mirror",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Mist",
+      "credit": "lsdlive",
+      "description": ""
+    },
+    {
+      "name": "Mix",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Motion Blur",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Mountains",
+      "credit": "",
+      "description": ""
+    },
+    {
+      "name": "Multi Mix",
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Octagrams",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "whisky_shusuky",
+      "description": ""
     },
     {
       "name": "Octahedron",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "iq",
+      "description": ""
     },
     {
       "name": "OldTV",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "Coldberg",
+      "description": ""
     },
     {
-      "name": "OneBitDither",
-      "credit": "Credit",
-      "description": "Description"
+      "name": "1b-Dither",
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Outline",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Paint",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Perplexion",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
-      "name": "PieSplit",
-      "credit": "Credit",
-      "description": "Description"
+      "name": "Pie Split",
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Pixel",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "PixelAudioParty",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "PixelPlay",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "armonnaeini",
+      "description": ""
     },
     {
       "name": "Plasma",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "jolle",
+      "description": ""
     },
     {
       "name": "PlasmaTwo",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "triggerHLM",
+      "description": ""
     },
     {
       "name": "Plasmor",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Psycurves",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "RGBShift",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "RainbowRotator",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Reflector",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "mrange",
+      "description": ""
     },
     {
       "name": "Resize",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Rings",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "Flypig",
+      "description": ""
     },
     {
       "name": "Rotate",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Rubiks",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "tdhooper",
+      "description": ""
     },
     {
       "name": "Scratchy",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Shader_glitch",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
-      "name": "SimpleBars",
-      "credit": "Credit",
-      "description": "Description"
+      "name": "Simple Bars",
+      "credit": "",
+      "description": ""
     },
     {
-      "name": "SimplePath",
-      "credit": "Credit",
-      "description": "Description"
+      "name": "Simple Path",
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Slider",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
-      "name": "SlidingFrame",
-      "credit": "Credit",
-      "description": "Description"
+      "name": "Sliding Frame",
+      "credit": "",
+      "description": ""
     },
     {
       "name": "SmokeRing",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Snowfall",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Sobel",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "SolidColor",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
-      "name": "SpaceRings",
-      "credit": "Credit",
-      "description": "Description"
+      "name": "Space Rings",
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Spiral",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "StaticFrame",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Stellar",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "StrangeScreen",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Stroke",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Swirl",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
-      "name": "SwirlingSoul",
-      "credit": "Credit",
-      "description": "Description"
+      "name": "Swirling Soul",
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Switcher",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "TextureMask",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Tile",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Tissue",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "zozuar",
+      "description": ""
+    },
+    {
+      "name": "Transform",
+      "credit": "",
+      "description": ""
     },
     {
       "name": "TraceAudio",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "TriangleMap",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "Shane",
+      "description": ""
     },
     {
       "name": "Triple",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "TwistedCubes",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
-      "name": "TwistedTrip",
-      "credit": "Credit",
-      "description": "Description"
+      "name": "Twisteder",
+      "credit": "",
+      "description": ""
     },
     {
-      "name": "UnknownPleasures",
-      "credit": "Credit",
-      "description": "Description"
+      "name": "Britpop",
+      "credit": "Ayoub",
+      "description": ""
     },
     {
       "name": "VHS",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "src3453",
+      "description": ""
     },
     {
       "name": "VHS2",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Vertex",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "VoronoiColumns",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Warp",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "trinketMage",
+      "description": ""
     },
     {
       "name": "Warpspeed",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Wavy",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
       "name": "Web",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     },
     {
-      "name": "WelcomeRings",
-      "credit": "Credit",
-      "description": "Description"
+      "name": "Glowing Rings",
+      "credit": "iq",
+      "description": ""
     },
     {
       "name": "Wobble",
-      "credit": "Credit",
-      "description": "Description"
-    },
-    {
-      "name": "unnamed",
-      "credit": "Credit",
-      "description": "Description"
+      "credit": "",
+      "description": ""
     }
   ]
 }

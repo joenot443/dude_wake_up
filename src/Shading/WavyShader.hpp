@@ -67,7 +67,7 @@ struct WavyShader: Shader {
   void drawSettings() override {
     CommonViews::H3Title("Wavy");
 
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
+    
   }
 };
 

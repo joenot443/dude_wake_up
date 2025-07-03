@@ -83,22 +83,24 @@ void OscillatorView::draw(std::vector<std::tuple<std::shared_ptr<Oscillator>, st
     }
     ImGui::SameLine(0, 10);
     
-    ImGui::BeginChild(formatString("##child%s", value->paramId.c_str()).c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 200));
+    ImGui::BeginChild(formatString("##child%s", value->paramId.c_str()).c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 200), ImGuiChildFlags_None, ImGuiWindowFlags_NoScrollbar);
+    ImGui::PushFont(FontService::getService()->current->sm);
     // Draw regular sliders
     if (ImGui::GetContentRegionAvail().x > 120.0) {
       ImGui::VSliderFloat(formatString("##freq%s%s", value->name.c_str(), value->paramId.c_str()).c_str(),
-                          ImVec2(40, 120), &waveformOscillator->frequency->value, 0.0f,
+                          ImVec2(38, 120), &waveformOscillator->frequency->value, 0.0f,
                           100.0f, "Freq.\n%.2f", ImGuiSliderFlags_Logarithmic);
       ImGui::SameLine();
       ImGui::VSliderFloat(formatString("##amp%s%s", value->name.c_str(), value->paramId.c_str()).c_str(),
-                          ImVec2(40, 120), &waveformOscillator->amplitude->value, 0.0f,
+                          ImVec2(38, 120), &waveformOscillator->amplitude->value, 0.0f,
                           waveformOscillator->amplitude->max, "Amp.\n%.2f",
                           ImGuiSliderFlags_None);
       ImGui::SameLine();
       ImGui::VSliderFloat(formatString("##shift%s%s", value->name.c_str(), value->paramId.c_str()).c_str(),
-                          ImVec2(40, 120), &waveformOscillator->shift->value,
+                          ImVec2(38, 120), &waveformOscillator->shift->value,
                           -value->max * 2, value->max * 2, "Shift\n%.2f");
     }
+    
     // Draw mini sliders
     else {
       ImGui::VSliderFloat(formatString("##freq%s%s", value->name.c_str(), value->paramId.c_str()).c_str(),
@@ -114,6 +116,7 @@ void OscillatorView::draw(std::vector<std::tuple<std::shared_ptr<Oscillator>, st
                           ImVec2(15, 130), &waveformOscillator->shift->value,
                           -value->max * 2, value->max * 2, "S");
     }
+    ImGui::PopFont();
     
 
     ImGui::SameLine();
@@ -126,6 +129,7 @@ void OscillatorView::draw(std::vector<std::tuple<std::shared_ptr<Oscillator>, st
     if (CommonViews::IconButton(ICON_MD_CLOSE, value->paramId.c_str())) {
       waveformOscillator->enabled->setBoolValue(false);
     }
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
     CommonViews::ShaderOption(waveformOscillator->waveShape, {
       "Sine Wave", "Square", "Sawtooth", "Triangle",
       "Pulse", "Exp. Sine", "Harmonic", "Rectified",

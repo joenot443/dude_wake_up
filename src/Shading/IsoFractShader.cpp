@@ -12,9 +12,9 @@
 void IsoFractShader::shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) {  
   canvas->begin();
   shader.begin();
-  if (lastFrame->isAllocated()) {
-    shader.setUniformTexture("tex", lastFrame->getTexture(), 4);
-  }
+//  if (lastFrame->isAllocated()) {
+//    shader.setUniformTexture("tex", lastFrame->getTexture(), 4);
+//  }
   shader.setUniform1f("time", ofGetElapsedTimef());
   shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
   shader.setUniform1f("alpha", settings->alpha->value);

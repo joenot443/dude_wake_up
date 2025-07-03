@@ -74,7 +74,7 @@ struct FrequencyVisualizerShader : Shader
     shader.setUniform1f("verticalBarCount", settings->verticalBarCountParam->value);
     shader.setUniform1f("horizontalSpacing", settings->horizontalSpacingParam->value);
     shader.setUniform1f("verticalSpacing", settings->verticalSpacingParam->value);
-    if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() > 0)
+    if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() == 256)
       shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0],
                            256);
 

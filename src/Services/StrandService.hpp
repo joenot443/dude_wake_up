@@ -61,6 +61,7 @@ public:
   void addStrand(std::shared_ptr<AvailableStrand> strand);
   void removeStrand(std::string id);
   std::string savePreview(std::string name, std::shared_ptr<Connectable> connectable);
+  std::string savePreviewToPath(std::string fullPath, std::shared_ptr<Connectable> connectable);
   std::string strandPreviewPath(std::string name);
   void clear();
 

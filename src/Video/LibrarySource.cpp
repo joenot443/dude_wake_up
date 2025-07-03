@@ -114,7 +114,7 @@ void LibrarySource::drawPreviewSized(ImVec2 size) {
     ImGui::Dummy(ImVec2(1.0, size.y / 2.0 - 10.0f));
     ImGui::Dummy(ImVec2(size.x / 2.0 - 10.0f, 1.0)); ImGui::SameLine();
     ImGui::Text("%.1f%%", libraryFile->progress * 100.0f);
-    
+    ImGui::Dummy(ImVec2(1.0, size.y / 2.0 - 10.0f));
     ImGui::PopFont();
     return;
   }
