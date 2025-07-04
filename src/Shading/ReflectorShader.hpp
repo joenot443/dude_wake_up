@@ -56,7 +56,7 @@ struct ReflectorShader: Shader {
     shader.setUniform1f("poly_u", settings->polyU->value);
     shader.setUniform1f("poly_v", settings->polyV->value);
     shader.setUniform1f("poly_w", settings->polyW->value);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);

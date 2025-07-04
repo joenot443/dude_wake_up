@@ -78,7 +78,7 @@ public:
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("amount", settings->amount->value);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("noiseScale", settings->noiseScale->value);
     shader.setUniform1f("warpSpeed", settings->warpSpeed->value);

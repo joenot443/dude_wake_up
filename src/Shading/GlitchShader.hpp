@@ -59,7 +59,7 @@ public:
     ofClear(0,0,0, 255);
     ofClear(0,0,0, 0);
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform1f("amount", settings->amount->value);
     shader.setUniform1f("blockSize", settings->blockSize->value);
     shader.setUniform1f("aberrationAmount", settings->aberrationAmount->value);

@@ -31,6 +31,8 @@
 		028651732D94699B000CE0D4 /* kiss_fft.c in Sources */ = {isa = PBXBuildFile; fileRef = 028651722D94699B000CE0D4 /* kiss_fft.c */; };
 		028651B12D95E331000CE0D4 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 028651AF2D95E208000CE0D4 /* icon.icns */; };
 		02AB2F0F2DE0DA2A004EDB3F /* CreditView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02AB2F0E2DE0DA2A004EDB3F /* CreditView.cpp */; };
+		02F157C82E1722E0003B6C2A /* TimePanelView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F157C72E1722E0003B6C2A /* TimePanelView.cpp */; };
+		02F157CB2E1722FE003B6C2A /* TimeService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F157CA2E1722FE003B6C2A /* TimeService.cpp */; };
 		"02F78074-12C3-4CFB-8B4D-C894E1498010" /* MidiService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "DD20483B-50DE-4F4F-85AC-74CAF3C8F56E" /* MidiService.cpp */; };
 		"049D0DB9-223D-432B-B78A-7CACA8EF4DC2" /* ShaderChainerService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "7AA1FB17-DC75-48A4-A385-A676D62B3120" /* ShaderChainerService.cpp */; };
 		"079B0752-2526-4BBA-9324-CE639AE697AC" /* StrandBrowserWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "2F9BBD61-7014-4808-BAE7-47E7E9C9D814" /* StrandBrowserWindow.cpp */; };
@@ -257,6 +259,10 @@
 		02AB2F0E2DE0DA2A004EDB3F /* CreditView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CreditView.cpp; sourceTree = "<group>"; };
 		02D115332DC94674007B87CE /* AudioSettings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AudioSettings.hpp; sourceTree = "<group>"; };
 		02D115342DC94674007B87CE /* AudioTrack.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AudioTrack.hpp; sourceTree = "<group>"; };
+		02F157C62E1722E0003B6C2A /* TimePanelView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TimePanelView.hpp; sourceTree = "<group>"; };
+		02F157C72E1722E0003B6C2A /* TimePanelView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TimePanelView.cpp; sourceTree = "<group>"; };
+		02F157C92E1722FE003B6C2A /* TimeService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TimeService.hpp; sourceTree = "<group>"; };
+		02F157CA2E1722FE003B6C2A /* TimeService.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TimeService.cpp; sourceTree = "<group>"; };
 		"032514A0-BDF2-4207-8C2E-4E219F57DDB7" /* ShaderType.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ShaderType.hpp; sourceTree = "<group>"; };
 		"035910F8-2281-4AB1-BC6E-A929EF8696B3" /* DiffractorShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DiffractorShader.hpp; sourceTree = "<group>"; };
 		"04688250-5838-4B1B-92ED-5B96B4C2ED1D" /* EngineGLFW.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = EngineGLFW.h; sourceTree = "<group>"; };
@@ -940,6 +946,8 @@
 				"CBAB67C0-2C70-4118-B9A0-24C031E77F85" /* MainStageView.hpp */,
 				"745D683C-76A5-4B68-A6D0-072F2064483A" /* MarkdownView.cpp */,
 				"8F352EFB-9B56-401F-816B-E95D0A4467C3" /* MarkdownView.hpp */,
+				02F157C62E1722E0003B6C2A /* TimePanelView.hpp */,
+				02F157C72E1722E0003B6C2A /* TimePanelView.cpp */,
 				"B4C24936-3A60-49E4-992C-A47A70D7A969" /* NodeShaderBrowserView.cpp */,
 				"ABAB0578-2BE4-4DDD-B2E3-38424FF45374" /* NodeShaderBrowserView.hpp */,
 				"B1D53039-B877-4019-B941-4E86FB70764B" /* NodeVideoSourceBrowserView.cpp */,
@@ -1020,6 +1028,8 @@
 		"841E7815-3983-46EF-8781-05F551EF2044" /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				02F157C92E1722FE003B6C2A /* TimeService.hpp */,
+				02F157CA2E1722FE003B6C2A /* TimeService.cpp */,
 				"7F4BC1CB-3E5B-48BC-9A10-FE5E3C1E167A" /* ActionService.cpp */,
 				"0044A1EF-1940-4F50-A282-73DB18019DF2" /* ActionService.hpp */,
 				"2A3F25C1-6CD6-49EF-8B45-D1542CF0EF20" /* AudioSourceService.cpp */,
@@ -1655,6 +1665,7 @@
 				"A4F0C022-839E-40AC-94AA-F5618732CB3F" /* Strings.cpp in Sources */,
 				"6B5C2CB4-112C-42E6-BBBC-6A7072193C5D" /* AvailableVideoSource.cpp in Sources */,
 				"0DD26806-FE9C-4B5D-8B71-48DF4D89DC14" /* FileSource.cpp in Sources */,
+				02F157CB2E1722FE003B6C2A /* TimeService.cpp in Sources */,
 				"6E71B313-9099-46C2-831A-3BD4AB9435AF" /* IconSource.cpp in Sources */,
 				"7E7EDE83-05FC-4B78-90E1-9F83F7FC7A3A" /* ImageSource.cpp in Sources */,
 				"8EE51117-B3A7-4F95-B891-99B66AB5ED0F" /* LibrarySource.cpp in Sources */,
@@ -1714,6 +1725,7 @@
 				"790DBE16-E73B-4C5E-BF78-804335431710" /* DefaultTheme.cpp in Sources */,
 				"D527D466-386F-4118-B77B-3EC8042F86AE" /* EngineGLFW.cpp in Sources */,
 				"EDAC7014-A151-4A82-83A8-0161F4447AE2" /* EngineOpenFrameworks.cpp in Sources */,
+				02F157C82E1722E0003B6C2A /* TimePanelView.cpp in Sources */,
 				"ED8949F5-517B-4439-BC72-2C6BF3CF9B5D" /* EngineOpenGLES.cpp in Sources */,
 				"249333AA-04EA-440D-9539-A9E1129A3321" /* Gui.cpp in Sources */,
 				02AB2F0F2DE0DA2A004EDB3F /* CreditView.cpp in Sources */,

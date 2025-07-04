@@ -63,7 +63,7 @@ struct VertexShader: Shader {
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform3f("color", settings->color->color->data()[0], settings->color->color->data()[1], settings->color->color->data()[2]);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("layerCount", settings->layerCount->value);
     shader.setUniform1f("netSpeed", settings->netSpeed->value * 0.1);

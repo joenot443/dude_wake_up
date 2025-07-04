@@ -70,7 +70,7 @@ struct GlitchDigitalShader: Shader {
       shader.setUniformTexture("tex2", texture->fbo.getTexture(), 8);
     }
     shader.setUniform1f("shaderValue", settings->shaderValue->value);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform1f("amount", settings->amount->value);
     shader.setUniform1f("threshold", settings->threshold->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());

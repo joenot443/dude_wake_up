@@ -11,6 +11,7 @@
 #include "Parameter.hpp"
 #include "MidiService.hpp"
 #include "ParameterService.hpp"
+#include "TimeService.hpp"
 #include "Oscillator.hpp"
 #include "JSONSerializable.hpp"
 #include "json.hpp"

@@ -61,7 +61,7 @@ struct ColoredDropsShader: Shader {
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("zoom", settings->zoom->value);
     shader.setUniform1f("brightness", settings->brightness->value);
-    shader.setUniform1f("time", ofGetElapsedTimef() * settings->speed->value);
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value * settings->speed->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform3f("color1", settings->color1->color->data()[0], settings->color1->color->data()[1], settings->color1->color->data()[2]);
     shader.setUniform3f("color2", settings->color2->color->data()[0], settings->color2->color->data()[1], settings->color2->color->data()[2]);

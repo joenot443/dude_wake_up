@@ -59,7 +59,7 @@ struct ColorStepperShader: Shader {
     shader.setUniform1f("speed", settings->speed->max - settings->speed->value);
     shader.setUniform1f("smoothness", settings->smoothness->value);
     shader.setUniform1f("amount", settings->amount->value);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
     shader.end();

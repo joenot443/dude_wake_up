@@ -50,7 +50,7 @@ struct WelcomeRingsShader: Shader {
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("cycles", settings->cycles->value);
     shader.setUniform1i("palette", settings->palette->intValue);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
     shader.end();

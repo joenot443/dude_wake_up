@@ -80,7 +80,7 @@ struct TripleShader : Shader
     shader.setUniform1i("blendMode", settings->blendMode->intValue);
     shader.setUniform1i("drawRight", settings->drawRight->boolValue);
     shader.setUniform1i("drawCenter", settings->drawCenter->boolValue);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
     shader.end();

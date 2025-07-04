@@ -81,7 +81,7 @@ public:
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform1f("spread", settings->spread->value);
     shader.setUniform1f("cycles", settings->cycles->value); 
     shader.setUniform1f("speed", settings->speed->value);

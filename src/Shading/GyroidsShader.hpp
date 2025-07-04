@@ -67,7 +67,7 @@ struct GyroidsShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("paletteMorph", settings->paletteMorph->value);
     shader.setUniform1f("gyroidComplexity", settings->gyroidComplexity->value);

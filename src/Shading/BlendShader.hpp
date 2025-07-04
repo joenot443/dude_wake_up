@@ -129,7 +129,7 @@ struct BlendShader: Shader {
 
       // Use the specific blendModeIndex for the preview
       shader.setUniform1i("mode", blendModeIndex);
-      shader.setUniform1f("time", ofGetElapsedTimef());
+      shader.setUniform1f("time", TimeService::getService()->timeParam->value);
       shader.setUniform1f("alpha", settings->alpha->value);
       shader.setUniform2f("dimensions", destFbo->getWidth(), destFbo->getHeight());
 
@@ -241,7 +241,7 @@ struct BlendShader: Shader {
       destFbo->begin();
       shader.begin();
       shader.setUniform1i("mode", settings->mode->intValue);
-      shader.setUniform1f("time", ofGetElapsedTimef());
+      shader.setUniform1f("time", TimeService::getService()->timeParam->value);
       shader.setUniform1f("alpha", settings->alpha->value);
       shader.setUniform1f("amount", settings->amount->value);
       shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());

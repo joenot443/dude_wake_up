@@ -39,7 +39,7 @@ public:
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
     shader.begin();
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     auto source = AudioSourceService::getService()->selectedAudioSource;
     if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() > 0)

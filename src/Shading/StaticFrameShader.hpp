@@ -61,7 +61,7 @@ struct StaticFrameShader: Shader {
     }
     
     shader.setUniformTexture("tex", StaticFrame->getTexture(), 4);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform1f("lineWidth", settings->lineWidth->value);
     shader.setUniform1f("dividerPosition", settings->position->value);
     shader.setUniform1f("angle", settings->angle->value);

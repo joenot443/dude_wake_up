@@ -75,7 +75,7 @@ public:
     shader.setUniform2f("sourceDimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("speed", settings->speed->value);
     shader.setUniform1f("color", settings->color->value);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform1f("alpha", settings->alpha->value);
     shader.setUniform1f("gamma", settings->gamma->value);
     shader.setUniform1f("beta", settings->beta->value);

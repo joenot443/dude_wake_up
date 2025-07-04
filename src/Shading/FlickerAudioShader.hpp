@@ -48,7 +48,7 @@ struct FlickerAudioShader: Shader {
                            256);
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1i("enableAudio", settings->enableAudio->intValue);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
     shader.end();

@@ -11,6 +11,7 @@
 #include "WaveformOscillator.hpp"
 #include "ofMain.h"
 #include "ShaderSettings.hpp"
+#include "TimeService.hpp"
 #include "CommonViews.hpp"
 #include "ofxImGui.h"
 #include "ShaderConfigSelectionView.hpp"
@@ -61,7 +62,7 @@ public:
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("scaleX", settings->scaleX->value);
     shader.setUniform1f("scaleY", settings->scaleY->value);

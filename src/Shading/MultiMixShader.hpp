@@ -85,7 +85,7 @@ struct MultiMixShader: Shader {
     if (lastFrameInputCount != activeInputs.size()) { resetSliders(); }
     lastFrameInputCount = activeInputs.size();
     
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
     shader.end();

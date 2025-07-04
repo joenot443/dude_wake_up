@@ -53,7 +53,7 @@ public:
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform1f("ringSize", settings->ringSize->value);
     shader.setUniform1i("ringCount", settings->ringCount->intValue);
     shader.setUniform3f("color", settings->color->color->data()[0], settings->color->color->data()[1], settings->color->color->data()[2]);

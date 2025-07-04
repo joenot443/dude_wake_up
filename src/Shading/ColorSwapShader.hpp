@@ -57,7 +57,7 @@ struct ColorSwapShader: Shader {
     }
     shader.setUniform1i("mainRGB", settings->mainRGB->intValue);
     shader.setUniform1i("auxRGB", settings->auxRGB->intValue);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform1f("blend", settings->blend->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);

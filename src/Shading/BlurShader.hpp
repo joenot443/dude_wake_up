@@ -63,7 +63,7 @@ public:
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("radius", settings->radius->value);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     frame->draw(0, 0);
     shader.end();
     canvas->end();

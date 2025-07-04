@@ -4,8 +4,8 @@ uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
 uniform float scale;
-uniform vec3 lightColor;
-uniform vec3 darkColor;
+uniform vec4 lightColor;
+uniform vec4 darkColor;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -47,8 +47,8 @@ void main(  )
     float ditheredGrey = clamp(floor(grey + pixelValueOffset), 0.0, 1.0);
     
     // Set frag colour
-    vec3 colorMapped = ditheredGrey * lightColor + (1.0 - ditheredGrey) * darkColor;
-    outputColor = vec4(colorMapped, 1);
+    vec4 colorMapped = ditheredGrey * lightColor + (1.0 - ditheredGrey) * darkColor;
+    outputColor = vec4(colorMapped);
 }
 
 

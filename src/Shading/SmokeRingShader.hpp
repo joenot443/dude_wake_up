@@ -55,7 +55,7 @@ struct SmokeRingShader : Shader
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("radius", settings->radius->value);
     shader.setUniform1f("colorFactor", settings->colorFactor->value);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
     shader.end();

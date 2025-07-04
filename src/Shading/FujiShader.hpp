@@ -97,7 +97,7 @@ public:
     canvas->begin();
     shader.begin();
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
-    shader.setUniform1f("time", ofGetElapsedTimef() * settings->speed->value);
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value * settings->speed->value);
     shader.setUniform2f("cloud1", settings->cloud1X->value, settings->cloud1Y->value);
     shader.setUniform2f("cloud2", settings->cloud2X->value, settings->cloud2Y->value);
     shader.setUniform1f("sunSize", settings->sunSize->value);

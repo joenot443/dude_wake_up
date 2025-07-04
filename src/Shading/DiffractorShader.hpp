@@ -70,7 +70,7 @@ struct DiffractorShader: Shader {
     shader.setUniform1f("scale", settings->scale->value);
     shader.setUniform1i("count", settings->count->intValue);
     shader.setUniform1f("scramble", settings->scramble->value); // Set uniform for scramble
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("red", settings->red->value);
     shader.setUniform1f("green", settings->green->value);

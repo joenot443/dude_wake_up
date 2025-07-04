@@ -84,7 +84,7 @@ public:
     shader.setUniform1i("drawTex", settings->drawInput->intParamValue());
     shader.setUniform1i("drawBackground", settings->drawBackground->intParamValue());
     shader.setUniform1i("invert", settings->invert->intValue);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform4f("chromaKey", settings->color->color->data()[0], settings->color->color->data()[1], settings->color->color->data()[2], 1.0);
     frame->draw(0, 0);

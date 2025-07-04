@@ -89,7 +89,7 @@ struct CoreShader: Shader {
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("shapeDistance", settings->shapeDistance->value);
     shader.setUniform1f("speed", settings->speed->value);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("u_count", settings->count->value);
     shader.setUniform1f("u_colorOffsetR", settings->colorOffsetR->value);

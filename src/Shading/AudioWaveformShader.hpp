@@ -48,7 +48,7 @@ public:
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() >= 256)
       shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0], 256);
     frame->draw(0, 0);

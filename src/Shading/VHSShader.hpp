@@ -101,7 +101,7 @@ struct VHSShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("chromaEmphasis", settings->chromaEmphasis->value);
     shader.setUniform1f("noiseIntensity", settings->noiseIntensity->value);
@@ -115,7 +115,7 @@ struct VHSShader: Shader {
     tempCanvas->begin();
     shaderTwo.begin();
     shaderTwo.setUniformTexture("tex", canvas->getTexture(), 8);
-    shaderTwo.setUniform1f("time", ofGetElapsedTimef());
+    shaderTwo.setUniform1f("time", TimeService::getService()->timeParam->value);
     shaderTwo.setUniform1f("hsyncJitter", settings->hsyncJitter->value);
     shaderTwo.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shaderTwo.setUniform1f("blurIntensity", settings->blurIntensity->value);

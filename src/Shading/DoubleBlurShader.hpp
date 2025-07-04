@@ -50,7 +50,7 @@ struct DoubleBlurShader: Shader {
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("amount", settings->amount->value);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1i("direction", 0); // Horizontal direction
     frame->draw(0, 0);
@@ -62,7 +62,7 @@ struct DoubleBlurShader: Shader {
     shader.begin();
     shader.setUniformTexture("tex", tempFbo.getTexture(), 4);
     shader.setUniform1f("amount", settings->amount->value);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", tempFbo.getWidth(), tempFbo.getHeight());
     shader.setUniform1i("direction", 1); // Vertical direction
     tempFbo.draw(0, 0);

@@ -121,6 +121,14 @@ void MainStageView::draw()
       if (ImGui::IsItemClicked()) {
         LayoutStateService::getService()->utilityPanelTab = 1;
       }
+
+      if (ImGui::BeginTabItem("Time", 0, LayoutStateService::getService()->utilityPanelTab == 2 ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
+        timePanelView.draw();
+        ImGui::EndTabItem();
+      }
+      if (ImGui::IsItemClicked()) {
+        LayoutStateService::getService()->utilityPanelTab = 2;
+      }
       
       ImGui::EndTabBar();
     }

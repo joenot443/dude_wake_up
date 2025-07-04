@@ -91,7 +91,7 @@ struct CrosshatchShader: Shader {
     } else {
       // Maybe set a default noise texture if texture is null?
     }
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform1f("amount", settings->mix->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
 

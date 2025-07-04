@@ -60,7 +60,7 @@ shader.load("shaders/RGBShift");
     ofClear(0,0,0, 0);
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform1f("speed", settings->speed->value);
     shader.setUniform1f("amount", settings->amount->value);
     frame->draw(0, 0);

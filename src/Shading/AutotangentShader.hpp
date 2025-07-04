@@ -49,7 +49,7 @@ struct AutotangentShader: Shader {
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("brightness", settings->brightness->value);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform3f("color",
       settings->color->color->data()[0],

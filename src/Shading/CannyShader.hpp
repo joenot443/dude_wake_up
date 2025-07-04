@@ -52,7 +52,7 @@ struct CannyShader: Shader {
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform4f("backgroundColor", settings->backgroundColor->color->data()[0], settings->backgroundColor->color->data()[1], settings->backgroundColor->color->data()[2], settings->backgroundColor->color->data()[3]);
     shader.setUniform4f("edgeColor", settings->edgeColor->color->data()[0], settings->edgeColor->color->data()[1], settings->edgeColor->color->data()[2], settings->edgeColor->color->data()[3]);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform1f("minThresh", settings->minThresh->value);
     shader.setUniform1f("maxThresh", settings->maxThresh->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());

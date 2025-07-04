@@ -70,7 +70,7 @@ struct GridRunShader: Shader {
     shader.setUniform1f("gridSkew", settings->gridSkew->value);
     shader.setUniform1f("lineWobble", settings->lineWobble->value);
     shader.setUniform1f("fogPosition", settings->fogPosition->value);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
     shader.end();

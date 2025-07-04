@@ -68,7 +68,7 @@ struct MaskShader : Shader
       }
     }
 
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("blend", settings->blend->value);
     frame->draw(0, 0);

@@ -73,7 +73,7 @@ struct DiscoAudioShader: Shader {
       shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0],
                            256);
     shader.setUniformTexture("tex", frame->getTexture(), 4); 
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("audioDisplacementScale", settings->audioDisplacementScale->value);
     shader.setUniform1i("patternComplexity", settings->patternComplexityParam->intValue);

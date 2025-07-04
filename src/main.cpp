@@ -27,6 +27,7 @@
 #include "HelpService.hpp"
 #include "BookmarkService.hpp"
 #include "StrandService.hpp"
+#include "TimeService.hpp"
 #include "ParameterService.hpp"
 #include "IconService.hpp"
 
@@ -55,6 +56,7 @@ ImageService *ImageService::service = 0;
 MarkdownService *MarkdownService::service = 0;
 LibraryService *LibraryService::service = 0;
 HelpService *HelpService::service = 0;
+TimeService *TimeService::service = 0;
 //SyphonService *SyphonService::service = 0;
 MainApp *MainApp::app = 0;
 

@@ -16,6 +16,7 @@
 #include "ShaderBrowserView.hpp"
 #include "VideoSource.hpp"
 #include "VideoSourceBrowserView.hpp"
+#include "TimePanelView.hpp"
 #include "WelcomeScreenView.hpp"
 #include "StrandBrowserView.hpp"
 #include "StageModeView.hpp"
@@ -41,7 +42,7 @@ private:
   WelcomeScreenView welcomeScreenView = WelcomeScreenView();
   FeedbackView feedbackView = FeedbackView();
   bool showFeedbackWindow = false;
-  
+  TimePanelView timePanelView = TimePanelView();
   void drawMenu();
   void drawVideoSourceBrowser();
   void drawOutputBrowser();

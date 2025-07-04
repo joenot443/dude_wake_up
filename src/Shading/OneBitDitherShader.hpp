@@ -52,9 +52,9 @@ struct OneBitDitherShader: Shader {
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("scale", settings->scale->value);
-    shader.setUniform3f("lightColor", settings->lightColor->color->data()[0], settings->lightColor->color->data()[1], settings->lightColor->color->data()[2]);
-    shader.setUniform3f("darkColor", settings->darkColor->color->data()[0], settings->darkColor->color->data()[1], settings->darkColor->color->data()[2]);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform4f("lightColor", settings->lightColor->color->data()[0], settings->lightColor->color->data()[1], settings->lightColor->color->data()[2], settings->lightColor->color->data()[3]);
+    shader.setUniform4f("darkColor", settings->darkColor->color->data()[0], settings->darkColor->color->data()[1], settings->darkColor->color->data()[2], settings->darkColor->color->data()[3]);
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
     shader.end();

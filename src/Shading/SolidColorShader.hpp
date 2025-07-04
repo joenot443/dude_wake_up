@@ -58,7 +58,7 @@ public:
 //    ofClear(0,0,0, 255);
 //    ofClear(0,0,0, 0);
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform1f("colorMix", settings->mix->value);
     shader.setUniform1i("colorTransparentPixels", settings->colorTransparentPixels->intValue);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());

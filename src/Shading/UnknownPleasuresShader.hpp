@@ -74,7 +74,7 @@ struct UnknownPleasuresShader: Shader {
     shader.setUniform1f("noiseIntensity", settings->noiseIntensity->value);
     shader.setUniform1f("waveFrequency", settings->waveFrequency->value);
     shader.setUniform1f("timeScale", settings->timeScale->value);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
     shader.end();

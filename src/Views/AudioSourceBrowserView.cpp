@@ -61,7 +61,7 @@ void AudioSourceBrowserView::drawSampleTrack() {
     source->setPlaybackPosition(samplePlaybackSliderPosition->value);
   }
   ImGui::SameLine();
-  if (CommonViews::PlayPauseButton("##playPause", source->isPaused, ImVec2(25.0, 25.0))) {
+  if (CommonViews::PlayPauseButton("##playPause", !source->isPaused, ImVec2(25.0, 25.0))) {
     if (source->isPaused) {
       source->resumePlayback();
     } else {

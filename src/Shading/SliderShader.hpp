@@ -55,7 +55,7 @@ shader.load("shaders/Slider");
     ofClear(0,0,0, 255);
     ofClear(0,0,0, 0);
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform1f("speed", settings->speed->value);
     shader.setUniform1i("vertical", settings->vertical->boolValue);
     frame->draw(0, 0);

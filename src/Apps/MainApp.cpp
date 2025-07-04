@@ -23,6 +23,7 @@
 #include "WebcamSource.hpp"
 #include "LibraryService.hpp"
 #include "TextureService.hpp"
+#include "TimeService.hpp"
 #include "functional"
 #include "implot.h"
 #include "ofMain.h"
@@ -59,6 +60,7 @@ void MainApp::setup()
   LibraryService::getService()->backgroundFetchLibraryFiles();
   LibraryService::getService()->backgroundFetchShaderCredits();
   ParameterService::getService()->setup();
+  TimeService::getService()->setup();
   StringManager::loadStrings();
 }
 
@@ -70,6 +72,7 @@ void MainApp::update()
   ParameterService::getService()->tickParameters();
   VideoSourceService::getService()->updateVideoSources();
   ShaderChainerService::getService()->processFrame();
+  TimeService::getService()->tick();
   ConfigService::getService()->checkAndSaveDefaultConfigFile();
   AudioSourceService::getService()->update();
   mainStageView->update();

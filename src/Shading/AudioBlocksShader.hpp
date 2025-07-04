@@ -62,7 +62,7 @@ struct AudioBlocksShader: Shader {
     shader.setUniform1f("speed", settings->speed->value);
     shader.setUniform1f("ySpread", settings->ySpread->value);
     shader.setUniform1f("audio", settings->size->value);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() > 0) {
       shader.setUniform1f("audioLow", source->audioAnalysis.lows->value);

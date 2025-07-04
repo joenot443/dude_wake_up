@@ -67,7 +67,7 @@ struct GameboyShader: Shader {
       shader.setUniformTexture("tex2", texture->fbo.getTexture(), 8);
     }
     shader.setUniform1i("mode", settings->mode->boolValue);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform1f("scale", settings->scale->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);

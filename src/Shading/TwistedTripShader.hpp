@@ -72,7 +72,7 @@ struct TwistedTripShader: Shader {
     shader.setUniform1f("twistAmount", settings->twistAmount->value);
     shader.setUniform1f("colorShift", settings->colorShift->value);
     shader.setUniform1f("patternScale", settings->patternScale->value);
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
     shader.end();

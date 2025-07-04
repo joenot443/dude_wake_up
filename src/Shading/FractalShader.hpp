@@ -51,7 +51,7 @@ public:
     canvas->begin();
     shader.begin();
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
-    shader.setUniform1f("time", ofGetElapsedTimef());
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform1f("zoom", settings->zoom->value);
     frame->draw(0, 0);
     shader.end();
