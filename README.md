@@ -1,12 +1,12 @@
-# nottawa 
+# Nottawa 
 (formerly named `dude_wake_up`)
 
-nottawa is a macOS app for making realtime audio-reactive visualizations for concerts and live events.
+[Nottawa](https://apps.apple.com/us/app/nottawa/id6503017159) is a macOS app for making realtime audio-reactive visualizations for concerts and live events.
 
-Development is currently in progress. 
+This document will eventually be updated with instructions for running and contributing.
 
 # License
 
-nottawa uses GPL licensed code from ShaderToy, OpenFrameworks, and other sources.
+Nottawa uses GPLv3 or similarly licensed code from ShaderToy, OpenFrameworks, and other sources.
 
-nottawa is licensed under the same terms, as per the GPL3 license. 
+Nottawa is licensed under GPLv3
