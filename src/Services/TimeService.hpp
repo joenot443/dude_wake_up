@@ -25,7 +25,7 @@ public:
   static TimeService* service;
   TimeService() : timeParam(std::make_shared<Parameter>("Time", 0.0f, 0.0f, 1000000000.0f)),
   timeSpeedParam(std::make_shared<Parameter>("Time Speed", 1.0f, 0.0f, 10.0f)),
-  timeOffsetParam(std::make_shared<Parameter>("Time Offset", 0.0f, 0.0f, 1000.0f)),
+  timeOffsetParam(std::make_shared<Parameter>("Time Offset", 0.0f, 0.0f, 10.0f)),
   timeOscillator(std::make_shared<WaveformOscillator>(timeParam)),
   timeSpeedOscillator(std::make_shared<WaveformOscillator>(timeSpeedParam)),
   timeOffsetOscillator(std::make_shared<WaveformOscillator>(timeOffsetParam)) {};

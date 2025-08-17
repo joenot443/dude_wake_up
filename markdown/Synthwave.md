@@ -1,0 +1,3 @@
+# Synthwave
+
+Information about Synthwave

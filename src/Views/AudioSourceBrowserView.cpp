@@ -277,8 +277,8 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
         ImGui::EndChild();
         ImGui::EndTable();
       }
-      ImGui::EndChild(); // End ##audioAnalysisPaddedArea
     }
+    ImGui::EndChild(); // End ##audioAnalysisPaddedArea
     // Pop the zero window padding
     ImGui::PopStyleVar();
     // Pop the background color

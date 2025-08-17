@@ -151,6 +151,17 @@ enum ShaderType {
   ShaderTypeCloudyTunnel, // 135
   ShaderTypeFireflies, // 136
   ShaderTypeGodRay, // 137
+  ShaderTypeAccretion,
+  ShaderTypeFlaming,
+  ShaderTypeGlowBeat,
+  ShaderTypeSynthwave,
+  ShaderTypeSpectrumClash,
+  ShaderTypeStrawberryWine,
+  ShaderTypeGlassy,
+  ShaderTypeCubeGlow,
+  ShaderTypeSynthfly,
+  ShaderTypeElectricEels,
+  ShaderTypeBubbles,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -222,6 +233,7 @@ static const ShaderType AvailableFilterShaderTypes[] = {
   ShaderTypeComicbook,
   ShaderTypeGameboy,
   ShaderTypeGlitch,
+  ShaderTypeStrawberryWine,
   ShaderTypeRainbowRotator, // Generated
   ShaderTypeRGBShift, // Generated
   ShaderTypeAscii,
@@ -281,6 +293,26 @@ static std::vector<ShaderType> AllShaderTypes() {
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) { // ShaderNames
+    case ShaderTypeBubbles:
+      return "Bubbles";
+    case ShaderTypeElectricEels:
+      return "ElectricEels";
+    case ShaderTypeSynthfly:
+      return "Synthfly";
+    case ShaderTypeGlassy:
+      return "Glassy";
+    case ShaderTypeStrawberryWine:
+      return "StrawberryWine";
+    case ShaderTypeSpectrumClash:
+      return "SpectrumClash";
+    case ShaderTypeSynthwave:
+      return "Synthwave";
+    case ShaderTypeGlowBeat:
+      return "GlowBeat";
+    case ShaderTypeFlaming:
+      return "Flaming";
+    case ShaderTypeAccretion:
+      return "Accretion";
     case ShaderTypeGodRay:
       return "GodRay";
     case ShaderTypeFireflies:

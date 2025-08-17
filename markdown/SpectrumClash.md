@@ -1,0 +1,3 @@
+# SpectrumClash
+
+Information about SpectrumClash

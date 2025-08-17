@@ -82,7 +82,7 @@ void AudioSourceService::populateSources() {
     auto audioSource = std::make_shared<MicrophoneAudioSource>();
     audioSource->id = UUID::generateUUID();
     audioSource->device = device;
-    audioSource->deviceId = device.deviceID;
+    audioSource->deviceId = formatString("%d", device.deviceID);
     audioSource->name = device.name;
     audioSourceMap[audioSource->deviceId] = audioSource;
     
@@ -174,6 +174,10 @@ void AudioSourceService::loadConfig(json j) {
       selectedAudioSource->active = j["active"];
       selectedAudioSource->toggle();
     }
+  }
+
+  if (LayoutStateService::getService()->abletonLinkEnabled) {
+    setupAbleton();
   }
 }
 

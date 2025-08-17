@@ -1,10 +1,18 @@
-
 // clang-format off
 
 #ifndef ShaderSource_hpp
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "BubblesShader.hpp"
+#include "ElectricEelsShader.hpp"
+#include "SynthflyShader.hpp"
+#include "SynthwaveShader.hpp"
+#include "GlassyShader.hpp"
+#include "SynthwaveShader.hpp"
+#include "GlowBeatShader.hpp"
+#include "FlamingShader.hpp"
+#include "AccretionShader.hpp"
 #include "FirefliesShader.hpp"
 #include "CloudyTunnelShader.hpp"
 #include "PixelAudioPartyShader.hpp"
@@ -157,6 +165,15 @@ enum ShaderSourceType {
   ShaderSource_PixelAudioParty, // 68
   ShaderSource_CloudyTunnel, // 69
   ShaderSource_Fireflies, // 70
+  ShaderSource_Accretion, //source enum,
+  ShaderSource_Flaming, //source enum,
+  ShaderSource_GlowBeat, //source enum,
+  ShaderSource_Synthwave, //source enum,
+  ShaderSource_Glassy, //source enum,
+  ShaderSource_CubeGlow, //source enum,
+  ShaderSource_Synthfly, //source enum,
+  ShaderSource_ElectricEels, //source enum,
+  ShaderSource_Bubbles, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -228,11 +245,35 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_PixelAudioParty, // Available
   ShaderSource_CloudyTunnel, // Available
   ShaderSource_Fireflies, // Available
+  ShaderSource_Accretion, // Available
+  ShaderSource_Flaming, // Available
+  ShaderSource_GlowBeat, // Available
+  ShaderSource_Synthwave, // Available
+  ShaderSource_Glassy, // Available
+  ShaderSource_Synthfly, // Available
+  ShaderSource_ElectricEels, // Available
+  ShaderSource_Bubbles, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
       // shaderTypeForShaderSourceType
+  case ShaderSource_Bubbles: //type enum
+    return ShaderTypeBubbles;
+  case ShaderSource_ElectricEels: //type enum
+    return ShaderTypeElectricEels;
+  case ShaderSource_Synthfly: //type enum
+    return ShaderTypeSynthfly;
+  case ShaderSource_Glassy: //type enum
+    return ShaderTypeGlassy;
+  case ShaderSource_Synthwave: //type enum
+    return ShaderTypeSynthwave;
+  case ShaderSource_GlowBeat: //type enum
+    return ShaderTypeGlowBeat;
+  case ShaderSource_Flaming: //type enum
+    return ShaderTypeFlaming;
+  case ShaderSource_Accretion: //type enum
+    return ShaderTypeAccretion;
   case ShaderSource_Fireflies: //type enum
     return ShaderTypeFireflies;
   case ShaderSource_CloudyTunnel: //type enum
@@ -625,7 +666,55 @@ public:
   
   void addShader(ShaderSourceType addType) {
     switch (addType) {
-        // Shader Settings
+    // Shader Settings
+    case ShaderSource_Bubbles: { // Settings
+      auto settings = new BubblesSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<BubblesShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_ElectricEels: { // Settings
+      auto settings = new ElectricEelsSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<ElectricEelsShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Synthfly: { // Settings
+        auto settings = new SynthflySettings(UUID::generateUUID(), 0);
+        shader = std::make_shared<SynthflyShader>(settings);
+        shader->setup();
+        return;
+    }
+    case ShaderSource_Glassy: { // Settings
+      auto settings = new GlassySettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<GlassyShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Synthwave: { // Settings
+      auto settings = new SynthwaveSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<SynthwaveShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_GlowBeat: { // Settings
+      auto settings = new GlowBeatSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<GlowBeatShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Flaming: { // Settings
+      auto settings = new FlamingSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<FlamingShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Accretion: { // Settings
+      auto settings = new AccretionSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<AccretionShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_Fireflies: { // Settings
       auto settings = new FirefliesSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<FirefliesShader>(settings);

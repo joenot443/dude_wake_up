@@ -605,7 +605,6 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
     VideoSourceService::getService()->addOutputWindow(node->connectable);
   }
   ImGui::Dummy(ImVec2(500.0, 20.0));
-  
   ed::EndNode();
 }
 
@@ -1726,11 +1725,11 @@ void NodeLayoutView::saveStrand()
   // Save the preview image to disk
   StrandService::getService()->savePreviewToPath(previewPath, nodeToSave->connectable);
   
-  // Persist security-scoped bookmark ONLY for the user-chosen json file (preview lives in container)
-  BookmarkService::getService()->saveBookmarkForPath(jsonPath);
-  
   // Finally write the Strand JSON file and register it with the application
   ConfigService::getService()->saveStrandFile(strand, jsonPath, previewPath);
+
+  // Persist security-scoped bookmark ONLY for the user-chosen json file (preview lives in container)
+  BookmarkService::getService()->saveBookmarkForPath(jsonPath);
 }
 
 void NodeLayoutView::drawHelp()

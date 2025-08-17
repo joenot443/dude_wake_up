@@ -8,6 +8,16 @@
 #include "ShaderChainerService.hpp"
 #include "Models/Strand.hpp"
 #include "AsciiShader.hpp"
+#include "BubblesShader.hpp"
+#include "ElectricEelsShader.hpp"
+#include "SynthflyShader.hpp"
+#include "GlassyShader.hpp"
+#include "StrawberryWineShader.hpp"
+#include "SpectrumClashShader.hpp"
+#include "SynthwaveShader.hpp"
+#include "GlowBeatShader.hpp"
+#include "FlamingShader.hpp"
+#include "AccretionShader.hpp"
 #include "GodRayShader.hpp"
 #include "FirefliesShader.hpp"
 #include "CloudyTunnelShader.hpp"
@@ -331,9 +341,8 @@ void ShaderChainerService::processFrame()
       breakConnectionForConnectionId(connection->id);
     }
     
-    // No need to traverse if the video's not active
-    if (videoSource != nullptr && !videoSource->active) continue;
-    
+    // Inactive source means a dry traversal
+    shader->isDry = !videoSource->active;
     shader->traverseFrame(videoSource->frame(), 0);
   }
 }
@@ -938,6 +947,66 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeBubbles: {
+      auto settings = new BubblesSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<BubblesShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeElectricEels: {
+      auto settings = new ElectricEelsSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<ElectricEelsShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeSynthfly: {
+      auto settings = new SynthflySettings(shaderId, shaderJson);
+      auto shader = std::make_shared<SynthflyShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeGlassy: {
+      auto settings = new GlassySettings(shaderId, shaderJson);
+      auto shader = std::make_shared<GlassyShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeStrawberryWine: {
+      auto settings = new StrawberryWineSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<StrawberryWineShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeSpectrumClash: {
+      auto settings = new SpectrumClashSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<SpectrumClashShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeSynthwave: {
+      auto settings = new SynthwaveSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<SynthwaveShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeGlowBeat: {
+      auto settings = new GlowBeatSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<GlowBeatShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeFlaming: {
+      auto settings = new FlamingSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<FlamingShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeAccretion: {
+      auto settings = new AccretionSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AccretionShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeGodRay: {
       auto settings = new GodRaySettings(shaderId, shaderJson);
       auto shader = std::make_shared<GodRayShader>(settings);

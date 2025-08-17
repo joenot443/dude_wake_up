@@ -55,7 +55,10 @@ public:
   
   // If this Shader is optional, whether it is presently enabled
   bool optionallyEnabled;
-  
+
+  // Whether this Shader is "dry" i.e. not rendering new frames but still allowing traversal
+  bool isDry;
+
   std::shared_ptr<ofFbo> lastFrame;
   
   // Used for applying the optional shaders
@@ -90,6 +93,8 @@ public:
   virtual bool enabled() { return true; };
   virtual bool hasFrameBuffer() { return false; };
   virtual std::string fileName() { return name(); };
+  virtual bool allowsDryTraversal() { return false; };
+  
   void saveFrame(ofFbo *frame){};
   
   void checkForFileChanges();

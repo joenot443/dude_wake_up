@@ -20,10 +20,16 @@
 void Shader::traverseFrame(std::shared_ptr<ofFbo> frame, int depth)
 {
   if (!active) return;
+
   clearLastFrame();
   checkForFileChanges();
   activateParameters();
-  shade(frame, lastFrame);
+
+  // Don't shader dry shaders unless explictly allowed
+  if (!isDry || allowsDryTraversal()) {
+    shade(frame, lastFrame);
+  }
+
   applyOptionalShaders();
   
   // On our terminal nodes, check if we need to update our defaultStageShader
@@ -33,7 +39,7 @@ void Shader::traverseFrame(std::shared_ptr<ofFbo> frame, int depth)
     }
   }
   
-  for (auto [slot, connections] : outputs) // Correctly iterate over connections
+  for (auto [slot, connections] : outputs) // Iterate over every connection
   {
     for (auto &connection : connections) {
       if (connection->inputSlot != InputSlotMain) { continue; }
@@ -42,6 +48,7 @@ void Shader::traverseFrame(std::shared_ptr<ofFbo> frame, int depth)
       std::shared_ptr<Shader> shader = std::dynamic_pointer_cast<Shader>(connection->end);
       if (shader)
       {
+        shader->isDry = isDry;
         shader->traverseFrame(lastFrame, depth + 1);
       }
     }

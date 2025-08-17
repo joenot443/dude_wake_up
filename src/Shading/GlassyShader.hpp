@@ -1,16 +1,12 @@
----
-to: src/Shading/<%= name %>Shader.hpp
----
-
 //
-//  <%= name %>Shader.hpp
+//  GlassyShader.hpp
 //  dude_wake_up
 //
 //  Created by Joe Crozier on 8/30/22.
 //
 
-#ifndef <%= name %>Shader_hpp
-#define <%= name %>Shader_hpp
+#ifndef GlassyShader_hpp
+#define GlassyShader_hpp
 
 #include "ofMain.h"
 #include "ShaderSettings.hpp"
@@ -22,14 +18,14 @@ to: src/Shading/<%= name %>Shader.hpp
 #include "Shader.hpp"
 #include <stdio.h>
 
-struct <%= name %>Settings: public ShaderSettings {
+struct GlassySettings: public ShaderSettings {
   std::shared_ptr<Parameter> shaderValue;
   std::shared_ptr<WaveformOscillator> shaderValueOscillator;
 
-  <%= name %>Settings(std::string shaderId, json j) :
+  GlassySettings(std::string shaderId, json j) :
   shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
   shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
-  ShaderSettings(shaderId, j, "<%= name %>") {
+  ShaderSettings(shaderId, j, "Glassy") {
     parameters = { shaderValue };
     oscillators = { shaderValueOscillator };
     load(j);
@@ -37,12 +33,12 @@ struct <%= name %>Settings: public ShaderSettings {
   };
 };
 
-struct <%= name %>Shader: Shader {
-  <%= name %>Settings *settings;
-  <%= name %>Shader(<%= name %>Settings *settings) : settings(settings), Shader(settings) {};
+struct GlassyShader: Shader {
+  GlassySettings *settings;
+  GlassyShader(GlassySettings *settings) : settings(settings), Shader(settings) {};
   
   void setup() override {
-    shader.load("shaders/<%= name %>");
+    shader.load("shaders/Glassy");
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -66,13 +62,13 @@ struct <%= name %>Shader: Shader {
   }
 
   ShaderType type() override {
-    return ShaderType<%= name %>;
+    return ShaderTypeGlassy;
   }
 
   void drawSettings() override {
-    CommonViews::H3Title("<%= name %>");
+    CommonViews::H3Title("Glassy");
 
   }
 };
 
-#endif /* <%= name %>Shader_hpp */
+#endif /* GlassyShader_hpp */

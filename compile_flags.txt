@@ -49,6 +49,7 @@
 -Isrc
 -Isrc/Apps
 -Isrc/Audio
+-Isrc/Audio/gist
 -Isrc/Feedback
 -Isrc/Models
 -Isrc/Network
@@ -62,6 +63,7 @@
 -Isrc/Util
 -Isrc/Util/observable
 -Isrc/Video
+-Isrc/Video/Recording
 -Isrc/Views
 -I../../../addons/ofxImGui/libs
 -I../../../addons/ofxImGui/libs/imgui
@@ -78,8 +80,12 @@
 -I../../../addons/ofxMidi/src/ios
 -I../../../addons/ofxSyphon/libs
 -I../../../addons/ofxSyphon/src
+-Ilib/
 -Ilib/imgui-node-editor
 -Ilib/observable
 -Ilib/gist
+-Ilib/gist/src
 -Ilib/implot
--Ilib/ableton/**
+-Ilib/ableton
+-Ilib/ableton/ableton
+-Ilib/ableton/ableton/platforms
