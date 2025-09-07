@@ -21,6 +21,12 @@
 #include "Vectors.hpp"
 #include "RollingMean.hpp" // Include the new RollingMean class
 
+enum BpmMode {
+  BpmMode_Auto,
+  BpmMode_Manual,
+  BpmMode_Link
+};
+
 struct AudioAnalysisParameter {
   float windowMin = 0.0;
   float windowMax = 0.0;
@@ -86,6 +92,7 @@ struct AudioAnalysisParameter {
 struct AudioAnalysis {
   std::string name;
   bool bpmEnabled = true;
+  BpmMode bpmMode = BpmMode_Manual;
   std::shared_ptr<Parameter> rms;
   std::shared_ptr<Parameter> highs;
   std::shared_ptr<Parameter> lows;

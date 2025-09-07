@@ -97,3 +97,4 @@ bool AvailableVideoSourceFile::hasFailedToLoad(ofVideoPlayer& videoPlayer) {
   std::shared_ptr<ofAVFoundationPlayer> player = std::dynamic_pointer_cast<ofAVFoundationPlayer>(videoPlayer.getPlayer());
   return !(player->isPlaying() || player->isPaused());
 }
+

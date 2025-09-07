@@ -12,12 +12,14 @@
 #include "ofMain.h"
 #include "Gist.h"
 #include "AudioSettings.hpp"
+#include "AutoBpmDetector.hpp"
 
 using json = nlohmann::json;
 
 enum AudioSourceType {
   AudioSourceType_Microphone,
-  AudioSourceType_File
+  AudioSourceType_File,
+  AudioSourceType_System
 };
 
 class AudioSource {
@@ -27,6 +29,7 @@ public:
   bool active = false;
   AudioAnalysis audioAnalysis;
   Gist<float> gist = Gist<float>(512, 44100);
+  AutoBpmDetector autoBpmDetector;
   
   virtual ~AudioSource() = default;
   

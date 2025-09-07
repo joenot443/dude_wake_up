@@ -10,6 +10,7 @@
 #include "FileAudioSource.hpp"
 #include "Console.hpp"
 #include "MicrophoneAudioSource.hpp"
+#include "SystemAudioSource.hpp"
 #include "ConfigService.hpp"
 #include "UUID.hpp"
 
@@ -97,6 +98,12 @@ void AudioSourceService::populateSources() {
   fileAudioSource->name = "Sample Track";
   fileAudioSource->track = defaultSampleAudioTrack();
   audioSourceMap[fileAudioSource->id] = fileAudioSource;
+  
+  // Add system audio source
+  auto systemAudioSource = std::make_shared<SystemAudioSource>();
+  systemAudioSource->id = UUID::generateUUID();
+  systemAudioSource->name = "System Audio";
+  audioSourceMap[systemAudioSource->id] = systemAudioSource;
 }
 
 std::vector<std::shared_ptr<AudioSource>> AudioSourceService::audioSources() {
@@ -127,8 +134,8 @@ void AudioSourceService::update() {
     
     double beatCount = link->captureAppSessionState().beatAtTime(link->clock().micros(), 4.);
     selectedAudioSource->audioAnalysis.updateBeat(beatCount - floor(beatCount));
-  } else if (selectedAudioSource->type() == AudioSourceType_Microphone) { // Don't update for the samples
-    selectedAudioSource->audioAnalysis.bpm->value = AudioSourceService::getService()->tapper.bpm();
+  } else if (selectedAudioSource->type() == AudioSourceType_Microphone || selectedAudioSource->type() == AudioSourceType_System) { // Don't update for the samples
+//    selectedAudioSource->audioAnalysis.bpm->value = AudioSourceService::getService()->tapper.bpm();
     selectedAudioSource->audioAnalysis.updateBeat(selectedAudioSource->audioAnalysis.bpmPct());
   } else if (selectedAudioSource->type() == AudioSourceType_File) {
     selectedAudioSource->audioAnalysis.bpmEnabled = true;

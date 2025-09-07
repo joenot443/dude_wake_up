@@ -96,6 +96,7 @@ public:
   std::shared_ptr<VideoSource> makeWebcamVideoSource(std::string name, int deviceId, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
   std::shared_ptr<VideoSource> makeShaderVideoSource(ShaderSourceType type, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
   std::shared_ptr<VideoSource> makeFileVideoSource(std::string name, std::string path, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
+  std::shared_ptr<VideoSource> makePlaylistVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
   std::shared_ptr<VideoSource> makeTextVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
   std::shared_ptr<VideoSource> makeIconVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
   std::shared_ptr<VideoSource> makeLibraryVideoSource(std::shared_ptr<LibraryFile> libraryFile, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);

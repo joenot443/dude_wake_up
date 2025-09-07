@@ -1247,6 +1247,12 @@ void NodeLayoutView::handleDropZone()
           //          unplacedNodeIds.push_back(source->id);
           break;
         }
+        case VideoSource_playlist:
+        {
+          source = ActionService::getService()->addPlaylistVideoSource(availableSource->sourceName);
+          unplacedNodeIds.push_back(source->id);
+          break;
+        }
         case VideoSource_empty:
           break;
       }

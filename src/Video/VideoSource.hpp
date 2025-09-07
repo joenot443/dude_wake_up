@@ -28,7 +28,8 @@ enum VideoSourceType {
   VideoSource_text,
   VideoSource_library,
   VideoSource_multi,
-  VideoSource_empty
+  VideoSource_empty,
+  VideoSource_playlist
 };
 
 

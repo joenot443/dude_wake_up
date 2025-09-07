@@ -17,6 +17,7 @@
 #include "BarPlotView.hpp"
 #include "LayoutStateService.hpp"
 #include "Strings.hpp"
+#include "AudioSettings.hpp"
 #include "ofxImGui.h"
 
 static const float AudioOscillatorHeight = 140.0;
@@ -194,39 +195,87 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
         if (CommonViews::IconButton(ICON_MD_INFO, "BPM")) {
           ImGui::OpenPopup("##BPM");
         }
+        
+        // BPM Mode Dropdown
+        if (!isSampleTrack) {
+          const char* bpmModeItems[] = { "Auto", "Manual", "Link" };
+          int currentBpmMode = static_cast<int>(source->audioAnalysis.bpmMode);
+          ImGui::SameLine();
+          ImGui::SetNextItemWidth(80.0f);
+          if (ImGui::Combo("##BpmMode", &currentBpmMode, bpmModeItems, IM_ARRAYSIZE(bpmModeItems))) {
+            source->audioAnalysis.bpmMode = static_cast<BpmMode>(currentBpmMode);
+            // Reset auto BPM detector when switching to Auto mode
+            if (source->audioAnalysis.bpmMode == BpmMode_Auto) {
+              source->autoBpmDetector.resetBeatTracking();
+            }
+            // Enable Ableton Link when switching to Link mode
+            else if (source->audioAnalysis.bpmMode == BpmMode_Link) {
+              LayoutStateService::getService()->abletonLinkEnabled = true;
+              AudioSourceService::getService()->setupAbleton();
+            }
+          }
+        }
         // Only draw graph if we're enabled
         if (source->audioAnalysis.bpmEnabled || isSampleTrack) {
           source->audioAnalysis.beatPulseOscillator->enabled = true;
           OscillatorView::draw(std::dynamic_pointer_cast<Oscillator>(source->audioAnalysis.beatPulseOscillator), source->audioAnalysis.beatPulse, audioGraphSize, false);
         }
         
-        if (LayoutStateService::getService()->abletonLinkEnabled && AudioSourceService::getService()->link != nullptr) {
-          ImGui::Text("%s", formatString("Ableton BPM: %f", AudioSourceService::getService()->link->captureAppSessionState().tempo()).c_str());
-          ImGui::SameLine(0., 5.);
-          if (ImGui::Checkbox("Link?", &LayoutStateService::getService()->abletonLinkEnabled)) {
-            AudioSourceService::getService()->setupAbleton();
-          }
-        } else if (!isSampleTrack) {
-          if (CommonViews::Slider("BPM", "##bpm", source->audioAnalysis.bpm, ImGui::GetContentRegionAvail().x - 170.0)) {
-            AudioSourceService::getService()->tapper.setBpm(source->audioAnalysis.bpm->value);
-          }
-          ImGui::SameLine();
-          static float lastTapTime = ofGetCurrentTime().seconds;
-          if (ImGui::Button("Tap")) {
-            if (ofGetCurrentTime().seconds - lastTapTime > 5.0f) {
-              AudioSourceService::getService()->tapper.startFresh();
-            } else {
-              AudioSourceService::getService()->tapper.tap();
+        if (!isSampleTrack) {
+          // Show different controls based on BPM mode
+          switch (source->audioAnalysis.bpmMode) {
+            case BpmMode_Auto: {
+              // Show current auto-detected BPM (read-only)
+              ImGui::Text("Auto BPM: %.1f", source->audioAnalysis.bpm->value);
+              ImGui::SameLine();
+              if (CommonViews::PlayPauseButton("##bpmPlayPause", source->audioAnalysis.bpmEnabled, ImVec2(20., 20.0), ImVec2(5.0, 5.0))) {
+                source->audioAnalysis.bpmEnabled = !source->audioAnalysis.bpmEnabled;
+              }
+              break;
             }
-            lastTapTime = ofGetCurrentTime().seconds;
-          }
-          ImGui::SameLine();
-          if (CommonViews::PlayPauseButton("##bpmPlayPause", source->audioAnalysis.bpmEnabled, ImVec2(20., 20.0), ImVec2(5.0, 5.0))) {
-            source->audioAnalysis.bpmEnabled = !source->audioAnalysis.bpmEnabled;
-          }
-          ImGui::SameLine(0., 10.);
-          if (ImGui::Checkbox("Link?", &LayoutStateService::getService()->abletonLinkEnabled)) {
-            AudioSourceService::getService()->setupAbleton();
+            case BpmMode_Manual: {
+              // Show manual BPM control with nudge buttons
+              if (CommonViews::Slider("BPM", "##bpm", source->audioAnalysis.bpm, ImGui::GetContentRegionAvail().x - 230.0)) {
+                AudioSourceService::getService()->tapper.setBpm(source->audioAnalysis.bpm->value);
+              }
+              ImGui::SameLine();
+              
+              // BPM nudge buttons
+              if (ImGui::Button("-##bpmDown", ImVec2(20, 20))) {
+                source->audioAnalysis.bpm->value = std::max(source->audioAnalysis.bpm->min, source->audioAnalysis.bpm->value - 1.0f);
+                AudioSourceService::getService()->tapper.setBpm(source->audioAnalysis.bpm->value);
+              }
+              ImGui::SameLine(0, 2);
+              if (ImGui::Button("+##bpmUp", ImVec2(20, 20))) {
+                source->audioAnalysis.bpm->value = std::min(source->audioAnalysis.bpm->max, source->audioAnalysis.bpm->value + 1.0f);
+                AudioSourceService::getService()->tapper.setBpm(source->audioAnalysis.bpm->value);
+              }
+              ImGui::SameLine();
+              
+              static float lastTapTime = ofGetCurrentTime().seconds;
+              if (ImGui::Button("Tap")) {
+                if (ofGetCurrentTime().seconds - lastTapTime > 5.0f) {
+                  AudioSourceService::getService()->tapper.startFresh();
+                } else {
+                  AudioSourceService::getService()->tapper.tap();
+                }
+                lastTapTime = ofGetCurrentTime().seconds;
+              }
+              ImGui::SameLine();
+              if (CommonViews::PlayPauseButton("##bpmPlayPause", source->audioAnalysis.bpmEnabled, ImVec2(20., 20.0), ImVec2(5.0, 5.0))) {
+                source->audioAnalysis.bpmEnabled = !source->audioAnalysis.bpmEnabled;
+              }
+              break;
+            }
+            case BpmMode_Link: {
+              // Show current Link BPM (read-only, controlled by Link)
+              if (LayoutStateService::getService()->abletonLinkEnabled && AudioSourceService::getService()->link != nullptr) {
+                ImGui::Text("Link BPM: %.1f", AudioSourceService::getService()->link->captureAppSessionState().tempo());
+              } else {
+                ImGui::Text("Link BPM: Not Connected");
+              }
+              break;
+            }
           }
           if (ImGui::BeginPopupModal("##BPM", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
             MarkdownView("BPM").draw();

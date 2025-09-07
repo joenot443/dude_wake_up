@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		021162772E6CC3A000B15198 /* SystemAudioSource.mm in Sources */ = {isa = PBXBuildFile; fileRef = 021162762E6CC3A000B15198 /* SystemAudioSource.mm */; };
+		021170DE2E6CD8A300B15198 /* AutoBpmDetector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 021170DD2E6CD8A300B15198 /* AutoBpmDetector.cpp */; };
+		02145B012E525064009C1855 /* DiffusionShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02145B002E525040009C1855 /* DiffusionShader.cpp */; };
 		024FAE772DA0207D00DE3197 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 024FAE5B2DA0207D00DE3197 /* .gitignore */; };
 		024FAE812DA0207D00DE3197 /* ofxFastFboReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024FAE592DA0207D00DE3197 /* ofxFastFboReader.cpp */; };
 		024FAE8D2DA02CF600DE3197 /* AVFRecorderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 024FAE8B2DA02CF600DE3197 /* AVFRecorderWrapper.mm */; };
@@ -31,6 +34,7 @@
 		028651732D94699B000CE0D4 /* kiss_fft.c in Sources */ = {isa = PBXBuildFile; fileRef = 028651722D94699B000CE0D4 /* kiss_fft.c */; };
 		028651B12D95E331000CE0D4 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 028651AF2D95E208000CE0D4 /* icon.icns */; };
 		02AB2F0F2DE0DA2A004EDB3F /* CreditView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02AB2F0E2DE0DA2A004EDB3F /* CreditView.cpp */; };
+		02EF52772E6B706400ECC53A /* PlaylistSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02EF52762E6B706400ECC53A /* PlaylistSource.cpp */; };
 		02F157C82E1722E0003B6C2A /* TimePanelView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F157C72E1722E0003B6C2A /* TimePanelView.cpp */; };
 		02F157CB2E1722FE003B6C2A /* TimeService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F157CA2E1722FE003B6C2A /* TimeService.cpp */; };
 		"02F78074-12C3-4CFB-8B4D-C894E1498010" /* MidiService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "DD20483B-50DE-4F4F-85AC-74CAF3C8F56E" /* MidiService.cpp */; };
@@ -147,6 +151,16 @@
 		"FDA66C1A-DAA1-4A88-B691-491E99EA0516" /* ShaderInfoView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "E8C64843-7699-4637-A9A4-C21FA5289557" /* ShaderInfoView.cpp */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		021171D32E6E3F9000B15198 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 021171AA2E6E3F8F00B15198 /* btrack~.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2FBBEAE508F335360078DB84;
+			remoteInfo = "max-external";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		E4A5B60F29BAAAE400C2D356 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -175,6 +189,14 @@
 		"01771929-4D11-4D13-9112-FE25FF6A46D6" /* PsycurvesShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PsycurvesShader.hpp; sourceTree = "<group>"; };
 		"018EA4E1-F2EA-4702-9A7F-DBF6ED73664D" /* BookmarkService.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BookmarkService.hpp; sourceTree = "<group>"; };
 		"01F7D881-9877-4747-9718-9FE1BED26EF7" /* HelpService.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = HelpService.hpp; sourceTree = "<group>"; };
+		021162752E6CC3A000B15198 /* SystemAudioSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SystemAudioSource.hpp; sourceTree = "<group>"; };
+		021162762E6CC3A000B15198 /* SystemAudioSource.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SystemAudioSource.mm; sourceTree = "<group>"; };
+		021170DC2E6CD8A300B15198 /* AutoBpmDetector.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AutoBpmDetector.hpp; sourceTree = "<group>"; };
+		021170DD2E6CD8A300B15198 /* AutoBpmDetector.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AutoBpmDetector.cpp; sourceTree = "<group>"; };
+		021171AA2E6E3F8F00B15198 /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
+		02145B002E525040009C1855 /* DiffusionShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DiffusionShader.cpp; sourceTree = "<group>"; };
+		02145B022E525095009C1855 /* DiffusionShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DiffusionShader.hpp; sourceTree = "<group>"; };
+		02145B032E5D55C7009C1855 /* AddPlaylistVideoSourceCommand.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AddPlaylistVideoSourceCommand.hpp; sourceTree = "<group>"; };
 		021A59222DAD815500CAA5E3 /* Font.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Font.hpp; sourceTree = "<group>"; };
 		"023ECAF6-5671-4C7D-89EB-33526DA42A8B" /* IsoFractShader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IsoFractShader.cpp; sourceTree = "<group>"; };
 		024219E02DB8362B00A19C28 /* WavyShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = WavyShader.hpp; sourceTree = "<group>"; };
@@ -259,6 +281,9 @@
 		02AB2F0E2DE0DA2A004EDB3F /* CreditView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CreditView.cpp; sourceTree = "<group>"; };
 		02D115332DC94674007B87CE /* AudioSettings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AudioSettings.hpp; sourceTree = "<group>"; };
 		02D115342DC94674007B87CE /* AudioTrack.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AudioTrack.hpp; sourceTree = "<group>"; };
+		02EF52742E6B706400ECC53A /* PlaylistSettings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PlaylistSettings.hpp; sourceTree = "<group>"; };
+		02EF52752E6B706400ECC53A /* PlaylistSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PlaylistSource.hpp; sourceTree = "<group>"; };
+		02EF52762E6B706400ECC53A /* PlaylistSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PlaylistSource.cpp; sourceTree = "<group>"; };
 		02F157C62E1722E0003B6C2A /* TimePanelView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TimePanelView.hpp; sourceTree = "<group>"; };
 		02F157C72E1722E0003B6C2A /* TimePanelView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TimePanelView.cpp; sourceTree = "<group>"; };
 		02F157C92E1722FE003B6C2A /* TimeService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TimeService.hpp; sourceTree = "<group>"; };
@@ -688,6 +713,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		021171D02E6E3F8F00B15198 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				021171D42E6E3F9000B15198 /* btrack~.mxo */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		"0211E7A8-500C-4F06-89CD-7E9AD68E5D9F" /* Network */ = {
 			isa = PBXGroup;
 			children = (
@@ -837,6 +870,7 @@
 				"A060C15E-254B-49A7-B054-3E61B495A225" /* AddShaderVideoSourceCommand.hpp */,
 				"6EBEED5A-B983-41D0-892A-CFF66B478038" /* AddTextVideoSourceCommand.hpp */,
 				"9D64AD3F-7236-459A-963C-DCBC5F1869BE" /* AddWebcamVideoSourceCommand.hpp */,
+				02145B032E5D55C7009C1855 /* AddPlaylistVideoSourceCommand.hpp */,
 				"144F17AF-3FE6-4DF3-A23C-A4BA6D45C4EF" /* Command.hpp */,
 				"058CCFC2-4BAF-42DD-AAC9-ADD5B51D884A" /* CopyCommand.hpp */,
 				"F186DA34-0207-40EC-90A8-A617F8DC78FF" /* MakeConnectionCommand.hpp */,
@@ -882,6 +916,9 @@
 				024FAE8C2DA02CF600DE3197 /* Recording */,
 				"79354DE8-7C04-4DEA-9956-69113F7BC799" /* AvailableVideoSource.cpp */,
 				"2240761B-A954-4B26-8F83-BB2F5CAF6FD0" /* AvailableVideoSource.hpp */,
+				02EF52742E6B706400ECC53A /* PlaylistSettings.hpp */,
+				02EF52752E6B706400ECC53A /* PlaylistSource.hpp */,
+				02EF52762E6B706400ECC53A /* PlaylistSource.cpp */,
 				"C9927FA0-1983-4A65-B903-432C39D44284" /* FileSource.cpp */,
 				"094AC0D1-F853-4351-A65E-4ECF31EF80E8" /* FileSource.hpp */,
 				"0790BB8A-209E-4016-974C-B76CF3AA8B99" /* IconSource.cpp */,
@@ -1140,6 +1177,10 @@
 				"847C62FC-F4DB-4D9E-AC52-A7DCA0A4FF8E" /* FileAudioSource.hpp */,
 				"B19D76F5-D648-45E6-A505-7EEDF67F1CC8" /* MicrophoneAudioSource.cpp */,
 				"FAB19008-CE87-4037-B0E7-BA9EC8F76835" /* MicrophoneAudioSource.hpp */,
+				021162752E6CC3A000B15198 /* SystemAudioSource.hpp */,
+				021162762E6CC3A000B15198 /* SystemAudioSource.mm */,
+				021170DC2E6CD8A300B15198 /* AutoBpmDetector.hpp */,
+				021170DD2E6CD8A300B15198 /* AutoBpmDetector.cpp */,
 			);
 			path = Audio;
 			sourceTree = "<group>";
@@ -1340,6 +1381,8 @@
 				"17CE770F-266B-4687-9091-BC24F790E2AB" /* WelcomeRingsShader.hpp */,
 				"62B9A22D-EB99-44E8-8A21-DC574718F88E" /* WobbleShader.hpp */,
 				024219E02DB8362B00A19C28 /* WavyShader.hpp */,
+				02145B022E525095009C1855 /* DiffusionShader.hpp */,
+				02145B002E525040009C1855 /* DiffusionShader.cpp */,
 			);
 			path = Shading;
 			sourceTree = "<group>";
@@ -1558,12 +1601,28 @@
 			mainGroup = E4B69B4A0A3A1720003C02F2;
 			productRefGroup = E4B69B4A0A3A1720003C02F2;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 021171D02E6E3F8F00B15198 /* Products */;
+					ProjectRef = 021171AA2E6E3F8F00B15198 /* btrack~.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				E4B69B5A0A3A1756003C02F2 /* dude_wake_up */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		021171D42E6E3F9000B15198 /* btrack~.mxo */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "btrack~.mxo";
+			remoteRef = 021171D32E6E3F9000B15198 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		028651B02D95E32D000CE0D4 /* Resources */ = {
@@ -1646,6 +1705,7 @@
 				"91E0E9A7-70FE-4C51-BD57-EB473B0BCA7D" /* BookmarkService.cpp in Sources */,
 				"490D2AA0-72C3-4FBF-A054-652CAB6089DD" /* ConfigService.cpp in Sources */,
 				024FAE812DA0207D00DE3197 /* ofxFastFboReader.cpp in Sources */,
+				021162772E6CC3A000B15198 /* SystemAudioSource.mm in Sources */,
 				"24B5DF02-1F3E-489D-B35B-BD8D3F822727" /* FontService.cpp in Sources */,
 				0286514C2D9468F8000CE0D4 /* crude_json.cpp in Sources */,
 				"912A58AE-8DD4-4B5B-82C4-85E44708C835" /* IconService.cpp in Sources */,
@@ -1663,6 +1723,7 @@
 				"A3B6C49A-FDFA-4B94-8B68-F5304511942A" /* VideoSourceService.cpp in Sources */,
 				"2987286D-D5D8-4C62-BF41-954D098CE626" /* FeedbackShader.cpp in Sources */,
 				"BACC44F3-4998-44C2-B2A6-DBAB1170A60F" /* ImageTexture.cpp in Sources */,
+				021170DE2E6CD8A300B15198 /* AutoBpmDetector.cpp in Sources */,
 				024FAE8D2DA02CF600DE3197 /* AVFRecorderWrapper.mm in Sources */,
 				024FAE8E2DA02CF600DE3197 /* AVFRecorder.m in Sources */,
 				"522DAC64-183B-4131-852C-1DC95FA2DE79" /* OptionalShadersHelper.cpp in Sources */,
@@ -1670,7 +1731,9 @@
 				"16985793-8C39-4F12-BF84-E3615EA51B00" /* CommonStrings.cpp in Sources */,
 				"A4F0C022-839E-40AC-94AA-F5618732CB3F" /* Strings.cpp in Sources */,
 				"6B5C2CB4-112C-42E6-BBBC-6A7072193C5D" /* AvailableVideoSource.cpp in Sources */,
+				02145B012E525064009C1855 /* DiffusionShader.cpp in Sources */,
 				"0DD26806-FE9C-4B5D-8B71-48DF4D89DC14" /* FileSource.cpp in Sources */,
+				02EF52772E6B706400ECC53A /* PlaylistSource.cpp in Sources */,
 				02F157CB2E1722FE003B6C2A /* TimeService.cpp in Sources */,
 				"6E71B313-9099-46C2-831A-3BD4AB9435AF" /* IconSource.cpp in Sources */,
 				"7E7EDE83-05FC-4B78-90E1-9F83F7FC7A3A" /* ImageSource.cpp in Sources */,

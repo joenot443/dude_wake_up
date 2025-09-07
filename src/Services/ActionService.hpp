@@ -3,6 +3,7 @@
 
 #include "Commands/Command.hpp"
 #include "Commands/AddShaderCommand.hpp"
+#include "Commands/AddPlaylistVideoSourceCommand.hpp"
 #include "Commands/RemoveShaderCommand.hpp"
 #include "Commands/MakeConnectionCommand.hpp"
 #include "Commands/RemoveConnectionCommand.hpp"
@@ -55,6 +56,7 @@ public:
   
   // Video source commands
   std::shared_ptr<VideoSource> addImageVideoSource(const std::string& name, const std::string& path);
+  std::shared_ptr<VideoSource> addPlaylistVideoSource(const std::string& name);
   std::shared_ptr<VideoSource> addWebcamVideoSource(const std::string& name, int deviceId);
   std::shared_ptr<VideoSource> addFileVideoSource(const std::string& name, const std::string& path);
   std::shared_ptr<VideoSource> addTextVideoSource(const std::string& name);

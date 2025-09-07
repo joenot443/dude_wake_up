@@ -151,4 +151,15 @@ public:
 private:
 };
 
+class AvailableVideoSourcePlaylist : public AvailableVideoSourceFile
+{
+public:
+  AvailableVideoSourcePlaylist(std::string sourceName, std::string path)
+    : AvailableVideoSourceFile(std::move(sourceName), std::move(path)) {
+      type = VideoSource_playlist;
+    }
+
+  void generatePreview() override {};
+};
+
 #endif /* AvailableVideoSource_h */

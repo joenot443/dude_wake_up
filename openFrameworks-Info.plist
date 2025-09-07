@@ -8,5 +8,7 @@
 	<string>????</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
+	<key>NSAudioCaptureUsageDescription</key>
+	<string>This app needs to capture system audio for visual analysis and audio processing features.</string>
 </dict>
 </plist>

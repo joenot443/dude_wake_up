@@ -8,6 +8,8 @@
 #include "ShaderChainerService.hpp"
 #include "Models/Strand.hpp"
 #include "AsciiShader.hpp"
+#include "AudioBallShader.hpp"
+#include "DiffusionShader.hpp"
 #include "BubblesShader.hpp"
 #include "ElectricEelsShader.hpp"
 #include "SynthflyShader.hpp"
@@ -947,6 +949,18 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeAudioBall: {
+      auto settings = new AudioBallSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AudioBallShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeDiffusion: {
+      auto settings = new DiffusionSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<DiffusionShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeBubbles: {
       auto settings = new BubblesSettings(shaderId, shaderJson);
       auto shader = std::make_shared<BubblesShader>(settings);

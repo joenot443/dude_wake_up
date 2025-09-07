@@ -107,6 +107,13 @@ std::shared_ptr<VideoSource> ActionService::addTextVideoSource(const std::string
   return command->getVideoSource();
 }
 
+std::shared_ptr<VideoSource> ActionService::addPlaylistVideoSource(const std::string& name) {
+//  auto command = std::make_shared<AddPlaylistVideoSourceCommand>(name);
+//  executeCommand(command);
+//  return command->getVideoSource();
+  return nullptr;
+}
+
 std::shared_ptr<VideoSource> ActionService::addLibraryVideoSource(std::shared_ptr<LibraryFile> libraryFile) {
   auto command = std::make_shared<AddLibraryVideoSourceCommand>(libraryFile);
   executeCommand(command);

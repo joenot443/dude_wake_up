@@ -74,6 +74,12 @@ void VideoSourceBrowserView::refreshSources()
     {
       shaderItems.push_back(tileItem);
     }
+
+    else if (source->type == VideoSource_playlist)
+    {
+      webcamItems.push_back(tileItem);
+    }
+
     else if (source->type == VideoSource_library)
     {
       if (std::dynamic_pointer_cast<AvailableVideoSourceLibrary>(source) != nullptr)
@@ -277,6 +283,9 @@ void VideoSourceBrowserView::setCallback(std::function<void(std::shared_ptr<Tile
 int VideoSourceBrowserView::tabForSourceType(VideoSourceType type) {
   switch (type) {
     case VideoSource_webcam:
+      return 1;
+      break;
+    case VideoSource_playlist:
       return 1;
       break;
     case VideoSource_file:

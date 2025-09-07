@@ -15,6 +15,7 @@
 #include "TextSource.hpp"
 #include "WebcamSource.hpp"
 #include "IconSource.hpp"
+#include "PlaylistSource.hpp"
 #include "ImageSource.hpp"
 #include "ShaderChainerService.hpp"
 #include "BookmarkService.hpp"
@@ -63,6 +64,9 @@ void VideoSourceService::populateAvailableVideoSources()
     fileSource->generatePreview();
     availableSourceMap[fileSource->availableVideoSourceId] = fileSource;
   }
+
+  auto playlistSource = std::make_shared<AvailableVideoSourcePlaylist>("Playlist", "");
+  availableSourceMap[playlistSource->availableVideoSourceId] = playlistSource;
   
   // Sort the shader sources by category count and then by name
   std::map<std::string, int> categoryCounts;
@@ -327,6 +331,14 @@ std::shared_ptr<VideoSource> VideoSourceService::makeFileVideoSource(std::string
   CFRelease(fileURL);
   CFRelease(bookmarkData);
   
+  return videoSource;
+}
+
+// Adds a playlist video source to the map
+std::shared_ptr<VideoSource> VideoSourceService::makePlaylistVideoSource(std::string name, ImVec2 origin, std::string id, json j)
+{
+  std::shared_ptr<VideoSource> videoSource = std::make_shared<PlaylistSource>(id, name);
+  videoSource->origin = origin;
   return videoSource;
 }
 

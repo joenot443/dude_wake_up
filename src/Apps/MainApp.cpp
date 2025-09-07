@@ -40,7 +40,6 @@ void MainApp::setup()
   ofEnableAlphaBlending();
   ofDisableDepthTest();
   ModulationService::getService();
-  MidiService::getService();
   AudioSourceService::getService();
   TextureService::getService();
   BookmarkService::getService();
@@ -61,6 +60,8 @@ void MainApp::setup()
   LibraryService::getService()->backgroundFetchShaderCredits();
   ParameterService::getService()->setup();
   TimeService::getService()->setup();
+  affirmScale();
+  MidiService::getService();
   StringManager::loadStrings();
 }
 
@@ -75,6 +76,7 @@ void MainApp::update()
   TimeService::getService()->tick();
   ConfigService::getService()->checkAndSaveDefaultConfigFile();
   AudioSourceService::getService()->update();
+  MidiService::getService()->update();
   mainStageView->update();
   affirmWindowSize();
   affirmScale();

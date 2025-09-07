@@ -10,6 +10,7 @@
 #include "AudioSourceService.hpp"
 #include "Gist.h"
 #include <stdio.h>
+#include <chrono>
 
 void AudioSource::toggle() {
   if (active)
@@ -40,6 +41,22 @@ void AudioSource::audioIn(ofSoundBuffer &soundBuffer) {
 void AudioSource::processFrame(const std::vector<float>& frame) {
   gist.processAudioFrame(frame);
   audioAnalysis.analyzeFrame(&gist);
+  
+  // Process beat detection using Gist data only in Auto mode
+  if (audioAnalysis.bpmMode == BpmMode_Auto) {
+    SimpleBeat beat = autoBpmDetector.processFrame(&gist);
+    
+    // Update BPM if we have a valid detection
+    if (beat.bpm > 0 && beat.bpm >= 50 && beat.bpm <= 200) {
+      audioAnalysis.bpm->setValue(beat.bpm);
+    }
+    
+    // If beat detected, reset timing for beat synchronization
+    if (beat.isBeat) {
+      auto currentTime = std::chrono::steady_clock::now();
+      audioAnalysis.bpmStartTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
+    }
+  }
 }
 
 void AudioSource::debugGist() {

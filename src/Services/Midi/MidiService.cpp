@@ -15,7 +15,7 @@
 
 using json = nlohmann::json;
 
-void MidiService::setup() {
+void MidiService::initializeMidiPorts() {
   // list the number of available input & output ports
   ofxMidiIn input;
   ofxMidiOut output;
@@ -47,6 +47,18 @@ void MidiService::setup() {
   
   // set this class to receieve midi device (dis)connection events
   ofxMidi::setConnectionListener(this);
+}
+
+void MidiService::setup() {
+  learningParam = nullptr;
+  midiInitialized = false;
+}
+
+void MidiService::update() {
+  if (!midiInitialized) {
+    initializeMidiPorts();
+    midiInitialized = true;
+  }
 }
 void MidiService::midiInputAdded(std::string name, bool isNetwork) {
   std::stringstream msg;
@@ -133,12 +145,26 @@ void MidiService::driveParameter(std::string paramId, ofxMidiMessage &msg) {
     log("Failed to get Parameter for MIDI message %s");
     return;
   }
+
   if (param->type == ParameterType_Bool) {
     param->toggleValue();
-  } else {
-    param->driveValue(msg.value / 127.0);
+    return;
+  }
+
+  float normalizedValue = 0.0;
+  switch (msg.status) {
+    case MIDI_PITCH_BEND:
+      // For pitch bend, ofxMidi gives us a value from 0 to 16383 (14-bit)
+      // We want to convert this to 0.0 - 1.0
+      normalizedValue = msg.value / 16383.0;
+      break;
+    default:
+      // Standard MIDI CC values are 7-bit (0-127)
+      normalizedValue = msg.value / 127.0;
+      break;
   }
   
+  param->driveValue(normalizedValue);
 }
 
 std::string MidiService::descriptorFrom(ofxMidiMessage &msg) {

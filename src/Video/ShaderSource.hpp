@@ -4,6 +4,7 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "AudioBallShader.hpp"
 #include "BubblesShader.hpp"
 #include "ElectricEelsShader.hpp"
 #include "SynthflyShader.hpp"
@@ -174,6 +175,7 @@ enum ShaderSourceType {
   ShaderSource_Synthfly, //source enum,
   ShaderSource_ElectricEels, //source enum,
   ShaderSource_Bubbles, //source enum,
+  ShaderSource_AudioBall, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -253,11 +255,14 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_Synthfly, // Available
   ShaderSource_ElectricEels, // Available
   ShaderSource_Bubbles, // Available
+  ShaderSource_AudioBall, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
       // shaderTypeForShaderSourceType
+  case ShaderSource_AudioBall: //type enum
+    return ShaderTypeAudioBall;
   case ShaderSource_Bubbles: //type enum
     return ShaderTypeBubbles;
   case ShaderSource_ElectricEels: //type enum
@@ -667,6 +672,12 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_AudioBall: { // Settings
+      auto settings = new AudioBallSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<AudioBallShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_Bubbles: { // Settings
       auto settings = new BubblesSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<BubblesShader>(settings);

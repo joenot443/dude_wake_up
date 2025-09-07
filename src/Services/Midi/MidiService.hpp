@@ -34,6 +34,7 @@ private:
   ofMutex messageMutex; // make sure we don't read from queue while writing
   int note, ctl;
   std::vector<unsigned char> bytes;
+  bool midiInitialized;
   void addMessage(std::string msg);
   void newMidiMessage(ofxMidiMessage& msg) override;
   void midiInputAdded(std::string name, bool isNetwork) override;
@@ -44,11 +45,13 @@ private:
   
 public:
   void setup();
+  void update();
   void stopLearning();
   void beginLearning(std::shared_ptr<Parameter> parameter);
   void saveAssignment(std::shared_ptr<Parameter> param, std::string descriptor);
   bool isLearning();
-  
+  void initializeMidiPorts();
+
   bool hasPairingForDescriptor(std::string descriptor);
   bool hasPairingForParameterId(std::string paramId);
   
