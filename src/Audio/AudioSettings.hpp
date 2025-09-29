@@ -136,7 +136,7 @@ struct AudioAnalysis {
         lows(std::make_shared<Parameter>("Lows", 0.0, 0.0, 1.0)),
         beatPulse(std::make_shared<Parameter>("BPM", 0.0, 0.0, 1.0)),
         bpm(std::make_shared<Parameter>("bpm", 120.0, 0.0, 300.0)),
-        frequencyRelease(std::make_shared<Parameter>("Release", 0.95, 0.01, 5.0)),
+        frequencyRelease(std::make_shared<Parameter>("Release", 0.95, 0.01, 1.0)),
         frequencyScale(std::make_shared<Parameter>("Scale", 1.0, 0.01, 2.0)),
         rmsOscillator(std::make_shared<ValueOscillator>(rms)),
         beatPulseOscillator(std::make_shared<PulseOscillator>(beatPulse)),

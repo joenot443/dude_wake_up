@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		021162772E6CC3A000B15198 /* SystemAudioSource.mm in Sources */ = {isa = PBXBuildFile; fileRef = 021162762E6CC3A000B15198 /* SystemAudioSource.mm */; };
-		021170DE2E6CD8A300B15198 /* AutoBpmDetector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 021170DD2E6CD8A300B15198 /* AutoBpmDetector.cpp */; };
 		02145B012E525064009C1855 /* DiffusionShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02145B002E525040009C1855 /* DiffusionShader.cpp */; };
 		024FAE772DA0207D00DE3197 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 024FAE5B2DA0207D00DE3197 /* .gitignore */; };
 		024FAE812DA0207D00DE3197 /* ofxFastFboReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024FAE592DA0207D00DE3197 /* ofxFastFboReader.cpp */; };
@@ -34,6 +33,13 @@
 		028651732D94699B000CE0D4 /* kiss_fft.c in Sources */ = {isa = PBXBuildFile; fileRef = 028651722D94699B000CE0D4 /* kiss_fft.c */; };
 		028651B12D95E331000CE0D4 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 028651AF2D95E208000CE0D4 /* icon.icns */; };
 		02AB2F0F2DE0DA2A004EDB3F /* CreditView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02AB2F0E2DE0DA2A004EDB3F /* CreditView.cpp */; };
+		02CED2702E6F95490010EC68 /* BTrackOnsetDetectionFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02CED25C2E6F94C80010EC68 /* BTrackOnsetDetectionFunction.cpp */; };
+		02CED2742E6F95FD0010EC68 /* BTrackDetector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02CED2732E6F95FD0010EC68 /* BTrackDetector.cpp */; };
+		02CED2752E6F9A230010EC68 /* BTrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02CED17A2E6F33530010EC68 /* BTrack.cpp */; };
+		02CED27F2E6F9E580010EC68 /* src_zoh.c in Sources */ = {isa = PBXBuildFile; fileRef = 02CED27E2E6F9E580010EC68 /* src_zoh.c */; };
+		02CED2802E6F9E580010EC68 /* src_sinc.c in Sources */ = {isa = PBXBuildFile; fileRef = 02CED27D2E6F9E580010EC68 /* src_sinc.c */; };
+		02CED2812E6F9E580010EC68 /* src_linear.c in Sources */ = {isa = PBXBuildFile; fileRef = 02CED27C2E6F9E580010EC68 /* src_linear.c */; };
+		02CED2822E6F9E580010EC68 /* samplerate.c in Sources */ = {isa = PBXBuildFile; fileRef = 02CED27B2E6F9E580010EC68 /* samplerate.c */; };
 		02EF52772E6B706400ECC53A /* PlaylistSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02EF52762E6B706400ECC53A /* PlaylistSource.cpp */; };
 		02F157C82E1722E0003B6C2A /* TimePanelView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F157C72E1722E0003B6C2A /* TimePanelView.cpp */; };
 		02F157CB2E1722FE003B6C2A /* TimeService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F157CA2E1722FE003B6C2A /* TimeService.cpp */; };
@@ -159,6 +165,13 @@
 			remoteGlobalIDString = 2FBBEAE508F335360078DB84;
 			remoteInfo = "max-external";
 		};
+		02CED26D2E6F94C80010EC68 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 02CED2462E6F94C80010EC68 /* btrack~.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2FBBEAE508F335360078DB84;
+			remoteInfo = "max-external";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -191,8 +204,6 @@
 		"01F7D881-9877-4747-9718-9FE1BED26EF7" /* HelpService.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = HelpService.hpp; sourceTree = "<group>"; };
 		021162752E6CC3A000B15198 /* SystemAudioSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SystemAudioSource.hpp; sourceTree = "<group>"; };
 		021162762E6CC3A000B15198 /* SystemAudioSource.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SystemAudioSource.mm; sourceTree = "<group>"; };
-		021170DC2E6CD8A300B15198 /* AutoBpmDetector.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AutoBpmDetector.hpp; sourceTree = "<group>"; };
-		021170DD2E6CD8A300B15198 /* AutoBpmDetector.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AutoBpmDetector.cpp; sourceTree = "<group>"; };
 		021171AA2E6E3F8F00B15198 /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
 		02145B002E525040009C1855 /* DiffusionShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DiffusionShader.cpp; sourceTree = "<group>"; };
 		02145B022E525095009C1855 /* DiffusionShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DiffusionShader.hpp; sourceTree = "<group>"; };
@@ -279,6 +290,24 @@
 		02AB2F0C2DE0C4D7004EDB3F /* strings.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = strings.json; path = misc/strings.json; sourceTree = "<group>"; };
 		02AB2F0D2DE0DA2A004EDB3F /* CreditView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CreditView.hpp; sourceTree = "<group>"; };
 		02AB2F0E2DE0DA2A004EDB3F /* CreditView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CreditView.cpp; sourceTree = "<group>"; };
+		02CED1792E6F33530010EC68 /* BTrack.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BTrack.h; sourceTree = "<group>"; };
+		02CED17A2E6F33530010EC68 /* BTrack.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BTrack.cpp; sourceTree = "<group>"; };
+		02CED2462E6F94C80010EC68 /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
+		02CED25B2E6F94C80010EC68 /* BTrackOnsetDetectionFunction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BTrackOnsetDetectionFunction.h; sourceTree = "<group>"; };
+		02CED25C2E6F94C80010EC68 /* BTrackOnsetDetectionFunction.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BTrackOnsetDetectionFunction.cpp; sourceTree = "<group>"; };
+		02CED26F2E6F94D80010EC68 /* CircularBuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CircularBuffer.h; sourceTree = "<group>"; };
+		02CED2722E6F95FD0010EC68 /* BTrackDetector.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BTrackDetector.hpp; sourceTree = "<group>"; };
+		02CED2732E6F95FD0010EC68 /* BTrackDetector.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BTrackDetector.cpp; sourceTree = "<group>"; };
+		02CED2762E6F9A3F0010EC68 /* samplerate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = samplerate.h; sourceTree = "<group>"; };
+		02CED2772E6F9E580010EC68 /* common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
+		02CED2782E6F9E580010EC68 /* fastest_coeffs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fastest_coeffs.h; sourceTree = "<group>"; };
+		02CED2792E6F9E580010EC68 /* high_qual_coeffs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = high_qual_coeffs.h; sourceTree = "<group>"; };
+		02CED27A2E6F9E580010EC68 /* mid_qual_coeffs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mid_qual_coeffs.h; sourceTree = "<group>"; };
+		02CED27B2E6F9E580010EC68 /* samplerate.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = samplerate.c; sourceTree = "<group>"; };
+		02CED27C2E6F9E580010EC68 /* src_linear.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = src_linear.c; sourceTree = "<group>"; };
+		02CED27D2E6F9E580010EC68 /* src_sinc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = src_sinc.c; sourceTree = "<group>"; };
+		02CED27E2E6F9E580010EC68 /* src_zoh.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = src_zoh.c; sourceTree = "<group>"; };
+		02CED2852E7058070010EC68 /* CircleMixShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CircleMixShader.hpp; sourceTree = "<group>"; };
 		02D115332DC94674007B87CE /* AudioSettings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AudioSettings.hpp; sourceTree = "<group>"; };
 		02D115342DC94674007B87CE /* AudioTrack.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AudioTrack.hpp; sourceTree = "<group>"; };
 		02EF52742E6B706400ECC53A /* PlaylistSettings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PlaylistSettings.hpp; sourceTree = "<group>"; };
@@ -786,12 +815,26 @@
 		0286514D2D94692A000CE0D4 /* gist */ = {
 			isa = PBXGroup;
 			children = (
+				02CED2772E6F9E580010EC68 /* common.h */,
+				02CED2782E6F9E580010EC68 /* fastest_coeffs.h */,
+				02CED2792E6F9E580010EC68 /* high_qual_coeffs.h */,
+				02CED27A2E6F9E580010EC68 /* mid_qual_coeffs.h */,
+				02CED27B2E6F9E580010EC68 /* samplerate.c */,
+				02CED27C2E6F9E580010EC68 /* src_linear.c */,
+				02CED27D2E6F9E580010EC68 /* src_sinc.c */,
+				02CED27E2E6F9E580010EC68 /* src_zoh.c */,
+				02CED2762E6F9A3F0010EC68 /* samplerate.h */,
+				02CED1792E6F33530010EC68 /* BTrack.h */,
+				02CED17A2E6F33530010EC68 /* BTrack.cpp */,
+				02CED26F2E6F94D80010EC68 /* CircularBuffer.h */,
 				028651702D94699B000CE0D4 /* _kiss_fft_guts.h */,
 				028651712D94699B000CE0D4 /* kiss_fft.h */,
 				028651722D94699B000CE0D4 /* kiss_fft.c */,
 				0286514E2D946945000CE0D4 /* AccelerateFFT.h */,
 				0286514F2D946945000CE0D4 /* AccelerateFFT.cpp */,
 				028651502D946945000CE0D4 /* CMakeLists.txt */,
+				02CED25B2E6F94C80010EC68 /* BTrackOnsetDetectionFunction.h */,
+				02CED25C2E6F94C80010EC68 /* BTrackOnsetDetectionFunction.cpp */,
 				028651512D946945000CE0D4 /* CoreFrequencyDomainFeatures.h */,
 				028651522D946945000CE0D4 /* CoreFrequencyDomainFeatures.cpp */,
 				028651532D946945000CE0D4 /* CoreTimeDomainFeatures.h */,
@@ -857,6 +900,14 @@
 				028651852D946BE8000CE0D4 /* value.hpp */,
 			);
 			path = observable;
+			sourceTree = "<group>";
+		};
+		02CED26A2E6F94C80010EC68 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				02CED26E2E6F94C80010EC68 /* btrack~.mxo */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		"1D39EA5E-9C49-4456-8318-43E5762584E5" /* Commands */ = {
@@ -1173,14 +1224,14 @@
 				"517BC169-93F0-4478-AC03-000F41D7801A" /* AudioSource.hpp */,
 				02D115332DC94674007B87CE /* AudioSettings.hpp */,
 				02D115342DC94674007B87CE /* AudioTrack.hpp */,
+				02CED2722E6F95FD0010EC68 /* BTrackDetector.hpp */,
+				02CED2732E6F95FD0010EC68 /* BTrackDetector.cpp */,
 				"7F50B89F-0348-43F2-A58C-1C5504692393" /* FileAudioSource.cpp */,
 				"847C62FC-F4DB-4D9E-AC52-A7DCA0A4FF8E" /* FileAudioSource.hpp */,
 				"B19D76F5-D648-45E6-A505-7EEDF67F1CC8" /* MicrophoneAudioSource.cpp */,
 				"FAB19008-CE87-4037-B0E7-BA9EC8F76835" /* MicrophoneAudioSource.hpp */,
 				021162752E6CC3A000B15198 /* SystemAudioSource.hpp */,
 				021162762E6CC3A000B15198 /* SystemAudioSource.mm */,
-				021170DC2E6CD8A300B15198 /* AutoBpmDetector.hpp */,
-				021170DD2E6CD8A300B15198 /* AutoBpmDetector.cpp */,
 			);
 			path = Audio;
 			sourceTree = "<group>";
@@ -1383,6 +1434,7 @@
 				024219E02DB8362B00A19C28 /* WavyShader.hpp */,
 				02145B022E525095009C1855 /* DiffusionShader.hpp */,
 				02145B002E525040009C1855 /* DiffusionShader.cpp */,
+				02CED2852E7058070010EC68 /* CircleMixShader.hpp */,
 			);
 			path = Shading;
 			sourceTree = "<group>";
@@ -1606,6 +1658,10 @@
 					ProductGroup = 021171D02E6E3F8F00B15198 /* Products */;
 					ProjectRef = 021171AA2E6E3F8F00B15198 /* btrack~.xcodeproj */;
 				},
+				{
+					ProductGroup = 02CED26A2E6F94C80010EC68 /* Products */;
+					ProjectRef = 02CED2462E6F94C80010EC68 /* btrack~.xcodeproj */;
+				},
 			);
 			projectRoot = "";
 			targets = (
@@ -1620,6 +1676,13 @@
 			fileType = wrapper.cfbundle;
 			path = "btrack~.mxo";
 			remoteRef = 021171D32E6E3F9000B15198 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		02CED26E2E6F94C80010EC68 /* btrack~.mxo */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "btrack~.mxo";
+			remoteRef = 02CED26D2E6F94C80010EC68 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -1682,10 +1745,16 @@
 				E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */,
 				"BE747D0D-95DB-4890-8345-A256402BFBCF" /* MainApp.cpp in Sources */,
 				"F291B4B3-9384-43E4-8D8C-B28A47CCBA4B" /* AudioSource.cpp in Sources */,
+				02CED2702E6F95490010EC68 /* BTrackOnsetDetectionFunction.cpp in Sources */,
+				02CED2742E6F95FD0010EC68 /* BTrackDetector.cpp in Sources */,
 				"1BBA5C49-4387-4DF1-B018-9F6E016F444A" /* FileAudioSource.cpp in Sources */,
 				"201BA7D8-7AC0-4851-BA33-523C3122F549" /* MicrophoneAudioSource.cpp in Sources */,
 				"25587D76-FA97-4F2E-8BBA-A4C133F463CF" /* FeedbackSource.cpp in Sources */,
 				"41A33622-C0FD-4318-ACAF-83D8230D1B5E" /* FeedbackSourceService.cpp in Sources */,
+				02CED27F2E6F9E580010EC68 /* src_zoh.c in Sources */,
+				02CED2802E6F9E580010EC68 /* src_sinc.c in Sources */,
+				02CED2812E6F9E580010EC68 /* src_linear.c in Sources */,
+				02CED2822E6F9E580010EC68 /* samplerate.c in Sources */,
 				"EBADD458-BAE7-43C7-8BFF-BE0AFAF9F0D5" /* HelpService.cpp in Sources */,
 				"7E974982-665D-49E8-98AB-0D9D4B26C6F7" /* IsoFractShader.cpp in Sources */,
 				"6D94E3C1-5770-4476-8604-5293607533E1" /* Connection.cpp in Sources */,
@@ -1723,7 +1792,6 @@
 				"A3B6C49A-FDFA-4B94-8B68-F5304511942A" /* VideoSourceService.cpp in Sources */,
 				"2987286D-D5D8-4C62-BF41-954D098CE626" /* FeedbackShader.cpp in Sources */,
 				"BACC44F3-4998-44C2-B2A6-DBAB1170A60F" /* ImageTexture.cpp in Sources */,
-				021170DE2E6CD8A300B15198 /* AutoBpmDetector.cpp in Sources */,
 				024FAE8D2DA02CF600DE3197 /* AVFRecorderWrapper.mm in Sources */,
 				024FAE8E2DA02CF600DE3197 /* AVFRecorder.m in Sources */,
 				"522DAC64-183B-4131-852C-1DC95FA2DE79" /* OptionalShadersHelper.cpp in Sources */,
@@ -1809,6 +1877,7 @@
 				028651662D946945000CE0D4 /* Gist.cpp in Sources */,
 				"F5423EB3-96DC-4F94-B9DF-EDB11F0354B4" /* ofxImGuiLoggerChannel.cpp in Sources */,
 				"20978F2F-9BFD-48B6-B8EC-48AA83AD51EF" /* RtMidi.cpp in Sources */,
+				02CED2752E6F9A230010EC68 /* BTrack.cpp in Sources */,
 				"D19444EB-11C9-4930-B137-E59CB53E5227" /* ofxRtMidiIn.cpp in Sources */,
 				"412E3B15-F86F-4BFB-86C3-7A2AE9773CC3" /* ofxRtMidiOut.cpp in Sources */,
 				"0FA8E047-D5B7-4EB7-A915-A2A14E0E9D2C" /* ofxBaseMidi.cpp in Sources */,

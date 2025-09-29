@@ -8,6 +8,8 @@
 #include "ShaderChainerService.hpp"
 #include "Models/Strand.hpp"
 #include "AsciiShader.hpp"
+#include "AudioGlowBarsShader.hpp"
+#include "CircleMixShader.hpp"
 #include "AudioBallShader.hpp"
 #include "DiffusionShader.hpp"
 #include "BubblesShader.hpp"
@@ -949,6 +951,18 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeAudioGlowBars: {
+      auto settings = new AudioGlowBarsSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AudioGlowBarsShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeCircleMix: {
+      auto settings = new CircleMixSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<CircleMixShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeAudioBall: {
       auto settings = new AudioBallSettings(shaderId, shaderJson);
       auto shader = std::make_shared<AudioBallShader>(settings);

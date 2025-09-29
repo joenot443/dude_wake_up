@@ -164,6 +164,8 @@ enum ShaderType {
   ShaderTypeBubbles,
   ShaderTypeDiffusion,
   ShaderTypeAudioBall,
+  ShaderTypeCircleMix,
+  ShaderTypeAudioGlowBars,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -191,6 +193,7 @@ static const ShaderType AvailableMixShaderTypes[] = {
   ShaderTypeSlidingFrame,
   ShaderTypeStaticFrame,
   ShaderTypeFeedback,
+  ShaderTypeCircleMix,
 };
 
 static const ShaderType AvailableMaskShaderTypes[] = {
@@ -224,7 +227,7 @@ static const ShaderType AvailableTransformShaderTypes[] = {
   ShaderTypeKaleidoscope,
   ShaderTypeSlider, // Generated
   ShaderTypeLiquid,
-  ShaderTypeSwirl,
+  ShaderTypeSwirl
 };
 
 static const ShaderType AvailableFilterShaderTypes[] = {
@@ -295,6 +298,10 @@ static std::vector<ShaderType> AllShaderTypes() {
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) { // ShaderNames
+    case ShaderTypeAudioGlowBars:
+      return "AudioGlowBars";
+    case ShaderTypeCircleMix:
+      return "CircleMix";
     case ShaderTypeAudioBall:
       return "AudioBall";
     case ShaderTypeDiffusion:

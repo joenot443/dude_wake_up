@@ -12,7 +12,7 @@
 #include "ofMain.h"
 #include "Gist.h"
 #include "AudioSettings.hpp"
-#include "AutoBpmDetector.hpp"
+#include "BTrackDetector.hpp"
 
 using json = nlohmann::json;
 
@@ -29,7 +29,7 @@ public:
   bool active = false;
   AudioAnalysis audioAnalysis;
   Gist<float> gist = Gist<float>(512, 44100);
-  AutoBpmDetector autoBpmDetector;
+  BTrackDetector btrackDetector;
   
   virtual ~AudioSource() = default;
   

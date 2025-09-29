@@ -43,9 +43,7 @@ public:
   : settings(settings), Shader(settings){};
 
   void setup() override {
-    shader.load("shaders/AudioBumper");
-    shader.load("shaders/AudioBumper");
-    
+    shader.load("shaders/AudioBumper");    
   }
   
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {

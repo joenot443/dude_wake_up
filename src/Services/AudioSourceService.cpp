@@ -128,18 +128,22 @@ void AudioSourceService::update() {
   if (!selectedAudioSource->active) return;
   
   if (LayoutStateService::getService()->abletonLinkEnabled && link != nullptr) {
-    selectedAudioSource->audioAnalysis.bpmEnabled = true;
     auto state = link->captureAppSessionState();
     selectedAudioSource->audioAnalysis.bpm->setValue(link->captureAppSessionState().tempo() * 2.0);
-    
-    double beatCount = link->captureAppSessionState().beatAtTime(link->clock().micros(), 4.);
-    selectedAudioSource->audioAnalysis.updateBeat(beatCount - floor(beatCount));
+
+    if (selectedAudioSource->audioAnalysis.bpmEnabled) {
+      double beatCount = link->captureAppSessionState().beatAtTime(link->clock().micros(), 4.);
+      selectedAudioSource->audioAnalysis.updateBeat(beatCount - floor(beatCount));
+    }
   } else if (selectedAudioSource->type() == AudioSourceType_Microphone || selectedAudioSource->type() == AudioSourceType_System) { // Don't update for the samples
-//    selectedAudioSource->audioAnalysis.bpm->value = AudioSourceService::getService()->tapper.bpm();
-    selectedAudioSource->audioAnalysis.updateBeat(selectedAudioSource->audioAnalysis.bpmPct());
+    selectedAudioSource->audioAnalysis.bpm->value = AudioSourceService::getService()->selectedAudioSource->btrackDetector.getCurrentBpm();
+    if (selectedAudioSource->audioAnalysis.bpmEnabled) {
+      selectedAudioSource->audioAnalysis.updateBeat(selectedAudioSource->audioAnalysis.bpmPct());
+    }
   } else if (selectedAudioSource->type() == AudioSourceType_File) {
-    selectedAudioSource->audioAnalysis.bpmEnabled = true;
-    selectedAudioSource->audioAnalysis.updateBeat(selectedAudioSource->audioAnalysis.bpmPct());
+    if (selectedAudioSource->audioAnalysis.bpmEnabled) {
+      selectedAudioSource->audioAnalysis.updateBeat(selectedAudioSource->audioAnalysis.bpmPct());
+    }
   }
 }
 

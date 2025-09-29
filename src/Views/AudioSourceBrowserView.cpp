@@ -205,21 +205,19 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
           if (ImGui::Combo("##BpmMode", &currentBpmMode, bpmModeItems, IM_ARRAYSIZE(bpmModeItems))) {
             source->audioAnalysis.bpmMode = static_cast<BpmMode>(currentBpmMode);
             // Reset auto BPM detector when switching to Auto mode
-            if (source->audioAnalysis.bpmMode == BpmMode_Auto) {
-              source->autoBpmDetector.resetBeatTracking();
-            }
+//            if (source->audioAnalysis.bpmMode == BpmMode_Auto) {
+//              source->btrackDetector.resetBeatTracking();
+//            }
             // Enable Ableton Link when switching to Link mode
-            else if (source->audioAnalysis.bpmMode == BpmMode_Link) {
+            if (source->audioAnalysis.bpmMode == BpmMode_Link) {
               LayoutStateService::getService()->abletonLinkEnabled = true;
               AudioSourceService::getService()->setupAbleton();
             }
           }
         }
-        // Only draw graph if we're enabled
-        if (source->audioAnalysis.bpmEnabled || isSampleTrack) {
-          source->audioAnalysis.beatPulseOscillator->enabled = true;
-          OscillatorView::draw(std::dynamic_pointer_cast<Oscillator>(source->audioAnalysis.beatPulseOscillator), source->audioAnalysis.beatPulse, audioGraphSize, false);
-        }
+        // Set oscillator enabled state and draw graph
+        source->audioAnalysis.beatPulseOscillator->enabled = source->audioAnalysis.bpmEnabled || isSampleTrack;
+        OscillatorView::draw(std::dynamic_pointer_cast<Oscillator>(source->audioAnalysis.beatPulseOscillator), source->audioAnalysis.beatPulse, audioGraphSize, false);
         
         if (!isSampleTrack) {
           // Show different controls based on BPM mode

@@ -171,7 +171,10 @@ public:
 
     /** Calculates the Mel-frequency Cepstral Coefficients */
     const std::vector<T>& getMelFrequencyCepstralCoefficients();
-    
+
+  std::vector<T> audioFrame;        /**< The current audio frame */
+
+
 private:
     //=======================================================================
 
@@ -206,7 +209,6 @@ private:
     int samplingFrequency;            /**< The sampling frequency used for analysis */
     WindowType windowType;            /**< The window type used in FFT analysis */
 
-    std::vector<T> audioFrame;        /**< The current audio frame */
     std::vector<T> windowFunction;    /**< The window function used in FFT processing */
     std::vector<T> fftReal;           /**< The real part of the FFT for the current audio frame */
     std::vector<T> fftImag;           /**< The imaginary part of the FFT for the current audio frame */

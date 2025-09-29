@@ -4,6 +4,7 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "AudioGlowBarsShader.hpp"
 #include "AudioBallShader.hpp"
 #include "BubblesShader.hpp"
 #include "ElectricEelsShader.hpp"
@@ -176,6 +177,7 @@ enum ShaderSourceType {
   ShaderSource_ElectricEels, //source enum,
   ShaderSource_Bubbles, //source enum,
   ShaderSource_AudioBall, //source enum,
+  ShaderSource_AudioGlowBars, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -256,11 +258,14 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_ElectricEels, // Available
   ShaderSource_Bubbles, // Available
   ShaderSource_AudioBall, // Available
+  ShaderSource_AudioGlowBars, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
       // shaderTypeForShaderSourceType
+  case ShaderSource_AudioGlowBars: //type enum
+    return ShaderTypeAudioGlowBars;
   case ShaderSource_AudioBall: //type enum
     return ShaderTypeAudioBall;
   case ShaderSource_Bubbles: //type enum
@@ -672,6 +677,12 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_AudioGlowBars: { // Settings
+      auto settings = new AudioGlowBarsSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<AudioGlowBarsShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_AudioBall: { // Settings
       auto settings = new AudioBallSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<AudioBallShader>(settings);
