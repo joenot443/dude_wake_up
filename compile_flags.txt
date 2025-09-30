@@ -9,6 +9,7 @@
 -DGLM_ENABLE_EXPERIMENTAL
 -DLINK_PLATFORM_MACOSX=1
 -DOF_NO_FMOD=1
+-DUSE_KISS_FFT
 
 -I/Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up/bin/include
 -I/usr/local/include

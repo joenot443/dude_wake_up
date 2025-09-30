@@ -38,7 +38,7 @@ uniform vec3 invert;
 vec4 blend(vec4 a, vec4 b, int mode) {
   vec4 result;
   if (mode == 0) { // Standard
-    return mix(a, b, fbMix);
+    result = mix(a, b, fbMix);
   }
   else if (mode == 1) { // Multiply
     result = a * b;
@@ -69,6 +69,12 @@ vec4 blend(vec4 a, vec4 b, int mode) {
   } else {
     result = a; // Default fallback
   }
+
+  // Apply fbMix to all blend modes (except mode 0 which already uses it)
+  if (mode != 0) {
+    result = mix(a, result, fbMix);
+  }
+
   result.a = 1.0; // Ensure the output is fully opaque
   return result;
 }

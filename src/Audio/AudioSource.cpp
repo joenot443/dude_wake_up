@@ -39,22 +39,33 @@ void AudioSource::audioIn(ofSoundBuffer &soundBuffer) {
 }
 
 void AudioSource::processFrame(const std::vector<float>& frame) {
-  gist.processAudioFrame(frame);
-  audioAnalysis.analyzeFrame(&gist);
-  
-  // Process beat detection using BTrack only in Auto mode
-  if (audioAnalysis.bpmMode == BpmMode_Auto) {
-    SimpleBeat beat = btrackDetector.processFrame(&gist);
-    
-    // Update BPM if we have a valid detection
-    if (beat.bpm > 0 && beat.bpm >= 50 && beat.bpm <= 200) {
-      audioAnalysis.bpm->setValue(beat.bpm);
-    }
-    
-    // If beat detected, reset timing for beat synchronization
-    if (beat.isBeat) {
-      auto currentTime = std::chrono::steady_clock::now();
-      audioAnalysis.bpmStartTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
+  // Gist expects frames of exactly 512 samples
+  // Process the buffer in chunks, calling BTrack for EACH chunk
+  const size_t gistFrameSize = 512;
+
+  // Process the buffer in chunks
+  for (size_t offset = 0; offset + gistFrameSize <= frame.size(); offset += gistFrameSize) {
+    std::vector<float> chunk(frame.begin() + offset, frame.begin() + offset + gistFrameSize);
+
+    gist.processAudioFrame(chunk);
+    audioAnalysis.analyzeFrame(&gist);
+
+    // Process beat detection using BTrack for EVERY chunk in Auto mode
+    // BTrack expects to be called once per hop (512 samples)
+    // Pass the raw audio chunk, not gist->audioFrame
+    if (audioAnalysis.bpmMode == BpmMode_Auto) {
+      SimpleBeat beat = btrackDetector.processAudioFrame(chunk);
+
+      // Update BPM if we have a valid detection
+      if (beat.bpm > 0 && beat.bpm >= 50 && beat.bpm <= 200) {
+        audioAnalysis.bpm->setValue(beat.bpm);
+      }
+
+      // If beat detected, reset timing for beat synchronization
+      if (beat.isBeat) {
+        auto currentTime = std::chrono::steady_clock::now();
+        audioAnalysis.bpmStartTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
+      }
     }
   }
 }

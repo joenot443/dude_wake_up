@@ -347,27 +347,44 @@ void BTrack::doNotFixTempo()
 //=======================================================================
 void BTrack::resampleOnsetDetectionFunction()
 {
-	float output[512];
-    float input[onsetDFBufferSize];
-    
+    // When ratio is 1.0, we don't need to resample - just copy directly
+    if (onsetDFBufferSize == 512)
+    {
+        for (int i = 0; i < 512; i++)
+            resampledOnsetDF[i] = (double) onsetDF[i];
+        return;
+    }
+
+    // Use heap allocation to ensure no memory overlap between input and output
+    std::vector<float> input(onsetDFBufferSize);
+    std::vector<float> output(512);
+
     for (int i = 0; i < onsetDFBufferSize; i++)
         input[i] = (float) onsetDF[i];
-        
+
     double ratio = 512.0 / ((double) onsetDFBufferSize);
     int bufferLength = onsetDFBufferSize;
     int outputLength = 512;
-    
+
     SRC_DATA src_data;
-    src_data.data_in = input;
+    src_data.data_in = input.data();
     src_data.input_frames = bufferLength;
     src_data.src_ratio = ratio;
-    src_data.data_out = output;
+    src_data.data_out = output.data();
     src_data.output_frames = outputLength;
-    
-    src_simple (&src_data, SRC_SINC_BEST_QUALITY, 1);
-            
+
+    int src_result = src_simple (&src_data, SRC_SINC_BEST_QUALITY, 1);
+
+    if (src_result != 0) {
+        std::cout << "ERROR: src_simple failed with code " << src_result
+                  << " (bufferSize=" << onsetDFBufferSize << ", ratio=" << ratio << ")" << std::endl;
+        // Fill with zeros on error
+        std::fill(resampledOnsetDF.begin(), resampledOnsetDF.end(), 0.0);
+        return;
+    }
+
     for (int i = 0; i < outputLength; i++)
-        resampledOnsetDF[i] = (double) src_data.data_out[i];
+        resampledOnsetDF[i] = (double) output[i];
 }
 
 //=======================================================================
@@ -376,22 +393,60 @@ void BTrack::calculateTempo()
     double tempoToLagFactor = 60. * 44100. / 512.;
     
 	// adaptive threshold on input
+	std::cout << "ResampledOnsetDF before threshold (first 10): ";
+	for (int i = 0; i < 10; i++) {
+		std::cout << resampledOnsetDF[i] << " ";
+	}
+	std::cout << std::endl;
+
 	adaptiveThreshold (resampledOnsetDF);
-		
+
+	std::cout << "ResampledOnsetDF after threshold (first 10): ";
+	for (int i = 0; i < 10; i++) {
+		std::cout << resampledOnsetDF[i] << " ";
+	}
+	std::cout << std::endl;
+
 	// calculate auto-correlation function of detection function
 	calculateBalancedACF (resampledOnsetDF);
 	
 	// calculate output of comb filterbank
+	std::cout << "Before comb filter - ACF values (first 10): ";
+	for (int i = 0; i < 10; i++) {
+		std::cout << acf[i] << " ";
+	}
+	std::cout << std::endl;
+
 	calculateOutputOfCombFilterBank();
+
+	std::cout << "After comb filter - combFilterBankOutput (first 10): ";
+	for (int i = 0; i < 10; i++) {
+		std::cout << combFilterBankOutput[i] << " ";
+	}
+	std::cout << std::endl;
 	
 	// adaptive threshold on rcf
 	adaptiveThreshold (combFilterBankOutput);
 
 	// calculate tempo observation vector from beat period observation vector
+	std::cout << "Tempo observation calculation:" << std::endl;
+	std::cout << "  tempoToLagFactor: " << tempoToLagFactor << std::endl;
+	std::cout << "  combFilterBankOutput size: " << combFilterBankOutput.size() << std::endl;
+	std::cout << "  First 5 combFilterBankOutput: ";
+	for (int i = 0; i < 5; i++) {
+		std::cout << combFilterBankOutput[i] << " ";
+	}
+	std::cout << std::endl;
+
 	for (int i = 0; i < 41; i++)
 	{
 		int tempoIndex1 = (int) round (tempoToLagFactor / ((double) ((2 * i) + 80)));
 		int tempoIndex2 = (int) round (tempoToLagFactor / ((double) ((4 * i) + 160)));
+
+		if (i == 0) {
+			std::cout << "  First iteration: tempoIndex1=" << tempoIndex1 << " tempoIndex2=" << tempoIndex2 << std::endl;
+		}
+
 		tempoObservationVector[i] = combFilterBankOutput[tempoIndex1 - 1] + combFilterBankOutput[tempoIndex2 - 1];
 	}
 	
@@ -418,10 +473,10 @@ void BTrack::calculateTempo()
 	}
 	
 	normaliseVector (delta);
-	
+
 	double maxIndex = -1;
 	double maxValue = -1;
-	
+
 	for (int j = 0; j < 41; j++)
 	{
 		if (delta[j] > maxValue)
@@ -429,14 +484,33 @@ void BTrack::calculateTempo()
 			maxValue = delta[j];
 			maxIndex = j;
 		}
-		
+
 		prevDelta[j] = delta[j];
 	}
-	
+
+	// Debug logging
+	std::cout << "calculateTempo DEBUG:" << std::endl;
+	std::cout << "  maxIndex: " << maxIndex << std::endl;
+	std::cout << "  maxValue: " << maxValue << std::endl;
+	std::cout << "  hopSize: " << hopSize << std::endl;
+	std::cout << "  Formula: (60.0 * 44100.0) / ((2 * " << maxIndex << " + 80) * " << hopSize << ")" << std::endl;
+	std::cout << "  = " << (60.0 * 44100.0) << " / " << (((2 * maxIndex) + 80) * ((double) hopSize)) << std::endl;
+
 	beatPeriod = round ((60.0 * 44100.0) / (((2 * maxIndex) + 80) * ((double) hopSize)));
-	
+
+	std::cout << "  beatPeriod: " << beatPeriod << std::endl;
+
 	if (beatPeriod > 0)
         estimatedTempo = 60.0 / ((((double) hopSize) / 44100.0) * beatPeriod);
+
+    std::cout << "  estimatedTempo: " << estimatedTempo << std::endl;
+
+    // Print first 10 delta values to see the distribution
+    std::cout << "  delta values: ";
+    for (int i = 0; i < 10; i++) {
+        std::cout << delta[i] << " ";
+    }
+    std::cout << std::endl;
 }
 
 //=======================================================================
@@ -502,8 +576,12 @@ void BTrack::calculateOutputOfCombFilterBank()
 void BTrack::calculateBalancedACF (std::vector<double>& onsetDetectionFunction)
 {
     int onsetDetectionFunctionLength = 512;
-    
+
+    std::cout << "calculateBalancedACF: START" << std::endl;
+    std::cout << "  FFTLengthForACFCalculation: " << FFTLengthForACFCalculation << std::endl;
+
 #ifdef USE_FFTW
+    std::cout << "  Using FFTW" << std::endl;
     // copy into complex array and zero pad
     for (int i = 0; i < FFTLengthForACFCalculation; i++)
     {
@@ -535,6 +613,12 @@ void BTrack::calculateBalancedACF (std::vector<double>& onsetDetectionFunction)
 #endif
     
 #ifdef USE_KISS_FFT
+    std::cout << "  Using KISS_FFT" << std::endl;
+    std::cout << "  cfgForwards ptr: " << (void*)cfgForwards << std::endl;
+    std::cout << "  cfgBackwards ptr: " << (void*)cfgBackwards << std::endl;
+    std::cout << "  fftIn ptr: " << (void*)fftIn << std::endl;
+    std::cout << "  fftOut ptr: " << (void*)fftOut << std::endl;
+
     // copy into complex array and zero pad
     for (int i = 0; i < FFTLengthForACFCalculation; i++)
     {
@@ -549,9 +633,35 @@ void BTrack::calculateBalancedACF (std::vector<double>& onsetDetectionFunction)
             fftIn[i].i = 0.0;
         }
     }
-    
+
+    // Debug: Sum all input values to verify they're reasonable
+    double sum = 0.0;
+    for (int i = 0; i < onsetDetectionFunctionLength; i++) {
+        sum += std::abs(onsetDetectionFunction[i]);
+    }
+    std::cout << "  Sum of onset values: " << sum << std::endl;
+    std::cout << "  Before forward FFT - fftIn[0]: r=" << fftIn[0].r << " i=" << fftIn[0].i << std::endl;
+    std::cout << "  Before forward FFT - fftIn[100]: r=" << fftIn[100].r << " i=" << fftIn[100].i << std::endl;
+
+    // Clear fftOut to prevent accumulation of garbage values from previous calls
+    for (int i = 0; i < FFTLengthForACFCalculation; i++)
+    {
+        fftOut[i].r = 0.0;
+        fftOut[i].i = 0.0;
+    }
+
+    // Check initial fftOut values (should be zero after clearing)
+    std::cout << "  fftOut[0] BEFORE kiss_fft: r=" << fftOut[0].r << " i=" << fftOut[0].i << std::endl;
+
     // execute kiss fft
     kiss_fft (cfgForwards, fftIn, fftOut);
+
+    // Check if kiss_fft actually modified fftOut
+    std::cout << "  fftOut[0] AFTER kiss_fft: r=" << fftOut[0].r << " i=" << fftOut[0].i << std::endl;
+    std::cout << "  fftOut[1] AFTER kiss_fft: r=" << fftOut[1].r << " i=" << fftOut[1].i << std::endl;
+
+    std::cout << "  After forward FFT - fftOut[0]: r=" << fftOut[0].r << " i=" << fftOut[0].i << std::endl;
+    std::cout << "  After forward FFT - fftOut[100]: r=" << fftOut[100].r << " i=" << fftOut[100].i << std::endl;
     
     // multiply by complex conjugate
     for (int i = 0; i < FFTLengthForACFCalculation; i++)
@@ -559,14 +669,20 @@ void BTrack::calculateBalancedACF (std::vector<double>& onsetDetectionFunction)
         fftOut[i].r = fftOut[i].r * fftOut[i].r + fftOut[i].i * fftOut[i].i;
         fftOut[i].i = 0.0;
     }
-    
+
+    std::cout << "  After conjugate - fftOut[0]: r=" << fftOut[0].r << " i=" << fftOut[0].i << std::endl;
+
     // perform the ifft
     kiss_fft (cfgBackwards, fftOut, fftIn);
+
+    std::cout << "  After inverse FFT - fftIn[0]: r=" << fftIn[0].r << " i=" << fftIn[0].i << std::endl;
     
 #endif
-    
+    std::cout << "  After FFTs - fftIn[0]: r=" << fftIn[0].r << " i=" << fftIn[0].i << std::endl;
+    std::cout << "  After FFTs - fftIn[1]: r=" << fftIn[1].r << " i=" << fftIn[1].i << std::endl;
+
     double lag = 512;
-    
+
     for (int i = 0; i < 512; i++)
     {
 #ifdef USE_FFTW

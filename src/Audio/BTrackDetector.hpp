@@ -28,7 +28,12 @@ private:
     std::vector<double> audioBuffer;
     float samplingFrequency;
     size_t frameSampleCount;
-    
+
+    // Buffer for accumulating samples (BTrack needs 1024 samples)
+    std::vector<float> sampleBuffer;
+    size_t samplesInBuffer;
+    static const size_t BTRACK_FRAME_SIZE = 1024;
+
     // BPM smoothing
     std::vector<float> bpmHistory;
     static const size_t MAX_BPM_HISTORY = 5;

@@ -22,6 +22,11 @@
 #ifndef __BTRACK_H
 #define __BTRACK_H
 
+// Ensure FFT implementation is defined
+#ifndef USE_KISS_FFT
+#define USE_KISS_FFT
+#endif
+
 #include "BTrackOnsetDetectionFunction.h"
 #include "CircularBuffer.h"
 #include <vector>

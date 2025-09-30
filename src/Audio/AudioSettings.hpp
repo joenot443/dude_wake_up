@@ -92,7 +92,7 @@ struct AudioAnalysisParameter {
 struct AudioAnalysis {
   std::string name;
   bool bpmEnabled = true;
-  BpmMode bpmMode = BpmMode_Manual;
+  BpmMode bpmMode = BpmMode_Auto;
   std::shared_ptr<Parameter> rms;
   std::shared_ptr<Parameter> highs;
   std::shared_ptr<Parameter> lows;

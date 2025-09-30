@@ -224,7 +224,7 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
           switch (source->audioAnalysis.bpmMode) {
             case BpmMode_Auto: {
               // Show current auto-detected BPM (read-only)
-              ImGui::Text("Auto BPM: %.1f", source->audioAnalysis.bpm->value);
+              ImGui::Text("Auto BPM: %.1f", source->audioAnalysis.bpm->value * 2.0f);
               ImGui::SameLine();
               if (CommonViews::PlayPauseButton("##bpmPlayPause", source->audioAnalysis.bpmEnabled, ImVec2(20., 20.0), ImVec2(5.0, 5.0))) {
                 source->audioAnalysis.bpmEnabled = !source->audioAnalysis.bpmEnabled;
@@ -315,7 +315,6 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
         
         audioGraphSize = ImVec2(audioGraphSize.x - 100.0, audioGraphSize.y);
         BarPlotView::draw(source->audioAnalysis.smoothMelSpectrum, "mel", audioGraphSize);
-        ImGui::SameLine();
         ImGui::BeginChild("##FrequencyMods");
         ImGui::Text("Release");
         CommonViews::MiniSlider(source->audioAnalysis.frequencyRelease, false);
