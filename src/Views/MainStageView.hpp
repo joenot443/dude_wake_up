@@ -31,6 +31,9 @@ private:
   ShaderType selectedShaderType;
   msa::BPMTapper bpmTapper;
   bool drawFPS = false;
+  bool sourceBrowserCollapsed = false;
+  bool shaderBrowserCollapsed = false;
+  bool utilityPanelCollapsed = false;
   
   VideoSourceBrowserView videoSourceBrowserView = VideoSourceBrowserView();
   ShaderBrowserView shaderBrowserView = ShaderBrowserView();

@@ -64,7 +64,26 @@ void ShaderBrowserView::setup()
 
 void ShaderBrowserView::drawSearchView() {
   ImGui::BeginChild("##shaderSearchView", ImVec2(ImGui::GetWindowWidth() - 10.0, 30.0), ImGuiChildFlags_AlwaysAutoResize | ImGuiChildFlags_AutoResizeY, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-  CommonViews::SearchBar(searchQuery, searchDirty, "ShaderSearch");
+
+  // Draw collapse button
+  if (collapsed != nullptr) {
+    std::string iconName = *collapsed ? "expand.png" : "collapse.png";
+    if (CommonViews::SimpleImageButton("##collapseShaderBrowser", iconName)) {
+      *collapsed = !*collapsed;
+    }
+    ImGui::SameLine();
+
+    // Show title when collapsed, search bar when expanded
+    if (*collapsed) {
+      ImGui::SetCursorPosY(ImGui::GetCursorPosY());
+      CommonViews::H3Title("Effects", false);
+    } else {
+      CommonViews::SearchBar(searchQuery, searchDirty, "ShaderSearch");
+    }
+  } else {
+    CommonViews::SearchBar(searchQuery, searchDirty, "ShaderSearch");
+  }
+
   ImGui::EndChild();
   
   if (searchQuery.length() != 0) {
@@ -117,65 +136,68 @@ void ShaderBrowserView::drawSelectedBrowser() {
 void ShaderBrowserView::draw()
 {
   drawSearchView();
-  
-  if (ImGui::BeginTabBar(idAppendedToString("VideoSourceBrowser", browserId).c_str(), ImGuiTabBarFlags_FittingPolicyScroll)) {
-    if (ImGui::BeginTabItem(idAppendedToString("Favorites", browserId).c_str(), nullptr, currentTab == 0 ? ImGuiTabItemFlags_SetSelected : 0)) {
-      drawSelectedBrowser();
-      ImGui::EndTabItem();
-    }
-    if (ImGui::IsItemClicked()) {
-      currentTab = 0;
-    }
-    
-    if (ImGui::BeginTabItem(idAppendedToString("Basic", browserId).c_str(), nullptr, currentTab == 1 ? ImGuiTabItemFlags_SetSelected : 0)) {
-      drawSelectedBrowser();
-      ImGui::EndTabItem();
-    }
-    if (ImGui::IsItemClicked()) {
-      currentTab = 1;
-    }
 
-    if (ImGui::BeginTabItem(idAppendedToString("Filter", browserId).c_str(), nullptr, currentTab == 2 ? ImGuiTabItemFlags_SetSelected : 0)) {
-      drawSelectedBrowser();
-      ImGui::EndTabItem();
-    }
-    if (ImGui::IsItemClicked()) {
-      currentTab = 2;
-    }
+  // Only draw tabs and content if not collapsed
+  if (collapsed == nullptr || !*collapsed) {
+    if (ImGui::BeginTabBar(idAppendedToString("VideoSourceBrowser", browserId).c_str(), ImGuiTabBarFlags_FittingPolicyScroll)) {
+      if (ImGui::BeginTabItem(idAppendedToString("Favorites", browserId).c_str(), nullptr, currentTab == 0 ? ImGuiTabItemFlags_SetSelected : 0)) {
+        drawSelectedBrowser();
+        ImGui::EndTabItem();
+      }
+      if (ImGui::IsItemClicked()) {
+        currentTab = 0;
+      }
 
-    if (ImGui::BeginTabItem(idAppendedToString("Glitch", browserId).c_str(), nullptr, currentTab == 3 ? ImGuiTabItemFlags_SetSelected : 0)) {
-      drawSelectedBrowser();
-      ImGui::EndTabItem();
-    }
-    if (ImGui::IsItemClicked()) {
-      currentTab = 3;
-    }
+      if (ImGui::BeginTabItem(idAppendedToString("Basic", browserId).c_str(), nullptr, currentTab == 1 ? ImGuiTabItemFlags_SetSelected : 0)) {
+        drawSelectedBrowser();
+        ImGui::EndTabItem();
+      }
+      if (ImGui::IsItemClicked()) {
+        currentTab = 1;
+      }
 
-    if (ImGui::BeginTabItem(idAppendedToString("Transform", browserId).c_str(), nullptr, currentTab == 4 ? ImGuiTabItemFlags_SetSelected : 0)) {
-      drawSelectedBrowser();
-      ImGui::EndTabItem();
-    }
-    if (ImGui::IsItemClicked()) {
-      currentTab = 4;
-    }
+      if (ImGui::BeginTabItem(idAppendedToString("Filter", browserId).c_str(), nullptr, currentTab == 2 ? ImGuiTabItemFlags_SetSelected : 0)) {
+        drawSelectedBrowser();
+        ImGui::EndTabItem();
+      }
+      if (ImGui::IsItemClicked()) {
+        currentTab = 2;
+      }
 
-    if (ImGui::BeginTabItem(idAppendedToString("Mix", browserId).c_str(), nullptr, currentTab == 5 ? ImGuiTabItemFlags_SetSelected : 0)) {
-      drawSelectedBrowser();
-      ImGui::EndTabItem();
-    }
-    if (ImGui::IsItemClicked()) {
-      currentTab = 5;
-    }
+      if (ImGui::BeginTabItem(idAppendedToString("Glitch", browserId).c_str(), nullptr, currentTab == 3 ? ImGuiTabItemFlags_SetSelected : 0)) {
+        drawSelectedBrowser();
+        ImGui::EndTabItem();
+      }
+      if (ImGui::IsItemClicked()) {
+        currentTab = 3;
+      }
 
-    if (ImGui::BeginTabItem(idAppendedToString("Mask", browserId).c_str(), nullptr, currentTab == 6 ? ImGuiTabItemFlags_SetSelected : 0)) {
-      drawSelectedBrowser();
-      ImGui::EndTabItem();
+      if (ImGui::BeginTabItem(idAppendedToString("Transform", browserId).c_str(), nullptr, currentTab == 4 ? ImGuiTabItemFlags_SetSelected : 0)) {
+        drawSelectedBrowser();
+        ImGui::EndTabItem();
+      }
+      if (ImGui::IsItemClicked()) {
+        currentTab = 4;
+      }
+
+      if (ImGui::BeginTabItem(idAppendedToString("Mix", browserId).c_str(), nullptr, currentTab == 5 ? ImGuiTabItemFlags_SetSelected : 0)) {
+        drawSelectedBrowser();
+        ImGui::EndTabItem();
+      }
+      if (ImGui::IsItemClicked()) {
+        currentTab = 5;
+      }
+
+      if (ImGui::BeginTabItem(idAppendedToString("Mask", browserId).c_str(), nullptr, currentTab == 6 ? ImGuiTabItemFlags_SetSelected : 0)) {
+        drawSelectedBrowser();
+        ImGui::EndTabItem();
+      }
+      if (ImGui::IsItemClicked()) {
+        currentTab = 6;
+      }
+
+      ImGui::EndTabBar();
     }
-    if (ImGui::IsItemClicked()) {
-      currentTab = 6;
-    }
-    
-    ImGui::EndTabBar();
   }
 }
 

@@ -21,10 +21,18 @@ public:
   void keyReleased(int key);
   
   std::shared_ptr<Parameter> samplePlaybackSliderPosition;
-  
-  AudioSourceBrowserView() : samplePlaybackSliderPosition(std::make_shared<Parameter>("Position", 0.0, 0.0, 1.0)) {}
-  
+
+  enum FrequencyViewMode {
+    FrequencyViewMode_Bands = 0,
+    FrequencyViewMode_Bars = 1
+  };
+
+  AudioSourceBrowserView() :
+    samplePlaybackSliderPosition(std::make_shared<Parameter>("Position", 0.0, 0.0, 1.0)),
+    frequencyViewMode(FrequencyViewMode_Bands) {}
+
 private:
+  FrequencyViewMode frequencyViewMode;
   void updatePlaybackPosition();
   void drawAudioSourceSelector();
   void drawSelectedAudioSource();

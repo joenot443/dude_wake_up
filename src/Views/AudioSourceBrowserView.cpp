@@ -166,7 +166,7 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
 //      ImGui::Indent(8.0f);
 
       // The table starts here, now manually spaced inside the colored child.
-      if (ImGui::BeginTable("##audioAnalysis", 4, ImGuiTableFlags_PadOuterX)) {
+      if (ImGui::BeginTable("##audioAnalysis", 3, ImGuiTableFlags_PadOuterX)) {
         // Loudness
         ImGui::TableNextColumn();
         ImVec2 audioGraphSize = ImVec2((ImGui::GetContentRegionAvail().x - 20.0), AudioOscillatorHeight);
@@ -224,7 +224,7 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
           switch (source->audioAnalysis.bpmMode) {
             case BpmMode_Auto: {
               // Show current auto-detected BPM (read-only)
-              ImGui::Text("Auto BPM: %.1f", source->audioAnalysis.bpm->value * 2.0f);
+              ImGui::Text("Auto BPM: %.1f", source->audioAnalysis.bpm->value);
               ImGui::SameLine();
               if (CommonViews::PlayPauseButton("##bpmPlayPause", source->audioAnalysis.bpmEnabled, ImVec2(20., 20.0), ImVec2(5.0, 5.0))) {
                 source->audioAnalysis.bpmEnabled = !source->audioAnalysis.bpmEnabled;
@@ -283,44 +283,66 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
         ImGui::PopStyleVar();
         
         ImGui::TableNextColumn();
-        
-        // Highs / Mids / Lows
-        ImGui::Text("Frequency Bands");
-        ImGui::SameLine();
-        if (ImGui::BeginPopupModal("##FrequencyBands", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
-          MarkdownView("FrequencyBands").draw();
-          ImGui::EndPopup();
-        }
-        if (CommonViews::IconButton(ICON_MD_INFO, "FrequencyBands")) {
-          ImGui::OpenPopup("##FrequencyBands");
-        }
-        OscillatorParam low = OscillatorParam(source->audioAnalysis.lowsOscillator, source->audioAnalysis.lowsAnalysisParam.param);
-        OscillatorParam mids = OscillatorParam(source->audioAnalysis.midsOscillator, source->audioAnalysis.midsAnalysisParam.param);
-        OscillatorParam highs = OscillatorParam(source->audioAnalysis.highsOscillator, source->audioAnalysis.highsAnalysisParam.param);
-        
-        OscillatorView::draw({low, mids, highs}, audioGraphSize, false);
-        
-        ImGui::TableNextColumn();
-        
-        // Frequency
+
         ImGui::Text("Frequency");
         ImGui::SameLine();
-        if (ImGui::BeginPopupModal("##Frequency", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
-          MarkdownView("Frequency").draw();
-          ImGui::EndPopup();
+
+        // Frequency view selector with borders and selection colors
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
+        ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.5f, 0.5f, 0.5f, 0.5f));
+        ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.3f, 0.5f, 0.8f, 0.8f));
+        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.4f, 0.6f, 0.9f, 0.9f));
+        ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0.2f, 0.4f, 0.7f, 1.0f));
+
+        if (ImGui::Selectable("Bands", frequencyViewMode == FrequencyViewMode_Bands, 0, ImVec2(50, 0))) {
+          frequencyViewMode = FrequencyViewMode_Bands;
         }
-        if (CommonViews::IconButton(ICON_MD_INFO, "Frequency")) {
-          ImGui::OpenPopup("##Frequency");
+        ImGui::SameLine();
+        if (ImGui::Selectable("Bars", frequencyViewMode == FrequencyViewMode_Bars, 0, ImVec2(50, 0))) {
+          frequencyViewMode = FrequencyViewMode_Bars;
         }
-        
-        audioGraphSize = ImVec2(audioGraphSize.x - 100.0, audioGraphSize.y);
-        BarPlotView::draw(source->audioAnalysis.smoothMelSpectrum, "mel", audioGraphSize);
-        ImGui::BeginChild("##FrequencyMods");
-        ImGui::Text("Release");
-        CommonViews::MiniSlider(source->audioAnalysis.frequencyRelease, false);
-        ImGui::Text("Scale");
-        CommonViews::MiniSlider(source->audioAnalysis.frequencyScale, false);
-        ImGui::EndChild();
+
+        ImGui::PopStyleColor(4);
+        ImGui::PopStyleVar();
+        ImGui::SameLine();
+
+        if (frequencyViewMode == FrequencyViewMode_Bands) {
+          // Highs / Mids / Lows
+          ImGui::SameLine();
+          if (ImGui::BeginPopupModal("##FrequencyBands", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
+            MarkdownView("FrequencyBands").draw();
+            ImGui::EndPopup();
+          }
+          if (CommonViews::IconButton(ICON_MD_INFO, "FrequencyBands")) {
+            ImGui::OpenPopup("##FrequencyBands");
+          }
+          OscillatorParam low = OscillatorParam(source->audioAnalysis.lowsOscillator, source->audioAnalysis.lowsAnalysisParam.param);
+          OscillatorParam mids = OscillatorParam(source->audioAnalysis.midsOscillator, source->audioAnalysis.midsAnalysisParam.param);
+          OscillatorParam highs = OscillatorParam(source->audioAnalysis.highsOscillator, source->audioAnalysis.highsAnalysisParam.param);
+
+          OscillatorView::draw({low, mids, highs}, audioGraphSize, false);
+        } else {
+          // Frequency Bars
+          ImGui::SameLine();
+          if (ImGui::BeginPopupModal("##Frequency", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
+            MarkdownView("Frequency").draw();
+            ImGui::EndPopup();
+          }
+          if (CommonViews::IconButton(ICON_MD_INFO, "Frequency")) {
+            ImGui::OpenPopup("##Frequency");
+          }
+
+          ImVec2 barsGraphSize = ImVec2(audioGraphSize.x - 100.0, audioGraphSize.y);
+          BarPlotView::draw(source->audioAnalysis.smoothMelSpectrum, "mel", barsGraphSize);
+          ImGui::SameLine();
+          ImGui::BeginChild("##FrequencyMods");
+          ImGui::Text("Release");
+          CommonViews::MiniSlider(source->audioAnalysis.frequencyRelease, false);
+          ImGui::Text("Scale");
+          CommonViews::MiniSlider(source->audioAnalysis.frequencyScale, false);
+          ImGui::EndChild();
+        }
+
         ImGui::EndTable();
       }
     }

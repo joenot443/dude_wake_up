@@ -29,11 +29,13 @@ public:
 
   // New public method to set the current tab
   void setCurrentTab(int tabIndex);
-  
+
   void drawSelectedBrowser();
-  
+
   static int tabForSourceType(VideoSourceType type);
   ImVec2 size = ImVec2(0.0, 0.0);
+
+  bool* collapsed = nullptr;
 
 private:
   ofFbo videoSourceFbo;

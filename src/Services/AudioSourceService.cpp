@@ -126,21 +126,35 @@ AudioSourceService::audioSourceForId(std::string id) {
 void AudioSourceService::update() {
   // Return if we're not enabled
   if (!selectedAudioSource->active) return;
-  
+
+
+  // Link Case
   if (LayoutStateService::getService()->abletonLinkEnabled && link != nullptr) {
     auto state = link->captureAppSessionState();
     selectedAudioSource->audioAnalysis.bpm->setValue(link->captureAppSessionState().tempo() * 2.0);
 
+    // Drive the beat with Ableton
     if (selectedAudioSource->audioAnalysis.bpmEnabled) {
       double beatCount = link->captureAppSessionState().beatAtTime(link->clock().micros(), 4.);
       selectedAudioSource->audioAnalysis.updateBeat(beatCount - floor(beatCount));
     }
-  } else if (selectedAudioSource->type() == AudioSourceType_Microphone || selectedAudioSource->type() == AudioSourceType_System) { // Don't update for the samples
-    selectedAudioSource->audioAnalysis.bpm->value = AudioSourceService::getService()->selectedAudioSource->btrackDetector.getCurrentBpm();
+  }
+  // Auto case
+  else if ((selectedAudioSource->type() == AudioSourceType_Microphone || selectedAudioSource->type() == AudioSourceType_System) && selectedAudioSource->audioAnalysis.bpmEnabled) {
+    // Only update the BPM from the detector if we're in Auto mode
+    if (selectedAudioSource->audioAnalysis.bpmMode == BpmMode_Auto) {
+      selectedAudioSource->audioAnalysis.bpm->value = AudioSourceService::getService()->selectedAudioSource->btrackDetector.getCurrentBpm();
+    }
+
+    // Drive the beat normally
     if (selectedAudioSource->audioAnalysis.bpmEnabled) {
       selectedAudioSource->audioAnalysis.updateBeat(selectedAudioSource->audioAnalysis.bpmPct());
     }
-  } else if (selectedAudioSource->type() == AudioSourceType_File) {
+  }
+  // File case
+  else if (selectedAudioSource->type() == AudioSourceType_File) {
+
+    // Drive the beat normally
     if (selectedAudioSource->audioAnalysis.bpmEnabled) {
       selectedAudioSource->audioAnalysis.updateBeat(selectedAudioSource->audioAnalysis.bpmPct());
     }

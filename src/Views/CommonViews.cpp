@@ -1237,31 +1237,47 @@ bool CommonViews::SmallImageButton(std::string id, std::string imageName) {
   auto pos = ImGui::GetCursorPos();
   ImGui::SetCursorPosX(pos.x + 10.0);
   pos = ImGui::GetCursorPos();
-  
+
   bool ret = ImGui::InvisibleButton(idStringNamed(id, imageName).c_str(), ImVec2(40.0, 40.0));
   ImGui::SameLine();
   auto endPos = ImGui::GetCursorPos();
-  
+
   ImGui::SetCursorPos(pos);
-  
-  ImDrawList* drawList = ed::GetCurrentDrawList();
+
+  ImDrawList* drawList = ed::IsActive() ? ed::GetCurrentDrawList() : ImGui::GetWindowDrawList();
   ImColor rectColor;
   if (ImGui::IsItemActive()) {
-    rectColor = Colors::Secondary200;  
+    rectColor = Colors::Secondary200;
   } else if (ImGui::IsItemHovered()) {
     rectColor = Colors::Secondary300;
   } else {
     rectColor = Colors::SecondaryDark;
   }
-  
+
   drawList->AddRectFilled(ImVec2(pos.x, pos.y),
                           ImVec2(pos.x + 40.0, pos.y + 40.0),
                           rectColor,
                           8.0);
-  
+
   // Draw the Image button at the center of the InvisibleButton, sized at 20x20
   ImGui::SetCursorPos(pos + ImVec2(10.0, 10.0));
   ImageNamedNew(imageName, 20.0, 20.0);
+  ImGui::SetCursorPos(endPos);
+  return ret;
+}
+
+bool CommonViews::SimpleImageButton(std::string id, std::string imageName, ImVec2 size) {
+  auto pos = ImGui::GetCursorPos();
+
+  bool ret = ImGui::InvisibleButton(idStringNamed(id, imageName).c_str(), size);
+  ImGui::SameLine();
+  auto endPos = ImGui::GetCursorPos();
+
+  ImGui::SetCursorPos(pos);
+
+  // Draw the image without any background or padding
+  ImageNamedNew(imageName, size.x, size.y);
+
   ImGui::SetCursorPos(endPos);
   return ret;
 }

@@ -8,6 +8,7 @@
 #include "ShaderChainerService.hpp"
 #include "Models/Strand.hpp"
 #include "AsciiShader.hpp"
+#include "LavaShader.hpp"
 #include "AudioGlowBarsShader.hpp"
 #include "CircleMixShader.hpp"
 #include "AudioBallShader.hpp"
@@ -951,6 +952,12 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeLava: {
+      auto settings = new LavaSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<LavaShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeAudioGlowBars: {
       auto settings = new AudioGlowBarsSettings(shaderId, shaderJson);
       auto shader = std::make_shared<AudioGlowBarsShader>(settings);

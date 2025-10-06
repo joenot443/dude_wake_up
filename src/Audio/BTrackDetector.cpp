@@ -54,18 +54,6 @@ SimpleBeat BTrackDetector::processAudioFrame(const std::vector<float>& audioFram
   // Convert to double and process
   std::vector<double> tmp(sampleBuffer.begin(), sampleBuffer.begin() + BTRACK_FRAME_SIZE);
 
-  // Debug: Check audio levels
-  static int frameCount = 0;
-  if (frameCount++ % 20 == 0) {  // Log every 20th frame
-    double maxVal = 0, avgVal = 0;
-    for (size_t i = 0; i < tmp.size(); i++) {
-      avgVal += std::abs(tmp[i]);
-      maxVal = std::max(maxVal, std::abs(tmp[i]));
-    }
-    avgVal /= tmp.size();
-    std::cout << "Audio frame: max=" << maxVal << " avg=" << avgVal << std::endl;
-  }
-
   btrack->processAudioFrame(tmp.data());
 
   // Shift buffer: move last 512 samples to beginning (50% overlap)
@@ -74,21 +62,20 @@ SimpleBeat BTrackDetector::processAudioFrame(const std::vector<float>& audioFram
 
   // Query results - tempo calculation happens automatically inside BTrack
   const bool beatDetected = btrack->beatDueInCurrentFrame();
-  const float currentBpm = static_cast<float>(btrack->getCurrentTempoEstimate());
+  const float btrackBpm = static_cast<float>(btrack->getCurrentTempoEstimate());
 
-  // BTrack's calculateTempo() is broken - always returns 78.30 BPM
-  // Measure actual BPM from beat intervals instead
+  // Measure actual BPM from beat intervals
+  static int frameCount = 0;
   static int lastBeatFrame = -1;
   static std::vector<float> beatIntervals;
+  static int logCounter = 0;
 
   float measuredBpm = lastBeat.bpm; // Keep previous BPM until we have a new measurement
 
   if (beatDetected) {
     if (lastBeatFrame >= 0) {
       int framesSinceLast = frameCount - lastBeatFrame;
-      // Calculate BPM from frame interval
-      // frames * (hopSize / sampleRate) = seconds between beats
-      // BPM = 60 / seconds
+      // Calculate BPM from frame interval: BPM = 60 / (frames * hopSize / sampleRate)
       float secondsSinceLast = framesSinceLast * (512.0f / 44100.0f);
       float intervalBpm = 60.0f / secondsSinceLast;
 
@@ -107,11 +94,25 @@ SimpleBeat BTrackDetector::processAudioFrame(const std::vector<float>& audioFram
           sum += beatIntervals[i] * weight;
           weightSum += weight;
         }
+        float oldBpm = measuredBpm;
         measuredBpm = sum / weightSum;
+
+        // Log beat detection with BPM update
+        std::cout << "[Beat Detected] Interval: " << intervalBpm << " BPM, Measured: " << measuredBpm
+                  << " BPM (avg of " << beatIntervals.size() << " intervals)" << std::endl;
       }
+    } else {
+      std::cout << "[Beat Detected] First beat detected, waiting for interval..." << std::endl;
     }
     lastBeatFrame = frameCount;
   }
+
+  // Periodic status update (every 5 seconds ~= 430 frames at 512 hop)
+  if (++logCounter % 430 == 0) {
+    std::cout << "[BPM Status] Current: " << measuredBpm << " BPM, BTrack: " << btrackBpm
+              << " BPM, Beats detected: " << (lastBeatFrame >= 0 ? "Yes" : "No") << std::endl;
+  }
+
   frameCount++;
 
   lastBeat = SimpleBeat(measuredBpm, beatDetected);

@@ -157,7 +157,9 @@ struct CommonViews
   static bool TitledButton(std::shared_ptr<Parameter> param, std::string title, ImVec2 size = ImVec2(105.0, 50.0));
   
   static bool SmallImageButton(std::string id, std::string imageName);
-  
+
+  static bool SimpleImageButton(std::string id, std::string imageName, ImVec2 size = ImVec2(20.0, 20.0));
+
   static bool ShaderDropdownButton(std::shared_ptr<Parameter> param);
 
   static bool FlipButton(std::string id, std::shared_ptr<Parameter> param, ImVec2 size = ImVec2(30.0, 30.0));

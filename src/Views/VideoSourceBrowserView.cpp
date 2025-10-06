@@ -223,7 +223,26 @@ void VideoSourceBrowserView::drawSelectedBrowser() {
 
 void VideoSourceBrowserView::drawSearchView() {
   ImGui::BeginChild("##sourceSearchView", ImVec2(ImGui::GetWindowWidth() - 10.0, 30.0), ImGuiChildFlags_AlwaysAutoResize | ImGuiChildFlags_AutoResizeY, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-  CommonViews::SearchBar(searchQuery, searchDirty, "SourceSearch");
+
+  // Draw collapse button
+  if (collapsed != nullptr) {
+    std::string iconName = *collapsed ? "expand.png" : "collapse.png";
+    if (CommonViews::SimpleImageButton("##collapseSourceBrowser", iconName)) {
+      *collapsed = !*collapsed;
+    }
+    ImGui::SameLine();
+
+    // Show title when collapsed, search bar when expanded
+    if (*collapsed) {
+      ImGui::SetCursorPosY(ImGui::GetCursorPosY());
+      CommonViews::H3Title("Sources", false);
+    } else {
+      CommonViews::SearchBar(searchQuery, searchDirty, "SourceSearch");
+    }
+  } else {
+    CommonViews::SearchBar(searchQuery, searchDirty, "SourceSearch");
+  }
+
   ImGui::EndChild();
   
   if (searchQuery.length() != 0 && searchTileItems.size() > 0) {
@@ -239,40 +258,44 @@ void VideoSourceBrowserView::drawSearchView() {
 
 void VideoSourceBrowserView::draw() {
   drawSearchView();
-  if (ImGui::BeginTabBar("VideoSourceBrowser", ImGuiTabBarFlags_None)) {
-    if (ImGui::BeginTabItem("Generated", nullptr, currentTab == 0 ? ImGuiTabItemFlags_SetSelected : 0)) {
-      drawSelectedBrowser();
-      ImGui::EndTabItem();
+
+  // Only draw tabs and content if not collapsed
+  if (collapsed == nullptr || !*collapsed) {
+    if (ImGui::BeginTabBar("VideoSourceBrowser", ImGuiTabBarFlags_None)) {
+      if (ImGui::BeginTabItem("Generated", nullptr, currentTab == 0 ? ImGuiTabItemFlags_SetSelected : 0)) {
+        drawSelectedBrowser();
+        ImGui::EndTabItem();
+      }
+      if (ImGui::IsItemClicked()) {
+        currentTab = 0;  // Update local tab state on click
+      }
+
+      if (ImGui::BeginTabItem("Webcam", nullptr, currentTab == 1 ? ImGuiTabItemFlags_SetSelected : 0)) {
+        drawSelectedBrowser();
+        ImGui::EndTabItem();
+      }
+      if (ImGui::IsItemClicked()) {
+        currentTab = 1;  // Update local tab state on click
+      }
+
+      if (ImGui::BeginTabItem("Library", nullptr, currentTab == 2 ? ImGuiTabItemFlags_SetSelected : 0)) {
+        drawSelectedBrowser();
+        ImGui::EndTabItem();
+      }
+      if (ImGui::IsItemClicked()) {
+        currentTab = 2;  // Update local tab state on click
+      }
+
+      if (ImGui::BeginTabItem("Local Files", nullptr, currentTab == 3 ? ImGuiTabItemFlags_SetSelected : 0)) {
+        drawSelectedBrowser();
+        ImGui::EndTabItem();
+      }
+      if (ImGui::IsItemClicked()) {
+        currentTab = 3;  // Update local tab state on click
+      }
+
+      ImGui::EndTabBar();
     }
-    if (ImGui::IsItemClicked()) {
-      currentTab = 0;  // Update local tab state on click
-    }
-    
-    if (ImGui::BeginTabItem("Webcam", nullptr, currentTab == 1 ? ImGuiTabItemFlags_SetSelected : 0)) {
-      drawSelectedBrowser();
-      ImGui::EndTabItem();
-    }
-    if (ImGui::IsItemClicked()) {
-      currentTab = 1;  // Update local tab state on click
-    }
-    
-    if (ImGui::BeginTabItem("Library", nullptr, currentTab == 2 ? ImGuiTabItemFlags_SetSelected : 0)) {
-      drawSelectedBrowser();
-      ImGui::EndTabItem();
-    }
-    if (ImGui::IsItemClicked()) {
-      currentTab = 2;  // Update local tab state on click
-    }
-    
-    if (ImGui::BeginTabItem("Local Files", nullptr, currentTab == 3 ? ImGuiTabItemFlags_SetSelected : 0)) {
-      drawSelectedBrowser();
-      ImGui::EndTabItem();
-    }
-    if (ImGui::IsItemClicked()) {
-      currentTab = 3;  // Update local tab state on click
-    }
-    
-    ImGui::EndTabBar();
   }
 }
 

@@ -53,7 +53,7 @@ void AudioSource::processFrame(const std::vector<float>& frame) {
     // Process beat detection using BTrack for EVERY chunk in Auto mode
     // BTrack expects to be called once per hop (512 samples)
     // Pass the raw audio chunk, not gist->audioFrame
-    if (audioAnalysis.bpmMode == BpmMode_Auto) {
+    if (audioAnalysis.bpmMode == BpmMode_Auto && audioAnalysis.bpmEnabled) {
       SimpleBeat beat = btrackDetector.processAudioFrame(chunk);
 
       // Update BPM if we have a valid detection

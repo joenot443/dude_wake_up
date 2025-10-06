@@ -234,7 +234,6 @@ void StageModeView::drawActionBar()
   
   
   ImGui::BeginChild("##ActionButtons", ImVec2(actionBarWidth, buttonWidth), ImGuiChildFlags_None, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize);
-  ImGui::Text("Wtf");
   // Collapse button
   if (CommonViews::ImageButton("collapse", "forward.png", imageSize, imageRatio, true)) {
     LayoutStateService::getService()->actionBarExpanded = false;

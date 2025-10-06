@@ -11,6 +11,7 @@
 #include "ShaderInfoView.hpp"
 #include "ActionService.hpp"
 #include "CommonStrings.hpp"
+#include "CommonViews.hpp"
 #include "ConfigService.hpp"
 #include "TileBrowserView.hpp"
 #include "ParameterTileBrowserView.hpp"
@@ -43,6 +44,10 @@ void MainStageView::setup()
   shaderBrowserView.setCurrentTab(0);
   stageModeView.setup();
   welcomeScreenView.setup();
+
+  // Wire up collapse state pointers
+  videoSourceBrowserView.collapsed = &sourceBrowserCollapsed;
+  shaderBrowserView.collapsed = &shaderBrowserCollapsed;
 }
 
 void MainStageView::update()
@@ -83,54 +88,106 @@ void MainStageView::draw()
   // | Sources |  Node Layout
   // | Effects |        ''
   // | Library |       Audio
-  
+
+  // Calculate dynamic heights based on collapse states
+  const float collapsedHeight = 40.0f; // Height when collapsed (just shows the search bar/header)
+  const float totalHeight = browserSize.y * 3; // Total available height for all three sections
+
+  // Count how many sections are expanded
+  int expandedCount = 0;
+  if (!sourceBrowserCollapsed) expandedCount++;
+  if (!shaderBrowserCollapsed) expandedCount++;
+  if (!utilityPanelCollapsed) expandedCount++;
+
+  // Calculate available height for expanded sections
+  float usedByCollapsed = 0;
+  if (sourceBrowserCollapsed) usedByCollapsed += collapsedHeight;
+  if (shaderBrowserCollapsed) usedByCollapsed += collapsedHeight;
+  if (utilityPanelCollapsed) usedByCollapsed += collapsedHeight;
+
+  float availableForExpanded = totalHeight - usedByCollapsed;
+  float expandedSectionHeight = expandedCount > 0 ? availableForExpanded / expandedCount : browserSize.y;
+
+  // Calculate individual section heights
+  ImVec2 sourceBrowserSize = ImVec2(browserSize.x, sourceBrowserCollapsed ? collapsedHeight : expandedSectionHeight);
+  ImVec2 shaderBrowserSize = ImVec2(browserSize.x, shaderBrowserCollapsed ? collapsedHeight : expandedSectionHeight);
+  ImVec2 utilityBrowserSize = ImVec2(browserSize.x, utilityPanelCollapsed ? collapsedHeight : expandedSectionHeight);
+
   // Sources
   ImGui::PushStyleColor(ImGuiCol_FrameBg, Colors::InnerChildBackgroundColor.Value);
-  ImGui::BeginChild("##sourceBrowser", browserSize, ImGuiChildFlags_None, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollWithMouse);
+  ImGui::BeginChild("##sourceBrowser", sourceBrowserSize, ImGuiChildFlags_Border, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollWithMouse);
   drawVideoSourceBrowser();
   ImGui::EndChild();
-  
-  ImGui::BeginChild("##shaderBrowser", browserSize, ImGuiChildFlags_None, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollWithMouse);
+
+  ImGui::BeginChild("##shaderBrowser", shaderBrowserSize, ImGuiChildFlags_Border, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollWithMouse);
   drawShaderBrowser();
   ImGui::EndChild();
   ImGui::PopStyleColor();
-  
-  if (ImGui::GetContentRegionAvail().x < 10) { return; }
-  
-  if (ImGui::BeginChild("##libraryOscillatorBrowser", browserSize, ImGuiChildFlags_None, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
-    
-    if (ImGui::BeginTabBar("##LibraryOscillatorTabBar")) {
-      
-      // My Strands Tab
-      if (ImGui::BeginTabItem("My Strands", 0, LayoutStateService::getService()->utilityPanelTab == 0 ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
-        // Set the tab if user clicks manually
-        strandBrowserView.draw();
-        ImGui::EndTabItem();
-      }
-      if (ImGui::IsItemClicked()) {
-        LayoutStateService::getService()->utilityPanelTab = 0;
-      }
-      
-      // Oscillators Tab
-      if (ImGui::BeginTabItem("Oscillators", 0, LayoutStateService::getService()->utilityPanelTab == 1 ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
-        // Set the tab if user clicks manually
-        oscillatorPanelView.draw();
-        
-        ImGui::EndTabItem();
-      }
-      if (ImGui::IsItemClicked()) {
-        LayoutStateService::getService()->utilityPanelTab = 1;
-      }
 
-      if (ImGui::BeginTabItem("Time", 0, LayoutStateService::getService()->utilityPanelTab == 2 ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
-        timePanelView.draw();
-        ImGui::EndTabItem();
+  if (ImGui::GetContentRegionAvail().x < 10) { return; }
+
+
+  if (ImGui::BeginChild("##libraryOscillatorBrowser", utilityBrowserSize, ImGuiChildFlags_Border, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
+
+    // Draw collapse button before the tab bar
+    ImGui::BeginChild("##utilityPanelHeader", ImVec2(ImGui::GetWindowWidth() - 10.0, 30.0), ImGuiChildFlags_AlwaysAutoResize | ImGuiChildFlags_AutoResizeY, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+    std::string iconName = utilityPanelCollapsed ? "expand.png" : "collapse.png";
+    if (CommonViews::SimpleImageButton("##collapseUtilityPanel", iconName)) {
+      utilityPanelCollapsed = !utilityPanelCollapsed;
+    }
+
+    // Show title when collapsed
+    if (utilityPanelCollapsed) {
+      ImGui::SameLine();
+      ImGui::SetCursorPosY(ImGui::GetCursorPosY());
+      auto title = "My Strands";
+      if (LayoutStateService::getService()->utilityPanelTab == 0) {
+        title = "My Strands";
+      } else if (LayoutStateService::getService()->utilityPanelTab == 1) {
+        title = "Oscillators";
+      } else if (LayoutStateService::getService()->utilityPanelTab == 2) {
+        title = "Time";
       }
-      if (ImGui::IsItemClicked()) {
-        LayoutStateService::getService()->utilityPanelTab = 2;
+      CommonViews::H3Title(title, false);
+    }
+
+    ImGui::EndChild();
+
+    // Only draw tabs and content if not collapsed
+    if (!utilityPanelCollapsed) {
+      if (ImGui::BeginTabBar("##LibraryOscillatorTabBar")) {
+
+        // My Strands Tab
+        if (ImGui::BeginTabItem("My Strands", 0, LayoutStateService::getService()->utilityPanelTab == 0 ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
+          // Set the tab if user clicks manually
+          strandBrowserView.draw();
+          ImGui::EndTabItem();
+        }
+        if (ImGui::IsItemClicked()) {
+          LayoutStateService::getService()->utilityPanelTab = 0;
+        }
+
+        // Oscillators Tab
+        if (ImGui::BeginTabItem("Oscillators", 0, LayoutStateService::getService()->utilityPanelTab == 1 ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
+          // Set the tab if user clicks manually
+          oscillatorPanelView.draw();
+
+          ImGui::EndTabItem();
+        }
+        if (ImGui::IsItemClicked()) {
+          LayoutStateService::getService()->utilityPanelTab = 1;
+        }
+
+        if (ImGui::BeginTabItem("Time", 0, LayoutStateService::getService()->utilityPanelTab == 2 ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
+          timePanelView.draw();
+          ImGui::EndTabItem();
+        }
+        if (ImGui::IsItemClicked()) {
+          LayoutStateService::getService()->utilityPanelTab = 2;
+        }
+
+        ImGui::EndTabBar();
       }
-      
-      ImGui::EndTabBar();
     }
   }
   
@@ -318,21 +375,21 @@ void MainStageView::drawMenu()
     }
     
     static bool showingMenu = false;
-//#ifndef RELEASE
-//    if (ImGui::MenuItem("ImGui Demo") || showingMenu)
-//    {
-//      ImGui::ShowDemoWindow();
-//      showingMenu = true;
-//    }
-//    if (ImGui::MenuItem("Save Default Workspace"))
-//    {
-//      ConfigService::getService()->saveDefaultConfigFile();
-//    }
-//    if (ImGui::MenuItem("Load Default Workspace"))
-//    {
-//      ConfigService::getService()->loadDefaultConfigFile();
-//    }
-//#endif
+#ifndef RELEASE
+    if (ImGui::MenuItem("ImGui Demo") || showingMenu)
+    {
+      ImGui::ShowDemoWindow();
+      showingMenu = true;
+    }
+    if (ImGui::MenuItem("Save Default Workspace"))
+    {
+      ConfigService::getService()->saveDefaultConfigFile();
+    }
+    if (ImGui::MenuItem("Load Default Workspace"))
+    {
+      ConfigService::getService()->loadDefaultConfigFile();
+    }
+#endif
     ImGui::EndMenuBar();
   }
 }

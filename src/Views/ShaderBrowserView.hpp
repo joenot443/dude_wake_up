@@ -43,7 +43,9 @@ public:
   int currentTab = 0;
   void setCurrentTab(int tabIndex);
   void drawSelectedBrowser();
-  
+
+  bool* collapsed = nullptr;
+
   ShaderBrowserView() : browserId(UUID::generateUUID()) {
     ParameterService::getService()->subscribeToFavoritesUpdates(
         [this]()
