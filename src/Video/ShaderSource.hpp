@@ -4,6 +4,7 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "AudioOscillatorShader.hpp"
 #include "LavaShader.hpp"
 #include "AudioGlowBarsShader.hpp"
 #include "AudioBallShader.hpp"
@@ -180,6 +181,7 @@ enum ShaderSourceType {
   ShaderSource_AudioBall, //source enum,
   ShaderSource_AudioGlowBars, //source enum,
   ShaderSource_Lava, //source enum,
+  ShaderSource_AudioOscillator, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -262,11 +264,14 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_AudioBall, // Available
   ShaderSource_AudioGlowBars, // Available
   ShaderSource_Lava, // Available
+  ShaderSource_AudioOscillator, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
       // shaderTypeForShaderSourceType
+  case ShaderSource_AudioOscillator: //type enum
+    return ShaderTypeAudioOscillator;
   case ShaderSource_Lava: //type enum
     return ShaderTypeLava;
   case ShaderSource_AudioGlowBars: //type enum
@@ -682,6 +687,12 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_AudioOscillator: { // Settings
+      auto settings = new AudioOscillatorSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<AudioOscillatorShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_Lava: { // Settings
       auto settings = new LavaSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<LavaShader>(settings);

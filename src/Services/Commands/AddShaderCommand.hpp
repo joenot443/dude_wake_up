@@ -9,8 +9,10 @@ public:
   void execute() override {
     if (!shader) {
       shader = ShaderChainerService::getService()->makeShader(shaderType);
+    } else {
+      // On redo, re-add the shader that was removed by undo
+      ShaderChainerService::getService()->addShader(shader);
     }
-    ShaderChainerService::getService()->addShader(shader);
   }
 
   void undo() override {

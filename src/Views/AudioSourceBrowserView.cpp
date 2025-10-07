@@ -337,7 +337,7 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
           ImGui::SameLine();
           ImGui::BeginChild("##FrequencyMods");
           ImGui::Text("Release");
-          CommonViews::MiniSlider(source->audioAnalysis.frequencyRelease, false);
+          CommonViews::MiniSlider(source->audioAnalysis.frequencyRelease, false, ImGuiSliderFlags_Logarithmic);
           ImGui::Text("Scale");
           CommonViews::MiniSlider(source->audioAnalysis.frequencyScale, false);
           ImGui::EndChild();

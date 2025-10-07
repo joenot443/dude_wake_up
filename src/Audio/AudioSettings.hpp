@@ -113,6 +113,8 @@ struct AudioAnalysis {
   std::vector<float> magnitudeSpectrum;
   std::vector<float> smoothSpectrum;
   std::vector<float> smoothMelSpectrum;
+  std::vector<float> waveform;
+  std::vector<float> smoothWaveform;
 
   AudioAnalysisParameter rmsAnalysisParam;  
   AudioAnalysisParameter highsAnalysisParam;
@@ -162,11 +164,23 @@ struct AudioAnalysis {
         Vectors::release(melFrequencySpectrum, smoothMelSpectrum, frequencyRelease->value);
     smoothMelSpectrum = Vectors::scalarMultiply(smoothMelSpectrum, frequencyScale->value);
 
+    // Apply smoothing to waveform (bipolar signal - handle positive and negative)
+    if (waveform.size() == smoothWaveform.size()) {
+      for (size_t i = 0; i < waveform.size(); i++) {
+        // Simple exponential smoothing that preserves both positive and negative values
+        smoothWaveform[i] = smoothWaveform[i] * frequencyRelease->value + waveform[i] * (1.0f - frequencyRelease->value);
+      }
+      smoothWaveform = Vectors::scalarMultiply(smoothWaveform, frequencyScale->value);
+    } else {
+      // Initialize smoothWaveform if sizes don't match
+      smoothWaveform = waveform;
+    }
+
     if (smoothSpectrum.size() > 14 && smoothMelSpectrum.size() > 14) {
       ofLogNotice("AudioSettings") << "smoothSpectrum 0 / 5 / 15: " << smoothSpectrum[0] << " / " << smoothSpectrum[5] << " / " << smoothSpectrum[15];
       ofLogNotice("AudioSettings") << "smoothMelSpectrum 0 / 5 / 15: " << smoothMelSpectrum[0] << " / " << smoothMelSpectrum[5] << " / " << smoothMelSpectrum[15];
     }
-    
+
     rmsAnalysisParam.tick(gist->rootMeanSquare());
     std::vector<float> buckets = splitAndAverage(smoothMelSpectrum, 3);
     lows->setValue(buckets[0]);

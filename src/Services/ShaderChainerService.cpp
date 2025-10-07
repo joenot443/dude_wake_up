@@ -8,6 +8,7 @@
 #include "ShaderChainerService.hpp"
 #include "Models/Strand.hpp"
 #include "AsciiShader.hpp"
+#include "AudioOscillatorShader.hpp"
 #include "LavaShader.hpp"
 #include "AudioGlowBarsShader.hpp"
 #include "CircleMixShader.hpp"
@@ -633,11 +634,10 @@ std::vector<std::shared_ptr<Connectable>> ShaderChainerService::pasteConnectable
 
     if (original->connectableType() == ConnectableTypeShader) {
       auto originalShader = std::dynamic_pointer_cast<Shader>(original);
-      auto newShader = makeShader(originalShader->type());
+      auto newShader = makeShader(originalShader->type());  // makeShader already calls addShader internally
       newShader->settings->x->setValue(originalShader->settings->x->value);
       newShader->settings->y->setValue(originalShader->settings->y->value);
       newShader->settings->copyFrom(*originalShader->settings);
-      addShader(newShader);
       newConnectable = newShader;
     } else if (original->connectableType() == ConnectableTypeSource) {
       auto originalSource = std::dynamic_pointer_cast<VideoSource>(original);
@@ -952,6 +952,12 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeAudioOscillator: {
+      auto settings = new AudioOscillatorSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AudioOscillatorShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeLava: {
       auto settings = new LavaSettings(shaderId, shaderJson);
       auto shader = std::make_shared<LavaShader>(settings);
@@ -1914,7 +1920,7 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
 }
 
 std::shared_ptr<Shader> ShaderChainerService::replaceShader(std::shared_ptr<Shader> oldShader, ShaderType newType) {
-  // Create a new shader of the specified type
+  // Create a new shader of the specified type (makeShader already calls addShader)
   auto newShader = makeShader(newType);
 
   // Copy connections from the old shader to the new shader
@@ -1922,9 +1928,6 @@ std::shared_ptr<Shader> ShaderChainerService::replaceShader(std::shared_ptr<Shad
 
   // Remove the old shader
   removeShader(oldShader);
-
-  // Add the new shader to the service
-  addShader(newShader);
 
   // Return the new shader
   return newShader;

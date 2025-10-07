@@ -115,14 +115,14 @@ bool CommonViews::ShaderParameter(std::shared_ptr<Parameter> param,
   return ret;
 }
 
-bool CommonViews::MiniSlider(std::shared_ptr<Parameter> param, bool sameLine) {
+bool CommonViews::MiniSlider(std::shared_ptr<Parameter> param, bool sameLine, ImGuiSliderFlags flags) {
   auto startPos = ImGui::GetCursorPos();
   ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 6.0);
   ImGui::Text("%s", param->name.c_str());
   if (sameLine) ImGui::SameLine();
   ImGui::PushItemWidth(70.0);
   ImGui::SetCursorPosY(startPos.y);
-  return ImGui::SliderFloat(idString(param->paramId).c_str(), &param->value, param->min, param->max);
+  return ImGui::SliderFloat(idString(param->paramId).c_str(), &param->value, param->min, param->max, "%.2f", flags);
 }
 
 bool CommonViews::MiniVSlider(std::shared_ptr<Parameter> param) {

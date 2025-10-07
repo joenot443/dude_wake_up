@@ -167,6 +167,7 @@ enum ShaderType {
   ShaderTypeCircleMix,
   ShaderTypeAudioGlowBars,
   ShaderTypeLava,
+  ShaderTypeAudioOscillator,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -299,6 +300,8 @@ static std::vector<ShaderType> AllShaderTypes() {
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) { // ShaderNames
+    case ShaderTypeAudioOscillator:
+      return "AudioOscillator";
     case ShaderTypeLava:
       return "Lava";
     case ShaderTypeAudioGlowBars:

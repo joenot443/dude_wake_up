@@ -50,6 +50,16 @@ void AudioSource::processFrame(const std::vector<float>& frame) {
     gist.processAudioFrame(chunk);
     audioAnalysis.analyzeFrame(&gist);
 
+    // Store waveform data (downsample from 512 to 256 for consistency with spectrum)
+    audioAnalysis.waveform.clear();
+    audioAnalysis.waveform.reserve(256);
+    for (size_t i = 0; i < 256; i++) {
+      // Downsample by averaging pairs of samples
+      size_t idx = i * 2;
+      float avg = (chunk[idx] + chunk[idx + 1]) * 0.5f;
+      audioAnalysis.waveform.push_back(avg);
+    }
+
     // Process beat detection using BTrack for EVERY chunk in Auto mode
     // BTrack expects to be called once per hop (512 samples)
     // Pass the raw audio chunk, not gist->audioFrame
