@@ -69,9 +69,11 @@ struct DiscoAudioShader: Shader {
 
     canvas->begin();
     shader.begin();
-    if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() > 0)
-      shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0],
-                           256);
+    if (source != nullptr) {
+      std::vector<float> safeSpectrum = source->audioAnalysis.getSafeSpectrum();
+      if (safeSpectrum.size() >= 256)
+        shader.setUniform1fv("audio", &safeSpectrum[0], 256);
+    }
     shader.setUniformTexture("tex", frame->getTexture(), 4); 
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());

@@ -56,7 +56,12 @@ void AudioSourceService::populateTracks() {
     if (bpm == 0) {
       continue;
     }
+    // Remove the first 3 characters from the name
     std::string trackName = name.substr(3);
+
+    // Trim the extension from the name
+    trackName = trackName.substr(0, trackName.find_last_of('.'));
+    
     audioTracks.push_back(std::make_shared<AudioTrack>(trackName, path, bpm));
   }
   // Sort by name
@@ -182,23 +187,69 @@ void AudioSourceService::removeParamMapping(std::string paramId) {
 
 json AudioSourceService::config() {
   json j;
+
+  // Save the selected audio source ID
+  j["selectedAudioSourceId"] = selectedAudioSource->id;
+
+  // Save the active state
+  j["active"] = selectedAudioSource->active;
+
+  // Save audio analysis settings (release/scale values)
+  j["frequencyRelease"] = selectedAudioSource->audioAnalysis.frequencyRelease->value;
+  j["frequencyScale"] = selectedAudioSource->audioAnalysis.frequencyScale->value;
+  j["bpmNudge"] = selectedAudioSource->audioAnalysis.bpmNudge->value;
+  j["smoothingMode"] = static_cast<int>(selectedAudioSource->audioAnalysis.smoothingMode);
+  j["loudnessRelease"] = selectedAudioSource->audioAnalysis.rmsAnalysisParam.release->value;
+
+  // For backward compatibility with MicrophoneAudioSource
   std::shared_ptr<MicrophoneAudioSource> audioSource = std::dynamic_pointer_cast<MicrophoneAudioSource>(selectedAudioSource);
   if (audioSource != nullptr) {
     j["deviceId"] = audioSource->deviceId;
-    j["active"] = audioSource->active;
   }
-  
+
   return j;
 }
 
 void AudioSourceService::loadConfig(json j) {
-  if (j.contains("deviceId")) {
+  // Try to load by selectedAudioSourceId first (new format)
+  if (j.contains("selectedAudioSourceId")) {
+    std::string sourceId = j["selectedAudioSourceId"];
+    if (audioSourceMap.count(sourceId) != 0) {
+      selectedAudioSource = audioSourceMap[sourceId];
+    }
+  }
+  // Fall back to deviceId (backward compatibility)
+  else if (j.contains("deviceId")) {
     std::string deviceId = j["deviceId"];
     if (audioSourceMap.count(deviceId) != 0) {
       selectedAudioSource = audioSourceMap[deviceId];
-      selectedAudioSource->active = j["active"];
-      selectedAudioSource->toggle();
     }
+  }
+
+  // Restore the active state
+  if (j.contains("active")) {
+    bool wasActive = j["active"];
+    // Don't set active first - setup() will set it to true
+    if (wasActive) {
+      selectedAudioSource->setup();
+    }
+  }
+
+  // Restore audio analysis settings (release/scale values)
+  if (j.contains("frequencyRelease")) {
+    selectedAudioSource->audioAnalysis.frequencyRelease->setValue(j["frequencyRelease"]);
+  }
+  if (j.contains("frequencyScale")) {
+    selectedAudioSource->audioAnalysis.frequencyScale->setValue(j["frequencyScale"]);
+  }
+  if (j.contains("bpmNudge")) {
+    selectedAudioSource->audioAnalysis.bpmNudge->setValue(j["bpmNudge"]);
+  }
+  if (j.contains("smoothingMode")) {
+    selectedAudioSource->audioAnalysis.smoothingMode = static_cast<SmoothingMode>(j["smoothingMode"]);
+  }
+  if (j.contains("loudnessRelease")) {
+    selectedAudioSource->audioAnalysis.rmsAnalysisParam.release->setValue(j["loudnessRelease"]);
   }
 
   if (LayoutStateService::getService()->abletonLinkEnabled) {

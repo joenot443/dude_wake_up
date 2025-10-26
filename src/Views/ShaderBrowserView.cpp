@@ -63,28 +63,14 @@ void ShaderBrowserView::setup()
 }
 
 void ShaderBrowserView::drawSearchView() {
-  ImGui::BeginChild("##shaderSearchView", ImVec2(ImGui::GetWindowWidth() - 10.0, 30.0), ImGuiChildFlags_AlwaysAutoResize | ImGuiChildFlags_AutoResizeY, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-
-  // Draw collapse button
-  if (collapsed != nullptr) {
-    std::string iconName = *collapsed ? "expand.png" : "collapse.png";
-    if (CommonViews::SimpleImageButton("##collapseShaderBrowser", iconName)) {
-      *collapsed = !*collapsed;
-    }
-    ImGui::SameLine();
-
-    // Show title when collapsed, search bar when expanded
-    if (*collapsed) {
-      ImGui::SetCursorPosY(ImGui::GetCursorPosY());
-      CommonViews::H3Title("Effects", false);
-    } else {
-      CommonViews::SearchBar(searchQuery, searchDirty, "ShaderSearch");
-    }
-  } else {
-    CommonViews::SearchBar(searchQuery, searchDirty, "ShaderSearch");
-  }
-
-  ImGui::EndChild();
+  CommonViews::CollapsibleSearchHeader(
+    "Effects",
+    "Search Effects",
+    collapsed,
+    searchQuery,
+    searchDirty,
+    "ShaderSearchClear"
+  );
   
   if (searchQuery.length() != 0) {
     searchResultsTileBrowserView->draw();

@@ -158,6 +158,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		0208F6362EA3DA0A00529661 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0208E5242E9AA3E600529661 /* btrack~.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2FBBEAE508F335360078DB84;
+			remoteInfo = "max-external";
+		};
 		021171D32E6E3F9000B15198 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 021171AA2E6E3F8F00B15198 /* btrack~.xcodeproj */;
@@ -209,6 +216,7 @@
 		"01771929-4D11-4D13-9112-FE25FF6A46D6" /* PsycurvesShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PsycurvesShader.hpp; sourceTree = "<group>"; };
 		"018EA4E1-F2EA-4702-9A7F-DBF6ED73664D" /* BookmarkService.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BookmarkService.hpp; sourceTree = "<group>"; };
 		"01F7D881-9877-4747-9718-9FE1BED26EF7" /* HelpService.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = HelpService.hpp; sourceTree = "<group>"; };
+		0208E5242E9AA3E600529661 /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
 		021162752E6CC3A000B15198 /* SystemAudioSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SystemAudioSource.hpp; sourceTree = "<group>"; };
 		021162762E6CC3A000B15198 /* SystemAudioSource.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SystemAudioSource.mm; sourceTree = "<group>"; };
 		021171AA2E6E3F8F00B15198 /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
@@ -294,6 +302,7 @@
 		028651AE2D95E0EE000CE0D4 /* Nottawa (Debug).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Nottawa (Debug).app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		028651AF2D95E208000CE0D4 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
 		028938E12E8B3C6F005299A6 /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
+		028949F12E95CDCE005299A6 /* AudioGraphShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AudioGraphShader.hpp; sourceTree = "<group>"; };
 		02A74E8A2DCBB70B009A607C /* GodRayShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GodRayShader.hpp; sourceTree = "<group>"; };
 		02AB2F0C2DE0C4D7004EDB3F /* strings.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = strings.json; path = misc/strings.json; sourceTree = "<group>"; };
 		02AB2F0D2DE0DA2A004EDB3F /* CreditView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CreditView.hpp; sourceTree = "<group>"; };
@@ -750,6 +759,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0208F3EA2E9AA3E600529661 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				0208F6372EA3DA0A00529661 /* btrack~.mxo */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		021171D02E6E3F8F00B15198 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -1315,6 +1332,7 @@
 				"294265F5-00E0-4B66-A273-ABDA6D648E4C" /* AudioBumperShader.hpp */,
 				"E0CDB18D-E5DB-4FA3-ADCB-D655B68F7DC6" /* AudioMountainsShader.hpp */,
 				"023ECAF6-5671-4C7D-89EB-33526DA42A8B" /* IsoFractShader.cpp */,
+				028949F12E95CDCE005299A6 /* AudioGraphShader.hpp */,
 				"9111962A-FD3F-466B-81B3-469A2DA4462A" /* AudioWaveformShader.hpp */,
 				"0041AC53-F77D-40BC-A6D6-8A2AF14678BB" /* AutotangentShader.hpp */,
 				"B18DB43C-A565-4093-9863-E529241F404E" /* BackgroundShader.hpp */,
@@ -1682,6 +1700,10 @@
 					ProductGroup = 02CED26A2E6F94C80010EC68 /* Products */;
 					ProjectRef = 02CED2462E6F94C80010EC68 /* btrack~.xcodeproj */;
 				},
+				{
+					ProductGroup = 0208F3EA2E9AA3E600529661 /* Products */;
+					ProjectRef = 0208E5242E9AA3E600529661 /* btrack~.xcodeproj */;
+				},
 			);
 			projectRoot = "";
 			targets = (
@@ -1691,6 +1713,13 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		0208F6372EA3DA0A00529661 /* btrack~.mxo */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "btrack~.mxo";
+			remoteRef = 0208F6362EA3DA0A00529661 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		021171D42E6E3F9000B15198 /* btrack~.mxo */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;

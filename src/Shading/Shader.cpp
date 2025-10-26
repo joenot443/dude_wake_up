@@ -228,3 +228,11 @@ void Shader::populateLastFrame() {
 bool Shader::allowAuxOutputSlot() {
   return type() == ShaderTypeFeedback || type() == ShaderTypeColorKeyMaskMaker || type() == ShaderTypeLumaMaskMaker;
 }
+
+void Shader::setAudioUniform(std::vector<float> *audio) {
+  // Make a copy to avoid threading issues
+  std::vector<float> audioCopy = *audio;
+  if (audioCopy.size() == 256) {
+    shader.setUniform1fv("audio", &audioCopy[0], 256);
+  }
+}

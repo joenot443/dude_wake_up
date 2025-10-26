@@ -8,6 +8,10 @@
 #include "ShaderChainerService.hpp"
 #include "Models/Strand.hpp"
 #include "AsciiShader.hpp"
+#include "CircleBlurShader.hpp"
+#include "RetroPCShader.hpp"
+#include "StageShader.hpp"
+#include "AudioGraphShader.hpp"
 #include "AudioOscillatorShader.hpp"
 #include "LavaShader.hpp"
 #include "AudioGlowBarsShader.hpp"
@@ -952,6 +956,30 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeCircleBlur: {
+      auto settings = new CircleBlurSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<CircleBlurShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeRetroPC: {
+      auto settings = new RetroPCSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<RetroPCShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeStage: {
+      auto settings = new StageSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<StageShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeAudioGraph: {
+      auto settings = new AudioGraphSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AudioGraphShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeAudioOscillator: {
       auto settings = new AudioOscillatorSettings(shaderId, shaderJson);
       auto shader = std::make_shared<AudioOscillatorShader>(settings);

@@ -46,8 +46,6 @@ private:
   std::vector<std::shared_ptr<TileItem>> searchItems;
   std::vector<std::shared_ptr<LibraryTileItem>> libraryItems;
 
-  std::string searchQuery;
-  bool searchDirty = false;
   std::vector<std::shared_ptr<TileItem>> searchTileItems = {};
   TileBrowserView searchResultsTileBrowserView = TileBrowserView({}, true);
 

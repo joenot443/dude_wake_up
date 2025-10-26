@@ -55,6 +55,7 @@ void MainStageView::update()
   videoSourceBrowserView.update();
   audioSourceBrowserView.update();
   shaderBrowserView.update();
+  strandBrowserView.update();
   if (LayoutStateService::getService()->stageModeEnabled) {
     stageModeView.update();
   }
@@ -62,7 +63,7 @@ void MainStageView::update()
   if (LayoutStateService::getService()->showWelcomeScreen) {
     welcomeScreenView.update();
   }
-  
+
   if (drawFPS) {
     ofSetWindowTitle(formatString("%.2f FPS", ofGetFrameRate()));
   }
@@ -90,7 +91,7 @@ void MainStageView::draw()
   // | Library |       Audio
 
   // Calculate dynamic heights based on collapse states
-  const float collapsedHeight = 40.0f; // Height when collapsed (just shows the search bar/header)
+  const float collapsedHeight = 56.0f; // Height when collapsed (just shows the search bar/header)
   const float totalHeight = browserSize.y * 3; // Total available height for all three sections
 
   // Count how many sections are expanded
@@ -108,50 +109,46 @@ void MainStageView::draw()
   float availableForExpanded = totalHeight - usedByCollapsed;
   float expandedSectionHeight = expandedCount > 0 ? availableForExpanded / expandedCount : browserSize.y;
 
-  // Calculate individual section heights
-  ImVec2 sourceBrowserSize = ImVec2(browserSize.x, sourceBrowserCollapsed ? collapsedHeight : expandedSectionHeight);
-  ImVec2 shaderBrowserSize = ImVec2(browserSize.x, shaderBrowserCollapsed ? collapsedHeight : expandedSectionHeight);
-  ImVec2 utilityBrowserSize = ImVec2(browserSize.x, utilityPanelCollapsed ? collapsedHeight : expandedSectionHeight);
+  // Calculate individual section heights with margin for rounded corners
+  const float sideMargin = 18.0f;
+  ImVec2 sourceBrowserSize = ImVec2(browserSize.x - sideMargin, sourceBrowserCollapsed ? collapsedHeight : expandedSectionHeight);
+  ImVec2 shaderBrowserSize = ImVec2(browserSize.x - sideMargin, shaderBrowserCollapsed ? collapsedHeight : expandedSectionHeight);
+  ImVec2 utilityBrowserSize = ImVec2(browserSize.x - sideMargin, utilityPanelCollapsed ? collapsedHeight : expandedSectionHeight);
 
   // Sources
-  ImGui::PushStyleColor(ImGuiCol_FrameBg, Colors::InnerChildBackgroundColor.Value);
-  ImGui::BeginChild("##sourceBrowser", sourceBrowserSize, ImGuiChildFlags_Border, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollWithMouse);
+  ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
+  ImGui::PushStyleColor(ImGuiCol_ChildBg, Colors::TabSelected.Value);
+  ImGui::BeginChild("##sourceBrowser", sourceBrowserSize, ImGuiChildFlags_Border, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+  ImGui::PopStyleColor();
   drawVideoSourceBrowser();
   ImGui::EndChild();
+  ImGui::PopStyleVar();
 
-  ImGui::BeginChild("##shaderBrowser", shaderBrowserSize, ImGuiChildFlags_Border, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollWithMouse);
+  ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
+  ImGui::PushStyleColor(ImGuiCol_ChildBg, Colors::TabSelected.Value);
+  ImGui::BeginChild("##shaderBrowser", shaderBrowserSize, ImGuiChildFlags_Border, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+  ImGui::PopStyleColor();
   drawShaderBrowser();
   ImGui::EndChild();
-  ImGui::PopStyleColor();
+  ImGui::PopStyleVar();
 
   if (ImGui::GetContentRegionAvail().x < 10) { return; }
 
 
+  ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
+  ImGui::PushStyleColor(ImGuiCol_ChildBg, Colors::TabSelected.Value);
   if (ImGui::BeginChild("##libraryOscillatorBrowser", utilityBrowserSize, ImGuiChildFlags_Border, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
+  ImGui::PopStyleColor();
 
     // Draw collapse button before the tab bar
-    ImGui::BeginChild("##utilityPanelHeader", ImVec2(ImGui::GetWindowWidth() - 10.0, 30.0), ImGuiChildFlags_AlwaysAutoResize | ImGuiChildFlags_AutoResizeY, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-    std::string iconName = utilityPanelCollapsed ? "expand.png" : "collapse.png";
-    if (CommonViews::SimpleImageButton("##collapseUtilityPanel", iconName)) {
-      utilityPanelCollapsed = !utilityPanelCollapsed;
-    }
-
-    // Show title when collapsed
-    if (utilityPanelCollapsed) {
-      ImGui::SameLine();
-      ImGui::SetCursorPosY(ImGui::GetCursorPosY());
-      auto title = "My Strands";
-      if (LayoutStateService::getService()->utilityPanelTab == 0) {
-        title = "My Strands";
-      } else if (LayoutStateService::getService()->utilityPanelTab == 1) {
-        title = "Oscillators";
-      } else if (LayoutStateService::getService()->utilityPanelTab == 2) {
-        title = "Time";
-      }
-      CommonViews::H3Title(title, false);
-    }
-
-    ImGui::EndChild();
+    CommonViews::CollapsibleSearchHeader(
+      "Utility",
+      "Search Strands",
+      &utilityPanelCollapsed,
+      LayoutStateService::getService()->strandSearchQuery,
+      LayoutStateService::getService()->strandSearchDirty,
+      "StrandSearchClear"
+    );
 
     // Only draw tabs and content if not collapsed
     if (!utilityPanelCollapsed) {
@@ -190,9 +187,10 @@ void MainStageView::draw()
       }
     }
   }
-  
+
   ImGui::EndChild();
-  
+  ImGui::PopStyleVar(); // Pop ChildRounding
+
   // Now, handle external tab selection by checking `utilityPanelTab`
   if (LayoutStateService::getService()->utilityPanelTab == 0) {
     ImGui::SetTabItemClosed("Oscillators");  // Reflect external control by closing the other tab

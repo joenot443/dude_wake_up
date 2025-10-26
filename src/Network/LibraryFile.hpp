@@ -25,7 +25,10 @@ struct LibraryFile
   std::string thumbnailFilename;
   std::string category;
   bool isDownloading = false;
+  bool isPaused = false;
   float progress = 0.0;
+  uint64_t downloadedBytes = 0;
+  uint64_t totalBytes = 0;
   
   std::string thumbnailPath();
   

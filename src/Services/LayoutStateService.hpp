@@ -67,15 +67,22 @@ public:
   observable::subject<void()> resolutionUpdateSubject;
 
   // Ephemeral
-  
+
   bool isEyeDroppingColor = false;
-  
+
   bool isEditingText = false;
-  
+
   bool showWelcomeScreen = true;
-  
+
   std::string libraryPath = "";
   std::vector<std::array<float, 4>> colorHistory = std::vector<std::array<float, 4>>(1, std::array<float, 4>{0.0f, 0.0f, 0.0f, 0.0f});
+
+  // Search state for browsers
+  std::string strandSearchQuery = "";
+  bool strandSearchDirty = false;
+
+  std::string sourceSearchQuery = "";
+  bool sourceSearchDirty = false;
 
   float audioSettingsViewHeight();
   

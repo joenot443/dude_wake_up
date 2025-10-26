@@ -31,6 +31,7 @@ public:
   void setup();
   void update();
   void draw();
+  void drawSearchView();
   void keyReleased(int key);
 
   std::vector<std::shared_ptr<AvailableStrandTileItem>> tileItems;
@@ -38,6 +39,10 @@ public:
   std::string tileBrowserId;
 
   TileBrowserView tileBrowserView;
+
+  // Search state
+  std::vector<std::shared_ptr<AvailableStrandTileItem>> searchTileItems;
+  TileBrowserView searchResultsTileBrowserView = TileBrowserView({}, true);
 
   // Rename dialog state ------------------------------------------------------------------
   bool showRenamePopup = false;

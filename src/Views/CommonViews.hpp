@@ -167,6 +167,15 @@ struct CommonViews
   static bool PlayPauseButton(std::string id, bool playing, ImVec2 size = ImVec2(40.0, 40.0), ImVec2 padding = ImVec2(7.5, 7.5));
 
   static bool SearchBar(std::string& searchQuery, bool& searchDirty, std::string id);
+
+  static void CollapsibleSearchHeader(
+    const char* collapsedTitle,
+    const char* searchPlaceholder,
+    bool* collapsed,
+    std::string& searchQuery,
+    bool& searchDirty,
+    std::string clearButtonId
+  );
 };
 
 static ImVec2 getScaledWindowSize() {

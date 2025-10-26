@@ -168,6 +168,10 @@ enum ShaderType {
   ShaderTypeAudioGlowBars,
   ShaderTypeLava,
   ShaderTypeAudioOscillator,
+  ShaderTypeAudioGraph,
+  ShaderTypeStage,
+  ShaderTypeRetroPC,
+  ShaderTypeCircleBlur,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -196,6 +200,7 @@ static const ShaderType AvailableMixShaderTypes[] = {
   ShaderTypeStaticFrame,
   ShaderTypeFeedback,
   ShaderTypeCircleMix,
+  ShaderTypeStage,
 };
 
 static const ShaderType AvailableMaskShaderTypes[] = {
@@ -249,8 +254,10 @@ static const ShaderType AvailableFilterShaderTypes[] = {
   ShaderTypeColorPass, // Generated
   ShaderTypeHalfTone, // Generated
   ShaderTypeCrosshatch, // Generated
+  ShaderTypeCircleBlur,
   ShaderTypeVHS,
   ShaderTypeOldTV,
+  ShaderTypeRetroPC,
   ShaderTypeOneBitDither,
 };
 
@@ -300,6 +307,14 @@ static std::vector<ShaderType> AllShaderTypes() {
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) { // ShaderNames
+    case ShaderTypeCircleBlur:
+      return "CircleBlur";
+    case ShaderTypeRetroPC:
+      return "RetroPC";
+    case ShaderTypeStage:
+      return "Stage";
+    case ShaderTypeAudioGraph:
+      return "AudioGraph";
     case ShaderTypeAudioOscillator:
       return "AudioOscillator";
     case ShaderTypeLava:

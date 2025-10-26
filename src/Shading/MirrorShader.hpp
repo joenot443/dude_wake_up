@@ -121,7 +121,7 @@ public:
     } else if (settings->mirrorTypeSelection->intParamValue() == 2) {
       CommonViews::ShaderParameter(settings->xOffset, settings->xOffsetOscillator);
       // Y Only
-    } else if (settings->mirrorTypeSelection->intParamValue() == 2) {
+    } else if (settings->mirrorTypeSelection->intParamValue() == 3) {
       CommonViews::ShaderParameter(settings->yOffset, settings->yOffsetOscillator);
       
     }

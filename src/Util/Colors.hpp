@@ -19,19 +19,19 @@ struct Colors {
 
   constexpr static ImColor ChildBackgroundColor = ImColor(47, 50, 50);
   constexpr static ImColor InnerChildBackgroundColor = ImColor(22, 22, 24);
-  
+
   constexpr static ImColor BorderColor = ImColor(40, 43, 43);
   constexpr static ImColor NodeBackgroundColor = ImColor(32, 32, 35);
   constexpr static ImColor ActionBarBackgroundColor = IM_COL32(32, 32, 35, 180);
   constexpr static ImColor NodeBorderColor = ImColor(86, 86, 89);
   constexpr static ImColor EditorBackgroundColor = ImColor(21, 21, 23);
   constexpr static ImColor NodeInnerRectBackgroundColor = IM_COL32(11, 11, 12, 255);
-  
+
   constexpr static ImColor SecondaryDark = IM_COL32(44, 44, 48, 255);
   constexpr static ImColor SecondaryDark200 = IM_COL32(65, 65, 69, 255);
   constexpr static ImColor Secondary300 = IM_COL32(114, 114, 116, 255);
   constexpr static ImColor Secondary200 = IM_COL32(144, 144, 146, 255);
-  
+
   constexpr static ImColor PinActive = AccentColor;
   constexpr static ImColor PinActiveSecondary = IM_COL32(181, 81, 38, 51);
   constexpr static ImColor PinActiveTertiary = IM_COL32(181, 81, 38, 25);
@@ -39,10 +39,13 @@ struct Colors {
   constexpr static ImColor ButtonHovered = IM_COL32(40, 40, 44, 255);
   constexpr static ImColor ButtonSelected = IM_COL32(50, 50, 52, 255);
   constexpr static ImColor ButtonSelectedHovered = IM_COL32(60, 60, 62, 255);
-  
+
   constexpr static ImColor TabSelected = IM_COL32(30, 30, 32, 255);
+
+  constexpr static ImColor Transparent = IM_COL32(0, 0, 0, 0);
+  constexpr static ImColor Black10 = IM_COL32(0, 0, 0, 25);
 };
-                       
+
 
 
 static ImColor SourceNodeColor = ImColor(174, 32, 18);

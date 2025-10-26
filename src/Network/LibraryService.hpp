@@ -51,7 +51,10 @@ public:
   void downloadThumbnail(std::shared_ptr<LibraryFile> file);
   void downloadAllThumbnails();
   void downloadFile(std::shared_ptr<LibraryFile> file, std::function<void()>);
-  
+
+  void pauseDownload(std::shared_ptr<LibraryFile> file);
+  void resumeDownload(std::shared_ptr<LibraryFile> file, std::function<void()> callback);
+
   std::shared_ptr<LibraryFile> libraryFileForId(std::string id);
 
   bool hasThumbnailOnDisk(std::shared_ptr<LibraryFile> file);

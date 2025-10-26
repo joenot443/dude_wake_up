@@ -24,7 +24,8 @@ public:
 
   enum FrequencyViewMode {
     FrequencyViewMode_Bands = 0,
-    FrequencyViewMode_Bars = 1
+    FrequencyViewMode_Bars = 1,
+    FrequencyViewMode_Waveform = 2
   };
 
   AudioSourceBrowserView() :

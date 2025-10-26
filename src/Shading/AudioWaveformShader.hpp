@@ -79,10 +79,14 @@ public:
     shader.setUniform1f("amplitude", settings->amplitude->value);
     shader.setUniform1f("colorShift", settings->colorShift->value);
     shader.setUniform1f("glowIntensity", settings->glowIntensity->value);
-    if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() >= 256)
-      shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0], 256);
-    if (source != nullptr && source->audioAnalysis.smoothWaveform.size() >= 256)
-      shader.setUniform1fv("waveform", &source->audioAnalysis.smoothWaveform[0], 256);
+    if (source != nullptr) {
+      std::vector<float> safeSpectrum = source->audioAnalysis.getSafeSpectrum();
+      if (safeSpectrum.size() >= 256)
+        shader.setUniform1fv("audio", &safeSpectrum[0], 256);
+      std::vector<float> safeWaveform = source->audioAnalysis.getSafeWaveform();
+      if (safeWaveform.size() >= 256)
+        shader.setUniform1fv("waveform", &safeWaveform[0], 256);
+    }
     frame->draw(0, 0);
     shader.end();
     canvas->end();

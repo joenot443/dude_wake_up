@@ -157,6 +157,72 @@ hygen shader new ShaderName
 ```
 This will automatically create the necessary files and update the project configuration.
 
+### Adding Parameters to Existing Shaders
+This is a very common workflow for making shader properties controllable and audio-reactive. Follow this pattern:
+
+**1. Update the ShaderSettings struct in the `.hpp` file:**
+```cpp
+struct MyShaderSettings: public ShaderSettings {
+  // Add Parameter and Oscillator pairs
+  std::shared_ptr<Parameter> myParam;
+  std::shared_ptr<WaveformOscillator> myParamOscillator;
+
+  MyShaderSettings(std::string shaderId, json j) :
+  myParam(std::make_shared<Parameter>("My Param", defaultValue, minValue, maxValue)),
+  myParamOscillator(std::make_shared<WaveformOscillator>(myParam)),
+  ShaderSettings(shaderId, j, "MyShader") {
+    // Register in arrays
+    parameters = { myParam };
+    oscillators = { myParamOscillator };
+    load(j);
+    registerParameters();
+  };
+};
+```
+
+**Important Naming Convention:**
+- C++ variable names: `camelCase` (e.g., `myParam`, `redIntensity`)
+- Parameter display names: `Capital Case` (e.g., `"My Param"`, `"Red Intensity"`)
+- The display name is what users see in the UI, so it should be human-readable
+
+**2. Pass the uniform to the shader in the `shade()` method:**
+```cpp
+void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
+  canvas->begin();
+  shader.begin();
+  // Add uniform
+  shader.setUniform1f("myParam", settings->myParam->value);
+  // ... other uniforms ...
+  shader.end();
+  canvas->end();
+}
+```
+
+**3. Add the uniform declaration in the fragment shader (`.frag` file):**
+```glsl
+uniform float myParam;
+```
+Replace any `#define` constants with the new uniform variable throughout the shader code.
+
+**4. Add UI controls in the `drawSettings()` method:**
+```cpp
+void drawSettings() override {
+  CommonViews::H3Title("MyShader");
+  CommonViews::ShaderParameter(settings->myParam, settings->myParamOscillator);
+}
+```
+
+**Parameter/Oscillator/Uniform Triple Pattern:**
+- **Parameter**: Stores the value with min/max bounds and name
+- **WaveformOscillator**: Enables audio-reactive modulation of the parameter
+- **Uniform**: Passes the value to the GPU shader each frame
+
+This pattern allows parameters to be:
+- Manually adjusted via UI sliders
+- Modulated by audio features (amplitude, frequency, etc.)
+- Saved/loaded with shader presets
+- Animated over time
+
 ## Development Notes
 
 ### Code Style

@@ -4,7 +4,9 @@ uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
 uniform float audio[256];
-uniform float waveform[256];
+uniform vec3 baseColor;
+uniform vec3 outlineColor;
+uniform float outlineThickness;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -33,15 +35,23 @@ void main(  )
   // Map to our audio array (256 samples)
   int tx = int(uv.x * 255.0);
 
-  // Get frequency data from audio array (FFT)
-  float fft = audio[tx];
-
   // Get actual waveform data (time-domain audio samples)
-  float wave = waveform[tx];
+  float wave = audio[tx];
 
-  // add wave form on top - now using actual waveform data
-  float col = 1.0 - smoothstep( 0.0, 0.15, abs(wave - (uv.y - 0.5) * 2.0) );
+  // Calculate distance from waveform line
+  float dist = abs(wave - (uv.y - 0.5) * 2.0);
+
+  // Base waveform line
+  float baseLine = 1.0 - smoothstep(0.0, 0.01, dist);
+
+  // Outline - slightly thicker region around the base line
+  float outlineWidth = 0.01 + (outlineThickness * 0.01);
+  float outline = 1.0 - smoothstep(0.01, outlineWidth, dist);
+
+  // Combine colors: outline where there's no base, otherwise use base
+  vec3 finalColor = mix(outlineColor, baseColor, baseLine);
+  float alpha = max(baseLine, outline);
 
   // output final color
-  outputColor = vec4(col, col, col, 1.0);
+  outputColor = vec4(finalColor * alpha, alpha);
 }

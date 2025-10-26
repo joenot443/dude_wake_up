@@ -1534,3 +1534,89 @@ bool CommonViews::SearchBar(std::string& searchQuery, bool& searchDirty, std::st
   }
   return changed;
 }
+
+void CommonViews::CollapsibleSearchHeader(
+  const char* collapsedTitle,
+  const char* searchPlaceholder,
+  bool* collapsed,
+  std::string& searchQuery,
+  bool& searchDirty,
+  std::string clearButtonId
+) {
+  if (collapsed != nullptr) {
+    // Create a child window for the section header
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+    ImGui::BeginChild((std::string("##") + collapsedTitle + "SearchView").c_str(),
+                      ImVec2(LayoutStateService::getService()->browserSize().x - 36.0, 28.0),
+                      ImGuiChildFlags_None,
+                      ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+    ImGui::PopStyleVar();
+
+    // Apply prominent styling for the collapsing header
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8.0f, 8.0f));
+    ImGui::PushStyleColor(ImGuiCol_Header, Colors::Transparent.Value);
+    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, Colors::Black10.Value);
+    ImGui::PushStyleColor(ImGuiCol_HeaderActive, Colors::Black10.Value);
+
+    // Use CollapsingHeader - it returns true when expanded
+    bool isExpanded = !*collapsed;
+    ImGui::SetNextItemOpen(isExpanded);
+
+    // Hide text when expanded, show only arrow
+    const char* headerText = isExpanded ? (std::string("##") + collapsedTitle).c_str() : collapsedTitle;
+    if (ImGui::CollapsingHeader(headerText, ImGuiTreeNodeFlags_AllowOverlap)) {
+      if (*collapsed) {
+        *collapsed = false;
+      }
+    } else {
+      if (!*collapsed) {
+        *collapsed = true;
+      }
+    }
+
+    ImGui::PopStyleColor(3);
+    ImGui::PopStyleVar();
+
+    // Show search bar on same line when expanded
+    if (!*collapsed) {
+      ImGui::SameLine();
+      ImGui::SetCursorPosX(35.0f); // Position after arrow
+
+      // Calculate width - reserve space for X button only if there's text
+      bool hasText = searchQuery.length() > 0;
+      float width = hasText ? ImGui::GetContentRegionAvail().x - 100.0f : ImGui::GetContentRegionAvail().x - 32.0f;
+      ImGui::PushItemWidth(width);
+
+      char buffer[256];
+      strncpy(buffer, searchQuery.c_str(), sizeof(buffer));
+      bool changed = ImGui::InputTextWithHint((std::string("##") + collapsedTitle + "Search").c_str(),
+                                              searchPlaceholder,
+                                              buffer,
+                                              sizeof(buffer));
+      if (changed) {
+        searchQuery = std::string(buffer);
+        searchDirty = true;
+      }
+      ImGui::PopItemWidth();
+
+      // Only show X button if there's text to clear
+      if (hasText) {
+        ImGui::SameLine();
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0);
+        if (ImageButton(clearButtonId, "x.png", ImVec2(16.0, 16.0), ImVec2(1.0, 1.0))) {
+          searchQuery = "";
+          searchDirty = true;
+        }
+      }
+    }
+
+    ImGui::EndChild();
+  } else {
+    ImGui::BeginChild((std::string("##") + collapsedTitle + "SearchView").c_str(),
+                      ImVec2(ImGui::GetWindowWidth() - 20.0, 16.0),
+                      ImGuiChildFlags_AlwaysAutoResize | ImGuiChildFlags_AutoResizeY,
+                      ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+    SearchBar(searchQuery, searchDirty, clearButtonId);
+    ImGui::EndChild();
+  }
+}

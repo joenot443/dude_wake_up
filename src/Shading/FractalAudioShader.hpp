@@ -47,12 +47,17 @@ struct FractalAudioShader: Shader {
     canvas->begin();
     shader.begin();
     auto source = AudioSourceService::getService()->selectedAudioSource;
-    if (settings->enableAudio->boolValue && source != nullptr && source->audioAnalysis.smoothSpectrum.size() > 0)
-      shader.setUniform1fv("audio", &source->audioAnalysis.smoothMelSpectrum[0],
-                           14);
-    else {
-      shader.setUniform1fv("audio", &Vectors::vectorFilled(14, 0.0)[0],
-                           14);
+    if (settings->enableAudio->boolValue && source != nullptr) {
+      std::vector<float> safeMelSpectrum = source->audioAnalysis.getSafeMelSpectrum();
+      if (safeMelSpectrum.size() >= 14)
+        shader.setUniform1fv("audio", &safeMelSpectrum[0], 14);
+      else {
+        std::vector<float> zero = Vectors::vectorFilled(14, 0.0);
+        shader.setUniform1fv("audio", &zero[0], 14);
+      }
+    } else {
+      std::vector<float> zero = Vectors::vectorFilled(14, 0.0);
+      shader.setUniform1fv("audio", &zero[0], 14);
     }
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("enableAudio", settings->enableAudio->value);

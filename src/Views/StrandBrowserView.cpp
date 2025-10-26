@@ -9,8 +9,11 @@
 #include "AvailableStrand.hpp"
 #include "StrandService.hpp"
 #include "TileBrowserView.hpp"
+#include "CommonViews.hpp"
+#include "LayoutStateService.hpp"
 #include <filesystem>
 #include <cstring>
+#include <algorithm>
 
 std::vector<std::shared_ptr<AvailableStrandTileItem>> StrandBrowserView::tileItemsFromAvailableStrands(std::vector<std::shared_ptr<AvailableStrand>> availableStrands)
 {
@@ -86,14 +89,80 @@ void StrandBrowserView::setup()
     tileItems = tileItemsFromAvailableStrands(StrandService::getService()->availableStrands());
     tileBrowserView.setTileItems(std::vector<std::shared_ptr<TileItem>>(tileItems.begin(), tileItems.end()));
   });
+
+  // Initialize the search results view
+  searchResultsTileBrowserView = TileBrowserView(searchTileItems, true);
+  searchResultsTileBrowserView.setContextMenuItems(menuItems);
 }
 
 void StrandBrowserView::update()
 {
+  if (LayoutStateService::getService()->strandSearchDirty) {
+    // Filter strands based on searchQuery
+    auto availableStrands = StrandService::getService()->availableStrands();
+    searchTileItems.clear();
+
+    // Convert the searchQuery to lowercase for case-insensitive comparison
+    std::string searchQueryLower = LayoutStateService::getService()->strandSearchQuery;
+    std::transform(searchQueryLower.begin(), searchQueryLower.end(), searchQueryLower.begin(),
+                   [](unsigned char c){ return std::tolower(c); });
+
+    for (auto& strand : availableStrands) {
+      // Convert strand name to lowercase for case-insensitive comparison
+      std::string strandNameLower = strand->name;
+      std::transform(strandNameLower.begin(), strandNameLower.end(), strandNameLower.begin(),
+                     [](unsigned char c){ return std::tolower(c); });
+
+      if (strandNameLower.find(searchQueryLower) != std::string::npos) {
+        ImTextureID textureId = (ImTextureID)(uint64_t) strand->fbo->getTexture().texData.textureID;
+
+        // Create a closure which will be called when the tile is clicked
+        std::function<void(std::string tileId)> dragCallback = [strand](std::string tileId)
+        {
+          // Create a payload to carry the Strand
+          if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+          {
+            // Set payload to carry the index of our item (could be anything)
+            ImGui::SetDragDropPayload("AvailableStrand", &strand->id,
+                                      sizeof(AvailableStrand));
+            ImGui::PushID(tileId.c_str());
+            ImGui::Text("%s", strand->name.c_str());
+            ImGui::PopID();
+            ImGui::EndDragDropSource();
+          }
+        };
+
+        auto tileItem = std::make_shared<AvailableStrandTileItem>(strand, textureId, 0, dragCallback);
+        searchTileItems.push_back(tileItem);
+      }
+    }
+    searchResultsTileBrowserView.setTileItems(std::vector<std::shared_ptr<TileItem>>(searchTileItems.begin(), searchTileItems.end()));
+    LayoutStateService::getService()->strandSearchDirty = false;
+  }
+}
+
+void StrandBrowserView::drawSearchView() {
+
+  if (LayoutStateService::getService()->strandSearchQuery.length() != 0 && searchTileItems.size() > 0) {
+    searchResultsTileBrowserView.draw();
+  } else if (LayoutStateService::getService()->strandSearchQuery.length() > 0) {
+    ImGui::Dummy(ImVec2(1.0, 5.0));
+    ImGui::Dummy(ImVec2(5.0, 1.0));
+    ImGui::SameLine();
+    ImGui::Text("No results.");
+    ImGui::Dummy(ImVec2(1.0, 5.0));
+  }
 }
 
 void StrandBrowserView::draw()
 {
+  // If there's an active search, show search results instead of regular browser
+  if (LayoutStateService::getService()->strandSearchQuery.length() > 0) {
+    drawSearchView();
+    return;
+  }
+
+  // Otherwise show regular browser
   // Begin a child window that fills the remaining space and allows vertical scrolling.
   // The 'true' argument adds a border around the child window.
   ImGui::BeginChild("##StrandBrowserScrollingRegion", ImVec2(0, 0), true, ImGuiWindowFlags_AlwaysVerticalScrollbar);

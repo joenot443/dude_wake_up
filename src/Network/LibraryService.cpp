@@ -277,106 +277,156 @@ void LibraryService::downloadAllThumbnails()
   }
 }
 
-// Downloads the file specified by file->url.
+// Downloads the file specified by file->url with support for pause/resume.
 // Assumes file->url is always HTTPS.
 void LibraryService::downloadFile(std::shared_ptr<LibraryFile> file, std::function<void()> callback)
 {
   std::string host, path;
-  
+
   // Parse the HTTPS URL
   if (!parseHttpsUrl(file->url, host, path)) {
     log("Error: Could not parse file HTTPS URL: %s", file->url.c_str());
     std::cerr << "Error: Could not parse file HTTPS URL: " << file->url << std::endl;
-    file->isDownloading = false; // Ensure flag is reset on parse error
-    return; // Stop if URL is invalid
+    file->isDownloading = false;
+    return;
   }
-  
+
 #ifndef CPPHTTPLIB_OPENSSL_SUPPORT
   log("Error: HTTPS URL provided but httplib not compiled with SSL support.");
   std::cerr << "Error: HTTPS URL provided but httplib not compiled with SSL support." << std::endl;
-  file->isDownloading = false; // Ensure flag is reset
-  return; // Cannot proceed without SSL support
+  file->isDownloading = false;
+  return;
 #endif
-  
-  // Create SSL client directly
+
+  // Get file path for partial/complete download
+  std::string file_path = ConfigService::getService()->libraryFolderFilePath() + "/" + file->filename;
+
+  // Check if partial download exists
+  uint64_t startByte = 0;
+  if (ofFile::doesFileExist(file_path)) {
+    ofFile partialFile(file_path);
+    startByte = partialFile.getSize();
+    file->downloadedBytes = startByte;
+    log("Resuming download from byte %llu", startByte);
+  }
+
+  // Create SSL client
   httplib::SSLClient cli(host);
   log("Using SSLClient for host: %s", host.c_str());
-  
-  // --- Option 2: Disable Verification (Insecure) ---
-  log("Warning: Disabling SSL server certificate verification! This is insecure.");
+
   cli.enable_server_certificate_verification(false);
-  // --- End Option 2 ---
-  
-  // Set reasonable timeouts to prevent hangs
-  cli.set_connection_timeout(15, 0); // Increased connection timeout slightly
-  cli.set_read_timeout(120, 0);      // Increased read timeout for potentially larger files
-  cli.set_follow_location(true);     // Automatically follow redirects (e.g., HTTP 301/302)
-  
-  // Add a User-Agent header - some servers require this
+  cli.set_connection_timeout(15, 0);
+  cli.set_read_timeout(120, 0);
+  cli.set_follow_location(true);
+
+  // Prepare headers with Range request if resuming
   httplib::Headers headers = {
     { "User-Agent", "dude_wake_up_downloader/1.0" }
   };
-  
-  // Send GET request using the parsed path
+
+  if (startByte > 0) {
+    headers.insert({ "Range", "bytes=" + std::to_string(startByte) + "-" });
+  }
+
+  // Send GET request with progress callback
   auto res = cli.Get(path.c_str(), headers,
-                     // Progress callback lambda
-                     [file](uint64_t current, uint64_t total) {
-    // Log progress. Handle cases where server doesn't send total size (total == 0)
-    if (!file->isDownloading) file->isDownloading = true; // Set flag on first progress update
-    if (total > 0) {
-      log("Download Progress: %llu / %llu", current, total);
-      // Update progress only if total is known
-      file->progress = (static_cast<double>(current) / static_cast<double>(total));
-    } else {
-      // Log bytes downloaded when total size is unknown
-      log("Download Progress: %llu bytes / Unknown total", current);
-      file->progress = -1.0f; // Indicate unknown/indeterminate progress
+                     [file, startByte](uint64_t current, uint64_t total) {
+    if (!file->isDownloading) file->isDownloading = true;
+
+    // Check if download is paused
+    if (file->isPaused) {
+      log("Download paused for file %s", file->filename.c_str());
+      return false; // Abort download
     }
-    
-    // Return true to continue the download, false to abort.
-    return true;
+
+    // Update progress accounting for resumed bytes
+    uint64_t totalDownloaded = startByte + current;
+    uint64_t actualTotal = (total > 0) ? (startByte + total) : 0;
+
+    file->downloadedBytes = totalDownloaded;
+    file->totalBytes = actualTotal;
+
+    if (actualTotal > 0) {
+      file->progress = static_cast<float>(totalDownloaded) / static_cast<float>(actualTotal);
+      log("Download Progress: %llu / %llu (%.1f%%)", totalDownloaded, actualTotal, file->progress * 100.0f);
+    } else {
+      log("Download Progress: %llu bytes / Unknown total", totalDownloaded);
+      file->progress = 0.0f;
+    }
+
+    return true; // Continue download
   });
-  
-  // Check the result of the GET request
-  if (res && res->status == 200)
+
+  // Check the result
+  if (res && (res->status == 200 || res->status == 206)) // 206 = Partial Content (resume)
   {
-    // Write the downloaded data to the file
-    std::string file_path = ConfigService::getService()->libraryFolderFilePath() + "/" + file->filename;
-    std::ofstream file_stream(file_path, std::ios::binary);
+    // Open file in append mode if resuming, otherwise truncate
+    std::ios_base::openmode mode = std::ios::binary;
+    if (startByte > 0 && res->status == 206) {
+      mode |= std::ios::app; // Append mode for resume
+    } else {
+      mode |= std::ios::trunc; // Truncate for fresh download
+    }
+
+    std::ofstream file_stream(file_path, mode);
     if (file_stream.is_open()) {
       file_stream.write(res->body.data(), res->body.size());
       file_stream.close();
-      libraryFileIdDownloadedMap[file->id] = true;
-      log("Successfully downloaded file %s", file->filename.c_str());
-      file->isDownloading = false; // Reset flag on success
-      if (callback) {
-        MainApp::getApp()->executeOnMainThread([callback](){ 
-          callback();
-        });
+
+      // Only mark as complete if not paused
+      if (!file->isPaused) {
+        libraryFileIdDownloadedMap[file->id] = true;
+        log("Successfully downloaded file %s", file->filename.c_str());
+        file->isDownloading = false;
+        file->progress = 1.0f;
+
+        if (callback) {
+          MainApp::getApp()->executeOnMainThread([callback](){
+            callback();
+          });
+        }
+      } else {
+        // Download was paused - keep partial file
+        file->isDownloading = false;
+        log("Download paused, partial file saved: %s", file->filename.c_str());
       }
     } else {
       log("Error: Failed to open file %s for writing.", file_path.c_str());
       std::cerr << "Error: Failed to open file " << file_path << " for writing." << std::endl;
-      file->isDownloading = false; // Reset flag on file error
-      // Consider adding error reporting or callback here
+      file->isDownloading = false;
     }
   }
   else
   {
-    // Handle HTTP errors or connection failures
     if (res) {
-      // Request completed but received an error status code (e.g., 404 Not Found, 500 Server Error)
       log("Error: Failed to download file %s. URL: %s. Status: %d", file->filename.c_str(), file->url.c_str(), res->status);
       std::cerr << "Error: Failed to download file " << file->filename << ". URL: " << file->url << ". Status: " << res->status << std::endl;
     } else {
-      // res is null, meaning the request failed at a lower level (e.g., connection timeout, DNS error, SSL handshake)
       auto err = res.error();
-      // Log the error even without the explicit logger
       log("Error: Failed to download file %s. URL: %s. Error: %s (%d)", file->filename.c_str(), file->url.c_str(), httplib::to_string(err).c_str(), static_cast<int>(err));
       std::cerr << "Error: Failed to download file " << file->filename << ". URL: " << file->url << ". Connection/request error: " << httplib::to_string(err) << std::endl;
     }
-    file->isDownloading = false; // Reset downloading flag on failure
-    // Consider adding error reporting or callback here
+    file->isDownloading = false;
+  }
+}
+
+void LibraryService::pauseDownload(std::shared_ptr<LibraryFile> file)
+{
+  if (file && file->isDownloading) {
+    file->isPaused = true;
+    log("Pausing download for file %s", file->filename.c_str());
+  }
+}
+
+void LibraryService::resumeDownload(std::shared_ptr<LibraryFile> file, std::function<void()> callback)
+{
+  if (file && file->isPaused) {
+    file->isPaused = false;
+    log("Resuming download for file %s", file->filename.c_str());
+
+    // Launch new download thread that will resume from downloadedBytes
+    downloadFutures.push_back(
+      std::async(std::launch::async, &LibraryService::downloadFile, this, file, callback));
   }
 }
 

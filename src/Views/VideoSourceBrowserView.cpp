@@ -14,6 +14,7 @@
 #include "TileBrowserView.hpp"
 #include "VideoSourceService.hpp"
 #include "CommonViews.hpp"
+#include "LayoutStateService.hpp"
 
 void VideoSourceBrowserView::setup()
 {
@@ -143,22 +144,22 @@ void VideoSourceBrowserView::refreshSources()
 void VideoSourceBrowserView::update()
 {
   //  fileBrowserView.update();
-  if (searchDirty) {
+  if (LayoutStateService::getService()->sourceSearchDirty) {
     // Filter tileItems based on searchQuery
     auto sources = VideoSourceService::getService()->availableVideoSources();
     searchTileItems.clear();
-    
+
     // Convert the searchQuery to lowercase for case-insensitive comparison
-    std::string searchQueryLower = searchQuery;
+    std::string searchQueryLower = LayoutStateService::getService()->sourceSearchQuery;
     std::transform(searchQueryLower.begin(), searchQueryLower.end(), searchQueryLower.begin(),
                    [](unsigned char c){ return std::tolower(c); });
-    
+
     for (auto& source : sources) {
       // Convert source name to lowercase for case-insensitive comparison
       std::string sourceNameLower = source->sourceName;
       std::transform(sourceNameLower.begin(), sourceNameLower.end(), sourceNameLower.begin(),
                      [](unsigned char c){ return std::tolower(c); });
-      
+
       if (sourceNameLower.find(searchQueryLower) != std::string::npos) {
         ImTextureID textureId = (ImTextureID)(uint64_t) source->preview->texData.textureID;
         // Create a closure which will be called when the tile is clicked
@@ -183,7 +184,7 @@ void VideoSourceBrowserView::update()
       }
     }
     searchResultsTileBrowserView.setTileItems(searchTileItems);
-    searchDirty = false;
+    LayoutStateService::getService()->sourceSearchDirty = false;
   }
 }
 
@@ -222,32 +223,18 @@ void VideoSourceBrowserView::drawSelectedBrowser() {
 }
 
 void VideoSourceBrowserView::drawSearchView() {
-  ImGui::BeginChild("##sourceSearchView", ImVec2(ImGui::GetWindowWidth() - 10.0, 30.0), ImGuiChildFlags_AlwaysAutoResize | ImGuiChildFlags_AutoResizeY, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+  CommonViews::CollapsibleSearchHeader(
+    "Sources",
+    "Search Sources",
+    collapsed,
+    LayoutStateService::getService()->sourceSearchQuery,
+    LayoutStateService::getService()->sourceSearchDirty,
+    "SourceSearchClear"
+  );
 
-  // Draw collapse button
-  if (collapsed != nullptr) {
-    std::string iconName = *collapsed ? "expand.png" : "collapse.png";
-    if (CommonViews::SimpleImageButton("##collapseSourceBrowser", iconName)) {
-      *collapsed = !*collapsed;
-    }
-    ImGui::SameLine();
-
-    // Show title when collapsed, search bar when expanded
-    if (*collapsed) {
-      ImGui::SetCursorPosY(ImGui::GetCursorPosY());
-      CommonViews::H3Title("Sources", false);
-    } else {
-      CommonViews::SearchBar(searchQuery, searchDirty, "SourceSearch");
-    }
-  } else {
-    CommonViews::SearchBar(searchQuery, searchDirty, "SourceSearch");
-  }
-
-  ImGui::EndChild();
-  
-  if (searchQuery.length() != 0 && searchTileItems.size() > 0) {
+  if (LayoutStateService::getService()->sourceSearchQuery.length() != 0 && searchTileItems.size() > 0) {
     searchResultsTileBrowserView.draw();
-  } else if (searchQuery.length() > 0) {
+  } else if (LayoutStateService::getService()->sourceSearchQuery.length() > 0) {
     ImGui::Dummy(ImVec2(1.0, 5.0));
     ImGui::Dummy(ImVec2(5.0, 1.0));
     ImGui::SameLine();

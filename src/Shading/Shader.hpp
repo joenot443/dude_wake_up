@@ -160,6 +160,8 @@ public:
   void drawOptionalSettings();
   void applyOptionalShaders();
   void populateLastFrame();
+
+  void setAudioUniform(std::vector<float> *audio);
 };
 
 #endif

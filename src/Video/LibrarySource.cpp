@@ -109,16 +109,122 @@ void LibrarySource::teardown() {
 }
 
 void LibrarySource::drawPreviewSized(ImVec2 size) {
-  if (libraryFile->isDownloading) {
-    ImGui::PushFont(FontService::getService()->current->h1);
-    ImGui::Dummy(ImVec2(1.0, size.y / 2.0 - 10.0f));
-    ImGui::Dummy(ImVec2(size.x / 2.0 - 10.0f, 1.0)); ImGui::SameLine();
-    ImGui::Text("%.1f%%", libraryFile->progress * 100.0f);
-    ImGui::Dummy(ImVec2(1.0, size.y / 2.0 - 10.0f));
+  if (libraryFile->isDownloading || libraryFile->isPaused) {
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImVec2 cursor_pos = ImGui::GetCursorScreenPos();
+
+    // Draw background rect for the entire preview area
+    draw_list->AddRectFilled(cursor_pos, ImVec2(cursor_pos.x + size.x, cursor_pos.y + size.y),
+                             IM_COL32(30, 30, 30, 255), 8.0f);
+
+    // Calculate centered position for progress UI
+    float progressBarWidth = size.x * 0.7f;
+    float progressBarHeight = 8.0f;
+    float marginX = (size.x - progressBarWidth) / 2.0f;
+    float centerY = size.y / 2.0f;
+
+    // Progress bar background (dark)
+    ImVec2 bg_min = ImVec2(cursor_pos.x + marginX, cursor_pos.y + centerY - progressBarHeight / 2.0f);
+    ImVec2 bg_max = ImVec2(cursor_pos.x + marginX + progressBarWidth, cursor_pos.y + centerY + progressBarHeight / 2.0f);
+    draw_list->AddRectFilled(bg_min, bg_max, IM_COL32(40, 40, 40, 200), 4.0f);
+
+    // Progress bar fill (blue if downloading, gray if paused)
+    float progress = libraryFile->progress;
+    float fillWidth = progressBarWidth * progress;
+    if (fillWidth > 0.0f) {
+      ImU32 fillColor = libraryFile->isPaused ? IM_COL32(120, 120, 120, 220) : IM_COL32(50, 150, 255, 220);
+      ImVec2 fill_max = ImVec2(cursor_pos.x + marginX + fillWidth, cursor_pos.y + centerY + progressBarHeight / 2.0f);
+      draw_list->AddRectFilled(bg_min, fill_max, fillColor, 4.0f);
+    }
+
+    // Progress percentage text
+    ImGui::PushFont(FontService::getService()->current->h2);
+    char progressText[32];
+    snprintf(progressText, sizeof(progressText), "%.1f%%", progress * 100.0f);
+    ImVec2 textSize = ImGui::CalcTextSize(progressText);
+    ImVec2 textPos = ImVec2(
+      cursor_pos.x + (size.x - textSize.x) / 2.0f,
+      cursor_pos.y + centerY - progressBarHeight / 2.0f - textSize.y - 10.0f
+    );
+    draw_list->AddText(textPos, IM_COL32(255, 255, 255, 255), progressText);
     ImGui::PopFont();
+
+    // Status label and pause/resume button
+    ImGui::PushFont(FontService::getService()->current->h3);
+    const char* label = libraryFile->isPaused ? "Paused" : "Downloading...";
+    ImVec2 labelSize = ImGui::CalcTextSize(label);
+
+    // Calculate button size and position
+    float buttonSize = 20.0f;
+    float totalWidth = labelSize.x + buttonSize + 5.0f; // 5px gap between label and button
+    float startX = cursor_pos.x + (size.x - totalWidth) / 2.0f;
+    float labelY = cursor_pos.y + centerY + progressBarHeight / 2.0f + 10.0f;
+
+    // Draw label
+    ImVec2 labelPos = ImVec2(startX, labelY);
+    ImU32 labelColor = libraryFile->isPaused ? IM_COL32(200, 200, 200, 255) : IM_COL32(180, 180, 180, 255);
+    draw_list->AddText(labelPos, labelColor, label);
+
+    // Draw pause/resume button
+    ImVec2 buttonPos = ImVec2(startX + labelSize.x + 5.0f, labelY + (labelSize.y - buttonSize) / 2.0f);
+    ImVec2 buttonMin = buttonPos;
+    ImVec2 buttonMax = ImVec2(buttonPos.x + buttonSize, buttonPos.y + buttonSize);
+
+    // Check if mouse is hovering over button
+    ImVec2 mousePos = ImGui::GetMousePos();
+    bool isHovered = mousePos.x >= buttonMin.x && mousePos.x <= buttonMax.x &&
+                     mousePos.y >= buttonMin.y && mousePos.y <= buttonMax.y;
+
+    // Button background (circle)
+    ImVec2 buttonCenter = ImVec2((buttonMin.x + buttonMax.x) / 2.0f, (buttonMin.y + buttonMax.y) / 2.0f);
+    ImU32 buttonBgColor = isHovered ? IM_COL32(70, 70, 70, 255) : IM_COL32(50, 50, 50, 200);
+    draw_list->AddCircleFilled(buttonCenter, buttonSize / 2.0f, buttonBgColor);
+
+    // Draw icon (pause = two bars, resume = triangle)
+    ImU32 iconColor = IM_COL32(255, 255, 255, 255);
+    if (libraryFile->isPaused) {
+      // Play triangle
+      float iconSize = buttonSize * 0.5f;
+      ImVec2 p1 = ImVec2(buttonCenter.x - iconSize * 0.3f, buttonCenter.y - iconSize * 0.4f);
+      ImVec2 p2 = ImVec2(buttonCenter.x - iconSize * 0.3f, buttonCenter.y + iconSize * 0.4f);
+      ImVec2 p3 = ImVec2(buttonCenter.x + iconSize * 0.4f, buttonCenter.y);
+      draw_list->AddTriangleFilled(p1, p2, p3, iconColor);
+    } else {
+      // Pause bars
+      float barWidth = 2.5f;
+      float barHeight = buttonSize * 0.5f;
+      float barGap = 3.0f;
+      ImVec2 bar1Min = ImVec2(buttonCenter.x - barGap / 2.0f - barWidth, buttonCenter.y - barHeight / 2.0f);
+      ImVec2 bar1Max = ImVec2(buttonCenter.x - barGap / 2.0f, buttonCenter.y + barHeight / 2.0f);
+      ImVec2 bar2Min = ImVec2(buttonCenter.x + barGap / 2.0f, buttonCenter.y - barHeight / 2.0f);
+      ImVec2 bar2Max = ImVec2(buttonCenter.x + barGap / 2.0f + barWidth, buttonCenter.y + barHeight / 2.0f);
+      draw_list->AddRectFilled(bar1Min, bar1Max, iconColor);
+      draw_list->AddRectFilled(bar2Min, bar2Max, iconColor);
+    }
+
+    ImGui::PopFont();
+
+    // Handle button click with invisible button positioned absolutely at button location
+    ImGui::SetCursorScreenPos(buttonMin);
+    ImGui::InvisibleButton("pauseResumeButton", ImVec2(buttonSize, buttonSize));
+    if (ImGui::IsItemClicked()) {
+      if (libraryFile->isPaused) {
+        // Resume download
+        auto onComplete = [this]() {
+          log("Download complete after resume");
+          this->state = LibrarySourceState_Completed;
+          ofAddListener(ofEvents().update, this, &LibrarySource::runSetupOnMainThread);
+        };
+        LibraryService::getService()->resumeDownload(libraryFile, onComplete);
+      } else {
+        // Pause download
+        LibraryService::getService()->pauseDownload(libraryFile);
+      }
+    }
+    ImGui::SetCursorPos(cursor_pos);
     return;
   }
-  
+
   FileSource::drawPreviewSized(size);
 }
 

@@ -11,6 +11,7 @@
 #include <cmath>
 #include <chrono>
 #include <iostream>
+#include <deque>
 #include "Gist.h"
 #include "Math.hpp"
 #include "Oscillator.hpp"
@@ -27,25 +28,34 @@ enum BpmMode {
   BpmMode_Link
 };
 
+enum SmoothingMode {
+  SmoothingMode_Exponential,
+  SmoothingMode_MovingAverage,
+  SmoothingMode_None,
+  SmoothingMode_PeakHold
+};
+
 struct AudioAnalysisParameter {
   float windowMin = 0.0;
   float windowMax = 0.0;
 
   float value = 0.0;
   float rollingMean = 0.0;
-  
+  float smoothedValue = 0.0;
+
   // Vary from 0.0 to 1.0: rollingMean / windowMax:
   float rollingMeanRelation = 0.0;
-  
+
   Pulser pulser;
 
   std::shared_ptr<Parameter> pulseLength;
   std::shared_ptr<Parameter> pulseThreshold;
+  std::shared_ptr<Parameter> release;
   std::shared_ptr<Parameter> param;
   std::shared_ptr<Parameter> pulse;
   std::shared_ptr<ValueOscillator> pulseOscillator;
   std::shared_ptr<ValueOscillator> thresholdOscillator;
-  
+
   RollingMean valueAcc;   // Use RollingMean instead of Boost Accumulator
   std::deque<double> minMaxValues;  // Store values to manually track min and max
   size_t minMaxWindowSize = 800;
@@ -54,6 +64,7 @@ struct AudioAnalysisParameter {
   valueAcc(2),   // Rolling window size for mean
   pulseLength(std::make_shared<Parameter>("pulseLength", 0.8, 0.0, 1.0)),
   pulseThreshold(std::make_shared<Parameter>("pulseThreshold", 0.6, 0.0, 1.0)),
+  release(std::make_shared<Parameter>("Release", 0.6, 0.0, 1.0)),
   pulse(std::make_shared<Parameter>("autoPulse", 0.0, 0.0, 1.0)),
   pulseOscillator(std::make_shared<ValueOscillator>(pulse)),
   thresholdOscillator(std::make_shared<ValueOscillator>(pulseThreshold)),
@@ -64,10 +75,14 @@ struct AudioAnalysisParameter {
 
   void tick(float val) {
     value = val;
-    valueAcc.add(val);  // Add value to RollingMean accumulator
 
-    // Update the min/max deque
-    minMaxValues.push_back(val);
+    // Apply exponential smoothing to the raw value first
+    smoothedValue = smoothedValue * release->value + val * (1.0f - release->value);
+
+    valueAcc.add(smoothedValue);  // Add smoothed value to RollingMean accumulator
+
+    // Update the min/max deque with smoothed values
+    minMaxValues.push_back(smoothedValue);
     if (minMaxValues.size() > minMaxWindowSize) {
         minMaxValues.pop_front();
     }
@@ -75,10 +90,10 @@ struct AudioAnalysisParameter {
     // Calculate min and max manually
     windowMin = *std::min_element(minMaxValues.begin(), minMaxValues.end());
     windowMax = *std::max_element(minMaxValues.begin(), minMaxValues.end());
-    
+
     rollingMean = valueAcc.mean();  // Get rolling mean
     rollingMeanRelation = relationToRange(rollingMean);
-    
+
     param->value = rollingMeanRelation;
     pulse->value = rollingMeanRelation;
   }
@@ -93,6 +108,7 @@ struct AudioAnalysis {
   std::string name;
   bool bpmEnabled = true;
   BpmMode bpmMode = BpmMode_Auto;
+  SmoothingMode smoothingMode = SmoothingMode_MovingAverage;
   std::shared_ptr<Parameter> rms;
   std::shared_ptr<Parameter> highs;
   std::shared_ptr<Parameter> lows;
@@ -100,6 +116,7 @@ struct AudioAnalysis {
   std::shared_ptr<Parameter> beatPulse;
   std::shared_ptr<Parameter> beatOscillatorSelection;
   std::shared_ptr<Parameter> bpm;
+  std::shared_ptr<Parameter> bpmNudge;
   std::shared_ptr<Parameter> frequencyRelease;
   std::shared_ptr<Parameter> frequencyScale;
 
@@ -116,6 +133,15 @@ struct AudioAnalysis {
   std::vector<float> waveform;
   std::vector<float> smoothWaveform;
 
+  // Smoothing buffers for different modes
+  std::deque<std::vector<float>> spectrumHistory;
+  std::deque<std::vector<float>> melSpectrumHistory;
+  std::deque<std::vector<float>> waveformHistory;
+  std::vector<float> peakSpectrum;
+  std::vector<float> peakMelSpectrum;
+  std::vector<float> peakWaveform;
+  int movingAverageWindowSize = 3;
+
   AudioAnalysisParameter rmsAnalysisParam;  
   AudioAnalysisParameter highsAnalysisParam;
   AudioAnalysisParameter midsAnalysisParam;
@@ -131,6 +157,19 @@ struct AudioAnalysis {
     beatPulse->value = 0.0f;
   }
 
+  // Thread-safe accessors for audio data
+  std::vector<float> getSafeSpectrum() const {
+    return smoothSpectrum;
+  }
+
+  std::vector<float> getSafeMelSpectrum() const {
+    return smoothMelSpectrum;
+  }
+
+  std::vector<float> getSafeWaveform() const {
+    return smoothWaveform;
+  }
+
   AudioAnalysis()
       : rms(std::make_shared<Parameter>("Loudness", 0.0, 0.0, 1.0)),
         highs(std::make_shared<Parameter>("Highs", 0.0, 0.0, 1.0)),
@@ -138,7 +177,8 @@ struct AudioAnalysis {
         lows(std::make_shared<Parameter>("Lows", 0.0, 0.0, 1.0)),
         beatPulse(std::make_shared<Parameter>("BPM", 0.0, 0.0, 1.0)),
         bpm(std::make_shared<Parameter>("bpm", 120.0, 0.0, 300.0)),
-        frequencyRelease(std::make_shared<Parameter>("Release", 0.95, 0.01, 1.0)),
+        bpmNudge(std::make_shared<Parameter>("BPM Nudge", 0.0, -1.0, 1.0)),
+        frequencyRelease(std::make_shared<Parameter>("Release", 0.7, 0.01, 1.0)),
         frequencyScale(std::make_shared<Parameter>("Scale", 1.0, 0.01, 2.0)),
         rmsOscillator(std::make_shared<ValueOscillator>(rms)),
         beatPulseOscillator(std::make_shared<PulseOscillator>(beatPulse)),
@@ -154,33 +194,101 @@ struct AudioAnalysis {
         parameters({beatPulse, rms, highs, mids, lows}),
         analysisParameters({&rmsAnalysisParam, &lowsAnalysisParam, &midsAnalysisParam, &highsAnalysisParam}) {};
 
+  std::vector<float> applySmoothing(const std::vector<float>& input, std::vector<float>& previous,
+                                     std::deque<std::vector<float>>& history, std::vector<float>& peak) {
+    std::vector<float> result;
+
+    switch (smoothingMode) {
+      case SmoothingMode_Exponential:
+        // Existing exponential smoothing
+        result = Vectors::release(input, previous, frequencyRelease->value);
+        break;
+
+      case SmoothingMode_MovingAverage: {
+        // Add current input to history
+        history.push_back(input);
+        if (history.size() > movingAverageWindowSize) {
+          history.pop_front();
+        }
+
+        // Calculate moving average
+        if (history.empty()) {
+          result = input;
+        } else {
+          result = std::vector<float>(input.size(), 0.0f);
+          for (const auto& frame : history) {
+            for (size_t i = 0; i < result.size() && i < frame.size(); i++) {
+              result[i] += frame[i];
+            }
+          }
+          for (size_t i = 0; i < result.size(); i++) {
+            result[i] /= history.size();
+          }
+        }
+        break;
+      }
+
+      case SmoothingMode_None:
+        // No smoothing, just return input
+        result = input;
+        break;
+
+      case SmoothingMode_PeakHold: {
+        // Initialize peak if empty
+        if (peak.empty()) {
+          peak = input;
+        }
+
+        result = std::vector<float>(input.size(), 0.0f);
+        for (size_t i = 0; i < input.size() && i < peak.size(); i++) {
+          // Update peak if current value is higher
+          if (input[i] > peak[i]) {
+            peak[i] = input[i];
+          } else {
+            // Decay peak
+            peak[i] *= frequencyRelease->value;
+          }
+          result[i] = peak[i];
+        }
+        break;
+      }
+    }
+
+    return result;
+  }
+
   void analyzeFrame(Gist<float> *gist) {
     magnitudeSpectrum = gist->getMagnitudeSpectrum();
     melFrequencySpectrum =
         Vectors::normalize(Vectors::sqrt(gist->getMelFrequencySpectrum()));
-    smoothSpectrum = Vectors::release(magnitudeSpectrum, smoothSpectrum, frequencyRelease->value);
+
+    smoothSpectrum = applySmoothing(magnitudeSpectrum, smoothSpectrum, spectrumHistory, peakSpectrum);
     smoothSpectrum = Vectors::scalarMultiply(smoothSpectrum, frequencyScale->value);
-    smoothMelSpectrum =
-        Vectors::release(melFrequencySpectrum, smoothMelSpectrum, frequencyRelease->value);
+    // Clamp spectrum to [0, 1] to prevent out-of-bounds spikes
+    for (size_t i = 0; i < smoothSpectrum.size(); i++) {
+      smoothSpectrum[i] = std::max(0.0f, std::min(1.0f, smoothSpectrum[i]));
+    }
+
+    smoothMelSpectrum = applySmoothing(melFrequencySpectrum, smoothMelSpectrum, melSpectrumHistory, peakMelSpectrum);
     smoothMelSpectrum = Vectors::scalarMultiply(smoothMelSpectrum, frequencyScale->value);
+    // Clamp mel spectrum to [0, 1] to prevent out-of-bounds spikes
+    for (size_t i = 0; i < smoothMelSpectrum.size(); i++) {
+      smoothMelSpectrum[i] = std::max(0.0f, std::min(1.0f, smoothMelSpectrum[i]));
+    }
 
     // Apply smoothing to waveform (bipolar signal - handle positive and negative)
     if (waveform.size() == smoothWaveform.size()) {
-      for (size_t i = 0; i < waveform.size(); i++) {
-        // Simple exponential smoothing that preserves both positive and negative values
-        smoothWaveform[i] = smoothWaveform[i] * frequencyRelease->value + waveform[i] * (1.0f - frequencyRelease->value);
-      }
+      smoothWaveform = applySmoothing(waveform, smoothWaveform, waveformHistory, peakWaveform);
       smoothWaveform = Vectors::scalarMultiply(smoothWaveform, frequencyScale->value);
+      // Clamp waveform to [-1, 1] to prevent out-of-bounds spikes
+      for (size_t i = 0; i < smoothWaveform.size(); i++) {
+        smoothWaveform[i] = std::max(-1.0f, std::min(1.0f, smoothWaveform[i]));
+      }
     } else {
       // Initialize smoothWaveform if sizes don't match
       smoothWaveform = waveform;
     }
-
-    if (smoothSpectrum.size() > 14 && smoothMelSpectrum.size() > 14) {
-      ofLogNotice("AudioSettings") << "smoothSpectrum 0 / 5 / 15: " << smoothSpectrum[0] << " / " << smoothSpectrum[5] << " / " << smoothSpectrum[15];
-      ofLogNotice("AudioSettings") << "smoothMelSpectrum 0 / 5 / 15: " << smoothMelSpectrum[0] << " / " << smoothMelSpectrum[5] << " / " << smoothMelSpectrum[15];
-    }
-
+    
     rmsAnalysisParam.tick(gist->rootMeanSquare());
     std::vector<float> buckets = splitAndAverage(smoothMelSpectrum, 3);
     lows->setValue(buckets[0]);
@@ -191,26 +299,26 @@ struct AudioAnalysis {
   float bpmPct() {
     auto currentTime = std::chrono::steady_clock::now();
     auto currentTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
-    
+
     auto elapsedTime = (currentTimeMs - bpmStartTime) / 1000.0;
     float beatDuration = 60.0f / bpm->value;
-    
+
     // Calculate the percentage and how close we are to the next beat
     float pct = fmod(elapsedTime, beatDuration) / beatDuration;
-    
+
     // Calculate how many milliseconds until the next beat
     float msUntilNextBeat = (1.0f - pct) * beatDuration * 1000;
-    
+
     // If we're very close to the next beat (within 1 frame @ 60fps), snap to 1.0
     if (msUntilNextBeat < 17) {
       return 1.0f;
     }
-    
+
     // If we're very close to the start of a beat, snap to 0.0
     if (pct < 0.017) { // 17ms / beatDuration
       return 0.0f;
     }
-    
+
     return pct;
   }
 
@@ -278,18 +386,25 @@ float gammaAtBeat(float pct) {
       if (pct < 0 || pct > 1) {
         return;
       }
-      
+
+      // Apply nudge value (-1 to 1, representing a full beat shift)
+      pct += bpmNudge->value;
+
+      // Wrap around if nudge pushes us outside [0, 1]
+      while (pct < 0.0f) pct += 1.0f;
+      while (pct >= 1.0f) pct -= 1.0f;
+
       // Constants for exponential decay
       const float A = 1.0f;    // Amplitude
       const float B = -5.0f;   // Controls the steepness
       const float C = 0.0f;    // Offset
-      
+
       // If we're at exactly 1.0 (snapped), ensure we hit peak amplitude
       if (pct >= 1.0f) {
         beatPulse->value = A;
         return;
       }
-      
+
       float y = A * exp(B * pct) + C;
       beatPulse->value = y;
     }
