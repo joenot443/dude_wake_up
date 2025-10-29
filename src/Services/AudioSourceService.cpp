@@ -28,11 +28,14 @@ void AudioSourceService::setupAbleton() {
 
 void AudioSourceService::affirmSampleAudioTrack() {
   selectedSampleTrack = sampleTracks[selectedSampleTrackParam->intValue];
-  
+
   // Load the track into the Source
   if (selectedAudioSource->type() == AudioSourceType_File) {
     std::shared_ptr<FileAudioSource> source = std::dynamic_pointer_cast<FileAudioSource>(selectedAudioSource);
-    source->audioAnalysis.bpm->setValue((int) selectedSampleTrack->bpm);
+    // Only update BPM if not locked
+    if (!source->audioAnalysis.bpmLocked->boolValue) {
+      source->audioAnalysis.bpm->setValue((int) selectedSampleTrack->bpm);
+    }
     source->loadFile(selectedSampleTrack);
   }
 }
@@ -72,10 +75,6 @@ void AudioSourceService::populateTracks() {
 }
 
 void AudioSourceService::populateSources() {
-  if (LayoutStateService::getService()->abletonLinkEnabled) {
-    link->enable(true);
-  }
-  
   // Get every input audio device
   auto devices = ofSoundStream().getDeviceList();
   // Create an AudioSource for each input audio device
@@ -86,11 +85,12 @@ void AudioSourceService::populateSources() {
     }
     
     auto audioSource = std::make_shared<MicrophoneAudioSource>();
-    audioSource->id = UUID::generateUUID();
     audioSource->device = device;
     audioSource->deviceId = formatString("%d", device.deviceID);
     audioSource->name = device.name;
-    audioSourceMap[audioSource->deviceId] = audioSource;
+    // Use deviceId as the stable ID for microphone sources
+    audioSource->id = formatString("mic-%s", audioSource->deviceId.c_str());
+    audioSourceMap[audioSource->id] = audioSource;
     
     if (device.isDefaultInput) {
       defaultAudioSource = audioSource;
@@ -99,14 +99,14 @@ void AudioSourceService::populateSources() {
   }
   
   auto fileAudioSource = std::make_shared<FileAudioSource>();
-  fileAudioSource->id = UUID::generateUUID();
+  fileAudioSource->id = "file-audio-source";
   fileAudioSource->name = "Sample Track";
   fileAudioSource->track = defaultSampleAudioTrack();
   audioSourceMap[fileAudioSource->id] = fileAudioSource;
-  
+
   // Add system audio source
   auto systemAudioSource = std::make_shared<SystemAudioSource>();
-  systemAudioSource->id = UUID::generateUUID();
+  systemAudioSource->id = "system-audio-source";
   systemAudioSource->name = "System Audio";
   audioSourceMap[systemAudioSource->id] = systemAudioSource;
 }
@@ -129,40 +129,44 @@ AudioSourceService::audioSourceForId(std::string id) {
 }
 
 void AudioSourceService::update() {
-  // Return if we're not enabled
-  if (!selectedAudioSource->active) return;
-
-
-  // Link Case
-  if (LayoutStateService::getService()->abletonLinkEnabled && link != nullptr) {
-    auto state = link->captureAppSessionState();
-    selectedAudioSource->audioAnalysis.bpm->setValue(link->captureAppSessionState().tempo() * 2.0);
-
-    // Drive the beat with Ableton
-    if (selectedAudioSource->audioAnalysis.bpmEnabled) {
-      double beatCount = link->captureAppSessionState().beatAtTime(link->clock().micros(), 4.);
-      selectedAudioSource->audioAnalysis.updateBeat(beatCount - floor(beatCount));
-    }
+  if (!selectedAudioSource->active || !selectedAudioSource->audioAnalysis.bpmEnabled) {
+    return;
   }
-  // Auto case
-  else if ((selectedAudioSource->type() == AudioSourceType_Microphone || selectedAudioSource->type() == AudioSourceType_System) && selectedAudioSource->audioAnalysis.bpmEnabled) {
-    // Only update the BPM from the detector if we're in Auto mode
+
+  // Update BPM value based on mode (if not locked)
+  if (!selectedAudioSource->audioAnalysis.bpmLocked->boolValue) {
     if (selectedAudioSource->audioAnalysis.bpmMode == BpmMode_Auto) {
-      selectedAudioSource->audioAnalysis.bpm->value = AudioSourceService::getService()->selectedAudioSource->btrackDetector.getCurrentBpm();
+      // Use detected BPM from audio thread
+      selectedAudioSource->audioAnalysis.bpm->setValue(selectedAudioSource->lastDetectedBpm);
     }
+    else if (selectedAudioSource->audioAnalysis.bpmMode == BpmMode_Link && link != nullptr) {
+      // Use Ableton Link BPM
+      selectedAudioSource->audioAnalysis.bpm->setValue(link->captureAppSessionState().tempo() * 2.0);
+    }
+    // Manual mode: don't update BPM, user controls it
+  }
 
-    // Drive the beat normally
-    if (selectedAudioSource->audioAnalysis.bpmEnabled) {
-      selectedAudioSource->audioAnalysis.updateBeat(selectedAudioSource->audioAnalysis.bpmPct());
+  // Sync timing to detected beats in Auto mode
+  if (selectedAudioSource->audioAnalysis.bpmMode == BpmMode_Auto) {
+    auto timeSinceLastBeat = std::chrono::steady_clock::now() - selectedAudioSource->lastBeatTime;
+    auto msSinceLastBeat = std::chrono::duration_cast<std::chrono::milliseconds>(timeSinceLastBeat).count();
+
+    // If we got a beat recently (within last 100ms), sync our timing
+    if (msSinceLastBeat < 100) {
+      selectedAudioSource->audioAnalysis.bpmStartTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(selectedAudioSource->lastBeatTime.time_since_epoch()).count();
     }
   }
-  // File case
-  else if (selectedAudioSource->type() == AudioSourceType_File) {
 
-    // Drive the beat normally
-    if (selectedAudioSource->audioAnalysis.bpmEnabled) {
-      selectedAudioSource->audioAnalysis.updateBeat(selectedAudioSource->audioAnalysis.bpmPct());
-    }
+  // Drive the beat pulse based on mode
+  if (selectedAudioSource->audioAnalysis.bpmMode == BpmMode_Link && link != nullptr) {
+    // Link mode: use Link's beat timing directly
+    double beatCount = link->captureAppSessionState().beatAtTime(link->clock().micros(), 4.);
+    selectedAudioSource->audioAnalysis.updateBeat(beatCount - floor(beatCount));
+  }
+  else {
+    // Auto/Manual mode: use bpmPct() calculation
+    selectedAudioSource->audioAnalysis.updateBeat(selectedAudioSource->audioAnalysis.bpmPct());
   }
 }
 
@@ -198,31 +202,19 @@ json AudioSourceService::config() {
   j["frequencyRelease"] = selectedAudioSource->audioAnalysis.frequencyRelease->value;
   j["frequencyScale"] = selectedAudioSource->audioAnalysis.frequencyScale->value;
   j["bpmNudge"] = selectedAudioSource->audioAnalysis.bpmNudge->value;
+  j["bpmLocked"] = selectedAudioSource->audioAnalysis.bpmLocked->boolValue;
   j["smoothingMode"] = static_cast<int>(selectedAudioSource->audioAnalysis.smoothingMode);
   j["loudnessRelease"] = selectedAudioSource->audioAnalysis.rmsAnalysisParam.release->value;
-
-  // For backward compatibility with MicrophoneAudioSource
-  std::shared_ptr<MicrophoneAudioSource> audioSource = std::dynamic_pointer_cast<MicrophoneAudioSource>(selectedAudioSource);
-  if (audioSource != nullptr) {
-    j["deviceId"] = audioSource->deviceId;
-  }
 
   return j;
 }
 
 void AudioSourceService::loadConfig(json j) {
-  // Try to load by selectedAudioSourceId first (new format)
+  // Load by selectedAudioSourceId
   if (j.contains("selectedAudioSourceId")) {
     std::string sourceId = j["selectedAudioSourceId"];
     if (audioSourceMap.count(sourceId) != 0) {
       selectedAudioSource = audioSourceMap[sourceId];
-    }
-  }
-  // Fall back to deviceId (backward compatibility)
-  else if (j.contains("deviceId")) {
-    std::string deviceId = j["deviceId"];
-    if (audioSourceMap.count(deviceId) != 0) {
-      selectedAudioSource = audioSourceMap[deviceId];
     }
   }
 
@@ -245,15 +237,14 @@ void AudioSourceService::loadConfig(json j) {
   if (j.contains("bpmNudge")) {
     selectedAudioSource->audioAnalysis.bpmNudge->setValue(j["bpmNudge"]);
   }
+  if (j.contains("bpmLocked")) {
+    selectedAudioSource->audioAnalysis.bpmLocked->setBoolValue(j["bpmLocked"]);
+  }
   if (j.contains("smoothingMode")) {
     selectedAudioSource->audioAnalysis.smoothingMode = static_cast<SmoothingMode>(j["smoothingMode"]);
   }
   if (j.contains("loudnessRelease")) {
     selectedAudioSource->audioAnalysis.rmsAnalysisParam.release->setValue(j["loudnessRelease"]);
-  }
-
-  if (LayoutStateService::getService()->abletonLinkEnabled) {
-    setupAbleton();
   }
 }
 

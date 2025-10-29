@@ -13,6 +13,7 @@
 #include "Gist.h"
 #include "AudioSettings.hpp"
 #include "BTrackDetector.hpp"
+#include <chrono>
 
 using json = nlohmann::json;
 
@@ -30,7 +31,11 @@ public:
   AudioAnalysis audioAnalysis;
   Gist<float> gist = Gist<float>(512, 44100);
   BTrackDetector btrackDetector;
-  
+
+  // Beat detection results (updated by audio thread, read by main thread)
+  float lastDetectedBpm = 120.0f;
+  std::chrono::steady_clock::time_point lastBeatTime;
+
   virtual ~AudioSource() = default;
   
   virtual json serialize() { return json(); }

@@ -79,7 +79,11 @@ void SystemAudioSource::setup() {
         cleanupTap();
         return;
     }
-    
+
+    // Initialize bpmStartTime to current time
+    auto currentTime = std::chrono::steady_clock::now();
+    audioAnalysis.bpmStartTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
+
     active = true;
     log("SystemAudioSource activated successfully");
 #else

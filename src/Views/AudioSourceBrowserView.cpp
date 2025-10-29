@@ -157,7 +157,7 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
     // Push the desired background color for the upcoming child window
     ImGui::PushStyleColor(ImGuiCol_ChildBg, Colors::InnerChildBackgroundColor.Value);
     // Push zero window padding for this child, as we're doing it manually inside
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
+//    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
 
     // Begin a child window specifically to hold the table and its manual padding, applying the background color
     if (ImGui::BeginChild("##audioAnalysisPaddedArea", ImVec2(0, 0), ImGuiChildFlags_None, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) { // Auto-size
@@ -169,14 +169,6 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
         ImVec2 audioGraphSize = ImVec2((ImGui::GetContentRegionAvail().x - 20.0), AudioOscillatorHeight);
         ImVec2 bpmGraphSize = ImVec2((ImGui::GetContentRegionAvail().x - 20.0), AudioOscillatorHeight - 20.0);
         ImGui::Text("Loudness");
-        ImGui::SameLine();
-        if (ImGui::BeginPopupModal("##Loudness", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
-          MarkdownView("Loudness").draw();
-          ImGui::EndPopup();
-        }
-        if (CommonViews::IconButton(ICON_MD_INFO, "Loudness")) {
-          ImGui::OpenPopup("##Loudness");
-        }
         OscillatorParam original = OscillatorParam (std::static_pointer_cast<Oscillator>(source->audioAnalysis.rmsOscillator), source->audioAnalysis.rms);
         std::vector<OscillatorParam> subjects = {original};
 
@@ -190,43 +182,54 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
         // Beats
         bool isSampleTrack = source->type() == AudioSourceType_File;
         ImGui::Text("BPM");
+
+        // BPM Lock Button
         ImGui::SameLine();
-        if (CommonViews::IconButton(ICON_MD_INFO, "BPM")) {
-          ImGui::OpenPopup("##BPM");
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() +
+                             4.0);
+        std::string lockIcon = source->audioAnalysis.bpmLocked->boolValue ? "locked.png" : "unlocked.png";
+        if (CommonViews::ImageButton("BPMLock", lockIcon, ImVec2(20.0, 20.0), ImVec2(2.0, 2.0))) {
+          source->audioAnalysis.bpmLocked->toggleValue();
         }
-        
-        // BPM Mode Dropdown
-//        if (!isSampleTrack) {
-//          const char* bpmModeItems[] = { "Auto", "Manual", "Link" };
-//          int currentBpmMode = static_cast<int>(source->audioAnalysis.bpmMode);
-//          ImGui::SameLine();
-//          ImGui::SetNextItemWidth(80.0f);
-//          if (ImGui::Combo("##BpmMode", &currentBpmMode, bpmModeItems, IM_ARRAYSIZE(bpmModeItems))) {
-//            source->audioAnalysis.bpmMode = static_cast<BpmMode>(currentBpmMode);
-//            // Reset auto BPM detector when switching to Auto mode
-////            if (source->audioAnalysis.bpmMode == BpmMode_Auto) {
-////              source->btrackDetector.resetBeatTracking();
-////            }
-//            // Enable Ableton Link when switching to Link mode
-//            if (source->audioAnalysis.bpmMode == BpmMode_Link) {
-//              LayoutStateService::getService()->abletonLinkEnabled = true;
-//              AudioSourceService::getService()->setupAbleton();
-//            }
-//          }
-//        }
+
+        ImGui::SameLine();
+        ImGui::Text("%.0f BPM", source->audioAnalysis.bpm->value);
+
         // Set oscillator enabled state and draw graph
         source->audioAnalysis.beatPulseOscillator->enabled = source->audioAnalysis.bpmEnabled || isSampleTrack;
         OscillatorView::draw(std::dynamic_pointer_cast<Oscillator>(source->audioAnalysis.beatPulseOscillator), source->audioAnalysis.beatPulse, audioGraphSize, false);
+
+        // BPM Mode Selector - underneath the graph
+        if (!isSampleTrack) {
+          ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2.0, 2.0));
+          if (CommonViews::Selector(source->audioAnalysis.bpmModeParam, {"Auto", "Manual", "Link"}, 100.0f)) {
+            BpmMode oldMode = source->audioAnalysis.bpmMode;
+            source->audioAnalysis.bpmMode = static_cast<BpmMode>(source->audioAnalysis.bpmModeParam->intValue);
+
+            // When switching TO Manual mode, reset bpmStartTime to sync with current BPM
+            if (source->audioAnalysis.bpmMode == BpmMode_Manual && oldMode != BpmMode_Manual) {
+              auto currentTime = std::chrono::steady_clock::now();
+              source->audioAnalysis.bpmStartTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
+            }
+
+            // Enable Ableton Link when switching to Link mode
+            if (source->audioAnalysis.bpmMode == BpmMode_Link) {
+              AudioSourceService::getService()->setupAbleton();
+            }
+          }
+          ImGui::PopStyleVar();
+          ImGui::SameLine();
+        }
 
         if (isSampleTrack) {
           // BPM Nudge buttons for sample tracks
           ImGui::Text("Nudge:");
           ImGui::SameLine();
-          if (ImGui::Button("-##nudgeDown", ImVec2(20, 20))) {
+          if (CommonViews::ImageButton("nudgeDownSample", "minus.png", ImVec2(20.0, 20.0), ImVec2(2.0, 2.0))) {
             source->audioAnalysis.bpmNudge->value = std::max(source->audioAnalysis.bpmNudge->min, source->audioAnalysis.bpmNudge->value - 0.1f);
           }
           ImGui::SameLine(0, 2);
-          if (ImGui::Button("+##nudgeUp", ImVec2(20, 20))) {
+          if (CommonViews::ImageButton("nudgeUpSample", "plus.png", ImVec2(20.0, 20.0), ImVec2(2.0, 2.0))) {
             source->audioAnalysis.bpmNudge->value = std::min(source->audioAnalysis.bpmNudge->max, source->audioAnalysis.bpmNudge->value + 0.1f);
           }
           ImGui::SameLine();
@@ -247,11 +250,11 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
               // BPM Nudge buttons
               ImGui::Text("Nudge:");
               ImGui::SameLine();
-              if (ImGui::Button("-##nudgeDown", ImVec2(20, 20))) {
+              if (CommonViews::ImageButton("nudgeDownAuto", "minus.png", ImVec2(20.0, 20.0), ImVec2(2.0, 2.0))) {
                 source->audioAnalysis.bpmNudge->value = std::max(source->audioAnalysis.bpmNudge->min, source->audioAnalysis.bpmNudge->value - 0.1f);
               }
               ImGui::SameLine(0, 2);
-              if (ImGui::Button("+##nudgeUp", ImVec2(20, 20))) {
+              if (CommonViews::ImageButton("nudgeUpAuto", "plus.png", ImVec2(20.0, 20.0), ImVec2(2.0, 2.0))) {
                 source->audioAnalysis.bpmNudge->value = std::min(source->audioAnalysis.bpmNudge->max, source->audioAnalysis.bpmNudge->value + 0.1f);
               }
               ImGui::SameLine();
@@ -265,13 +268,13 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
               }
               ImGui::SameLine();
 
-              // BPM nudge buttons
-              if (ImGui::Button("-##bpmDown", ImVec2(20, 20))) {
+              // BPM adjustment buttons
+              if (CommonViews::ImageButton("bpmDown", "minus.png", ImVec2(20.0, 20.0), ImVec2(2.0, 2.0))) {
                 source->audioAnalysis.bpm->value = std::max(source->audioAnalysis.bpm->min, source->audioAnalysis.bpm->value - 1.0f);
                 AudioSourceService::getService()->tapper.setBpm(source->audioAnalysis.bpm->value);
               }
               ImGui::SameLine(0, 2);
-              if (ImGui::Button("+##bpmUp", ImVec2(20, 20))) {
+              if (CommonViews::ImageButton("bpmUp", "plus.png", ImVec2(20.0, 20.0), ImVec2(2.0, 2.0))) {
                 source->audioAnalysis.bpm->value = std::min(source->audioAnalysis.bpm->max, source->audioAnalysis.bpm->value + 1.0f);
                 AudioSourceService::getService()->tapper.setBpm(source->audioAnalysis.bpm->value);
               }
@@ -291,14 +294,14 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
                 source->audioAnalysis.bpmEnabled = !source->audioAnalysis.bpmEnabled;
               }
 
-              // BPM Nudge buttons
+              // Phase nudge buttons
               ImGui::Text("Nudge:");
               ImGui::SameLine();
-              if (ImGui::Button("-##nudgeDownManual", ImVec2(20, 20))) {
+              if (CommonViews::ImageButton("nudgeDownManual", "minus.png", ImVec2(20.0, 20.0), ImVec2(2.0, 2.0))) {
                 source->audioAnalysis.bpmNudge->value = std::max(source->audioAnalysis.bpmNudge->min, source->audioAnalysis.bpmNudge->value - 0.1f);
               }
               ImGui::SameLine(0, 2);
-              if (ImGui::Button("+##nudgeUpManual", ImVec2(20, 20))) {
+              if (CommonViews::ImageButton("nudgeUpManual", "plus.png", ImVec2(20.0, 20.0), ImVec2(2.0, 2.0))) {
                 source->audioAnalysis.bpmNudge->value = std::min(source->audioAnalysis.bpmNudge->max, source->audioAnalysis.bpmNudge->value + 0.1f);
               }
               ImGui::SameLine();
@@ -313,14 +316,14 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
                 ImGui::Text("Link BPM: Not Connected");
               }
 
-              // BPM Nudge buttons
+              // Phase nudge buttons
               ImGui::Text("Nudge:");
               ImGui::SameLine();
-              if (ImGui::Button("-##nudgeDownLink", ImVec2(20, 20))) {
+              if (CommonViews::ImageButton("nudgeDownLink", "minus.png", ImVec2(20.0, 20.0), ImVec2(2.0, 2.0))) {
                 source->audioAnalysis.bpmNudge->value = std::max(source->audioAnalysis.bpmNudge->min, source->audioAnalysis.bpmNudge->value - 0.1f);
               }
               ImGui::SameLine(0, 2);
-              if (ImGui::Button("+##nudgeUpLink", ImVec2(20, 20))) {
+              if (CommonViews::ImageButton("nudgeUpLink", "plus.png", ImVec2(20.0, 20.0), ImVec2(2.0, 2.0))) {
                 source->audioAnalysis.bpmNudge->value = std::min(source->audioAnalysis.bpmNudge->max, source->audioAnalysis.bpmNudge->value + 0.1f);
               }
               ImGui::SameLine();
@@ -328,12 +331,8 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
               break;
             }
           }
-          if (ImGui::BeginPopupModal("##BPM", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
-            MarkdownView("BPM").draw();
-            ImGui::EndPopup();
-          }
         }
-        
+
         ImGui::TableNextColumn();
 
         ImGui::Text("Frequency");
@@ -360,18 +359,9 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
 
         ImGui::PopStyleColor(4);
         ImGui::PopStyleVar();
-        ImGui::SameLine();
 
         if (frequencyViewMode == FrequencyViewMode_Bands) {
           // Highs / Mids / Lows
-          ImGui::SameLine();
-          if (ImGui::BeginPopupModal("##FrequencyBands", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
-            MarkdownView("FrequencyBands").draw();
-            ImGui::EndPopup();
-          }
-          if (CommonViews::IconButton(ICON_MD_INFO, "FrequencyBands")) {
-            ImGui::OpenPopup("##FrequencyBands");
-          }
           OscillatorParam low = OscillatorParam(source->audioAnalysis.lowsOscillator, source->audioAnalysis.lowsAnalysisParam.param);
           OscillatorParam mids = OscillatorParam(source->audioAnalysis.midsOscillator, source->audioAnalysis.midsAnalysisParam.param);
           OscillatorParam highs = OscillatorParam(source->audioAnalysis.highsOscillator, source->audioAnalysis.highsAnalysisParam.param);
@@ -379,15 +369,6 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
           OscillatorView::draw({low, mids, highs}, audioGraphSize, false);
         } else if (frequencyViewMode == FrequencyViewMode_Bars) {
           // Frequency Bars
-          ImGui::SameLine();
-          if (ImGui::BeginPopupModal("##Frequency", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
-            MarkdownView("Frequency").draw();
-            ImGui::EndPopup();
-          }
-          if (CommonViews::IconButton(ICON_MD_INFO, "Frequency")) {
-            ImGui::OpenPopup("##Frequency");
-          }
-
           ImVec2 barsGraphSize = ImVec2(audioGraphSize.x - 100.0, audioGraphSize.y);
           BarPlotView::draw(source->audioAnalysis.smoothMelSpectrum, "mel", barsGraphSize);
           ImGui::SameLine();
@@ -409,14 +390,6 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
           ImGui::EndChild();
         } else if (frequencyViewMode == FrequencyViewMode_Waveform) {
           // Waveform visualization
-          ImGui::SameLine();
-          if (ImGui::BeginPopupModal("##Waveform", nullptr, ImGuiPopupFlags_MouseButtonLeft)) {
-            MarkdownView("Waveform").draw();
-            ImGui::EndPopup();
-          }
-          if (CommonViews::IconButton(ICON_MD_INFO, "Waveform")) {
-            ImGui::OpenPopup("##Waveform");
-          }
 
           ImVec2 waveformGraphSize = ImVec2(audioGraphSize.x - 100.0, audioGraphSize.y);
 
@@ -489,7 +462,7 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
     }
     ImGui::EndChild(); // End ##audioAnalysisPaddedArea
     // Pop the zero window padding
-    ImGui::PopStyleVar();
+//    ImGui::PopStyleVar();
     // Pop the background color
     ImGui::PopStyleColor();
   }

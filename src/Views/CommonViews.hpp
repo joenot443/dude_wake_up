@@ -64,7 +64,7 @@ struct CommonViews
   
   static bool MiniVSlider(std::shared_ptr<Parameter> param);
   
-  static bool Selector(std::shared_ptr<Parameter> param, std::vector<std::string> options);
+  static bool Selector(std::shared_ptr<Parameter> param, std::vector<std::string> options, float width = 200.0f);
   
   static bool ShaderCheckbox(std::shared_ptr<Parameter> param, bool sameLine = false);
   

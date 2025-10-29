@@ -60,21 +60,18 @@ void AudioSource::processFrame(const std::vector<float>& frame) {
       audioAnalysis.waveform.push_back(avg);
     }
 
-    // Process beat detection using BTrack for EVERY chunk in Auto mode
+    // Run beat detection only in Auto mode
     // BTrack expects to be called once per hop (512 samples)
-    // Pass the raw audio chunk, not gist->audioFrame
-    if (audioAnalysis.bpmMode == BpmMode_Auto && audioAnalysis.bpmEnabled) {
+    if (audioAnalysis.bpmEnabled && audioAnalysis.bpmMode == BpmMode_Auto) {
       SimpleBeat beat = btrackDetector.processAudioFrame(chunk);
 
-      // Update BPM if we have a valid detection
+      // Store the detected beat info for use by AudioSourceService
       if (beat.bpm > 0 && beat.bpm >= 50 && beat.bpm <= 200) {
-        audioAnalysis.bpm->setValue(beat.bpm);
+        lastDetectedBpm = beat.bpm;
       }
 
-      // If beat detected, reset timing for beat synchronization
       if (beat.isBeat) {
-        auto currentTime = std::chrono::steady_clock::now();
-        audioAnalysis.bpmStartTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
+        lastBeatTime = std::chrono::steady_clock::now();
       }
     }
   }

@@ -1054,11 +1054,11 @@ void CommonViews::BlendModeSelector(std::shared_ptr<Parameter> blendMode, std::s
   }
 }
 
-bool CommonViews::Selector(std::shared_ptr<Parameter> param, std::vector<std::string> options)
+bool CommonViews::Selector(std::shared_ptr<Parameter> param, std::vector<std::string> options, float width)
 {
   ImGui::Text("%s", param->name.c_str());
   ImGui::SameLine();
-  ImGui::PushItemWidth(200);
+  ImGui::PushItemWidth(width);
   // Convert the strings to C strings
   std::vector<const char *> optionsC;
   for (auto &option : options) {

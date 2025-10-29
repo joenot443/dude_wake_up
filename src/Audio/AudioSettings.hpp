@@ -116,6 +116,8 @@ struct AudioAnalysis {
   std::shared_ptr<Parameter> beatPulse;
   std::shared_ptr<Parameter> beatOscillatorSelection;
   std::shared_ptr<Parameter> bpm;
+  std::shared_ptr<Parameter> bpmModeParam;
+  std::shared_ptr<Parameter> bpmLocked;
   std::shared_ptr<Parameter> bpmNudge;
   std::shared_ptr<Parameter> frequencyRelease;
   std::shared_ptr<Parameter> frequencyScale;
@@ -177,6 +179,8 @@ struct AudioAnalysis {
         lows(std::make_shared<Parameter>("Lows", 0.0, 0.0, 1.0)),
         beatPulse(std::make_shared<Parameter>("BPM", 0.0, 0.0, 1.0)),
         bpm(std::make_shared<Parameter>("bpm", 120.0, 0.0, 300.0)),
+        bpmModeParam(std::make_shared<Parameter>("", static_cast<float>(BpmMode_Auto), 0.0, 2.0)),
+        bpmLocked(std::make_shared<Parameter>("BPM Locked", 0.0, ParameterType_Bool)),
         bpmNudge(std::make_shared<Parameter>("BPM Nudge", 0.0, -1.0, 1.0)),
         frequencyRelease(std::make_shared<Parameter>("Release", 0.7, 0.01, 1.0)),
         frequencyScale(std::make_shared<Parameter>("Scale", 1.0, 0.01, 2.0)),
@@ -192,7 +196,14 @@ struct AudioAnalysis {
         smoothMelSpectrum({0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.}),
   			// TODO: Readd/fix Pulser
         parameters({beatPulse, rms, highs, mids, lows}),
-        analysisParameters({&rmsAnalysisParam, &lowsAnalysisParam, &midsAnalysisParam, &highsAnalysisParam}) {};
+        analysisParameters({&rmsAnalysisParam, &lowsAnalysisParam, &midsAnalysisParam, &highsAnalysisParam}) {
+    // Initialize bpmStartTime to current time
+    auto currentTime = std::chrono::steady_clock::now();
+    bpmStartTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
+
+    // Sync bpmMode with bpmModeParam
+    bpmModeParam->intValue = static_cast<int>(bpmMode);
+  };
 
   std::vector<float> applySmoothing(const std::vector<float>& input, std::vector<float>& previous,
                                      std::deque<std::vector<float>>& history, std::vector<float>& peak) {
@@ -320,6 +331,25 @@ struct AudioAnalysis {
     }
 
     return pct;
+  }
+
+  // Adjust bpmStartTime to preserve the current beat phase when BPM value changes
+  void adjustBpmStartTimeForPhase(float newBpm) {
+    // Calculate current phase before BPM changes
+    float currentPct = bpmPct();
+
+    // Update BPM value
+    bpm->setValue(newBpm);
+
+    // Calculate new beat duration
+    float newBeatDuration = 60.0f / newBpm;
+
+    // Adjust bpmStartTime so that bpmPct() returns the same phase
+    auto currentTime = std::chrono::steady_clock::now();
+    auto currentTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
+
+    // New start time = current time - (phase * beat duration)
+    bpmStartTime = currentTimeMs - static_cast<u_int64_t>(currentPct * newBeatDuration * 1000);
   }
 
   std::vector<float> splitAndAverage(const std::vector<float>& frequencies, int count) {

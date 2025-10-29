@@ -20,6 +20,11 @@ void MicrophoneAudioSource::setup() {
     gist.setAudioFrameSize(512);
     gist.setSamplingFrequency(44100);
     active = true;
+
+    // Initialize bpmStartTime to current time
+    auto currentTime = std::chrono::steady_clock::now();
+    audioAnalysis.bpmStartTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
+
     stream.setup(settings);
 }
 
