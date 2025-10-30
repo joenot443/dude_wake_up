@@ -70,6 +70,7 @@ void VideoSourceBrowserView::refreshSources()
     
     if (source->type == VideoSource_shader ||
         source->type == VideoSource_text ||
+        source->type == VideoSource_typewriter ||
         source->type == VideoSource_multi ||
         source->type == VideoSource_icon)
     {

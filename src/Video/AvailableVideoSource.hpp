@@ -138,6 +138,19 @@ public:
 private:
 };
 
+class AvailableVideoSourceTypewriter : public AvailableVideoSource
+{
+public:
+  AvailableVideoSourceTypewriter(std::string sourceName)
+      : AvailableVideoSource(std::move(sourceName), "Text", VideoSource_typewriter) {}
+
+  void generatePreview() override
+  {
+  }
+
+private:
+};
+
 class AvailableVideoSourceIcon : public AvailableVideoSource
 {
 public:

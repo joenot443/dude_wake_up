@@ -23,8 +23,8 @@ public:
   json serialize() override;
   void load(json j) override;
   void drawSettings() override;
-  
-private:
+
+protected:
   TextEditorView textEditorView;
   ofTrueTypeFont font;
   std::string fontPath;

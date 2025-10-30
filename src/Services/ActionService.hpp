@@ -11,6 +11,7 @@
 #include "Commands/AddWebcamVideoSourceCommand.hpp"
 #include "Commands/AddFileVideoSourceCommand.hpp"
 #include "Commands/AddTextVideoSourceCommand.hpp"
+#include "Commands/AddTypewriterTextVideoSourceCommand.hpp"
 #include "Commands/AddLibraryVideoSourceCommand.hpp"
 #include "Commands/AddIconVideoSourceCommand.hpp"
 #include "Commands/AddShaderVideoSourceCommand.hpp"
@@ -60,6 +61,7 @@ public:
   std::shared_ptr<VideoSource> addWebcamVideoSource(const std::string& name, int deviceId);
   std::shared_ptr<VideoSource> addFileVideoSource(const std::string& name, const std::string& path);
   std::shared_ptr<VideoSource> addTextVideoSource(const std::string& name);
+  std::shared_ptr<VideoSource> addTypewriterTextVideoSource(const std::string& name);
   std::shared_ptr<VideoSource> addLibraryVideoSource(std::shared_ptr<LibraryFile> libraryFile);
   std::shared_ptr<VideoSource> addIconVideoSource(const std::string& name);
   std::shared_ptr<VideoSource> addShaderVideoSource(ShaderSourceType type);

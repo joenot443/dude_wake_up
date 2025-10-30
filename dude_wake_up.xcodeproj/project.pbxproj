@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0208F63C2EB2F44700529661 /* TypewriterTextSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0208F63B2EB2F44700529661 /* TypewriterTextSource.cpp */; };
 		021162772E6CC3A000B15198 /* SystemAudioSource.mm in Sources */ = {isa = PBXBuildFile; fileRef = 021162762E6CC3A000B15198 /* SystemAudioSource.mm */; };
 		02145B012E525064009C1855 /* DiffusionShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02145B002E525040009C1855 /* DiffusionShader.cpp */; };
 		024FAE772DA0207D00DE3197 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 024FAE5B2DA0207D00DE3197 /* .gitignore */; };
@@ -217,6 +218,8 @@
 		"018EA4E1-F2EA-4702-9A7F-DBF6ED73664D" /* BookmarkService.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BookmarkService.hpp; sourceTree = "<group>"; };
 		"01F7D881-9877-4747-9718-9FE1BED26EF7" /* HelpService.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = HelpService.hpp; sourceTree = "<group>"; };
 		0208E5242E9AA3E600529661 /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
+		0208F63A2EB2F44700529661 /* TypewriterTextSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TypewriterTextSource.hpp; sourceTree = "<group>"; };
+		0208F63B2EB2F44700529661 /* TypewriterTextSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TypewriterTextSource.cpp; sourceTree = "<group>"; };
 		021162752E6CC3A000B15198 /* SystemAudioSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SystemAudioSource.hpp; sourceTree = "<group>"; };
 		021162762E6CC3A000B15198 /* SystemAudioSource.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SystemAudioSource.mm; sourceTree = "<group>"; };
 		021171AA2E6E3F8F00B15198 /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
@@ -1019,6 +1022,8 @@
 				"7A48EB74-419A-48A1-9EFF-80173D7D9309" /* ShaderSource.hpp */,
 				"073A32C0-5C47-41FD-8EF5-43463ED7D2E7" /* TextSource.cpp */,
 				"423FAD2D-0653-4B13-80DC-A06359E44DAE" /* TextSource.hpp */,
+				0208F63A2EB2F44700529661 /* TypewriterTextSource.hpp */,
+				0208F63B2EB2F44700529661 /* TypewriterTextSource.cpp */,
 				"837E3528-6579-423A-B146-4C0FA0F11D6F" /* VideoSource.cpp */,
 				"B1B857E1-7D93-44EF-B81E-6D60945F0669" /* VideoSource.hpp */,
 				"16B6C13D-9489-4069-B917-1853B389EA59" /* VideoSourceSettings.hpp */,
@@ -1932,6 +1937,7 @@
 				028651652D946945000CE0D4 /* OnsetDetectionFunction.cpp in Sources */,
 				028651662D946945000CE0D4 /* Gist.cpp in Sources */,
 				"F5423EB3-96DC-4F94-B9DF-EDB11F0354B4" /* ofxImGuiLoggerChannel.cpp in Sources */,
+				0208F63C2EB2F44700529661 /* TypewriterTextSource.cpp in Sources */,
 				"20978F2F-9BFD-48B6-B8EC-48AA83AD51EF" /* RtMidi.cpp in Sources */,
 				02CED2752E6F9A230010EC68 /* BTrack.cpp in Sources */,
 				"D19444EB-11C9-4930-B137-E59CB53E5227" /* ofxRtMidiIn.cpp in Sources */,

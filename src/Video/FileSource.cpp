@@ -14,6 +14,8 @@
 
 void FileSource::setup()
 {
+  if (path.length() == 0) return;
+  
   applyRanges();
   player.setPixelFormat(OF_PIXELS_RGB);
   player.load(path);

@@ -142,9 +142,11 @@ public:
   void clearLastFrame();
 
   json serialize();
-  
-  bool allowAuxOutputSlot();
-  
+
+  virtual bool allowAuxOutputSlot();
+
+  // Breaks any connections on the auxiliary output slot
+  void breakAuxillary();
 
   // Called after all the Shaders have been created.
   // Used to populate aux.

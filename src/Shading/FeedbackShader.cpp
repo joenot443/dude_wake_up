@@ -109,19 +109,11 @@ ofTexture FeedbackShader::feedbackTexture()
   return terminalAuxShader->lastFrame->getTexture();
 }
 
-void FeedbackShader::clearFrameIfNeeded() {
-  if (settings->shouldClearFeedbackBuffer->boolValue) {
-    clearFrameBuffer();
-    settings->shouldClearFeedbackBuffer->toggleValue();
-  }
-}
-
 void FeedbackShader::shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas)
 {
   // Set the textures
   populateSource();
-  
-  clearFrameIfNeeded();
+
   // Shade the auxillary connection, if available.
   ofTexture fbTex = feedbackTexture();
   
@@ -170,10 +162,18 @@ void FeedbackShader::clearFrameBuffer()
 
 void FeedbackShader::drawSettings()
 {
-  
-  
+
+
   ImGui::Checkbox(settings->lumaKeyEnabled->name.c_str(), &settings->lumaKeyEnabled->boolValue);
   ImGui::Checkbox(settings->priority->name.c_str(), &settings->priority->boolValue);
+
+  bool previousAllowAuxillary = settings->allowAuxillary->boolValue;
+  ImGui::Checkbox(settings->allowAuxillary->name.c_str(), &settings->allowAuxillary->boolValue);
+
+  // If we just unchecked allowAuxillary, break any existing auxiliary connections
+  if (previousAllowAuxillary && !settings->allowAuxillary->boolValue) {
+    breakAuxillary();
+  }
   
   if (!hasInputAtSlot(InputSlotTwo)) {
     ImGui::PushItemWidth(50.0);
@@ -185,8 +185,10 @@ void FeedbackShader::drawSettings()
   
   ImGui::SameLine();
   CommonViews::HSpacing(3);
-  
-  CommonViews::ShaderCheckbox(settings->shouldClearFeedbackBuffer);
+
+  if (ImGui::Button("Clear Feedback Buffer")) {
+    clearFrameBuffer();
+  }
   // Delay Amount
   CommonViews::ShaderParameter(settings->delayAmount,
                                settings->delayAmountOscillator);
@@ -229,3 +231,7 @@ void FeedbackShader::drawSettings()
 int FeedbackShader::inputCount() { return 1; }
 
 ShaderType FeedbackShader::type() { return ShaderTypeFeedback; }
+
+bool FeedbackShader::allowAuxOutputSlot() {
+  return settings->allowAuxillary->boolValue;
+}

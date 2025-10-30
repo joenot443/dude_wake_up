@@ -220,6 +220,7 @@ void Shader::generateOptionalShaders() {
 
 void Shader::populateLastFrame() {
   lastFrame->begin();
+  ofClear(0,0,0,255);
   ofClear(0,0,0,0);
   optionalFrame->draw(0, 0, lastFrame->getWidth(), lastFrame->getHeight());
   lastFrame->end();
@@ -227,6 +228,18 @@ void Shader::populateLastFrame() {
 
 bool Shader::allowAuxOutputSlot() {
   return type() == ShaderTypeFeedback || type() == ShaderTypeColorKeyMaskMaker || type() == ShaderTypeLumaMaskMaker;
+}
+
+void Shader::breakAuxillary() {
+  if (hasOutputAtSlot(OutputSlotAux)) {
+    // Get all connections on the auxiliary output slot
+    auto connections = outputs[OutputSlotAux];
+
+    // Break each connection
+    for (auto connection : connections) {
+      ShaderChainerService::getService()->breakConnectionForConnectionId(connection->id);
+    }
+  }
 }
 
 void Shader::setAudioUniform(std::vector<float> *audio) {

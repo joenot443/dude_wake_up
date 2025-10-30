@@ -604,7 +604,24 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
   if (CommonViews::ImageButton(node->connectable->connId(), "fullscreen.png", ImVec2(buttonSize,  buttonHeight))) {
     VideoSourceService::getService()->addOutputWindow(node->connectable);
   }
-  ImGui::Dummy(ImVec2(500.0, 20.0));
+
+  // Draw Aux output pin for shaders that support it (e.g., FeedbackShader)
+  if (node->type == NodeTypeShader && node->shader->allowAuxOutputSlot()) {
+    ImGui::Dummy(ImVec2(500.0, 10.0));
+
+    // Center the aux output pin horizontally
+    float auxPinWidth = 40.0f;
+    float centerX = (500.0f - auxPinWidth) / 2.0f;
+    ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2(centerX, 0.0));
+
+    ed::PinId auxOutputPinId = CommonViews::OutputNodePin(node, OutputSlotAux);
+    pinIdNodeMap[auxOutputPinId.Get()] = node;
+
+    ImGui::Dummy(ImVec2(500.0, 10.0));
+  } else {
+    ImGui::Dummy(ImVec2(500.0, 20.0));
+  }
+
   ed::EndNode();
 }
 
@@ -1217,6 +1234,12 @@ void NodeLayoutView::handleDropZone()
         case VideoSource_text:
         {
           source = ActionService::getService()->addTextVideoSource(availableSource->sourceName);
+          unplacedNodeIds.push_back(source->id);
+          break;
+        }
+        case VideoSource_typewriter:
+        {
+          source = ActionService::getService()->addTypewriterTextVideoSource(availableSource->sourceName);
           unplacedNodeIds.push_back(source->id);
           break;
         }

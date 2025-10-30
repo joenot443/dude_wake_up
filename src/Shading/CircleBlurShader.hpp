@@ -31,6 +31,18 @@ struct CircleBlurSettings: public ShaderSettings {
   std::shared_ptr<Parameter> threshold;
   std::shared_ptr<WaveformOscillator> thresholdOscillator;
 
+  std::shared_ptr<Parameter> rotation;
+  std::shared_ptr<WaveformOscillator> rotationOscillator;
+
+  std::shared_ptr<Parameter> spiral;
+  std::shared_ptr<WaveformOscillator> spiralOscillator;
+
+  std::shared_ptr<Parameter> hueShift;
+  std::shared_ptr<WaveformOscillator> hueShiftOscillator;
+
+  std::shared_ptr<Parameter> chromaticStrength;
+  std::shared_ptr<WaveformOscillator> chromaticStrengthOscillator;
+
   CircleBlurSettings(std::string shaderId, json j) :
   shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
   shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
@@ -40,9 +52,17 @@ struct CircleBlurSettings: public ShaderSettings {
   channelSeparationOscillator(std::make_shared<WaveformOscillator>(channelSeparation)),
   threshold(std::make_shared<Parameter>("Threshold", 0.35, 0.0, 1.0)),
   thresholdOscillator(std::make_shared<WaveformOscillator>(threshold)),
+  rotation(std::make_shared<Parameter>("Rotation", 0.0, 0.0, 6.28)),
+  rotationOscillator(std::make_shared<WaveformOscillator>(rotation)),
+  spiral(std::make_shared<Parameter>("Spiral", 0.0, 0.0, 1.0)),
+  spiralOscillator(std::make_shared<WaveformOscillator>(spiral)),
+  hueShift(std::make_shared<Parameter>("Hue Shift", 0.0, 0.0, 1.0)),
+  hueShiftOscillator(std::make_shared<WaveformOscillator>(hueShift)),
+  chromaticStrength(std::make_shared<Parameter>("Chromatic Strength", 1.0, 0.0, 1.0)),
+  chromaticStrengthOscillator(std::make_shared<WaveformOscillator>(chromaticStrength)),
   ShaderSettings(shaderId, j, "CircleBlur") {
-    parameters = { shaderValue, blurRadius, channelSeparation, threshold };
-    oscillators = { shaderValueOscillator, blurRadiusOscillator, channelSeparationOscillator, thresholdOscillator };
+    parameters = { shaderValue, blurRadius, channelSeparation, threshold, rotation, spiral, hueShift, chromaticStrength };
+    oscillators = { shaderValueOscillator, blurRadiusOscillator, channelSeparationOscillator, thresholdOscillator, rotationOscillator, spiralOscillator, hueShiftOscillator, chromaticStrengthOscillator };
     load(j);
     registerParameters();
   };
@@ -64,6 +84,10 @@ struct CircleBlurShader: Shader {
     shader.setUniform1f("blurRadius", settings->blurRadius->value);
     shader.setUniform1f("channelSeparation", settings->channelSeparation->value);
     shader.setUniform1f("threshold", settings->threshold->value);
+    shader.setUniform1f("rotation", settings->rotation->value);
+    shader.setUniform1f("spiral", settings->spiral->value);
+    shader.setUniform1f("hueShift", settings->hueShift->value);
+    shader.setUniform1f("chromaticStrength", settings->chromaticStrength->value);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
@@ -89,6 +113,10 @@ struct CircleBlurShader: Shader {
     CommonViews::ShaderParameter(settings->blurRadius, settings->blurRadiusOscillator);
     CommonViews::ShaderParameter(settings->channelSeparation, settings->channelSeparationOscillator);
     CommonViews::ShaderParameter(settings->threshold, settings->thresholdOscillator);
+    CommonViews::ShaderParameter(settings->rotation, settings->rotationOscillator);
+    CommonViews::ShaderParameter(settings->spiral, settings->spiralOscillator);
+    CommonViews::ShaderParameter(settings->hueShift, settings->hueShiftOscillator);
+    CommonViews::ShaderParameter(settings->chromaticStrength, settings->chromaticStrengthOscillator);
   }
 };
 

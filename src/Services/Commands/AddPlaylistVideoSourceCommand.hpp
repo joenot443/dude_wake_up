@@ -9,8 +9,9 @@ public:
   void execute() override {
     if (!videoSource)
       videoSource = VideoSourceService::getService()->makeFileVideoSource(name, path);
-    
-    VideoSourceService::getService()->addVideoSource(videoSource, videoSource->id, 0);  }
+
+    VideoSourceService::getService()->addVideoSource(videoSource, videoSource->id, 0);
+  }
 
   void undo() override {
     if (videoSource) {

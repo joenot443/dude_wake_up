@@ -13,6 +13,7 @@
 #include "ConfigService.hpp"
 #include "LibraryService.hpp"
 #include "TextSource.hpp"
+#include "TypewriterTextSource.hpp"
 #include "WebcamSource.hpp"
 #include "IconSource.hpp"
 #include "PlaylistSource.hpp"
@@ -52,7 +53,10 @@ void VideoSourceService::populateAvailableVideoSources()
   
   auto textSource = std::make_shared<AvailableVideoSourceText>("Basic Text");
   availableSourceMap[textSource->availableVideoSourceId] = textSource;
-  
+
+  auto typewriterSource = std::make_shared<AvailableVideoSourceTypewriter>("Typewriter");
+  availableSourceMap[typewriterSource->availableVideoSourceId] = typewriterSource;
+
   // TODO: Readd IconSource with better icons
 //  auto iconSource = std::make_shared<AvailableVideoSourceIcon>("Icon");
 //  availableSourceMap[iconSource->availableVideoSourceId] = iconSource;
@@ -275,7 +279,13 @@ std::shared_ptr<VideoSource> VideoSourceService::makeFileVideoSource(std::string
   // Get the bookmark service instance
   BookmarkService* bookmarkService = BookmarkService::getService();
   std::shared_ptr<VideoSource> videoSource = nullptr;
-  
+
+  if (path.length() == 0) {
+    videoSource = std::make_shared<FileSource>(id, "Empty", "");
+    videoSource->origin = origin;
+    return videoSource;
+  }
+
   // Use the new bookmarkForPath method
   auto bookmarkString = bookmarkService->bookmarkForPath(path);
   if (!bookmarkString) {
@@ -452,6 +462,17 @@ std::shared_ptr<VideoSource> VideoSourceService::makeTextVideoSource(std::string
   return videoSource;
 }
 
+// Adds a Typewriter Text video source to the map
+std::shared_ptr<VideoSource> VideoSourceService::makeTypewriterTextVideoSource(std::string name, ImVec2 origin, std::string id, json j)
+{
+  auto displayText = std::make_shared<DisplayText>();
+  auto typewriterSource = TypewriterTextSource(id, name, displayText);
+  typewriterSource.load(j);
+  std::shared_ptr<VideoSource> videoSource = std::make_shared<TypewriterTextSource>(typewriterSource);
+  videoSource->origin = origin;
+  return videoSource;
+}
+
 // Adds a Library video source to the map
 std::shared_ptr<VideoSource> VideoSourceService::makeLibraryVideoSource(std::shared_ptr<LibraryFile> libraryFile, ImVec2 origin, std::string id, json j)
 {
@@ -559,6 +580,9 @@ void VideoSourceService::appendConfig(json j)
       break;
     case VideoSource_text:
       source = makeTextVideoSource(name, position, sourceId, j);
+      break;
+    case VideoSource_typewriter:
+      source = makeTypewriterTextVideoSource(name, position, sourceId, j);
       break;
     case VideoSource_icon:
       source = makeIconVideoSource(name, position, sourceId, j);

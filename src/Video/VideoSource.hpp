@@ -26,6 +26,7 @@ enum VideoSourceType {
   VideoSource_icon,
   VideoSource_shader,
   VideoSource_text,
+  VideoSource_typewriter,
   VideoSource_library,
   VideoSource_multi,
   VideoSource_empty,

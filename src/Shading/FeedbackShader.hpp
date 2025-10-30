@@ -64,9 +64,11 @@ public:
   std::shared_ptr<Oscillator> rotationOscillator;
   
   std::shared_ptr<Parameter> sourceSelection;
-  
+
   std::shared_ptr<Parameter> shouldClearFeedbackBuffer;
-  
+
+  std::shared_ptr<Parameter> allowAuxillary;
+
   FeedbackSettings(std::string shaderId, json j, std::string name) : index(index),
   priority(std::make_shared<Parameter>("Main Takes Priority", ParameterType_Bool)),
   blendMode(std::make_shared<Parameter>("Blend Mode", 0.0, 0.0, 15.0, ParameterType_Int)),
@@ -95,12 +97,13 @@ public:
   scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
   sourceSelection(std::make_shared<Parameter>("Source", 1.0, 0.0, 3.0)),
   shouldClearFeedbackBuffer(std::make_shared<Parameter>("Clear Feedback Buffer", ParameterType_Bool)),
+  allowAuxillary(std::make_shared<Parameter>("Allow Auxillary", ParameterType_Bool)),
   shaderId(shaderId),
   ShaderSettings(shaderId, j, name)
   {
-    parameters = {mainAlpha, feedbackMix, feedbackAlpha, keyValue, keyThreshold, delayAmount, lumaKeyEnabled, xPosition, yPosition, scale, sourceSelection, blendMode, priority, rotation, shouldClearFeedbackBuffer};
+    parameters = {mainAlpha, feedbackMix, feedbackAlpha, keyValue, keyThreshold, delayAmount, lumaKeyEnabled, xPosition, yPosition, scale, sourceSelection, blendMode, priority, rotation, allowAuxillary};
     oscillators = {mainAlphaOscillator, feedbackMixOscillator, feedbackAlphaOscillator, keyValueOscillator, keyThresholdOscillator, delayAmountOscillator, xPositionOscillator, yPositionOscillator, scaleOscillator, rotationOscillator };
-    
+
     load(j);
     registerParameters();
   }
@@ -151,7 +154,6 @@ struct FeedbackShader : Shader
   void populateSource();
   ofTexture feedbackTexture();
   void drawFeedbackSourceSelector();
-  void clearFrameIfNeeded();
   int frameIndex();
   int inputCount() override;
   
@@ -160,6 +162,7 @@ struct FeedbackShader : Shader
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override;
   void drawSettings() override;
   ShaderType type() override;
+  bool allowAuxOutputSlot() override;
 };
 
 #endif
