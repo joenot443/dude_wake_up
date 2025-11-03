@@ -20,6 +20,7 @@
 #include "Strings.hpp"
 #include "ConfigService.hpp"
 #include "VideoSourceService.hpp"
+#include "ShaderSource.hpp"
 #include "StrandService.hpp"
 #include "Colors.hpp"
 #include "ofMain.h"
@@ -1045,6 +1046,31 @@ void NodeLayoutView::handleRightClick()
   if (ImGui::BeginPopup("Node"))
   {
     auto node = nodeIdNodeMap[contextMenuNodeId.Get()];
+
+    // Add "Edit" option for Shader and ShaderSource nodes
+    bool isShader = node->type == NodeTypeShader;
+    bool isShaderSource = node->type == NodeTypeSource && node->source->type == VideoSource_shader;
+
+    if (isShader || isShaderSource) {
+      if (ImGui::MenuItem("Edit")) {
+        // Get the shader name
+        std::string shaderName;
+        if (isShader) {
+          shaderName = node->shader->name();
+        } else if (isShaderSource) {
+          auto shaderSource = std::dynamic_pointer_cast<ShaderSource>(node->source);
+          shaderName = shaderSource->shader->name();
+        }
+
+        // Construct the path to the .frag file
+        std::string fragPath = ofToDataPath("shaders/" + shaderName + ".frag");
+
+        // Open the file with the default editor on macOS
+        std::string command = "open \"" + fragPath + "\"";
+        system(command.c_str());
+      }
+    }
+
     if (ImGui::MenuItem("Save Strand"))
     {
       handleSaveNode(node);
@@ -1065,7 +1091,7 @@ void NodeLayoutView::handleRightClick()
     if (selectedNodeCount == 2) {
       ed::NodeId selectedNodes[2];
       ed::GetSelectedNodes(selectedNodes, 2);
-      
+
       if (ImGui::MenuItem("Blend")) {
         createBlendShaderForSelectedNodes(selectedNodes[0], selectedNodes[1]);
       }
@@ -1240,6 +1266,12 @@ void NodeLayoutView::handleDropZone()
         case VideoSource_typewriter:
         {
           source = ActionService::getService()->addTypewriterTextVideoSource(availableSource->sourceName);
+          unplacedNodeIds.push_back(source->id);
+          break;
+        }
+        case VideoSource_scrollingText:
+        {
+          source = ActionService::getService()->addScrollingTextVideoSource(availableSource->sourceName);
           unplacedNodeIds.push_back(source->id);
           break;
         }

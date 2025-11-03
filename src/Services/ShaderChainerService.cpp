@@ -8,6 +8,7 @@
 #include "ShaderChainerService.hpp"
 #include "Models/Strand.hpp"
 #include "AsciiShader.hpp"
+#include "WindowsShader.hpp"
 #include "CircleBlurShader.hpp"
 #include "RetroPCShader.hpp"
 #include "StageShader.hpp"
@@ -956,6 +957,12 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeWindows: {
+      auto settings = new WindowsSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<WindowsShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeCircleBlur: {
       auto settings = new CircleBlurSettings(shaderId, shaderJson);
       auto shader = std::make_shared<CircleBlurShader>(settings);

@@ -161,7 +161,8 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
 
     // Begin a child window specifically to hold the table and its manual padding, applying the background color
     if (ImGui::BeginChild("##audioAnalysisPaddedArea", ImVec2(0, 0), ImGuiChildFlags_None, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) { // Auto-size
-
+      // Pad down 2.0
+      ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.0);
       // The table starts here, now manually spaced inside the colored child.
       if (ImGui::BeginTable("##audioAnalysis", 3, ImGuiTableFlags_PadOuterX)) {
         // Loudness
@@ -181,14 +182,15 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
 
         // Beats
         bool isSampleTrack = source->type() == AudioSourceType_File;
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 2.0);
         ImGui::Text("BPM");
 
         // BPM Lock Button
         ImGui::SameLine();
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() +
-                             4.0);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.0);
+
         std::string lockIcon = source->audioAnalysis.bpmLocked->boolValue ? "locked.png" : "unlocked.png";
-        if (CommonViews::ImageButton("BPMLock", lockIcon, ImVec2(20.0, 20.0), ImVec2(2.0, 2.0))) {
+        if (CommonViews::ImageButton("BPMLock", lockIcon, ImVec2(16.0, 16.0), ImVec2(2.0, 2.0))) {
           source->audioAnalysis.bpmLocked->toggleValue();
         }
 
@@ -197,6 +199,7 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
 
         // Set oscillator enabled state and draw graph
         source->audioAnalysis.beatPulseOscillator->enabled = source->audioAnalysis.bpmEnabled || isSampleTrack;
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 6.0);
         OscillatorView::draw(std::dynamic_pointer_cast<Oscillator>(source->audioAnalysis.beatPulseOscillator), source->audioAnalysis.beatPulse, audioGraphSize, false);
 
         // BPM Mode Selector - underneath the graph

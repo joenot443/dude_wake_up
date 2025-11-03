@@ -104,3 +104,12 @@ void FontService::loadFonts() {
    fontNames.push_back(font.name);
   }
 }
+
+std::string FontService::fontPathByName(std::string name) {
+  for (const auto& font : fonts) {
+    if (font.name == name) {
+      return font.path;
+    }
+  }
+  return ""; // Return empty string if not found
+}

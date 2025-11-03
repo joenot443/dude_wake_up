@@ -113,6 +113,12 @@ std::shared_ptr<VideoSource> ActionService::addTypewriterTextVideoSource(const s
   return command->getVideoSource();
 }
 
+std::shared_ptr<VideoSource> ActionService::addScrollingTextVideoSource(const std::string& name) {
+  auto command = std::make_shared<AddScrollingTextVideoSourceCommand>(name);
+  executeCommand(command);
+  return command->getVideoSource();
+}
+
 std::shared_ptr<VideoSource> ActionService::addPlaylistVideoSource(const std::string& name) {
   auto command = std::make_shared<AddPlaylistVideoSourceCommand>(name, "");
   executeCommand(command);

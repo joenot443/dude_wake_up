@@ -69,8 +69,10 @@ void CommonViews::HSpacing(int n)
 bool CommonViews::ShaderParameter(std::shared_ptr<Parameter> param,
                                   std::shared_ptr<Oscillator> osc)
 {
+  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.);
   H3Title(param->name, false);
   ImGui::SameLine();
+  ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 4.);
   float sliderWidth = ImGui::GetContentRegionAvail().x - 80.0;
   bool ret = Slider(param->name, param->paramId, param, sliderWidth);
   float endYPos = ImGui::GetCursorPosY();
@@ -116,13 +118,13 @@ bool CommonViews::ShaderParameter(std::shared_ptr<Parameter> param,
 }
 
 bool CommonViews::MiniSlider(std::shared_ptr<Parameter> param, bool sameLine, ImGuiSliderFlags flags) {
-  auto startPos = ImGui::GetCursorPos();
-  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 6.0);
   ImGui::Text("%s", param->name.c_str());
   if (sameLine) ImGui::SameLine();
   ImGui::PushItemWidth(70.0);
-  ImGui::SetCursorPosY(startPos.y);
-  return ImGui::SliderFloat(idString(param->paramId).c_str(), &param->value, param->min, param->max, "%.2f", flags);
+  ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 1.0f));
+  bool res = ImGui::SliderFloat(idString(param->paramId).c_str(), &param->value, param->min, param->max, "%.2f", flags);
+  ImGui::PopStyleVar();
+  return res;
 }
 
 bool CommonViews::MiniVSlider(std::shared_ptr<Parameter> param) {

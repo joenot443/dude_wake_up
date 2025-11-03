@@ -151,6 +151,19 @@ public:
 private:
 };
 
+class AvailableVideoSourceScrollingText : public AvailableVideoSource
+{
+public:
+  AvailableVideoSourceScrollingText(std::string sourceName)
+      : AvailableVideoSource(std::move(sourceName), "Text", VideoSource_scrollingText) {}
+
+  void generatePreview() override
+  {
+  }
+
+private:
+};
+
 class AvailableVideoSourceIcon : public AvailableVideoSource
 {
 public:

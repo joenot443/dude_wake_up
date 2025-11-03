@@ -14,6 +14,7 @@
 #include "LibraryService.hpp"
 #include "TextSource.hpp"
 #include "TypewriterTextSource.hpp"
+#include "ScrollingTextSource.hpp"
 #include "WebcamSource.hpp"
 #include "IconSource.hpp"
 #include "PlaylistSource.hpp"
@@ -56,6 +57,9 @@ void VideoSourceService::populateAvailableVideoSources()
 
   auto typewriterSource = std::make_shared<AvailableVideoSourceTypewriter>("Typewriter");
   availableSourceMap[typewriterSource->availableVideoSourceId] = typewriterSource;
+
+  auto scrollingTextSource = std::make_shared<AvailableVideoSourceScrollingText>("Scrolling Text");
+  availableSourceMap[scrollingTextSource->availableVideoSourceId] = scrollingTextSource;
 
   // TODO: Readd IconSource with better icons
 //  auto iconSource = std::make_shared<AvailableVideoSourceIcon>("Icon");
@@ -473,6 +477,17 @@ std::shared_ptr<VideoSource> VideoSourceService::makeTypewriterTextVideoSource(s
   return videoSource;
 }
 
+// Adds a Scrolling Text video source to the map
+std::shared_ptr<VideoSource> VideoSourceService::makeScrollingTextVideoSource(std::string name, ImVec2 origin, std::string id, json j)
+{
+  auto displayText = std::make_shared<DisplayText>();
+  auto scrollingSource = ScrollingTextSource(id, name, displayText);
+  scrollingSource.load(j);
+  std::shared_ptr<VideoSource> videoSource = std::make_shared<ScrollingTextSource>(scrollingSource);
+  videoSource->origin = origin;
+  return videoSource;
+}
+
 // Adds a Library video source to the map
 std::shared_ptr<VideoSource> VideoSourceService::makeLibraryVideoSource(std::shared_ptr<LibraryFile> libraryFile, ImVec2 origin, std::string id, json j)
 {
@@ -583,6 +598,9 @@ void VideoSourceService::appendConfig(json j)
       break;
     case VideoSource_typewriter:
       source = makeTypewriterTextVideoSource(name, position, sourceId, j);
+      break;
+    case VideoSource_scrollingText:
+      source = makeScrollingTextVideoSource(name, position, sourceId, j);
       break;
     case VideoSource_icon:
       source = makeIconVideoSource(name, position, sourceId, j);

@@ -253,11 +253,11 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_Spiral, // Available
   ShaderSource_Companions, // Available
   ShaderSource_PixelAudioParty, // Available
-  ShaderSource_CloudyTunnel, // Available
-  ShaderSource_Fireflies, // Available
+//  ShaderSource_CloudyTunnel, // Available
+//  ShaderSource_Fireflies, // Available
   ShaderSource_Accretion, // Available
   ShaderSource_Flaming, // Available
-  ShaderSource_GlowBeat, // Available
+//  ShaderSource_GlowBeat, // Available
   ShaderSource_Synthwave, // Available
   ShaderSource_Glassy, // Available
   ShaderSource_Synthfly, // Available
@@ -594,15 +594,22 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     case ShaderSource_FlickerAudio:
     case ShaderSource_DiscoAudio:
     case ShaderSource_PixelAudioParty:
+    case ShaderSource_AudioBall:
+    case ShaderSource_AudioGlowBars:
+    case ShaderSource_AudioGraph:
+    case ShaderSource_AudioOscillator:
       return "Audio Reactive";
       
-      // Simple
+      // Particles
     case ShaderSource_empty:
     case ShaderSource_ColorWheel:
     case ShaderSource_FullHouse:
     case ShaderSource_FloatingSparks:
     case ShaderSource_ColoredDrops:
     case ShaderSource_SpaceRings:
+    case ShaderSource_Bubbles:
+    case ShaderSource_ElectricEels:
+    case ShaderSource_WelcomeRings:
       return "Particles";
       
       // Scenic
@@ -618,6 +625,9 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     case ShaderSource_Limbo:
     case ShaderSource_MotionBlurTexture:
     case ShaderSource_CloudyShapes:
+    case ShaderSource_Companions:
+    case ShaderSource_Flaming:
+    case ShaderSource_Glassy:
       return "Scenic";
       
       // Textured
@@ -642,6 +652,7 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     case ShaderSource_Octahedron:
     case ShaderSource_Spiral:
     case ShaderSource_SimpleShape:
+    case ShaderSource_Lava:
       return "Shapes & Solids";
       
       // Psychedelic
@@ -665,6 +676,9 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     case ShaderSource_TwistedTrip:
     case ShaderSource_Aerogel:
     case ShaderSource_Diffractor:
+    case ShaderSource_Accretion:
+    case ShaderSource_Synthfly:
+    case ShaderSource_Synthwave:
       return "Psychedelic";
     default:
       return "Unknown";

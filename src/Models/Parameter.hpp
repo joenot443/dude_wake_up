@@ -36,6 +36,7 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
   float value = 0.0;
   int intValue = 0;
   bool boolValue = false;
+  std::string stringValue = "";
   bool favorited = false;
   bool buttonsVisible = false;
   
@@ -78,7 +79,12 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
     j["intValue"] = intValue;
     j["boolValue"] = boolValue;
     j["favorited"] = favorited;
-    
+
+    // Save stringValue if it's not empty
+    if (!stringValue.empty()) {
+      j["stringValue"] = stringValue;
+    }
+
     // If the color RGB values are not all 0, add them to the json
     if (color->at(0) != 0.0 || color->at(1) != 0.0 || color->at(2) != 0.0 || color->at(3) != 0.0)
     {
@@ -126,6 +132,10 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
       if (j.contains("boolValue"))
       {
         boolValue = j["boolValue"];
+      }
+      if (j.contains("stringValue"))
+      {
+        stringValue = j["stringValue"];
       }
       if (j.contains("midiDescriptor"))
       {

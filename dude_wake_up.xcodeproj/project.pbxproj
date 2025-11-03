@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0208F63C2EB2F44700529661 /* TypewriterTextSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0208F63B2EB2F44700529661 /* TypewriterTextSource.cpp */; };
+		0208F6412EB3D0B600529661 /* ScrollingTextSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0208F6402EB3D0B600529661 /* ScrollingTextSource.cpp */; };
 		021162772E6CC3A000B15198 /* SystemAudioSource.mm in Sources */ = {isa = PBXBuildFile; fileRef = 021162762E6CC3A000B15198 /* SystemAudioSource.mm */; };
 		02145B012E525064009C1855 /* DiffusionShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02145B002E525040009C1855 /* DiffusionShader.cpp */; };
 		024FAE772DA0207D00DE3197 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 024FAE5B2DA0207D00DE3197 /* .gitignore */; };
@@ -220,6 +221,8 @@
 		0208E5242E9AA3E600529661 /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
 		0208F63A2EB2F44700529661 /* TypewriterTextSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TypewriterTextSource.hpp; sourceTree = "<group>"; };
 		0208F63B2EB2F44700529661 /* TypewriterTextSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TypewriterTextSource.cpp; sourceTree = "<group>"; };
+		0208F63F2EB3D0B600529661 /* ScrollingTextSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ScrollingTextSource.hpp; sourceTree = "<group>"; };
+		0208F6402EB3D0B600529661 /* ScrollingTextSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScrollingTextSource.cpp; sourceTree = "<group>"; };
 		021162752E6CC3A000B15198 /* SystemAudioSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SystemAudioSource.hpp; sourceTree = "<group>"; };
 		021162762E6CC3A000B15198 /* SystemAudioSource.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SystemAudioSource.mm; sourceTree = "<group>"; };
 		021171AA2E6E3F8F00B15198 /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
@@ -1018,6 +1021,8 @@
 				"5F11C9E7-FEA0-4802-9D81-6EB1B1840614" /* MultiSource.hpp */,
 				"916A4FFE-6D66-4ED1-9195-FBE7721C8A2E" /* OutputWindow.mm */,
 				"399A1778-BFBC-4C97-A938-FC764F8C06AC" /* OutputWindow.hpp */,
+				0208F63F2EB3D0B600529661 /* ScrollingTextSource.hpp */,
+				0208F6402EB3D0B600529661 /* ScrollingTextSource.cpp */,
 				"517FA119-0D87-4B31-9B75-3F5D6326DC21" /* ShaderSource.cpp */,
 				"7A48EB74-419A-48A1-9EFF-80173D7D9309" /* ShaderSource.hpp */,
 				"073A32C0-5C47-41FD-8EF5-43463ED7D2E7" /* TextSource.cpp */,
@@ -1833,6 +1838,7 @@
 				02864DF12D94611B000CE0D4 /* MSABPMTapper.cpp in Sources */,
 				"A0BBE0F2-0ED9-44F9-97A1-46E639579F0B" /* AudioSourceService.cpp in Sources */,
 				"91E0E9A7-70FE-4C51-BD57-EB473B0BCA7D" /* BookmarkService.cpp in Sources */,
+				0208F6412EB3D0B600529661 /* ScrollingTextSource.cpp in Sources */,
 				"490D2AA0-72C3-4FBF-A054-652CAB6089DD" /* ConfigService.cpp in Sources */,
 				024FAE812DA0207D00DE3197 /* ofxFastFboReader.cpp in Sources */,
 				021162772E6CC3A000B15198 /* SystemAudioSource.mm in Sources */,

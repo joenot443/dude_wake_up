@@ -59,9 +59,12 @@ public:
   
   void loadFonts();
   void setup();
-  
+
   void loadFontSet(FontSet& set, float scale);
   void useFontSetForScale(float scale);
+
+  // Get font path by name
+  std::string fontPathByName(std::string name);
   
   static FontService* getService() {
     if (!service) {

@@ -58,41 +58,51 @@ struct RotateShader: Shader {
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
-    
+
     ofClear(0, 0, 0, 255);
     ofClear(0, 0, 0, 0);
-    
+
     // Push the current transformation matrix onto the matrix stack
     ofPushMatrix();
-    
+
     // Calculate rotation value based on settings
     float rotate = settings->rotate->value;
     if (settings->autoRotate->value > 0) {
         rotate += ofGetElapsedTimef() * settings->autoRotate->value * 50;
     }
 
-    // Apply scale
-    ofScale(settings->scale->value, settings->scale->value);
-
-    // Apply rotation with the correct pivot point
+    // Apply transformations based on center mode
     if (settings->center->value) {
-      // Move origin to where you want the center of the frame to be (e.g. (0,0) or wherever you want the frame's center)
-      ofTranslate(frame->getWidth() / 2, frame->getHeight() / 2);
+      // Center mode: scale and rotate from center of canvas
+      ofTranslate(canvas->getWidth() / 2, canvas->getHeight() / 2);
+
+      // Apply flips before scale
+      if (settings->horizontalFlip->value) {
+        ofScale(-1, 1);
+      }
+      if (settings->verticalFlip->value) {
+        ofScale(1, -1);
+      }
+
+      ofScale(settings->scale->value, settings->scale->value);
       ofRotateDeg(rotate);
-      // Draw the frame centered at the origin
       frame->draw(-frame->getWidth() / 2, -frame->getHeight() / 2);
     } else {
-      // Rotate about top-left
+      // Non-center mode: scale and rotate from center of frame
+      ofTranslate(frame->getWidth() / 2, frame->getHeight() / 2);
+
+      // Apply flips before scale
+      if (settings->horizontalFlip->value) {
+        ofScale(-1, 1);
+      }
+      if (settings->verticalFlip->value) {
+        ofScale(1, -1);
+      }
+
+      ofScale(settings->scale->value, settings->scale->value);
       ofRotateDeg(rotate);
+      ofTranslate(-frame->getWidth() / 2, -frame->getHeight() / 2);
       frame->draw(0, 0);
-    }
-
-    if (settings->verticalFlip->value) {
-      ofScale(1, -1);
-    }
-
-    if (settings->horizontalFlip->value) {
-      ofScale(-1, 1);
     }
 
     // Restore the original transformation matrix
