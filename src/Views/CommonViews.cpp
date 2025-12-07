@@ -1063,7 +1063,13 @@ void CommonViews::BlendModeSelector(std::shared_ptr<Parameter> blendMode, std::s
   }
   ImGui::Combo("##BlendMode", &blendMode->intValue, blendModeNamesC.data(), (int) BlendModeNames.size());
 
-  if (flip != nullptr) {
+  // Only show flip button for non-commutative blend modes where order matters
+  // Non-commutative modes: Mix (0), Overlay (7), Hard Light (8), Soft Light (9), Color Dodge (10), Burn (12)
+  bool isNonCommutative = blendMode->intValue == 0 || blendMode->intValue == 7 || 
+                          blendMode->intValue == 8 || blendMode->intValue == 9 || 
+                          blendMode->intValue == 10 || blendMode->intValue == 12;
+  
+  if (flip != nullptr && isNonCommutative) {
     ImGui::SameLine();
     CommonViews::FlipButton(flip->paramId, flip);
   }
