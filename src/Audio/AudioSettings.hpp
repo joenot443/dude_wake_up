@@ -68,7 +68,6 @@ struct AudioAnalysisParameter {
   pulse(std::make_shared<Parameter>("autoPulse", 0.0, 0.0, 1.0)),
   pulseOscillator(std::make_shared<ValueOscillator>(pulse)),
   thresholdOscillator(std::make_shared<ValueOscillator>(pulseThreshold)),
-  pulser(pulseThreshold, pulseLength),
   param(param) {
     pulser = Pulser(pulseThreshold, pulseLength);
   }

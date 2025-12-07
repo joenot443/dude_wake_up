@@ -23,6 +23,7 @@
 #include "BookmarkService.hpp"
 #include "LayoutStateService.hpp"
 #include "FileSource.hpp"
+#include "Strings.hpp"
 #include <cstdlib>
 
 
@@ -697,13 +698,82 @@ void VideoSourceService::captureOutputWindowScreenshot()
   // Save the image to the specified file path
   if (ofSaveImage(image.getPixels(), filePath)) {
     ofLog() << "Screenshot saved to " << filePath;
-    
+
     // Open the destination folder in Finder (macOS only)
     std::string command = "open \"" + ofFilePath::getEnclosingDirectory(filePath) + "\"";
     std::system(command.c_str());
   } else {
     ofLog() << "Failed";
   }
+}
+
+void VideoSourceService::captureAllNodesScreenshots()
+{
+  // Present a folder picker dialog
+  ofFileDialogResult result = ofSystemLoadDialog("Select folder to save screenshots", true);
+  if (!result.bSuccess) {
+    return; // user cancelled
+  }
+
+  std::string folderPath = result.getPath();
+  std::string timestamp = ofGetTimestampString();
+
+  // Collect all connectables (video sources + shaders)
+  std::vector<std::shared_ptr<Connectable>> allConnectables;
+
+  // Add all video sources
+  auto sources = videoSources();
+  for (auto& source : sources) {
+    allConnectables.push_back(std::dynamic_pointer_cast<Connectable>(source));
+  }
+
+  // Add all shaders
+  auto shaders = ShaderChainerService::getService()->shaders();
+  for (auto& shader : shaders) {
+    allConnectables.push_back(std::dynamic_pointer_cast<Connectable>(shader));
+  }
+
+  int index = 1;
+  int successCount = 0;
+
+  // Iterate through all connectables and save their frames
+  for (auto& connectable : allConnectables) {
+    if (connectable == nullptr) continue;
+
+    std::shared_ptr<ofFbo> fbo = connectable->frame();
+    if (fbo == nullptr || fbo->getWidth() == 0 || fbo->getHeight() == 0) {
+      continue; // Skip if no valid frame
+    }
+
+    // Create filename: index-timestamp.jpg
+    std::string filename = formatString("%d-%s.jpg", index, timestamp.c_str());
+    std::string filePath = ofFilePath::join(folderPath, filename);
+
+    // Create an ofImage to store the pixels
+    ofImage image;
+    image.allocate(fbo->getWidth(), fbo->getHeight(), OF_IMAGE_COLOR);
+
+    // Bind the FBO and read its pixels
+    fbo->bind();
+    fbo->readToPixels(image.getPixels());
+    fbo->unbind();
+
+    // Save the image
+    if (ofSaveImage(image.getPixels(), filePath)) {
+      ofLog() << "Saved screenshot " << index << ": " << connectable->name() << " to " << filePath;
+      successCount++;
+    } else {
+      ofLog() << "Failed to save screenshot " << index << ": " << connectable->name();
+    }
+
+    index++;
+  }
+
+  ofLog() << "Successfully saved " << successCount << " screenshots to " << folderPath;
+
+  // Open the destination folder in Finder (macOS only)
+  std::string command = "open \"" + folderPath + "\"";
+  std::system(command.c_str());
 }
 
 void VideoSourceService::startAccessingBookmarkPath(std::string path)

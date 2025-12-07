@@ -84,7 +84,7 @@ public:
     ImGui::SetNextWindowSize(ImVec2(460, 0), ImGuiCond_FirstUseEver);
     ImGui::Begin("Send Feedback", open, ImGuiWindowFlags_AlwaysAutoResize);
 
-    CommonViews::H2Title("I love feedback", false);
+    CommonViews::H2Title("How's Nottawa working?", false);
     ImGui::TextWrapped("This is the best way for me to make Nottawa better.\nIf anything is broken, ugly, inconsistent, or unclear, I really want hear it. If you're confused about what to do or how the app works, let me know.\nIf your work was used in nottawa and wasn't properly attributed or you'd like it taken down, you can let me know here or reach out directly at joe@nottawa.app.");
 
     if (success)

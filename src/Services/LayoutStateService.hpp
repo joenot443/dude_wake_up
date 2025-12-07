@@ -74,6 +74,8 @@ public:
 
   bool showWelcomeScreen = true;
 
+  std::string selectedOscillatorSettings = "";
+
   std::string libraryPath = "";
   std::vector<std::array<float, 4>> colorHistory = std::vector<std::array<float, 4>>(1, std::array<float, 4>{0.0f, 0.0f, 0.0f, 0.0f});
 

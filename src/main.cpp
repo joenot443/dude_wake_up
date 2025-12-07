@@ -104,11 +104,11 @@ int main( ){
   auto sentryPath = ofFilePath::join(homeDir, "/nottawa/sentry");
   
   ofGLFWWindowSettings settings;
-  settings.setSize(1920, 1080);
+  settings.setSize(1440, 900);
   settings.setGLVersion(3, 2);
   auto window = ofCreateWindow(settings);
   auto app = shared_ptr<MainApp>(new MainApp(window));
-  ofSetWindowShape(ofGetScreenWidth(), ofGetScreenHeight());
+  ofSetWindowShape(1440, 900);
   ofSetFrameRate(60);
   ofEnableAntiAliasing();
   ofEnableSmoothing();

@@ -127,8 +127,8 @@ struct SimpleBarsShader: Shader {
           auto waveform = std::static_pointer_cast<WaveformOscillator>(oscillator);
           waveform->enabled->setBoolValue(true);
           waveform->frequency->setValue(ofRandom(waveform->frequency->min / 2.0, waveform->frequency->max / 2.0));
-          waveform->shift->setValue(ofRandom(waveform->shift->min / 3.0, waveform->shift->max / 3.0));
-          waveform->amplitude->setValue(ofRandom(waveform->amplitude->min / 2.0, waveform->amplitude->max / 2.0));
+//          waveform->shift->setValue(ofRandom(waveform->shift->min / 3.0, waveform->shift->max / 3.0));
+//          waveform->amplitude->setValue(ofRandom(waveform->amplitude->min / 2.0, waveform->amplitude->max / 2.0));
         } else {
           oscillator->enabled->setBoolValue(false);
         }

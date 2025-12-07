@@ -94,15 +94,19 @@ void main()
   // --- Cell Calculation Setup ---
   vec3 finalColor = vec3(0.0); // Initialize final color to black
   float cellMask = 1.0;        // Factor controlling cell brightness/visibility
-  
+
+  // scaleY now ranges from 0.0 to 2.0, so multiply by 50 to get effective 0-100 range
+  float effectiveScaleY = scaleY * 50.0;
+
   // Calculate a local time cycle based on vertical scaling
   // This value loops from 0 to 1/scaleY
-  float localTimeCycle = mod(time * timeScale, 1.0 / scaleY);
+  float localTimeCycle = mod(time * timeScale, 1.0 / effectiveScaleY);
   
   // --- Map Polar Coordinates to Grid ---
-  
+
   // Scale angle by horizontal factor and wrap around circle
-  polarInvRadiusCoord.x *= scaleX / (2.0 * 3.1415926); // Scale angle to fit scaleX columns
+  // scaleX now ranges from 0.0 to 1.0, so multiply by 100 to get effective 0-100 range
+  polarInvRadiusCoord.x *= (scaleX * 100.0) / (2.0 * 3.1415926); // Scale angle to fit scaleX columns
   float columnIndex = floor(polarInvRadiusCoord.x);      // Integer part = column index
   polarInvRadiusCoord.x = fract(polarInvRadiusCoord.x); // Fractional part = horizontal position within cell
   
@@ -116,7 +120,7 @@ void main()
     // Animate vertical position based on global time
     polarInvRadiusCoord.y += time * timeScale;
     // Scale vertical position by vertical factor
-    polarInvRadiusCoord.y *= scaleY;
+    polarInvRadiusCoord.y *= effectiveScaleY;
     
     float rowIndex = floor(polarInvRadiusCoord.y); // Integer part = row index
     polarInvRadiusCoord.y = fract(polarInvRadiusCoord.y); // Fractional part = vertical position within cell
@@ -141,14 +145,14 @@ void main()
     
     // Calculate row index considering the time cycle and border offset
     float effectiveTime = (border - localTimeCycle + time * timeScale);
-    float rowIndex = floor(effectiveTime * scaleY + floor(polarInvRadiusCoord.y));
+    float rowIndex = floor(effectiveTime * effectiveScaleY + floor(polarInvRadiusCoord.y));
     vec2 cellGridIndex = vec2(columnIndex, rowIndex);
     
     // Complex calculation for vertical position within the fading cell, creating a trail effect
     // Includes scaling and an offset based on time, scale factors, and hash randomness.
     float randomTrailSpeedFactor = hash1(columnIndex + hash1(rowIndex));
-    float trailOffset = min(0.0, 1.0 - scaleY + localTimeCycle * (scaleY / timeScale * scaleY * randomTrailSpeedFactor + 1.0));
-    polarInvRadiusCoord.y = fract(polarInvRadiusCoord.y) * scaleY + trailOffset;
+    float trailOffset = min(0.0, 1.0 - effectiveScaleY + localTimeCycle * (effectiveScaleY / timeScale * effectiveScaleY * randomTrailSpeedFactor + 1.0));
+    polarInvRadiusCoord.y = fract(polarInvRadiusCoord.y) * effectiveScaleY + trailOffset;
     
     
     // Start with the box shape for the cell mask

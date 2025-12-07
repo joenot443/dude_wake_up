@@ -125,7 +125,7 @@ void ShaderBrowserView::draw()
 
   // Only draw tabs and content if not collapsed
   if (collapsed == nullptr || !*collapsed) {
-    if (ImGui::BeginTabBar(idAppendedToString("VideoSourceBrowser", browserId).c_str(), ImGuiTabBarFlags_FittingPolicyScroll)) {
+    if (ImGui::BeginTabBar(idAppendedToString("VideoSourceBrowser", browserId).c_str(), ImGuiTabBarFlags_FittingPolicyScroll | ImGuiTabBarFlags_NoTabListScrollingButtons)) {
       if (ImGui::BeginTabItem(idAppendedToString("Favorites", browserId).c_str(), nullptr, currentTab == 0 ? ImGuiTabItemFlags_SetSelected : 0)) {
         drawSelectedBrowser();
         ImGui::EndTabItem();

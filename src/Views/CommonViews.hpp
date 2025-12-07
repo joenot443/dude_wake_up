@@ -59,7 +59,9 @@ struct CommonViews
   static void ShaderStageParameter(std::shared_ptr<Parameter> param, std::shared_ptr<Oscillator> osc);
   
   static bool ShaderParameter(std::shared_ptr<Parameter> param, std::shared_ptr<Oscillator> osc);
-  
+
+  static bool ShaderMiniParameter(std::shared_ptr<Parameter> param, std::shared_ptr<Oscillator> osc);
+
   static bool MiniSlider(std::shared_ptr<Parameter> param, bool sameLine = true, ImGuiSliderFlags flags = ImGuiSliderFlags_None);
   
   static bool MiniVSlider(std::shared_ptr<Parameter> param);

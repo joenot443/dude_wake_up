@@ -260,18 +260,46 @@ void MainStageView::drawMenu()
     }
     
     /// #Edit Menu
-    
+
     if (ImGui::BeginMenu("Edit"))
     {
+      if (ImGui::MenuItem("Undo", "Cmd+Z"))
+      {
+        ActionService::getService()->undo();
+      }
+
+      if (ImGui::MenuItem("Redo", "Cmd+Y"))
+      {
+        ActionService::getService()->redo();
+      }
+
+      ImGui::Separator();
+
       if (ImGui::MenuItem("Clear Feedback Buffers", "Cmd+K"))
       {
         FeedbackSourceService::getService()->clearBuffers();
       }
       ImGui::EndMenu();
     }
-    
+
+    /// #Capture Menu
+
+    if (ImGui::BeginMenu("Capture"))
+    {
+      if (ImGui::MenuItem("Capture Output Window"))
+      {
+        VideoSourceService::getService()->captureOutputWindowScreenshot();
+      }
+
+      if (ImGui::MenuItem("Capture All Nodes"))
+      {
+        VideoSourceService::getService()->captureAllNodesScreenshots();
+      }
+      ImGui::EndMenu();
+    }
+
     /// #Output Menu
-    
+
     if (ImGui::BeginMenu("Display"))
     {
       bool enabled = LayoutStateService::getService()->outputWindowUpdatesAutomatically;

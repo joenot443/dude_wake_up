@@ -22,7 +22,7 @@ struct SwirlSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> amountOscillator;
 
   SwirlSettings(std::string shaderId, json j, std::string name) :
-  amount(std::make_shared<Parameter>("Amount", 0.5, 0.0, 3.0)),
+  amount(std::make_shared<Parameter>("Amount", 0.5, -3.0, 3.0)),
   amountOscillator(std::make_shared<WaveformOscillator>(amount)),
   ShaderSettings(shaderId, j, "Swirl") {
     parameters = { amount };

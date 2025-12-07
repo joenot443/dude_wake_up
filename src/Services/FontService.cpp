@@ -57,7 +57,7 @@ void FontService::loadFontSet(FontSet& set, float scale) {
   set.h2 = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/Roboto-Medium.ttf").string().c_str(), 24, &cfg);
   set.h3 = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/Roboto-Medium.ttf").string().c_str(), 20, &cfg);
   set.h3b = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/Roboto-Bold.ttf").string().c_str(), 18, &cfg);
-  set.h4 = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/Roboto-Bold.ttf").string().c_str(), 18, &cfg);
+  set.h4 = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/Roboto-Bold.ttf").string().c_str(), 16, &cfg);
   set.sm = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/Roboto-Regular.ttf").string().c_str(), 13, &cfg);
   set.b = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/Roboto-Bold.ttf").string().c_str(), 15, &cfg);
   set.p = set.atlas->AddFontFromFileTTF(ofToDataPathFS("fonts/Roboto-Regular.ttf").string().c_str(), 15, &cfg);

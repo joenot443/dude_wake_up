@@ -30,7 +30,7 @@ struct RotateSettings: public ShaderSettings {
   std::shared_ptr<Oscillator> autoRotateOscillator;
   
   RotateSettings(std::string shaderId, json j) :
-  rotate(std::make_shared<Parameter>("Rotate", 0.0, 0.0, 360.0)),
+  rotate(std::make_shared<Parameter>("Rotate", 0.0, -360.0, 360.0)),
   verticalFlip(std::make_shared<Parameter>("Vertical Flip", 0.0, 0.0, 1.0, ParameterType_Bool)),
   horizontalFlip(std::make_shared<Parameter>("Horizontal Flip", 0.0, 0.0, 1.0, ParameterType_Bool)),
   center(std::make_shared<Parameter>("Center", 0.0, 0.0, 1.0, ParameterType_Bool)),

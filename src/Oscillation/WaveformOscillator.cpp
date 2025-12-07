@@ -10,13 +10,15 @@
 
 const float OscillatorDampen = 0.3;
 
-// New constructor implementation
+// Constructor with custom values - converts old amplitude/shift to min/max
 WaveformOscillator::WaveformOscillator(std::shared_ptr<Parameter> param, float amplitude, float shift, float frequency)
   : WaveformOscillator(param)
 {
-  this->amplitude = std::make_shared<Parameter>("amplitude", amplitude, 0.0, 1.0);
-  this->shift = std::make_shared<Parameter>("shift", shift, -1.0, 1.0);
-  this->frequency = std::make_shared<Parameter>("frequency", frequency, 0.0, 10.0);
+  // Convert old amplitude/shift to min/max output
+  float halfRange = 0.3 * amplitude;  // OscillatorDampen * amplitude
+  this->minOutput->setValue(shift - halfRange);
+  this->maxOutput->setValue(shift + halfRange);
+  this->frequency->setValue(frequency);
 }
 
 void WaveformOscillator::tick()
@@ -102,17 +104,21 @@ void WaveformOscillator::tick()
     }
   }
 
-  // Apply amplitude, shift, and dampening
-  v = OscillatorDampen * amplitude->value * v + shift->value; 
-  
-  // Get current parameter bounds safely
-  // Accessing param directly which might not be correct if this is the base class method
-  // Let's assume 'value' is the shared_ptr<Parameter> this oscillator controls.
-  float currentMin = value->min;
-  float currentMax = value->max;
-  
-  // Clamp value to the target parameter's bounds
-  value->setValue(fmin(fmax(v, currentMin), currentMax));
+  // Map waveform from [-1, 1] to [minOutput, maxOutput]
+  // First normalize to [0, 1]
+  float normalized = (v + 1.0f) / 2.0f;
+
+  // Ensure minOutput <= maxOutput
+  float actualMin = fmin(minOutput->value, maxOutput->value);
+  float actualMax = fmax(minOutput->value, maxOutput->value);
+
+  // Map to output range
+  float outputValue = actualMin + normalized * (actualMax - actualMin);
+
+  // Clamp to parameter bounds (shouldn't be necessary, but safety check)
+  outputValue = fmin(fmax(outputValue, value->min), value->max);
+
+  value->setValue(outputValue);
 
   // Maintain a fixed number of data points
   if (data.size() >= 1000) {
@@ -124,36 +130,10 @@ void WaveformOscillator::tick()
 
 float WaveformOscillator::max()
 {
-  float baseMax = 1.0f;
-  switch (static_cast<WaveShape>(waveShape->intValue)) {
-    case ExponentialSine:
-      // sin(x) * exp(sin(x)) max value occurs at sin(x) = 1, which is exp(1) = e
-      baseMax = M_E; // ~2.71828
-      break;
-    // Add other cases here if they don't have a base range of [-1, 1]
-    default:
-      baseMax = 1.0f;
-      break;
-  }
-  // Ensure amplitude is non-negative for calculation, though it should be based on constructor constraints
-  float currentAmplitude = fmax(0.0f, amplitude->value);
-  return OscillatorDampen * currentAmplitude * baseMax + shift->value;
+  return fmax(minOutput->value, maxOutput->value);
 }
 
 float WaveformOscillator::min()
 {
-  float baseMin = -1.0f;
-   switch (static_cast<WaveShape>(waveShape->intValue)) {
-    case ExponentialSine:
-      // sin(x) * exp(sin(x)) min value occurs at sin(x) = -1, which is -1 * exp(-1) = -1/e
-      baseMin = -1.0f / M_E; // ~-0.36788
-      break;
-    // Add other cases here if they don't have a base range of [-1, 1]
-    default:
-      baseMin = -1.0f;
-      break;
-  }
-  // Ensure amplitude is non-negative for calculation
-  float currentAmplitude = fmax(0.0f, amplitude->value);
-  return OscillatorDampen * currentAmplitude * baseMin + shift->value;
+  return fmin(minOutput->value, maxOutput->value);
 }

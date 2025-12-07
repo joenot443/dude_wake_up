@@ -20,11 +20,19 @@ public:
   std::shared_ptr<Parameter> duration;
   float startTime;
   bool isPulsing;
-  
+
+  // Default constructor
+  Pulser() : threshold(nullptr), duration(nullptr), startTime(0), isPulsing(false) {}
+
   Pulser(std::shared_ptr<Parameter> threshold, std::shared_ptr<Parameter> duration)
   : threshold(threshold), duration(duration), startTime(0), isPulsing(false) {}
   
   float next(float value) {
+    // Safety check: ensure parameters are initialized
+    if (!threshold || !duration) {
+      return 0.0f;
+    }
+
     double currentTime = ofGetSystemTimeMillis() / 1000.0f;
     double delta = currentTime - startTime;
     double pulsePct = isPulsing ? delta / (double) duration->value : 0.0;

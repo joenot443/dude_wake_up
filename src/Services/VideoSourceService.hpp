@@ -112,7 +112,8 @@ public:
   void updateOutputWindow(std::shared_ptr<Connectable> oldConnectable, std::shared_ptr<Connectable> newConnectable);
   bool hasOutputWindowForConnectable(std::shared_ptr<Connectable> connectable);
   void captureOutputWindowScreenshot();
-  
+  void captureAllNodesScreenshots();
+
   void clear();
   json config() override;
   void loadConfig(json j) override;

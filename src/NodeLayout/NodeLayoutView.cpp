@@ -184,9 +184,16 @@ void NodeLayoutView::draw()
         {
           std::shared_ptr<Node> nextNode = idNodeMap[connection->end->connId()];
           std::shared_ptr<Node> startNode = idNodeMap[connection->start->connId()];
-          
+
+          // Skip drawing this link if either node has been deleted
+          if (nextNode == nullptr || startNode == nullptr) {
+            log("Warning: Skipping connection with deleted node(s) - start: %s, end: %s",
+                connection->start->connId().c_str(), connection->end->connId().c_str());
+            continue;
+          }
+
           ed::LinkId nextShaderLinkId = uniqueId++;
-          
+
           auto shaderLink =
           std::make_shared<ShaderLink>(nextShaderLinkId, nextNode, shaderNode, connection->outputSlot, connection->inputSlot, connection->id);
           linksMap[nextShaderLinkId.Get()] = shaderLink;
@@ -304,7 +311,7 @@ void NodeLayoutView::drawPinHoverView() {
   const float buttonSize = 30.0f;
   const float padding = 12.0f;
   const float rowHeight = buttonSize + 4.0f;
-  const float wiggle = 24.0f;
+  const float wiggle = 50.0f;
   const float buttonCornerRounding = 6.0f;
   const float tooltipCornerRounding = 12.0f;
   const float tooltipAlpha = 230.0f;
@@ -315,26 +322,47 @@ void NodeLayoutView::drawPinHoverView() {
   const float textSizeScale = 0.75f;
 
   static ed::PinId lastHoveredPin;
-  static ImVec2 lastPinPosition;
+  static ImVec2 lastPinScreenPosition;
   static bool isHovering = false;
   static ImVec2 lastTooltipMin, lastTooltipMax;
-  
+  static int hoverFrameCount = 0;
+  const int hoverFrameThreshold = 30; // ~1 second at 60fps
+
   ed::PinId hoveredPin = ed::GetHoveredPin();
-  ImVec2 mousePos = ImGui::GetMousePos();
-  
+
   // If we're hovering over a pin, update our tracking variables
   if (hoveredPin.Get() != 0) {
-    lastHoveredPin = hoveredPin;
-    lastPinPosition = ed::GetPinPosition(hoveredPin);
+    // If this is a new pin, reset the frame counter
+    if (lastHoveredPin.Get() != hoveredPin.Get()) {
+      hoverFrameCount = 0;
+      lastHoveredPin = hoveredPin;
+    }
+
+    // Convert to screen space immediately to handle zoom/pan changes
+    ImVec2 pinCanvasPos = ed::GetPinPosition(hoveredPin);
+    lastPinScreenPosition = ed::CanvasToScreen(pinCanvasPos);
     isHovering = true;
+    hoverFrameCount++;
   }
-  
-  // Get all ShaderLinks for this pin
+
+  // Get all ShaderLinks for this pin (check even if not currently hovering)
   long pinKey = lastHoveredPin.Get();
-  if (!isHovering || pinIdConnectionMap.find(pinKey) == pinIdConnectionMap.end()) return;
+  if (pinKey == 0 || pinIdConnectionMap.find(pinKey) == pinIdConnectionMap.end()) {
+    isHovering = false;
+    return;
+  }
   const auto& links = pinIdConnectionMap[pinKey];
-  if (links.empty()) return;
-  
+  if (links.empty()) {
+    isHovering = false;
+    return;
+  }
+
+  // Suspend EARLY so all our mouse checks and drawing are in screen space
+  ed::Suspend();
+
+  // Get mouse position AFTER suspend to ensure it's in screen space
+  ImVec2 mousePos = ImGui::GetMousePos();
+
   // Calculate the widest text width for all clipped node names
   float widestTextWidth = 0.0f;
   std::vector<std::string> clippedNames;
@@ -361,28 +389,45 @@ void NodeLayoutView::drawPinHoverView() {
   const float tooltipWidth = std::min(maxTooltipWidth, buttonSize + buttonTextPadding + 2 * padding + widestTextWidth);
 
   float tooltipHeight = links.size() * rowHeight + padding * 2;
-  // Position tooltip so its bottom edge is tooltipYOffset px above the pin
-  ImVec2 tooltipCenter = lastPinPosition - ImVec2(0, tooltipHeight + tooltipYOffset);
+
+  // Position tooltip so its bottom edge is tooltipYOffset px above the pin (already in screen space)
+  ImVec2 tooltipCenter = lastPinScreenPosition - ImVec2(0, tooltipHeight + tooltipYOffset);
   ImVec2 tooltipMin = tooltipCenter - ImVec2(tooltipWidth/2, 0);
   ImVec2 tooltipMax = tooltipCenter + ImVec2(tooltipWidth/2, tooltipHeight);
   lastTooltipMin = tooltipMin;
   lastTooltipMax = tooltipMax;
-  
+
   // Hover logic: keep open if mouse is within tooltip bounds plus wiggle room
-  ImVec2 hoverMin = tooltipMin - ImVec2(wiggle, wiggle);
-  ImVec2 hoverMax = tooltipMax + ImVec2(wiggle, wiggle);
-  bool mouseInTooltip = mousePos.x >= hoverMin.x && mousePos.x <= hoverMax.x && mousePos.y >= hoverMin.y && mousePos.y <= hoverMax.y;
-  if (!mouseInTooltip && hoveredPin.Get() == 0) {
-    isHovering = false;
-    lastHoveredPin = ed::PinId();
+  // Create a generous hover area that includes both the tooltip and the path to the pin
+  // The tooltip is ABOVE the pin, so hoverMin.y should be at the tooltip top
+  // and hoverMax.y should be at/below the pin
+  float hoverMinX = std::min(tooltipMin.x, lastPinScreenPosition.x) - wiggle;
+  float hoverMaxX = std::max(tooltipMax.x, lastPinScreenPosition.x) + wiggle;
+  float hoverMinY = tooltipMin.y - wiggle;  // Top of tooltip with margin
+  float hoverMaxY = lastPinScreenPosition.y + wiggle;  // Bottom at pin with margin
+
+  bool mouseInHoverArea = mousePos.x >= hoverMinX && mousePos.x <= hoverMaxX &&
+                          mousePos.y >= hoverMinY && mousePos.y <= hoverMaxY;
+
+  // Keep the tooltip open if: we're hovering the pin OR mouse is in the hover area
+  bool shouldShowTooltip = (hoveredPin.Get() != 0) || mouseInHoverArea;
+
+  // Only show tooltip after hovering for the threshold duration
+  if (!shouldShowTooltip || hoverFrameCount < hoverFrameThreshold) {
+    if (!shouldShowTooltip) {
+      isHovering = false;
+      lastHoveredPin = ed::PinId();
+      hoverFrameCount = 0;
+    }
+    ed::Resume();  // Must resume before returning since we suspended earlier
     return;
   }
-  
+
   // Use the foreground draw list to ensure the popover is always on top
-  ImDrawList* drawList = ImGui::GetWindowDrawList();
+  ImDrawList* drawList = ImGui::GetForegroundDrawList();
   drawList->AddRectFilled(tooltipMin, tooltipMax, IM_COL32(40, 40, 40, tooltipAlpha), tooltipCornerRounding);
   drawList->AddRect(tooltipMin, tooltipMax, IM_COL32(60, 60, 60, tooltipBorderAlpha), tooltipCornerRounding);
-  
+
   for (size_t i = 0; i < links.size(); ++i) {
     ImVec2 rowTopLeft = tooltipMin + ImVec2(padding, padding + i * rowHeight);
     float centerY = rowTopLeft.y + rowHeight / 2.0f;
@@ -424,11 +469,12 @@ void NodeLayoutView::drawPinHoverView() {
       clippedNodeName = clippedNodeName.substr(0, 15) + "…";
     }
     float textMaxWidth = tooltipWidth - (buttonSize + buttonTextPadding + 2 * padding);
-    ImVec2 textBlockSize = ImGui::CalcTextSize(clippedNodeName.c_str(), nullptr, false, textMaxWidth);
     float smallTextSize = ImGui::GetFontSize() * textSizeScale;
+    // Calculate actual text height at the scaled size for proper centering
+    float scaledTextHeight = smallTextSize;
     ImVec2 textPos = ImVec2(
       buttonMax.x + buttonTextPadding,
-      centerY - textBlockSize.y / 2.0f
+      centerY - scaledTextHeight / 2.0f
     );
 
     ImVec2 titleMin = textPos;
@@ -467,6 +513,9 @@ void NodeLayoutView::drawPinHoverView() {
       break;
     }
   }
+
+  // Resume the node editor after drawing in screen space
+  ed::Resume();
 }
 
 void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {

@@ -13,6 +13,7 @@
 #include "OscillationService.hpp"
 #include "ParameterService.hpp"
 #include "Colors.hpp"
+#include "LayoutStateService.hpp"
 #include "PulseOscillator.hpp"
 #include "WaveformOscillator.hpp"
 #include "Strings.hpp"
@@ -41,23 +42,31 @@ void OscillatorView::draw(std::vector<std::tuple<std::shared_ptr<Oscillator>, st
   {
     WaveformOscillator *waveformOscillator = (WaveformOscillator *)oscillator.get();
     ImVector<ImVec2> data = waveformOscillator->data;
-    
+
+    // Calculate sizes to make plot hug the buttons
+    float buttonWidth = 50.0f;
+    float buttonSpacing = 10.0f;
+    ImVec2 plotSize = ImVec2(size.x - buttonWidth - buttonSpacing, size.y);
+
     // Set x-axis limits based on the current time and data size
     float currentTime = frameTime() + 2.0;
     float startTime = fmax(currentTime - 10.0, 0.0f);
-    
+
     auto plotStyle = ImPlot::GetStyle();
     ImPlot::PushStyleVar(ImPlotStyleVar_FitPadding, ImVec2(0.3f, 0.3f));
     ImPlot::SetNextAxesToFit();
-    if (data.size() > 0 && ImPlot::BeginPlot(formatString("##plot%s", value->paramId.c_str()).c_str(), size, ImPlotFlags_CanvasOnly | (drawExtras ? 0 : ImPlotFlags_NoLegend)))
+
+    // Draw the plot with calculated size
+    if (data.size() > 0 && ImPlot::BeginPlot(formatString("##plot%s", value->paramId.c_str()).c_str(), plotSize, ImPlotFlags_CanvasOnly | (drawExtras ? 0 : ImPlotFlags_NoLegend)))
     {
       if (!drawExtras) {
-        ImPlot::SetupAxis(ImAxis_X1, "", ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoLabel);
-        ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoLabel);
+        ImPlot::SetupAxis(ImAxis_X1, NULL, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoLabel);
+        ImPlot::SetupAxis(ImAxis_Y1, NULL, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoLabel);
         ImPlot::SetupAxisFormat(ImAxis_X1, "");
         ImPlot::SetupAxisFormat(ImAxis_Y1, "");
       }
-      ImPlot::PlotLine("##", &data[0].x, &data[0].y, data.size(), 0, 2.0, 2 * sizeof(float));
+
+      ImPlot::PlotLine("##", &data[0].x, &data[0].y, data.size(), ImPlotLineFlags_Segments, 2.0, 2 * sizeof(float));
 
       // Add plotting for min/max lines if enabled
       if (waveformOscillator->showMinMax) {
@@ -81,61 +90,41 @@ void OscillatorView::draw(std::vector<std::tuple<std::shared_ptr<Oscillator>, st
 
       ImPlot::EndPlot();
     }
-    ImGui::SameLine(0, 10);
-    
-    ImGui::BeginChild(formatString("##child%s", value->paramId.c_str()).c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 200), ImGuiChildFlags_None, ImGuiWindowFlags_NoScrollbar);
-    ImGui::PushFont(FontService::getService()->current->sm);
-    // Draw regular sliders
-    if (ImGui::GetContentRegionAvail().x > 120.0) {
-      ImGui::VSliderFloat(formatString("##freq%s%s", value->name.c_str(), value->paramId.c_str()).c_str(),
-                          ImVec2(38, 120), &waveformOscillator->frequency->value, 0.0f,
-                          100.0f, "Freq.\n%.2f", ImGuiSliderFlags_Logarithmic);
-      ImGui::SameLine();
-      ImGui::VSliderFloat(formatString("##amp%s%s", value->name.c_str(), value->paramId.c_str()).c_str(),
-                          ImVec2(38, 120), &waveformOscillator->amplitude->value, 0.0f,
-                          waveformOscillator->amplitude->max, "Amp.\n%.2f",
-                          ImGuiSliderFlags_None);
-      ImGui::SameLine();
-      ImGui::VSliderFloat(formatString("##shift%s%s", value->name.c_str(), value->paramId.c_str()).c_str(),
-                          ImVec2(38, 120), &waveformOscillator->shift->value,
-                          -value->max * 2, value->max * 2, "Shift\n%.2f");
-    }
-    
-    // Draw mini sliders
-    else {
-      ImGui::VSliderFloat(formatString("##freq%s%s", value->name.c_str(), value->paramId.c_str()).c_str(),
-                          ImVec2(15, 130), &waveformOscillator->frequency->value, 0.0f,
-                          100.0f, "F", ImGuiSliderFlags_Logarithmic);
-      ImGui::SameLine();
-      ImGui::VSliderFloat(formatString("##amp%s%s", value->name.c_str(), value->paramId.c_str()).c_str(),
-                          ImVec2(15, 130), &waveformOscillator->amplitude->value, 0.0f,
-                          waveformOscillator->amplitude->max, "A",
-                          ImGuiSliderFlags_None);
-      ImGui::SameLine();
-      ImGui::VSliderFloat(formatString("##shift%s%s", value->name.c_str(), value->paramId.c_str()).c_str(),
-                          ImVec2(15, 130), &waveformOscillator->shift->value,
-                          -value->max * 2, value->max * 2, "S");
-    }
-    ImGui::PopFont();
-    
 
-    ImGui::SameLine();
-    if (CommonViews::IconButton(ICON_MD_REFRESH, value->paramId.c_str())) {
-      waveformOscillator->amplitude->resetValue();
-      waveformOscillator->shift->resetValue();
+    ImGui::SameLine(0, buttonSpacing);
+
+    // Draw 3 buttons in a column, vertically centered
+    ImGui::BeginChild(formatString("##child%s", value->paramId.c_str()).c_str(), ImVec2(buttonWidth, plotSize.y), ImGuiChildFlags_AutoResizeY | ImGuiChildFlags_AlwaysAutoResize, ImGuiWindowFlags_NoScrollbar);
+
+    // Center the buttons vertically
+    ImVec2 buttonSize = ImVec2(25.0f, 25.0f);
+    ImVec2 buttonPad = ImVec2(2.0, 2.0);
+    float spacing = 8.0f;
+
+    // Play/Pause button
+    const char* playPauseImage = waveformOscillator->enabled->boolValue ? "pause.png" : "play.png";
+    if (CommonViews::ImageButton(formatString("playPause%s", value->paramId.c_str()), playPauseImage, buttonSize, buttonPad)) {
+      waveformOscillator->enabled->setBoolValue(!waveformOscillator->enabled->boolValue);
+    }
+
+    // Settings button
+    const char* settingsImage = "settings.png";
+    if (CommonViews::ImageButton(formatString("settings%s", value->paramId.c_str()), settingsImage, buttonSize, buttonPad)) {
+      // Toggle the selected oscillator settings
+      if (LayoutStateService::getService()->selectedOscillatorSettings == oscillator->settingsId) {
+        LayoutStateService::getService()->selectedOscillatorSettings = "";
+      } else {
+        LayoutStateService::getService()->selectedOscillatorSettings = oscillator->settingsId;
+      }
+    }
+
+    // Reset button
+    const char* resetImage = "undo.png";
+    if (CommonViews::ImageButton(formatString("reset%s", value->paramId.c_str()), resetImage, buttonSize, buttonPad)) {
+      waveformOscillator->minOutput->resetValue();
+      waveformOscillator->maxOutput->resetValue();
       waveformOscillator->frequency->resetValue();
     }
-    ImGui::SameLine();
-    if (CommonViews::IconButton(ICON_MD_CLOSE, value->paramId.c_str())) {
-      waveformOscillator->enabled->setBoolValue(false);
-    }
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-    CommonViews::ShaderOption(waveformOscillator->waveShape, {
-      "Sine Wave", "Square", "Sawtooth", "Triangle",
-      "Pulse", "Exp. Sine", "Harmonic", "Rectified",
-      "Noise Mod.", "Bitcrush", "Moire"
-    }, false);
-    ImGui::Checkbox(formatString("Show Min/Max##%s", value->paramId.c_str()).c_str(), &waveformOscillator->showMinMax);
     ImGui::EndChild();
   }
   
@@ -231,7 +220,7 @@ void OscillatorView::drawMini(std::shared_ptr<Oscillator> oscillator, std::share
       ImPlot::SetupAxisFormat(ImAxis_X1, "");
       ImPlot::SetupAxisFormat(ImAxis_Y1, "");
       ImPlot::SetupLegend(ImPlotLocation_SouthWest);
-      ImPlot::PlotLine("", &data[0].x, &data[0].y, data.size(), 0, 5.0, 2 * sizeof(float));
+      ImPlot::PlotLine("", &data[0].x, &data[0].y, data.size(), ImPlotLineFlags_NoClip, 5.0, 2 * sizeof(float));
 
       // Add plotting for min/max lines if enabled in drawMini
       if (waveformOscillator->showMinMax) {
@@ -266,12 +255,12 @@ void OscillatorView::drawMini(std::shared_ptr<Oscillator> oscillator, std::share
     ImGui::EndChild();
     ImGui::SameLine();
     ImGui::VSliderFloat(formatString("##amp%s%s", value->name.c_str(), value->paramId.c_str()).c_str(),
-                        ImVec2(15, 50), &waveformOscillator->amplitude->value, 0.0f,
-                        waveformOscillator->amplitude->max, "A",
+                        ImVec2(15, 50), &waveformOscillator->minOutput->value, 0.0f,
+                        waveformOscillator->maxOutput->max, "A",
                         ImGuiSliderFlags_Logarithmic);
     ImGui::SameLine();
     ImGui::VSliderFloat(formatString("##shift%s%s", value->name.c_str(), value->paramId.c_str()).c_str(),
-                        ImVec2(15, 50), &waveformOscillator->shift->value,
+                        ImVec2(15, 50), &waveformOscillator->minOutput->value,
                         -value->max * 2, value->max * 2, "S", ImGuiSliderFlags_Logarithmic);
 
     if (drawExtras) {
@@ -279,9 +268,9 @@ void OscillatorView::drawMini(std::shared_ptr<Oscillator> oscillator, std::share
       ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 50);
       ImGui::Text("%s", formatString("%.2f", waveformOscillator->frequency->value).c_str());
       ImGui::SameLine(0, 5);
-      ImGui::Text("%s", formatString("%.2f", waveformOscillator->amplitude->value).c_str());
+      ImGui::Text("%s", formatString("%.2f", waveformOscillator->minOutput->value).c_str());
       ImGui::SameLine(0, 5);
-      ImGui::Text("%s", formatString("%.2f", waveformOscillator->shift->value).c_str());
+      ImGui::Text("%s", formatString("%.2f", waveformOscillator->maxOutput->value).c_str());
       ImGui::PopFont();
     }
   }

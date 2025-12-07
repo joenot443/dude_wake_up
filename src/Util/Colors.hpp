@@ -44,6 +44,8 @@ struct Colors {
 
   constexpr static ImColor Transparent = IM_COL32(0, 0, 0, 0);
   constexpr static ImColor Black10 = IM_COL32(0, 0, 0, 25);
+
+  constexpr static ImColor White10 = IM_COL32(255, 255, 255, 25);
 };
 
 

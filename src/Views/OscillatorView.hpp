@@ -17,7 +17,7 @@
 
 typedef std::tuple<std::shared_ptr<Oscillator>, std::shared_ptr<Parameter>> OscillatorParam;
 
-static const ImVec2 ChartSize = ImVec2(190, 190);
+static const ImVec2 ChartSize = ImVec2(220, 160);
 
 struct OscillatorView {
 public:

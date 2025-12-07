@@ -160,6 +160,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		02045F7B2EDC898000E3B89A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 02044E652EBFC72E00E3B89A /* btrack~.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2FBBEAE508F335360078DB84;
+			remoteInfo = "max-external";
+		};
 		0208F6362EA3DA0A00529661 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0208E5242E9AA3E600529661 /* btrack~.xcodeproj */;
@@ -170,6 +177,13 @@
 		021171D32E6E3F9000B15198 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 021171AA2E6E3F8F00B15198 /* btrack~.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2FBBEAE508F335360078DB84;
+			remoteInfo = "max-external";
+		};
+		022DF2862EE10F2800F110CC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 022DE16F2EE10EDA00F110CC /* btrack~.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 2FBBEAE508F335360078DB84;
 			remoteInfo = "max-external";
@@ -218,6 +232,7 @@
 		"01771929-4D11-4D13-9112-FE25FF6A46D6" /* PsycurvesShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PsycurvesShader.hpp; sourceTree = "<group>"; };
 		"018EA4E1-F2EA-4702-9A7F-DBF6ED73664D" /* BookmarkService.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BookmarkService.hpp; sourceTree = "<group>"; };
 		"01F7D881-9877-4747-9718-9FE1BED26EF7" /* HelpService.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = HelpService.hpp; sourceTree = "<group>"; };
+		02044E652EBFC72E00E3B89A /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
 		0208E5242E9AA3E600529661 /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
 		0208F63A2EB2F44700529661 /* TypewriterTextSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TypewriterTextSource.hpp; sourceTree = "<group>"; };
 		0208F63B2EB2F44700529661 /* TypewriterTextSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TypewriterTextSource.cpp; sourceTree = "<group>"; };
@@ -230,6 +245,7 @@
 		02145B022E525095009C1855 /* DiffusionShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DiffusionShader.hpp; sourceTree = "<group>"; };
 		02145B032E5D55C7009C1855 /* AddPlaylistVideoSourceCommand.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AddPlaylistVideoSourceCommand.hpp; sourceTree = "<group>"; };
 		021A59222DAD815500CAA5E3 /* Font.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Font.hpp; sourceTree = "<group>"; };
+		022DE16F2EE10EDA00F110CC /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
 		"023ECAF6-5671-4C7D-89EB-33526DA42A8B" /* IsoFractShader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IsoFractShader.cpp; sourceTree = "<group>"; };
 		024219E02DB8362B00A19C28 /* WavyShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = WavyShader.hpp; sourceTree = "<group>"; };
 		024FAE582DA0207D00DE3197 /* ofxFastFboReader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ofxFastFboReader.h; sourceTree = "<group>"; };
@@ -765,6 +781,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		02045D2B2EBFC72E00E3B89A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				02045F7C2EDC898000E3B89A /* btrack~.mxo */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		0208F3EA2E9AA3E600529661 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -792,6 +816,14 @@
 				"D4C1505A-2364-4233-9F21-AA6F0ED79435" /* LibraryService.hpp */,
 			);
 			path = Network;
+			sourceTree = "<group>";
+		};
+		022DF0352EE10EDA00F110CC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				022DF2872EE10F2800F110CC /* btrack~.mxo */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		024FAE5A2DA0207D00DE3197 /* src */ = {
@@ -1647,6 +1679,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = E4B69B5F0A3A1757003C02F2 /* Build configuration list for PBXNativeTarget "dude_wake_up" */;
 			buildPhases = (
+				022DF2842EE10F2800F110CC /* ShellScript */,
 				E42962A92163ECCD00A6A9E2 /* Run Script — Compile OF */,
 				E4B69B580A3A1756003C02F2 /* Sources */,
 				E4B69B590A3A1756003C02F2 /* Frameworks */,
@@ -1699,12 +1732,20 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
+					ProductGroup = 022DF0352EE10EDA00F110CC /* Products */;
+					ProjectRef = 022DE16F2EE10EDA00F110CC /* btrack~.xcodeproj */;
+				},
+				{
 					ProductGroup = 028947A72E8B3C6F005299A6 /* Products */;
 					ProjectRef = 028938E12E8B3C6F005299A6 /* btrack~.xcodeproj */;
 				},
 				{
 					ProductGroup = 021171D02E6E3F8F00B15198 /* Products */;
 					ProjectRef = 021171AA2E6E3F8F00B15198 /* btrack~.xcodeproj */;
+				},
+				{
+					ProductGroup = 02045D2B2EBFC72E00E3B89A /* Products */;
+					ProjectRef = 02044E652EBFC72E00E3B89A /* btrack~.xcodeproj */;
 				},
 				{
 					ProductGroup = 02CED26A2E6F94C80010EC68 /* Products */;
@@ -1723,6 +1764,13 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		02045F7C2EDC898000E3B89A /* btrack~.mxo */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "btrack~.mxo";
+			remoteRef = 02045F7B2EDC898000E3B89A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		0208F6372EA3DA0A00529661 /* btrack~.mxo */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
@@ -1735,6 +1783,13 @@
 			fileType = wrapper.cfbundle;
 			path = "btrack~.mxo";
 			remoteRef = 021171D32E6E3F9000B15198 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		022DF2872EE10F2800F110CC /* btrack~.mxo */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "btrack~.mxo";
+			remoteRef = 022DF2862EE10F2800F110CC /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		028949EC2E8D5A04005299A6 /* btrack~.mxo */ = {
@@ -1766,6 +1821,24 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		022DF2842EE10F2800F110CC /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "rm -rf /Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up/bin\n";
+		};
 		19B789C429E5AB4A0082E9B8 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -1969,6 +2042,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CODE_SIGN_ENTITLEMENTS = of.entitlements;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 2;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_DEBUG_DYLIB = YES;
 				ENABLE_TESTABILITY = YES;
@@ -1991,6 +2065,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CODE_SIGN_ENTITLEMENTS = of.entitlements;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 2;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_DEBUG_DYLIB = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
@@ -2015,7 +2090,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 30;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEPLOYMENT_POSTPROCESSING = YES;
 				DEVELOPMENT_TEAM = 7VUCELU5PL;
@@ -2074,6 +2149,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = "";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
+				MARKETING_VERSION = 1.0.1;
 				OTHER_CFLAGS = "-DofxAddons_ENABLE_IMGUI";
 				OTHER_CPLUSPLUSFLAGS = "-D__MACOSX_CORE__";
 				OTHER_LDFLAGS = (
@@ -2098,7 +2174,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 30;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEPLOYMENT_POSTPROCESSING = YES;
 				DEVELOPMENT_TEAM = 7VUCELU5PL;
@@ -2157,6 +2233,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = "";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
+				MARKETING_VERSION = 1.0.1;
 				OTHER_CFLAGS = "-DofxAddons_ENABLE_IMGUI";
 				OTHER_CPLUSPLUSFLAGS = "-D__MACOSX_CORE__";
 				OTHER_LDFLAGS = (

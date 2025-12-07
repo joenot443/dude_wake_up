@@ -74,36 +74,49 @@ std::shared_ptr<Oscillator> OscillationService::oscillatorForParameter(std::shar
 
 json OscillationService::config() {
   json j = json::object();
-  
+
   for (auto & [id, osc] : oscillators) {
     if (osc->enabled->boolValue && osc->type() == OscillatorType_waveform) {
       std::shared_ptr<WaveformOscillator> wOsc = std::dynamic_pointer_cast<WaveformOscillator>(osc);
       json oscJ = json::object();
       oscJ["freq"] = wOsc->frequency->value;
-      oscJ["shift"] = wOsc->shift->value;
-      oscJ["amp"] = wOsc->amplitude->value;
+      oscJ["minOutput"] = wOsc->minOutput->value;
+      oscJ["maxOutput"] = wOsc->maxOutput->value;
       j[wOsc->value->paramId] = oscJ;
     }
   }
-  
+
   return j;
 }
 
 void OscillationService::loadConfig(json data) {
-  if (data.is_object()) {  
+  if (data.is_object()) {
     std::map<std::string, std::map<std::string, float>> itemsMap = data;
-    
+
     for (auto & [id, values] : itemsMap) {
       std::string paramId = id;
       if (oscillators.count(paramId) != 0) {
         std::shared_ptr<Oscillator> osc = oscillators[id];
-        
+
         if (osc->type() == OscillatorType_waveform) {
           std::shared_ptr<WaveformOscillator> wOsc = std::dynamic_pointer_cast<WaveformOscillator>(osc);
-          
+
           wOsc->frequency->value = values["freq"];
-          wOsc->shift->value = values["shift"];
-          wOsc->amplitude->value = values["amp"];
+
+          // Handle both old format (amp/shift) and new format (minOutput/maxOutput)
+          if (values.count("minOutput") > 0 && values.count("maxOutput") > 0) {
+            // New format
+            wOsc->minOutput->value = values["minOutput"];
+            wOsc->maxOutput->value = values["maxOutput"];
+          } else if (values.count("amp") > 0 && values.count("shift") > 0) {
+            // Old format - convert to new format
+            float amplitude = values["amp"];
+            float shift = values["shift"];
+            float halfRange = 0.3f * amplitude;  // OscillatorDampen * amplitude
+            wOsc->minOutput->value = shift - halfRange;
+            wOsc->maxOutput->value = shift + halfRange;
+          }
+
           osc->enabled->boolValue = true;
         }
       } else {

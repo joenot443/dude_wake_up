@@ -32,8 +32,8 @@ public:
   std::shared_ptr<WaveformOscillator> borderOscillator;
 
   DiscoSettings(std::string shaderId, json j, std::string name) :
-  scaleX(std::make_shared<Parameter>("Scale X", 24.0, 1.0, 100.0)),
-  scaleY(std::make_shared<Parameter>("Scale Y", 10.0, 1.0, 100.0)),
+  scaleX(std::make_shared<Parameter>("Scale X", 0.5, 0.0, 2.0)),
+  scaleY(std::make_shared<Parameter>("Scale Y", 0.5, 0.0, 2.0)),
   timeScale(std::make_shared<Parameter>("Time Scale", 0.1, 0.0, 1.0)),
   border(std::make_shared<Parameter>("Border", 9.5, 0.0, 20.0)),
   scaleXOscillator(std::make_shared<WaveformOscillator>(scaleX)),

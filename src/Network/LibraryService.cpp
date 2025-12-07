@@ -12,7 +12,6 @@
 #include "MainApp.h"
 #include "Console.hpp"
 #include "httplib.h"
-#include "base64.h"
 #include "json.hpp"
 #include <memory>
 //#include <sentry.h>

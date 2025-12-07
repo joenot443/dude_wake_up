@@ -505,6 +505,17 @@ std::vector<std::string> ShaderChainerService::idsFromLoadingConfig(json j) {
 
 void ShaderChainerService::loadConnectionsConfig(json j)
 {
+  // Store failed connections for retry
+  struct ConnectionData {
+    ConnectionType type;
+    std::string startId;
+    std::string endId;
+    InputSlot inputSlot;
+    OutputSlot outputSlot;
+  };
+  std::vector<ConnectionData> failedConnections;
+
+  // First pass: try to load all connections
   for (auto const &[key, val] : j.items())
   {
     ConnectionType type = val["type"];
@@ -512,10 +523,10 @@ void ShaderChainerService::loadConnectionsConfig(json j)
     std::string endId = val["end"];
     InputSlot inputSlot = val["inputSlot"];
     OutputSlot outputSlot = val["outputSlot"];
-    
+
     std::shared_ptr<Connectable> start;
     std::shared_ptr<Connectable> end = shaderForId(endId);
-    
+
     switch (type)
     {
       case ConnectionTypeSource:
@@ -524,14 +535,75 @@ void ShaderChainerService::loadConnectionsConfig(json j)
       case ConnectionTypeShader:
         start = shaderForId(startId);
     }
-    
+
     if (start == nullptr || end == nullptr)
     {
-      log("Couldn't load connection for %s -> %s", startId.c_str(), endId.c_str());
+      // Save for retry instead of giving up
+      failedConnections.push_back({type, startId, endId, inputSlot, outputSlot});
       continue;
     }
-    
+
     makeConnection(start, end, type, outputSlot, inputSlot);
+  }
+
+  // Second pass: retry failed connections (handles timing/ordering issues)
+  if (!failedConnections.empty())
+  {
+    log("Retrying %zu failed connections...", failedConnections.size());
+
+    std::vector<ConnectionData> stillFailed;
+    for (auto const &conn : failedConnections)
+    {
+      std::shared_ptr<Connectable> start;
+      std::shared_ptr<Connectable> end = shaderForId(conn.endId);
+
+      switch (conn.type)
+      {
+        case ConnectionTypeSource:
+          start = VideoSourceService::getService()->videoSourceForId(conn.startId);
+          break;
+        case ConnectionTypeShader:
+          start = shaderForId(conn.startId);
+      }
+
+      if (start == nullptr || end == nullptr)
+      {
+        stillFailed.push_back(conn);
+        continue;
+      }
+
+      makeConnection(start, end, conn.type, conn.outputSlot, conn.inputSlot);
+    }
+
+    // Log final failures with details
+    if (!stillFailed.empty())
+    {
+      log("WARNING: %zu connections failed to load:", stillFailed.size());
+      for (auto const &conn : stillFailed)
+      {
+        std::shared_ptr<Connectable> start;
+        std::shared_ptr<Connectable> end = shaderForId(conn.endId);
+
+        switch (conn.type)
+        {
+          case ConnectionTypeSource:
+            start = VideoSourceService::getService()->videoSourceForId(conn.startId);
+            break;
+          case ConnectionTypeShader:
+            start = shaderForId(conn.startId);
+        }
+
+        std::string startStatus = start ? "exists" : "MISSING";
+        std::string endStatus = end ? "exists" : "MISSING";
+        log("  - %s -> %s (start: %s, end: %s)",
+            conn.startId.c_str(), conn.endId.c_str(),
+            startStatus.c_str(), endStatus.c_str());
+      }
+    }
+    else
+    {
+      log("All connections loaded successfully after retry");
+    }
   }
 }
 

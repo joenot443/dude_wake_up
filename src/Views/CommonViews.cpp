@@ -117,6 +117,32 @@ bool CommonViews::ShaderParameter(std::shared_ptr<Parameter> param,
   return ret;
 }
 
+bool CommonViews::ShaderMiniParameter(std::shared_ptr<Parameter> param, std::shared_ptr<Oscillator> osc)
+{
+  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 1.);
+  H4Title(param->name, false);
+  ImGui::SameLine();
+  ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 2.);
+  float sliderWidth = ImGui::GetContentRegionAvail().x - 60.0;
+
+  // Use smaller frame padding for a more compact slider
+  ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 2.0f));
+  ImGui::SetNextItemWidth(sliderWidth);
+  bool ret = ImGui::SliderFloat(idString(param->paramId + "slider").c_str(), &param->value, param->min, param->max, "%.3f");
+  if (ret) {
+    param->affirmValue();
+  }
+  ImGui::PopStyleVar();
+
+  float endYPos = ImGui::GetCursorPosY();
+  ImGui::SameLine();
+  ResetButton(param->paramId, param, ImVec2(24.0, 24.0), ImVec2(5., 5.));
+  ImGui::NewLine();
+  ImGui::SetCursorPosY(endYPos);
+
+  return ret;
+}
+
 bool CommonViews::MiniSlider(std::shared_ptr<Parameter> param, bool sameLine, ImGuiSliderFlags flags) {
   ImGui::Text("%s", param->name.c_str());
   if (sameLine) ImGui::SameLine();
@@ -129,7 +155,7 @@ bool CommonViews::MiniSlider(std::shared_ptr<Parameter> param, bool sameLine, Im
 
 bool CommonViews::MiniVSlider(std::shared_ptr<Parameter> param) {
   ImGui::Text("%s", param->name.c_str());
-  return ImGui::VSliderFloat(idString(param->paramId).c_str(), ImVec2(10.0, 30.0), &param->value, param->min, param->max);
+  return ImGui::VSliderFloat(idString(param->paramId).c_str(), ImVec2(10.0, 30.0), &param->value, param->min, param->max, "", ImGuiSliderFlags_Logarithmic);
 }
 
 void CommonViews::OscillatorWindow(std::shared_ptr<Oscillator> o, std::shared_ptr<Parameter> p)
@@ -792,7 +818,7 @@ bool CommonViews::ResetButton(std::string id,
                          8.0);
   
   ImGui::SetCursorPos(pos + padding);
-  ImageNamedNew("reset.png", size.x - padding.x * 2, size.y - padding.y * 2);
+  ImageNamedNew("undo.png", size.x - padding.x * 2, size.y - padding.y * 2);
   ImGui::SetCursorPos(pos);
   bool ret = ImGui::InvisibleButton(formatString("%s-reset", id.c_str()).c_str(), size);
   
@@ -847,10 +873,12 @@ bool CommonViews::IconButton(const char *icon, std::string id)
 {
   auto buttonId = formatString("%s##%s", icon, id.c_str());
   ImGui::PushFont(FontService::getService()->current->icon);
+  ImGui::PushStyleColor(ImGuiCol_Text, Colors::White10.Value);
   ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+  ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
   ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0., 0.));
   auto button = ImGui::Button(buttonId.c_str(), ImVec2(16., 16.));
-  ImGui::PopStyleColor();
+  ImGui::PopStyleColor(3);
   ImGui::PopStyleVar();
   ImGui::PopFont();
   

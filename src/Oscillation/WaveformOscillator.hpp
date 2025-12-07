@@ -28,26 +28,34 @@ enum WaveShape {
 };
 
 struct WaveformOscillator: public Oscillator {
-  std::shared_ptr<Parameter> amplitude;
-  std::shared_ptr<Parameter> shift;
+  std::shared_ptr<Parameter> minOutput;
+  std::shared_ptr<Parameter> maxOutput;
   std::shared_ptr<Parameter> frequency;
   std::shared_ptr<Parameter> waveShape;
   bool showMinMax = true;
-  
+
   void tick() override;
-  
+
   float max();
   float min();
-  
+
   float randOffset = ofRandom(TWO_PI);
-  
+
   WaveformOscillator(std::shared_ptr<Parameter> v) :
-  amplitude(std::make_shared<Parameter>("amp", 1.0, 0.0, v->max * 2.0, ParameterType_Hidden)),
-  shift(std::make_shared<Parameter>("shift", v->max / 2.0 - v->defaultValue, v->min * -3.0, v->max * 3.0, ParameterType_Hidden)),
-  frequency(std::make_shared<Parameter>("freq", 1.0, 0.0, 3.0, ParameterType_Hidden)),
+  minOutput(std::make_shared<Parameter>("Min Output",
+    v->min + (v->max - v->min) * 0.3,  // Default: lower 30% of range
+    v->min,
+    v->max,
+    ParameterType_Hidden)),
+  maxOutput(std::make_shared<Parameter>("Max Output",
+    v->min + (v->max - v->min) * 0.7,  // Default: upper 70% of range
+    v->min,
+    v->max,
+    ParameterType_Hidden)),
+  frequency(std::make_shared<Parameter>("Frequency", 1.0, 0.0, 10.0, ParameterType_Hidden)),
   waveShape(std::make_shared<Parameter>("Wave Shape", Sine, 0, 10)),
   Oscillator(v) {
-    parameters = {amplitude, frequency, shift};
+    parameters = {minOutput, maxOutput, frequency};
   }
   
   WaveformOscillator(std::shared_ptr<Parameter> param, float amplitude, float shift, float frequency);

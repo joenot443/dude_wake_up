@@ -9,12 +9,16 @@
 #define OscillatorPanelView_hpp
 
 #include <stdio.h>
+#include <memory>
+
+class Oscillator;
 
 struct OscillatorPanelView {
 public:
   void setup();
   void update();
   void draw();
+  void drawOscillatorSettings(std::shared_ptr<Oscillator> oscillator);
 
   OscillatorPanelView() {
 
