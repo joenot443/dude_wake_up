@@ -10,5 +10,19 @@
 	<true/>
 	<key>NSAudioCaptureUsageDescription</key>
 	<string>This app needs to capture system audio for visual analysis and audio processing features.</string>
+
+	<!-- Sparkle Auto-Update Configuration -->
+	<key>SUFeedURL</key>
+	<string>https://nottawa.app/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>2ISmClcG8GYubpCKqQpOqRMOYqHmQKOjo3XOjW9z7Nk=</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUScheduledCheckInterval</key>
+	<integer>86400</integer>
+	<key>SUShowReleaseNotes</key>
+	<true/>
+	<key>SUAllowsAutomaticUpdates</key>
+	<true/>
 </dict>
 </plist>

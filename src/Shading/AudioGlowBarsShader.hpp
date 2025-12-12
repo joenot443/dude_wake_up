@@ -16,6 +16,7 @@
 #include "WaveformOscillator.hpp"
 #include "Parameter.hpp"
 #include "Shader.hpp"
+#include "AudioSourceService.hpp"
 #include <stdio.h>
 
 struct AudioGlowBarsSettings: public ShaderSettings {
@@ -45,6 +46,8 @@ struct AudioGlowBarsShader: Shader {
     auto source = AudioSourceService::getService()->selectedAudioSource;
 
     canvas->begin();
+    // Clear canvas to ensure alpha channel is properly set
+    ofClear(0, 0, 0, 0);
     shader.begin();
 
     if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() > 254)

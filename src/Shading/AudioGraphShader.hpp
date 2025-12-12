@@ -77,7 +77,7 @@ struct AudioGraphShader: Shader {
       if (waveform.size() >= 256) {
         float width = canvas->getWidth();
         float height = canvas->getHeight();
-        float centerY = height * settings->yTranslate->value;
+        float centerY = height * (1. - settings->yTranslate->value);
         float amp = settings->amplitude->value * height * 0.5f;
         float lineThickness = settings->thickness->value;
 

@@ -30,6 +30,7 @@
 #include "ofxImGui.h"
 #include "Strings.hpp"
 #include <stdio.h>
+#include "../Services/SparkleUpdater.h"
 
 void MainApp::setup()
 {
@@ -63,6 +64,11 @@ void MainApp::setup()
   affirmScale();
   MidiService::getService();
   StringManager::loadStrings();
+
+  // Initialize Sparkle auto-updater
+  #ifdef TARGET_OSX
+  SparkleUpdaterService::getInstance().initialize();
+  #endif
 }
 
 void MainApp::update()

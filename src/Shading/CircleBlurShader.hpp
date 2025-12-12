@@ -78,6 +78,8 @@ struct CircleBlurShader: Shader {
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
     canvas->begin();
+    // Clear canvas to ensure alpha channel is properly set
+    ofClear(0, 0, 0, 0);
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("shaderValue", settings->shaderValue->value);

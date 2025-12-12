@@ -531,7 +531,8 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
   
   // Preview:   500 x 280
   // Node Size: 500 x 220
-  if (isSource || node->hasInputLinkAt(InputSlotMain)) {
+  // Always show preview for sources and shaders (even when not connected)
+  if (isSource || isShader) {
     ImGui::SetCursorPos(ImGui::GetCursorPos() + previewPadding);
     node->drawPreviewSized(ImVec2(500.0, 280.0) - 2*previewPadding);
     ImGui::Dummy(ImVec2(500.0, 280.0));

@@ -113,5 +113,10 @@ void main() {
   }
   b /= pass;
 
-  outputColor = vec4(r, g, b, 1.0);
+  // Calculate alpha based on the blur effect intensity
+  // Use the maximum of RGB channels to represent the overall blur effect
+  // This ensures the blur area (including the spread) is captured in alpha
+  float alpha = max(max(r, g), b);
+  
+  outputColor = vec4(r, g, b, alpha);
 }

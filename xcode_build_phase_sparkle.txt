@@ -1,0 +1,20 @@
+# Add this to your existing Xcode build script right after the sentry line:
+
+# Copy Sparkle framework
+if [ -d "$NOTTAWA_DIR/lib/Sparkle.framework" ]; then
+    echo "Copying Sparkle.framework to app bundle..."
+
+    # Ensure Frameworks directory exists
+    mkdir -p "$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/"
+
+    # Use cp -R instead of rsync (rsync with symlinks is problematic)
+    cp -R "$NOTTAWA_DIR/lib/Sparkle.framework" "$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/"
+
+    # Remove bin directory (build tools not needed at runtime)
+    rm -rf "$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/Sparkle.framework/bin"
+
+    # Code sign
+    codesign --force --deep --sign - "$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/Sparkle.framework"
+
+    echo "Sparkle.framework copied and signed"
+fi

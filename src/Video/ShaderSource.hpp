@@ -1212,7 +1212,8 @@ public:
     }
     
     canvas->begin();
-    ofClear(0,0,0, 255);
+    ofClear(0, 0, 0, 255);
+    ofClear(0, 0, 0, 0);
     canvas->end();
     
     // Check for file changes
@@ -1223,6 +1224,7 @@ public:
     
     fbo->begin();
     ofClear(0, 0, 0, 255);
+    ofClear(0, 0, 0, 0);
     canvas->draw(0, 0, fbo->getWidth(), fbo->getHeight());
     fbo->end();
     

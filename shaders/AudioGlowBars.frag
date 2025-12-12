@@ -152,6 +152,7 @@ void main() {
     vec2 uv = coord / dimensions.xy;
     
     vec3 finalColor = vec3(0.0);
+    float finalAlpha = 0.0;
     
     // Calculate pixel size for consistent rendering
     vec2 pixelSize = 1.0 / dimensions.xy;
@@ -187,6 +188,7 @@ void main() {
     // Add center line to final color
     float centerIntensity = centerLine + centerGlow;
     finalColor += CENTER_LINE_COLOR * centerIntensity;
+    finalAlpha = max(finalAlpha, centerIntensity);
     
     // Draw frequency bars
     for (int i = 0; i < NUM_BARS; i++) {
@@ -207,22 +209,41 @@ void main() {
         // Create bar with sharp edges - use negative distance for inside
         float bar = 1.0 - smoothstep(-pixelSize.x, pixelSize.x, dist);
         
-        // Enhanced bloom effect
+        // Enhanced bloom effect - calculate based on absolute distance
+        // This ensures bloom extends outward from the bar surface
         float glowSize = BLOOM_SIZE * length(pixelSize);
         
-        // Multi-layer glow
-        float glow1 = exp(-max(dist, 0.0) * BLOOM_FALLOFF / glowSize) * BLOOM_INTENSITY;
-        float glow2 = exp(-max(dist, 0.0) * (BLOOM_FALLOFF * 0.5) / (glowSize * 2.0)) * (BLOOM_INTENSITY * 0.5);
+        // For bloom, we want it to extend outward from the bar edge
+        // Use abs(dist) to get distance from bar surface (positive both inside and outside)
+        // But we only want bloom outside the bar, so clamp dist to >= 0 for bloom
+        float distForGlow = max(dist, 0.0);
+        
+        // Multi-layer glow for RGB
+        float glow1 = exp(-distForGlow * BLOOM_FALLOFF / glowSize) * BLOOM_INTENSITY;
+        float glow2 = exp(-distForGlow * (BLOOM_FALLOFF * 0.5) / (glowSize * 2.0)) * (BLOOM_INTENSITY * 0.5);
         
         float totalGlow = glow1 + glow2;
         
-        // Combine bar and glow
+        // Combine bar and glow for RGB output
         float intensity = bar + totalGlow;
+        
+        // For alpha, use the same intensity calculation as RGB
+        // This ensures the bloom effect is captured in alpha channel
+        // The intensity already includes both bar and bloom, so use it directly
+        float alphaContribution = intensity;
         
         // Add to final color with screen blend
         vec3 layerColor = barColor * intensity;
         finalColor = finalColor + layerColor - finalColor * layerColor;
+        
+        // Accumulate alpha additively to combine bloom from multiple bars
+        // This ensures pixels in bloom areas (including between bars) get proper alpha
+        // Additive blending allows overlapping blooms to combine properly
+        finalAlpha = min(finalAlpha + alphaContribution, 1.0);
     }
     
-    outputColor = vec4(finalColor, 1.0);
+    // Clamp alpha to valid range
+    finalAlpha = clamp(finalAlpha, 0.0, 1.0);
+    
+    outputColor = vec4(finalColor, finalAlpha);
 }

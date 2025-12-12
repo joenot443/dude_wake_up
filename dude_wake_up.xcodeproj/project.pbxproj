@@ -42,6 +42,8 @@
 		02CED2802E6F9E580010EC68 /* src_sinc.c in Sources */ = {isa = PBXBuildFile; fileRef = 02CED27D2E6F9E580010EC68 /* src_sinc.c */; };
 		02CED2812E6F9E580010EC68 /* src_linear.c in Sources */ = {isa = PBXBuildFile; fileRef = 02CED27C2E6F9E580010EC68 /* src_linear.c */; };
 		02CED2822E6F9E580010EC68 /* samplerate.c in Sources */ = {isa = PBXBuildFile; fileRef = 02CED27B2E6F9E580010EC68 /* samplerate.c */; };
+		02D080382EE85937003AD114 /* SparkleUpdater.mm in Sources */ = {isa = PBXBuildFile; fileRef = 02D080372EE85937003AD114 /* SparkleUpdater.mm */; };
+		02D0803B2EE9B015003AD114 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 02D080342EE857C3003AD114 /* Sparkle.framework */; };
 		02EF52772E6B706400ECC53A /* PlaylistSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02EF52762E6B706400ECC53A /* PlaylistSource.cpp */; };
 		02F157C82E1722E0003B6C2A /* TimePanelView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F157C72E1722E0003B6C2A /* TimePanelView.cpp */; };
 		02F157CB2E1722FE003B6C2A /* TimeService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F157CA2E1722FE003B6C2A /* TimeService.cpp */; };
@@ -202,6 +204,13 @@
 			remoteGlobalIDString = 2FBBEAE508F335360078DB84;
 			remoteInfo = "max-external";
 		};
+		02D080322EE85093003AD114 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 02D06F1C2EE6F8FA003AD114 /* btrack~.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2FBBEAE508F335360078DB84;
+			remoteInfo = "max-external";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -347,6 +356,10 @@
 		02CED27D2E6F9E580010EC68 /* src_sinc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = src_sinc.c; sourceTree = "<group>"; };
 		02CED27E2E6F9E580010EC68 /* src_zoh.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = src_zoh.c; sourceTree = "<group>"; };
 		02CED2852E7058070010EC68 /* CircleMixShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CircleMixShader.hpp; sourceTree = "<group>"; };
+		02D06F1C2EE6F8FA003AD114 /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
+		02D080342EE857C3003AD114 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = lib/Sparkle.framework; sourceTree = "<group>"; };
+		02D080362EE85937003AD114 /* SparkleUpdater.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SparkleUpdater.h; sourceTree = "<group>"; };
+		02D080372EE85937003AD114 /* SparkleUpdater.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SparkleUpdater.mm; sourceTree = "<group>"; };
 		02D115332DC94674007B87CE /* AudioSettings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AudioSettings.hpp; sourceTree = "<group>"; };
 		02D115342DC94674007B87CE /* AudioTrack.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AudioTrack.hpp; sourceTree = "<group>"; };
 		02EF52742E6B706400ECC53A /* PlaylistSettings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PlaylistSettings.hpp; sourceTree = "<group>"; };
@@ -774,6 +787,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				02D0803B2EE9B015003AD114 /* Sparkle.framework in Frameworks */,
 				"0A7A065D-785F-489A-914F-8B1EDF273782" /* CoreMIDI.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -981,6 +995,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		02D07DE12EE6F8FA003AD114 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				02D080332EE85093003AD114 /* btrack~.mxo */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		"1D39EA5E-9C49-4456-8318-43E5762584E5" /* Commands */ = {
 			isa = PBXGroup;
 			children = (
@@ -1007,6 +1029,7 @@
 		"206C875A-443C-40A6-A803-63FD44907689" /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				02D080342EE857C3003AD114 /* Sparkle.framework */,
 				"04CA78A1-FF25-425E-B2D1-041597750E58" /* CoreMIDI.framework */,
 			);
 			name = Frameworks;
@@ -1226,6 +1249,8 @@
 				"8835E4CC-119D-4147-865E-E8F064CF7942" /* ParameterService.hpp */,
 				"7AA1FB17-DC75-48A4-A385-A676D62B3120" /* ShaderChainerService.cpp */,
 				"6EFB1B9C-3BAD-4AA0-874F-3EEB50C57D65" /* ShaderChainerService.hpp */,
+				02D080362EE85937003AD114 /* SparkleUpdater.h */,
+				02D080372EE85937003AD114 /* SparkleUpdater.mm */,
 				"CB8A8FEB-43D7-45EA-8167-6DA30320942A" /* StrandService.cpp */,
 				"C12DDDBE-B4DB-4ECA-A07D-B0240F531ACA" /* StrandService.hpp */,
 				"7781352D-8ED2-4588-B25C-17029F165EB4" /* TextureService.cpp */,
@@ -1679,14 +1704,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = E4B69B5F0A3A1757003C02F2 /* Build configuration list for PBXNativeTarget "dude_wake_up" */;
 			buildPhases = (
-				022DF2842EE10F2800F110CC /* ShellScript */,
 				E42962A92163ECCD00A6A9E2 /* Run Script — Compile OF */,
 				E4B69B580A3A1756003C02F2 /* Sources */,
 				E4B69B590A3A1756003C02F2 /* Frameworks */,
 				E4C2427710CC5ABF004149E2 /* CopyFiles */,
 				E4A5B60F29BAAAE400C2D356 /* CopyFiles */,
-				19B789C429E5AB4A0082E9B8 /* ShellScript */,
+				19B789C429E5AB4A0082E9B8 /* Run Script */,
 				028651B02D95E32D000CE0D4 /* Resources */,
+				02D080392EE85B3A003AD114 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -1734,6 +1759,10 @@
 				{
 					ProductGroup = 022DF0352EE10EDA00F110CC /* Products */;
 					ProjectRef = 022DE16F2EE10EDA00F110CC /* btrack~.xcodeproj */;
+				},
+				{
+					ProductGroup = 02D07DE12EE6F8FA003AD114 /* Products */;
+					ProjectRef = 02D06F1C2EE6F8FA003AD114 /* btrack~.xcodeproj */;
 				},
 				{
 					ProductGroup = 028947A72E8B3C6F005299A6 /* Products */;
@@ -1806,6 +1835,13 @@
 			remoteRef = 02CED26D2E6F94C80010EC68 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		02D080332EE85093003AD114 /* btrack~.mxo */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "btrack~.mxo";
+			remoteRef = 02D080322EE85093003AD114 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -1821,9 +1857,8 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		022DF2842EE10F2800F110CC /* ShellScript */ = {
+		02D080392EE85B3A003AD114 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -1837,9 +1872,9 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "rm -rf /Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up/bin\n";
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n";
 		};
-		19B789C429E5AB4A0082E9B8 /* ShellScript */ = {
+		19B789C429E5AB4A0082E9B8 /* Run Script */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -1849,13 +1884,14 @@
 			);
 			inputPaths = (
 			);
+			name = "Run Script";
 			outputFileListPaths = (
 			);
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"$OF_PATH/scripts/osx/xcode_project.sh\"\n\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n# Copy libfmod and change install directory for fmod to run\nrsync -aved \"$OF_PATH/libs/fmod/lib/osx/libfmod.dylib\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/\";\n\nrsync -aved \"$NOTTAWA_DIR/lib/sentry-native/xcodebuild/Debug/libsentry.dylib\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/\";\n\n\necho \"$GCC_PREPROCESSOR_DEFINITIONS\";\n\nNOTTAWA_DIR=\"/Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up\"\nalias \n\n# Copy the shaders folder into Resources/data\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/\"\n\ncp -R \"$NOTTAWA_DIR/images/\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/images\"\n\n\ncp -R \"$NOTTAWA_DIR/shaders/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/shaders\"\n\n# Copy the markdown folder into Resources/data\ncp -R \"$NOTTAWA_DIR/markdown/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/markdown\"\n\n# Copy the fonts folder into Resources/data\ncp -R \"$NOTTAWA_DIR/fonts/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/fonts\"\n\n# Copy the misc folder into Resources/data\ncp -R \"$NOTTAWA_DIR/misc/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/misc\"\n\n# Copy the audio folder into Resources/data\ncp -R \"$NOTTAWA_DIR/audio/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/audio\"\n";
+			shellScript = "\"$OF_PATH/scripts/osx/xcode_project.sh\"\nNOTTAWA_DIR=\"/Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up\"\n\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n# Copy libfmod and change install directory for fmod to run\nrsync -aved \"$OF_PATH/libs/fmod/lib/osx/libfmod.dylib\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/\";\n\nrsync -aved \"$NOTTAWA_DIR/lib/sentry-native/xcodebuild/Debug/libsentry.dylib\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/\";\n\n# Copy Sparkle - with proper error checking\nSOURCE=\"/Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up/lib/Sparkle.framework\"\nDEST=\"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks\"\n\necho \"Copying from: $SOURCE\"\necho \"Copying to: $DEST\"\n\nif [ -d \"$SOURCE\" ]; then\n    mkdir -p \"$DEST\"\n\n    # Use ditto instead of cp - it's what Xcode uses internally\n    ditto \"$SOURCE\" \"$DEST/Sparkle.framework\"\n\n    # Remove bin\n    rm -rf \"$DEST/Sparkle.framework/bin\"\n\n    # Verify it's there\n    if [ -d \"$DEST/Sparkle.framework\" ]; then\n        echo \"Sparkle.framework successfully copied\"\n        codesign --force --sign - \"$DEST/Sparkle.framework\"\n    else\n        echo \"ERROR: Sparkle.framework not found after copy!\"\n        exit 1\n    fi\nelse\n    echo \"ERROR: Source not found at $SOURCE\"\n    exit 1\nfi\n\necho \"$GCC_PREPROCESSOR_DEFINITIONS\";\n\n\n# Copy the shaders folder into Resources/data\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/\"\n\ncp -R \"$NOTTAWA_DIR/images/\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/images\"\n\n\ncp -R \"$NOTTAWA_DIR/shaders/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/shaders\"\n\n# Copy the markdown folder into Resources/data\ncp -R \"$NOTTAWA_DIR/markdown/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/markdown\"\n\n# Copy the fonts folder into Resources/data\ncp -R \"$NOTTAWA_DIR/fonts/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/fonts\"\n\n# Copy the misc folder into Resources/data\ncp -R \"$NOTTAWA_DIR/misc/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/misc\"\n\n# Copy the audio folder into Resources/data\ncp -R \"$NOTTAWA_DIR/audio/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/audio\"\n";
 			showEnvVarsInLog = 0;
 		};
 		E42962A92163ECCD00A6A9E2 /* Run Script — Compile OF */ = {
@@ -1957,6 +1993,7 @@
 				"BFB5A457-0FBA-4ED4-A184-8C5C5B8D5250" /* AudioSourceBrowserView.cpp in Sources */,
 				028651472D9468DB000CE0D4 /* imgui_canvas.cpp in Sources */,
 				028651482D9468DB000CE0D4 /* imgui_node_editor.cpp in Sources */,
+				02D080382EE85937003AD114 /* SparkleUpdater.mm in Sources */,
 				028651492D9468DB000CE0D4 /* imgui_node_editor_api.cpp in Sources */,
 				"45643836-DB4D-4615-84BD-406FD1FC93B3" /* AvailableShader.cpp in Sources */,
 				"DC518C46-16A7-4897-BE4A-BDA838873EEE" /* BarPlotView.cpp in Sources */,
@@ -2095,7 +2132,10 @@
 				DEPLOYMENT_POSTPROCESSING = YES;
 				DEVELOPMENT_TEAM = 7VUCELU5PL;
 				ENABLE_HARDENED_RUNTIME = NO;
-				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/lib",
+				);
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -2147,6 +2187,11 @@
 				INFOPLIST_KEY_NSCameraUsageDescription = "Nottawa can use your camera as a video source";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Nottawa can use your microphone for live music analysis";
 				INFOPLIST_KEY_UILaunchStoryboardName = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(LD_RUNPATH_SEARCH_PATHS_$(IS_MACCATALYST))",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 1.0.1;
@@ -2179,7 +2224,10 @@
 				DEPLOYMENT_POSTPROCESSING = YES;
 				DEVELOPMENT_TEAM = 7VUCELU5PL;
 				ENABLE_HARDENED_RUNTIME = YES;
-				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/lib",
+				);
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -2231,6 +2279,11 @@
 				INFOPLIST_KEY_NSCameraUsageDescription = "Nottawa can use your camera as a video source";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Nottawa can use your microphone for live music analysis";
 				INFOPLIST_KEY_UILaunchStoryboardName = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(LD_RUNPATH_SEARCH_PATHS_$(IS_MACCATALYST))",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 1.0.1;

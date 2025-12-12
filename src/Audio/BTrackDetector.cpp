@@ -98,11 +98,11 @@ SimpleBeat BTrackDetector::processAudioFrame(const std::vector<float>& audioFram
         measuredBpm = sum / weightSum;
 
         // Log beat detection with BPM update
-        std::cout << "[Beat Detected] Interval: " << intervalBpm << " BPM, Measured: " << measuredBpm
-                  << " BPM (avg of " << beatIntervals.size() << " intervals)" << std::endl;
+//        std::cout << "[Beat Detected] Interval: " << intervalBpm << " BPM, Measured: " << measuredBpm
+//                  << " BPM (avg of " << beatIntervals.size() << " intervals)" << std::endl;
       }
     } else {
-      std::cout << "[Beat Detected] First beat detected, waiting for interval..." << std::endl;
+//      std::cout << "[Beat Detected] First beat detected, waiting for interval..." << std::endl;
     }
     lastBeatFrame = frameCount;
   }

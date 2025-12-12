@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>Nottawa Updates</title>
+    <link>https://your-server.com/nottawa/appcast.xml</link>
+    <description>Updates for Nottawa - Audio-Reactive Visual Experience Platform</description>
+    <language>en</language>
+
+    <item>
+      <title>Version 1.0.2</title>
+      <sparkle:releaseNotesLink>
+        https://your-server.com/nottawa/release-notes/1.0.2.html
+      </sparkle:releaseNotesLink>
+      <pubDate>Mon, 09 Dec 2024 12:00:00 +0000</pubDate>
+      <enclosure
+        url="https://your-server.com/nottawa/Nottawa-1.0.2.dmg"
+        sparkle:version="1.0.2"
+        sparkle:shortVersionString="1.0.2"
+        sparkle:edSignature="YOUR_SIGNATURE_HERE"
+        length="123456789"
+        type="application/octet-stream" />
+      <sparkle:minimumSystemVersion>10.13</sparkle:minimumSystemVersion>
+    </item>
+
+    <!-- Previous versions for rollback if needed -->
+    <item>
+      <title>Version 1.0.1</title>
+      <sparkle:releaseNotesLink>
+        https://your-server.com/nottawa/release-notes/1.0.1.html
+      </sparkle:releaseNotesLink>
+      <pubDate>Sat, 30 Nov 2024 12:00:00 +0000</pubDate>
+      <enclosure
+        url="https://your-server.com/nottawa/Nottawa-1.0.1.dmg"
+        sparkle:version="1.0.1"
+        sparkle:shortVersionString="1.0.1"
+        sparkle:edSignature="YOUR_SIGNATURE_HERE"
+        length="174019690"
+        type="application/octet-stream" />
+      <sparkle:minimumSystemVersion>10.13</sparkle:minimumSystemVersion>
+    </item>
+  </channel>
+</rss>
