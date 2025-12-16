@@ -179,6 +179,12 @@ void Shader::applyOptionalShaders() {
   for (auto shader: optionalShaders) {
     if (!shader->optionallyEnabled) continue;
     
+    // Clear optionalFrame before applying the shader
+    optionalFrame->begin();
+    ofClear(0, 0, 0, 255);
+    ofClear(0, 0, 0, 0);
+    optionalFrame->end();
+    
     shader->shade(lastFrame, optionalFrame);
     populateLastFrame();
   }

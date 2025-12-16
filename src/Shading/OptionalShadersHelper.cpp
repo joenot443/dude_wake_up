@@ -28,6 +28,13 @@ void OptionalShadersHelper::generateOptionalShaders() {
 void OptionalShadersHelper::applyOptionalShaders(std::shared_ptr<ofFbo> lastFrame, std::shared_ptr<ofFbo> optionalFrame) {
   for (auto shader : optionalShaders) {
     if (!shader->optionallyEnabled) continue;
+    
+    // Clear optionalFrame before applying the shader
+    optionalFrame->begin();
+    ofClear(0, 0, 0, 255);
+    ofClear(0, 0, 0, 0);
+    optionalFrame->end();
+    
     shader->shade(lastFrame, optionalFrame);
     populateLastFrame(lastFrame, optionalFrame);
   }
