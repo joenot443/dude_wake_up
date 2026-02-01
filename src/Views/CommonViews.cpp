@@ -732,8 +732,8 @@ void CommonViews::RangeSlider(std::string title, std::string id, std::shared_ptr
     ImGui::PushStyleColor(ImGuiCol_SliderGrab, WarningColor.Value);
   }
   
-  ImGui::SetNextItemWidth(300.0);
-  ImGui::RangeSliderFloat(title.c_str(), &param->value, &param2->value, fmin(param->min, param2->min), fmax(param->max, param2->max), label.c_str(), 1.0);
+  ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 10.0);
+  ImGui::RangeSliderFloat("##rangeSlider", &param->value, &param2->value, fmin(param->min, param2->min), fmax(param->max, param2->max), label.c_str(), 1.0);
   if (dirty) {
     ImGui::PopStyleColor();
   }
@@ -742,9 +742,9 @@ void CommonViews::RangeSlider(std::string title, std::string id, std::shared_ptr
 // Draws a slider driving the param with a label representing the param's value (0..1)
 // represented as a timestamp, with length being the total length in seconds.
 // The timestamp should be converted to a string in the format "mm:ss"
-bool CommonViews::PlaybackSlider(std::shared_ptr<Parameter> param, float length)
+bool CommonViews::PlaybackSlider(std::shared_ptr<Parameter> param, float length, float width)
 {
-  ImGui::SetNextItemWidth(300.0);
+  ImGui::SetNextItemWidth(width);
   auto timeString = formatString("%s : %s", formatTimeDuration(param->value * length).c_str(), formatTimeDuration(length).c_str());
   
   bool ret = ImGui::SliderFloat(formatString("##%s", param->paramId.c_str()).c_str(),

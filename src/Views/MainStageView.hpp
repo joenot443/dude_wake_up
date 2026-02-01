@@ -22,6 +22,7 @@
 #include "StageModeView.hpp"
 #include "OscillatorPanelView.hpp"
 #include "FeedbackView.hpp"
+#include "ShareStrandView.hpp"
 #include "ofMain.h"
 #include <stdio.h>
 
@@ -34,6 +35,7 @@ private:
   bool sourceBrowserCollapsed = false;
   bool shaderBrowserCollapsed = false;
   bool utilityPanelCollapsed = false;
+  bool leftPanelCollapsed = false;
   
   VideoSourceBrowserView videoSourceBrowserView = VideoSourceBrowserView();
   ShaderBrowserView shaderBrowserView = ShaderBrowserView();
@@ -45,6 +47,8 @@ private:
   WelcomeScreenView welcomeScreenView = WelcomeScreenView();
   FeedbackView feedbackView = FeedbackView();
   bool showFeedbackWindow = false;
+  ShareStrandView shareStrandView = ShareStrandView();
+  bool showShareStrandWindow = false;
   TimePanelView timePanelView = TimePanelView();
   void drawMenu();
   void drawVideoSourceBrowser();

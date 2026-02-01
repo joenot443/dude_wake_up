@@ -57,14 +57,18 @@ json LibrarySource::serialize()
 
 void LibrarySource::setup() {
   fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
-  
-  
-  // Check if the libraryFileId has been downloaded already
-  if (LibraryService::getService()->libraryFileIdDownloadedMap[libraryFile->id]) {
-    // Run FileSource setup normally
+
+  // Check if the file actually exists on disk (more reliable than checking the map,
+  // which may not be populated when resuming a strand before library fetch completes)
+  if (LibraryService::getService()->hasMediaOnDisk(libraryFile)) {
+    // File exists on disk - run FileSource setup normally
+    state = LibrarySourceState_Completed;
+    // Update the map so other checks work correctly
+    LibraryService::getService()->libraryFileIdDownloadedMap[libraryFile->id] = true;
+    // Ensure path is set correctly (may differ from saved path if library folder changed)
+    path = libraryFile->videoPath();
     FileSource::setup();
   }
-  
   else {
     // Define the completion callback to be executed after download
     auto onComplete = [this]() {
@@ -82,7 +86,8 @@ void LibrarySource::setup() {
 
 void LibrarySource::drawSettings()
 {
-  if (LibraryService::getService()->libraryFileIdDownloadedMap[libraryFile->id]) {
+  // Only show FileSource settings if player is loaded
+  if (player.isLoaded()) {
     FileSource::drawSettings();
     return;
   } else {
@@ -99,7 +104,10 @@ void LibrarySource::runSetupOnMainThread(ofEventArgs & args)
 {
   // Remove the listener to avoid repeated calls
   ofRemoveListener(ofEvents().update, this, &LibrarySource::runSetupOnMainThread);
-  
+
+  // Ensure path is set correctly before calling FileSource::setup
+  path = libraryFile->videoPath();
+
   // Now it's safe to call FileSource::setup on the main thread
   FileSource::setup();
 }
@@ -109,7 +117,8 @@ void LibrarySource::teardown() {
 }
 
 void LibrarySource::drawPreviewSized(ImVec2 size) {
-  if (libraryFile->isDownloading || libraryFile->isPaused) {
+  // Show download UI if player isn't ready yet
+  if (!player.isLoaded()) {
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImVec2 cursor_pos = ImGui::GetCursorScreenPos();
 

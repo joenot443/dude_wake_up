@@ -17,6 +17,7 @@ class HelpService {
 public:
   bool completed = false;
   bool showPopup = false;
+  bool showShareHelp = false;
   bool hasOpenedStageMode = false;
   bool hasEditedBlendMode = false;
   bool hasEditedAlpha = false;
@@ -83,7 +84,10 @@ public:
   
   // Help in Stage Mode
   void drawStageModeHelp();
-  
+
+  // Share Strand help
+  void drawShareStrandHelp();
+
   // Completion window
   void drawCompletionPopup();
   

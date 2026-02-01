@@ -121,7 +121,7 @@ struct CommonViews
   
   static void RangeSlider(std::string title, std::string id, std::shared_ptr<Parameter> param, std::shared_ptr<Parameter> param2, std::string label, bool dirty = false);
   
-  static bool PlaybackSlider(std::shared_ptr<Parameter> param, float length);
+  static bool PlaybackSlider(std::shared_ptr<Parameter> param, float length, float width = 300.0);
   
   static void PlaybackRangeSlider(std::string title, std::string id, std::shared_ptr<Parameter> param, std::shared_ptr<Parameter> param2, float duration, bool dirty = false);
   

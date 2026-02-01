@@ -7,6 +7,7 @@ uniform int blendWithEmpty;
 uniform int flip;
 uniform float alpha;
 uniform float amount;
+uniform int alphaSwap;
 
 in vec2 coord;
 out vec4 outputColor;
@@ -74,5 +75,5 @@ void main() {
     outputColor = result;
     return;
   }
-	outputColor = mix(tex_color, result, alpha);
+	outputColor = alphaSwap == 1 ? mix(result, tex_color, alpha) : mix(tex_color, result, alpha);
 }

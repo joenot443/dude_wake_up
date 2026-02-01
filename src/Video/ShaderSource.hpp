@@ -266,7 +266,7 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_AudioBall, // Available
   ShaderSource_AudioGlowBars, // Available
   ShaderSource_Lava, // Available
-  ShaderSource_AudioOscillator, // Available
+//  ShaderSource_AudioOscillator,  Available
   ShaderSource_AudioGraph, // Available
 }; // End AvailableShaderSourceTypes
 

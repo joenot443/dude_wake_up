@@ -36,6 +36,7 @@ struct LumaMaskMakerSettings: public ShaderSettings {
   ShaderSettings(shaderId, 0, "LumaMaskMaker") {
     parameters = {upper, lower, flip, drawInput };
     oscillators = { upperOscillator, lowerOscillator };
+    drawInput->setBoolValue(true);
     registerParameters();
   };
 };

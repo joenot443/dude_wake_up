@@ -34,6 +34,7 @@ protected:
   ofFbo tempFbo;
   float xPos = 0.0;
   float yPos = 0.0;
+  float lastSampleCount = 8.0;
 };
 
 #endif /* TextSource_hpp */

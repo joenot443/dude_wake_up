@@ -210,9 +210,21 @@ bool SystemAudioSource::setupAudioDevice() {
         }
         
         aggregateDevice = aggregateDeviceID;
-        
-        // Use default format
-        streamFormat.mSampleRate = 48000.0;
+
+        // Query the actual sample rate from the device
+        Float64 actualSampleRate = 48000.0;
+        propertyAddress.mSelector = kAudioDevicePropertyNominalSampleRate;
+        propertyAddress.mScope = kAudioObjectPropertyScopeGlobal;
+        propertySize = sizeof(Float64);
+        status = AudioObjectGetPropertyData(aggregateDevice, &propertyAddress, 0, nullptr, &propertySize, &actualSampleRate);
+        if (status == noErr) {
+            NSLog(@"[SystemAudioSource] Aggregate device sample rate: %.0f Hz", actualSampleRate);
+        } else {
+            NSLog(@"[SystemAudioSource] Could not query sample rate, defaulting to 48000 Hz");
+            actualSampleRate = 48000.0;
+        }
+
+        streamFormat.mSampleRate = actualSampleRate;
         streamFormat.mFormatID = kAudioFormatLinearPCM;
         streamFormat.mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagIsPacked;
         streamFormat.mChannelsPerFrame = 2;
@@ -325,26 +337,45 @@ OSStatus SystemAudioSource::audioIOCallback(AudioObjectID inDevice,
         
         // Use the buffer with the most audio activity (or buffer 0 if all are silent)
         int bufferToUse = (bufferWithData >= 0) ? bufferWithData : 0;
-        
+
         const AudioBuffer& buffer = inInputData->mBuffers[bufferToUse];
         const float* samples = static_cast<const float*>(buffer.mData);
-        
+
         if (samples && buffer.mDataByteSize > 0) {
-            UInt32 numFrames = buffer.mDataByteSize / sizeof(float) / source->streamFormat.mChannelsPerFrame;
-            
-            // Create ofSoundBuffer from the audio data
+            // Use the buffer's actual channel count, not the hardcoded streamFormat
+            UInt32 bufferChannels = buffer.mNumberChannels;
+            if (bufferChannels == 0) bufferChannels = source->streamFormat.mChannelsPerFrame;
+
+            // Log buffer info once for debugging
+            static bool loggedOnce = false;
+            if (!loggedOnce) {
+                NSLog(@"[SystemAudioSource] Buffer info: mNumberChannels=%u, mDataByteSize=%u, streamFormat.channels=%u",
+                      buffer.mNumberChannels, buffer.mDataByteSize, source->streamFormat.mChannelsPerFrame);
+                loggedOnce = true;
+            }
+
+            UInt32 numFrames = buffer.mDataByteSize / sizeof(float) / bufferChannels;
+
+            // Create ofSoundBuffer - output as stereo (2 channels) for consistency
+            UInt32 outputChannels = 2;
             ofSoundBuffer soundBuffer;
-            soundBuffer.allocate(numFrames, source->streamFormat.mChannelsPerFrame);
-            
+            soundBuffer.allocate(numFrames, outputChannels);
+            soundBuffer.setSampleRate(source->streamFormat.mSampleRate);
+
             for (UInt32 frame = 0; frame < numFrames; frame++) {
-                for (UInt32 channel = 0; channel < source->streamFormat.mChannelsPerFrame; channel++) {
-                    UInt32 sampleIndex = frame * source->streamFormat.mChannelsPerFrame + channel;
-                    if (sampleIndex < buffer.mDataByteSize / sizeof(float)) {
-                        soundBuffer.getSample(frame, channel) = samples[sampleIndex];
-                    }
+                if (bufferChannels >= 2) {
+                    // Source has stereo or more - take first two channels
+                    UInt32 srcIdx = frame * bufferChannels;
+                    soundBuffer.getSample(frame, 0) = samples[srcIdx];
+                    soundBuffer.getSample(frame, 1) = samples[srcIdx + 1];
+                } else {
+                    // Source is mono - duplicate to both channels
+                    float sample = samples[frame];
+                    soundBuffer.getSample(frame, 0) = sample;
+                    soundBuffer.getSample(frame, 1) = sample;
                 }
             }
-            
+
             // Process through AudioSource pipeline
             source->audioIn(soundBuffer);
         }

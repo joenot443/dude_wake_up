@@ -29,7 +29,7 @@ private:
   std::unique_ptr<PagedTileBrowserView> libraryTileBrowserView;
   
   int currentTab = 0;
-  const char* tabLabels[3] = {"Generated", "Webcam", "Library"};
+  const char* tabLabels[3] = {"Scenes", "Webcam", "Library"};
   
   std::vector<std::shared_ptr<TileItem>> webcamItems;
   std::vector<std::shared_ptr<TileItem>> shaderItems;

@@ -55,7 +55,8 @@ public:
     void setup() override;
     void disable() override;
     AudioSourceType type() override { return AudioSourceType_System; }
-    
+    float getSampleRate() const { return static_cast<float>(streamFormat.mSampleRate); }
+
     // Configuration methods
     void setTargetProcess(pid_t pid);
     void setGlobalTap(bool global);

@@ -24,5 +24,18 @@
 	<true/>
 	<key>SUAllowsAutomaticUpdates</key>
 	<true/>
+
+	<!-- URL Scheme for opening shared strands -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.nottawa.strand</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>nottawa</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

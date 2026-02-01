@@ -3,6 +3,8 @@
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
+uniform float orbX;
+uniform float orbY;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -171,6 +173,7 @@ vec3 effect(vec2 p, vec2 pp) {
 void main(  ) {
   vec2 q = coord/RESOLUTION.xy;
   vec2 p = -1. + 2. * q;
+  p += vec2(-orbX, -orbY);
   vec2 pp = p;
   p.x *= RESOLUTION.x/RESOLUTION.y;
 

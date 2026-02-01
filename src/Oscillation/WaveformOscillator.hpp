@@ -52,7 +52,7 @@ struct WaveformOscillator: public Oscillator {
     v->min,
     v->max,
     ParameterType_Hidden)),
-  frequency(std::make_shared<Parameter>("Frequency", 1.0, 0.0, 10.0, ParameterType_Hidden)),
+  frequency(std::make_shared<Parameter>("Frequency", 1.0, 0.0, 4.0, ParameterType_Hidden)),
   waveShape(std::make_shared<Parameter>("Wave Shape", Sine, 0, 10)),
   Oscillator(v) {
     parameters = {minOutput, maxOutput, frequency};

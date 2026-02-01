@@ -11,14 +11,25 @@
 #include "Fonts.hpp"
 #include "CommonViews.hpp"
 #include "LayoutStateService.hpp"
+#include "Console.hpp"
 
 void FileSource::setup()
 {
-  if (path.length() == 0) return;
-  
+  if (path.length() == 0) {
+    log("FileSource::setup() - path is empty, skipping");
+    return;
+  }
+
   applyRanges();
   player.setPixelFormat(OF_PIXELS_RGB);
-  player.load(path);
+  bool loaded = player.load(path);
+  log("FileSource::setup() - loaded %s from path: %s", loaded ? "successfully" : "FAILED", path.c_str());
+  if (loaded && player.getWidth() > 0 && player.getHeight() > 0) {
+    auto currentRes = LayoutStateService::getService()->resolution;
+    if (currentRes.x != player.getWidth() || currentRes.y != player.getHeight()) {
+      LayoutStateService::getService()->setCustomResolution(player.getWidth(), player.getHeight());
+    }
+  }
   player.setPosition(start);
   player.play();
   player.setVolume(0.5);
@@ -108,22 +119,12 @@ void FileSource::drawSettings()
   if (mute->value < 0.5)
     player.setVolume(volume->value);
 
-  CommonViews::Slider("Volume", "##volume", volume);
+  // Volume slider with mute button on the same line
+  CommonViews::Slider("Volume", "##volume", volume, ImGui::GetContentRegionAvail().x - 100.0);
   ImGui::SameLine();
-  
-  // Play / Pause button
-  if (CommonViews::PlayPauseButton("##filePlayPause", playing, ImVec2(25.0, 25.0))) {
-    playing = !playing;
-    // Toggle paused state and update the underlying video player
-    player.setPaused(!playing);
-    if (playing) {
-      player.play();
-    }
-  }
-  ImGui::SameLine();
-  
-  auto muteIcon = mute->value > 0.5 ? ICON_MD_VOLUME_MUTE : ICON_MD_VOLUME_UP;
-  if (CommonViews::IconButton(muteIcon, "##mute"))
+
+  std::string muteIcon = mute->boolValue ? "unmute.png" : "mute.png";
+  if (CommonViews::ImageButton(mute->paramId, muteIcon, ImVec2(25.0, 25.0), ImVec2(2.0, 2.0)))
   {
     mute->value = mute->value > 0.5 ? 0.0 : 1.0;
     if (mute->value > 0.5)
@@ -136,11 +137,25 @@ void FileSource::drawSettings()
     }
   }
 
-  // Draw a slider to control the video playback position
-  if (CommonViews::PlaybackSlider(sliderPosition, player.getDuration())) {
+  // Playback slider (already has its own reset button with SameLine)
+  if (CommonViews::PlaybackSlider(sliderPosition, player.getDuration(), ImGui::GetContentRegionAvail().x - 100.0)) {
     applyRanges();
   }
-  
+
+  ImGui::SameLine();
+  // Play / Pause button on the same line as playback slider
+  if (CommonViews::PlayPauseButton("##filePlayPause", playing, ImVec2(25.0, 25.0))) {
+    playing = !playing;
+    // Toggle paused state and update the underlying video player
+    player.setPaused(!playing);
+    if (playing) {
+      player.play();
+    }
+  }
+  ImGui::NewLine();
+  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0);
+  CommonViews::H3Title("Range");
+
   CommonViews::PlaybackRangeSlider("Playback Range", "##playbackRange", settings->start, settings->end, player.getDuration(), playbackRangeDirty());
   
   if (playbackRangeDirty())

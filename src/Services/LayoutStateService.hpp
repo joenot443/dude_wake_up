@@ -103,6 +103,7 @@ public:
   bool shouldDrawShaderInfo();
   
   void updateResolutionSettings(int index);
+  void setCustomResolution(float width, float height);
   
   void togglePortraitSetting();
   

@@ -48,6 +48,7 @@ struct AccretionShader: Shader {
     shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
+    ofClear(0, 0, 0, 255);
     frame->draw(0, 0);
     shader.end();
     canvas->end();

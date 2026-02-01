@@ -606,10 +606,24 @@ void VideoSourceService::appendConfig(json j)
     case VideoSource_icon:
       source = makeIconVideoSource(name, position, sourceId, j);
       break;
-    case VideoSource_library:
-      std::shared_ptr<LibraryFile> libraryFile = LibraryService::getService()->libraryFileForId(j["libraryFileId"]);
+    case VideoSource_library: {
+      std::shared_ptr<LibraryFile> libraryFile = nullptr;
+
+      // First try to find in local library cache
+      if (j.contains("libraryFileId")) {
+        libraryFile = LibraryService::getService()->libraryFileForId(j["libraryFileId"]);
+      }
+
+      // If not found locally, reconstruct from serialized data (for shared strands)
+      if (libraryFile == nullptr && j.contains("libraryFile")) {
+        libraryFile = std::make_shared<LibraryFile>();
+        libraryFile->load(j["libraryFile"]);
+      }
+
       if (libraryFile == nullptr) return;
       source = makeLibraryVideoSource(libraryFile, position, sourceId, j);
+      break;
+    }
   }
   if (source != nullptr)
   	addVideoSource(source, sourceId);

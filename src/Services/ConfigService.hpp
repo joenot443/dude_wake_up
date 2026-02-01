@@ -78,6 +78,7 @@ public:
   void saveStrandFile(Strand strand, std::string path, std::string previewPath);
   bool validateStrandJson(std::string path);
   std::vector<std::string> loadStrandFile(std::string path);
+  std::vector<std::string> loadStrandJson(const std::string &jsonString);
   
   AvailableStrand availableStrandFromPath(std::string path);
   
@@ -105,6 +106,7 @@ public:
   std::string exportsFolderFilePath();
   std::string templatesFolderFilePath();
   std::string strandsFolderFilePath();
+  std::string tempFilePath();
   std::string defaultConfigFilePath();
   std::string relativeFilePathWithinNottawaFolder(std::string filePath);
   

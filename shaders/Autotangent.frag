@@ -4,6 +4,7 @@ uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
 uniform float brightness;
+uniform float speed;
 uniform vec3 color;
 in vec2 coord;
 out vec4 outputColor;
@@ -15,7 +16,8 @@ void main()
   vec2 uv = coord / dimensions.xy;
   
   // Time-varying pixel color calculation
-  vec3 col = 0.5 + 0.5 * cos(time + uv.xyx + vec3(0, 2, 4));
+  float t = time * speed;
+  vec3 col = 0.5 + 0.5 * cos(t + uv.xyx + vec3(0, 2, 4));
   
   // Sample texture at UV coordinates
   vec4 temp = texture(tex, uv);
@@ -29,7 +31,7 @@ void main()
   // Modify color based on texture and apply a tan function for color warping
   col = temp.rgb * brightness
   + vec3(tan((temp.rgb * vec3(3.0, 5.0, 50.0)
-              + (time / 135.0) * 100.0) * 3.1415)) * color;
+              + (t / 135.0) * 100.0) * 3.1415)) * color;
   
   outputColor = vec4(col, 1.0);
 }

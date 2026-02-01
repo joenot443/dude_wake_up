@@ -210,11 +210,13 @@ void TextEditorView::draw() {
   }
 
   CommonViews::ShaderColor(displayText->color);
+  CommonViews::ShaderParameter(displayText->textSmoothing, nullptr);
   CommonViews::ShaderCheckbox(displayText->strokeEnabled);
   
   if (displayText->strokeEnabled->boolValue) {
       CommonViews::ShaderColor(displayText->strokeColor);
     CommonViews::ShaderParameter(displayText->strokeWeight, nullptr);
+    CommonViews::ShaderParameter(displayText->edgeSoftness, nullptr);
   }
   
   int currentFontSize = displayText->fontSize;

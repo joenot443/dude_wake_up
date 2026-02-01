@@ -43,19 +43,21 @@ struct BlendSettings: public ShaderSettings {
   std::shared_ptr<Parameter> flip;
   std::shared_ptr<Parameter> amount;
   std::shared_ptr<Parameter> alpha;
-  
+  std::shared_ptr<Parameter> alphaSwap;
+
   std::shared_ptr<WaveformOscillator> alphaOscillator;
   std::shared_ptr<WaveformOscillator> amountOscillator;
-  
+
   BlendSettings(std::string shaderId, json j) :
   mode(std::make_shared<Parameter>("Mode", 4.0, 0.0, 13.0, ParameterType_Int)),
   flip(std::make_shared<Parameter>("Flip", 0.0, 0.0, 1.0, ParameterType_Bool)),
   alpha(std::make_shared<Parameter>("Alpha", 1.0, 0.0, 1.0)),
   amount(std::make_shared<Parameter>("Amount", 0.5, 0.0, 1.0)),
+  alphaSwap(std::make_shared<Parameter>("Alpha Swap", 0.0, 0.0, 1.0, ParameterType_Bool)),
   alphaOscillator(std::make_shared<WaveformOscillator>(alpha)),
   ShaderSettings(shaderId, j, "Blend") {
     mode->options = BlendModeNames;
-    parameters = { mode, flip, alpha, amount };
+    parameters = { mode, flip, alpha, amount, alphaSwap };
     oscillators = { alphaOscillator, amountOscillator };
     audioReactiveParameter = alpha;
     mode->buttonsVisible = true;
@@ -244,6 +246,7 @@ struct BlendShader: Shader {
       shader.setUniform1f("time", TimeService::getService()->timeParam->value);
       shader.setUniform1f("alpha", settings->alpha->value);
       shader.setUniform1f("amount", settings->amount->value);
+      shader.setUniform1i("alphaSwap", settings->alphaSwap->boolValue ? 1 : 0);
       shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
       
       std::shared_ptr<ofFbo> nextFrame = inputAtSlot(slot)->frame();
@@ -289,6 +292,9 @@ struct BlendShader: Shader {
   void drawSettings() override {
     // Display the main blend mode selector controls
     CommonViews::BlendModeSelector(settings->mode, settings->flip, settings->alpha, settings->alphaOscillator, settings->amount, settings->amountOscillator);
+    CommonViews::FlipButton("alphaSwap", settings->alphaSwap);
+    ImGui::SameLine();
+    ImGui::Text("Swap Alpha");
     ImGui::Dummy(ImVec2(1.0, 30.0));
     // Add a collapsible header for the previews
     if (ImGui::CollapsingHeader("Blend Previews")) {

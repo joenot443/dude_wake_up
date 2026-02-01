@@ -200,12 +200,32 @@ void Shader::drawPreviewSized(ImVec2 size)
 {
   ImTextureID texID = (ImTextureID)(uintptr_t)lastFrame->getTexture().getTextureData().textureID;
   ImVec2 cursorPos = ImGui::GetCursorPos();
+
+  float fboW = lastFrame->getWidth();
+  float fboH = lastFrame->getHeight();
+  if (fboW <= 0 || fboH <= 0) return;
+
+  float fboAspect = fboW / fboH;
+  float boxAspect = size.x / size.y;
+
+  ImVec2 drawSize;
+  if (fboAspect > boxAspect) {
+    drawSize.x = size.x;
+    drawSize.y = size.x / fboAspect;
+  } else {
+    drawSize.y = size.y;
+    drawSize.x = size.y * fboAspect;
+  }
+
+  ImVec2 offset((size.x - drawSize.x) * 0.5f, (size.y - drawSize.y) * 0.5f);
+  ImVec2 topLeft = cursorPos + offset;
+
   ImGui::GetWindowDrawList()->AddImageRounded(
     texID,
-    cursorPos,                          // top-left corner
-    cursorPos + size,                   // bottom-right corner
-    ImVec2(0,0),                        // UV coordinates for top-left
-    ImVec2(1,1),                        // UV coordinates for bottom-right
+    topLeft,
+    topLeft + drawSize,
+    ImVec2(0,0),
+    ImVec2(1,1),
     IM_COL32_WHITE,
     8.0
   );

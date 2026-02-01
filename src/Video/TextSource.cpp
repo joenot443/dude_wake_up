@@ -13,28 +13,48 @@
 #include "LayoutStateService.hpp"
 
 void TextSource::setup() {
-  fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y, GL_RGBA);
-  optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y, GL_RGBA);
-  
-  font.load(displayText->font.path, displayText->fontSize);
+  // Allocate FBOs with multisampling for better antialiasing
+  ofFbo::Settings settings;
+  settings.width = LayoutStateService::getService()->resolution.x;
+  settings.height = LayoutStateService::getService()->resolution.y;
+  settings.internalformat = GL_RGBA;
+  settings.numSamples = max(4, static_cast<int>(displayText->textSmoothing->value)); // Use configurable MSAA, minimum 4
+  settings.useDepth = false;
+  settings.useStencil = false;
+  settings.minFilter = GL_LINEAR;
+  settings.maxFilter = GL_LINEAR;
+
+  fbo->allocate(settings);
+  optionalFbo->allocate(settings);
+  tempFbo.allocate(settings);
+
+  // Enable better font rendering
+  font.setLetterSpacing(1.0);
+  font.load(displayText->font.path, displayText->fontSize, true, true, true); // antialiased, full character set, make contours
   fontPath = displayText->font.path;
   strokeShader.load("shaders/Stroke");
-  
-  tempFbo.allocate(fbo->getWidth(), fbo->getHeight());
+
   if (displayText->font.name != FontService::getService()->fonts[displayText->fontSelector->intValue].name) {
     displayText->font = FontService::getService()->fonts[displayText->fontSelector->intValue];
-    font.load(displayText->font.path, displayText->fontSize);
+    font.load(displayText->font.path, displayText->fontSize, true, true, true);
   }
 }
 
 void TextSource::saveFrame() {
-  // Changed resolution
-  if (static_cast<int>(fbo->getWidth()) != LayoutStateService::getService()->resolution.x) {
+  // Changed resolution or antialiasing settings
+  if (static_cast<int>(fbo->getWidth()) != LayoutStateService::getService()->resolution.x ||
+      lastSampleCount != displayText->textSmoothing->value) {
+    lastSampleCount = displayText->textSmoothing->value;
     setup();
   }
   
   tempFbo.begin();
-  
+
+  // Enable smooth rendering
+  ofEnableSmoothing();
+  ofEnableAlphaBlending();
+  ofEnableAntiAliasing();
+
   bool shouldClear = false;
   
   // Clear if we've changed font size
@@ -42,7 +62,7 @@ void TextSource::saveFrame() {
       font.getSize() != displayText->fontSize
       || fontPath != displayText->font.path) {
     fontPath = displayText->font.path;
-    font.load(displayText->font.path, displayText->fontSize);
+    font.load(displayText->font.path, displayText->fontSize, true, true, true); // antialiased
     shouldClear = true;
   }
   
@@ -74,17 +94,25 @@ void TextSource::saveFrame() {
   
   // Flip y for OF style coordinates
   font.drawString(displayText->text, xPos, yPos);
+
+  // Restore rendering settings
+  ofDisableAntiAliasing();
   tempFbo.end();
   
   fbo->begin();
   ofClear(0, 0.);
-  
+
+  // Enable smooth rendering for FBO drawing
+  ofEnableSmoothing();
+  ofEnableAlphaBlending();
+
   if (displayText->strokeEnabled->boolValue) {
     strokeShader.begin();
     strokeShader.setUniform4f("backgroundColor", displayText->color->color->data()[0], displayText->color->color->data()[1], displayText->color->color->data()[2], 0.0);
     strokeShader.setUniform4f("strokeColor", displayText->strokeColor->color->data()[0], displayText->strokeColor->color->data()[1], displayText->strokeColor->color->data()[2], displayText->strokeColor->color->data()[3]);
     strokeShader.setUniform1f("weight", displayText->strokeWeight->value);
     strokeShader.setUniform1f("fineness", 64.0);
+    strokeShader.setUniform1f("edgeSoftness", displayText->edgeSoftness->value);
     strokeShader.setUniform2f("dimensions", fbo->getWidth(), fbo->getHeight());
     strokeShader.setUniform1f("minThresh", 0.1);
     strokeShader.setUniform1f("maxThresh", 0.6);
@@ -92,9 +120,22 @@ void TextSource::saveFrame() {
     tempFbo.draw(0,0);
     strokeShader.end();
   } else {
+    // When stroke is disabled, still use the stroke shader for its antialiasing
+    // but with a very small weight to preserve text quality
+    strokeShader.begin();
+    strokeShader.setUniform4f("backgroundColor", displayText->color->color->data()[0], displayText->color->color->data()[1], displayText->color->color->data()[2], 0.0);
+    strokeShader.setUniform4f("strokeColor", displayText->color->color->data()[0], displayText->color->color->data()[1], displayText->color->color->data()[2], 0.0); // Same as text color
+    strokeShader.setUniform1f("weight", 0.5); // Very small weight for edge smoothing only
+    strokeShader.setUniform1f("fineness", 64.0);
+    strokeShader.setUniform1f("edgeSoftness", displayText->edgeSoftness->value);
+    strokeShader.setUniform2f("dimensions", fbo->getWidth(), fbo->getHeight());
+    strokeShader.setUniformTexture("tex", tempFbo.getTexture(), 4);
     tempFbo.draw(0,0);
+    strokeShader.end();
   }
-  
+
+  ofDisableAlphaBlending();
+  ofDisableSmoothing();
   fbo->end();
 }
 
@@ -113,6 +154,8 @@ json TextSource::serialize() {
   j["displayY"] = displayText->yPosition->value;
   j["settings"] = settings->serialize();
   j["strokeEnabled"] = displayText->strokeEnabled->boolValue;
+  j["edgeSoftness"] = displayText->edgeSoftness->value;
+  j["textSmoothing"] = displayText->textSmoothing->value;
   auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);
   if (node != nullptr) {
     j["x"] = node->position.x;
@@ -154,6 +197,12 @@ void TextSource::load(json j) {
   }
   if (j.contains("strokeEnabled")) {
     displayText->strokeEnabled->setBoolValue(j["strokeEnabled"]);
+  }
+  if (j.contains("edgeSoftness")) {
+    displayText->edgeSoftness->value = j["edgeSoftness"];
+  }
+  if (j.contains("textSmoothing")) {
+    displayText->textSmoothing->value = j["textSmoothing"];
   }
   if (j.contains("x")) {
     auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);

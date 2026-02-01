@@ -59,5 +59,13 @@
     "completion_description_2": "I hope you can continue playing around and make something cool. Try using a Webcam, videos from the Library, or ones you've filmed yourself.",
     "completion_description_3": "Once you're done, I'd love if you could share your thoughts. Use the menu option above, join the Discord, post in /r/nottawa_app, or just send me a message.\n\nWhat was cool? What was confusing? What was broken? What was missing? Everything helps!",
     "completion_description_4": "I love you all -\nJoe",
-    "credit": "The code for this effect comes from "
+    "credit": "The code for this effect comes from ",
+    "share_strand_instruction": "- Shares your strand with a link",
+    "share_strand_title": "Share Your Creation",
+    "share_strand_description": "You can share your node setup with others!",
+    "share_strand_step1": "Click the Share button in the action bar (or right-click any node and select \"Share Strand...\")",
+    "share_strand_step2": "Add a title and description for your creation",
+    "share_strand_step3": "The preview image is captured automatically from your output",
+    "share_strand_step4": "Click Share to upload and get a link you can share anywhere!",
+    "share_strand_note": "Others can open your strand directly in Nottawa from the link."
 }

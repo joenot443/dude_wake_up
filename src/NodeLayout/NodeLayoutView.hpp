@@ -86,6 +86,7 @@ public:
   void handleDoubleClick();
   void handleRightClick();
   void handleSaveNode(std::shared_ptr<Node> node);
+  void handleShareNode(std::shared_ptr<Node> node);
   void handleDeleteNode(std::shared_ptr<Node> node);
   void handleUploadChain(std::shared_ptr<Node> node);
   void handleUnplacedDownloadedLibraryFile();
@@ -137,6 +138,10 @@ public:
   bool showSaveDialog = false;
   char saveFileName[256] = "";
   std::shared_ptr<Node> nodeToSave;
+
+  // Share strand from context menu - MainStageView checks this
+  bool hasPendingShareStrand = false;
+  Strand pendingShareStrand;
   
   std::map<std::string, std::shared_ptr<Node>> idNodeMap;
   std::map<long, std::shared_ptr<Node>> pinIdNodeMap;

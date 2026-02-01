@@ -27,9 +27,9 @@ struct SwirlingSoulSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> sizeOscillator;
 
   SwirlingSoulSettings(std::string shaderId, json j, std::string name) :
-  centerX(std::make_shared<Parameter>("centerX", 0.0, -1.0, 1.0)),
-  centerY(std::make_shared<Parameter>("centerY", 0.0, -1.0, 1.0)),
-  size(std::make_shared<Parameter>("size", 2.0, 0.0, 4.0)),
+  centerX(std::make_shared<Parameter>("X", 0.0, -1.0, 1.0)),
+  centerY(std::make_shared<Parameter>("Y", 0.0, -1.0, 1.0)),
+  size(std::make_shared<Parameter>("Size", 2.0, 0.0, 4.0)),
   centerXOscillator(std::make_shared<WaveformOscillator>(centerX)),
   centerYOscillator(std::make_shared<WaveformOscillator>(centerY)),
   sizeOscillator(std::make_shared<WaveformOscillator>(size)),

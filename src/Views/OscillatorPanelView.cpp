@@ -80,7 +80,7 @@ void OscillatorPanelView::draw() {
         ImGui::Dummy(ImVec2(2.0, 5.0));
         ImGui::SameLine();
 
-        ImGui::BeginChild(formatString("##oscillator%s", oscillator->settingsId.c_str()).c_str(), ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), ImGuiChildFlags_AutoResizeY | ImGuiChildFlags_AlwaysAutoResize);
+        ImGui::BeginChild(formatString("##oscillator%s", oscillator->settingsId.c_str()).c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0), ImGuiChildFlags_AutoResizeY | ImGuiChildFlags_AlwaysAutoResize);
         CommonViews::H4Title(formatString("%s - %s", oscillator->value->name.c_str(), oscillator->value->ownerName.c_str()));
         ImVec2 availableSize = ImGui::GetContentRegionAvail();
         ImVec2 oscillatorSize = ImVec2(availableSize.x, 100.0f);

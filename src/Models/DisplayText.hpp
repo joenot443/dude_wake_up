@@ -25,6 +25,8 @@ public:
   std::shared_ptr<Parameter> strokeColor;
   std::shared_ptr<Parameter> strokeWeight;
   std::shared_ptr<Parameter> strokeEnabled;
+  std::shared_ptr<Parameter> edgeSoftness;
+  std::shared_ptr<Parameter> textSmoothing;
 
   int fontSize = 72;
   Font font = FontService::getService()->fonts[0];
@@ -45,6 +47,8 @@ public:
   color(std::make_shared<Parameter>("Color", ParameterType_Color)),
   strokeColor(std::make_shared<Parameter>("Stroke Color", ParameterType_Color)),
   strokeEnabled(std::make_shared<Parameter>("Stroke", ParameterType_Bool)),
+  edgeSoftness(std::make_shared<Parameter>("Edge Smoothing", 0.8, 0.0, 2.0)),
+  textSmoothing(std::make_shared<Parameter>("Text Antialiasing", 8.0, 0.0, 16.0)),
   xPositionOscillator(std::make_shared<WaveformOscillator>(xPosition)),
   yPositionOscillator(std::make_shared<WaveformOscillator>(yPosition)),
   fontSelector(std::make_shared<Parameter>("Font", 0.0, 0.0, 0.0, ParameterType_Int))
@@ -82,7 +86,7 @@ public:
     }
 
     oscillators = {xPositionOscillator, yPositionOscillator};
-    parameters = {xPosition, yPosition, strokeEnabled, fontSelector};
+    parameters = {xPosition, yPosition, strokeEnabled, fontSelector, edgeSoftness, textSmoothing};
     registerParameters();
   };
 };

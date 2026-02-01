@@ -9,11 +9,18 @@ static void *AVFRecordingContext = &AVFRecordingContext;
 @property (nonatomic, strong) AVAssetWriter *assetWriter;
 @property (nonatomic, strong) AVAssetWriterInput *videoInput;
 @property (nonatomic, strong) AVAssetWriterInputPixelBufferAdaptor *pixelBufferAdaptor;
+@property (nonatomic, strong) AVAssetWriterInput *audioInput;
 @property (nonatomic, strong) dispatch_queue_t writingQueue;
 @property (nonatomic, strong) NSURL *outputURL;
 @property (nonatomic, assign) CGSize videoSize;
 @property (nonatomic, assign) int32_t timeScale; // FPS
 @property (nonatomic, assign) BOOL isRecording; // Internal mutable property
+@property (nonatomic, assign) BOOL hasAudio;
+
+// Audio format info
+@property (nonatomic, assign) Float64 audioSampleRate;
+@property (nonatomic, assign) int audioChannels;
+@property (nonatomic, assign) CMAudioFormatDescriptionRef audioFormatDescription;
 
 @end
 
@@ -28,7 +35,9 @@ static void *AVFRecordingContext = &AVFRecordingContext;
         _videoSize = videoSize;
         _timeScale = timeScale;
         _isRecording = NO;
-        
+        _hasAudio = NO;
+        _audioFormatDescription = NULL;
+
         // Serial queue for all writing operations
         // Using DISPATCH_QUEUE_SERIAL for safety with AVAssetWriter
         _writingQueue = dispatch_queue_create("com.yourapp.avfrecorder.writingqueue", DISPATCH_QUEUE_SERIAL);
@@ -60,7 +69,7 @@ static void *AVFRecordingContext = &AVFRecordingContext;
 - (BOOL)setupVideoInputWithSettings:(NSDictionary<NSString *, id> *)videoSettings error:(NSError **)error {
     NSError *writerError = nil;
     self.assetWriter = [[AVAssetWriter alloc] initWithURL:self.outputURL
-                                                 fileType:AVFileTypeQuickTimeMovie // .mov
+                                                 fileType:AVFileTypeMPEG4 // .mp4
                                                     error:&writerError];
     if (writerError || !self.assetWriter) {
         NSLog(@"[AVFRecorder] Error creating AVAssetWriter: %@", writerError);
@@ -92,6 +101,74 @@ static void *AVFRecordingContext = &AVFRecordingContext;
         return NO;
     }
 
+    return YES;
+}
+
+- (BOOL)setupAudioInputWithSampleRate:(Float64)sampleRate
+                             channels:(int)channels
+                                error:(NSError **)error {
+    if (!self.assetWriter) {
+        NSLog(@"[AVFRecorder] Must call setupVideoInput before setupAudioInput");
+        if (error) *error = [NSError errorWithDomain:@"AVFRecorderErrorDomain" code:-10
+                                            userInfo:@{NSLocalizedDescriptionKey: @"Video must be set up first."}];
+        return NO;
+    }
+
+    self.audioSampleRate = sampleRate;
+    self.audioChannels = channels;
+
+    // Audio output settings for AAC encoding
+    AudioChannelLayout channelLayout = {0};
+    channelLayout.mChannelLayoutTag = (channels == 1) ? kAudioChannelLayoutTag_Mono : kAudioChannelLayoutTag_Stereo;
+    NSData *channelLayoutData = [NSData dataWithBytes:&channelLayout length:sizeof(channelLayout)];
+
+    NSDictionary *audioSettings = @{
+        AVFormatIDKey: @(kAudioFormatMPEG4AAC),
+        AVSampleRateKey: @(sampleRate),
+        AVNumberOfChannelsKey: @(channels),
+        AVEncoderBitRateKey: @(128000), // 128 kbps
+        AVChannelLayoutKey: channelLayoutData
+    };
+
+    self.audioInput = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio
+                                                         outputSettings:audioSettings];
+    self.audioInput.expectsMediaDataInRealTime = YES;
+
+    if ([self.assetWriter canAddInput:self.audioInput]) {
+        [self.assetWriter addInput:self.audioInput];
+    } else {
+        NSLog(@"[AVFRecorder] Cannot add audio input to writer.");
+        if (error) *error = [NSError errorWithDomain:@"AVFRecorderErrorDomain" code:-11
+                                            userInfo:@{NSLocalizedDescriptionKey: @"Cannot add audio input."}];
+        return NO;
+    }
+
+    // Create audio format description for source (Float32 interleaved)
+    AudioStreamBasicDescription asbd = {0};
+    asbd.mSampleRate = sampleRate;
+    asbd.mFormatID = kAudioFormatLinearPCM;
+    asbd.mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagIsPacked;
+    asbd.mBytesPerPacket = sizeof(float) * channels;
+    asbd.mFramesPerPacket = 1;
+    asbd.mBytesPerFrame = sizeof(float) * channels;
+    asbd.mChannelsPerFrame = channels;
+    asbd.mBitsPerChannel = 32;
+
+    OSStatus status = CMAudioFormatDescriptionCreate(kCFAllocatorDefault,
+                                                      &asbd,
+                                                      sizeof(channelLayout),
+                                                      &channelLayout,
+                                                      0, NULL, NULL,
+                                                      &_audioFormatDescription);
+    if (status != noErr) {
+        NSLog(@"[AVFRecorder] Failed to create audio format description: %d", (int)status);
+        if (error) *error = [NSError errorWithDomain:@"AVFRecorderErrorDomain" code:status
+                                            userInfo:@{NSLocalizedDescriptionKey: @"Failed to create audio format."}];
+        return NO;
+    }
+
+    self.hasAudio = YES;
+    NSLog(@"[AVFRecorder] Audio input set up: %.0f Hz, %d channels", sampleRate, channels);
     return YES;
 }
 
@@ -170,6 +247,80 @@ static void *AVFRecordingContext = &AVFRecordingContext;
     return appendSuccess;
 }
 
+- (BOOL)addAudioSamples:(const float *)samples
+              numFrames:(int)numFrames
+              timestamp:(CMTime)timestamp {
+    if (!self.isRecording || !self.hasAudio || !samples || numFrames <= 0) {
+        return NO;
+    }
+
+    if (!CMTIME_IS_VALID(timestamp)) {
+        NSLog(@"[AVFRecorder] WARN: addAudioSamples called with invalid timestamp.");
+        return NO;
+    }
+
+    __block BOOL appendSuccess = NO;
+
+    // Copy samples to ensure data remains valid during async processing
+    size_t dataSize = numFrames * self.audioChannels * sizeof(float);
+    float *samplesCopy = (float *)malloc(dataSize);
+    if (!samplesCopy) {
+        NSLog(@"[AVFRecorder] Failed to allocate audio buffer copy.");
+        return NO;
+    }
+    memcpy(samplesCopy, samples, dataSize);
+
+    dispatch_sync(self.writingQueue, ^{
+        if (!self.audioInput.readyForMoreMediaData || !self.isRecording) {
+            NSLog(@"[AVFRecorder] WARN: Audio input not ready or not recording.");
+            free(samplesCopy);
+            return;
+        }
+
+        // Create CMBlockBuffer from audio data
+        CMBlockBufferRef blockBuffer = NULL;
+        OSStatus status = CMBlockBufferCreateWithMemoryBlock(kCFAllocatorDefault,
+                                                              samplesCopy,
+                                                              dataSize,
+                                                              kCFAllocatorMalloc, // Will free the memory
+                                                              NULL,
+                                                              0,
+                                                              dataSize,
+                                                              0,
+                                                              &blockBuffer);
+        if (status != kCMBlockBufferNoErr || !blockBuffer) {
+            NSLog(@"[AVFRecorder] Failed to create block buffer: %d", (int)status);
+            free(samplesCopy);
+            return;
+        }
+
+        // Create CMSampleBuffer
+        CMSampleBufferRef sampleBuffer = NULL;
+        status = CMAudioSampleBufferCreateReadyWithPacketDescriptions(kCFAllocatorDefault,
+                                                                       blockBuffer,
+                                                                       self.audioFormatDescription,
+                                                                       numFrames,
+                                                                       timestamp,
+                                                                       NULL, // No packet descriptions for PCM
+                                                                       &sampleBuffer);
+        CFRelease(blockBuffer);
+
+        if (status != noErr || !sampleBuffer) {
+            NSLog(@"[AVFRecorder] Failed to create audio sample buffer: %d", (int)status);
+            return;
+        }
+
+        // Append to writer
+        appendSuccess = [self.audioInput appendSampleBuffer:sampleBuffer];
+        CFRelease(sampleBuffer);
+
+        if (!appendSuccess) {
+            NSLog(@"[AVFRecorder] Error appending audio samples: %@", self.assetWriter.error);
+        }
+    });
+
+    return appendSuccess;
+}
 
 - (void)finishRecordingWithCompletionHandler:(void (^)(NSError * _Nullable error))handler {
     if (!self.isRecording && self.assetWriter.status != AVAssetWriterStatusWriting) {
@@ -186,7 +337,10 @@ static void *AVFRecordingContext = &AVFRecordingContext;
         self.isRecording = NO; // Set immediately on the queue
 
         if (self.assetWriter.status == AVAssetWriterStatusWriting) {
-            [self.videoInput markAsFinished]; // Mark input as finished first
+            [self.videoInput markAsFinished];
+            if (self.audioInput) {
+                [self.audioInput markAsFinished];
+            }
             
             // Weak self for block safety
             __weak typeof(self) weakSelf = self;
@@ -204,18 +358,28 @@ static void *AVFRecordingContext = &AVFRecordingContext;
                     if (handler) handler(finishError); // Failure
                 }
                 
-                // Clean up writer? Maybe not here, let ARC handle it or manage in C++ wrapper destructor
+                // Clean up writer
                  strongSelf.assetWriter = nil;
                  strongSelf.videoInput = nil;
                  strongSelf.pixelBufferAdaptor = nil;
+                 strongSelf.audioInput = nil;
+                 if (strongSelf.audioFormatDescription) {
+                     CFRelease(strongSelf.audioFormatDescription);
+                     strongSelf->_audioFormatDescription = NULL;
+                 }
             }];
         } else {
              NSLog(@"[AVFRecorder] Writer was not in writing state (%ld), cannot finish properly.", (long)self.assetWriter.status);
              NSError *finishError = self.assetWriter.error ?: [NSError errorWithDomain:@"AVFRecorderErrorDomain" code:-4 userInfo:@{NSLocalizedDescriptionKey: @"Writer not in writing state."}];
-             // Clean up resources even if not writing?
+             // Clean up resources
              self.assetWriter = nil;
              self.videoInput = nil;
              self.pixelBufferAdaptor = nil;
+             self.audioInput = nil;
+             if (self.audioFormatDescription) {
+                 CFRelease(self.audioFormatDescription);
+                 self->_audioFormatDescription = NULL;
+             }
              if (handler) handler(finishError);
         }
     });
@@ -225,16 +389,15 @@ static void *AVFRecordingContext = &AVFRecordingContext;
     // Check if still recording? Should be stopped via C++ wrapper destructor ideally.
     if (self.isRecording) {
         NSLog(@"[AVFRecorder] WARN: Dealloc called while still recording. Attempting to stop.");
-        // Synchronous stop might be problematic in dealloc
-        // This indicates a potential lifecycle issue in the calling code.
-        // Consider asserting or logging heavily.
-        // For safety, maybe just try dispatching async, but file might not finish.
          [self finishRecordingWithCompletionHandler:nil];
     }
-    
-    // Release queue if not using ARC for dispatch queues (modern SDKs use ARC)
-    // if (_writingQueue) { dispatch_release(_writingQueue); _writingQueue = nil; } // Pre-ARC
-    
+
+    // Clean up audio format description if not already done
+    if (_audioFormatDescription) {
+        CFRelease(_audioFormatDescription);
+        _audioFormatDescription = NULL;
+    }
+
     NSLog(@"[AVFRecorder] Deallocated.");
 }
 

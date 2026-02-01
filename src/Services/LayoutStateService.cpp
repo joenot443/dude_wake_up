@@ -107,6 +107,11 @@ void LayoutStateService::updateResolutionSettings(int i) {
   resolutionUpdateSubject.notify();
 }
 
+void LayoutStateService::setCustomResolution(float width, float height) {
+  resolution = ImVec2(width, height);
+  resolutionUpdateSubject.notify();
+}
+
 void LayoutStateService::togglePortraitSetting() {
   resolutionUpdateSubject.notify();
 }

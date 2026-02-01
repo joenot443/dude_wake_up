@@ -57,6 +57,17 @@ std::string ConfigService::strandsFolderFilePath()
   return relativeFilePathWithinNottawaFolder("/strands/");
 }
 
+std::string ConfigService::tempFilePath()
+{
+  std::string tempDir = relativeFilePathWithinNottawaFolder("/temp");
+  // Ensure temp directory exists
+  ofDirectory dir(tempDir);
+  if (!dir.exists()) {
+    dir.create(true);
+  }
+  return tempDir;
+}
+
 std::string ConfigService::relativeFilePathWithinNottawaFolder(std::string filePath)
 {
   return nottawaFolderFilePath() + filePath;
@@ -461,6 +472,109 @@ std::vector<std::string> ConfigService::loadStrandFile(std::string path)
   {
     ParameterService::getService()->loadConfig(data[ParametersJsonKey]);
   }
+  return ids;
+}
+
+std::vector<std::string> ConfigService::loadStrandJson(const std::string &jsonString)
+{
+  json data;
+  try
+  {
+    data = json::parse(jsonString);
+  }
+  catch (const std::exception &e)
+  {
+    log("Could not parse strand JSON: %s", e.what());
+    return {};
+  }
+
+  std::vector<std::string> ids;
+
+  // Handle shaders - strand format uses array, config format uses object keyed by ID
+  if (data.contains(ShadersJsonKey))
+  {
+    json shadersData = data[ShadersJsonKey];
+
+    // Convert array to object format if needed
+    if (shadersData.is_array())
+    {
+      json shadersObj = json::object();
+      for (const auto& shader : shadersData)
+      {
+        if (shader.contains("shaderId"))
+        {
+          std::string shaderId = shader["shaderId"];
+          shadersObj[shaderId] = shader;
+        }
+      }
+      shadersData = shadersObj;
+    }
+
+    if (shadersData.is_object())
+    {
+      std::vector<std::string> shaders = ShaderChainerService::getService()->idsFromLoadingConfig(shadersData);
+      ids.insert(ids.end(), shaders.begin(), shaders.end());
+    }
+  }
+
+  // Handle sources - strand format uses array, config format uses object keyed by ID
+  if (data.contains(SourcesJsonKey))
+  {
+    json sourcesData = data[SourcesJsonKey];
+
+    // Convert array to object format if needed
+    if (sourcesData.is_array())
+    {
+      json sourcesObj = json::object();
+      for (const auto& source : sourcesData)
+      {
+        if (source.contains("id"))
+        {
+          std::string sourceId = source["id"];
+          sourcesObj[sourceId] = source;
+        }
+      }
+      sourcesData = sourcesObj;
+    }
+
+    if (sourcesData.is_object())
+    {
+      std::vector<std::string> sources = VideoSourceService::getService()->idsFromLoadingConfig(sourcesData);
+      ids.insert(ids.end(), sources.begin(), sources.end());
+    }
+  }
+
+  // Handle connections - strand format uses array, config format uses object
+  if (data.contains(ConnectionsJsonKey))
+  {
+    json connectionsData = data[ConnectionsJsonKey];
+
+    // Convert array to object format if needed
+    if (connectionsData.is_array())
+    {
+      json connectionsObj = json::object();
+      for (const auto& conn : connectionsData)
+      {
+        if (conn.contains("id"))
+        {
+          std::string connId = conn["id"];
+          connectionsObj[connId] = conn;
+        }
+      }
+      connectionsData = connectionsObj;
+    }
+
+    if (connectionsData.is_object())
+    {
+      ShaderChainerService::getService()->loadConnectionsConfig(connectionsData);
+    }
+  }
+
+  if (data[ParametersJsonKey].is_object())
+  {
+    ParameterService::getService()->loadConfig(data[ParametersJsonKey]);
+  }
+
   return ids;
 }
 

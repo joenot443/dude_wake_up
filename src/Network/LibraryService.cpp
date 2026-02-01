@@ -92,8 +92,10 @@ void LibraryService::backgroundFetchLibraryFiles()
 }
 
 void LibraryService::didFetchLibraryFiles() {
-  downloadFutures.push_back(std::async(std::launch::async, &LibraryService::downloadAllThumbnails, this));
+  // First populate sources (without thumbnails) so they appear in the browser immediately
   repopulateVideoSourcesFromMainThread();
+  // Then download thumbnails and repopulate again when done
+  downloadFutures.push_back(std::async(std::launch::async, &LibraryService::downloadAllThumbnails, this));
 }
 
 void LibraryService::repopulateVideoSourcesFromMainThread() {
@@ -232,7 +234,7 @@ void LibraryService::downloadThumbnail(std::shared_ptr<LibraryFile> file)
   
   if (res && res->status == 200)
   {
-    std::string file_path = ConfigService::getService()->libraryFolderFilePath() + "/" + file->thumbnailFilename;
+    std::string file_path = file->thumbnailPath();
     std::ofstream file_stream(file_path, std::ios::binary);
     if (file_stream.is_open()) {
       file_stream.write(res->body.data(), res->body.size());
@@ -264,6 +266,7 @@ void LibraryService::downloadAllThumbnails()
   // didFetchLibraryFiles), so blocking here will not stall the main/UI
   // thread. Downloading one at a time also prevents excessive resource
   // consumption that previously led to crashes.
+  bool downloadedAny = false;
   for (const auto &file : libraryFiles)
   {
     if (hasThumbnailOnDisk(file.second)) {
@@ -273,6 +276,13 @@ void LibraryService::downloadAllThumbnails()
     // Download the thumbnail synchronously. The method handles its own error
     // reporting and will block until the download completes (or fails).
     downloadThumbnail(file.second);
+    downloadedAny = true;
+  }
+
+  // After all thumbnails are downloaded, repopulate video sources
+  // so that generatePreview() can now find the thumbnail files
+  if (downloadedAny) {
+    repopulateVideoSourcesFromMainThread();
   }
 }
 
@@ -298,7 +308,7 @@ void LibraryService::downloadFile(std::shared_ptr<LibraryFile> file, std::functi
 #endif
 
   // Get file path for partial/complete download
-  std::string file_path = ConfigService::getService()->libraryFolderFilePath() + "/" + file->filename;
+  std::string file_path = file->videoPath();
 
   // Check if partial download exists
   uint64_t startByte = 0;
@@ -645,6 +655,185 @@ void LibraryService::submitFeedback(const std::string &text,
     if (callback) {
       MainApp::getApp()->executeOnMainThread([callback, ok, err]() {
         callback(ok, err);
+      });
+    }
+  }));
+}
+
+// MARK: - Strand Sharing
+
+void LibraryService::shareStrand(const std::string &title,
+                                  const std::string &description,
+                                  const std::string &strandJson,
+                                  const std::string &previewData,
+                                  const std::string &videoData,
+                                  const std::string &author,
+                                  std::function<void(bool success, const std::string &url, const std::string &error)> callback)
+{
+  // Launch in background similar to other async operations
+  downloadFutures.push_back(std::async(std::launch::async, [=]() {
+
+    std::string host, dummy;
+    if (!parseHttpsUrl(API_URL, host, dummy)) {
+      if (callback) {
+        MainApp::getApp()->executeOnMainThread([callback]() {
+          callback(false, "", "Invalid API URL");
+        });
+      }
+      return;
+    }
+
+#ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+    if (callback) {
+      MainApp::getApp()->executeOnMainThread([callback]() {
+        callback(false, "", "cpp-httplib built without SSL support");
+      });
+    }
+    return;
+#else
+    httplib::SSLClient cli(host.c_str());
+    cli.enable_server_certificate_verification(false);
+    cli.set_connection_timeout(30, 0); // Increased timeout for video uploads
+    cli.set_read_timeout(120, 0); // Increased read timeout for video processing
+    cli.set_follow_location(true);
+
+    httplib::Headers headers = {
+      {"User-Agent", "nottawa-app/1.0"}
+    };
+
+    httplib::MultipartFormDataItems items;
+    items.push_back({"title", title, "", "text/plain"});
+    items.push_back({"strand", strandJson, "", "application/json"});
+
+    if (!description.empty()) {
+      items.push_back({"description", description, "", "text/plain"});
+    }
+    if (!author.empty()) {
+      items.push_back({"author", author, "", "text/plain"});
+    }
+    if (!previewData.empty()) {
+      items.push_back({"preview", previewData, "preview.png", "image/png"});
+    }
+    if (!videoData.empty()) {
+      items.push_back({"video", videoData, "preview.mp4", "video/mp4"});
+    }
+
+    auto res = cli.Post("/api/strands/share", headers, items);
+#endif
+
+    bool ok = false;
+    std::string url;
+    std::string err;
+
+    if (res && res->status == 201) {
+      ok = true;
+      try {
+        json responseJson = json::parse(res->body);
+        if (responseJson.contains("url")) {
+          url = responseJson["url"];
+        }
+      } catch (const std::exception &e) {
+        log("Failed to parse share response: %s", e.what());
+        url = ""; // URL parsing failed but share succeeded
+      }
+    } else {
+      ok = false;
+      if (res) {
+        if (res->status == 429) {
+          err = "Too many shares. Please wait before sharing more.";
+        } else {
+          err = "Server returned status " + std::to_string(res->status);
+        }
+      } else {
+        err = "Network error - please check your connection";
+      }
+    }
+
+    // Invoke callback on main thread
+    if (callback) {
+      MainApp::getApp()->executeOnMainThread([callback, ok, url, err]() {
+        callback(ok, url, err);
+      });
+    }
+  }));
+}
+
+void LibraryService::fetchSharedStrand(const std::string &slug,
+                                        std::function<void(bool success, const std::string &strandJson, const std::string &title, const std::string &error)> callback)
+{
+  // Launch in background similar to other async operations
+  downloadFutures.push_back(std::async(std::launch::async, [=]() {
+
+    std::string host, dummy;
+    if (!parseHttpsUrl(API_URL, host, dummy)) {
+      if (callback) {
+        MainApp::getApp()->executeOnMainThread([callback]() {
+          callback(false, "", "", "Invalid API URL");
+        });
+      }
+      return;
+    }
+
+#ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+    if (callback) {
+      MainApp::getApp()->executeOnMainThread([callback]() {
+        callback(false, "", "", "cpp-httplib built without SSL support");
+      });
+    }
+    return;
+#else
+    httplib::SSLClient cli(host.c_str());
+    cli.enable_server_certificate_verification(false);
+    cli.set_connection_timeout(15, 0);
+    cli.set_read_timeout(30, 0);
+    cli.set_follow_location(true);
+
+    httplib::Headers headers = {
+      {"User-Agent", "nottawa-app/1.0"}
+    };
+
+    std::string path = "/api/strands/shared/" + slug;
+    auto res = cli.Get(path.c_str(), headers);
+#endif
+
+    bool ok = false;
+    std::string strandJson;
+    std::string title;
+    std::string err;
+
+    if (res && res->status == 200) {
+      ok = true;
+      try {
+        json responseJson = json::parse(res->body);
+        if (responseJson.contains("strand")) {
+          // The strand field contains the strand data as a string
+          strandJson = responseJson["strand"];
+        }
+        if (responseJson.contains("title")) {
+          title = responseJson["title"];
+        }
+      } catch (const std::exception &e) {
+        log("Failed to parse shared strand response: %s", e.what());
+        ok = false;
+        err = "Failed to parse strand data";
+      }
+    } else {
+      ok = false;
+      if (res) {
+        if (res->status == 404) {
+          err = "Strand not found";
+        } else {
+          err = "Server returned status " + std::to_string(res->status);
+        }
+      } else {
+        err = "Network error - please check your connection";
+      }
+    }
+
+    // Invoke callback on main thread
+    if (callback) {
+      MainApp::getApp()->executeOnMainThread([callback, ok, strandJson, title, err]() {
+        callback(ok, strandJson, title, err);
       });
     }
   }));

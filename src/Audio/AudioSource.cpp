@@ -19,7 +19,29 @@ void AudioSource::toggle() {
     setup();
 }
 
+void AudioSource::setRecordingCallback(AudioRecordingCallback callback) {
+  std::lock_guard<std::mutex> lock(recordingMutex);
+  recordingCallback = callback;
+}
+
+void AudioSource::clearRecordingCallback() {
+  std::lock_guard<std::mutex> lock(recordingMutex);
+  recordingCallback = nullptr;
+}
+
 void AudioSource::audioIn(ofSoundBuffer &soundBuffer) {
+  // Call recording callback first (before silence check) to capture all audio
+  {
+    std::lock_guard<std::mutex> lock(recordingMutex);
+    if (recordingCallback) {
+      auto& buffer = soundBuffer.getBuffer();
+      recordingCallback(buffer.data(),
+                        static_cast<int>(soundBuffer.getNumFrames()),
+                        static_cast<int>(soundBuffer.getNumChannels()),
+                        soundBuffer.getSampleRate());
+    }
+  }
+
   float avg = 0.0f;
   for (size_t i = 0; i < soundBuffer.getNumFrames(); i++) {
     for (size_t c = 0; c < soundBuffer.getNumChannels(); c++) {
@@ -27,12 +49,12 @@ void AudioSource::audioIn(ofSoundBuffer &soundBuffer) {
     }
   }
   avg /= static_cast<float>(soundBuffer.getNumFrames() * soundBuffer.getNumChannels());
-  
-  // If we have mostly silence, return
+
+  // If we have mostly silence, return (but recording still captured above)
   if (abs(avg) < 0.001f) {
     return;
   }
-  
+
   auto& buffer = soundBuffer.getBuffer();
   processFrame(buffer);
   debugGist();

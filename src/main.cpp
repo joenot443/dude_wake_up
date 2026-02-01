@@ -8,6 +8,7 @@
 #include "imgui_internal.h"
 #include "CommonViews.hpp"
 #include "ofMain.h"
+#include "GLFW/glfw3.h"
 #include "MainApp.h"
 #include "FontService.hpp"
 #include "ModulationService.hpp"
@@ -30,6 +31,7 @@
 #include "TimeService.hpp"
 #include "ParameterService.hpp"
 #include "IconService.hpp"
+#include "URLSchemeHandler.h"
 
 
 const static ofVec2f windowSize = ofVec2f(2400, 1600);
@@ -104,17 +106,25 @@ int main( ){
   auto sentryPath = ofFilePath::join(homeDir, "/nottawa/sentry");
   
   ofGLFWWindowSettings settings;
-  settings.setSize(1440, 900);
   settings.setGLVersion(3, 2);
+  settings.setSize(1440, 900);
   auto window = ofCreateWindow(settings);
+  // Maximize the window to fill the screen
+  auto glfwWindow = dynamic_cast<ofAppGLFWWindow*>(window.get())->getGLFWWindow();
+  glfwMaximizeWindow(glfwWindow);
   auto app = shared_ptr<MainApp>(new MainApp(window));
-  ofSetWindowShape(1440, 900);
   ofSetFrameRate(60);
   ofEnableAntiAliasing();
   ofEnableSmoothing();
   ofSetEscapeQuitsApp(false);
   ofSetWindowTitle("Nottawa");
   ofSetLogLevel(OF_LOG_NOTICE);
+
+  // Initialize URL scheme handler for nottawa:// links
+  #ifdef TARGET_OSX
+  URLSchemeHandler::getInstance().initialize();
+  #endif
+
   ofRunApp(window, app);
   ofRunMainLoop();
   return 0;

@@ -43,6 +43,7 @@
 		02CED2812E6F9E580010EC68 /* src_linear.c in Sources */ = {isa = PBXBuildFile; fileRef = 02CED27C2E6F9E580010EC68 /* src_linear.c */; };
 		02CED2822E6F9E580010EC68 /* samplerate.c in Sources */ = {isa = PBXBuildFile; fileRef = 02CED27B2E6F9E580010EC68 /* samplerate.c */; };
 		02D080382EE85937003AD114 /* SparkleUpdater.mm in Sources */ = {isa = PBXBuildFile; fileRef = 02D080372EE85937003AD114 /* SparkleUpdater.mm */; };
+		02D0803C2FFAA000003AD114 /* URLSchemeHandler.mm in Sources */ = {isa = PBXBuildFile; fileRef = 02D0803A2FFAA000003AD114 /* URLSchemeHandler.mm */; };
 		02D0803B2EE9B015003AD114 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 02D080342EE857C3003AD114 /* Sparkle.framework */; };
 		02EF52772E6B706400ECC53A /* PlaylistSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02EF52762E6B706400ECC53A /* PlaylistSource.cpp */; };
 		02F157C82E1722E0003B6C2A /* TimePanelView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F157C72E1722E0003B6C2A /* TimePanelView.cpp */; };
@@ -360,6 +361,8 @@
 		02D080342EE857C3003AD114 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = lib/Sparkle.framework; sourceTree = "<group>"; };
 		02D080362EE85937003AD114 /* SparkleUpdater.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SparkleUpdater.h; sourceTree = "<group>"; };
 		02D080372EE85937003AD114 /* SparkleUpdater.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SparkleUpdater.mm; sourceTree = "<group>"; };
+		02D0803A2FFAA000003AD114 /* URLSchemeHandler.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = URLSchemeHandler.mm; sourceTree = "<group>"; };
+		02D0803B2FFAA000003AD114 /* URLSchemeHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = URLSchemeHandler.h; sourceTree = "<group>"; };
 		02D115332DC94674007B87CE /* AudioSettings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AudioSettings.hpp; sourceTree = "<group>"; };
 		02D115342DC94674007B87CE /* AudioTrack.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AudioTrack.hpp; sourceTree = "<group>"; };
 		02EF52742E6B706400ECC53A /* PlaylistSettings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PlaylistSettings.hpp; sourceTree = "<group>"; };
@@ -1251,6 +1254,8 @@
 				"6EFB1B9C-3BAD-4AA0-874F-3EEB50C57D65" /* ShaderChainerService.hpp */,
 				02D080362EE85937003AD114 /* SparkleUpdater.h */,
 				02D080372EE85937003AD114 /* SparkleUpdater.mm */,
+				02D0803B2FFAA000003AD114 /* URLSchemeHandler.h */,
+				02D0803A2FFAA000003AD114 /* URLSchemeHandler.mm */,
 				"CB8A8FEB-43D7-45EA-8167-6DA30320942A" /* StrandService.cpp */,
 				"C12DDDBE-B4DB-4ECA-A07D-B0240F531ACA" /* StrandService.hpp */,
 				"7781352D-8ED2-4588-B25C-17029F165EB4" /* TextureService.cpp */,
@@ -1891,7 +1896,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"$OF_PATH/scripts/osx/xcode_project.sh\"\nNOTTAWA_DIR=\"/Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up\"\n\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n# Copy libfmod and change install directory for fmod to run\nrsync -aved \"$OF_PATH/libs/fmod/lib/osx/libfmod.dylib\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/\";\n\nrsync -aved \"$NOTTAWA_DIR/lib/sentry-native/xcodebuild/Debug/libsentry.dylib\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/\";\n\n# Copy Sparkle - with proper error checking\nSOURCE=\"/Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up/lib/Sparkle.framework\"\nDEST=\"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks\"\n\necho \"Copying from: $SOURCE\"\necho \"Copying to: $DEST\"\n\nif [ -d \"$SOURCE\" ]; then\n    mkdir -p \"$DEST\"\n\n    # Use ditto instead of cp - it's what Xcode uses internally\n    ditto \"$SOURCE\" \"$DEST/Sparkle.framework\"\n\n    # Remove bin\n    rm -rf \"$DEST/Sparkle.framework/bin\"\n\n    # Verify it's there\n    if [ -d \"$DEST/Sparkle.framework\" ]; then\n        echo \"Sparkle.framework successfully copied\"\n        codesign --force --sign - \"$DEST/Sparkle.framework\"\n    else\n        echo \"ERROR: Sparkle.framework not found after copy!\"\n        exit 1\n    fi\nelse\n    echo \"ERROR: Source not found at $SOURCE\"\n    exit 1\nfi\n\necho \"$GCC_PREPROCESSOR_DEFINITIONS\";\n\n\n# Copy the shaders folder into Resources/data\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/\"\n\ncp -R \"$NOTTAWA_DIR/images/\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/images\"\n\n\ncp -R \"$NOTTAWA_DIR/shaders/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/shaders\"\n\n# Copy the markdown folder into Resources/data\ncp -R \"$NOTTAWA_DIR/markdown/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/markdown\"\n\n# Copy the fonts folder into Resources/data\ncp -R \"$NOTTAWA_DIR/fonts/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/fonts\"\n\n# Copy the misc folder into Resources/data\ncp -R \"$NOTTAWA_DIR/misc/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/misc\"\n\n# Copy the audio folder into Resources/data\ncp -R \"$NOTTAWA_DIR/audio/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/audio\"\n";
+			shellScript = "\"$OF_PATH/scripts/osx/xcode_project.sh\"\nNOTTAWA_DIR=\"/Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up\"\n\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n# Copy libfmod and change install directory for fmod to run\nrsync -aved \"$OF_PATH/libs/fmod/lib/osx/libfmod.dylib\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/\";\n\n# Copy Sparkle - with proper error checking\nSOURCE=\"/Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up/lib/Sparkle.framework\"\nDEST=\"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks\"\n\necho \"Copying from: $SOURCE\"\necho \"Copying to: $DEST\"\n\nif [ -d \"$SOURCE\" ]; then\n    mkdir -p \"$DEST\"\n\n    # Use ditto instead of cp - it's what Xcode uses internally\n    ditto \"$SOURCE\" \"$DEST/Sparkle.framework\"\n\n    # Remove bin\n    rm -rf \"$DEST/Sparkle.framework/bin\"\n\n    # Verify it's there\n    if [ -d \"$DEST/Sparkle.framework\" ]; then\n        echo \"Sparkle.framework successfully copied\"\n        codesign --force --sign - \"$DEST/Sparkle.framework\"\n    else\n        echo \"ERROR: Sparkle.framework not found after copy!\"\n        exit 1\n    fi\nelse\n    echo \"ERROR: Source not found at $SOURCE\"\n    exit 1\nfi\n\necho \"$GCC_PREPROCESSOR_DEFINITIONS\";\n\n\n# Copy the shaders folder into Resources/data\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/\"\n\ncp -R \"$NOTTAWA_DIR/images/\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/images\"\n\n\ncp -R \"$NOTTAWA_DIR/shaders/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/shaders\"\n\n# Copy the markdown folder into Resources/data\ncp -R \"$NOTTAWA_DIR/markdown/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/markdown\"\n\n# Copy the fonts folder into Resources/data\ncp -R \"$NOTTAWA_DIR/fonts/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/fonts\"\n\n# Copy the misc folder into Resources/data\ncp -R \"$NOTTAWA_DIR/misc/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/misc\"\n\n# Copy the audio folder into Resources/data\ncp -R \"$NOTTAWA_DIR/audio/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/audio\"\n";
 			showEnvVarsInLog = 0;
 		};
 		E42962A92163ECCD00A6A9E2 /* Run Script — Compile OF */ = {
@@ -1994,6 +1999,7 @@
 				028651472D9468DB000CE0D4 /* imgui_canvas.cpp in Sources */,
 				028651482D9468DB000CE0D4 /* imgui_node_editor.cpp in Sources */,
 				02D080382EE85937003AD114 /* SparkleUpdater.mm in Sources */,
+				02D0803C2FFAA000003AD114 /* URLSchemeHandler.mm in Sources */,
 				028651492D9468DB000CE0D4 /* imgui_node_editor_api.cpp in Sources */,
 				"45643836-DB4D-4615-84BD-406FD1FC93B3" /* AvailableShader.cpp in Sources */,
 				"DC518C46-16A7-4897-BE4A-BDA838873EEE" /* BarPlotView.cpp in Sources */,

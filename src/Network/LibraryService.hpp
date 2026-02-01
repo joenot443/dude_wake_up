@@ -75,6 +75,22 @@ public:
                       const std::string &email,
                       std::function<void(bool success, const std::string &error)> callback);
 
+  // Strand Sharing
+  // Shares a strand publicly and returns the URL via callback
+  // previewData: PNG image data for the preview
+  // videoData: MOV video data (optional, empty string to skip)
+  void shareStrand(const std::string &title,
+                   const std::string &description,
+                   const std::string &strandJson,
+                   const std::string &previewData,
+                   const std::string &videoData,
+                   const std::string &author,
+                   std::function<void(bool success, const std::string &url, const std::string &error)> callback);
+
+  // Fetches a shared strand by slug and returns the strand JSON via callback
+  void fetchSharedStrand(const std::string &slug,
+                         std::function<void(bool success, const std::string &strandJson, const std::string &title, const std::string &error)> callback);
+
   observable::subject<void()> libraryThumbnailUpdateSubject;
 
   std::map<std::string, std::shared_ptr<LibraryFile>> libraryFiles;

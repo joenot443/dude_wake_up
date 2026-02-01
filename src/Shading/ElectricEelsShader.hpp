@@ -22,12 +22,22 @@ struct ElectricEelsSettings: public ShaderSettings {
   std::shared_ptr<Parameter> shaderValue;
   std::shared_ptr<WaveformOscillator> shaderValueOscillator;
 
+  std::shared_ptr<Parameter> orbX;
+  std::shared_ptr<WaveformOscillator> orbXOscillator;
+
+  std::shared_ptr<Parameter> orbY;
+  std::shared_ptr<WaveformOscillator> orbYOscillator;
+
   ElectricEelsSettings(std::string shaderId, json j) :
   shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
   shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
+  orbX(std::make_shared<Parameter>("Orb X", 0.0, -2.0, 2.0)),
+  orbXOscillator(std::make_shared<WaveformOscillator>(orbX)),
+  orbY(std::make_shared<Parameter>("Orb Y", 0.0, -2.0, 2.0)),
+  orbYOscillator(std::make_shared<WaveformOscillator>(orbY)),
   ShaderSettings(shaderId, j, "ElectricEels") {
-    parameters = { shaderValue };
-    oscillators = { shaderValueOscillator };
+    parameters = { shaderValue, orbX, orbY };
+    oscillators = { shaderValueOscillator, orbXOscillator, orbYOscillator };
     load(j);
     registerParameters();
   };
@@ -48,6 +58,8 @@ struct ElectricEelsShader: Shader {
     shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
+    shader.setUniform1f("orbX", settings->orbX->value);
+    shader.setUniform1f("orbY", settings->orbY->value);
     frame->draw(0, 0);
     shader.end();
     canvas->end();
@@ -67,7 +79,7 @@ struct ElectricEelsShader: Shader {
 
   void drawSettings() override {
     CommonViews::H3Title("ElectricEels");
-
+    CommonViews::MultiSlider("Orb Position", settings->shaderId, settings->orbX, settings->orbY, settings->orbXOscillator, settings->orbYOscillator);
   }
 };
 

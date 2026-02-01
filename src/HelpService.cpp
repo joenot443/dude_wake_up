@@ -373,11 +373,15 @@ void HelpService::drawActionButtons() {
   ImGui::SameLine();
   CommonViews::H3Title(StringManager::get("scale_to_fit_instruction"), false);
   ImGui::SetCursorPosX(x);
+  CommonViews::ImageNamedNew("forward.png", iconSize);
+  ImGui::SameLine();
+  CommonViews::H3Title(StringManager::get("share_strand_instruction"), false);
+  ImGui::SetCursorPosX(x);
   ImGui::PushFont(FontService::getService()->current->p);
   ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 180.0);
   ImGui::BeginChild("##completeHelpChild", ImVec2(50.0, 50.0), ImGuiChildFlags_None, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration);
   if (ImGui::Button("Okay!")) {
-    showPopup = true;
+    showShareHelp = true;
   }
   ImGui::EndChild();
   ImGui::PopFont();
@@ -391,6 +395,64 @@ void HelpService::drawStageModeHelp() {
   CommonViews::H3Title(StringManager::get("stage_mode_subtitle"));
   CommonViews::xsSpacing();
   CommonViews::H3Title(StringManager::get("stage_mode_description"));
+  ImGui::EndChild();
+}
+
+void HelpService::drawShareStrandHelp() {
+  ImVec2 helpSize = ImVec2(400.0, 280.0);
+  ImGui::SetCursorPos(ImVec2(ImGui::GetWindowWidth() / 2.0 - helpSize.x / 2.0, ImGui::GetWindowHeight() / 2.0 - helpSize.y / 2.0));
+  ImGui::BeginChild("share_strand_help", helpSize, true, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar);
+
+  CommonViews::H2Title(StringManager::get("share_strand_title"));
+  CommonViews::xsSpacing();
+  CommonViews::H3Title(StringManager::get("share_strand_description"));
+  CommonViews::mSpacing();
+
+  ImVec2 iconSize = ImVec2(20.0, 20.0);
+  float x = ImGui::GetCursorPosX();
+
+  // Step 1: Click share button
+  ImGui::SetCursorPosX(x);
+  CommonViews::ImageNamedNew("forward.png", iconSize);
+  ImGui::SameLine();
+  CommonViews::H3Title(StringManager::get("share_strand_step1"), false);
+  CommonViews::xsSpacing();
+
+  // Step 2: Add title/description
+  ImGui::SetCursorPosX(x);
+  ImGui::Bullet();
+  ImGui::SameLine();
+  CommonViews::H3Title(StringManager::get("share_strand_step2"), false);
+  CommonViews::xsSpacing();
+
+  // Step 3: Preview is captured automatically
+  ImGui::SetCursorPosX(x);
+  ImGui::Bullet();
+  ImGui::SameLine();
+  CommonViews::H3Title(StringManager::get("share_strand_step3"), false);
+  CommonViews::xsSpacing();
+
+  // Step 4: Click share to get link
+  ImGui::SetCursorPosX(x);
+  ImGui::Bullet();
+  ImGui::SameLine();
+  CommonViews::H3Title(StringManager::get("share_strand_step4"), false);
+  CommonViews::mSpacing();
+
+  // Note about opening shared strands
+  ImGui::SetCursorPosX(x);
+  CommonViews::H3BTitle(StringManager::get("share_strand_note"), false);
+  CommonViews::mSpacing();
+
+  // Continue button
+  ImGui::PushFont(FontService::getService()->current->p);
+  ImGui::SetCursorPosX(helpSize.x / 2.0 - 30.0);
+  if (ImGui::Button("Got it!")) {
+    showShareHelp = false;
+    showPopup = true;
+  }
+  ImGui::PopFont();
+
   ImGui::EndChild();
 }
 

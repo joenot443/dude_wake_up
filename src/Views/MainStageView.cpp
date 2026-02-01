@@ -64,6 +64,9 @@ void MainStageView::update()
   if (LayoutStateService::getService()->showWelcomeScreen) {
     welcomeScreenView.update();
   }
+  if (showShareStrandWindow) {
+    shareStrandView.update();
+  }
 
   if (drawFPS) {
     ofSetWindowTitle(formatString("%.2f FPS", ofGetFrameRate()));
@@ -78,10 +81,11 @@ void MainStageView::draw()
   ImVec2 browserSize = LayoutStateService::getService()->browserSize();
   
   //  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(15.0, 15.0));
+  float leftColumnWidth = leftPanelCollapsed ? 20.0f : browserSize.x;
   int columnCount = LayoutStateService::getService()->shouldDrawShaderInfo() ? 3 : 2;
   ImGui::Columns(columnCount, "main_stage_view", false);
-  ImGui::SetColumnWidth(0, browserSize.x);
-  ImGui::SetColumnWidth(1, nodeLayoutSize.x);
+  ImGui::SetColumnWidth(0, leftColumnWidth);
+  ImGui::SetColumnWidth(1, nodeLayoutSize.x + (leftPanelCollapsed ? browserSize.x - 20.0f : 0.0f));
   if (LayoutStateService::getService()->shouldDrawShaderInfo()) {
     ImGui::SetColumnWidth(2, browserSize.x);
   }
@@ -91,6 +95,18 @@ void MainStageView::draw()
   // | Effects |        ''
   // | Library |       Audio
 
+  if (leftPanelCollapsed) {
+    float panelHeight = browserSize.y * 3;
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 0.5f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.4f, 0.4f, 0.4f, 0.7f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.5f, 0.5f, 0.5f, 0.8f));
+    if (ImGui::Button(">>##expandPanel", ImVec2(10.0f, panelHeight))) {
+      leftPanelCollapsed = false;
+    }
+    ImGui::PopStyleColor(3);
+  }
+
+  if (!leftPanelCollapsed) {
   // Calculate dynamic heights based on collapse states
   const float collapsedHeight = 56.0f; // Height when collapsed (just shows the search bar/header)
   const float totalHeight = browserSize.y * 3; // Total available height for all three sections
@@ -111,7 +127,9 @@ void MainStageView::draw()
   float expandedSectionHeight = expandedCount > 0 ? availableForExpanded / expandedCount : browserSize.y;
 
   // Calculate individual section heights with margin for rounded corners
+  const float collapseBarWidth = 10.0f;
   const float sideMargin = 18.0f;
+  ImVec2 collapseBarStartPos = ImGui::GetCursorPos();
   ImVec2 sourceBrowserSize = ImVec2(browserSize.x - sideMargin, sourceBrowserCollapsed ? collapsedHeight : expandedSectionHeight);
   ImVec2 shaderBrowserSize = ImVec2(browserSize.x - sideMargin, shaderBrowserCollapsed ? collapsedHeight : expandedSectionHeight);
   ImVec2 utilityBrowserSize = ImVec2(browserSize.x - sideMargin, utilityPanelCollapsed ? collapsedHeight : expandedSectionHeight);
@@ -199,8 +217,22 @@ void MainStageView::draw()
     ImGui::SetTabItemClosed("My Strands");   // Reflect external control by closing the other tab
   }
   
+  // Collapse left panel button — narrow vertical bar to the right of browsers
+  float collapseBarHeight = totalHeight;
+  ImGui::SetCursorPos(ImVec2(browserSize.x - sideMargin, collapseBarStartPos.y));
+  ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 0.5f));
+  ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.4f, 0.4f, 0.4f, 0.7f));
+  ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.5f, 0.5f, 0.5f, 0.8f));
+  ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
+  if (ImGui::Button("##collapsePanel", ImVec2(sideMargin, collapseBarHeight))) {
+    leftPanelCollapsed = true;
+  }
+  ImGui::PopStyleVar();
+  ImGui::PopStyleColor(3);
+  } // end if (!leftPanelCollapsed)
+
   drawMenu();
-    
+
   ImGui::NextColumn();
   // NodeLayout OR StageMode
   if (LayoutStateService::getService()->stageModeEnabled) {
@@ -230,6 +262,17 @@ void MainStageView::draw()
   if (showFeedbackWindow) {
     feedbackView.draw(&showFeedbackWindow);
   }
+
+  // Check if NodeLayoutView wants to share a strand
+  if (NodeLayoutView::getInstance()->hasPendingShareStrand) {
+    NodeLayoutView::getInstance()->hasPendingShareStrand = false;
+    shareStrandView.show(NodeLayoutView::getInstance()->pendingShareStrand);
+    showShareStrandWindow = true;
+  }
+
+  if (showShareStrandWindow) {
+    shareStrandView.draw(&showShareStrandWindow);
+  }
 }
 
 void MainStageView::drawMenu()
@@ -247,6 +290,33 @@ void MainStageView::drawMenu()
       {
         ConfigService::getService()->saveNewWorkspace();
       }
+
+      ImGui::Separator();
+
+      if (ImGui::MenuItem("Share Strand...", ""))
+      {
+        // Build a strand from all current connectables
+        std::vector<std::shared_ptr<Connectable>> connectables;
+        for (auto& shader : ShaderChainerService::getService()->shaders()) {
+          connectables.push_back(shader);
+        }
+        for (auto& source : VideoSourceService::getService()->videoSources()) {
+          connectables.push_back(source);
+        }
+
+        if (!connectables.empty()) {
+          Strand strand;
+          strand.connectables = connectables;
+          strand.connections = ShaderChainerService::getService()->connections();
+          strand.name = Strand::strandName(connectables);
+
+          shareStrandView.show(strand);
+          showShareStrandWindow = true;
+        }
+      }
+
+      ImGui::Separator();
+
       if (ImGui::MenuItem("Open Workspace", "Cmd+O"))
       {
         ConfigService::getService()->loadWorkspaceDialogue();

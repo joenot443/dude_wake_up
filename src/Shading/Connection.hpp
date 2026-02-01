@@ -400,7 +400,7 @@ public:
   {
     if (!conn)
       return; // Don't proceed if the connection is null
-    
+
     // Remove the connection from the 'outputs' map of the starting Connectable
     if (conn->start)
     {
@@ -410,27 +410,24 @@ public:
       {
         auto& connections = output_iter->second; // Get reference to the vector
         connections.erase(std::remove(connections.begin(), connections.end(), conn), connections.end());
-        
+
         // If it's the last Connection in that OutputSlot, remove the entry
         if (connections.empty()) {
           // Use the iterator to erase for efficiency
           conn->start->outputs.erase(output_iter);
         }
       }
-      // Optional: Add logging here if output_iter == conn->start->outputs.end()
-      // as it might indicate an inconsistent state.
     }
-    
+
     // Remove the connection from the 'inputs' map of the ending Connectable
+    // Use the inputSlot directly for more reliable removal
     if (conn->end)
     {
-      // This part looks correct - iterates and erases based on value comparison
-      auto it = conn->end->inputs.begin();
-      while (it != conn->end->inputs.end()) {
-        if (conn == it->second) {
-          it = conn->end->inputs.erase(it); // Erase and update iterator
-        } else {
-          ++it;
+      auto input_iter = conn->end->inputs.find(conn->inputSlot);
+      if (input_iter != conn->end->inputs.end()) {
+        // Verify this is the same connection before erasing
+        if (input_iter->second == conn || input_iter->second->id == conn->id) {
+          conn->end->inputs.erase(input_iter);
         }
       }
     }

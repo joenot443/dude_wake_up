@@ -251,7 +251,7 @@ void VideoSourceBrowserView::draw() {
   // Only draw tabs and content if not collapsed
   if (collapsed == nullptr || !*collapsed) {
     if (ImGui::BeginTabBar("VideoSourceBrowser", ImGuiTabBarFlags_None)) {
-      if (ImGui::BeginTabItem("Generated", nullptr, currentTab == 0 ? ImGuiTabItemFlags_SetSelected : 0)) {
+      if (ImGui::BeginTabItem("Scenes", nullptr, currentTab == 0 ? ImGuiTabItemFlags_SetSelected : 0)) {
         drawSelectedBrowser();
         ImGui::EndTabItem();
       }

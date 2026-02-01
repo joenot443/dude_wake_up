@@ -114,7 +114,7 @@ void NodeLayoutView::draw()
   
   bool showAudio = LayoutStateService::getService()->showAudioSettings;
   
-  float width = (ImGui::GetWindowContentRegionMax().x * 4.0) / 5;
+  float width = ImGui::GetContentRegionAvail().x;
   float height = ImGui::GetWindowContentRegionMax().y - LayoutStateService::getService()->audioSettingsViewHeight() - 56.0f;
   
   ed::Begin("My Editor", ImVec2(width, height));
@@ -525,6 +525,9 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
   bool isShader = node->type == NodeTypeShader;
   bool hasSelectorOpen = node->id == selectorNodeId;
   bool height = hasSelectorOpen ? 1000.0 : 500.0;
+  auto res = LayoutStateService::getService()->resolution;
+  float previewWidth = 500.0f;
+  float previewHeight = previewWidth / (res.x / res.y);
   ImVec2 previewPadding = ImVec2(0.9, 0.7);
   auto pos = ImGui::GetCursorPos();
   auto startPos = pos;
@@ -534,8 +537,8 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
   // Always show preview for sources and shaders (even when not connected)
   if (isSource || isShader) {
     ImGui::SetCursorPos(ImGui::GetCursorPos() + previewPadding);
-    node->drawPreviewSized(ImVec2(500.0, 280.0) - 2*previewPadding);
-    ImGui::Dummy(ImVec2(500.0, 280.0));
+    node->drawPreviewSized(ImVec2(previewWidth, previewHeight) - 2*previewPadding);
+    ImGui::Dummy(ImVec2(previewWidth, previewHeight));
   }
   
   if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && ImGui::IsItemHovered()) {
@@ -658,19 +661,19 @@ void NodeLayoutView::drawNodeNew(std::shared_ptr<Node> node) {
 
   // Draw Aux output pin for shaders that support it (e.g., FeedbackShader)
   if (node->type == NodeTypeShader && node->shader->allowAuxOutputSlot()) {
-    ImGui::Dummy(ImVec2(500.0, 10.0));
+    ImGui::Dummy(ImVec2(previewWidth, 10.0));
 
     // Center the aux output pin horizontally
     float auxPinWidth = 40.0f;
-    float centerX = (500.0f - auxPinWidth) / 2.0f;
+    float centerX = (previewWidth - auxPinWidth) / 2.0f;
     ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2(centerX, 0.0));
 
     ed::PinId auxOutputPinId = CommonViews::OutputNodePin(node, OutputSlotAux);
     pinIdNodeMap[auxOutputPinId.Get()] = node;
 
-    ImGui::Dummy(ImVec2(500.0, 10.0));
+    ImGui::Dummy(ImVec2(previewWidth, 10.0));
   } else {
-    ImGui::Dummy(ImVec2(500.0, 20.0));
+    ImGui::Dummy(ImVec2(previewWidth, 20.0));
   }
 
   ed::EndNode();
@@ -1125,6 +1128,10 @@ void NodeLayoutView::handleRightClick()
     {
       handleSaveNode(node);
     }
+    if (ImGui::MenuItem("Share Strand..."))
+    {
+      handleShareNode(node);
+    }
     if (ImGui::MenuItem("Delete Node"))
     {
       handleDeleteNode(node);
@@ -1227,19 +1234,26 @@ void NodeLayoutView::addUnplacedConnectable(std::shared_ptr<Connectable> connect
 void NodeLayoutView::handleSaveNode(std::shared_ptr<Node> node)
 {
   Strand strand = ShaderChainerService::getService()->strandForConnectable(node->connectable);
-  
+
   // Generate default filename
   std::string defaultName = ofGetTimestampString("%m-%d");
   defaultName = formatString("%s_%s", strand.name.c_str(), defaultName.c_str());
   std::string defaultJsonName = formatString("%s.json", defaultName.c_str());
-  
+
   // Copy the default name into the char array
   std::strncpy(saveFileName, defaultJsonName.c_str(), sizeof(saveFileName) - 1);
   saveFileName[sizeof(saveFileName) - 1] = '\0'; // Ensure null termination
-  
+
   // Show the ImGui save dialog popup
   nodeToSave = node;
   saveStrand();
+}
+
+void NodeLayoutView::handleShareNode(std::shared_ptr<Node> node)
+{
+  // Build a strand from the node's connectable chain
+  pendingShareStrand = ShaderChainerService::getService()->strandForConnectable(node->connectable);
+  hasPendingShareStrand = true;
 }
 
 void NodeLayoutView::handleDropZone()
@@ -1586,7 +1600,7 @@ void NodeLayoutView::drawPreviewWindow(std::shared_ptr<Node> node)
 void NodeLayoutView::drawActionButtons()
 {
   ImVec2 pos = ImGui::GetCursorPos();
-  int buttonCount = 6;
+  int buttonCount = 7;
   float buttonWidth = 30.0;
   ImVec2 imageSize = ImVec2(buttonWidth, buttonWidth);
   ImVec2 imageRatio = ImVec2(1.5, 1.5);
@@ -1707,7 +1721,28 @@ void NodeLayoutView::drawActionButtons()
   }
   if (ImGui::IsItemHovered())
     ImGui::SetTooltip("Create Random Filter Chain");
-  
+  ImGui::SameLine(0, 10);
+
+  // Draw the share strand button
+  if (CommonViews::ImageButton("share", "forward.png", imageSize, imageRatio, true)) {
+    // Build connectables from shaders and video sources
+    std::vector<std::shared_ptr<Connectable>> connectables;
+    for (auto& shader : ShaderChainerService::getService()->shaders()) {
+      connectables.push_back(shader);
+    }
+    for (auto& source : VideoSourceService::getService()->videoSources()) {
+      connectables.push_back(source);
+    }
+    if (!connectables.empty()) {
+      pendingShareStrand.connectables = connectables;
+      pendingShareStrand.connections = ShaderChainerService::getService()->connections();
+      pendingShareStrand.name = Strand::strandName(connectables);
+      hasPendingShareStrand = true;
+    }
+  }
+  if (ImGui::IsItemHovered())
+    ImGui::SetTooltip("Share Strand");
+
   ImGui::EndChild();
   ImGui::PopStyleVar(2);
   ImGui::PopStyleColor();
@@ -2099,13 +2134,20 @@ void NodeLayoutView::drawHelp()
         return;
     }
   }
-  if (!HelpService::getService()->showPopup && !HelpService::getService()->completed) {
+  if (!HelpService::getService()->showShareHelp && !HelpService::getService()->showPopup && !HelpService::getService()->completed) {
     HelpService::getService()->drawActionButtons();
     // Reset our cursor and return without drawing additional help
     ImGui::SetCursorPos(cursorPos);
     return;
   }
-  
+
+  if (HelpService::getService()->showShareHelp) {
+    HelpService::getService()->drawShareStrandHelp();
+    // Reset our cursor and return without drawing additional help
+    ImGui::SetCursorPos(cursorPos);
+    return;
+  }
+
   if (HelpService::getService()->showPopup) {
     HelpService::getService()->drawCompletionPopup();
     // Reset our cursor and return without drawing additional help

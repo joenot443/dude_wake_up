@@ -31,6 +31,7 @@
 #include "Strings.hpp"
 #include <stdio.h>
 #include "../Services/SparkleUpdater.h"
+#include "URLSchemeHandler.h"
 
 void MainApp::setup()
 {
@@ -68,6 +69,11 @@ void MainApp::setup()
   // Initialize Sparkle auto-updater
   #ifdef TARGET_OSX
   SparkleUpdaterService::getInstance().initialize();
+  #endif
+
+  // Process any pending URL that launched the app
+  #ifdef TARGET_OSX
+  URLSchemeHandler::getInstance().processPendingURL();
   #endif
 }
 
