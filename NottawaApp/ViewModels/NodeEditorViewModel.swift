@@ -1,0 +1,690 @@
+//
+//  NodeEditorViewModel.swift
+//  NottawaApp
+//
+//  Central ViewModel for the node editor canvas and inspector.
+//
+
+import Foundation
+import SwiftUI
+import UniformTypeIdentifiers
+
+/// Key for identifying a pin position in the pin positions dictionary.
+struct PinKey: Hashable {
+    let nodeId: String
+    let slotIndex: Int
+    let isOutput: Bool
+}
+
+/// State for an in-progress connection drag.
+struct DragConnectionState {
+    let fromNodeId: String
+    let fromSlotIndex: Int
+    let fromIsOutput: Bool
+    let fromPosition: CGPoint   // Pin position at drag start (screen coords)
+    var currentPosition: CGPoint
+}
+
+@Observable
+final class NodeEditorViewModel {
+    // MARK: - Graph State
+    var nodes: [NodeModel] = []
+    var connections: [ConnectionModel] = []
+
+    // MARK: - Canvas State
+    var canvasOffset: CGPoint = .zero
+    var canvasScale: CGFloat = 1.0
+
+    // MARK: - Selection
+    var selectedNodeIds: Set<String> = []
+
+    // MARK: - Drag Connection
+    var dragConnection: DragConnectionState?
+
+    // MARK: - Browser State
+    var showShaderBrowser = false
+    var showSourceBrowser = false
+    var browserPosition: CGPoint = .zero
+    var browserMode: BrowserMode = .add
+    var swapTargetNodeId: String?
+
+    enum BrowserMode {
+        case add
+        case swap
+    }
+
+    // MARK: - Action Bar State
+    var actionBarExpanded = true
+    var helpEnabled = false
+
+    // MARK: - Sidebar State
+    var showSidebar = true
+    var sidebarActiveTab: SidebarTab = .shaders
+    var sidebarWidth: CGFloat = 240
+    var inspectorWidth: CGFloat = 350
+
+    enum SidebarTab {
+        case shaders
+        case sources
+        case oscillators
+        case library
+    }
+
+    // MARK: - Pin Positions (screen coords for cable drawing)
+    var pinPositions: [PinKey: CGPoint] = [:]
+
+    // MARK: - Library State
+    var libraryFiles: [LibraryFileInfo] = []
+    var libraryLoading = false
+    private var downloadPollTimer: Timer?
+    private var nodeDownloadPollTimer: Timer?
+
+    // MARK: - Inspector
+    var inspectorParameters: [ParameterInfo] = []
+    var fileSourceState: FileSourceState?
+
+    private let engine = NottawaEngine.shared
+    private var sharingTextureIds: Set<String> = []
+
+    // MARK: - Initialization
+
+    func setup() {
+        engine.registerGraphChangedCallback { [weak self] in
+            self?.refresh()
+        }
+        engine.registerLibraryUpdateCallback { [weak self] in
+            self?.refreshLibrary()
+        }
+        refresh()
+    }
+
+    // MARK: - Refresh from Engine
+
+    func refresh() {
+        let shaders = engine.allShaders()
+        let sources = engine.allVideoSources()
+        let conns = engine.allConnections()
+
+        let shaderNodes = shaders.map { NodeModel.from($0) }
+        let sourceNodes = sources.map { NodeModel.from($0) }
+
+        // Update active state and download state from engine
+        var allNodes = shaderNodes + sourceNodes
+        for i in allNodes.indices {
+            allNodes[i].isActive = engine.isConnectableActive(id: allNodes[i].id)
+
+            // Check download state for library sources (sourceType 8 = VideoSource_library)
+            if case .source(let sourceType) = allNodes[i].nodeType, sourceType == 8 {
+                if let dlState = engine.librarySourceState(sourceId: allNodes[i].id) {
+                    if dlState.isDownloading {
+                        allNodes[i].downloadProgress = dlState.progress
+                        allNodes[i].downloadPaused = dlState.isPaused
+                        allNodes[i].libraryFileId = dlState.libraryFileId
+                    }
+                }
+            }
+        }
+
+        // Manage texture sharing: start for new nodes, stop for removed
+        let newIds = Set(allNodes.map(\.id))
+        let oldIds = sharingTextureIds
+
+        for id in newIds.subtracting(oldIds) {
+            engine.startTextureSharing(connectableId: id)
+            sharingTextureIds.insert(id)
+        }
+        for id in oldIds.subtracting(newIds) {
+            engine.stopTextureSharing(connectableId: id)
+            sharingTextureIds.remove(id)
+            TextureProvider.shared.invalidate(connectableId: id)
+        }
+
+        nodes = allNodes
+        connections = conns.map { ConnectionModel.from($0) }
+
+        // Clean up selection for removed nodes
+        selectedNodeIds = selectedNodeIds.intersection(newIds)
+
+        // Auto-poll while any on-canvas node is downloading
+        let hasDownloading = allNodes.contains { $0.downloadProgress != nil }
+        if hasDownloading && nodeDownloadPollTimer == nil {
+            nodeDownloadPollTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+                self?.refresh()
+            }
+        } else if !hasDownloading && nodeDownloadPollTimer != nil {
+            nodeDownloadPollTimer?.invalidate()
+            nodeDownloadPollTimer = nil
+        }
+
+        // Refresh inspector if a selected node still exists
+        refreshInspector()
+    }
+
+    // MARK: - Selection
+
+    var selectedNodeId: String? {
+        selectedNodeIds.count == 1 ? selectedNodeIds.first : nil
+    }
+
+    func selectNode(_ id: String, exclusive: Bool = true) {
+        if exclusive {
+            selectedNodeIds = [id]
+        } else {
+            selectedNodeIds.insert(id)
+        }
+        engine.selectConnectable(id: id)
+        refreshInspector()
+    }
+
+    func deselectAll() {
+        selectedNodeIds.removeAll()
+        engine.deselectConnectable()
+        inspectorParameters = []
+        fileSourceState = nil
+    }
+
+    func toggleNodeSelection(_ id: String) {
+        if selectedNodeIds.contains(id) {
+            selectedNodeIds.remove(id)
+            if selectedNodeIds.isEmpty {
+                engine.deselectConnectable()
+            }
+        } else {
+            selectedNodeIds.insert(id)
+            engine.selectConnectable(id: id)
+        }
+        refreshInspector()
+    }
+
+    // MARK: - Inspector
+
+    func refreshInspector() {
+        guard let nodeId = selectedNodeId else {
+            inspectorParameters = []
+            fileSourceState = nil
+            return
+        }
+        inspectorParameters = engine.parameters(for: nodeId)
+        fileSourceState = engine.fileSourceState(sourceId: nodeId)
+    }
+
+    // MARK: - Node Actions
+
+    /// Fast local-only position update (no engine call) for smooth dragging.
+    func setNodePositionLocal(_ id: String, to position: CGPoint) {
+        if let idx = nodes.firstIndex(where: { $0.id == id }) {
+            nodes[idx].position = position
+        }
+    }
+
+    /// Update position locally and persist to engine.
+    func moveNode(_ id: String, to position: CGPoint) {
+        setNodePositionLocal(id, to: position)
+        engine.setConnectablePosition(id: id, x: Float(position.x), y: Float(position.y))
+    }
+
+    func deleteSelected() {
+        for id in selectedNodeIds {
+            engine.stopTextureSharing(connectableId: id)
+            sharingTextureIds.remove(id)
+            TextureProvider.shared.invalidate(connectableId: id)
+            engine.removeConnectable(id: id)
+        }
+        selectedNodeIds.removeAll()
+        inspectorParameters = []
+        refresh()
+    }
+
+    func toggleActiveState(_ id: String) {
+        if let idx = nodes.firstIndex(where: { $0.id == id }) {
+            nodes[idx].isActive.toggle()
+            engine.setConnectableActive(id: id, active: nodes[idx].isActive)
+        }
+    }
+
+    func deleteNode(_ id: String) {
+        engine.stopTextureSharing(connectableId: id)
+        sharingTextureIds.remove(id)
+        TextureProvider.shared.invalidate(connectableId: id)
+        engine.removeConnectable(id: id)
+        selectedNodeIds.remove(id)
+        refresh()
+    }
+
+    // MARK: - Connection Helpers
+
+    /// Get all connections involving a specific node.
+    func connectionsForNode(_ nodeId: String) -> [ConnectionModel] {
+        connections.filter { $0.startNodeId == nodeId || $0.endNodeId == nodeId }
+    }
+
+    /// Get the display name for the other end of a connection relative to a node.
+    func nodeNameForConnection(_ connection: ConnectionModel, relativeTo nodeId: String) -> String {
+        let otherId = connection.startNodeId == nodeId ? connection.endNodeId : connection.startNodeId
+        return nodes.first(where: { $0.id == otherId })?.name ?? "Unknown"
+    }
+
+    // MARK: - Connection Actions
+
+    func makeConnection(startId: String, endId: String, outputSlot: Int, inputSlot: Int) {
+        // Determine connection type based on node types
+        let startNode = nodes.first(where: { $0.id == startId })
+        let connectionType: Int = startNode?.isSource == true ? 1 : 0
+        engine.makeConnection(
+            startId: startId,
+            endId: endId,
+            connectionType: connectionType,
+            outputSlot: outputSlot,
+            inputSlot: inputSlot
+        )
+        refresh()
+    }
+
+    func removeConnection(_ id: String) {
+        engine.removeConnection(id: id)
+        refresh()
+    }
+
+    // MARK: - Multi-drag Support
+
+    /// Move all selected nodes by a delta (local only, for smooth dragging).
+    func moveSelectedNodesLocal(by delta: CGPoint) {
+        for id in selectedNodeIds {
+            if let idx = nodes.firstIndex(where: { $0.id == id }),
+               let startPos = multiDragStartPositions[id] {
+                nodes[idx].position = CGPoint(
+                    x: startPos.x + delta.x,
+                    y: startPos.y + delta.y
+                )
+            }
+        }
+    }
+
+    /// Persist all selected node positions to the engine after drag ends.
+    func commitSelectedNodePositions() {
+        for id in selectedNodeIds {
+            if let node = nodes.first(where: { $0.id == id }) {
+                engine.setConnectablePosition(id: id, x: Float(node.position.x), y: Float(node.position.y))
+            }
+        }
+        multiDragStartPositions.removeAll()
+    }
+
+    /// Snapshot current positions for multi-drag.
+    var multiDragStartPositions: [String: CGPoint] = [:]
+
+    func captureMultiDragStartPositions() {
+        multiDragStartPositions.removeAll()
+        for id in selectedNodeIds {
+            if let node = nodes.first(where: { $0.id == id }) {
+                multiDragStartPositions[id] = node.position
+            }
+        }
+    }
+
+    // MARK: - Blend
+
+    func blendSelectedNodes() {
+        guard selectedNodeIds.count == 2 else { return }
+        let ids = Array(selectedNodeIds)
+        createBlendBetween(id1: ids[0], id2: ids[1])
+    }
+
+    func createBlendBetween(id1: String, id2: String) {
+        let node1 = nodes.first(where: { $0.id == id1 })
+        let node2 = nodes.first(where: { $0.id == id2 })
+
+        guard let blendId = engine.createBlendBetween(id1: id1, id2: id2) else { return }
+
+        // Position blend to the right of both nodes, centered vertically
+        if let n1 = node1, let n2 = node2 {
+            let rightX = max(n1.position.x, n2.position.x) + 300
+            let midY = (n1.position.y + n2.position.y) / 2
+            engine.setConnectablePosition(id: blendId, x: Float(rightX), y: Float(midY))
+        }
+
+        refresh()
+    }
+
+    // MARK: - Shader Swap
+
+    func swapShader(nodeId: String, newType: Int) {
+        engine.stopTextureSharing(connectableId: nodeId)
+        sharingTextureIds.remove(nodeId)
+        TextureProvider.shared.invalidate(connectableId: nodeId)
+
+        guard let newId = engine.replaceShader(shaderId: nodeId, newType: newType) else { return }
+
+        // Start sharing for the new shader
+        engine.startTextureSharing(connectableId: newId)
+        sharingTextureIds.insert(newId)
+
+        // Update selection
+        selectedNodeIds.remove(nodeId)
+        selectedNodeIds.insert(newId)
+
+        refresh()
+    }
+
+    // MARK: - Source Swap
+
+    func swapSource(nodeId: String, newType: Int) {
+        engine.stopTextureSharing(connectableId: nodeId)
+        sharingTextureIds.remove(nodeId)
+        TextureProvider.shared.invalidate(connectableId: nodeId)
+
+        guard let newId = engine.replaceVideoSource(sourceId: nodeId, newType: newType) else { return }
+
+        // Start sharing for the new source
+        engine.startTextureSharing(connectableId: newId)
+        sharingTextureIds.insert(newId)
+
+        // Update selection
+        selectedNodeIds.remove(nodeId)
+        selectedNodeIds.insert(newId)
+
+        refresh()
+    }
+
+    // MARK: - Select All
+
+    func selectAll() {
+        selectedNodeIds = Set(nodes.map(\.id))
+    }
+
+    // MARK: - Add Nodes
+
+    /// Tracks the last position where a node was added, for cascading.
+    var lastAddedNodePosition: CGPoint?
+
+    private func nextAutoPosition() -> CGPoint {
+        if let last = lastAddedNodePosition {
+            return CGPoint(x: last.x, y: last.y + 228)
+        }
+        return screenToCanvas(CGPoint(x: 400, y: 300))
+    }
+
+    @discardableResult
+    func addShader(type: Int, at position: CGPoint? = nil) -> String? {
+        guard let id = engine.addShader(type: type) else { return nil }
+        let pos = position ?? nextAutoPosition()
+        engine.setConnectablePosition(id: id, x: Float(pos.x), y: Float(pos.y))
+        lastAddedNodePosition = pos
+        refresh()
+        return id
+    }
+
+    @discardableResult
+    func addShaderVideoSource(type: Int, at position: CGPoint? = nil) -> String? {
+        guard let id = engine.addShaderVideoSource(type: type) else { return nil }
+        let pos = position ?? nextAutoPosition()
+        engine.setConnectablePosition(id: id, x: Float(pos.x), y: Float(pos.y))
+        lastAddedNodePosition = pos
+        refresh()
+        return id
+    }
+
+    /// Add a node at a specific canvas position from a drop payload.
+    /// Payload format: "shader:<typeInt>" or "source:<typeInt>"
+    /// If targetNodeId is provided and the payload is a shader (effect),
+    /// the new shader is chained after the target (output 0 → input 0).
+    func addNodeFromDrop(payload: String, at screenPoint: CGPoint, targetNodeId: String? = nil) {
+        let canvasPos = screenToCanvas(screenPoint)
+        let parts = payload.split(separator: ":", maxSplits: 1)
+        guard parts.count == 2 else { return }
+
+        let kind = parts[0]
+        let value = String(parts[1])
+
+        if kind == "library" {
+            addLibrarySource(libraryFileId: value, at: canvasPos)
+        } else if let typeInt = Int(value) {
+            if kind == "shader" {
+                if let targetId = targetNodeId,
+                   let targetNode = nodes.first(where: { $0.id == targetId }) {
+                    // Dropped onto an existing node — chain the new effect after it
+                    let chainPos = CGPoint(x: targetNode.position.x + 300, y: targetNode.position.y)
+                    guard let newId = addShader(type: typeInt, at: chainPos) else { return }
+                    let connectionType: Int = targetNode.isSource ? 1 : 0
+                    engine.makeConnection(
+                        startId: targetId,
+                        endId: newId,
+                        connectionType: connectionType,
+                        outputSlot: 0,
+                        inputSlot: 0
+                    )
+                    refresh()
+                } else {
+                    addShader(type: typeInt, at: canvasPos)
+                }
+            } else if kind == "source" {
+                addShaderVideoSource(type: typeInt, at: canvasPos)
+            }
+        }
+    }
+
+    // MARK: - Undo / Redo
+
+    func undo() { engine.undo() }
+    func redo() { engine.redo() }
+    var canUndo: Bool { engine.canUndo }
+    var canRedo: Bool { engine.canRedo }
+
+    // MARK: - Canvas Coordinate Helpers
+
+    /// Convert a screen point to canvas coordinates.
+    func screenToCanvas(_ point: CGPoint) -> CGPoint {
+        CGPoint(
+            x: (point.x - canvasOffset.x) / canvasScale,
+            y: (point.y - canvasOffset.y) / canvasScale
+        )
+    }
+
+    /// Convert a canvas point to screen coordinates.
+    func canvasToScreen(_ point: CGPoint) -> CGPoint {
+        CGPoint(
+            x: point.x * canvasScale + canvasOffset.x,
+            y: point.y * canvasScale + canvasOffset.y
+        )
+    }
+
+    // MARK: - Zoom to Fit
+
+    /// Adjusts canvas offset and scale so all nodes are visible with padding.
+    func zoomToFit(canvasSize: CGSize) {
+        guard !nodes.isEmpty else {
+            canvasScale = 1.0
+            canvasOffset = .zero
+            return
+        }
+
+        let nodeWidth: CGFloat = 200
+        let nodeHeight: CGFloat = 150
+        let padding: CGFloat = 60
+
+        var minX = CGFloat.infinity
+        var minY = CGFloat.infinity
+        var maxX = -CGFloat.infinity
+        var maxY = -CGFloat.infinity
+
+        for node in nodes {
+            minX = min(minX, node.position.x)
+            minY = min(minY, node.position.y)
+            maxX = max(maxX, node.position.x + nodeWidth)
+            maxY = max(maxY, node.position.y + nodeHeight)
+        }
+
+        let contentWidth = maxX - minX + padding * 2
+        let contentHeight = maxY - minY + padding * 2
+
+        let scaleX = canvasSize.width / contentWidth
+        let scaleY = canvasSize.height / contentHeight
+        let newScale = min(scaleX, scaleY, 1.5) // Don't zoom in too far
+
+        let centerX = (minX + maxX) / 2
+        let centerY = (minY + maxY) / 2
+
+        canvasScale = max(0.2, newScale)
+        canvasOffset = CGPoint(
+            x: canvasSize.width / 2 - centerX * canvasScale,
+            y: canvasSize.height / 2 - centerY * canvasScale
+        )
+    }
+
+    // MARK: - Pin Hit Testing
+
+    /// Find the nearest pin within a distance threshold.
+    func hitTestPin(at screenPoint: CGPoint, excluding nodeId: String? = nil, outputOnly: Bool = false, inputOnly: Bool = false) -> PinKey? {
+        let threshold: CGFloat = 20
+        var bestKey: PinKey?
+        var bestDist = CGFloat.infinity
+
+        for (key, pos) in pinPositions {
+            if let excluding = nodeId, key.nodeId == excluding { continue }
+            if outputOnly && !key.isOutput { continue }
+            if inputOnly && key.isOutput { continue }
+
+            let dist = hypot(pos.x - screenPoint.x, pos.y - screenPoint.y)
+            if dist < threshold && dist < bestDist {
+                bestDist = dist
+                bestKey = key
+            }
+        }
+        return bestKey
+    }
+
+    // MARK: - Workspace Management
+
+    var currentWorkspacePath: String?
+    var currentWorkspaceName: String?
+
+    var hasWorkspace: Bool { currentWorkspacePath != nil }
+
+    func newWorkspace() {
+        for node in nodes {
+            engine.stopTextureSharing(connectableId: node.id)
+        }
+        sharingTextureIds.removeAll()
+        TextureProvider.shared.invalidateAll()
+        engine.clearGraph()
+        currentWorkspacePath = nil
+        currentWorkspaceName = nil
+        selectedNodeIds.removeAll()
+        inspectorParameters = []
+        refresh()
+    }
+
+    func openWorkspace(url: URL) {
+        for node in nodes {
+            engine.stopTextureSharing(connectableId: node.id)
+        }
+        sharingTextureIds.removeAll()
+        TextureProvider.shared.invalidateAll()
+        engine.loadWorkspace(path: url.path)
+        currentWorkspacePath = url.path
+        currentWorkspaceName = url.deletingPathExtension().lastPathComponent
+        selectedNodeIds.removeAll()
+        inspectorParameters = []
+        refresh()
+    }
+
+    func saveWorkspace() {
+        if let path = currentWorkspacePath, let name = currentWorkspaceName {
+            engine.saveWorkspaceToPath(path: path, name: name)
+        }
+    }
+
+    func saveWorkspaceAs(url: URL) {
+        let name = url.deletingPathExtension().lastPathComponent
+        engine.saveWorkspaceToPath(path: url.path, name: name)
+        currentWorkspacePath = url.path
+        currentWorkspaceName = name
+    }
+
+    // MARK: - Screenshot
+
+    func captureScreenshot() {
+        // Find the best node to screenshot: selected node, or last shader, or last source
+        let targetId: String? = selectedNodeId
+            ?? nodes.last(where: { !$0.isSource })?.id
+            ?? nodes.last?.id
+
+        guard let id = targetId,
+              let cgImage = TextureProvider.shared.snapshot(for: id) else {
+            return
+        }
+
+        let panel = NSSavePanel()
+        let timestamp = ISO8601DateFormatter().string(from: Date())
+            .replacingOccurrences(of: ":", with: "-")
+        panel.nameFieldStringValue = "nottawa_\(timestamp).jpg"
+        panel.allowedContentTypes = [.jpeg, .png]
+
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+
+        let nsImage = NSImage(cgImage: cgImage, size: NSSize(width: cgImage.width, height: cgImage.height))
+        guard let tiffData = nsImage.tiffRepresentation,
+              let bitmap = NSBitmapImageRep(data: tiffData) else { return }
+
+        let isJPEG = url.pathExtension.lowercased() == "jpg" || url.pathExtension.lowercased() == "jpeg"
+        let fileType: NSBitmapImageRep.FileType = isJPEG ? .jpeg : .png
+        let properties: [NSBitmapImageRep.PropertyKey: Any] = isJPEG ? [.compressionFactor: 0.9] : [:]
+
+        guard let data = bitmap.representation(using: fileType, properties: properties) else { return }
+
+        do {
+            try data.write(to: url)
+            // Open containing folder in Finder
+            NSWorkspace.shared.selectFile(url.path, inFileViewerRootedAtPath: "")
+        } catch {
+            print("Screenshot save failed: \(error)")
+        }
+    }
+
+    // MARK: - Library
+
+    func fetchLibrary() {
+        libraryLoading = true
+        engine.fetchLibraryFiles()
+    }
+
+    func refreshLibrary() {
+        libraryFiles = engine.libraryFiles()
+        libraryLoading = false
+    }
+
+    func addLibrarySource(libraryFileId: String, at position: CGPoint? = nil) {
+        guard let id = engine.addLibraryVideoSource(libraryFileId: libraryFileId) else {
+            print("NottawaApp: Failed to add library source for file ID: \(libraryFileId)")
+            return
+        }
+        let pos = position ?? nextAutoPosition()
+        engine.setConnectablePosition(id: id, x: Float(pos.x), y: Float(pos.y))
+        lastAddedNodePosition = pos
+        refresh()
+    }
+
+    func startDownloadPolling() {
+        guard downloadPollTimer == nil else { return }
+        downloadPollTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+            self?.refreshLibrary()
+        }
+    }
+
+    func stopDownloadPolling() {
+        downloadPollTimer?.invalidate()
+        downloadPollTimer = nil
+    }
+
+    // MARK: - Cleanup
+
+    func cleanup() {
+        for id in sharingTextureIds {
+            engine.stopTextureSharing(connectableId: id)
+        }
+        sharingTextureIds.removeAll()
+        TextureProvider.shared.invalidateAll()
+        nodeDownloadPollTimer?.invalidate()
+        nodeDownloadPollTimer = nil
+    }
+}
