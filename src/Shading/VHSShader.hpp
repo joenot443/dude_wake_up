@@ -42,7 +42,7 @@ struct VHSSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> kernelBiasOscillator;
 
   VHSSettings(std::string shaderId, json j, std::string name) :
-  hsyncJitter(std::make_shared<Parameter>("Hsync Jitter", 0.5, 1.0, 0.0)),
+  hsyncJitter(std::make_shared<Parameter>("Hsync Jitter", 0.5, 0.0, 1.0)),
   hsyncJitterOscillator(std::make_shared<WaveformOscillator>(hsyncJitter)),
   chromaEmphasis(std::make_shared<Parameter>("Chroma Emphasis", 0.5, 0.0, 2.0)),
   chromaEmphasisOscillator(std::make_shared<WaveformOscillator>(chromaEmphasis)),

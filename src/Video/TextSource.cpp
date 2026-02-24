@@ -34,7 +34,9 @@ void TextSource::setup() {
   fontPath = displayText->font.path;
   strokeShader.load("shaders/Stroke");
 
-  if (displayText->font.name != FontService::getService()->fonts[displayText->fontSelector->intValue].name) {
+  if (displayText->fontSelector->intValue >= 0 &&
+      displayText->fontSelector->intValue < static_cast<int>(FontService::getService()->fonts.size()) &&
+      displayText->font.name != FontService::getService()->fonts[displayText->fontSelector->intValue].name) {
     displayText->font = FontService::getService()->fonts[displayText->fontSelector->intValue];
     font.load(displayText->font.path, displayText->fontSize, true, true, true);
   }
@@ -46,6 +48,16 @@ void TextSource::saveFrame() {
       lastSampleCount != displayText->textSmoothing->value) {
     lastSampleCount = displayText->textSmoothing->value;
     setup();
+  }
+
+  // Sync font from fontSelector (normally done by ImGui TextEditorView,
+  // but NottawaApp doesn't run ImGui).
+  if (displayText->fontSelector->intValue >= 0 &&
+      displayText->fontSelector->intValue < static_cast<int>(FontService::getService()->fonts.size())) {
+    auto& selectedFont = FontService::getService()->fonts[displayText->fontSelector->intValue];
+    if (displayText->font.name != selectedFont.name) {
+      displayText->font = selectedFont;
+    }
   }
   
   tempFbo.begin();
@@ -83,9 +95,19 @@ void TextSource::saveFrame() {
       }
   
   if (shouldClear) {
-    ofClear(0, 0.);
+    if (displayText->backgroundEnabled->boolValue) {
+      auto bg = displayText->backgroundColor->color->data();
+      ofClear(bg[0] * 255.0, bg[1] * 255.0, bg[2] * 255.0, bg[3] * 255.0);
+    } else {
+      ofClear(0, 0.);
+    }
   } else {
-    ofSetColor(0, 0, 0, 0);
+    if (displayText->backgroundEnabled->boolValue) {
+      auto bg = displayText->backgroundColor->color->data();
+      ofSetColor(bg[0] * 255.0, bg[1] * 255.0, bg[2] * 255.0, bg[3] * 255.0);
+    } else {
+      ofSetColor(0, 0, 0, 0);
+    }
     ofDrawRectangle(0, 0, fbo->getWidth(), fbo->getHeight());
   }
   
@@ -100,7 +122,12 @@ void TextSource::saveFrame() {
   tempFbo.end();
   
   fbo->begin();
-  ofClear(0, 0.);
+  if (displayText->backgroundEnabled->boolValue) {
+    auto bg = displayText->backgroundColor->color->data();
+    ofClear(bg[0] * 255.0, bg[1] * 255.0, bg[2] * 255.0, bg[3] * 255.0);
+  } else {
+    ofClear(0, 0.);
+  }
 
   // Enable smooth rendering for FBO drawing
   ofEnableSmoothing();
@@ -154,12 +181,17 @@ json TextSource::serialize() {
   j["displayY"] = displayText->yPosition->value;
   j["settings"] = settings->serialize();
   j["strokeEnabled"] = displayText->strokeEnabled->boolValue;
+  j["backgroundColor"] = displayText->backgroundColor->serialize();
+  j["backgroundEnabled"] = displayText->backgroundEnabled->boolValue;
   j["edgeSoftness"] = displayText->edgeSoftness->value;
   j["textSmoothing"] = displayText->textSmoothing->value;
   auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);
   if (node != nullptr) {
     j["x"] = node->position.x;
     j["y"] = node->position.y;
+  } else {
+    j["x"] = origin.x;
+    j["y"] = origin.y;
   }
   return j;
 }
@@ -197,6 +229,12 @@ void TextSource::load(json j) {
   }
   if (j.contains("strokeEnabled")) {
     displayText->strokeEnabled->setBoolValue(j["strokeEnabled"]);
+  }
+  if (j.contains("backgroundColor")) {
+    displayText->backgroundColor->load(j["backgroundColor"]);
+  }
+  if (j.contains("backgroundEnabled")) {
+    displayText->backgroundEnabled->setBoolValue(j["backgroundEnabled"]);
   }
   if (j.contains("edgeSoftness")) {
     displayText->edgeSoftness->value = j["edgeSoftness"];

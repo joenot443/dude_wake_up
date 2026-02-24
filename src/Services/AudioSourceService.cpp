@@ -161,12 +161,25 @@ void AudioSourceService::update() {
   // Drive the beat pulse based on mode
   if (selectedAudioSource->audioAnalysis.bpmMode == BpmMode_Link && link != nullptr) {
     // Link mode: use Link's beat timing directly
-    double beatCount = link->captureAppSessionState().beatAtTime(link->clock().micros(), 4.);
-    selectedAudioSource->audioAnalysis.updateBeat(beatCount - floor(beatCount));
+    double linkBeatCount = link->captureAppSessionState().beatAtTime(link->clock().micros(), 4.);
+    selectedAudioSource->audioAnalysis.updateBeat(linkBeatCount - floor(linkBeatCount));
   }
   else {
     // Auto/Manual mode: use bpmPct() calculation
     selectedAudioSource->audioAnalysis.updateBeat(selectedAudioSource->audioAnalysis.bpmPct());
+  }
+
+  // Beat counter for Manual/Link: detect phase wrap
+  // (Auto mode counts beats directly from BTrack in AudioSource.cpp)
+  auto& analysis = selectedAudioSource->audioAnalysis;
+  if (analysis.bpmMode != BpmMode_Auto) {
+    float pulse = analysis.beatPulse->value;
+    if (pulse > 0.9f && !analysis.beatCounted) {
+      analysis.beatCount++;
+      analysis.beatCounted = true;
+    } else if (pulse < 0.3f) {
+      analysis.beatCounted = false;
+    }
   }
 }
 

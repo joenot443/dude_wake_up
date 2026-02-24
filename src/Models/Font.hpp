@@ -15,6 +15,7 @@ struct Font {
   
   std::string path = "";
   
+  Font() = default;
   Font(std::string name, std::string path) : name(name), path(path) {};
 };
 

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>__xctestrun_metadata__</key>
+	<dict>
+		<key>FormatVersion</key>
+		<integer>1</integer>
+	</dict>
+	<key>NottawaAppUITests</key>
+	<dict>
+		<key>TestBundlePath</key>
+		<string>__TESTROOT__/NottawaAppUITests-Runner.app/Contents/PlugIns/NottawaAppUITests.app</string>
+		<key>TestHostPath</key>
+		<string>__TESTROOT__/NottawaAppUITests-Runner.app</string>
+		<key>UITargetAppPath</key>
+		<string>__TESTROOT__/NottawaApp.app</string>
+		<key>IsUITestBundle</key>
+		<true/>
+		<key>IsAppHostedTestBundle</key>
+		<false/>
+		<key>TestingEnvironmentVariables</key>
+		<dict>
+			<key>DYLD_FRAMEWORK_PATH</key>
+			<string>__TESTROOT__/NottawaAppUITests-Runner.app/Contents/Frameworks</string>
+			<key>DYLD_LIBRARY_PATH</key>
+			<string>__TESTROOT__/NottawaAppUITests-Runner.app/Contents/Frameworks</string>
+		</dict>
+		<key>EnvironmentVariables</key>
+		<dict>
+		</dict>
+		<key>TestHostBundleIdentifier</key>
+		<string>com.joecrozier.NottawaAppUITests.xctrunner</string>
+		<key>UITargetAppBundleIdentifier</key>
+		<string>com.joecrozier.nottawaapp</string>
+		<key>DependentProductPaths</key>
+		<array>
+			<string>__TESTROOT__/NottawaAppUITests-Runner.app/Contents/PlugIns/NottawaAppUITests.app</string>
+			<string>__TESTROOT__/NottawaApp.app</string>
+		</array>
+	</dict>
+</dict>
+</plist>

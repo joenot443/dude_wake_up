@@ -11,6 +11,9 @@
 #include "Credit.hpp"
 #include "MainApp.h"
 #include "Console.hpp"
+#ifdef NOTTAWA_ENGINE_ONLY
+#include "EngineLoop.hpp"
+#endif
 #include "httplib.h"
 #include "json.hpp"
 #include <memory>
@@ -53,8 +56,10 @@ const static std::string API_URL = "https://nottawa.app";
 
 void LibraryService::setup()
 {
+#ifndef NOTTAWA_ENGINE_ONLY
   // Automatically fetch shader credits on startup
   backgroundFetchShaderCredits();
+#endif
 }
 
 //void LibraryService::uploadChainer(const std::string &name, const std::string &author, const std::shared_ptr<ShaderChainer> chainer, std::function<void()> success_callback, std::function<void(const std::string &)> error_callback)
@@ -92,8 +97,10 @@ void LibraryService::backgroundFetchLibraryFiles()
 }
 
 void LibraryService::didFetchLibraryFiles() {
+#ifndef NOTTAWA_ENGINE_ONLY
   // First populate sources (without thumbnails) so they appear in the browser immediately
   repopulateVideoSourcesFromMainThread();
+#endif
   // Then download thumbnails and repopulate again when done
   downloadFutures.push_back(std::async(std::launch::async, &LibraryService::downloadAllThumbnails, this));
 }
@@ -281,9 +288,11 @@ void LibraryService::downloadAllThumbnails()
 
   // After all thumbnails are downloaded, repopulate video sources
   // so that generatePreview() can now find the thumbnail files
+#ifndef NOTTAWA_ENGINE_ONLY
   if (downloadedAny) {
     repopulateVideoSourcesFromMainThread();
   }
+#endif
 }
 
 // Downloads the file specified by file->url with support for pause/resume.
@@ -390,9 +399,15 @@ void LibraryService::downloadFile(std::shared_ptr<LibraryFile> file, std::functi
         file->progress = 1.0f;
 
         if (callback) {
+#ifdef NOTTAWA_ENGINE_ONLY
+          EngineLoop::getInstance()->executeOnEngineThread([callback]() {
+            callback();
+          });
+#else
           MainApp::getApp()->executeOnMainThread([callback](){
             callback();
           });
+#endif
         }
       } else {
         // Download was paused - keep partial file

@@ -38,29 +38,8 @@ const static ofVec2f windowSize = ofVec2f(2400, 1600);
 
 using json = nlohmann::json;
 
-NodeLayoutView *NodeLayoutView::instance = 0;
-BookmarkService *BookmarkService::service = 0;
-StrandService *StrandService::service = 0;
-FontService *FontService::service = 0;
-TextureService *TextureService::service = 0;
-IconService *IconService::service = 0;
-ModulationService *ModulationService::service = 0;
-OscillationService *OscillationService::service = 0;
-MidiService *MidiService::service = 0;
-ParameterService *ParameterService::service = 0;
-ConfigService *ConfigService::service = 0;
-FeedbackSourceService *FeedbackSourceService::service = 0;
-VideoSourceService *VideoSourceService::service = 0;
-ShaderChainerService *ShaderChainerService::service = 0;
-AudioSourceService *AudioSourceService::service = 0;
-LayoutStateService *LayoutStateService::service = 0;
-ImageService *ImageService::service = 0;
-MarkdownService *MarkdownService::service = 0;
-LibraryService *LibraryService::service = 0;
-HelpService *HelpService::service = 0;
-TimeService *TimeService::service = 0;
-//SyphonService *SyphonService::service = 0;
-MainApp *MainApp::app = 0;
+// Static member definitions moved to src/Engine/ServiceStatics.cpp
+// so they can be shared between dude_wake_up and NottawaApp targets.
 
 void setupDirectories() {
   ofSetDataPathRoot("../Resources/data/");

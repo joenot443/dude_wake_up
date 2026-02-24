@@ -74,13 +74,17 @@ std::string ConfigService::relativeFilePathWithinNottawaFolder(std::string fileP
 }
 
 std::string ConfigService::appSupportFilePath() {
+#ifdef NOTTAWA_ENGINE_ONLY
+  // NottawaApp is sandboxed with bundle ID com.joecrozier.nottawaapp.
+  // Use its own sandbox container (same pattern as the main app).
+  std::string appSupportPath = ofFilePath::getUserHomeDir() + "/Library/Containers/com.joecrozier.nottawaapp/Data";
+#else
   std::string appSupportPath = ofFilePath::getUserHomeDir() + "/Library/Containers/com.joecrozier.nottawa/Data";
-  
-  // Create the directory if it doesn't exist
   if (!ofDirectory::doesDirectoryExist(appSupportPath, false)) {
     ofDirectory::createDirectory(appSupportPath, false, true);
   }
-  
+#endif
+
   return appSupportPath;
 }
 
@@ -293,7 +297,7 @@ void ConfigService::checkAndSaveDefaultConfigFile()
   // Only perform this check every 3000 frames, and after we've been launched for 10s
   if (ofGetFrameNum() % 3000 != 0 || ofGetFrameNum() < 1000)
     return;
-  
+
   auto currentConfig = this->currentConfig();
   if (currentConfig != lastConfig)
   {
@@ -368,30 +372,23 @@ json ConfigService::currentConfig()
 void ConfigService::saveConfigFile(std::string path)
 {
   if (isLoading) return;
-  
+
   json config = currentConfig();
-  
-  if (lastConfig == config) {
-    log("No need to save identical config");
-    return;
-  }
-  
+
+  if (lastConfig == config) return;
+
   std::ofstream fileStream;
   fileStream.open(path.c_str(), std::ios::trunc);
-  
+
   if (fileStream.is_open())
   {
-    //    std::cout << config.dump(4) << std::endl;
     fileStream << config.dump(4, ' ', false, nlohmann::detail::error_handler_t::ignore);
     fileStream.close();
-    
-    std::cout << "Successfully saved config" << std::endl;
     lastConfig = config;
   }
   else
   {
-    //    std::cout << config.dump(4) << std::endl;
-    log("Problem saving config.");
+    ofLogError("ConfigService") << "Failed to save config to: " << path;
   }
 }
 
@@ -584,7 +581,7 @@ void ConfigService::loadConfigFile(std::string path)
   std::fstream fileStream;
   fileStream.open(path, std::ios::in);
   json data;
-  
+
   if (fileStream.is_open())
   {
     try
@@ -592,7 +589,6 @@ void ConfigService::loadConfigFile(std::string path)
       // Make sure the file isn't empty
       if (fileStream.peek() == std::ifstream::traits_type::eof())
       {
-        log("JSON file for %s is empty.", path.c_str());
         isLoading = false;
         return;
       }
@@ -600,7 +596,6 @@ void ConfigService::loadConfigFile(std::string path)
     }
     catch (int code)
     {
-      log("Could not load JSON file for %s.", path.c_str());
       isLoading = false;
       return;
     }

@@ -77,6 +77,9 @@ struct ParameterInfo: Identifiable, Hashable {
     var driverShift: Float
     var driverScale: Float
 
+    // Options (for int params with named choices, e.g. font selector)
+    var options: [String]
+
     enum ParameterType: Int {
         case standard = 0
         case int_ = 1
@@ -116,6 +119,15 @@ struct ParameterInfo: Identifiable, Hashable {
         self.driverName = c.driverName != nil ? String(cString: c.driverName) : nil
         self.driverShift = c.driverShift
         self.driverScale = c.driverScale
+
+        if c.optionCount > 0, let opts = c.options {
+            self.options = (0..<Int(c.optionCount)).compactMap { idx in
+                guard let s = opts[idx] else { return nil }
+                return String(cString: s)
+            }
+        } else {
+            self.options = []
+        }
     }
 }
 
@@ -351,6 +363,103 @@ struct FileSourceState {
     let isPlaying: Bool
 }
 
+// MARK: - Text Source State
+
+struct TextSourceState: Equatable {
+    let text: String
+    let fontSize: Int
+    let xPosition: Float
+    let yPosition: Float
+    let fontIndex: Int
+    let fontNames: [String]
+}
+
+// MARK: - Available Non-Shader Source
+
+struct AvailableNonShaderSourceInfo: Identifiable, Hashable {
+    let id: String
+    let name: String
+    let icon: String
+    let sourceType: Int
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
+    static func == (lhs: AvailableNonShaderSourceInfo, rhs: AvailableNonShaderSourceInfo) -> Bool {
+        lhs.id == rhs.id
+    }
+}
+
+// MARK: - Strand
+
+struct StrandInfo: Identifiable, Hashable {
+    let id: String
+    let name: String
+    let imagePath: String?
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
+    static func == (lhs: StrandInfo, rhs: StrandInfo) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    init(from c: NTWAvailableStrandInfo) {
+        self.id = String(cString: c.id)
+        self.name = String(cString: c.name)
+        let path = String(cString: c.imagePath)
+        self.imagePath = path.isEmpty ? nil : path
+    }
+}
+
+// MARK: - Shared Strand (Community)
+
+struct SharedStrandInfo: Identifiable, Hashable {
+    let slug: String
+    let title: String
+    let description: String?
+    let previewUrl: String?
+    let author: String?
+    var upvotes: Int
+    var downvotes: Int
+    var score: Int
+    let views: Int
+    let opens: Int
+    let createdAt: String
+    var userVote: String?  // "up", "down", or nil
+
+    var id: String { slug }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(slug)
+    }
+
+    static func == (lhs: SharedStrandInfo, rhs: SharedStrandInfo) -> Bool {
+        lhs.slug == rhs.slug
+    }
+
+    init(from c: NTWSharedStrandInfo) {
+        self.slug = String(cString: c.slug)
+        self.title = String(cString: c.title)
+        let desc = String(cString: c.description)
+        self.description = desc.isEmpty ? nil : desc
+        let preview = String(cString: c.previewUrl)
+        self.previewUrl = preview.isEmpty ? nil : preview
+        let auth = String(cString: c.author)
+        self.author = auth.isEmpty ? nil : auth
+        self.upvotes = Int(c.upvotes)
+        self.downvotes = Int(c.downvotes)
+        self.score = Int(c.score)
+        self.views = Int(c.views)
+        self.opens = Int(c.opens)
+        self.createdAt = String(cString: c.createdAt)
+        let vote = String(cString: c.userVote)
+        self.userVote = vote.isEmpty ? nil : vote
+    }
+}
+
 // MARK: - Audio Analysis
 
 struct AudioAnalysisSnapshot {
@@ -378,4 +487,165 @@ struct AudioAnalysisSnapshot {
             bpm: 120, beatPulse: 0, beatDetected: false
         )
     )
+}
+
+// MARK: - Extended Audio Analysis (Audio Panel)
+
+enum BpmMode: Int, CaseIterable, Identifiable {
+    case auto = 0
+    case manual = 1
+    case link = 2
+
+    var id: Int { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .auto: return "Auto"
+        case .manual: return "Manual"
+        case .link: return "Link"
+        }
+    }
+}
+
+enum SmoothingMode: Int, CaseIterable, Identifiable {
+    case exponential = 0
+    case movingAverage = 1
+    case none = 2
+    case peakHold = 3
+
+    var id: Int { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .exponential: return "Exponential"
+        case .movingAverage: return "Mov. Avg"
+        case .none: return "None"
+        case .peakHold: return "Peak Hold"
+        }
+    }
+}
+
+enum AudioSourceType: Int {
+    case microphone = 0
+    case file = 1
+    case system = 2
+
+    var displayName: String {
+        switch self {
+        case .microphone: return "Microphone"
+        case .file: return "File"
+        case .system: return "System"
+        }
+    }
+}
+
+struct ExtendedAudioAnalysisSnapshot {
+    let rms: Float
+    let lows: Float
+    let mids: Float
+    let highs: Float
+    let bpm: Float
+    let beatPulse: Float
+    let beatCount: UInt32
+
+    let bpmMode: BpmMode
+    let bpmLocked: Bool
+    let bpmNudge: Float
+    let bpmEnabled: Bool
+
+    let smoothingMode: SmoothingMode
+    let frequencyRelease: Float
+    let frequencyScale: Float
+    let loudnessRelease: Float
+
+    let audioActive: Bool
+    let audioSourceType: AudioSourceType
+
+    let melSpectrum: [Float]
+    let waveform: [Float]
+
+    init(from c: NTWExtendedAudioAnalysisInfo) {
+        self.rms = c.rms
+        self.lows = c.lows
+        self.mids = c.mids
+        self.highs = c.highs
+        self.bpm = c.bpm
+        self.beatPulse = c.beatPulse
+        self.beatCount = c.beatCount
+
+        self.bpmMode = BpmMode(rawValue: Int(c.bpmMode)) ?? .auto
+        self.bpmLocked = c.bpmLocked
+        self.bpmNudge = c.bpmNudge
+        self.bpmEnabled = c.bpmEnabled
+
+        self.smoothingMode = SmoothingMode(rawValue: Int(c.smoothingMode)) ?? .movingAverage
+        self.frequencyRelease = c.frequencyRelease
+        self.frequencyScale = c.frequencyScale
+        self.loudnessRelease = c.loudnessRelease
+
+        self.audioActive = c.audioActive
+        self.audioSourceType = AudioSourceType(rawValue: Int(c.audioSourceType)) ?? .microphone
+
+        // Convert fixed-size C arrays to Swift arrays
+        var mel = [Float]()
+        withUnsafePointer(to: c.melSpectrum) { ptr in
+            ptr.withMemoryRebound(to: Float.self, capacity: Int(c.melSpectrumCount)) { floatPtr in
+                for i in 0..<Int(c.melSpectrumCount) {
+                    mel.append(floatPtr[i])
+                }
+            }
+        }
+        self.melSpectrum = mel
+
+        var wave = [Float]()
+        withUnsafePointer(to: c.waveform) { ptr in
+            ptr.withMemoryRebound(to: Float.self, capacity: Int(c.waveformCount)) { floatPtr in
+                for i in 0..<Int(c.waveformCount) {
+                    wave.append(floatPtr[i])
+                }
+            }
+        }
+        self.waveform = wave
+    }
+
+    static let zero = ExtendedAudioAnalysisSnapshot(
+        rms: 0, lows: 0, mids: 0, highs: 0, bpm: 120, beatPulse: 0, beatCount: 0,
+        bpmMode: .auto, bpmLocked: false, bpmNudge: 0, bpmEnabled: true,
+        smoothingMode: .movingAverage, frequencyRelease: 0.7, frequencyScale: 1.0, loudnessRelease: 0.6,
+        audioActive: false, audioSourceType: .microphone,
+        melSpectrum: [], waveform: []
+    )
+
+    // Direct init for .zero
+    private init(rms: Float, lows: Float, mids: Float, highs: Float, bpm: Float, beatPulse: Float, beatCount: UInt32,
+                 bpmMode: BpmMode, bpmLocked: Bool, bpmNudge: Float, bpmEnabled: Bool,
+                 smoothingMode: SmoothingMode, frequencyRelease: Float, frequencyScale: Float, loudnessRelease: Float,
+                 audioActive: Bool, audioSourceType: AudioSourceType,
+                 melSpectrum: [Float], waveform: [Float]) {
+        self.rms = rms; self.lows = lows; self.mids = mids; self.highs = highs
+        self.bpm = bpm; self.beatPulse = beatPulse; self.beatCount = beatCount
+        self.bpmMode = bpmMode; self.bpmLocked = bpmLocked; self.bpmNudge = bpmNudge; self.bpmEnabled = bpmEnabled
+        self.smoothingMode = smoothingMode; self.frequencyRelease = frequencyRelease
+        self.frequencyScale = frequencyScale; self.loudnessRelease = loudnessRelease
+        self.audioActive = audioActive; self.audioSourceType = audioSourceType
+        self.melSpectrum = melSpectrum; self.waveform = waveform
+    }
+}
+
+struct AudioTrackInfo: Identifiable {
+    let name: String
+    let path: String
+    let bpm: Int
+    let index: Int
+
+    var id: Int { index }
+}
+
+struct FileAudioState {
+    let volume: Float
+    let isPaused: Bool
+    let playbackPosition: Float
+    let totalDuration: Float
+    let isFileSource: Bool
+    let selectedTrackIndex: Int
 }

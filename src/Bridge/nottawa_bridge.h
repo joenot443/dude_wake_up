@@ -47,6 +47,10 @@ typedef struct {
   const char* driverName;      // Owned by caller - must free. NULL if no driver
   float driverShift;           // -1.0 to 1.0
   float driverScale;           // 0.0 to 2.0
+
+  // Options (for int params with named choices, e.g. font selector)
+  const char** options;        // Array of option strings (NULL if none) - caller must free each + array
+  int optionCount;             // 0 if no options
 } NTWParameterInfo;
 
 typedef struct {
@@ -361,6 +365,92 @@ NTWAudioSourceInfo* ntw_get_all_audio_sources(int* outCount);
 void ntw_select_audio_source(const char* audioSourceId);
 
 // ---------------------------------------------------------------------------
+// MARK: - Extended Audio (for Audio Panel)
+// ---------------------------------------------------------------------------
+
+typedef struct {
+  // Core analysis values
+  float rms;
+  float lows, mids, highs;
+  float bpm;
+  float beatPulse;
+
+  // BPM settings
+  int bpmMode;          // 0=Auto, 1=Manual, 2=Link
+  bool bpmLocked;
+  float bpmNudge;       // -1.0 to 1.0
+  bool bpmEnabled;
+
+  // Frequency settings
+  int smoothingMode;    // 0=Exp, 1=MovAvg, 2=None, 3=PeakHold
+  float frequencyRelease;
+  float frequencyScale;
+  float loudnessRelease;
+
+  // Beat detection
+  uint32_t beatCount;   // Increments on each detected beat
+
+  // State
+  bool audioActive;
+  int audioSourceType;  // 0=Mic, 1=File, 2=System
+
+  // Spectrum data (fixed-size for C interop)
+  float melSpectrum[13];
+  int melSpectrumCount;
+
+  // Waveform data (downsampled)
+  float waveform[256];
+  int waveformCount;
+} NTWExtendedAudioAnalysisInfo;
+
+typedef struct {
+  float volume;
+  bool isPaused;
+  float playbackPosition;  // 0.0-1.0
+  float totalDuration;     // seconds
+  bool isFileSource;
+  int selectedTrackIndex;
+} NTWFileAudioState;
+
+typedef struct {
+  const char* name;   // Owned by caller - must free
+  const char* path;   // Owned by caller - must free
+  int bpm;
+  int index;
+} NTWAudioTrackInfo;
+
+// Extended audio analysis snapshot (primary 30fps polling call)
+NTWExtendedAudioAnalysisInfo ntw_get_extended_audio_analysis(void);
+
+// Sample tracks
+NTWAudioTrackInfo* ntw_get_sample_tracks(int* outCount);
+void ntw_free_audio_track_info_array(NTWAudioTrackInfo* array, int count);
+
+// File audio state
+NTWFileAudioState ntw_get_file_audio_state(void);
+
+// Audio source ID
+const char* ntw_get_selected_audio_source_id(void);
+
+// Audio mutations (dispatched to engine thread)
+void ntw_toggle_audio_source(void);
+void ntw_set_bpm_mode(int mode);
+void ntw_set_bpm_locked(bool locked);
+void ntw_set_bpm_value(float bpm);
+void ntw_nudge_bpm(float delta);
+void ntw_set_bpm_nudge(float value);
+void ntw_tap_bpm(void);
+void ntw_set_bpm_enabled(bool enabled);
+void ntw_set_smoothing_mode(int mode);
+void ntw_set_frequency_release(float value);
+void ntw_set_frequency_scale(float value);
+void ntw_set_loudness_release(float value);
+void ntw_select_sample_track(int index);
+void ntw_set_file_audio_volume(float volume);
+void ntw_toggle_file_audio_pause(void);
+void ntw_set_file_audio_position(float position);
+
+// ---------------------------------------------------------------------------
 // MARK: - Config / Workspace
 // ---------------------------------------------------------------------------
 
@@ -391,6 +481,7 @@ char* ntw_get_current_workspace_name(void);
 // ---------------------------------------------------------------------------
 
 void ntw_set_resolution(int settingIndex);
+int ntw_get_resolution_setting_index(void);
 void ntw_set_custom_resolution(float width, float height);
 float ntw_get_resolution_width(void);
 float ntw_get_resolution_height(void);
@@ -422,6 +513,42 @@ void ntw_tick_previews(void);
 // Save a strand from a node to a file.
 // Returns true on success.
 bool ntw_save_strand_from_node(const char* nodeId, const char* path, const char* name);
+
+typedef struct {
+    const char* id;        // Owned by caller (strdup'd) - must free
+    const char* name;      // Owned by caller (strdup'd) - must free
+    const char* imagePath; // Owned by caller (strdup'd) - must free (empty if no preview)
+} NTWAvailableStrandInfo;
+
+// Get all available strands. Caller owns the returned array.
+NTWAvailableStrandInfo* ntw_get_available_strands(int* outCount);
+
+// Free an array of NTWAvailableStrandInfo.
+void ntw_free_available_strand_info_array(NTWAvailableStrandInfo* array, int count);
+
+// Load a strand file into the graph. Returns new node IDs.
+// Caller owns the returned array and must free with ntw_free_string_array().
+char** ntw_load_strand(const char* strandId, int* outCount);
+
+// Get all available template strands. Caller owns the returned array.
+NTWAvailableStrandInfo* ntw_get_available_template_strands(int* outCount);
+
+// Load the demo strand into the graph. Returns new node IDs.
+// Caller owns the returned array and must free with ntw_free_string_array().
+char** ntw_load_demo_strand(int* outCount);
+
+// Free a string array returned by ntw_load_strand.
+void ntw_free_string_array(char** array, int count);
+
+// Delete a strand by ID (removes files from disk).
+void ntw_delete_strand(const char* strandId);
+
+// Rename a strand by ID.
+void ntw_rename_strand(const char* strandId, const char* newName);
+
+// Register a callback that fires when strands are updated.
+typedef void (*NTWStrandsUpdatedCallback)(void);
+void ntw_register_strands_updated_callback(NTWStrandsUpdatedCallback callback);
 
 // ---------------------------------------------------------------------------
 // MARK: - Optional Shaders
@@ -566,6 +693,94 @@ void ntw_set_file_source_speed(const char* sourceId, float speed);
 void ntw_set_file_source_position(const char* sourceId, float position);
 void ntw_set_file_source_mute(const char* sourceId, int mute);
 void ntw_set_file_source_playing(const char* sourceId, int playing);
+
+// ---------------------------------------------------------------------------
+// MARK: - Text Source State
+// ---------------------------------------------------------------------------
+
+typedef struct {
+    const char* text;    // Owned by caller (strdup'd) - must free
+    int fontSize;
+    int isTextSource;    // 1 if this connectable is a TextSource
+    float xPosition;     // 0.0 - 1.0
+    float yPosition;     // 0.0 - 1.0
+    int fontIndex;       // Current font selector index
+    int fontCount;       // Total available fonts
+    const char** fontNames; // Array of font name strings (owned, must free)
+} NTWTextSourceState;
+
+NTWTextSourceState ntw_get_text_source_state(const char* sourceId);
+void ntw_set_text_source_text(const char* sourceId, const char* text);
+void ntw_set_text_source_font_size(const char* sourceId, int fontSize);
+void ntw_set_text_source_font_index(const char* sourceId, int fontIndex);
+void ntw_set_text_source_position(const char* sourceId, float x, float y);
+
+// ---------------------------------------------------------------------------
+// MARK: - Available Non-Shader Sources (for sidebar browser)
+// ---------------------------------------------------------------------------
+
+typedef struct {
+    const char* id;       // Owned by caller - must free
+    const char* name;     // Owned by caller - must free
+    const char* icon;     // SF Symbol name - owned by caller - must free
+    int sourceType;       // VideoSourceType enum value
+} NTWAvailableNonShaderSourceInfo;
+
+NTWAvailableNonShaderSourceInfo* ntw_get_available_non_shader_sources(int* outCount);
+void ntw_free_available_non_shader_source_info_array(NTWAvailableNonShaderSourceInfo* array, int count);
+
+// ---------------------------------------------------------------------------
+// MARK: - Strand Sharing & Community
+// ---------------------------------------------------------------------------
+
+// Callback types for async strand operations.
+typedef void (*NTWShareStrandCallback)(bool success, const char* slugOrError);
+
+typedef struct {
+    const char* slug;
+    const char* title;
+    const char* description;
+    const char* previewUrl;
+    const char* author;
+    int upvotes;
+    int downvotes;
+    int score;
+    int views;
+    int opens;
+    const char* createdAt;
+    const char* userVote;  // "up", "down", or "" for none
+} NTWSharedStrandInfo;
+
+typedef void (*NTWFeedCallback)(bool success, NTWSharedStrandInfo* strands, int count, int totalPages);
+typedef void (*NTWVoteCallback)(bool success, int upvotes, int downvotes, int score, const char* userVote);
+typedef void (*NTWFetchStrandCallback)(bool success, const char* jsonOrError);
+
+// Share a strand (async). Serializes strand JSON on engine thread, then uploads via HTTP.
+// previewPngData/previewLen: optional PNG screenshot data. Pass NULL/0 to skip.
+// Callback receives slug on success, error message on failure.
+void ntw_share_strand(const char* nodeId, const char* title, const char* description,
+                      const char* author, const void* previewPngData, int previewLen,
+                      NTWShareStrandCallback callback);
+
+// Fetch community feed (async). page is 1-based.
+// voterId: unique voter ID for tracking user's votes on each strand.
+void ntw_fetch_community_feed(int page, int limit, const char* voterId, NTWFeedCallback callback);
+
+// Free an array of NTWSharedStrandInfo returned by feed callback.
+void ntw_free_shared_strand_info_array(NTWSharedStrandInfo* array, int count);
+
+// Vote on a strand (async). vote: "up", "down", or "none" to remove vote.
+void ntw_vote_strand(const char* slug, const char* voterId, const char* vote, NTWVoteCallback callback);
+
+// Fetch a shared strand's JSON by slug (async).
+void ntw_fetch_shared_strand(const char* slug, NTWFetchStrandCallback callback);
+
+// Load a strand from a JSON string into the graph.
+// Returns new node IDs. Caller owns the returned array and must free with ntw_free_string_array().
+char** ntw_load_strand_from_json(const char* jsonStr, int* outCount);
+
+// Get serialized strand JSON for a node. Caller must free with ntw_free_string().
+char* ntw_get_strand_json_for_node(const char* nodeId);
 
 // ---------------------------------------------------------------------------
 // MARK: - Texture Sharing (IOSurface)

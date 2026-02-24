@@ -52,6 +52,12 @@ struct ParameterInspectorView: View {
 
                 Divider()
 
+                // Text source controls (text field, font size)
+                if let textState = viewModel.textSourceState {
+                    TextSourceControlsView(state: textState, sourceId: node.id)
+                    Divider()
+                }
+
                 // File source playback controls (video files, library sources)
                 if let fileState = viewModel.fileSourceState {
                     FileSourceControlsView(state: fileState, sourceId: node.id)

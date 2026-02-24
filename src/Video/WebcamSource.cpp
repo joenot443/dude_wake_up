@@ -11,6 +11,7 @@
 #include "LayoutStateService.hpp"
 
 void WebcamSource::setup() {
+  grabberReady = false;
   grabber.close();
   grabber.setDeviceID(settings->deviceId->intValue);
   grabber.setDesiredFrameRate(30);
@@ -18,6 +19,7 @@ void WebcamSource::setup() {
   if (!grabber.setup(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y)) {
     return;
   }
+  grabberReady = true;
   fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   maskShader.load("shaders/ColorKeyMaskMaker");
@@ -25,17 +27,27 @@ void WebcamSource::setup() {
   // Collect the device names
   deviceNames.clear();
   std::vector<ofVideoDevice> devices = grabber.listDevices();
-  
+
   for (int i = 0; i < devices.size(); i++)
   {
     deviceNames.push_back(devices[i].deviceName);
   }
   // Sort the deviceNames alphabetically
   std::sort(deviceNames.begin(), deviceNames.end());
+
+  // Populate parameter options so the bridge exposes them to Swift
+  settings->deviceId->options = deviceNames;
+  lastDeviceId = settings->deviceId->intValue;
 }
 
 void WebcamSource::saveFrame() {
-  if (!grabber.isInitialized()) {
+  // Re-initialize if device selection changed (e.g. from SwiftUI inspector)
+  if (settings->deviceId->intValue != lastDeviceId) {
+    lastDeviceId = settings->deviceId->intValue;
+    setup();
+  }
+
+  if (!grabberReady) {
     return;
   }
   grabber.update();
@@ -68,6 +80,9 @@ json WebcamSource::serialize() {
   if (node != nullptr) {
     j["x"] = node->position.x;
     j["y"] = node->position.y;
+  } else {
+    j["x"] = origin.x;
+    j["y"] = origin.y;
   }
   return j;
 }

@@ -8,6 +8,8 @@
 #include "ShaderChainerService.hpp"
 #include "Models/Strand.hpp"
 #include "AsciiShader.hpp"
+#include "NeonShader.hpp"
+#include "RuttEtraShader.hpp"
 #include "WindowsShader.hpp"
 #include "CircleBlurShader.hpp"
 #include "RetroPCShader.hpp"
@@ -350,8 +352,9 @@ void ShaderChainerService::processFrame()
     
     if (videoSource == nullptr || shader == nullptr) {
       breakConnectionForConnectionId(connection->id);
+      continue;
     }
-    
+
     // Inactive source means a dry traversal
     shader->isDry = !videoSource->active;
     shader->traverseFrame(videoSource->frame(), 0);
@@ -1029,6 +1032,18 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeNeon: {
+      auto settings = new NeonSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<NeonShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeRuttEtra: {
+      auto settings = new RuttEtraSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<RuttEtraShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeWindows: {
       auto settings = new WindowsSettings(shaderId, shaderJson);
       auto shader = std::make_shared<WindowsShader>(settings);

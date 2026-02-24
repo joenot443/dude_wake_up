@@ -21,9 +21,7 @@
 //}
 
 static float frameTime() {
-  static float t = 0.0;
-  t += ImGui::GetIO().DeltaTime;
-  return t;
+  return ofGetElapsedTimef();
 }
 
 

@@ -93,7 +93,17 @@ void AudioSource::processFrame(const std::vector<float>& frame) {
       }
 
       if (beat.isBeat) {
-        lastBeatTime = std::chrono::steady_clock::now();
+        auto now = std::chrono::steady_clock::now();
+        auto msSinceLast = std::chrono::duration_cast<std::chrono::milliseconds>(
+            now - lastBeatTime).count();
+        // Debounce: reject beats within 60% of a beat duration.
+        // This also gates lastBeatTime, preventing bpmStartTime resync
+        // from causing a second beatPulse spike.
+        float minIntervalMs = 36000.0f / std::max(1.0f, audioAnalysis.bpm->value);
+        if (msSinceLast > minIntervalMs) {
+          lastBeatTime = now;
+          audioAnalysis.beatCount++;
+        }
       }
     }
   }

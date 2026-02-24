@@ -11,6 +11,9 @@
 #include "FontService.hpp"
 #include "NodeLayoutView.hpp"
 #include "ofMain.h" // For main thread utilities
+#ifdef NOTTAWA_ENGINE_ONLY
+#include "EngineLoop.hpp"
+#endif
 
 void LibrarySource::load(json j)
 {
@@ -47,10 +50,12 @@ json LibrarySource::serialize()
   j["libraryFile"] = libraryFile->serialize();
   j["libraryFileId"] = libraryFile->id;
   auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);
-  if (node != nullptr)
-  {
+  if (node != nullptr) {
     j["x"] = node->position.x;
     j["y"] = node->position.y;
+  } else {
+    j["x"] = origin.x;
+    j["y"] = origin.y;
   }
   return j;
 }
@@ -61,20 +66,34 @@ void LibrarySource::setup() {
   // Check if the file actually exists on disk (more reliable than checking the map,
   // which may not be populated when resuming a strand before library fetch completes)
   if (LibraryService::getService()->hasMediaOnDisk(libraryFile)) {
-    // File exists on disk - run FileSource setup normally
-    state = LibrarySourceState_Completed;
-    // Update the map so other checks work correctly
-    LibraryService::getService()->libraryFileIdDownloadedMap[libraryFile->id] = true;
-    // Ensure path is set correctly (may differ from saved path if library folder changed)
+    // File exists on disk - try FileSource setup
     path = libraryFile->videoPath();
     FileSource::setup();
+    if (player.isLoaded()) {
+      // File loaded successfully
+      state = LibrarySourceState_Completed;
+      LibraryService::getService()->libraryFileIdDownloadedMap[libraryFile->id] = true;
+    } else {
+      // File on disk is corrupted or partial - delete and re-download
+      log("LibrarySource: file on disk failed to load, re-downloading: %s", path.c_str());
+      ofFile::removeFile(path);
+      LibraryService::getService()->libraryFileIdDownloadedMap[libraryFile->id] = false;
+      // Fall through to the download path below
+    }
   }
-  else {
+  if (state != LibrarySourceState_Completed) {
     // Define the completion callback to be executed after download
     auto onComplete = [this]() {
       log("Download complete, setting up FileSource");
       this->state = LibrarySourceState_Completed;
+#ifdef NOTTAWA_ENGINE_ONLY
+      EngineLoop::getInstance()->executeOnEngineThread([this]() {
+        this->path = this->libraryFile->videoPath();
+        FileSource::setup();
+      });
+#else
       ofAddListener(ofEvents().update, this, &LibrarySource::runSetupOnMainThread);
+#endif
     };
     state = LibrarySourceState_Downloading;
     

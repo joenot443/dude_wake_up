@@ -33,10 +33,12 @@ json MultiSource::serialize()
   j["videoSourceType"] = VideoSource_multi;
   j["settings"] = settings->serialize();
   auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);
-  if (node != nullptr)
-  {
+  if (node != nullptr) {
     j["x"] = node->position.x;
     j["y"] = node->position.y;
+  } else {
+    j["x"] = origin.x;
+    j["y"] = origin.y;
   }
   return j;
 }

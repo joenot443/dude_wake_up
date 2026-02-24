@@ -17,18 +17,23 @@ class TextSource : public VideoSource {
 public:
   TextSource(std::string id, std::string name, std::shared_ptr<DisplayText> displayText)
   : VideoSource(id, name, VideoSource_text), displayText(displayText), textEditorView(TextEditorView(displayText)) {};
-  
+
   void setup() override;
   void saveFrame() override;
   json serialize() override;
   void load(json j) override;
   void drawSettings() override;
 
+  std::shared_ptr<Settings> settingsRef() override {
+    return std::dynamic_pointer_cast<Settings>(displayText);
+  }
+
+  std::shared_ptr<DisplayText> displayText;
+
 protected:
   TextEditorView textEditorView;
   ofTrueTypeFont font;
   std::string fontPath;
-  std::shared_ptr<DisplayText> displayText;
   std::string lastText;
   ofShader strokeShader;
   ofFbo tempFbo;

@@ -177,6 +177,13 @@ struct BlendShader: Shader {
   }
   
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
+    // Guard: bail if FBOs aren't allocated yet (startup race)
+    if (!frame || !canvas || !frame->isAllocated() || !canvas->isAllocated()) return;
+    if (!optionalFrame || !optionalFrame->isAllocated()) return;
+    // Validate GL textures are actually valid (isAllocated can be true with stale textures)
+    if (frame->getTexture().getTextureData().textureID == 0) return;
+    if (canvas->getTexture().getTextureData().textureID == 0) return;
+
     // Lazily initialize preview FBOs and the optional frame on the first run or if dimensions change
     if (!previewsInitialized ||
         (previewsInitialized && !blendPreviews.empty() && blendPreviews.begin()->second->getWidth() != frame->getWidth()) ||
@@ -240,6 +247,10 @@ struct BlendShader: Shader {
       std::shared_ptr<ofFbo> sourceFbo = useOptionalAsSource ? optionalFrame : canvas;
       std::shared_ptr<ofFbo> destFbo = useOptionalAsSource ? canvas : optionalFrame;
       
+      std::shared_ptr<ofFbo> nextFrame = inputAtSlot(slot)->frame();
+      if (!nextFrame || !nextFrame->isAllocated()) continue;
+      if (nextFrame->getTexture().getTextureData().textureID == 0) continue;
+
       destFbo->begin();
       shader.begin();
       shader.setUniform1i("mode", settings->mode->intValue);
@@ -248,9 +259,7 @@ struct BlendShader: Shader {
       shader.setUniform1f("amount", settings->amount->value);
       shader.setUniform1i("alphaSwap", settings->alphaSwap->boolValue ? 1 : 0);
       shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
-      
-      std::shared_ptr<ofFbo> nextFrame = inputAtSlot(slot)->frame();
-      
+
       // Set textures based on flip setting
       ofTexture mainTexture = settings->flip->boolValue ? nextFrame->getTexture() : sourceFbo->getTexture();
       ofTexture secondaryTexture = settings->flip->boolValue ? sourceFbo->getTexture() : nextFrame->getTexture();

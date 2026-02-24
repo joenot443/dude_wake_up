@@ -40,6 +40,10 @@ final class NodeEditorViewModel {
 
     // MARK: - Drag Connection
     var dragConnection: DragConnectionState?
+    /// Pin currently snapped to during drag (within magnetic radius).
+    var dragSnapPinKey: PinKey?
+    /// All valid target pins for the current drag (compatible type, not self).
+    var dragValidPinKeys: Set<PinKey> = []
 
     // MARK: - Browser State
     var showShaderBrowser = false
@@ -68,10 +72,14 @@ final class NodeEditorViewModel {
         case sources
         case oscillators
         case library
+        case strands
     }
 
     // MARK: - Pin Positions (screen coords for cable drawing)
     var pinPositions: [PinKey: CGPoint] = [:]
+
+    // MARK: - Strands State
+    var strandsList: [StrandInfo] = []
 
     // MARK: - Library State
     var libraryFiles: [LibraryFileInfo] = []
@@ -79,12 +87,83 @@ final class NodeEditorViewModel {
     private var downloadPollTimer: Timer?
     private var nodeDownloadPollTimer: Timer?
 
+    // MARK: - Canvas Drop Highlight
+    var isDropTargetActive = false
+
+    // MARK: - Welcome Screen
+    var showWelcomeScreen: Bool = true
+    var welcomeScreenEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(welcomeScreenEnabled, forKey: "nottawa_welcome_enabled")
+        }
+    }
+    var templateStrandsList: [StrandInfo] = []
+
+    // MARK: - Audio Panel
+    var showAudioPanel = false
+    var audioPanelHeight: CGFloat = 250
+
     // MARK: - Inspector
     var inspectorParameters: [ParameterInfo] = []
     var fileSourceState: FileSourceState?
+    var textSourceState: TextSourceState?
+
+    // MARK: - Community State
+    var communityStrands: [SharedStrandInfo] = []
+    var communityPage: Int = 1
+    var communityTotalPages: Int = 1
+    var communityLoading: Bool = false
+    var communitySortOrder: CommunitySortOrder = .newest
+    var strandViewMode: StrandViewMode = .local
+    var shareInProgress: Bool = false
+    var shareResult: ShareResult? = nil
+    var showShareSheet: Bool = false
+    var shareNodeId: String? = nil
+
+    enum StrandViewMode {
+        case local
+        case community
+    }
+
+    enum CommunitySortOrder: String, CaseIterable {
+        case newest = "Newest"
+        case popular = "Popular"
+        case mostViewed = "Most Viewed"
+        case topRated = "Top Rated"
+    }
+
+    var sortedCommunityStrands: [SharedStrandInfo] {
+        switch communitySortOrder {
+        case .newest:
+            return communityStrands.sorted { $0.createdAt > $1.createdAt }
+        case .popular:
+            return communityStrands.sorted { $0.opens > $1.opens }
+        case .mostViewed:
+            return communityStrands.sorted { $0.views > $1.views }
+        case .topRated:
+            return communityStrands.sorted { $0.score > $1.score }
+        }
+    }
+
+    enum ShareResult {
+        case success(slug: String)
+        case error(message: String)
+    }
+
+    var voterId: String {
+        if let id = UserDefaults.standard.string(forKey: "nottawa_voter_id") { return id }
+        let id = UUID().uuidString
+        UserDefaults.standard.set(id, forKey: "nottawa_voter_id")
+        return id
+    }
 
     private let engine = NottawaEngine.shared
     private var sharingTextureIds: Set<String> = []
+
+    init() {
+        self.welcomeScreenEnabled = UserDefaults.standard.object(forKey: "nottawa_welcome_enabled") as? Bool ?? true
+        self.showWelcomeScreen = self.welcomeScreenEnabled
+    }
 
     // MARK: - Initialization
 
@@ -95,7 +174,14 @@ final class NodeEditorViewModel {
         engine.registerLibraryUpdateCallback { [weak self] in
             self?.refreshLibrary()
         }
+        engine.registerResolutionChangedCallback {
+            PreviewWindowManager.shared.updateWindowSizes()
+        }
+        engine.registerStrandsUpdatedCallback { [weak self] in
+            self?.refreshStrands()
+        }
         refresh()
+        fetchTemplateStrands()
     }
 
     // MARK: - Refresh from Engine
@@ -181,6 +267,7 @@ final class NodeEditorViewModel {
         engine.deselectConnectable()
         inspectorParameters = []
         fileSourceState = nil
+        textSourceState = nil
     }
 
     func toggleNodeSelection(_ id: String) {
@@ -202,10 +289,12 @@ final class NodeEditorViewModel {
         guard let nodeId = selectedNodeId else {
             inspectorParameters = []
             fileSourceState = nil
+            textSourceState = nil
             return
         }
         inspectorParameters = engine.parameters(for: nodeId)
         fileSourceState = engine.fileSourceState(sourceId: nodeId)
+        textSourceState = engine.textSourceState(sourceId: nodeId)
     }
 
     // MARK: - Node Actions
@@ -424,6 +513,48 @@ final class NodeEditorViewModel {
         return id
     }
 
+    @discardableResult
+    func addTextVideoSource(at position: CGPoint? = nil) -> String? {
+        guard let id = engine.addTextVideoSource(name: "Text") else { return nil }
+        let pos = position ?? nextAutoPosition()
+        engine.setConnectablePosition(id: id, x: Float(pos.x), y: Float(pos.y))
+        lastAddedNodePosition = pos
+        refresh()
+        return id
+    }
+
+    @discardableResult
+    func addIconVideoSource(at position: CGPoint? = nil) -> String? {
+        guard let id = engine.addIconVideoSource(name: "Icon") else { return nil }
+        let pos = position ?? nextAutoPosition()
+        engine.setConnectablePosition(id: id, x: Float(pos.x), y: Float(pos.y))
+        lastAddedNodePosition = pos
+        refresh()
+        return id
+    }
+
+    @discardableResult
+    func addWebcamVideoSource(at position: CGPoint? = nil) -> String? {
+        guard let id = engine.addWebcamVideoSource(name: "Webcam", deviceId: 0) else { return nil }
+        let pos = position ?? nextAutoPosition()
+        engine.setConnectablePosition(id: id, x: Float(pos.x), y: Float(pos.y))
+        lastAddedNodePosition = pos
+        refresh()
+        return id
+    }
+
+    /// Add a non-shader video source by VideoSourceType enum value.
+    @discardableResult
+    func addNonShaderSource(type: Int, at position: CGPoint? = nil) -> String? {
+        // VideoSourceType: 0=webcam, 3=icon, 5=text
+        switch type {
+        case 5: return addTextVideoSource(at: position)
+        case 3: return addIconVideoSource(at: position)
+        case 0: return addWebcamVideoSource(at: position)
+        default: return nil
+        }
+    }
+
     /// Add a node at a specific canvas position from a drop payload.
     /// Payload format: "shader:<typeInt>" or "source:<typeInt>"
     /// If targetNodeId is provided and the payload is a shader (effect),
@@ -436,8 +567,16 @@ final class NodeEditorViewModel {
         let kind = parts[0]
         let value = String(parts[1])
 
-        if kind == "library" {
+        if kind == "strand" {
+            loadStrand(id: value, at: canvasPos)
+            return
+        } else if kind == "shared_strand" {
+            loadSharedStrand(slug: value)
+            return
+        } else if kind == "library" {
             addLibrarySource(libraryFileId: value, at: canvasPos)
+        } else if kind == "nonsrc", let typeInt = Int(value) {
+            addNonShaderSource(type: typeInt, at: canvasPos)
         } else if let typeInt = Int(value) {
             if kind == "shader" {
                 if let targetId = targetNodeId,
@@ -551,6 +690,49 @@ final class NodeEditorViewModel {
             }
         }
         return bestKey
+    }
+
+    /// Compute valid target pins for the current drag and the snap target.
+    func updateDragTargets(at screenPoint: CGPoint) {
+        guard let drag = dragConnection else {
+            dragSnapPinKey = nil
+            dragValidPinKeys = []
+            return
+        }
+
+        // Valid targets: opposite type, not on source node
+        // Also include output pins when dragging from output (for blend)
+        let targetIsInput = drag.fromIsOutput
+        var validKeys = Set<PinKey>()
+        for (key, _) in pinPositions {
+            if key.nodeId == drag.fromNodeId { continue }
+            if targetIsInput && !key.isOutput { validKeys.insert(key) }   // input pins
+            if !targetIsInput && key.isOutput { validKeys.insert(key) }   // output pins
+            if drag.fromIsOutput && key.isOutput && key.nodeId != drag.fromNodeId {
+                validKeys.insert(key)  // output→output for blend
+            }
+        }
+        dragValidPinKeys = validKeys
+
+        // Magnetic snap — larger radius (30pt, scaled by zoom)
+        let snapRadius: CGFloat = 30 / canvasScale
+        var bestKey: PinKey?
+        var bestDist = CGFloat.infinity
+        for key in validKeys {
+            guard let pos = pinPositions[key] else { continue }
+            let dist = hypot(pos.x - screenPoint.x, pos.y - screenPoint.y)
+            if dist < snapRadius && dist < bestDist {
+                bestDist = dist
+                bestKey = key
+            }
+        }
+        dragSnapPinKey = bestKey
+    }
+
+    /// Clear all drag target state.
+    func clearDragTargets() {
+        dragSnapPinKey = nil
+        dragValidPinKeys = []
     }
 
     // MARK: - Workspace Management
@@ -674,6 +856,131 @@ final class NodeEditorViewModel {
     func stopDownloadPolling() {
         downloadPollTimer?.invalidate()
         downloadPollTimer = nil
+    }
+
+    // MARK: - Strands
+
+    func fetchStrands() {
+        strandsList = engine.availableStrands()
+    }
+
+    func refreshStrands() {
+        strandsList = engine.availableStrands()
+    }
+
+    func loadStrand(id: String, at position: CGPoint? = nil) {
+        let newIds = engine.loadStrand(id: id)
+        if let pos = position {
+            // Position the first new node at the drop location
+            if let firstId = newIds.first {
+                engine.setConnectablePosition(id: firstId, x: Float(pos.x), y: Float(pos.y))
+            }
+        }
+        refresh()
+    }
+
+    func deleteStrand(id: String) {
+        engine.deleteStrand(id: id)
+        refreshStrands()
+    }
+
+    func renameStrand(id: String, newName: String) {
+        engine.renameStrand(id: id, newName: newName)
+        refreshStrands()
+    }
+
+    // MARK: - Community Strands
+
+    func fetchCommunityFeed(page: Int = 1) {
+        communityLoading = true
+        engine.fetchCommunityFeed(page: page, limit: 20, voterId: voterId) { [weak self] strands, totalPages in
+            guard let self else { return }
+            if page == 1 {
+                self.communityStrands = strands
+            } else {
+                self.communityStrands.append(contentsOf: strands)
+            }
+            self.communityPage = page
+            self.communityTotalPages = totalPages
+            self.communityLoading = false
+        }
+    }
+
+    func voteOnStrand(slug: String, vote: String) {
+        // Optimistic update
+        if let idx = communityStrands.firstIndex(where: { $0.slug == slug }) {
+            let current = communityStrands[idx].userVote
+            if vote == "up" {
+                communityStrands[idx].userVote = current == "up" ? nil : "up"
+                communityStrands[idx].score += current == "up" ? -1 : (current == "down" ? 2 : 1)
+                communityStrands[idx].upvotes += current == "up" ? -1 : 1
+                if current == "down" { communityStrands[idx].downvotes -= 1 }
+            } else if vote == "down" {
+                communityStrands[idx].userVote = current == "down" ? nil : "down"
+                communityStrands[idx].score += current == "down" ? 1 : (current == "up" ? -2 : -1)
+                communityStrands[idx].downvotes += current == "down" ? -1 : 1
+                if current == "up" { communityStrands[idx].upvotes -= 1 }
+            }
+        }
+
+        let voteAction = communityStrands.first(where: { $0.slug == slug })?.userVote == nil ? "none" : vote
+        engine.voteOnStrand(slug: slug, voterId: voterId, vote: voteAction) { [weak self] success, upvotes, downvotes, score, userVote in
+            guard let self, success else { return }
+            if let idx = self.communityStrands.firstIndex(where: { $0.slug == slug }) {
+                self.communityStrands[idx].upvotes = upvotes
+                self.communityStrands[idx].downvotes = downvotes
+                self.communityStrands[idx].score = score
+                self.communityStrands[idx].userVote = userVote
+            }
+        }
+    }
+
+    func shareStrand(nodeId: String, title: String, description: String, author: String, previewPng: Data?) {
+        shareInProgress = true
+        shareResult = nil
+        engine.shareStrand(nodeId: nodeId, title: title, description: description,
+                          author: author, previewPng: previewPng) { [weak self] result in
+            guard let self else { return }
+            self.shareInProgress = false
+            switch result {
+            case .success(let slug):
+                self.shareResult = .success(slug: slug)
+                self.fetchCommunityFeed(page: 1)
+            case .failure(let error):
+                self.shareResult = .error(message: error.localizedDescription)
+            }
+        }
+    }
+
+    func loadSharedStrand(slug: String) {
+        engine.fetchSharedStrand(slug: slug) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success(let json):
+                let newIds = self.engine.loadStrandFromJson(json)
+                if !newIds.isEmpty {
+                    self.refresh()
+                }
+            case .failure(let error):
+                print("Failed to load shared strand: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    // MARK: - Welcome Screen
+
+    func fetchTemplateStrands() {
+        templateStrandsList = engine.availableTemplateStrands()
+    }
+
+    func loadDemoStrand() {
+        let _ = engine.loadDemoStrand()
+        refresh()
+        showWelcomeScreen = false
+    }
+
+    func dismissWelcomeScreen() {
+        showWelcomeScreen = false
     }
 
     // MARK: - Cleanup

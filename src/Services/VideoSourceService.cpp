@@ -571,7 +571,9 @@ void VideoSourceService::appendConfig(json j)
   
   VideoSourceType type = j["videoSourceType"];
   std::string sourceId = j["id"];
-  ImVec2 position = ImVec2(j["x"], j["y"]);
+  float posX = (j.contains("x") && j["x"].is_number()) ? j["x"].get<float>() : 0.0f;
+  float posY = (j.contains("y") && j["y"].is_number()) ? j["y"].get<float>() : 0.0f;
+  ImVec2 position = ImVec2(posX, posY);
   std::shared_ptr<VideoSource> source;
   std::string name = "New Source";
   if (j.contains("sourceName")) {

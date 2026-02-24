@@ -22,11 +22,18 @@
 #include "OscillationService.hpp"
 #include "WaveformOscillator.hpp"
 #include "Strand.hpp"
+#include "StrandService.hpp"
 #include "Workspace.hpp"
+
+#include <filesystem>
 #include "LibraryService.hpp"
 #include "LibraryFile.hpp"
 #include "FileSource.hpp"
+#include "FileAudioSource.hpp"
+#include "TextSource.hpp"
 #include "ofMain.h"
+
+#include "httplib.h"
 
 #include <cstdio>
 #include <cstring>
@@ -154,6 +161,12 @@ void ntw_free_parameter_info(NTWParameterInfo* info) {
   free((void*)info->id);
   free((void*)info->name);
   if (info->driverName) free((void*)info->driverName);
+  if (info->options) {
+    for (int i = 0; i < info->optionCount; i++) {
+      free((void*)info->options[i]);
+    }
+    free((void*)info->options);
+  }
 }
 
 void ntw_free_parameter_info_array(NTWParameterInfo* array, int count) {
@@ -405,11 +418,13 @@ char* ntw_add_shader_video_source(int shaderSourceTypeRaw) {
 
 char* ntw_add_text_video_source(const char* name) {
   std::string sname = name ? std::string(name) : "Text";
-  return runOnEngineThread([sname]() -> char* {
+  auto result = runOnEngineThread([sname]() -> char* {
     auto source = ActionService::getService()->addTextVideoSource(sname);
     if (!source) return nullptr;
     return strdup_safe(source->id);
   });
+  notifyGraphChanged();
+  return result;
 }
 
 char* ntw_add_image_video_source(const char* name, const char* path) {
@@ -783,6 +798,19 @@ NTWParameterInfo* ntw_get_parameters(const char* connectableId, int* outCount) {
     result[i].colorB = p->color->at(2);
     result[i].colorA = p->color->at(3);
     populateOscillatorDriverFields(result[i], p);
+
+    // Populate options (e.g. font names for font selector)
+    if (!p->options.empty()) {
+      int optCount = static_cast<int>(p->options.size());
+      result[i].optionCount = optCount;
+      result[i].options = static_cast<const char**>(calloc(optCount, sizeof(const char*)));
+      for (int j = 0; j < optCount; j++) {
+        result[i].options[j] = strdup_safe(p->options[j]);
+      }
+    } else {
+      result[i].optionCount = 0;
+      result[i].options = nullptr;
+    }
   }
 
   return result;
@@ -1177,7 +1205,7 @@ NTWAudioSourceInfo* ntw_get_all_audio_sources(int* outCount) {
     auto& src = sources[i];
     result[i].id = strdup_safe(src->id);
     result[i].name = strdup_safe(src->name);
-    result[i].sourceType = 0; // Default to mic; subtypes determined by dynamic_cast if needed
+    result[i].sourceType = static_cast<int>(src->type());
   }
 
   return result;
@@ -1188,6 +1216,275 @@ void ntw_select_audio_source(const char* audioSourceId) {
   auto source = AudioSourceService::getService()->audioSourceForId(std::string(audioSourceId));
   if (source) {
     AudioSourceService::getService()->selectAudioSource(source);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// MARK: - Extended Audio (Audio Panel)
+// ---------------------------------------------------------------------------
+
+NTWExtendedAudioAnalysisInfo ntw_get_extended_audio_analysis(void) {
+  NTWExtendedAudioAnalysisInfo info = {};
+  auto svc = AudioSourceService::getService();
+  auto source = svc->selectedAudioSource;
+  if (!source) return info;
+
+  auto& analysis = source->audioAnalysis;
+
+  // Core values
+  info.rms = analysis.rms ? analysis.rms->value : 0.0f;
+  info.lows = analysis.lows ? analysis.lows->value : 0.0f;
+  info.mids = analysis.mids ? analysis.mids->value : 0.0f;
+  info.highs = analysis.highs ? analysis.highs->value : 0.0f;
+  info.bpm = analysis.bpm ? analysis.bpm->value : 120.0f;
+  info.beatPulse = analysis.beatPulse ? analysis.beatPulse->value : 0.0f;
+  info.beatCount = analysis.beatCount;
+
+  // BPM settings
+  info.bpmMode = static_cast<int>(analysis.bpmMode);
+  info.bpmLocked = analysis.bpmLocked ? analysis.bpmLocked->boolValue : false;
+  info.bpmNudge = analysis.bpmNudge ? analysis.bpmNudge->value : 0.0f;
+  info.bpmEnabled = analysis.bpmEnabled;
+
+  // Frequency settings
+  info.smoothingMode = static_cast<int>(analysis.smoothingMode);
+  info.frequencyRelease = analysis.frequencyRelease ? analysis.frequencyRelease->value : 0.7f;
+  info.frequencyScale = analysis.frequencyScale ? analysis.frequencyScale->value : 1.0f;
+  info.loudnessRelease = analysis.rmsAnalysisParam.release ? analysis.rmsAnalysisParam.release->value : 0.6f;
+
+  // State
+  info.audioActive = source->active;
+  info.audioSourceType = static_cast<int>(source->type());
+
+  // Mel spectrum (copy up to 13 bins)
+  auto melSpec = analysis.getSafeMelSpectrum();
+  info.melSpectrumCount = std::min(static_cast<int>(melSpec.size()), 13);
+  for (int i = 0; i < info.melSpectrumCount; i++) {
+    info.melSpectrum[i] = melSpec[i];
+  }
+
+  // Waveform (downsample to 256 if needed)
+  auto wave = analysis.getSafeWaveform();
+  if (wave.empty()) {
+    info.waveformCount = 0;
+  } else if (wave.size() <= 256) {
+    info.waveformCount = static_cast<int>(wave.size());
+    for (int i = 0; i < info.waveformCount; i++) {
+      info.waveform[i] = wave[i];
+    }
+  } else {
+    // Downsample
+    info.waveformCount = 256;
+    float step = static_cast<float>(wave.size()) / 256.0f;
+    for (int i = 0; i < 256; i++) {
+      info.waveform[i] = wave[static_cast<int>(i * step)];
+    }
+  }
+
+  return info;
+}
+
+NTWAudioTrackInfo* ntw_get_sample_tracks(int* outCount) {
+  auto& tracks = AudioSourceService::getService()->sampleTracks;
+  int count = static_cast<int>(tracks.size());
+  if (outCount) *outCount = count;
+  if (count == 0) return nullptr;
+
+  auto* result = static_cast<NTWAudioTrackInfo*>(
+    calloc(count, sizeof(NTWAudioTrackInfo)));
+
+  for (int i = 0; i < count; i++) {
+    result[i].name = strdup_safe(tracks[i]->name);
+    result[i].path = strdup_safe(tracks[i]->path);
+    result[i].bpm = tracks[i]->bpm;
+    result[i].index = i;
+  }
+
+  return result;
+}
+
+void ntw_free_audio_track_info_array(NTWAudioTrackInfo* array, int count) {
+  if (!array) return;
+  for (int i = 0; i < count; i++) {
+    free(const_cast<char*>(array[i].name));
+    free(const_cast<char*>(array[i].path));
+  }
+  free(array);
+}
+
+NTWFileAudioState ntw_get_file_audio_state(void) {
+  NTWFileAudioState state = {};
+  auto svc = AudioSourceService::getService();
+  auto source = svc->selectedAudioSource;
+  if (!source) return state;
+
+  auto fileSrc = std::dynamic_pointer_cast<FileAudioSource>(source);
+  if (!fileSrc) {
+    state.isFileSource = false;
+    return state;
+  }
+
+  state.isFileSource = true;
+  state.volume = fileSrc->volume;
+  state.isPaused = fileSrc->isPaused.load();
+  state.playbackPosition = fileSrc->getPlaybackPosition();
+  state.totalDuration = fileSrc->getTotalDuration();
+
+  // Find selected track index
+  auto& tracks = svc->sampleTracks;
+  auto selectedTrack = svc->selectedSampleTrack;
+  state.selectedTrackIndex = -1;
+  if (selectedTrack) {
+    for (int i = 0; i < static_cast<int>(tracks.size()); i++) {
+      if (tracks[i] == selectedTrack) {
+        state.selectedTrackIndex = i;
+        break;
+      }
+    }
+  }
+
+  return state;
+}
+
+const char* ntw_get_selected_audio_source_id(void) {
+  auto source = AudioSourceService::getService()->selectedAudioSource;
+  if (!source) return nullptr;
+  return strdup_safe(source->id);
+}
+
+void ntw_toggle_audio_source(void) {
+  runOnEngineThread([]() {
+    auto source = AudioSourceService::getService()->selectedAudioSource;
+    if (source) {
+      source->toggle();
+    }
+  });
+}
+
+void ntw_set_bpm_mode(int mode) {
+  runOnEngineThread([mode]() {
+    auto source = AudioSourceService::getService()->selectedAudioSource;
+    if (!source) return;
+    source->audioAnalysis.bpmMode = static_cast<BpmMode>(mode);
+    source->audioAnalysis.bpmModeParam->intValue = mode;
+  });
+}
+
+void ntw_set_bpm_locked(bool locked) {
+  auto source = AudioSourceService::getService()->selectedAudioSource;
+  if (!source) return;
+  source->audioAnalysis.bpmLocked->boolValue = locked;
+}
+
+void ntw_set_bpm_value(float bpm) {
+  runOnEngineThread([bpm]() {
+    auto svc = AudioSourceService::getService();
+    auto source = svc->selectedAudioSource;
+    if (!source) return;
+    source->audioAnalysis.adjustBpmStartTimeForPhase(bpm);
+    svc->tapper.setBpm(bpm);
+  });
+}
+
+void ntw_nudge_bpm(float delta) {
+  auto source = AudioSourceService::getService()->selectedAudioSource;
+  if (!source || !source->audioAnalysis.bpmNudge) return;
+  float newVal = source->audioAnalysis.bpmNudge->value + delta;
+  newVal = std::max(-1.0f, std::min(1.0f, newVal));
+  source->audioAnalysis.bpmNudge->value = newVal;
+}
+
+void ntw_set_bpm_nudge(float value) {
+  auto source = AudioSourceService::getService()->selectedAudioSource;
+  if (!source || !source->audioAnalysis.bpmNudge) return;
+  source->audioAnalysis.bpmNudge->value = std::max(-1.0f, std::min(1.0f, value));
+}
+
+void ntw_tap_bpm(void) {
+  runOnEngineThread([]() {
+    auto svc = AudioSourceService::getService();
+    auto source = svc->selectedAudioSource;
+    if (!source) return;
+    // If tapper has been idle, reset it
+    if (svc->tapper.bpm() < 1.0f) {
+      svc->tapper.startFresh();
+    }
+    svc->tapper.tap();
+    float bpm = svc->tapper.bpm();
+    if (bpm > 0) {
+      source->audioAnalysis.adjustBpmStartTimeForPhase(bpm);
+    }
+  });
+}
+
+void ntw_set_bpm_enabled(bool enabled) {
+  auto source = AudioSourceService::getService()->selectedAudioSource;
+  if (!source) return;
+  source->audioAnalysis.bpmEnabled = enabled;
+}
+
+void ntw_set_smoothing_mode(int mode) {
+  auto source = AudioSourceService::getService()->selectedAudioSource;
+  if (!source) return;
+  source->audioAnalysis.smoothingMode = static_cast<SmoothingMode>(mode);
+}
+
+void ntw_set_frequency_release(float value) {
+  auto source = AudioSourceService::getService()->selectedAudioSource;
+  if (!source || !source->audioAnalysis.frequencyRelease) return;
+  source->audioAnalysis.frequencyRelease->value = value;
+}
+
+void ntw_set_frequency_scale(float value) {
+  auto source = AudioSourceService::getService()->selectedAudioSource;
+  if (!source || !source->audioAnalysis.frequencyScale) return;
+  source->audioAnalysis.frequencyScale->value = value;
+}
+
+void ntw_set_loudness_release(float value) {
+  auto source = AudioSourceService::getService()->selectedAudioSource;
+  if (!source) return;
+  source->audioAnalysis.rmsAnalysisParam.release->value = value;
+}
+
+void ntw_select_sample_track(int index) {
+  runOnEngineThread([index]() {
+    auto svc = AudioSourceService::getService();
+    auto& tracks = svc->sampleTracks;
+    if (index < 0 || index >= static_cast<int>(tracks.size())) return;
+    svc->selectedSampleTrack = tracks[index];
+    svc->selectedSampleTrackParam->intValue = index;
+    svc->affirmSampleAudioTrack();
+  });
+}
+
+void ntw_set_file_audio_volume(float volume) {
+  auto source = AudioSourceService::getService()->selectedAudioSource;
+  if (!source) return;
+  auto fileSrc = std::dynamic_pointer_cast<FileAudioSource>(source);
+  if (fileSrc) {
+    fileSrc->setVolume(volume);
+  }
+}
+
+void ntw_toggle_file_audio_pause(void) {
+  auto source = AudioSourceService::getService()->selectedAudioSource;
+  if (!source) return;
+  auto fileSrc = std::dynamic_pointer_cast<FileAudioSource>(source);
+  if (!fileSrc) return;
+  if (fileSrc->isPaused.load()) {
+    fileSrc->resumePlayback();
+  } else {
+    fileSrc->pausePlayback();
+  }
+}
+
+void ntw_set_file_audio_position(float position) {
+  auto source = AudioSourceService::getService()->selectedAudioSource;
+  if (!source) return;
+  auto fileSrc = std::dynamic_pointer_cast<FileAudioSource>(source);
+  if (fileSrc) {
+    fileSrc->setPlaybackPosition(position);
   }
 }
 
@@ -1312,6 +1609,10 @@ void ntw_set_resolution(int settingIndex) {
   runOnEngineThread([settingIndex]() {
     LayoutStateService::getService()->updateResolutionSettings(settingIndex);
   });
+}
+
+int ntw_get_resolution_setting_index(void) {
+  return LayoutStateService::getService()->resolutionSetting;
 }
 
 void ntw_set_custom_resolution(float width, float height) {
@@ -1594,19 +1895,33 @@ void ntw_tick_previews(void) {
       fbo->end();
 
       resultFrame = fbo;
-    } else if (inst.shader && effectInputFrame) {
-      if (!effectInputFrame->isAllocated()) continue;
+    } else if (inst.shader) {
       auto lastFrame = inst.shader->lastFrame;
-      if (!lastFrame || !lastFrame->isAllocated()) continue;
+      bool canRender = effectInputFrame && effectInputFrame->isAllocated()
+                       && lastFrame && lastFrame->isAllocated()
+                       && inst.shader->shader.isLoaded()
+                       && lastFrame->getTexture().getTextureData().textureID;
 
-      // Verify GL shader program is still valid
-      if (!inst.shader->shader.isLoaded()) continue;
-      if (!lastFrame->getTexture().getTextureData().textureID) continue;
+      if (canRender) {
+        inst.shader->clearLastFrame();
+        // Re-clear to opaque black so unwritten pixels don't show
+        // the macOS debug-pink from the transparent clear.
+        lastFrame->begin();
+        ofClear(0, 0, 0, 255);
+        lastFrame->end();
+        inst.shader->shade(effectInputFrame, inst.shader->lastFrame);
+        resultFrame = inst.shader->frame();
+        if (!resultFrame || !resultFrame->isAllocated()) resultFrame = nullptr;
+      }
 
-      inst.shader->clearLastFrame();
-      inst.shader->shade(effectInputFrame, inst.shader->lastFrame);
-      resultFrame = inst.shader->frame();
-      if (!resultFrame || !resultFrame->isAllocated()) continue;
+      // If shader couldn't render, clear its frame to black
+      if (!resultFrame && lastFrame && lastFrame->isAllocated()
+          && lastFrame->getTexture().getTextureData().textureID) {
+        lastFrame->begin();
+        ofClear(0, 0, 0, 255);
+        lastFrame->end();
+        resultFrame = lastFrame;
+      }
     }
 
     // Directly blit to IOSurface
@@ -1635,6 +1950,158 @@ bool ntw_save_strand_from_node(const char* nodeId, const char* path, const char*
     strand.name = sname;
     ConfigService::getService()->saveStrandFile(strand, spath, "");
     return true;
+  });
+}
+
+// Strands updated callback
+static NTWStrandsUpdatedCallback strandsUpdatedCallback = nullptr;
+
+static void notifyStrandsChanged() {
+  if (strandsUpdatedCallback) strandsUpdatedCallback();
+}
+
+NTWAvailableStrandInfo* ntw_get_available_strands(int* outCount) {
+  if (outCount) *outCount = 0;
+  auto strands = StrandService::getService()->availableStrands();
+  int count = static_cast<int>(strands.size());
+  if (outCount) *outCount = count;
+  if (count == 0) return nullptr;
+
+  auto* result = static_cast<NTWAvailableStrandInfo*>(
+    calloc(count, sizeof(NTWAvailableStrandInfo)));
+
+  for (int i = 0; i < count; i++) {
+    result[i].id = strdup_safe(strands[i]->id);
+    result[i].name = strdup_safe(strands[i]->name);
+    result[i].imagePath = strdup_safe(strands[i]->imagePath);
+  }
+
+  return result;
+}
+
+void ntw_free_available_strand_info_array(NTWAvailableStrandInfo* array, int count) {
+  if (!array) return;
+  for (int i = 0; i < count; i++) {
+    free((void*)array[i].id);
+    free((void*)array[i].name);
+    free((void*)array[i].imagePath);
+  }
+  free(array);
+}
+
+char** ntw_load_strand(const char* strandId, int* outCount) {
+  if (outCount) *outCount = 0;
+  if (!strandId) return nullptr;
+  std::string sid(strandId);
+
+  auto ids = runOnEngineThread([sid]() -> std::vector<std::string> {
+    auto strand = StrandService::getService()->availableStrandForId(sid);
+    if (!strand) return {};
+    return ConfigService::getService()->loadStrandFile(strand->path);
+  });
+
+  if (ids.empty()) return nullptr;
+
+  int count = static_cast<int>(ids.size());
+  if (outCount) *outCount = count;
+
+  char** result = static_cast<char**>(calloc(count, sizeof(char*)));
+  for (int i = 0; i < count; i++) {
+    result[i] = strdup_safe(ids[i]);
+  }
+
+  notifyGraphChanged();
+  return result;
+}
+
+void ntw_free_string_array(char** array, int count) {
+  if (!array) return;
+  for (int i = 0; i < count; i++) {
+    free(array[i]);
+  }
+  free(array);
+}
+
+NTWAvailableStrandInfo* ntw_get_available_template_strands(int* outCount) {
+  if (outCount) *outCount = 0;
+  auto strands = StrandService::getService()->availableTemplateStrands();
+  int count = static_cast<int>(strands.size());
+  if (outCount) *outCount = count;
+  if (count == 0) return nullptr;
+
+  auto* result = static_cast<NTWAvailableStrandInfo*>(
+    calloc(count, sizeof(NTWAvailableStrandInfo)));
+
+  for (int i = 0; i < count; i++) {
+    result[i].id = strdup_safe(strands[i]->id);
+    result[i].name = strdup_safe(strands[i]->name);
+    result[i].imagePath = strdup_safe(strands[i]->imagePath);
+  }
+
+  return result;
+}
+
+char** ntw_load_demo_strand(int* outCount) {
+  if (outCount) *outCount = 0;
+
+  auto ids = runOnEngineThread([]() -> std::vector<std::string> {
+    auto demoStrand = StrandService::getService()->demoStrand;
+    if (!demoStrand) return {};
+    return ConfigService::getService()->loadStrandFile(demoStrand->path);
+  });
+
+  if (ids.empty()) return nullptr;
+
+  int count = static_cast<int>(ids.size());
+  if (outCount) *outCount = count;
+
+  char** result = static_cast<char**>(calloc(count, sizeof(char*)));
+  for (int i = 0; i < count; i++) {
+    result[i] = strdup_safe(ids[i]);
+  }
+
+  notifyGraphChanged();
+  return result;
+}
+
+void ntw_delete_strand(const char* strandId) {
+  if (!strandId) return;
+  std::string sid(strandId);
+
+  runOnEngineThread([sid]() {
+    auto strand = StrandService::getService()->availableStrandForId(sid);
+    if (!strand) return;
+
+    // Remove files from disk
+    if (!strand->path.empty()) {
+      std::filesystem::remove(strand->path);
+    }
+    if (!strand->imagePath.empty()) {
+      std::filesystem::remove(strand->imagePath);
+    }
+
+    StrandService::getService()->removeStrand(sid);
+  });
+
+  notifyStrandsChanged();
+}
+
+void ntw_rename_strand(const char* strandId, const char* newName) {
+  if (!strandId || !newName) return;
+  std::string sid(strandId), sname(newName);
+
+  runOnEngineThread([sid, sname]() {
+    StrandService::getService()->renameStrand(sid, sname);
+  });
+
+  notifyStrandsChanged();
+}
+
+void ntw_register_strands_updated_callback(NTWStrandsUpdatedCallback callback) {
+  strandsUpdatedCallback = callback;
+  // Also subscribe to the C++ observable so we fire on internal changes
+  StrandService::getService()->subscribeToStrandsUpdated([]() {
+    notifyStrandsChanged();
   });
 }
 
@@ -1951,6 +2418,402 @@ void ntw_set_file_source_playing(const char* sourceId, int playing) {
     if (fileSrc->playing) {
       fileSrc->player.play();
     }
+  });
+}
+
+// ---------------------------------------------------------------------------
+// MARK: - Text Source State
+// ---------------------------------------------------------------------------
+
+NTWTextSourceState ntw_get_text_source_state(const char* sourceId) {
+  NTWTextSourceState result = {};
+  result.text = nullptr;
+  result.fontSize = 0;
+  result.isTextSource = 0;
+  if (!sourceId) return result;
+
+  auto src = VideoSourceService::getService()->videoSourceForId(std::string(sourceId));
+  if (!src || src->type != VideoSource_text) return result;
+
+  auto* textSrc = dynamic_cast<TextSource*>(src.get());
+  if (!textSrc || !textSrc->displayText) return result;
+
+  result.isTextSource = 1;
+  result.text = strdup_safe(textSrc->displayText->text);
+  result.fontSize = textSrc->displayText->fontSize;
+  result.xPosition = textSrc->displayText->xPosition->value;
+  result.yPosition = textSrc->displayText->yPosition->value;
+  result.fontIndex = textSrc->displayText->fontSelector->intValue;
+
+  auto& fonts = FontService::getService()->fonts;
+  int fontCount = static_cast<int>(fonts.size());
+  result.fontCount = fontCount;
+  if (fontCount > 0) {
+    result.fontNames = static_cast<const char**>(calloc(fontCount, sizeof(const char*)));
+    for (int i = 0; i < fontCount; i++) {
+      result.fontNames[i] = strdup_safe(fonts[i].name);
+    }
+  } else {
+    result.fontNames = nullptr;
+  }
+
+  return result;
+}
+
+void ntw_set_text_source_text(const char* sourceId, const char* text) {
+  if (!sourceId || !text) return;
+  std::string sid(sourceId), stext(text);
+  auto src = VideoSourceService::getService()->videoSourceForId(sid);
+  if (!src || src->type != VideoSource_text) return;
+  auto* textSrc = dynamic_cast<TextSource*>(src.get());
+  if (!textSrc || !textSrc->displayText) return;
+  textSrc->displayText->text = stext;
+}
+
+void ntw_set_text_source_font_size(const char* sourceId, int fontSize) {
+  if (!sourceId) return;
+  std::string sid(sourceId);
+  auto src = VideoSourceService::getService()->videoSourceForId(sid);
+  if (!src || src->type != VideoSource_text) return;
+  auto* textSrc = dynamic_cast<TextSource*>(src.get());
+  if (!textSrc || !textSrc->displayText) return;
+  textSrc->displayText->fontSize = fontSize;
+}
+
+void ntw_set_text_source_font_index(const char* sourceId, int fontIndex) {
+  if (!sourceId) return;
+  std::string sid(sourceId);
+  auto src = VideoSourceService::getService()->videoSourceForId(sid);
+  if (!src || src->type != VideoSource_text) return;
+  auto* textSrc = dynamic_cast<TextSource*>(src.get());
+  if (!textSrc || !textSrc->displayText) return;
+
+  auto& fonts = FontService::getService()->fonts;
+  if (fontIndex < 0 || fontIndex >= static_cast<int>(fonts.size())) return;
+
+  textSrc->displayText->fontSelector->intValue = fontIndex;
+  textSrc->displayText->fontSelector->affirmIntValue();
+  textSrc->displayText->font = fonts[fontIndex];
+}
+
+void ntw_set_text_source_position(const char* sourceId, float x, float y) {
+  if (!sourceId) return;
+  std::string sid(sourceId);
+  auto src = VideoSourceService::getService()->videoSourceForId(sid);
+  if (!src || src->type != VideoSource_text) return;
+  auto* textSrc = dynamic_cast<TextSource*>(src.get());
+  if (!textSrc || !textSrc->displayText) return;
+  textSrc->displayText->xPosition->value = x;
+  textSrc->displayText->yPosition->value = y;
+}
+
+// ---------------------------------------------------------------------------
+// MARK: - Available Non-Shader Sources
+// ---------------------------------------------------------------------------
+
+NTWAvailableNonShaderSourceInfo* ntw_get_available_non_shader_sources(int* outCount) {
+  if (outCount) *outCount = 0;
+
+  // Define the non-shader source types we want to expose.
+  // VideoSourceType: 0=webcam, 1=file, 2=image, 3=icon, 4=shader, 5=text, 6=typewriter, 7=scrollingText, 8=library, 9=multi, 10=empty, 11=playlist
+  struct NonShaderSourceDef {
+    VideoSourceType type;
+    const char* name;
+    const char* icon;
+  };
+
+  static const NonShaderSourceDef defs[] = {
+    { VideoSource_text,          "Text",           "textformat" },
+    { VideoSource_icon,          "Icon",           "face.smiling" },
+    { VideoSource_webcam,        "Webcam",         "web.camera" },
+  };
+
+  int count = sizeof(defs) / sizeof(defs[0]);
+  if (outCount) *outCount = count;
+
+  auto* result = static_cast<NTWAvailableNonShaderSourceInfo*>(
+    calloc(count, sizeof(NTWAvailableNonShaderSourceInfo)));
+
+  for (int i = 0; i < count; i++) {
+    result[i].id = strdup_safe("nonsrc_" + std::to_string(static_cast<int>(defs[i].type)));
+    result[i].name = strdup_safe(defs[i].name);
+    result[i].icon = strdup_safe(defs[i].icon);
+    result[i].sourceType = static_cast<int>(defs[i].type);
+  }
+
+  return result;
+}
+
+void ntw_free_available_non_shader_source_info_array(NTWAvailableNonShaderSourceInfo* array, int count) {
+  if (!array) return;
+  for (int i = 0; i < count; i++) {
+    free((void*)array[i].id);
+    free((void*)array[i].name);
+    free((void*)array[i].icon);
+  }
+  free(array);
+}
+
+// ---------------------------------------------------------------------------
+// MARK: - Strand Sharing & Community
+// ---------------------------------------------------------------------------
+
+void ntw_share_strand(const char* nodeId, const char* title, const char* description,
+                      const char* author, const void* previewPngData, int previewLen,
+                      NTWShareStrandCallback callback) {
+  if (!nodeId || !title || !callback) return;
+  std::string sid(nodeId), stitle(title);
+  std::string sdesc(description ? description : "");
+  std::string sauthor(author ? author : "");
+  std::string previewBinary;
+  if (previewPngData && previewLen > 0) {
+    previewBinary.assign(static_cast<const char*>(previewPngData), previewLen);
+  }
+
+  // Serialize strand JSON on engine thread
+  std::string strandJson = runOnEngineThread([sid]() -> std::string {
+    auto connectable = findConnectable(sid.c_str());
+    if (!connectable) return "";
+    auto strand = ShaderChainerService::getService()->strandForConnectable(connectable);
+    return strand.serialize().dump();
+  });
+
+  if (strandJson.empty()) {
+    callback(false, "Failed to serialize strand");
+    return;
+  }
+
+  // Upload on detached background thread
+  std::thread([=]() {
+    httplib::SSLClient cli("nottawa.app");
+    cli.enable_server_certificate_verification(false);
+    cli.set_connection_timeout(10, 0);
+    cli.set_read_timeout(30, 0);
+    cli.set_follow_location(true);
+
+    httplib::Headers headers = {{"User-Agent", "nottawa-app/1.0"}};
+    httplib::MultipartFormDataItems items;
+    items.push_back({"title", stitle, "", "text/plain"});
+    items.push_back({"strand", strandJson, "", "application/json"});
+    if (!sdesc.empty()) items.push_back({"description", sdesc, "", "text/plain"});
+    if (!sauthor.empty()) items.push_back({"author", sauthor, "", "text/plain"});
+    if (!previewBinary.empty()) items.push_back({"preview", previewBinary, "preview.png", "image/png"});
+
+    auto res = cli.Post("/api/strands/share", headers, items);
+
+    if (res && res->status == 201) {
+      try {
+        json responseJson = json::parse(res->body);
+        std::string slug;
+        if (responseJson.contains("slug")) slug = responseJson["slug"].get<std::string>();
+        else if (responseJson.contains("url")) slug = responseJson["url"].get<std::string>();
+        callback(true, strdup_safe(slug));
+      } catch (...) {
+        callback(true, strdup_safe(""));
+      }
+    } else {
+      std::string err = "Upload failed";
+      if (res) {
+        if (res->status == 429) err = "Too many shares. Please wait.";
+        else err = "Server returned status " + std::to_string(res->status);
+      } else {
+        err = "Network error";
+      }
+      callback(false, strdup_safe(err));
+    }
+  }).detach();
+}
+
+void ntw_fetch_community_feed(int page, int limit, const char* voterId, NTWFeedCallback callback) {
+  if (!callback) return;
+  std::string vid(voterId ? voterId : "");
+
+  std::thread([=]() {
+    httplib::SSLClient cli("nottawa.app");
+    cli.enable_server_certificate_verification(false);
+    cli.set_connection_timeout(10, 0);
+    cli.set_read_timeout(30, 0);
+    cli.set_follow_location(true);
+
+    httplib::Headers headers = {{"User-Agent", "nottawa-app/1.0"}};
+    std::string path = "/api/strands/feed?page=" + std::to_string(page) +
+                       "&limit=" + std::to_string(limit);
+    if (!vid.empty()) path += "&voter_id=" + vid;
+
+    auto res = cli.Get(path.c_str(), headers);
+
+    if (res && res->status == 200) {
+      try {
+        json responseJson = json::parse(res->body);
+        json strandsArr = responseJson.value("strands", json::array());
+        int totalPages = 1;
+        if (responseJson.contains("pagination") && responseJson["pagination"].is_object()) {
+          totalPages = responseJson["pagination"].value("total_pages", 1);
+        }
+        int count = static_cast<int>(strandsArr.size());
+
+        if (count == 0) {
+          callback(true, nullptr, 0, totalPages);
+          return;
+        }
+
+        // Helper to safely extract a string from JSON (handles null values)
+        auto safeStr = [](const json& obj, const char* key) -> std::string {
+          if (!obj.contains(key) || obj[key].is_null()) return "";
+          return obj[key].get<std::string>();
+        };
+
+        auto* result = static_cast<NTWSharedStrandInfo*>(calloc(count, sizeof(NTWSharedStrandInfo)));
+        for (int i = 0; i < count; i++) {
+          auto& s = strandsArr[i];
+          result[i].slug = strdup_safe(safeStr(s, "slug"));
+          result[i].title = strdup_safe(safeStr(s, "title"));
+          result[i].description = strdup_safe(safeStr(s, "description"));
+          result[i].previewUrl = strdup_safe(safeStr(s, "preview_url"));
+          result[i].author = strdup_safe(safeStr(s, "author"));
+          result[i].upvotes = s.value("upvotes", 0);
+          result[i].downvotes = s.value("downvotes", 0);
+          result[i].score = s.value("score", 0);
+          result[i].views = s.value("views", 0);
+          result[i].opens = s.value("opens", 0);
+          result[i].createdAt = strdup_safe(safeStr(s, "created_at"));
+          result[i].userVote = strdup_safe(safeStr(s, "user_vote"));
+        }
+        callback(true, result, count, totalPages);
+      } catch (...) {
+        callback(false, nullptr, 0, 0);
+      }
+    } else {
+      callback(false, nullptr, 0, 0);
+    }
+  }).detach();
+}
+
+void ntw_free_shared_strand_info_array(NTWSharedStrandInfo* array, int count) {
+  if (!array) return;
+  for (int i = 0; i < count; i++) {
+    free((void*)array[i].slug);
+    free((void*)array[i].title);
+    free((void*)array[i].description);
+    free((void*)array[i].previewUrl);
+    free((void*)array[i].author);
+    free((void*)array[i].createdAt);
+    free((void*)array[i].userVote);
+  }
+  free(array);
+}
+
+void ntw_vote_strand(const char* slug, const char* voterId, const char* vote, NTWVoteCallback callback) {
+  if (!slug || !voterId || !vote || !callback) return;
+  std::string sslug(slug), svid(voterId), svote(vote);
+
+  std::thread([=]() {
+    httplib::SSLClient cli("nottawa.app");
+    cli.enable_server_certificate_verification(false);
+    cli.set_connection_timeout(10, 0);
+    cli.set_read_timeout(15, 0);
+    cli.set_follow_location(true);
+
+    httplib::Headers headers = {
+      {"User-Agent", "nottawa-app/1.0"},
+      {"Content-Type", "application/json"}
+    };
+
+    json body;
+    body["voter_id"] = svid;
+    body["vote"] = svote;
+
+    std::string path = "/api/strands/" + sslug + "/vote";
+    auto res = cli.Post(path.c_str(), headers, body.dump(), "application/json");
+
+    if (res && res->status == 200) {
+      try {
+        json r = json::parse(res->body);
+        std::string uv;
+        if (r.contains("user_vote") && !r["user_vote"].is_null())
+          uv = r["user_vote"].get<std::string>();
+        callback(true,
+                 r.value("upvotes", 0),
+                 r.value("downvotes", 0),
+                 r.value("score", 0),
+                 strdup_safe(uv));
+      } catch (...) {
+        callback(false, 0, 0, 0, strdup_safe(""));
+      }
+    } else {
+      callback(false, 0, 0, 0, strdup_safe(""));
+    }
+  }).detach();
+}
+
+void ntw_fetch_shared_strand(const char* slug, NTWFetchStrandCallback callback) {
+  if (!slug || !callback) return;
+  std::string sslug(slug);
+
+  std::thread([=]() {
+    httplib::SSLClient cli("nottawa.app");
+    cli.enable_server_certificate_verification(false);
+    cli.set_connection_timeout(15, 0);
+    cli.set_read_timeout(30, 0);
+    cli.set_follow_location(true);
+
+    httplib::Headers headers = {{"User-Agent", "nottawa-app/1.0"}};
+    std::string path = "/api/strands/shared/" + sslug;
+    auto res = cli.Get(path.c_str(), headers);
+
+    if (res && res->status == 200) {
+      try {
+        json responseJson = json::parse(res->body);
+        std::string strandJson = responseJson.value("strand", "");
+        callback(true, strdup_safe(strandJson));
+      } catch (...) {
+        callback(false, strdup_safe("Failed to parse strand data"));
+      }
+    } else {
+      std::string err = "Fetch failed";
+      if (res) {
+        if (res->status == 404) err = "Strand not found";
+        else err = "Server returned status " + std::to_string(res->status);
+      } else {
+        err = "Network error";
+      }
+      callback(false, strdup_safe(err));
+    }
+  }).detach();
+}
+
+char** ntw_load_strand_from_json(const char* jsonStr, int* outCount) {
+  if (outCount) *outCount = 0;
+  if (!jsonStr) return nullptr;
+  std::string sjson(jsonStr);
+
+  auto ids = runOnEngineThread([sjson]() -> std::vector<std::string> {
+    return ConfigService::getService()->loadStrandJson(sjson);
+  });
+
+  if (ids.empty()) return nullptr;
+
+  int count = static_cast<int>(ids.size());
+  if (outCount) *outCount = count;
+
+  char** result = static_cast<char**>(calloc(count, sizeof(char*)));
+  for (int i = 0; i < count; i++) {
+    result[i] = strdup_safe(ids[i]);
+  }
+
+  notifyGraphChanged();
+  return result;
+}
+
+char* ntw_get_strand_json_for_node(const char* nodeId) {
+  if (!nodeId) return nullptr;
+  std::string sid(nodeId);
+
+  return runOnEngineThread([sid]() -> char* {
+    auto connectable = findConnectable(sid.c_str());
+    if (!connectable) return nullptr;
+    auto strand = ShaderChainerService::getService()->strandForConnectable(connectable);
+    return strdup_safe(strand.serialize().dump());
   });
 }
 

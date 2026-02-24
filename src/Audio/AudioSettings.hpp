@@ -149,6 +149,9 @@ struct AudioAnalysis {
   AudioAnalysisParameter lowsAnalysisParam;
   
   u_int64_t bpmStartTime;
+  uint32_t beatCount = 0;
+  bool beatCounted = false;
+  float lastBpmPct = 0.0f;
   
   std::vector<std::shared_ptr<Parameter>> parameters;
   std::vector<AudioAnalysisParameter *> analysisParameters;
@@ -415,6 +418,8 @@ float gammaAtBeat(float pct) {
       if (pct < 0 || pct > 1) {
         return;
       }
+
+      lastBpmPct = pct;
 
       // Apply nudge value (-1 to 1, representing a full beat shift)
       pct += bpmNudge->value;

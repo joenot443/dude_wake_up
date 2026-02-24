@@ -53,22 +53,26 @@ struct FeedbackSource {
   }
   
   ofTexture getFrame(int index) {
-    if (!beingConsumed()) {
-      log("Getting Feedback frame for a source not being consumed");
-      ofLogFatalError();
+    if (!beingConsumed() || frameBuffer.empty()) {
+      // Return an empty texture instead of crashing
+      return ofTexture();
     }
-    
+
     int destIndex = (startIndex + index) % FrameBufferCount;
     auto fbo = frameBuffer.at(destIndex);
     return fbo->getTexture();
   }
-  
+
   std::shared_ptr<ofFbo> getFbo(int index) {
-    if (!beingConsumed()) {
-      log("Getting Feedback frame for a source not being consumed");
-      ofLogFatalError();
+    if (!beingConsumed() || frameBuffer.empty()) {
+      // Return an empty FBO instead of crashing
+      static auto emptyFbo = std::make_shared<ofFbo>();
+      if (!emptyFbo->isAllocated()) {
+        emptyFbo->allocate(1, 1, GL_RGBA);
+      }
+      return emptyFbo;
     }
-    
+
     int destIndex = (startIndex + index) % FrameBufferCount;
     auto fbo = frameBuffer.at(destIndex);
     return fbo;

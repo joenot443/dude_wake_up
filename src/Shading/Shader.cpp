@@ -20,6 +20,10 @@
 void Shader::traverseFrame(std::shared_ptr<ofFbo> frame, int depth)
 {
   if (!active) return;
+  if (!frame || !frame->isAllocated()) return;
+  if (!lastFrame || !lastFrame->isAllocated()) return;
+  if (frame->getTexture().getTextureData().textureID == 0) return;
+  if (lastFrame->getTexture().getTextureData().textureID == 0) return;
 
   clearLastFrame();
   checkForFileChanges();
@@ -93,13 +97,12 @@ json Shader::serialize()
   auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(shaderId);
   if (node != nullptr)
   {
-    settings->x->value = NodeLayoutView::getInstance()->nodeForShaderSourceId(shaderId)->position.x;
-    settings->y->value = NodeLayoutView::getInstance()->nodeForShaderSourceId(shaderId)->position.y;
-    j["x"] = settings->x->value;
-    j["y"] = settings->y->value;
-  } else {
-    return 0;
+    settings->x->value = node->position.x;
+    settings->y->value = node->position.y;
   }
+  // Always serialize x/y from settings (bridge sets these in NottawaApp).
+  j["x"] = settings->x->value;
+  j["y"] = settings->y->value;
 
   return j;
 };

@@ -357,6 +357,170 @@ final class NottawaEngine {
         ntw_save_strand_from_node(nodeId, path, name)
     }
 
+    func availableStrands() -> [StrandInfo] {
+        var count: Int32 = 0
+        guard let ptr = ntw_get_available_strands(&count), count > 0 else { return [] }
+        defer { ntw_free_available_strand_info_array(ptr, count) }
+        return (0..<Int(count)).map { StrandInfo(from: ptr[$0]) }
+    }
+
+    func loadStrand(id: String) -> [String] {
+        var count: Int32 = 0
+        guard let ptr = ntw_load_strand(id, &count), count > 0 else { return [] }
+        defer { ntw_free_string_array(ptr, count) }
+        return (0..<Int(count)).compactMap { idx in
+            guard let cStr = ptr[idx] else { return nil }
+            return String(cString: cStr)
+        }
+    }
+
+    func availableTemplateStrands() -> [StrandInfo] {
+        var count: Int32 = 0
+        guard let ptr = ntw_get_available_template_strands(&count), count > 0 else { return [] }
+        defer { ntw_free_available_strand_info_array(ptr, count) }
+        return (0..<Int(count)).map { StrandInfo(from: ptr[$0]) }
+    }
+
+    func loadDemoStrand() -> [String] {
+        var count: Int32 = 0
+        guard let ptr = ntw_load_demo_strand(&count), count > 0 else { return [] }
+        defer { ntw_free_string_array(ptr, count) }
+        return (0..<Int(count)).compactMap { idx in
+            guard let cStr = ptr[idx] else { return nil }
+            return String(cString: cStr)
+        }
+    }
+
+    func deleteStrand(id: String) {
+        ntw_delete_strand(id)
+    }
+
+    func renameStrand(id: String, newName: String) {
+        ntw_rename_strand(id, newName)
+    }
+
+    func registerStrandsUpdatedCallback(_ callback: @escaping () -> Void) {
+        strandsUpdatedHandler = callback
+        ntw_register_strands_updated_callback {
+            DispatchQueue.main.async {
+                NottawaEngine.shared.strandsUpdatedHandler?()
+            }
+        }
+    }
+
+    private var strandsUpdatedHandler: (() -> Void)?
+
+    // MARK: - Strand Sharing & Community
+
+    // Stored closures for async C callbacks (C function pointers can't capture)
+    private var pendingShareCompletion: ((Result<String, Error>) -> Void)?
+    private var pendingFeedCompletion: (([SharedStrandInfo], Int) -> Void)?
+    private var pendingVoteCompletion: ((Bool, Int, Int, Int, String?) -> Void)?
+    private var pendingFetchCompletion: ((Result<String, Error>) -> Void)?
+
+    func shareStrand(nodeId: String, title: String, description: String, author: String,
+                     previewPng: Data?, completion: @escaping (Result<String, Error>) -> Void) {
+        pendingShareCompletion = completion
+
+        if let data = previewPng {
+            data.withUnsafeBytes { rawBuf in
+                ntw_share_strand(nodeId, title, description, author,
+                                rawBuf.baseAddress, Int32(data.count)) { success, slugOrError in
+                    DispatchQueue.main.async {
+                        guard let cb = NottawaEngine.shared.pendingShareCompletion else { return }
+                        NottawaEngine.shared.pendingShareCompletion = nil
+                        if success, let s = slugOrError {
+                            cb(.success(String(cString: s)))
+                        } else {
+                            let msg = slugOrError != nil ? String(cString: slugOrError!) : "Unknown error"
+                            cb(.failure(NSError(domain: "NTW", code: -1,
+                                               userInfo: [NSLocalizedDescriptionKey: msg])))
+                        }
+                    }
+                }
+            }
+        } else {
+            ntw_share_strand(nodeId, title, description, author, nil, 0) { success, slugOrError in
+                DispatchQueue.main.async {
+                    guard let cb = NottawaEngine.shared.pendingShareCompletion else { return }
+                    NottawaEngine.shared.pendingShareCompletion = nil
+                    if success, let s = slugOrError {
+                        cb(.success(String(cString: s)))
+                    } else {
+                        let msg = slugOrError != nil ? String(cString: slugOrError!) : "Unknown error"
+                        cb(.failure(NSError(domain: "NTW", code: -1,
+                                           userInfo: [NSLocalizedDescriptionKey: msg])))
+                    }
+                }
+            }
+        }
+    }
+
+    func fetchCommunityFeed(page: Int, limit: Int, voterId: String,
+                            completion: @escaping ([SharedStrandInfo], Int) -> Void) {
+        pendingFeedCompletion = completion
+        ntw_fetch_community_feed(Int32(page), Int32(limit), voterId) { success, ptr, count, totalPages in
+            DispatchQueue.main.async {
+                guard let cb = NottawaEngine.shared.pendingFeedCompletion else { return }
+                NottawaEngine.shared.pendingFeedCompletion = nil
+                guard success, let ptr = ptr, count > 0 else {
+                    cb([], Int(totalPages))
+                    return
+                }
+                let strands = (0..<Int(count)).map { SharedStrandInfo(from: ptr[$0]) }
+                ntw_free_shared_strand_info_array(ptr, count)
+                cb(strands, Int(totalPages))
+            }
+        }
+    }
+
+    func voteOnStrand(slug: String, voterId: String, vote: String,
+                      completion: @escaping (Bool, Int, Int, Int, String?) -> Void) {
+        pendingVoteCompletion = completion
+        ntw_vote_strand(slug, voterId, vote) { success, upvotes, downvotes, score, userVote in
+            DispatchQueue.main.async {
+                guard let cb = NottawaEngine.shared.pendingVoteCompletion else { return }
+                NottawaEngine.shared.pendingVoteCompletion = nil
+                let voteStr: String? = userVote != nil ? String(cString: userVote!) : nil
+                cb(success, Int(upvotes), Int(downvotes), Int(score),
+                   (voteStr?.isEmpty == true) ? nil : voteStr)
+            }
+        }
+    }
+
+    func fetchSharedStrand(slug: String, completion: @escaping (Result<String, Error>) -> Void) {
+        pendingFetchCompletion = completion
+        ntw_fetch_shared_strand(slug) { success, jsonOrError in
+            DispatchQueue.main.async {
+                guard let cb = NottawaEngine.shared.pendingFetchCompletion else { return }
+                NottawaEngine.shared.pendingFetchCompletion = nil
+                if success, let s = jsonOrError {
+                    cb(.success(String(cString: s)))
+                } else {
+                    let msg = jsonOrError != nil ? String(cString: jsonOrError!) : "Unknown error"
+                    cb(.failure(NSError(domain: "NTW", code: -1,
+                                       userInfo: [NSLocalizedDescriptionKey: msg])))
+                }
+            }
+        }
+    }
+
+    func loadStrandFromJson(_ json: String) -> [String] {
+        var count: Int32 = 0
+        guard let ptr = ntw_load_strand_from_json(json, &count), count > 0 else { return [] }
+        defer { ntw_free_string_array(ptr, count) }
+        return (0..<Int(count)).compactMap { idx in
+            guard let cStr = ptr[idx] else { return nil }
+            return String(cString: cStr)
+        }
+    }
+
+    func getStrandJson(nodeId: String) -> String? {
+        guard let cStr = ntw_get_strand_json_for_node(nodeId) else { return nil }
+        defer { ntw_free_string(cStr) }
+        return String(cString: cStr)
+    }
+
     // MARK: - Optional Shaders
 
     struct OptionalShaderInfo {
@@ -464,6 +628,61 @@ final class NottawaEngine {
         ntw_select_audio_source(id)
     }
 
+    // MARK: - Audio Panel
+
+    func extendedAudioAnalysis() -> ExtendedAudioAnalysisSnapshot {
+        ExtendedAudioAnalysisSnapshot(from: ntw_get_extended_audio_analysis())
+    }
+
+    func sampleTracks() -> [AudioTrackInfo] {
+        var count: Int32 = 0
+        guard let ptr = ntw_get_sample_tracks(&count), count > 0 else { return [] }
+        defer { ntw_free_audio_track_info_array(ptr, count) }
+        return (0..<Int(count)).map {
+            AudioTrackInfo(
+                name: String(cString: ptr[$0].name),
+                path: String(cString: ptr[$0].path),
+                bpm: Int(ptr[$0].bpm),
+                index: Int(ptr[$0].index)
+            )
+        }
+    }
+
+    func fileAudioState() -> FileAudioState {
+        let s = ntw_get_file_audio_state()
+        return FileAudioState(
+            volume: s.volume,
+            isPaused: s.isPaused,
+            playbackPosition: s.playbackPosition,
+            totalDuration: s.totalDuration,
+            isFileSource: s.isFileSource,
+            selectedTrackIndex: Int(s.selectedTrackIndex)
+        )
+    }
+
+    var selectedAudioSourceId: String? {
+        guard let cStr = ntw_get_selected_audio_source_id() else { return nil }
+        defer { ntw_free_string(UnsafeMutablePointer(mutating: cStr)) }
+        return String(cString: cStr)
+    }
+
+    func toggleAudioSource() { ntw_toggle_audio_source() }
+    func setBpmMode(_ mode: Int) { ntw_set_bpm_mode(Int32(mode)) }
+    func setBpmLocked(_ locked: Bool) { ntw_set_bpm_locked(locked) }
+    func setBpmValue(_ bpm: Float) { ntw_set_bpm_value(bpm) }
+    func nudgeBpm(_ delta: Float) { ntw_nudge_bpm(delta) }
+    func setBpmNudge(_ value: Float) { ntw_set_bpm_nudge(value) }
+    func tapBpm() { ntw_tap_bpm() }
+    func setBpmEnabled(_ enabled: Bool) { ntw_set_bpm_enabled(enabled) }
+    func setSmoothingMode(_ mode: Int) { ntw_set_smoothing_mode(Int32(mode)) }
+    func setFrequencyRelease(_ value: Float) { ntw_set_frequency_release(value) }
+    func setFrequencyScale(_ value: Float) { ntw_set_frequency_scale(value) }
+    func setLoudnessRelease(_ value: Float) { ntw_set_loudness_release(value) }
+    func selectSampleTrack(_ index: Int) { ntw_select_sample_track(Int32(index)) }
+    func setFileAudioVolume(_ volume: Float) { ntw_set_file_audio_volume(volume) }
+    func toggleFileAudioPause() { ntw_toggle_file_audio_pause() }
+    func setFileAudioPosition(_ position: Float) { ntw_set_file_audio_position(position) }
+
     // MARK: - Screenshot
 
     func captureScreenshot() { ntw_capture_screenshot() }
@@ -503,6 +722,10 @@ final class NottawaEngine {
 
     func setResolution(settingIndex: Int) {
         ntw_set_resolution(Int32(settingIndex))
+    }
+
+    var resolutionSettingIndex: Int {
+        Int(ntw_get_resolution_setting_index())
     }
 
     func setCustomResolution(width: Float, height: Float) {
@@ -628,6 +851,72 @@ final class NottawaEngine {
 
     func setFileSourcePlaying(sourceId: String, playing: Bool) {
         ntw_set_file_source_playing(sourceId, playing ? 1 : 0)
+    }
+
+    // MARK: - Text Source State
+
+    func textSourceState(sourceId: String) -> TextSourceState? {
+        let s = ntw_get_text_source_state(sourceId)
+        defer {
+            if let t = s.text { free(UnsafeMutableRawPointer(mutating: t)) }
+            if let names = s.fontNames {
+                for i in 0..<Int(s.fontCount) {
+                    if let n = names[i] { free(UnsafeMutableRawPointer(mutating: n)) }
+                }
+                free(UnsafeMutableRawPointer(mutating: names))
+            }
+        }
+        guard s.isTextSource != 0 else { return nil }
+
+        var fontNames: [String] = []
+        if let names = s.fontNames {
+            for i in 0..<Int(s.fontCount) {
+                if let n = names[i] {
+                    fontNames.append(String(cString: n))
+                }
+            }
+        }
+
+        return TextSourceState(
+            text: s.text != nil ? String(cString: s.text) : "",
+            fontSize: Int(s.fontSize),
+            xPosition: s.xPosition,
+            yPosition: s.yPosition,
+            fontIndex: Int(s.fontIndex),
+            fontNames: fontNames
+        )
+    }
+
+    func setTextSourceText(sourceId: String, text: String) {
+        ntw_set_text_source_text(sourceId, text)
+    }
+
+    func setTextSourceFontSize(sourceId: String, fontSize: Int) {
+        ntw_set_text_source_font_size(sourceId, Int32(fontSize))
+    }
+
+    func setTextSourceFontIndex(sourceId: String, fontIndex: Int) {
+        ntw_set_text_source_font_index(sourceId, Int32(fontIndex))
+    }
+
+    func setTextSourcePosition(sourceId: String, x: Float, y: Float) {
+        ntw_set_text_source_position(sourceId, x, y)
+    }
+
+    // MARK: - Available Non-Shader Sources
+
+    func availableNonShaderSources() -> [AvailableNonShaderSourceInfo] {
+        var count: Int32 = 0
+        guard let ptr = ntw_get_available_non_shader_sources(&count), count > 0 else { return [] }
+        defer { ntw_free_available_non_shader_source_info_array(ptr, count) }
+        return (0..<Int(count)).map {
+            AvailableNonShaderSourceInfo(
+                id: String(cString: ptr[$0].id),
+                name: String(cString: ptr[$0].name),
+                icon: String(cString: ptr[$0].icon),
+                sourceType: Int(ptr[$0].sourceType)
+            )
+        }
     }
 
     // MARK: - Texture Sharing

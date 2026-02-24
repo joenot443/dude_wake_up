@@ -99,7 +99,7 @@ void FontService::loadFonts() {
   std::sort(fonts.begin(), fonts.end(), [](const Font& a, const Font& b) {
     return a.name < b.name;
   });
-  
+
   for (auto font : fonts) {
    fontNames.push_back(font.name);
   }

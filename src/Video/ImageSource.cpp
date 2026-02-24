@@ -115,10 +115,12 @@ json ImageSource::serialize()
   j["horizontalFlip"] = horizontalFlip->boolValue;
 
   auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);
-  if (node != nullptr)
-  {
+  if (node != nullptr) {
     j["x"] = node->position.x;
     j["y"] = node->position.y;
+  } else {
+    j["x"] = origin.x;
+    j["y"] = origin.y;
   }
   return j;
 }

@@ -19,8 +19,9 @@ public:
     std::shared_ptr<Parameter> deviceId;
 
     WebcamVideoSourceSettings(std::string sourceId, json j)
-  : VideoSourceSettings(sourceId, j), deviceId(std::make_shared<Parameter>("Device", 0.0, 0.0, 100.0)) {
+  : VideoSourceSettings(sourceId, j), deviceId(std::make_shared<Parameter>("Device", 0.0, 0.0, 100.0, ParameterType_Int)) {
     parameters.push_back(deviceId);
+    registerParameters();
   }
 };
 
@@ -34,10 +35,15 @@ public:
   void load(json j) override;
   ofShader maskShader;
   void drawSettings() override;
+  std::shared_ptr<Settings> settingsRef() override {
+    return std::dynamic_pointer_cast<Settings>(settings);
+  }
   std::shared_ptr<WebcamVideoSourceSettings> settings;
   std::vector<std::string> deviceNames;
 private:
   ofVideoGrabber grabber;
+  bool grabberReady = false;
+  int lastDeviceId = -1;
 };
 
 #endif

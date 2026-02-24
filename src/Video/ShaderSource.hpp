@@ -1210,24 +1210,29 @@ public:
         fbo->getHeight() != LayoutStateService::getService()->resolution.y) {
       setup();
     }
-    
+
+    // Verify FBOs are allocated and have valid textures before rendering
+    if (!fbo->isAllocated() || !canvas->isAllocated()) return;
+    if (fbo->getTexture().getTextureData().textureID == 0) return;
+    if (canvas->getTexture().getTextureData().textureID == 0) return;
+
     canvas->begin();
     ofClear(0, 0, 0, 255);
     ofClear(0, 0, 0, 0);
     canvas->end();
-    
+
     // Check for file changes
     shader->checkForFileChanges();
-    
+
     shader->shade(fbo, canvas);
     shader->activateParameters();
-    
+
     fbo->begin();
     ofClear(0, 0, 0, 255);
     ofClear(0, 0, 0, 0);
     canvas->draw(0, 0, fbo->getWidth(), fbo->getHeight());
     fbo->end();
-    
+
   }
   
   void drawSettings() override {
