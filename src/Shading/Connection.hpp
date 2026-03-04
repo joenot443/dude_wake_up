@@ -159,6 +159,9 @@ public:
   
   // Whether the Connectable is processing new frames
   bool active = true;
+
+  // Whether the Connectable is bypassed (passes input through without processing)
+  bool bypassed = false;
   
   bool hasOutputs()
   {

@@ -101,6 +101,9 @@ public:
   shaderId(shaderId),
   ShaderSettings(shaderId, j, name)
   {
+    blendMode->options = {"Mix", "Multiply", "Screen", "Darken", "Lighten", "Difference", "Exclusion", "Overlay", "Hard Light", "Soft Light", "Color Dodge", "Linear Dodge", "Burn", "Linear Burn"};
+    sourceSelection->options = {"Origin Source", "Feedback", "Final Node", "Original"};
+
     parameters = {mainAlpha, feedbackMix, feedbackAlpha, keyValue, keyThreshold, delayAmount, lumaKeyEnabled, xPosition, yPosition, scale, sourceSelection, blendMode, priority, rotation, allowAuxillary};
     oscillators = {mainAlphaOscillator, feedbackMixOscillator, feedbackAlphaOscillator, keyValueOscillator, keyThresholdOscillator, delayAmountOscillator, xPositionOscillator, yPositionOscillator, scaleOscillator, rotationOscillator };
 

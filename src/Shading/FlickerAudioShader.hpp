@@ -43,7 +43,7 @@ struct FlickerAudioShader: Shader {
     canvas->begin();
     shader.begin();
     auto source = AudioSourceService::getService()->selectedAudioSource;
-    if (settings->enableAudio->boolValue && source != nullptr && source->audioAnalysis.smoothSpectrum.size() > 0)
+    if (settings->enableAudio->boolValue && source != nullptr && source->audioAnalysis.smoothSpectrum.size() >= 256)
       shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0],
                            256);
     shader.setUniformTexture("tex", frame->getTexture(), 4);

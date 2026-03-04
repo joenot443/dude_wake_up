@@ -32,7 +32,7 @@ void main() {
 
   for (float i = 0.0; i < float(lineCount); i++) {
 
-    uv.y += (0.2 * sin(uv.x + i / 7.0 - time * 0.6));
+    uv.y += (0.2 * amplitude * sin(uv.x + i / 7.0 - time * 0.6));
 
     // Each layer gets its own frequency band (bass at bottom, treble at top)
     float layerBand = clamp((i + 0.5) * (256.0 / float(lineCount)), 0.0, 255.0);

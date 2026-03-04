@@ -71,13 +71,14 @@ struct CrosshatchShader: Shader {
   CrosshatchShader(CrosshatchSettings *settings) : settings(settings), Shader(settings) {
     texture = TextureService::getService()->textureWithName("bark1.png");
     settings->textureOptions = TextureService::getService()->availableTextureNames();
-
+    settings->texture->options = settings->textureOptions;
   };
 
   void setup() override {
     shader.load("shaders/Crosshatch");
     texture = TextureService::getService()->textureWithName("bark1.png");
     settings->textureOptions = TextureService::getService()->availableTextureNames();
+    settings->texture->options = settings->textureOptions;
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {

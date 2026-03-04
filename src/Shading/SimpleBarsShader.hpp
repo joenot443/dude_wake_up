@@ -31,7 +31,7 @@ struct SimpleBarsSettings: public ShaderSettings {
   
   SimpleBarsSettings(std::string shaderId, json j) :
   orientation(std::make_shared<Parameter>("Orientation", 0, 0, 1)), // 0: Horizontal, 1: Vertical
-  barCount(std::make_shared<Parameter>("Bar Count", 10, 1, 100)),
+  barCount(std::make_shared<Parameter>("Bar Count", 10, 1, 100, ParameterType_Int)),
   barWidth(std::make_shared<Parameter>("Bar Width", 25.0, 1.0, 500.0)),
   barSpacing(std::make_shared<Parameter>("Bar Spacing", 20.0, 0.0, 200.0)),
   fillColor(std::make_shared<Parameter>("FillColor", ParameterType_Color)),
@@ -105,7 +105,7 @@ struct SimpleBarsShader: Shader {
     }
     
     CommonViews::Selector(settings->orientation, {"Horizontal", "Vertical"});
-    CommonViews::ShaderParameter(settings->barCount, settings->barCountOscillator);
+    CommonViews::ShaderIntParameter(settings->barCount);
     CommonViews::ShaderParameter(settings->barWidth, settings->barWidthOscillator);
     CommonViews::ShaderParameter(settings->barSpacing, settings->barSpacingOscillator);
     CommonViews::ShaderColor(settings->fillColor);

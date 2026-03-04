@@ -9,6 +9,7 @@
 import SwiftUI
 
 struct AudioDriverControlsView: View {
+    @Environment(ThemeManager.self) private var theme
     let param: ParameterInfo
 
     @State private var shift: Float
@@ -38,48 +39,22 @@ struct AudioDriverControlsView: View {
                     } label: {
                         Image(systemName: "xmark.circle.fill")
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(theme.colors.textSecondary)
                     }
                     .buttonStyle(.plain)
                 }
 
                 // Shift slider
-                VStack(alignment: .leading, spacing: 1) {
-                    HStack {
-                        Text("Shift")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Text(String(format: "%.2f", shift))
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                            .monospacedDigit()
+                DSSlider(value: $shift, range: -1...1, label: "Shift", showValue: true)
+                    .onChange(of: shift) { _, newValue in
+                        NottawaEngine.shared.setParameterDriverShift(paramId: param.id, shift: newValue)
                     }
-                    Slider(value: $shift, in: -1...1)
-                        .controlSize(.small)
-                        .onChange(of: shift) { _, newValue in
-                            NottawaEngine.shared.setParameterDriverShift(paramId: param.id, shift: newValue)
-                        }
-                }
 
                 // Scale slider
-                VStack(alignment: .leading, spacing: 1) {
-                    HStack {
-                        Text("Scale")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Text(String(format: "%.2f", scale))
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                            .monospacedDigit()
+                DSSlider(value: $scale, range: 0...2, label: "Scale", showValue: true)
+                    .onChange(of: scale) { _, newValue in
+                        NottawaEngine.shared.setParameterDriverScale(paramId: param.id, scale: newValue)
                     }
-                    Slider(value: $scale, in: 0...2)
-                        .controlSize(.small)
-                        .onChange(of: scale) { _, newValue in
-                            NottawaEngine.shared.setParameterDriverScale(paramId: param.id, scale: newValue)
-                        }
-                }
             } else {
                 // No driver — show picker
                 HStack {
@@ -89,7 +64,7 @@ struct AudioDriverControlsView: View {
                     if availableDrivers.isEmpty {
                         Text("No audio source")
                             .font(.caption2)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(theme.colors.textSecondary)
                     } else {
                         Menu {
                             ForEach(availableDrivers) { driver in

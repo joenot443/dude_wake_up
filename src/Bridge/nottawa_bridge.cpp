@@ -576,6 +576,66 @@ bool ntw_can_redo(void) {
   return ActionService::getService()->canRedo();
 }
 
+void ntw_copy_connectables(const char** ids, int count) {
+  // Capture the IDs as strings before dispatching.
+  std::vector<std::string> idStrings;
+  for (int i = 0; i < count; i++) {
+    if (ids[i]) idStrings.emplace_back(ids[i]);
+  }
+  runOnEngineThread([idStrings]() {
+    std::vector<std::shared_ptr<Connectable>> connectables;
+    for (const auto& sid : idStrings) {
+      auto c = findConnectable(sid.c_str());
+      if (c) connectables.push_back(c);
+    }
+    if (!connectables.empty()) {
+      ActionService::getService()->copy(connectables);
+    }
+  });
+}
+
+char** ntw_paste_connectables(int* outCount) {
+  *outCount = 0;
+  auto result = runOnEngineThread([&]() -> char** {
+    auto copied = ActionService::getService()->getCopiedConnectables();
+    if (copied.empty()) return nullptr;
+
+    auto newConnectables = ShaderChainerService::getService()->pasteConnectables(copied);
+    if (newConnectables.empty()) return nullptr;
+
+    // Apply +40/+40 offset so pasted nodes don't overlap originals.
+    for (auto& c : newConnectables) {
+      if (c->connectableType() == ConnectableTypeShader) {
+        auto shader = std::dynamic_pointer_cast<Shader>(c);
+        if (shader) {
+          shader->settings->x->setValue(shader->settings->x->value + 40.0f);
+          shader->settings->y->setValue(shader->settings->y->value + 40.0f);
+        }
+      } else if (c->connectableType() == ConnectableTypeSource) {
+        auto source = std::dynamic_pointer_cast<VideoSource>(c);
+        if (source) {
+          source->origin.x += 40.0f;
+          source->origin.y += 40.0f;
+        }
+      }
+    }
+
+    int count = static_cast<int>(newConnectables.size());
+    *outCount = count;
+    char** ids = (char**)malloc(sizeof(char*) * count);
+    for (int i = 0; i < count; i++) {
+      ids[i] = strdup_safe(newConnectables[i]->connId());
+    }
+    return ids;
+  });
+  notifyGraphChanged();
+  return result;
+}
+
+bool ntw_has_copied_connectables(void) {
+  return !ActionService::getService()->getCopiedConnectables().empty();
+}
+
 // ---------------------------------------------------------------------------
 // MARK: - Queries: Shaders
 // ---------------------------------------------------------------------------
@@ -1051,12 +1111,14 @@ NTWAvailableShaderInfo* ntw_get_available_shaders(int category, int* outCount) {
   auto* result = static_cast<NTWAvailableShaderInfo*>(
     calloc(count, sizeof(NTWAvailableShaderInfo)));
 
+  auto* paramSvc = ParameterService::getService();
   for (int i = 0; i < count; i++) {
     auto& as = filtered[i];
     result[i].id = strdup_safe(std::to_string(static_cast<int>(as->type)));
     result[i].name = strdup_safe(as->name);
     result[i].category = nullptr;
     result[i].shaderTypeRaw = static_cast<int>(as->type);
+    result[i].isFavorited = paramSvc->isShaderTypeFavorited(as->type) ? 1 : 0;
   }
 
   return result;
@@ -1098,6 +1160,41 @@ bool ntw_get_connectable_active(const char* connectableId) {
   return conn ? conn->active : false;
 }
 
+void ntw_set_shader_bypassed(const char* shaderId, int bypassed) {
+  if (!shaderId) return;
+  std::string sid(shaderId);
+  auto shader = ShaderChainerService::getService()->shaderForId(sid);
+  if (shader) shader->bypassed = (bypassed != 0);
+}
+
+int ntw_get_shader_bypassed(const char* shaderId) {
+  if (!shaderId) return 0;
+  std::string sid(shaderId);
+  auto shader = ShaderChainerService::getService()->shaderForId(sid);
+  return shader ? (shader->bypassed ? 1 : 0) : 0;
+}
+
+int ntw_get_shader_depth(const char* shaderId) {
+  if (!shaderId) return 0;
+  std::string sid(shaderId);
+  auto shader = ShaderChainerService::getService()->shaderForId(sid);
+  if (!shader) return 0;
+
+  // Walk input connections back to source, counting depth
+  int depth = 0;
+  auto current = std::dynamic_pointer_cast<Connectable>(shader);
+  while (current && !current->inputs.empty()) {
+    auto it = current->inputs.find(InputSlotMain);
+    if (it == current->inputs.end()) break;
+    auto parent = it->second->start;
+    if (!parent) break;
+    depth++;
+    if (parent->connectableType() == ConnectableTypeSource) break;
+    current = parent;
+  }
+  return depth;
+}
+
 void ntw_remove_connectable(const char* connectableId) {
   if (!connectableId) return;
   std::string sid(connectableId);
@@ -1130,6 +1227,7 @@ NTWAvailableShaderInfo* ntw_get_available_shader_sources(int* outCount) {
   auto* result = static_cast<NTWAvailableShaderInfo*>(
     calloc(count, sizeof(NTWAvailableShaderInfo)));
 
+  auto* paramSvc = ParameterService::getService();
   for (int i = 0; i < count; i++) {
     auto type = AvailableShaderSourceTypes[i];
     std::string name = shaderSourceTypeName(type);
@@ -1138,6 +1236,7 @@ NTWAvailableShaderInfo* ntw_get_available_shader_sources(int* outCount) {
     result[i].name = strdup_safe(name);
     result[i].category = strdup_safe(cat);
     result[i].shaderTypeRaw = static_cast<int>(type);
+    result[i].isFavorited = paramSvc->isFavoriteSourceType(static_cast<int>(type)) ? 1 : 0;
   }
 
   return result;
@@ -1251,6 +1350,7 @@ NTWExtendedAudioAnalysisInfo ntw_get_extended_audio_analysis(void) {
   info.frequencyRelease = analysis.frequencyRelease ? analysis.frequencyRelease->value : 0.7f;
   info.frequencyScale = analysis.frequencyScale ? analysis.frequencyScale->value : 1.0f;
   info.loudnessRelease = analysis.rmsAnalysisParam.release ? analysis.rmsAnalysisParam.release->value : 0.6f;
+  info.loudnessScale = analysis.loudnessScale ? analysis.loudnessScale->value : 1.0f;
 
   // State
   info.audioActive = source->active;
@@ -1445,6 +1545,12 @@ void ntw_set_loudness_release(float value) {
   auto source = AudioSourceService::getService()->selectedAudioSource;
   if (!source) return;
   source->audioAnalysis.rmsAnalysisParam.release->value = value;
+}
+
+void ntw_set_loudness_scale(float value) {
+  auto source = AudioSourceService::getService()->selectedAudioSource;
+  if (!source) return;
+  source->audioAnalysis.loudnessScale->value = value;
 }
 
 void ntw_select_sample_track(int index) {
@@ -2534,11 +2640,13 @@ NTWAvailableNonShaderSourceInfo* ntw_get_available_non_shader_sources(int* outCo
   auto* result = static_cast<NTWAvailableNonShaderSourceInfo*>(
     calloc(count, sizeof(NTWAvailableNonShaderSourceInfo)));
 
+  auto* paramSvc = ParameterService::getService();
   for (int i = 0; i < count; i++) {
     result[i].id = strdup_safe("nonsrc_" + std::to_string(static_cast<int>(defs[i].type)));
     result[i].name = strdup_safe(defs[i].name);
     result[i].icon = strdup_safe(defs[i].icon);
     result[i].sourceType = static_cast<int>(defs[i].type);
+    result[i].isFavorited = paramSvc->isFavoriteSourceType(1000 + static_cast<int>(defs[i].type)) ? 1 : 0;
   }
 
   return result;
@@ -2552,6 +2660,26 @@ void ntw_free_available_non_shader_source_info_array(NTWAvailableNonShaderSource
     free((void*)array[i].icon);
   }
   free(array);
+}
+
+// ---------------------------------------------------------------------------
+// MARK: - Favorites (Shader Types & Source Types)
+// ---------------------------------------------------------------------------
+
+void ntw_toggle_favorite_shader_type(int shaderTypeRaw) {
+  ParameterService::getService()->toggleFavoriteShaderType(static_cast<ShaderType>(shaderTypeRaw));
+}
+
+int ntw_is_shader_type_favorited(int shaderTypeRaw) {
+  return ParameterService::getService()->isShaderTypeFavorited(static_cast<ShaderType>(shaderTypeRaw)) ? 1 : 0;
+}
+
+void ntw_toggle_favorite_source_type(int sourceType) {
+  ParameterService::getService()->toggleFavoriteSourceType(sourceType);
+}
+
+int ntw_is_source_type_favorited(int sourceType) {
+  return ParameterService::getService()->isFavoriteSourceType(sourceType) ? 1 : 0;
 }
 
 // ---------------------------------------------------------------------------

@@ -29,8 +29,12 @@ void Shader::traverseFrame(std::shared_ptr<ofFbo> frame, int depth)
   checkForFileChanges();
   activateParameters();
 
-  // Don't shader dry shaders unless explictly allowed
-  if (!isDry || allowsDryTraversal()) {
+  // Bypass: copy input to output without processing
+  if (bypassed) {
+    lastFrame->begin();
+    frame->draw(0, 0);
+    lastFrame->end();
+  } else if (!isDry || allowsDryTraversal()) {
     shade(frame, lastFrame);
   }
 

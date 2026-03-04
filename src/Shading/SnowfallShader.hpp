@@ -27,7 +27,7 @@ struct SnowfallSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> sizeOscillator;
   
   SnowfallSettings(std::string shaderId, json j, std::string name) :
-  flakesCount(std::make_shared<Parameter>("flakesCount", 50, 1, 100)),
+  flakesCount(std::make_shared<Parameter>("Flake Count", 50, 1, 100, ParameterType_Int)),
   descentSpeed(std::make_shared<Parameter>("descentSpeed", 10, 0, 50)),
   size(std::make_shared<Parameter>("size", 0.3, 0.0, 1.0)),
   
@@ -128,7 +128,7 @@ ShaderType type() override {
   
   void drawSettings() override {
     
-    CommonViews::ShaderParameter(settings->flakesCount, settings->flakesCountOscillator);
+    CommonViews::ShaderIntParameter(settings->flakesCount);
     CommonViews::ShaderParameter(settings->descentSpeed, settings->descentSpeedOscillator);
     CommonViews::ShaderParameter(settings->size, settings->sizeOscillator);
   }

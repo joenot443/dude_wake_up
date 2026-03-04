@@ -839,7 +839,8 @@ bool CommonViews::ResetButton(std::string id,
 
 bool CommonViews::ShaderOption(std::shared_ptr<Parameter> param, std::vector<std::string> options, bool drawTitle) {
   if (options.empty()) return false;
-  
+  if (param->options.empty()) param->options = options;
+
   if (drawTitle) {
     ImGui::Text("%s", param->name.c_str());
     ImGui::SameLine(0, 20);

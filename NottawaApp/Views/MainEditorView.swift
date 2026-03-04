@@ -9,6 +9,7 @@ import SwiftUI
 
 struct MainEditorView: View {
     @Environment(NodeEditorViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var theme
     @State private var shiftHeld = false
     @State private var fpsCounter = FPSCounter()
     @State private var canvasSize: CGSize = CGSize(width: 800, height: 600)
@@ -17,7 +18,7 @@ struct MainEditorView: View {
         VStack(spacing: 0) {
             ToolbarView()
 
-            Divider()
+            theme.colors.border.frame(height: 1)
 
             HStack(spacing: 0) {
                 // Sidebar (left)
@@ -36,51 +37,58 @@ struct MainEditorView: View {
                 }
 
                 // Canvas (center)
-                NodeEditorView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background {
-                        GeometryReader { geo in
-                            Color.clear.onAppear { canvasSize = geo.size }
-                                .onChange(of: geo.size) { _, newSize in canvasSize = newSize }
-                        }
-                    }
-                    .overlay(alignment: .bottomTrailing) {
-                        ActionBarView(canvasSize: canvasSize)
-                            .padding(16)
-                    }
-                    .overlay(alignment: .topLeading) {
-                        if shiftHeld {
-                            TimelineView(.animation(minimumInterval: nil, paused: false)) { _ in
-                                let uiFPS = fpsCounter.tick()
-                                let engineFPS = NottawaEngine.shared.engineFPS
-                                FPSOverlayView(engineFPS: Int(engineFPS), uiFPS: Int(uiFPS))
-                                    .padding(8)
-                            }
-                        }
-                    }
-                    .overlay {
-                        // Floating browser for swap mode only
-                        if viewModel.browserMode == .swap &&
-                           (viewModel.showShaderBrowser || viewModel.showSourceBrowser) {
+                if viewModel.stageModeEnabled {
+                    StageModeView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .transition(.opacity)
+                } else {
+                    NodeEditorView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background {
                             GeometryReader { geo in
-                                Group {
-                                    if viewModel.showShaderBrowser {
-                                        ShaderBrowserView()
-                                    } else {
-                                        VideoSourceBrowserView()
-                                    }
-                                }
-                                .frame(width: 500, height: 420)
-                                .background(.ultraThickMaterial, in: RoundedRectangle(cornerRadius: 12))
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                                .shadow(color: .black.opacity(0.4), radius: 12, y: 4)
-                                .position(clampedBrowserPosition(in: geo.size))
+                                Color.clear.onAppear { canvasSize = geo.size }
+                                    .onChange(of: geo.size) { _, newSize in canvasSize = newSize }
                             }
                         }
-                    }
+                        .overlay(alignment: .bottomTrailing) {
+                            ActionBarView(canvasSize: canvasSize)
+                                .padding(16)
+                        }
+                        .overlay(alignment: .topLeading) {
+                            if shiftHeld {
+                                TimelineView(.animation(minimumInterval: nil, paused: false)) { _ in
+                                    let uiFPS = fpsCounter.tick()
+                                    let engineFPS = NottawaEngine.shared.engineFPS
+                                    FPSOverlayView(engineFPS: Int(engineFPS), uiFPS: Int(uiFPS))
+                                        .padding(8)
+                                }
+                            }
+                        }
+                        .overlay {
+                            // Floating browser for swap mode only
+                            if viewModel.browserMode == .swap &&
+                               (viewModel.showShaderBrowser || viewModel.showSourceBrowser) {
+                                GeometryReader { geo in
+                                    Group {
+                                        if viewModel.showShaderBrowser {
+                                            ShaderBrowserView()
+                                        } else {
+                                            VideoSourceBrowserView()
+                                        }
+                                    }
+                                    .frame(width: 500, height: 420)
+                                    .background(theme.colors.backgroundSecondary, in: RoundedRectangle(cornerRadius: 12))
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .shadow(color: .black.opacity(0.4), radius: 12, y: 4)
+                                    .position(clampedBrowserPosition(in: geo.size))
+                                }
+                            }
+                        }
+                        .transition(.opacity)
+                }
 
-                // Inspector (right)
-                if viewModel.selectedNodeId != nil {
+                // Inspector (right) — hidden in stage mode
+                if !viewModel.selectedNodeIds.isEmpty && !viewModel.stageModeEnabled {
                     PanelResizeHandle(
                         width: Binding(
                             get: { viewModel.inspectorWidth },
@@ -95,7 +103,8 @@ struct MainEditorView: View {
                 }
             }
             .animation(.easeInOut(duration: 0.2), value: viewModel.showSidebar)
-            .animation(.easeInOut(duration: 0.2), value: viewModel.selectedNodeId != nil)
+            .animation(.easeInOut(duration: 0.2), value: viewModel.selectedNodeIds.isEmpty)
+            .animation(.easeInOut(duration: 0.3), value: viewModel.stageModeEnabled)
 
             // Audio Panel (bottom)
             if viewModel.showAudioPanel {
@@ -112,6 +121,7 @@ struct MainEditorView: View {
                     .transition(.move(edge: .bottom))
             }
         }
+        .background(theme.colors.background)
         .animation(.easeInOut(duration: 0.2), value: viewModel.showAudioPanel)
         .sheet(isPresented: Binding(
             get: { viewModel.showShareSheet },
@@ -162,6 +172,26 @@ struct MainEditorView: View {
                         vm.undo()
                     }
                     return nil
+                case "s":
+                    if flags.contains(.shift) {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            vm.toggleStageMode()
+                        }
+                        return nil
+                    }
+                    return event
+                case "c":
+                    if !flags.contains(.shift) && !MainEditorView.isTextFieldFocused() {
+                        vm.copySelected()
+                        return nil
+                    }
+                    return event
+                case "v":
+                    if !flags.contains(.shift) && !MainEditorView.isTextFieldFocused() {
+                        vm.pasteNodes()
+                        return nil
+                    }
+                    return event
                 case "a":
                     if !flags.contains(.shift) {
                         vm.selectAll()
@@ -213,6 +243,7 @@ struct MainEditorView: View {
 /// doesn't shift the gesture reference frame, and computes width
 /// from initial value + total translation to avoid jitter.
 struct PanelResizeHandle: View {
+    @Environment(ThemeManager.self) private var theme
     @Binding var width: CGFloat
     let minWidth: CGFloat
     let maxWidth: CGFloat
@@ -221,7 +252,7 @@ struct PanelResizeHandle: View {
     @State private var startWidth: CGFloat?
 
     var body: some View {
-        Color(.separatorColor)
+        theme.colors.border
             .frame(width: 1)
             .padding(.horizontal, 2)
             .contentShape(Rectangle())
@@ -245,6 +276,7 @@ struct PanelResizeHandle: View {
 
 /// Thin draggable divider for resizing vertical (height) panels.
 struct VerticalPanelResizeHandle: View {
+    @Environment(ThemeManager.self) private var theme
     @Binding var height: CGFloat
     let minHeight: CGFloat
     let maxHeight: CGFloat
@@ -252,7 +284,7 @@ struct VerticalPanelResizeHandle: View {
     @State private var startHeight: CGFloat?
 
     var body: some View {
-        Color(.separatorColor)
+        theme.colors.border
             .frame(height: 1)
             .padding(.vertical, 2)
             .contentShape(Rectangle())

@@ -26,7 +26,7 @@ struct FullHouseSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> speedOscillator;
   
   FullHouseSettings(std::string shaderId, json j) :
-  count(std::make_shared<Parameter>("Count", 10.0, 0.0, 100.0)),
+  count(std::make_shared<Parameter>("Count", 10.0, 0.0, 100.0, ParameterType_Int)),
   length(std::make_shared<Parameter>("Length", 120.0, 10.0, 300.0)),
   speed(std::make_shared<Parameter>("Speed", 50.0, 0.0, 500.0)),
   lengthOscillator(std::make_shared<WaveformOscillator>(length)),
@@ -63,7 +63,7 @@ struct FullHouseShader: Shader {
     ofColor color;
     
     // Use a slower frame progression to manage movement
-    float frameProgress = ofGetFrameNum() * 0.00001 * settings->speed->value;
+    float frameProgress = ofGetElapsedTimef() * 0.0006 * settings->speed->value;
     
     for (int i = 0; i < numberOfActor; i++) {
       glm::vec2 noise_seed = noiseSeeds[i];  // Use pre-initialized seeds

@@ -45,7 +45,7 @@ struct BubblesSettings: public ShaderSettings {
 
   BubblesSettings(std::string shaderId, json j) :
   // Initialize core parameters
-  maxIterations(std::make_shared<Parameter>("Max Iterations", 12.0, 4.0, 24.0)),
+  maxIterations(std::make_shared<Parameter>("Max Iterations", 12.0, 4.0, 24.0, ParameterType_Int)),
   nearPlane(std::make_shared<Parameter>("Near Plane", 4.0, 1.0, 8.0)),
   fadeIntensity(std::make_shared<Parameter>("Fade Intensity", 0.25, 0.1, 1.0)),
   bubbleOpacity(std::make_shared<Parameter>("Bubble Opacity", 1.0, 0.1, 1.0)),
@@ -130,7 +130,7 @@ struct BubblesShader: Shader {
     
     // Core visual parameters
     CommonViews::H4Title("Core Parameters");
-    CommonViews::ShaderParameter(settings->maxIterations, settings->maxIterationsOscillator);
+    CommonViews::ShaderIntParameter(settings->maxIterations);
     CommonViews::ShaderParameter(settings->nearPlane, settings->nearPlaneOscillator);
     CommonViews::ShaderParameter(settings->fadeIntensity, settings->fadeIntensityOscillator);
     CommonViews::ShaderParameter(settings->bubbleOpacity, settings->bubbleOpacityOscillator);

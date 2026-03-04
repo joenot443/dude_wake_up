@@ -103,7 +103,7 @@ struct GlitchAudioShader: Shader {
     shader.setUniform1f("noiseOffsetG", settings->noiseOffsetG->value);
     shader.setUniform1f("noiseOffsetB", settings->noiseOffsetB->value);
 
-    if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() > 0)
+    if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() >= 256)
       shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0],
                            256);
     frame->draw(0, 0);

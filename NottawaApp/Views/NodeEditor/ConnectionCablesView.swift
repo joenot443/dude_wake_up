@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ConnectionCablesView: View {
     @Environment(NodeEditorViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var theme
 
     var body: some View {
         // Read observable properties outside Canvas closure so SwiftUI
@@ -17,6 +18,8 @@ struct ConnectionCablesView: View {
         let pinPositions = viewModel.pinPositions
         let isDragging = viewModel.dragConnection != nil
         let dragValidPinKeys = viewModel.dragValidPinKeys
+        // Capture theme color as a local — Canvas closure is @Sendable
+        let accentColor = theme.colors.accent
 
         Canvas { context, size in
             for connection in connections {
@@ -32,8 +35,12 @@ struct ConnectionCablesView: View {
                 // unless one of this cable's pins is a valid target.
                 let isRelevant = dragValidPinKeys.contains(outKey) || dragValidPinKeys.contains(inKey)
                 let opacity: Double = isDragging && !isRelevant ? 0.3 : 0.8
+                let glowOpacity: Double = isDragging && !isRelevant ? 0.05 : 0.12
 
-                context.stroke(path, with: .color(.accentColor.opacity(opacity)), lineWidth: 2.5)
+                // Glow layer
+                context.stroke(path, with: .color(accentColor.opacity(glowOpacity)), lineWidth: 8)
+                // Main cable
+                context.stroke(path, with: .color(accentColor.opacity(opacity)), lineWidth: 2.5)
             }
         }
         .allowsHitTesting(false)

@@ -767,7 +767,8 @@ std::vector<std::shared_ptr<Connectable>> ShaderChainerService::pasteConnectable
 
       if (newSource) {
         newSource->settings->copyFrom(*originalSource->settings);
-        VideoSourceService::getService()->addVideoSource(newSource, UUID::generateUUID());
+        newSource->origin = originalSource->origin;
+        VideoSourceService::getService()->addVideoSource(newSource, newSource->id);
         newConnectable = newSource;
       }
     }

@@ -14,6 +14,7 @@ import SwiftUI
 /// Shows a crosshair indicator at the current position. Drag anywhere
 /// in the pad to reposition. 16:9 aspect ratio to match the canvas.
 struct PositionPadView: View {
+    @Environment(ThemeManager.self) private var theme
     @Binding var x: Float
     @Binding var y: Float
     var connectableId: String? = nil
@@ -40,7 +41,7 @@ struct PositionPadView: View {
                         .fill(Color.black.opacity(0.3))
                 } else {
                     RoundedRectangle(cornerRadius: padCornerRadius)
-                        .fill(Color(.controlBackgroundColor))
+                        .fill(theme.colors.surface)
                 }
 
                 // Grid lines (subtle)
@@ -79,7 +80,7 @@ struct PositionPadView: View {
 
                 // Handle dot
                 Circle()
-                    .fill(Color.accentColor)
+                    .fill(theme.colors.accent)
                     .frame(width: handleRadius * 2, height: handleRadius * 2)
                     .shadow(color: .black.opacity(0.5), radius: 3, x: 0, y: 1)
                     .position(x: pointX, y: pointY)
@@ -92,7 +93,7 @@ struct PositionPadView: View {
 
                 // Border
                 RoundedRectangle(cornerRadius: padCornerRadius)
-                    .strokeBorder(Color(.separatorColor), lineWidth: 0.5)
+                    .strokeBorder(theme.colors.border, lineWidth: 0.5)
             }
             .contentShape(Rectangle())
             .gesture(
@@ -110,6 +111,7 @@ struct PositionPadView: View {
 // MARK: - Text Source Controls
 
 struct TextSourceControlsView: View {
+    @Environment(ThemeManager.self) private var theme
     let state: TextSourceState
     let sourceId: String
 
@@ -137,16 +139,16 @@ struct TextSourceControlsView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Text")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(theme.colors.textSecondary)
                 TextEditor(text: $text)
                     .font(.system(size: 13))
                     .frame(minHeight: 60, maxHeight: 120)
                     .scrollContentBackground(.hidden)
-                    .background(Color(.controlBackgroundColor))
+                    .background(theme.colors.surface)
                     .clipShape(RoundedRectangle(cornerRadius: 4))
                     .overlay(
                         RoundedRectangle(cornerRadius: 4)
-                            .strokeBorder(Color(.separatorColor), lineWidth: 0.5)
+                            .strokeBorder(theme.colors.border, lineWidth: 0.5)
                     )
                     .onChange(of: text) { _, newValue in
                         engine.setTextSourceText(sourceId: sourceId, text: newValue)
@@ -158,7 +160,7 @@ struct TextSourceControlsView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Font")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(theme.colors.textSecondary)
                     Picker("", selection: $fontIndex) {
                         ForEach(0..<state.fontNames.count, id: \.self) { idx in
                             Text(state.fontNames[idx]).tag(idx)
@@ -172,30 +174,19 @@ struct TextSourceControlsView: View {
             }
 
             // Font size
-            HStack(spacing: 8) {
-                Text("Size")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .frame(width: 28, alignment: .leading)
-
-                Slider(
-                    value: Binding(
-                        get: { Float(fontSize) },
-                        set: { fontSize = Int($0) }
-                    ),
-                    in: 8...400,
-                    step: 1
-                )
-                .controlSize(.small)
-                .onChange(of: fontSize) { _, newValue in
-                    engine.setTextSourceFontSize(sourceId: sourceId, fontSize: newValue)
-                }
-
-                Text("\(fontSize)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .monospacedDigit()
-                    .frame(width: 32, alignment: .trailing)
+            DSSlider(
+                value: Binding(
+                    get: { Float(fontSize) },
+                    set: { fontSize = Int($0) }
+                ),
+                range: 8...400,
+                step: 1,
+                label: "Size",
+                showValue: true,
+                formatString: "%.0f"
+            )
+            .onChange(of: fontSize) { _, newValue in
+                engine.setTextSourceFontSize(sourceId: sourceId, fontSize: newValue)
             }
 
             // 2D Position pad
@@ -203,11 +194,11 @@ struct TextSourceControlsView: View {
                 HStack {
                     Text("Position")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(theme.colors.textSecondary)
                     Spacer()
                     Text(String(format: "%.2f, %.2f", xPosition, yPosition))
                         .font(.caption)
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(theme.colors.textTertiary)
                         .monospacedDigit()
                 }
 

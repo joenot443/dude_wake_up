@@ -120,6 +120,7 @@ struct AudioAnalysis {
   std::shared_ptr<Parameter> bpmNudge;
   std::shared_ptr<Parameter> frequencyRelease;
   std::shared_ptr<Parameter> frequencyScale;
+  std::shared_ptr<Parameter> loudnessScale;
 
   std::shared_ptr<ValueOscillator> rmsOscillator;
   std::shared_ptr<PulseOscillator> beatPulseOscillator;
@@ -186,6 +187,7 @@ struct AudioAnalysis {
         bpmNudge(std::make_shared<Parameter>("BPM Nudge", 0.0, -1.0, 1.0)),
         frequencyRelease(std::make_shared<Parameter>("Release", 0.7, 0.01, 1.0)),
         frequencyScale(std::make_shared<Parameter>("Scale", 1.0, 0.01, 2.0)),
+        loudnessScale(std::make_shared<Parameter>("Loudness Scale", 1.0, 0.1, 5.0)),
         rmsOscillator(std::make_shared<ValueOscillator>(rms)),
         beatPulseOscillator(std::make_shared<PulseOscillator>(beatPulse)),
         highsOscillator(std::make_shared<ValueOscillator>(highs)),
@@ -195,7 +197,6 @@ struct AudioAnalysis {
         highsAnalysisParam(AudioAnalysisParameter(highs)),
         midsAnalysisParam(AudioAnalysisParameter(mids)),
         lowsAnalysisParam(AudioAnalysisParameter(lows)),
-        smoothMelSpectrum({0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.}),
   			// TODO: Readd/fix Pulser
         parameters({beatPulse, rms, highs, mids, lows}),
         analysisParameters({&rmsAnalysisParam, &lowsAnalysisParam, &midsAnalysisParam, &highsAnalysisParam}) {
@@ -277,6 +278,10 @@ struct AudioAnalysis {
 
     smoothSpectrum = applySmoothing(magnitudeSpectrum, smoothSpectrum, spectrumHistory, peakSpectrum);
     smoothSpectrum = Vectors::scalarMultiply(smoothSpectrum, frequencyScale->value);
+    // Ensure at least 256 elements — shaders index up to [255]
+    if (smoothSpectrum.size() < 256) {
+      smoothSpectrum.resize(256, 0.0f);
+    }
     // Clamp spectrum to [0, 1] to prevent out-of-bounds spikes
     for (size_t i = 0; i < smoothSpectrum.size(); i++) {
       smoothSpectrum[i] = std::max(0.0f, std::min(1.0f, smoothSpectrum[i]));
@@ -303,6 +308,7 @@ struct AudioAnalysis {
     }
     
     rmsAnalysisParam.tick(gist->rootMeanSquare());
+    rms->value = std::min(1.0f, rms->value * loudnessScale->value);
     std::vector<float> buckets = splitAndAverage(smoothMelSpectrum, 3);
     lows->setValue(buckets[0]);
     mids->setValue(buckets[1]);

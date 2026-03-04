@@ -155,6 +155,25 @@ final class NottawaEngine {
     var canUndo: Bool { ntw_can_undo() }
     var canRedo: Bool { ntw_can_redo() }
 
+    // MARK: - Copy / Paste
+
+    func copyConnectables(ids: [String]) {
+        var cPtrs: [UnsafePointer<CChar>?] = ids.map { ($0 as NSString).utf8String }
+        ntw_copy_connectables(&cPtrs, Int32(ids.count))
+    }
+
+    func pasteConnectables() -> [String] {
+        var count: Int32 = 0
+        guard let ptr = ntw_paste_connectables(&count), count > 0 else { return [] }
+        defer { ntw_free_string_array(ptr, count) }
+        return (0..<Int(count)).compactMap { idx in
+            guard let cStr = ptr[idx] else { return nil }
+            return String(cString: cStr)
+        }
+    }
+
+    var hasCopiedConnectables: Bool { ntw_has_copied_connectables() }
+
     // MARK: - Queries
 
     func allShaders() -> [ConnectableInfo] {
@@ -302,6 +321,20 @@ final class NottawaEngine {
 
     func removeConnectable(id: String) {
         ntw_remove_connectable(id)
+    }
+
+    // MARK: - Bypass
+
+    func setShaderBypassed(id: String, bypassed: Bool) {
+        ntw_set_shader_bypassed(id, bypassed ? 1 : 0)
+    }
+
+    func isShaderBypassed(id: String) -> Bool {
+        ntw_get_shader_bypassed(id) != 0
+    }
+
+    func shaderDepth(id: String) -> Int {
+        Int(ntw_get_shader_depth(id))
     }
 
     // MARK: - Blend / Replace / Shader File
@@ -678,6 +711,7 @@ final class NottawaEngine {
     func setFrequencyRelease(_ value: Float) { ntw_set_frequency_release(value) }
     func setFrequencyScale(_ value: Float) { ntw_set_frequency_scale(value) }
     func setLoudnessRelease(_ value: Float) { ntw_set_loudness_release(value) }
+    func setLoudnessScale(_ value: Float) { ntw_set_loudness_scale(value) }
     func selectSampleTrack(_ index: Int) { ntw_select_sample_track(Int32(index)) }
     func setFileAudioVolume(_ volume: Float) { ntw_set_file_audio_volume(volume) }
     func toggleFileAudioPause() { ntw_toggle_file_audio_pause() }
@@ -914,9 +948,20 @@ final class NottawaEngine {
                 id: String(cString: ptr[$0].id),
                 name: String(cString: ptr[$0].name),
                 icon: String(cString: ptr[$0].icon),
-                sourceType: Int(ptr[$0].sourceType)
+                sourceType: Int(ptr[$0].sourceType),
+                isFavorited: ptr[$0].isFavorited != 0
             )
         }
+    }
+
+    // MARK: - Favorites
+
+    func toggleFavoriteShaderType(shaderTypeRaw: Int) {
+        ntw_toggle_favorite_shader_type(Int32(shaderTypeRaw))
+    }
+
+    func toggleFavoriteSourceType(sourceType: Int) {
+        ntw_toggle_favorite_source_type(Int32(sourceType))
     }
 
     // MARK: - Texture Sharing

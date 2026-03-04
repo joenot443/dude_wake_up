@@ -9,6 +9,7 @@
 import SwiftUI
 
 struct AudioPanelTopBar: View {
+    @Environment(ThemeManager.self) private var theme
     let data: AudioControlData
 
     private let engine = NottawaEngine.shared
@@ -23,31 +24,35 @@ struct AudioPanelTopBar: View {
                     Text(data.snapshot.audioActive ? "Stop" : "Start")
                 }
             }
-            .buttonStyle(.bordered)
-            .tint(data.snapshot.audioActive ? .red : .green)
+            .buttonStyle(.plain)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(data.snapshot.audioActive ? Color.red.opacity(0.2) : Color.green.opacity(0.2))
+            .foregroundStyle(data.snapshot.audioActive ? .red : .green)
+            .clipShape(RoundedRectangle(cornerRadius: 6))
 
-            Picker("Source", selection: Binding(
-                get: { data.selectedSourceId ?? "" },
-                set: { engine.selectAudioSource(id: $0) }
-            )) {
-                ForEach(data.audioSources) { source in
-                    Text(source.name).tag(source.id)
-                }
-            }
+            DSPicker(
+                selection: Binding(
+                    get: { data.selectedSourceId ?? "" },
+                    set: { engine.selectAudioSource(id: $0) }
+                ),
+                options: data.audioSources.map { DSPickerOption(value: $0.id, label: $0.name) },
+                style: .menu, size: .sm
+            )
             .frame(width: 180)
 
             if data.fileState.isFileSource {
-                Divider().frame(height: 20)
+                theme.colors.border.frame(width: 1, height: 20)
 
                 if !data.tracks.isEmpty {
-                    Picker("Track", selection: Binding(
-                        get: { data.fileState.selectedTrackIndex },
-                        set: { engine.selectSampleTrack($0) }
-                    )) {
-                        ForEach(data.tracks) { track in
-                            Text(track.name).tag(track.index)
-                        }
-                    }
+                    DSPicker(
+                        selection: Binding(
+                            get: { data.fileState.selectedTrackIndex },
+                            set: { engine.selectSampleTrack($0) }
+                        ),
+                        options: data.tracks.map { DSPickerOption(value: $0.index, label: $0.name) },
+                        style: .menu, size: .sm
+                    )
                     .frame(width: 160)
                 }
 
@@ -59,30 +64,30 @@ struct AudioPanelTopBar: View {
 
                 HStack(spacing: 4) {
                     Image(systemName: "speaker.fill")
-                        .font(.caption).foregroundStyle(.secondary)
-                    Slider(
+                        .font(.caption).foregroundStyle(theme.colors.textSecondary)
+                    DSSlider(
                         value: Binding(
                             get: { data.fileState.volume },
                             set: { engine.setFileAudioVolume($0) }
                         ),
-                        in: 0...1
+                        range: 0...1
                     )
                     .frame(width: 80)
                 }
 
                 HStack(spacing: 4) {
                     Text(formatTime(data.fileState.playbackPosition * data.fileState.totalDuration))
-                        .font(.caption).monospacedDigit().foregroundStyle(.secondary)
-                    Slider(
+                        .font(.caption).monospacedDigit().foregroundStyle(theme.colors.textSecondary)
+                    DSSlider(
                         value: Binding(
                             get: { data.fileState.playbackPosition },
                             set: { engine.setFileAudioPosition($0) }
                         ),
-                        in: 0...1
+                        range: 0...1
                     )
                     .frame(width: 120)
                     Text(formatTime(data.fileState.totalDuration))
-                        .font(.caption).monospacedDigit().foregroundStyle(.secondary)
+                        .font(.caption).monospacedDigit().foregroundStyle(theme.colors.textSecondary)
                 }
             }
 

@@ -3,6 +3,8 @@
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
+uniform float smoothness;
+uniform float blobCount;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -20,13 +22,13 @@ float sdSphere( vec3 p, float s )
 float map(vec3 p)
 {
   float d = 2.0;
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < int(blobCount); i++) {
     float fi = float(i);
     float time = time * (fract(fi * 412.531 + 0.513) - 0.5) * 2.0;
     d = opSmoothUnion(
                       sdSphere(p + sin(time + fi * vec3(52.5126, 64.62744, 632.25)) * vec3(2.0, 2.0, 0.8), mix(0.5, 1.0, fract(fi * 412.531 + 0.5124))),
                       d,
-                      0.4
+                      smoothness
                       );
   }
   return d;

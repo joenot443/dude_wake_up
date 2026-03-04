@@ -3,6 +3,7 @@
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
+uniform float cellCount;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -10,8 +11,8 @@ out vec4 outputColor;
 
 void main()
 {
-  float v = 39.;
-  float n = 39.;                                              // number of cells in height
+  float n = cellCount;                                              // number of cells in height
+  float v = n;
   vec2 R = dimensions.xy;
   vec2 U = n * coord / R.y;                                           // normalized coordinates
   vec2 I = floor(U);                                             // cell Id

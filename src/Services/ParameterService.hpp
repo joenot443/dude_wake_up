@@ -23,6 +23,7 @@ using json = nlohmann::json;
 
 static const std::string FavoriteParameterJsonKey = "favoriteParameters";
 static const std::string FavoriteShadersJsonKey = "favoriteShaders";
+static const std::string FavoriteSourcesJsonKey = "favoriteSources";
 static const std::string StageShadersJsonKey = "stageShaders";
 
 class ParameterService: public ConfigurableService {
@@ -59,6 +60,10 @@ public:
   void removeFavoriteShaderType(ShaderType type);
   void toggleFavoriteShaderType(ShaderType type);
   
+  std::set<int> favoriteSourceTypes;
+  void toggleFavoriteSourceType(int sourceType);
+  bool isFavoriteSourceType(int sourceType);
+
   std::set<std::string> stageShaderIds;
   // If no stageShaderIds have been set otherwise, use the defaultStageShaderId
   // which maps to the Shader with the most traversals (furthest along).

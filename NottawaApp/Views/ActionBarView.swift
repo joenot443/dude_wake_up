@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ActionBarView: View {
     @Environment(NodeEditorViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var theme
     var canvasSize: CGSize
 
     var body: some View {
@@ -37,7 +38,7 @@ struct ActionBarView: View {
         .buttonStyle(ActionBarButtonStyle())
         .accessibilityIdentifier("action-bar-expand")
         .padding(6)
-        .background(Color(white: 0.13, opacity: 0.7))
+        .background(theme.colors.surface.opacity(0.85))
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
@@ -57,8 +58,7 @@ struct ActionBarView: View {
             .accessibilityIdentifier("action-bar-collapse")
             .help("Collapse action bar")
 
-            Divider()
-                .frame(height: 20)
+            theme.colors.border.frame(width: 1, height: 20)
                 .opacity(0.3)
 
             // Undo
@@ -83,8 +83,7 @@ struct ActionBarView: View {
             .disabled(!viewModel.canRedo)
             .help("Redo (Cmd+Shift+Z)")
 
-            Divider()
-                .frame(height: 20)
+            theme.colors.border.frame(width: 1, height: 20)
                 .opacity(0.3)
 
             // Screenshot
@@ -103,12 +102,11 @@ struct ActionBarView: View {
                     .font(.system(size: 14, weight: .medium))
                     .frame(width: 28, height: 28)
             }
-            .buttonStyle(ActionBarButtonStyle(isActive: viewModel.helpEnabled))
+            .buttonStyle(ActionBarButtonStyle(isActive: viewModel.helpEnabled, accentColor: theme.colors.accent))
             .accessibilityIdentifier("action-bar-help")
             .help("Toggle help overlay")
 
-            Divider()
-                .frame(height: 20)
+            theme.colors.border.frame(width: 1, height: 20)
                 .opacity(0.3)
 
             // Clear / Reset
@@ -135,7 +133,7 @@ struct ActionBarView: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 6)
-        .background(Color(white: 0.13, opacity: 0.7))
+        .background(theme.colors.surface.opacity(0.85))
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
@@ -143,18 +141,20 @@ struct ActionBarView: View {
 // MARK: - Button Style
 
 private struct ActionBarButtonStyle: ButtonStyle {
+    @Environment(ThemeManager.self) var theme
     var isActive: Bool = false
+    var accentColor: Color = .accentColor
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .foregroundStyle(
-                configuration.isPressed ? .white.opacity(0.5) :
-                isActive ? .cyan :
-                .white.opacity(0.8)
+                configuration.isPressed ? theme.colors.textTertiary :
+                isActive ? accentColor :
+                theme.colors.textPrimary.opacity(0.8)
             )
             .background(
                 configuration.isPressed ?
-                    Color.white.opacity(0.1) :
+                    theme.colors.surfacePressed :
                     Color.clear
             )
             .clipShape(RoundedRectangle(cornerRadius: 6))

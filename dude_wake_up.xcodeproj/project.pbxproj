@@ -376,6 +376,49 @@
 		STR0B1A2B3C4D5E678902222 /* StrandTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = STR0F1A2B3C4D5E678902222 /* StrandTileView.swift */; };
 		TSC0A1B2C3D4E5F6A7B8C9D2 /* TextSourceControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TSC0A1B2C3D4E5F6A7B8C9D0 /* TextSourceControlsView.swift */; };
 		WPV0A1B2C3D4E5F6A7B8C9D2 /* WaveformPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WPV0A1B2C3D4E5F6A7B8C9D0 /* WaveformPreviewView.swift */; };
+		B37192BBF978394AE437AE0D /* StageModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 823513EDE000886C04125412 /* StageModeView.swift */; };
+		5DE4956B9F327D96CD7B2217 /* ChannelStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04AD3BADCAA0F1EA5788259E /* ChannelStripView.swift */; };
+		E974EBB052574E74A2BE9438 /* CompactParameterControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5341016A589857CE37B2D0A2 /* CompactParameterControl.swift */; };
+		A7C3E91D4F8B2A06E5D71C83 /* CompactOscillatorControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2D8F40E7A1C5963D4E08B17 /* CompactOscillatorControls.swift */; };
+		6C2E3D6138B246985E91BA40 /* StageOutputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FCBE50AE5E3C50C9262756E /* StageOutputView.swift */; };
+		EC44FA4961FD79BB456AF2FF /* StageBottomBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1D25A317F9F3B3285E6D8EA /* StageBottomBarView.swift */; };
+		DDCC00000000000200000000 /* DesignLibraryApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000000 /* DesignLibraryApp.swift */; };
+		DDCC00000000000200000001 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000001 /* Theme.swift */; };
+		DDCC00000000000200000002 /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000002 /* ThemeManager.swift */; };
+		DDCC00000000000200000003 /* ThemePresets.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000003 /* ThemePresets.swift */; };
+		DDCC00000000000200000004 /* DSButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000004 /* DSButton.swift */; };
+		DDCC00000000000200000005 /* DSSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000005 /* DSSlider.swift */; };
+		DDCC00000000000200000006 /* DSText.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000006 /* DSText.swift */; };
+		DDCC00000000000200000007 /* DSCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000007 /* DSCard.swift */; };
+		DDCC00000000000200000008 /* ShowcaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000008 /* ShowcaseView.swift */; };
+		DDCC00000000000200000009 /* TypographyShowcase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000009 /* TypographyShowcase.swift */; };
+		DDCC0000000000020000000A /* ColorShowcase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC0000000000010000000A /* ColorShowcase.swift */; };
+		DDCC0000000000020000000B /* ButtonShowcase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC0000000000010000000B /* ButtonShowcase.swift */; };
+		DDCC0000000000020000000C /* SliderShowcase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC0000000000010000000C /* SliderShowcase.swift */; };
+		DDCC0000000000020000000D /* SpacingShowcase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC0000000000010000000D /* SpacingShowcase.swift */; };
+		DDCC0000000000020000000E /* DSIconButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC0000000000010000000E /* DSIconButton.swift */; };
+		DDCC0000000000020000000F /* DSPin.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC0000000000010000000F /* DSPin.swift */; };
+		DDCC00000000000200000010 /* DSNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000010 /* DSNodeView.swift */; };
+		DDCC00000000000200000011 /* IconButtonShowcase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000011 /* IconButtonShowcase.swift */; };
+		DDCC00000000000200000012 /* NodeShowcase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000012 /* NodeShowcase.swift */; };
+		DDCC00000000000200000013 /* DSCable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000013 /* DSCable.swift */; };
+		913F8AC6FCBB3E18C7806DBC /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000001 /* Theme.swift */; };
+		07F48380489A2DCFC0528367 /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000002 /* ThemeManager.swift */; };
+		1EE5F08D950518B3D3576703 /* ThemePresets.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000003 /* ThemePresets.swift */; };
+		D464D46F1E4EE5F686A43FDE /* DSButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000004 /* DSButton.swift */; };
+		759F0757DC34159F428B66FF /* DSSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000005 /* DSSlider.swift */; };
+		36A384FEE0AA0F00837A4098 /* DSText.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000006 /* DSText.swift */; };
+		651CACE35636C322E76C4152 /* DSCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000007 /* DSCard.swift */; };
+		C0928C9039F16373A1FF0CC1 /* DSIconButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC0000000000010000000E /* DSIconButton.swift */; };
+		3D1A0ED5E7F95DD0C48554D6 /* DSPin.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC0000000000010000000F /* DSPin.swift */; };
+		0C77727E760A3B436BF0C464 /* DSNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000010 /* DSNodeView.swift */; };
+		D1C1D62BF20D382047437FD0 /* DSCable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000013 /* DSCable.swift */; };
+		DDCC00000000000200000014 /* DSToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000014 /* DSToggle.swift */; };
+		DDCC00000000000200000015 /* DSPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000015 /* DSPicker.swift */; };
+		DDCC00000000000200000016 /* ToggleShowcase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000016 /* ToggleShowcase.swift */; };
+		DDCC00000000000200000017 /* PickerShowcase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000017 /* PickerShowcase.swift */; };
+		A7B3C8D2E1F4059638214B7C /* DSToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000014 /* DSToggle.swift */; };
+		B8C4D9E3F2050A7749325C8D /* DSPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000015 /* DSPicker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1079,6 +1122,37 @@
 		STR0F1A2B3C4D5E678902222 /* StrandTileView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StrandTileView.swift; path = NottawaApp/Views/Browser/StrandTileView.swift; sourceTree = "<group>"; };
 		TSC0A1B2C3D4E5F6A7B8C9D0 /* TextSourceControlsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TextSourceControlsView.swift; path = NottawaApp/Views/Inspector/TextSourceControlsView.swift; sourceTree = "<group>"; };
 		WPV0A1B2C3D4E5F6A7B8C9D0 /* WaveformPreviewView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WaveformPreviewView.swift; path = NottawaApp/Views/Inspector/WaveformPreviewView.swift; sourceTree = "<group>"; };
+		823513EDE000886C04125412 /* StageModeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StageModeView.swift; path = NottawaApp/Views/StageMode/StageModeView.swift; sourceTree = "<group>"; };
+		04AD3BADCAA0F1EA5788259E /* ChannelStripView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChannelStripView.swift; path = NottawaApp/Views/StageMode/ChannelStripView.swift; sourceTree = "<group>"; };
+		5341016A589857CE37B2D0A2 /* CompactParameterControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CompactParameterControl.swift; path = NottawaApp/Views/StageMode/CompactParameterControl.swift; sourceTree = "<group>"; };
+		B2D8F40E7A1C5963D4E08B17 /* CompactOscillatorControls.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CompactOscillatorControls.swift; path = NottawaApp/Views/StageMode/CompactOscillatorControls.swift; sourceTree = "<group>"; };
+		5FCBE50AE5E3C50C9262756E /* StageOutputView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StageOutputView.swift; path = NottawaApp/Views/StageMode/StageOutputView.swift; sourceTree = "<group>"; };
+		D1D25A317F9F3B3285E6D8EA /* StageBottomBarView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StageBottomBarView.swift; path = NottawaApp/Views/StageMode/StageBottomBarView.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000000 /* DesignLibraryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignLibraryApp.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000001 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000002 /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000003 /* ThemePresets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemePresets.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000004 /* DSButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSButton.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000005 /* DSSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSSlider.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000006 /* DSText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSText.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000007 /* DSCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSCard.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000008 /* ShowcaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowcaseView.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000009 /* TypographyShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypographyShowcase.swift; sourceTree = "<group>"; };
+		DDCC0000000000010000000A /* ColorShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorShowcase.swift; sourceTree = "<group>"; };
+		DDCC0000000000010000000B /* ButtonShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonShowcase.swift; sourceTree = "<group>"; };
+		DDCC0000000000010000000C /* SliderShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderShowcase.swift; sourceTree = "<group>"; };
+		DDCC0000000000010000000D /* SpacingShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpacingShowcase.swift; sourceTree = "<group>"; };
+		DDCC00000000000000000008 /* DesignLibrary.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DesignLibrary.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DDCC0000000000010000000E /* DSIconButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSIconButton.swift; sourceTree = "<group>"; };
+		DDCC0000000000010000000F /* DSPin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSPin.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000010 /* DSNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSNodeView.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000011 /* IconButtonShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconButtonShowcase.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000012 /* NodeShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeShowcase.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000013 /* DSCable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSCable.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000014 /* DSToggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSToggle.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000015 /* DSPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSPicker.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000016 /* ToggleShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToggleShowcase.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000017 /* PickerShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerShowcase.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -1113,6 +1187,13 @@
 				02D0803B2EE9B015003AD114 /* Sparkle.framework in Frameworks */,
 				"0A7A065D-785F-489A-914F-8B1EDF273782" /* CoreMIDI.framework in Frameworks */,
 				CA766C53643A48B6849A73A2 /* IOSurface.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DDCC00000000000000000003 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1195,6 +1276,7 @@
 				AUD0A1B2C3D4E5F6A7000009 /* FrequencyColumnView.swift */,
 				AUD0A1B2C3D4E5F6A700000B /* ScrollingGraphView.swift */,
 				AUD0A1B2C3D4E5F6A700000D /* BarChartView.swift */,
+				7D34ABB5DD238CFC95FEDAAD /* StageMode */,
 				2C657C6B09794AF6AC3CF667 /* Metal.framework */,
 				0A5C2CE6E1B74DA19E4A0525 /* MetalKit.framework */,
 			);
@@ -2066,6 +2148,8 @@
 				AABB00000000000000000004 /* NottawaAppUITests */,
 				AABB00000000000000000001 /* NottawaAppUITests.app */,
 				020F8C222F4907C000DE1990 /* Recovered References */,
+				DDCC00000000000000000009 /* DesignLibrary */,
+				DDCC00000000000000000008 /* DesignLibrary.app */,
 			);
 			sourceTree = "<group>";
 		};
@@ -2115,6 +2199,82 @@
 				"B86517BB-785D-4AF0-95CA-FA1E70DDFAE4" /* imgui_impl_opengl3_loader.h */,
 			);
 			path = backends;
+			sourceTree = "<group>";
+		};
+		7D34ABB5DD238CFC95FEDAAD /* StageMode */ = {
+			isa = PBXGroup;
+			children = (
+				823513EDE000886C04125412 /* StageModeView.swift */,
+				04AD3BADCAA0F1EA5788259E /* ChannelStripView.swift */,
+				5341016A589857CE37B2D0A2 /* CompactParameterControl.swift */,
+				B2D8F40E7A1C5963D4E08B17 /* CompactOscillatorControls.swift */,
+				5FCBE50AE5E3C50C9262756E /* StageOutputView.swift */,
+				D1D25A317F9F3B3285E6D8EA /* StageBottomBarView.swift */,
+			);
+			name = StageMode;
+			sourceTree = "<group>";
+		};
+		DDCC00000000000000000009 /* DesignLibrary */ = {
+			isa = PBXGroup;
+			children = (
+				DDCC0000000000000000000A /* App */,
+				DDCC0000000000000000000B /* Theme */,
+				DDCC0000000000000000000C /* Components */,
+				DDCC0000000000000000000D /* Showcase */,
+			);
+			path = DesignLibrary;
+			sourceTree = "<group>";
+		};
+		DDCC0000000000000000000A /* App */ = {
+			isa = PBXGroup;
+			children = (
+				DDCC00000000000100000000 /* DesignLibraryApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		DDCC0000000000000000000B /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				DDCC00000000000100000001 /* Theme.swift */,
+				DDCC00000000000100000002 /* ThemeManager.swift */,
+				DDCC00000000000100000003 /* ThemePresets.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		DDCC0000000000000000000C /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				DDCC00000000000100000004 /* DSButton.swift */,
+				DDCC00000000000100000005 /* DSSlider.swift */,
+				DDCC00000000000100000006 /* DSText.swift */,
+				DDCC00000000000100000007 /* DSCard.swift */,
+				DDCC0000000000010000000E /* DSIconButton.swift */,
+				DDCC0000000000010000000F /* DSPin.swift */,
+				DDCC00000000000100000010 /* DSNodeView.swift */,
+				DDCC00000000000100000013 /* DSCable.swift */,
+				DDCC00000000000100000014 /* DSToggle.swift */,
+				DDCC00000000000100000015 /* DSPicker.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		DDCC0000000000000000000D /* Showcase */ = {
+			isa = PBXGroup;
+			children = (
+				DDCC00000000000100000008 /* ShowcaseView.swift */,
+				DDCC00000000000100000009 /* TypographyShowcase.swift */,
+				DDCC0000000000010000000A /* ColorShowcase.swift */,
+				DDCC0000000000010000000B /* ButtonShowcase.swift */,
+				DDCC0000000000010000000C /* SliderShowcase.swift */,
+				DDCC0000000000010000000D /* SpacingShowcase.swift */,
+				DDCC00000000000100000011 /* IconButtonShowcase.swift */,
+				DDCC00000000000100000012 /* NodeShowcase.swift */,
+				DDCC00000000000100000016 /* ToggleShowcase.swift */,
+				DDCC00000000000100000017 /* PickerShowcase.swift */,
+			);
+			path = Showcase;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -2176,6 +2336,23 @@
 			name = dude_wake_up;
 			productName = myOFApp;
 			productReference = 028651AE2D95E0EE000CE0D4 /* Nottawa (Debug).app */;
+			productType = "com.apple.product-type.application";
+		};
+		DDCC00000000000000000001 /* DesignLibrary */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DDCC00000000000000000005 /* Build configuration list for PBXNativeTarget "DesignLibrary" */;
+			buildPhases = (
+				DDCC00000000000000000002 /* Sources */,
+				DDCC00000000000000000003 /* Frameworks */,
+				DDCC00000000000000000004 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DesignLibrary;
+			productName = DesignLibrary;
+			productReference = DDCC00000000000000000008 /* DesignLibrary.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -2254,6 +2431,7 @@
 				E4B69B5A0A3A1756003C02F2 /* dude_wake_up */,
 				1E3E8E1C4B7740E297B599EF /* NottawaApp */,
 				AABB0000000000000000000C /* NottawaAppUITests */,
+				DDCC00000000000000000001 /* DesignLibrary */,
 			);
 		};
 /* End PBXProject section */
@@ -2339,6 +2517,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				7CC043A8A25C47038A1F194F /* icon.icns in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DDCC00000000000000000004 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2437,6 +2622,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				913F8AC6FCBB3E18C7806DBC /* Theme.swift in Sources */,
+				07F48380489A2DCFC0528367 /* ThemeManager.swift in Sources */,
+				1EE5F08D950518B3D3576703 /* ThemePresets.swift in Sources */,
+				D464D46F1E4EE5F686A43FDE /* DSButton.swift in Sources */,
+				759F0757DC34159F428B66FF /* DSSlider.swift in Sources */,
+				36A384FEE0AA0F00837A4098 /* DSText.swift in Sources */,
+				651CACE35636C322E76C4152 /* DSCard.swift in Sources */,
+				C0928C9039F16373A1FF0CC1 /* DSIconButton.swift in Sources */,
+				3D1A0ED5E7F95DD0C48554D6 /* DSPin.swift in Sources */,
+				0C77727E760A3B436BF0C464 /* DSNodeView.swift in Sources */,
+				D1C1D62BF20D382047437FD0 /* DSCable.swift in Sources */,
+				A7B3C8D2E1F4059638214B7C /* DSToggle.swift in Sources */,
+				B8C4D9E3F2050A7749325C8D /* DSPicker.swift in Sources */,
+
 				18420F6015C64C20A92878DF /* ServiceStatics.cpp in Sources */,
 				556C0B8272934AA8B9577701 /* MainApp.cpp in Sources */,
 				6D30EE41242143B0866D4A0A /* AudioSource.cpp in Sources */,
@@ -2641,6 +2840,12 @@
 				AUD0A1B2C3D4E5F6A700000A /* FrequencyColumnView.swift in Sources */,
 				AUD0A1B2C3D4E5F6A700000C /* ScrollingGraphView.swift in Sources */,
 				AUD0A1B2C3D4E5F6A700000E /* BarChartView.swift in Sources */,
+				B37192BBF978394AE437AE0D /* StageModeView.swift in Sources */,
+				5DE4956B9F327D96CD7B2217 /* ChannelStripView.swift in Sources */,
+				E974EBB052574E74A2BE9438 /* CompactParameterControl.swift in Sources */,
+				A7C3E91D4F8B2A06E5D71C83 /* CompactOscillatorControls.swift in Sources */,
+				6C2E3D6138B246985E91BA40 /* StageOutputView.swift in Sources */,
+				EC44FA4961FD79BB456AF2FF /* StageBottomBarView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2809,6 +3014,37 @@
 				6FB54051EBA94AD394E848D2 /* ServiceStatics.cpp in Sources */,
 				CA2B8CB0615046AB820F5191 /* IOSurfaceTextureManager.cpp in Sources */,
 				99F0EB53FFA142988600E0EA /* nottawa_bridge.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DDCC00000000000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DDCC00000000000200000000 /* DesignLibraryApp.swift in Sources */,
+				DDCC00000000000200000001 /* Theme.swift in Sources */,
+				DDCC00000000000200000002 /* ThemeManager.swift in Sources */,
+				DDCC00000000000200000003 /* ThemePresets.swift in Sources */,
+				DDCC00000000000200000004 /* DSButton.swift in Sources */,
+				DDCC00000000000200000005 /* DSSlider.swift in Sources */,
+				DDCC00000000000200000006 /* DSText.swift in Sources */,
+				DDCC00000000000200000007 /* DSCard.swift in Sources */,
+				DDCC00000000000200000008 /* ShowcaseView.swift in Sources */,
+				DDCC00000000000200000009 /* TypographyShowcase.swift in Sources */,
+				DDCC0000000000020000000A /* ColorShowcase.swift in Sources */,
+				DDCC0000000000020000000B /* ButtonShowcase.swift in Sources */,
+				DDCC0000000000020000000C /* SliderShowcase.swift in Sources */,
+				DDCC0000000000020000000D /* SpacingShowcase.swift in Sources */,
+				DDCC0000000000020000000E /* DSIconButton.swift in Sources */,
+				DDCC0000000000020000000F /* DSPin.swift in Sources */,
+				DDCC00000000000200000010 /* DSNodeView.swift in Sources */,
+				DDCC00000000000200000011 /* IconButtonShowcase.swift in Sources */,
+				DDCC00000000000200000012 /* NodeShowcase.swift in Sources */,
+				DDCC00000000000200000013 /* DSCable.swift in Sources */,
+				DDCC00000000000200000014 /* DSToggle.swift in Sources */,
+				DDCC00000000000200000015 /* DSPicker.swift in Sources */,
+				DDCC00000000000200000016 /* ToggleShowcase.swift in Sources */,
+				DDCC00000000000200000017 /* PickerShowcase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3295,6 +3531,49 @@
 			};
 			name = Release;
 		};
+		DDCC00000000000000000006 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7VUCELU5PL;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Design Library";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.joecrozier.designlibrary;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		DDCC00000000000000000007 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7VUCELU5PL;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Design Library";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.joecrozier.designlibrary;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -3330,6 +3609,15 @@
 			buildConfigurations = (
 				E4B69B600A3A1757003C02F2 /* Debug */,
 				E4B69B610A3A1757003C02F2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DDCC00000000000000000005 /* Build configuration list for PBXNativeTarget "DesignLibrary" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DDCC00000000000000000006 /* Debug */,
+				DDCC00000000000000000007 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

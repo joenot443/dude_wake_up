@@ -11,6 +11,7 @@ import AVKit
 
 struct WelcomeView: View {
     @Environment(NodeEditorViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var theme
 
     @State private var player: AVPlayer?
 
@@ -42,7 +43,7 @@ struct WelcomeView: View {
                     strandBrowsers(height: panelHeight * 0.45)
                 }
                 .frame(width: panelWidth, height: panelHeight)
-                .background(.ultraThickMaterial)
+                .background(theme.colors.backgroundSecondary)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .shadow(color: .black.opacity(0.3), radius: 20)
                 .position(x: geo.size.width / 2, y: geo.size.height / 2)
@@ -66,8 +67,7 @@ struct WelcomeView: View {
 
         ZStack(alignment: .bottom) {
             if let player = player {
-                VideoPlayer(player: player)
-                    .disabled(true)
+                LoopingVideoView(player: player)
                     .frame(width: width, height: headerHeight)
                     .clipped()
             } else {
@@ -79,18 +79,12 @@ struct WelcomeView: View {
             // Bottom overlay bar
             HStack {
                 // Always show at launch toggle
-                Toggle(isOn: Bindable(viewModel).welcomeScreenEnabled) {
-                    Text("Always show at launch")
-                        .font(.caption)
-                        .foregroundStyle(.white.opacity(0.85))
-                }
-                .toggleStyle(.checkbox)
-                .tint(.white)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(
-                    Capsule().fill(Color.black.opacity(0.5))
-                )
+                DSToggle(isOn: Bindable(viewModel).welcomeScreenEnabled, label: "Always show at launch", style: .checkbox, size: .sm)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(
+                        Capsule().fill(Color.black.opacity(0.5))
+                    )
 
                 Spacer()
 
@@ -98,8 +92,12 @@ struct WelcomeView: View {
                 Button("Try this out") {
                     viewModel.loadDemoStrand()
                 }
-                .buttonStyle(.bordered)
-                .tint(.white)
+                .buttonStyle(.plain)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(theme.colors.accent)
+                .foregroundStyle(theme.colors.textOnAccent)
+                .clipShape(Capsule())
                 .controlSize(.small)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
@@ -123,8 +121,10 @@ struct WelcomeView: View {
                 Text("Resume Workspace")
                     .frame(width: 160, height: 36)
             }
-            .buttonStyle(.bordered)
-            .controlSize(.large)
+            .buttonStyle(.plain)
+            .background(theme.colors.surface)
+            .foregroundStyle(theme.colors.textPrimary)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
 
             Button {
                 viewModel.newWorkspace()
@@ -133,8 +133,10 @@ struct WelcomeView: View {
                 Text("New Workspace")
                     .frame(width: 160, height: 36)
             }
-            .buttonStyle(.bordered)
-            .controlSize(.large)
+            .buttonStyle(.plain)
+            .background(theme.colors.surface)
+            .foregroundStyle(theme.colors.textPrimary)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
 
             Button {
                 openWorkspacePanel()
@@ -142,8 +144,10 @@ struct WelcomeView: View {
                 Text("Open Workspace")
                     .frame(width: 160, height: 36)
             }
-            .buttonStyle(.bordered)
-            .controlSize(.large)
+            .buttonStyle(.plain)
+            .background(theme.colors.surface)
+            .foregroundStyle(theme.colors.textPrimary)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
         }
     }
 
@@ -177,7 +181,7 @@ struct WelcomeView: View {
             .frame(maxWidth: .infinity)
             .frame(height: height)
 
-            Divider()
+            theme.colors.border.frame(width: 1)
 
             // Recent column
             VStack(alignment: .leading, spacing: 8) {
@@ -254,4 +258,22 @@ struct WelcomeView: View {
             }
         }
     }
+}
+
+// MARK: - Looping Video (no controls)
+
+private struct LoopingVideoView: NSViewRepresentable {
+    let player: AVPlayer
+
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        let playerLayer = AVPlayerLayer(player: player)
+        playerLayer.videoGravity = .resizeAspectFill
+        playerLayer.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
+        view.wantsLayer = true
+        view.layer?.addSublayer(playerLayer)
+        return view
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {}
 }

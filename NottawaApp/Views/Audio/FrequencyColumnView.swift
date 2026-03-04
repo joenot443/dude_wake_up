@@ -10,6 +10,7 @@
 import SwiftUI
 
 struct FrequencyColumnView: View {
+    @Environment(ThemeManager.self) private var theme
     let graphs: AudioGraphData
     let controls: AudioControlData
 
@@ -26,16 +27,13 @@ struct FrequencyColumnView: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
                 Text("Frequency")
-                    .font(.caption).fontWeight(.semibold).foregroundStyle(.secondary)
+                    .font(.caption).fontWeight(.semibold).foregroundStyle(theme.colors.textSecondary)
                 Spacer()
-                Picker("", selection: $viewMode) {
-                    ForEach(FreqViewMode.allCases) { mode in
-                        Text(mode.rawValue).tag(mode)
-                    }
-                }
-                .labelsHidden()
-                .pickerStyle(.segmented)
-                .controlSize(.small)
+                DSPicker(
+                    selection: $viewMode,
+                    options: FreqViewMode.allCases.map { DSPickerOption(value: $0, label: $0.rawValue) },
+                    style: .segmented, size: .sm
+                )
                 .frame(width: 200)
             }
 
@@ -173,45 +171,42 @@ struct FreqWaveformGraphView: View {
 // MARK: - Controls (3fps)
 
 struct FreqControlsView: View {
+    @Environment(ThemeManager.self) private var theme
     let data: AudioControlData
     private let engine = NottawaEngine.shared
     private var snapshot: ExtendedAudioAnalysisSnapshot { data.snapshot }
 
     var body: some View {
         HStack(spacing: 8) {
-            Picker("", selection: Binding(
-                get: { snapshot.smoothingMode },
-                set: { engine.setSmoothingMode($0.rawValue) }
-            )) {
-                ForEach(SmoothingMode.allCases) { mode in
-                    Text(mode.displayName).tag(mode)
-                }
-            }
-            .labelsHidden()
+            DSPicker(
+                selection: Binding(
+                    get: { snapshot.smoothingMode },
+                    set: { engine.setSmoothingMode($0.rawValue) }
+                ),
+                options: SmoothingMode.allCases.map { DSPickerOption(value: $0, label: $0.displayName) },
+                style: .menu, size: .sm
+            )
             .frame(width: 150)
-            .controlSize(.small)
 
-            HStack(spacing: 4) {
-                Text("Release").font(.caption2).foregroundStyle(.secondary)
-                Slider(
-                    value: Binding(
-                        get: { snapshot.frequencyRelease },
-                        set: { engine.setFrequencyRelease($0) }
-                    ),
-                    in: 0.01...1.0
-                )
-            }
+            DSSlider(
+                value: Binding(
+                    get: { snapshot.frequencyRelease },
+                    set: { engine.setFrequencyRelease($0) }
+                ),
+                range: 0.01...1.0,
+                label: "Release",
+                showValue: true
+            )
 
-            HStack(spacing: 4) {
-                Text("Scale").font(.caption2).foregroundStyle(.secondary)
-                Slider(
-                    value: Binding(
-                        get: { snapshot.frequencyScale },
-                        set: { engine.setFrequencyScale($0) }
-                    ),
-                    in: 0.01...2.0
-                )
-            }
+            DSSlider(
+                value: Binding(
+                    get: { snapshot.frequencyScale },
+                    set: { engine.setFrequencyScale($0) }
+                ),
+                range: 0.01...2.0,
+                label: "Scale",
+                showValue: true
+            )
         }
     }
 }

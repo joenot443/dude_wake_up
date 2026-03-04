@@ -6,6 +6,7 @@ uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
 uniform float speed;
+uniform vec3 bgColor;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -54,5 +55,6 @@ void main() {
   // Highlight at the center of the light source
   float hl = (1.0-length(uv));
   hl -= hl * hl;
-  outputColor = vec4(pow(.1+0.5*fbm(10.0*cuv, vec2(20)), 10.0)+hl);
+  float brightness = pow(.1+0.5*fbm(10.0*cuv, vec2(20)), 10.0)+hl;
+  outputColor = vec4(bgColor + vec3(brightness), 1.0);
 }

@@ -11,6 +11,7 @@ struct ParameterControlView: View {
     let param: ParameterInfo
 
     @Environment(NodeEditorViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var theme
 
     @State private var sliderValue: Float
     @State private var intValue: Int
@@ -40,14 +41,11 @@ struct ParameterControlView: View {
 
             case .bool_:
                 HStack {
-                    Text(param.name)
-                        .font(.caption)
-                    Spacer()
-                    Toggle("", isOn: $boolValue)
-                        .labelsHidden()
+                    DSToggle(isOn: $boolValue, label: param.name, style: .switch, size: .sm)
                         .onChange(of: boolValue) { _, newValue in
                             NottawaEngine.shared.setParameterBool(paramId: param.id, value: newValue)
                         }
+                    Spacer()
                     favoriteButton
                 }
 
@@ -61,41 +59,24 @@ struct ParameterControlView: View {
                             Spacer()
                             favoriteButton
                         }
-                        Picker("", selection: $intValue) {
-                            ForEach(0..<param.options.count, id: \.self) { idx in
-                                Text(param.options[idx]).tag(idx)
-                            }
-                        }
-                        .labelsHidden()
+                        DSPicker(
+                            selection: $intValue,
+                            options: param.options.enumerated().map { DSPickerOption(value: $0.offset, label: $0.element) },
+                            style: .menu, size: .sm
+                        )
                         .onChange(of: intValue) { _, newValue in
                             NottawaEngine.shared.setParameterInt(paramId: param.id, value: newValue)
                         }
                     }
                 } else {
-                    VStack(alignment: .leading, spacing: 2) {
-                        HStack {
-                            Text(param.name)
-                                .font(.caption)
-                            Spacer()
-                            Text("\(intValue)")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            oscillatorDriverButtons
-                            favoriteButton
-                        }
-                        Slider(
-                            value: Binding(
-                                get: { Float(intValue) },
-                                set: { intValue = Int($0) }
-                            ),
-                            in: param.minValue...param.maxValue,
-                            step: 1
-                        )
-                        .disabled(param.oscillatorEnabled || param.hasDriver)
-                        .opacity(param.oscillatorEnabled || param.hasDriver ? 0.4 : 1.0)
-                        .onChange(of: intValue) { _, newValue in
-                            NottawaEngine.shared.setParameterInt(paramId: param.id, value: newValue)
-                        }
+                    IntSliderControl(
+                        param: param,
+                        intValue: $intValue,
+                        oscillatorDriverButtons: oscillatorDriverButtons,
+                        favoriteButton: favoriteButton
+                    )
+                    .onChange(of: intValue) { _, newValue in
+                        NottawaEngine.shared.setParameterInt(paramId: param.id, value: newValue)
                     }
                     expandableSections
                 }
@@ -127,12 +108,12 @@ struct ParameterControlView: View {
                         Spacer()
                         Text(String(format: "%.2f", sliderValue))
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(theme.colors.textSecondary)
                             .monospacedDigit()
                         oscillatorDriverButtons
                         favoriteButton
                     }
-                    Slider(value: $sliderValue, in: param.minValue...param.maxValue)
+                    DSSlider(value: $sliderValue, range: param.minValue...param.maxValue)
                         .disabled(param.oscillatorEnabled || param.hasDriver)
                         .opacity(param.oscillatorEnabled || param.hasDriver ? 0.4 : 1.0)
                         .onChange(of: sliderValue) { _, newValue in
@@ -173,7 +154,7 @@ struct ParameterControlView: View {
             } label: {
                 Image(systemName: param.oscillatorEnabled ? "waveform.circle.fill" : "waveform.circle")
                     .font(.caption2)
-                    .foregroundStyle(param.oscillatorEnabled ? .cyan : .secondary)
+                    .foregroundStyle(param.oscillatorEnabled ? theme.colors.accent : theme.colors.textSecondary)
             }
             .buttonStyle(.plain)
             .accessibilityIdentifier("osc-toggle-\(param.id)")
@@ -187,7 +168,7 @@ struct ParameterControlView: View {
         } label: {
             Image(systemName: param.hasDriver ? "music.note.list" : "music.note")
                 .font(.caption2)
-                .foregroundStyle(param.hasDriver ? .orange : .secondary)
+                .foregroundStyle(param.hasDriver ? theme.colors.warning : theme.colors.textSecondary)
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("driver-toggle-\(param.id)")
@@ -217,8 +198,83 @@ struct ParameterControlView: View {
         } label: {
             Image(systemName: param.isFavorited ? "star.fill" : "star")
                 .font(.caption2)
-                .foregroundStyle(param.isFavorited ? .yellow : .secondary)
+                .foregroundStyle(param.isFavorited ? theme.colors.warning : theme.colors.textSecondary)
         }
         .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Integer Slider Control
+
+/// A stepped slider with -/+ buttons for integer parameters.
+struct IntSliderControl<Buttons: View, Fav: View>: View {
+    @Environment(ThemeManager.self) private var theme
+    let param: ParameterInfo
+    @Binding var intValue: Int
+    let oscillatorDriverButtons: Buttons
+    let favoriteButton: Fav
+
+    private let minInt: Int
+    private let maxInt: Int
+
+    init(param: ParameterInfo, intValue: Binding<Int>,
+         oscillatorDriverButtons: Buttons, favoriteButton: Fav) {
+        self.param = param
+        self._intValue = intValue
+        self.oscillatorDriverButtons = oscillatorDriverButtons
+        self.favoriteButton = favoriteButton
+        self.minInt = Int(param.minValue)
+        self.maxInt = Int(param.maxValue)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack {
+                Text(param.name)
+                    .font(.caption)
+                Spacer()
+                oscillatorDriverButtons
+                favoriteButton
+            }
+            HStack(spacing: 6) {
+                Button {
+                    if intValue > minInt { intValue -= 1 }
+                } label: {
+                    Image(systemName: "minus")
+                        .font(.caption2.weight(.bold))
+                        .frame(width: 20, height: 20)
+                        .background(theme.colors.surface, in: RoundedRectangle(cornerRadius: 4))
+                }
+                .buttonStyle(.plain)
+                .disabled(intValue <= minInt)
+
+                DSSlider(
+                    value: Binding(
+                        get: { Float(intValue) },
+                        set: { intValue = Int($0.rounded()) }
+                    ),
+                    range: Float(minInt)...Float(maxInt),
+                    step: 1
+                )
+                .disabled(param.oscillatorEnabled || param.hasDriver)
+                .opacity(param.oscillatorEnabled || param.hasDriver ? 0.4 : 1.0)
+
+                Button {
+                    if intValue < maxInt { intValue += 1 }
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.caption2.weight(.bold))
+                        .frame(width: 20, height: 20)
+                        .background(theme.colors.surface, in: RoundedRectangle(cornerRadius: 4))
+                }
+                .buttonStyle(.plain)
+                .disabled(intValue >= maxInt)
+
+                Text("\(intValue)")
+                    .font(.caption.monospacedDigit())
+                    .foregroundStyle(theme.colors.textSecondary)
+                    .frame(minWidth: 28, alignment: .trailing)
+            }
+        }
     }
 }

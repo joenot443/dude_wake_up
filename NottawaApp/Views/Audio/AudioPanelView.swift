@@ -120,6 +120,7 @@ final class AudioControlData {
 // MARK: - Container
 
 struct AudioPanelView: View {
+    @Environment(ThemeManager.self) private var theme
     // These are passed to children by reference — AudioPanelView's body
     // never reads their @Observable properties, so it never re-evaluates.
     @State private var graphs = AudioGraphData()
@@ -130,24 +131,24 @@ struct AudioPanelView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Divider()
+            theme.colors.border.frame(height: 1)
 
             AudioPanelTopBar(data: controls)
 
-            Divider()
+            theme.colors.border.frame(height: 1)
 
             HStack(spacing: 12) {
                 // Loudness column
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Loudness")
-                        .font(.caption).fontWeight(.semibold).foregroundStyle(.secondary)
+                        .font(.caption).fontWeight(.semibold).foregroundStyle(theme.colors.textSecondary)
                     LoudnessGraphView(data: graphs)
                         .frame(maxHeight: .infinity)
                     LoudnessControlsView(data: controls)
                 }
                 .frame(maxWidth: .infinity)
 
-                Divider()
+                theme.colors.border.frame(width: 1)
 
                 // BPM column
                 VStack(spacing: 6) {
@@ -160,7 +161,7 @@ struct AudioPanelView: View {
                 }
                 .frame(maxWidth: .infinity)
 
-                Divider()
+                theme.colors.border.frame(width: 1)
 
                 // Frequency column
                 FrequencyColumnView(graphs: graphs, controls: controls)
@@ -170,7 +171,7 @@ struct AudioPanelView: View {
             .padding(.vertical, 8)
             .frame(maxHeight: .infinity)
         }
-        .background(.ultraThinMaterial)
+        .background(theme.colors.backgroundSecondary)
         .onAppear { controls.poll() }
         .onReceive(fastTimer) { _ in graphs.poll() }
         .onReceive(slowTimer) { _ in controls.poll() }
@@ -301,25 +302,37 @@ struct BpmOverlayView: View {
 // MARK: - Control-only views (re-render at 3fps)
 
 struct LoudnessControlsView: View {
+    @Environment(ThemeManager.self) private var theme
     let data: AudioControlData
     private let engine = NottawaEngine.shared
 
     var body: some View {
-        HStack(spacing: 4) {
-            Text("Release")
-                .font(.caption2).foregroundStyle(.secondary)
-            Slider(
+        VStack(spacing: 4) {
+            DSSlider(
                 value: Binding(
                     get: { data.snapshot.loudnessRelease },
                     set: { engine.setLoudnessRelease($0) }
                 ),
-                in: 0.01...1.0
+                range: 0.01...1.0,
+                label: "Release",
+                showValue: true
+            )
+            DSSlider(
+                value: Binding(
+                    get: { data.snapshot.loudnessScale },
+                    set: { engine.setLoudnessScale($0) }
+                ),
+                range: 0.1...5.0,
+                label: "Scale",
+                showValue: true,
+                formatString: "%.1fx"
             )
         }
     }
 }
 
 struct BpmControlsView: View {
+    @Environment(ThemeManager.self) private var theme
     let data: AudioControlData
     private let engine = NottawaEngine.shared
     private var snapshot: ExtendedAudioAnalysisSnapshot { data.snapshot }
@@ -327,17 +340,14 @@ struct BpmControlsView: View {
     var body: some View {
         VStack(spacing: 4) {
             if !data.fileState.isFileSource {
-                Picker("", selection: Binding(
-                    get: { snapshot.bpmMode },
-                    set: { engine.setBpmMode($0.rawValue) }
-                )) {
-                    ForEach(BpmMode.allCases) { mode in
-                        Text(mode.displayName).tag(mode)
-                    }
-                }
-                .labelsHidden()
-                .pickerStyle(.segmented)
-                .controlSize(.small)
+                DSPicker(
+                    selection: Binding(
+                        get: { snapshot.bpmMode },
+                        set: { engine.setBpmMode($0.rawValue) }
+                    ),
+                    options: BpmMode.allCases.map { DSPickerOption(value: $0, label: $0.displayName) },
+                    style: .segmented, size: .sm
+                )
             }
 
             if snapshot.bpmMode == .manual {
@@ -347,14 +357,13 @@ struct BpmControlsView: View {
                     }
                     .buttonStyle(.bordered).controlSize(.small)
 
-                    Slider(
+                    DSSlider(
                         value: Binding(
                             get: { snapshot.bpm },
                             set: { engine.setBpmValue($0) }
                         ),
-                        in: 1...300
+                        range: 1...300
                     )
-                    .controlSize(.small)
 
                     Button { engine.setBpmValue(snapshot.bpm + 1) } label: {
                         Image(systemName: "plus").frame(width: 12, height: 12)
@@ -368,7 +377,7 @@ struct BpmControlsView: View {
 
             // Nudge
             HStack(spacing: 4) {
-                Text("Nudge").font(.caption2).foregroundStyle(.secondary)
+                Text("Nudge").font(.caption2).foregroundStyle(theme.colors.textSecondary)
                 Button { engine.nudgeBpm(-0.1) } label: {
                     Image(systemName: "minus").frame(width: 12, height: 12)
                 }

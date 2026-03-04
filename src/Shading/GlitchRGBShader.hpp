@@ -53,6 +53,7 @@ struct GlitchRGBShader: Shader {
   void setup() override {
     texture = TextureService::getService()->textureWithName("Gravel Path");
     settings->textureOptions = TextureService::getService()->availableTextureNames();
+    settings->texture->options = settings->textureOptions;
     shader.load("shaders/Glitch RGB");
   }
 

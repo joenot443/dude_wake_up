@@ -11,41 +11,49 @@ import UniformTypeIdentifiers
 @main
 struct NottawaApp: App {
     @State private var viewModel = NodeEditorViewModel()
+    @State private var themeManager = ThemeManager()
     @State private var engineStatus: EngineStatus = .idle
     @State private var stretchPreviewWindows = false
 
     var body: some Scene {
         WindowGroup {
-            Group {
-                switch engineStatus {
-                case .ready:
-                    MainEditorView()
-                        .environment(viewModel)
-                        .navigationTitle(viewModel.currentWorkspaceName ?? "Nottawa")
-                        .overlay {
-                            if viewModel.showWelcomeScreen {
-                                WelcomeView()
-                                    .environment(viewModel)
+            ColorSchemeObserver(themeManager: themeManager) {
+                Group {
+                    switch engineStatus {
+                    case .ready:
+                        MainEditorView()
+                            .environment(viewModel)
+                            .environment(themeManager)
+                            .navigationTitle(viewModel.currentWorkspaceName ?? "Nottawa")
+                            .overlay {
+                                if viewModel.showWelcomeScreen {
+                                    WelcomeView()
+                                        .environment(viewModel)
+                                        .environment(themeManager)
+                                }
                             }
+                    case .error(let msg):
+                        VStack(spacing: 12) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.largeTitle)
+                                .foregroundStyle(.red)
+                            Text("Engine Error")
+                                .font(.title2)
+                                .foregroundStyle(themeManager.colors.textPrimary)
+                            Text(msg)
+                                .foregroundStyle(themeManager.colors.textSecondary)
                         }
-                case .error(let msg):
-                    VStack(spacing: 12) {
-                        Image(systemName: "exclamationmark.triangle")
-                            .font(.largeTitle)
-                            .foregroundStyle(.red)
-                        Text("Engine Error")
-                            .font(.title2)
-                        Text(msg)
-                            .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(themeManager.colors.background)
+                    default:
+                        VStack(spacing: 12) {
+                            ProgressView()
+                            Text("Initializing Engine...")
+                                .foregroundStyle(themeManager.colors.textSecondary)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(themeManager.colors.background)
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                default:
-                    VStack(spacing: 12) {
-                        ProgressView()
-                        Text("Initializing Engine...")
-                            .foregroundStyle(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
             .onAppear {
@@ -130,6 +138,7 @@ struct NottawaApp: App {
 
         Settings {
             SettingsView()
+                .environment(themeManager)
         }
     }
 
@@ -173,6 +182,28 @@ struct NottawaApp: App {
         let f = DateFormatter()
         f.dateFormat = "MM-dd-yyyy"
         return f.string(from: Date())
+    }
+}
+
+// MARK: - Color Scheme Observer
+
+/// Lightweight view that reads `@Environment(\.colorScheme)` from the view
+/// hierarchy (not the App struct) and syncs it to ThemeManager. This ensures
+/// the adaptive Default theme switches between Midnight/Daylight colors
+/// whenever the system appearance changes.
+struct ColorSchemeObserver<Content: View>: View {
+    let themeManager: ThemeManager
+    @ViewBuilder let content: () -> Content
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        content()
+            .onAppear {
+                themeManager.colorScheme = colorScheme
+            }
+            .onChange(of: colorScheme) { _, newScheme in
+                themeManager.colorScheme = newScheme
+            }
     }
 }
 

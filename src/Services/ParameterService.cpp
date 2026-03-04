@@ -156,6 +156,14 @@ void ParameterService::loadConfig(json j) {
       favoriteShaderTypes.insert(static_cast<ShaderType>(type));
     }
     
+    favoriteSourceTypes.clear();
+    if (j.contains(FavoriteSourcesJsonKey)) {
+      std::vector<int> intSourceTypes = j[FavoriteSourcesJsonKey];
+      for (auto const &type : intSourceTypes) {
+        favoriteSourceTypes.insert(type);
+      }
+    }
+
     std::vector<std::string> stageIds = j[StageShadersJsonKey];
     for (auto const &id : stageIds) {
       stageShaderIds.insert(id);
@@ -173,6 +181,7 @@ json ParameterService::config() {
   }
   j[FavoriteParameterJsonKey] = favoriteParameters;
   j[FavoriteShadersJsonKey] = favoriteShaderTypes;
+  j[FavoriteSourcesJsonKey] = favoriteSourceTypes;
   j[StageShadersJsonKey] = stageShaderIds;
   return j;
 }
@@ -201,6 +210,20 @@ void ParameterService::toggleFavoriteShaderType(ShaderType type) {
 
 bool ParameterService::isShaderTypeFavorited(ShaderType type) {
   return favoriteShaderTypes.count(type) != 0;
+}
+
+void ParameterService::toggleFavoriteSourceType(int sourceType) {
+  if (favoriteSourceTypes.count(sourceType) != 0) {
+    favoriteSourceTypes.erase(sourceType);
+  } else {
+    favoriteSourceTypes.insert(sourceType);
+  }
+  ConfigService::getService()->saveDefaultConfigFile();
+  notifyFavoritesUpdate();
+}
+
+bool ParameterService::isFavoriteSourceType(int sourceType) {
+  return favoriteSourceTypes.count(sourceType) != 0;
 }
 
 void ParameterService::addStageShaderId(std::string shaderId) {

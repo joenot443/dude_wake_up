@@ -34,7 +34,7 @@ public:
   MirrorSettings(std::string shaderId, json j, std::string name)
   : shaderId(shaderId),
   // Both - X - Y
-  mirrorTypeSelection(std::make_shared<Parameter>("Mirror Type", 0.0, 0.0, 2.0, ParameterType_Int)),
+  mirrorTypeSelection(std::make_shared<Parameter>("Mirror Type", 0.0, 0.0, 3.0, ParameterType_Int)),
   xOffset(
           std::make_shared<Parameter>("Offset X", 0.0, 0.0, 1.0)),
   yOffset(
@@ -42,6 +42,7 @@ public:
   xOffsetOscillator(std::make_shared<WaveformOscillator>(xOffset)),
   yOffsetOscillator(std::make_shared<WaveformOscillator>(yOffset)),
   ShaderSettings(shaderId, j, name) {
+    mirrorTypeSelection->options = {"X / Y Locked", "X / Y Separate", "X Only", "Y Only"};
     audioReactiveParameter = xOffset;
     parameters = {mirrorTypeSelection, xOffset, yOffset};
     oscillators = {xOffsetOscillator, yOffsetOscillator};

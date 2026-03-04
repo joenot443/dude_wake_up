@@ -38,7 +38,7 @@ struct DiscoAudioSettings: public ShaderSettings {
   DiscoAudioSettings(std::string shaderId, json j) :
   audioDisplacementScale(std::make_shared<Parameter>("Audio Scale", 1.0, 0.0, 5.0)),
   audioDisplacementScaleOscillator(std::make_shared<WaveformOscillator>(audioDisplacementScale)),
-  patternComplexityParam(std::make_shared<Parameter>("Complexity", 4.0, 1.0, 10.0)),
+  patternComplexityParam(std::make_shared<Parameter>("Complexity", 4.0, 1.0, 10.0, ParameterType_Int)),
   patternComplexityOscillator(std::make_shared<WaveformOscillator>(patternComplexityParam)),
   // Initialize new color parameters
   colorPaletteSeedParam(std::make_shared<Parameter>("Palette Seed", 0.0, 0.0, 100.0)),
@@ -103,7 +103,7 @@ struct DiscoAudioShader: Shader {
 
   void drawSettings() override {
     CommonViews::ShaderParameter(settings->audioDisplacementScale, settings->audioDisplacementScaleOscillator);
-    CommonViews::ShaderParameter(settings->patternComplexityParam, settings->patternComplexityOscillator);
+    CommonViews::ShaderIntParameter(settings->patternComplexityParam);
     
     // Draw UI for new color parameters
     CommonViews::ShaderParameter(settings->colorPaletteSeedParam, settings->colorPaletteSeedOscillator);

@@ -57,6 +57,7 @@ public:
   edgeSoftness(std::make_shared<Parameter>("Edge Softness", 1.0, 0.1, 5.0)),
   edgeSoftnessOscillator(std::make_shared<WaveformOscillator>(edgeSoftness)),
   ShaderSettings(shaderId, j, name) {
+    colormapType->options = {"Default", "Rainbow", "Gray", "Fire"};
     parameters = { amount, noiseScale, warpSpeed, colorOffset, complexity, directionX, directionY, colormapType, edgeSoftness };
     oscillators = { amountOscillator, noiseScaleOscillator, warpSpeedOscillator, colorOffsetOscillator, complexityOscillator, directionXOscillator, directionYOscillator, edgeSoftnessOscillator };
     load(j);

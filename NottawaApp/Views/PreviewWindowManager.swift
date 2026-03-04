@@ -14,6 +14,9 @@ final class PreviewWindowManager {
     private var windows: [String: NSWindow] = [:]
     var stretchToFill: Bool = false
 
+    /// IDs of nodes with open preview windows.
+    var openNodeIds: Set<String> { Set(windows.keys) }
+
     private init() {}
 
     func openPreview(for nodeId: String, nodeName: String) {

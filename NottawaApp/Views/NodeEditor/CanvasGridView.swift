@@ -10,11 +10,14 @@ import SwiftUI
 struct CanvasGridView: View {
     let offset: CGPoint
     let scale: CGFloat
+    @Environment(ThemeManager.self) private var theme
 
     private let gridSpacing: CGFloat = 40
     private let dotRadius: CGFloat = 1.5
 
     var body: some View {
+        let gridColor = theme.colors.textTertiary.opacity(0.3)
+
         Canvas { context, size in
             let spacing = gridSpacing * scale
             guard spacing > 4 else { return } // Don't draw when zoomed too far out
@@ -26,7 +29,6 @@ struct CanvasGridView: View {
             let rows = Int(size.height / spacing) + 2
 
             let dotSize = CGSize(width: dotRadius * 2, height: dotRadius * 2)
-            let color = Color(.separatorColor)
 
             for col in 0..<cols {
                 for row in 0..<rows {
@@ -39,7 +41,7 @@ struct CanvasGridView: View {
                         width: dotSize.width,
                         height: dotSize.height
                     )
-                    context.fill(Circle().path(in: rect), with: .color(color))
+                    context.fill(Circle().path(in: rect), with: .color(gridColor))
                 }
             }
         }

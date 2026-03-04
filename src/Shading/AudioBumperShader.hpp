@@ -51,7 +51,7 @@ public:
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() > 0)
+    if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() >= 256)
       shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0],
                            256);
     shader.setUniform3f("minColor", settings->minColor->color->data()[0], settings->minColor->color->data()[1], settings->minColor->color->data()[2]);

@@ -99,6 +99,17 @@ final class NodeEditorViewModel {
     }
     var templateStrandsList: [StrandInfo] = []
 
+    // MARK: - Stage Mode
+    var stageModeEnabled: Bool = false
+    var soloedNodeId: String? = nil
+    var pinnedOutputId: String? = nil
+    var stageShowAllParams: Bool = true
+    var orderedChainStrips: [ChainStrip] = []
+    var openPreviewWindowIds: Set<String> = []
+    var stageStripOrder: [String]? = nil   // user-defined ordering (node IDs)
+    private var stageRefreshTimer: Timer?
+    private var savedSidebarState: Bool?
+
     // MARK: - Audio Panel
     var showAudioPanel = false
     var audioPanelHeight: CGFloat = 250
@@ -194,10 +205,13 @@ final class NodeEditorViewModel {
         let shaderNodes = shaders.map { NodeModel.from($0) }
         let sourceNodes = sources.map { NodeModel.from($0) }
 
-        // Update active state and download state from engine
+        // Update active state, bypass state, and download state from engine
         var allNodes = shaderNodes + sourceNodes
         for i in allNodes.indices {
             allNodes[i].isActive = engine.isConnectableActive(id: allNodes[i].id)
+            if allNodes[i].isShader {
+                allNodes[i].isBypassed = engine.isShaderBypassed(id: allNodes[i].id)
+            }
 
             // Check download state for library sources (sourceType 8 = VideoSource_library)
             if case .source(let sourceType) = allNodes[i].nodeType, sourceType == 8 {
@@ -244,6 +258,17 @@ final class NodeEditorViewModel {
 
         // Refresh inspector if a selected node still exists
         refreshInspector()
+
+        // Stage mode: refresh strips and auto-clear solo/pinned if node was deleted
+        if stageModeEnabled {
+            if let soloId = soloedNodeId, !newIds.contains(soloId) {
+                soloedNodeId = nil
+            }
+            if let pinId = pinnedOutputId, !newIds.contains(pinId) {
+                pinnedOutputId = nil
+            }
+            refreshStageStrips()
+        }
     }
 
     // MARK: - Selection
@@ -479,6 +504,21 @@ final class NodeEditorViewModel {
 
     func selectAll() {
         selectedNodeIds = Set(nodes.map(\.id))
+    }
+
+    // MARK: - Copy / Paste
+
+    func copySelected() {
+        guard !selectedNodeIds.isEmpty else { return }
+        engine.copyConnectables(ids: Array(selectedNodeIds))
+    }
+
+    func pasteNodes() {
+        let newIds = engine.pasteConnectables()
+        guard !newIds.isEmpty else { return }
+        refresh()
+        selectedNodeIds = Set(newIds)
+        refreshInspector()
     }
 
     // MARK: - Add Nodes
@@ -946,6 +986,9 @@ final class NodeEditorViewModel {
             case .success(let slug):
                 self.shareResult = .success(slug: slug)
                 self.fetchCommunityFeed(page: 1)
+                self.sidebarActiveTab = .strands
+                self.strandViewMode = .community
+                self.showShareSheet = false
             case .failure(let error):
                 self.shareResult = .error(message: error.localizedDescription)
             }
@@ -983,6 +1026,212 @@ final class NodeEditorViewModel {
         showWelcomeScreen = false
     }
 
+    // MARK: - Stage Mode
+
+    /// The connectable ID whose texture should fill the main output view.
+    /// Priority: solo > pinned > deepest terminal shader.
+    var stageOutputId: String? {
+        // Solo overrides everything
+        if let soloId = soloedNodeId,
+           nodes.contains(where: { $0.id == soloId }) {
+            return soloId
+        }
+        // Pinned output
+        if let pinId = pinnedOutputId,
+           nodes.contains(where: { $0.id == pinId }) {
+            return pinId
+        }
+        // Default: terminal node (no outgoing connections) with the greatest depth
+        let terminals = orderedChainStrips.filter(\.isTerminal)
+        return terminals.max(by: { $0.depth < $1.depth })?.node.id
+            ?? orderedChainStrips.last?.node.id
+    }
+
+    func toggleSolo(_ nodeId: String) {
+        if soloedNodeId == nodeId {
+            soloedNodeId = nil
+        } else {
+            soloedNodeId = nodeId
+        }
+    }
+
+    func toggleBypass(_ nodeId: String) {
+        if let idx = nodes.firstIndex(where: { $0.id == nodeId }) {
+            nodes[idx].isBypassed.toggle()
+            engine.setShaderBypassed(id: nodeId, bypassed: nodes[idx].isBypassed)
+        }
+    }
+
+    func enterStageMode() {
+        savedSidebarState = showSidebar
+        showSidebar = false
+        deselectAll()
+        stageModeEnabled = true
+        loadStageStripOrder()
+        refreshStageStrips()
+        startStageRefreshTimer()
+    }
+
+    func exitStageMode() {
+        stageModeEnabled = false
+        soloedNodeId = nil
+        pinnedOutputId = nil
+        stopStageRefreshTimer()
+        if let saved = savedSidebarState {
+            showSidebar = saved
+            savedSidebarState = nil
+        }
+    }
+
+    func moveStageStrip(from source: IndexSet, to destination: Int) {
+        orderedChainStrips.move(fromOffsets: source, toOffset: destination)
+        stageStripOrder = orderedChainStrips.map(\.node.id)
+        saveStageStripOrder()
+    }
+
+    func resetStageStripOrder() {
+        stageStripOrder = nil
+        UserDefaults.standard.removeObject(forKey: "stageStripOrder")
+        refreshStageStrips()
+    }
+
+    private func saveStageStripOrder() {
+        UserDefaults.standard.set(stageStripOrder, forKey: "stageStripOrder")
+    }
+
+    private func loadStageStripOrder() {
+        stageStripOrder = UserDefaults.standard.stringArray(forKey: "stageStripOrder")
+    }
+
+    func toggleStageMode() {
+        if stageModeEnabled {
+            exitStageMode()
+        } else {
+            enterStageMode()
+        }
+    }
+
+    func refreshStageStrips() {
+        // Build adjacency and compute topological depth via BFS
+        var adjacency: [String: [String]] = [:]   // parent -> children
+        var inDegree: [String: Int] = [:]
+
+        let nodeMap = Dictionary(uniqueKeysWithValues: nodes.map { ($0.id, $0) })
+
+        for node in nodes {
+            inDegree[node.id] = 0
+            adjacency[node.id] = []
+        }
+
+        for conn in connections {
+            adjacency[conn.startNodeId, default: []].append(conn.endNodeId)
+            inDegree[conn.endNodeId, default: 0] += 1
+        }
+
+        // BFS from roots (nodes with no incoming edges)
+        var depth: [String: Int] = [:]
+        var chainIndex: [String: Int] = [:]
+        var queue: [String] = []
+        var currentChain = 0
+
+        let roots = nodes.filter { (inDegree[$0.id] ?? 0) == 0 }.map(\.id)
+
+        for root in roots {
+            if depth[root] != nil { continue }
+            depth[root] = 0
+            chainIndex[root] = currentChain
+            queue.append(root)
+
+            while !queue.isEmpty {
+                let current = queue.removeFirst()
+                let currentDepth = depth[current] ?? 0
+                let chain = chainIndex[current] ?? currentChain
+
+                for child in adjacency[current] ?? [] {
+                    let newDepth = currentDepth + 1
+                    if depth[child] == nil || newDepth > depth[child]! {
+                        depth[child] = newDepth
+                        chainIndex[child] = chain
+                        queue.append(child)
+                    }
+                }
+            }
+            currentChain += 1
+        }
+
+        // Build strips, sorted by chain then depth
+        var strips: [ChainStrip] = []
+        for node in nodes {
+            let d = depth[node.id] ?? 0
+            let c = chainIndex[node.id] ?? 0
+            let params = engine.parameters(for: node.id).filter { $0.parameterType != .hidden }
+            let favoriteParams = params.filter(\.isFavorited)
+            let terminal = (adjacency[node.id] ?? []).isEmpty
+            strips.append(ChainStrip(
+                chainIndex: c,
+                depth: d,
+                node: node,
+                favoriteParams: favoriteParams,
+                allParams: params,
+                isTerminal: terminal
+            ))
+        }
+
+        strips.sort {
+            if $0.chainIndex != $1.chainIndex { return $0.chainIndex < $1.chainIndex }
+            return $0.depth < $1.depth
+        }
+
+        // Apply user-defined custom order if set
+        if let customOrder = stageStripOrder {
+            let stripMap = Dictionary(uniqueKeysWithValues: strips.map { ($0.node.id, $0) })
+            var reordered: [ChainStrip] = []
+            for id in customOrder {
+                if let strip = stripMap[id] {
+                    reordered.append(strip)
+                }
+            }
+            // Append any new strips not in the custom order
+            for strip in strips where !customOrder.contains(strip.node.id) {
+                reordered.append(strip)
+            }
+            strips = reordered
+        }
+
+        orderedChainStrips = strips
+    }
+
+    // MARK: - Preview Window Helpers
+
+    func refreshOpenWindows() {
+        openPreviewWindowIds = PreviewWindowManager.shared.openNodeIds
+    }
+
+    func openPreviewWindow(_ nodeId: String) {
+        let name = nodes.first(where: { $0.id == nodeId })?.name ?? "Preview"
+        PreviewWindowManager.shared.openPreview(for: nodeId, nodeName: name)
+        refreshOpenWindows()
+    }
+
+    func closePreviewWindow(_ nodeId: String) {
+        PreviewWindowManager.shared.closePreview(for: nodeId)
+        refreshOpenWindows()
+    }
+
+    private func startStageRefreshTimer() {
+        stopStageRefreshTimer()
+        stageRefreshTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+            guard let self, self.stageModeEnabled else { return }
+            self.refreshStageStrips()
+            self.refreshOpenWindows()
+        }
+    }
+
+    private func stopStageRefreshTimer() {
+        stageRefreshTimer?.invalidate()
+        stageRefreshTimer = nil
+    }
+
     // MARK: - Cleanup
 
     func cleanup() {
@@ -993,5 +1242,6 @@ final class NodeEditorViewModel {
         TextureProvider.shared.invalidateAll()
         nodeDownloadPollTimer?.invalidate()
         nodeDownloadPollTimer = nil
+        stopStageRefreshTimer()
     }
 }

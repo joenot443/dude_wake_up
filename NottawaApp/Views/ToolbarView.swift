@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ToolbarView: View {
     @Environment(NodeEditorViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var theme
 
     var body: some View {
         HStack(spacing: 16) {
@@ -33,8 +34,7 @@ struct ToolbarView: View {
                 .accessibilityIdentifier("redo-button")
             }
 
-            Divider()
-                .frame(height: 20)
+            theme.colors.border.frame(width: 1, height: 20)
 
             // Sidebar toggle
             Button {
@@ -54,8 +54,19 @@ struct ToolbarView: View {
             .help("Toggle Audio Panel")
             .accessibilityIdentifier("audio-panel-toggle")
 
-            Divider()
-                .frame(height: 20)
+            // Stage mode toggle
+            Button {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    viewModel.toggleStageMode()
+                }
+            } label: {
+                Image(systemName: "slider.horizontal.2.rectangle.and.arrow.triangle.2.circlepath")
+            }
+            .foregroundStyle(viewModel.stageModeEnabled ? theme.colors.accent : theme.colors.textSecondary)
+            .help("Stage Mode (Cmd+Shift+S)")
+            .accessibilityIdentifier("stage-mode-toggle")
+
+            theme.colors.border.frame(width: 1, height: 20)
 
             // Delete selected
             Button {
@@ -69,8 +80,11 @@ struct ToolbarView: View {
 
             Spacer()
         }
+        .buttonStyle(.plain)
+        .font(.system(size: 14))
+        .foregroundStyle(theme.colors.textSecondary)
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
-        .background(.ultraThinMaterial)
+        .background(theme.colors.backgroundSecondary)
     }
 }

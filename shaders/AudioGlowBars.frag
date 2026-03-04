@@ -4,6 +4,9 @@ uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
 uniform float audio[256];
+uniform float barHeight;
+uniform float bloomIntensity;
+uniform float bloomSize;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -18,9 +21,6 @@ out vec4 outputColor;
 // CONFIGURABLE SETTINGS
 #define BAR_WIDTH 0.008       // Width of each bar
 #define BAR_SPACING 0.014     // Fixed spacing between bars
-#define MAX_BAR_HEIGHT 0.7    // Maximum bar height
-#define BLOOM_SIZE 12.0       // Bloom/glow size
-#define BLOOM_INTENSITY 0.3   // Bloom intensity
 #define BLOOM_FALLOFF 2.0     // Bloom falloff rate
 
 // COLOR SCHEME CONFIGURATION
@@ -182,8 +182,8 @@ void main() {
     float centerLine = 1.0 - smoothstep(0.0, centerLineThickness, centerLineDist);
     
     // Center line glow
-    float centerGlowSize = BLOOM_SIZE * 0.5 * length(pixelSize);
-    float centerGlow = exp(-centerLineDist * BLOOM_FALLOFF / centerGlowSize) * (BLOOM_INTENSITY * 0.3);
+    float centerGlowSize = bloomSize * 0.5 * length(pixelSize);
+    float centerGlow = exp(-centerLineDist * BLOOM_FALLOFF / centerGlowSize) * (bloomIntensity * 0.3);
     
     // Add center line to final color
     float centerIntensity = centerLine + centerGlow;
@@ -198,20 +198,20 @@ void main() {
         
         // Calculate bar position with fixed spacing
         float barCenterX = startX + float(i) * (BAR_WIDTH + actualSpacing) + BAR_WIDTH * 0.5;
-        float barHeight = freq * MAX_BAR_HEIGHT;
-        
+        float bh = freq * barHeight;
+
         // Ensure minimum bar height for proper capsule (should be at least the width)
-        barHeight = max(barHeight, BAR_WIDTH);
-        
+        bh = max(bh, BAR_WIDTH);
+
         // Calculate distance to this rounded bar (capsule)
-        float dist = distToRoundedBar(uv, barCenterX, BAR_WIDTH, barHeight);
+        float dist = distToRoundedBar(uv, barCenterX, BAR_WIDTH, bh);
         
         // Create bar with sharp edges - use negative distance for inside
         float bar = 1.0 - smoothstep(-pixelSize.x, pixelSize.x, dist);
         
         // Enhanced bloom effect - calculate based on absolute distance
         // This ensures bloom extends outward from the bar surface
-        float glowSize = BLOOM_SIZE * length(pixelSize);
+        float glowSize = bloomSize * length(pixelSize);
         
         // For bloom, we want it to extend outward from the bar edge
         // Use abs(dist) to get distance from bar surface (positive both inside and outside)
@@ -219,8 +219,8 @@ void main() {
         float distForGlow = max(dist, 0.0);
         
         // Multi-layer glow for RGB
-        float glow1 = exp(-distForGlow * BLOOM_FALLOFF / glowSize) * BLOOM_INTENSITY;
-        float glow2 = exp(-distForGlow * (BLOOM_FALLOFF * 0.5) / (glowSize * 2.0)) * (BLOOM_INTENSITY * 0.5);
+        float glow1 = exp(-distForGlow * BLOOM_FALLOFF / glowSize) * bloomIntensity;
+        float glow2 = exp(-distForGlow * (BLOOM_FALLOFF * 0.5) / (glowSize * 2.0)) * (bloomIntensity * 0.5);
         
         float totalGlow = glow1 + glow2;
         

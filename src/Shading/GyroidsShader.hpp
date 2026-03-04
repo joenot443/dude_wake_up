@@ -39,7 +39,7 @@ struct GyroidsSettings: public ShaderSettings {
   paletteMorph(std::make_shared<Parameter>("Palette Morph", 0.0, 0.0, 1.0)),
   gyroidComplexity(std::make_shared<Parameter>("Gyroid Complexity", 1.0, 0.1, 5.0)),
   surfaceDistortion(std::make_shared<Parameter>("Surface Distortion", 0.0, 0.0, 0.5)),
-  maxSteps(std::make_shared<Parameter>("Max Steps", 100, 20, 200)),
+  maxSteps(std::make_shared<Parameter>("Max Steps", 100, 20, 200, ParameterType_Int)),
   aoIntensity(std::make_shared<Parameter>("AO Intensity", 1.0, 0.0, 2.0)),
   fresnel(std::make_shared<Parameter>("Fresnel", ParameterType_Color)), 
   paletteMorphOscillator(std::make_shared<WaveformOscillator>(paletteMorph)),
@@ -98,7 +98,7 @@ struct GyroidsShader: Shader {
     CommonViews::ShaderParameter(settings->surfaceDistortion, settings->surfaceDistortionOscillator);
     
     CommonViews::H2Title("Quality & Lighting");
-    CommonViews::ShaderParameter(settings->maxSteps, settings->maxStepsOscillator);
+    CommonViews::ShaderIntParameter(settings->maxSteps);
     CommonViews::ShaderParameter(settings->aoIntensity, settings->aoIntensityOscillator);
 
     CommonViews::H2Title("Fresnel Color");

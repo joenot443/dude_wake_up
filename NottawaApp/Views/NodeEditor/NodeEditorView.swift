@@ -44,10 +44,7 @@ struct CanvasPanGestureView: NSViewRepresentable {
 
         // Node layout constants (must match NodeView / NodeDragOverlayView)
         let nodeWidth: CGFloat = 260
-        let previewHeight: CGFloat = 146
-        let pinBarHeight: CGFloat = 28
-        let buttonBarHeight: CGFloat = 24
-        var totalNodeHeight: CGFloat { previewHeight + pinBarHeight + buttonBarHeight }
+        let totalNodeHeight: CGFloat = 146
 
         init(viewModel: NodeEditorViewModel) {
             self.viewModel = viewModel
@@ -290,7 +287,7 @@ struct CanvasPanGestureView: NSViewRepresentable {
 
         override func scrollWheel(with event: NSEvent) {
             guard let coordinator else { return }
-            let delta = event.hasPreciseScrollingDeltas ? event.scrollingDeltaY * 0.003 : event.scrollingDeltaY * 0.01
+            let delta = event.hasPreciseScrollingDeltas ? event.scrollingDeltaY * 0.006 : event.scrollingDeltaY * 0.02
             let oldScale = coordinator.viewModel.canvasScale
             let newScale = max(0.2, min(3.0, oldScale * (1.0 + delta)))
             zoomTowardCursor(event: event, oldScale: oldScale, newScale: newScale)
@@ -484,6 +481,7 @@ struct CanvasPanGestureView: NSViewRepresentable {
 /// Passes through events for pins (connection drawing) and buttons.
 struct NodeDragOverlayView: NSViewRepresentable {
     let viewModel: NodeEditorViewModel
+    var accentColor: Color = .accentColor
 
     func makeCoordinator() -> Coordinator {
         Coordinator(viewModel: viewModel)
@@ -495,10 +493,13 @@ struct NodeDragOverlayView: NSViewRepresentable {
         view.wantsLayer = true
         view.layerContentsRedrawPolicy = .onSetNeedsDisplay
         view.registerForDraggedTypes([.string])
+        view.accentNSColor = NSColor(accentColor)
         return view
     }
 
-    func updateNSView(_ nsView: NodeDragNSView, context: Context) {}
+    func updateNSView(_ nsView: NodeDragNSView, context: Context) {
+        nsView.accentNSColor = NSColor(accentColor)
+    }
 
     // MARK: - Coordinator
 
@@ -513,15 +514,31 @@ struct NodeDragOverlayView: NSViewRepresentable {
         // Pin drag state
         var isDraggingPin = false
 
+        // Marquee selection state
+        var isMarqueeSelecting = false
+        var marqueeOrigin: CGPoint?
+        var marqueeBaseSelection: Set<String> = []  // Selection before marquee started (for Cmd+drag)
+
         // Node layout constants (must match NodeView)
         let nodeWidth: CGFloat = 260
-        let previewHeight: CGFloat = 146
-        let pinBarHeight: CGFloat = 28
-        let buttonBarHeight: CGFloat = 24
-        var totalNodeHeight: CGFloat { previewHeight + pinBarHeight + buttonBarHeight }
+        let totalNodeHeight: CGFloat = 146
 
         init(viewModel: NodeEditorViewModel) {
             self.viewModel = viewModel
+        }
+
+        /// Returns IDs of all nodes whose screen-space center falls within the given rect.
+        func nodesInRect(_ rect: CGRect) -> Set<String> {
+            let vm = viewModel
+            var result = Set<String>()
+            for node in vm.nodes {
+                let cx = node.position.x * vm.canvasScale + vm.canvasOffset.x
+                let cy = node.position.y * vm.canvasScale + vm.canvasOffset.y
+                if rect.contains(CGPoint(x: cx, y: cy)) {
+                    result.insert(node.id)
+                }
+            }
+            return result
         }
 
         /// Returns the PinKey if the point is near a pin, nil otherwise.
@@ -539,9 +556,10 @@ struct NodeDragOverlayView: NSViewRepresentable {
             return bestKey
         }
 
-        /// Returns true if the point is on a button bar that should pass through to SwiftUI.
+        /// Returns true if the point is on the bottom action overlay that should pass through to SwiftUI.
         func hitTestButton(at viewPoint: CGPoint) -> Bool {
             let vm = viewModel
+            let actionBarHeight: CGFloat = 28 // Bottom gradient overlay with title + actions
             for node in vm.nodes {
                 let screenX = node.position.x * vm.canvasScale + vm.canvasOffset.x
                 let screenY = node.position.y * vm.canvasScale + vm.canvasOffset.y
@@ -557,7 +575,7 @@ struct NodeDragOverlayView: NSViewRepresentable {
 
                 guard nodeRect.contains(viewPoint) else { continue }
 
-                let buttonAreaTop = nodeRect.maxY - buttonBarHeight * vm.canvasScale
+                let buttonAreaTop = nodeRect.maxY - actionBarHeight * vm.canvasScale
                 if viewPoint.y > buttonAreaTop {
                     return true
                 }
@@ -595,6 +613,9 @@ struct NodeDragOverlayView: NSViewRepresentable {
     class NodeDragNSView: NSView {
         var coordinator: Coordinator?
 
+        // Theme accent color for cable rendering (updated from SwiftUI)
+        var accentNSColor: NSColor = .systemCyan
+
         // Drag cable endpoints for Core Graphics rendering.
         // Stored directly on the NSView so draw() doesn't need SwiftUI.
         var cableFromPos: CGPoint?
@@ -603,11 +624,59 @@ struct NodeDragOverlayView: NSViewRepresentable {
         var cableSnapped: Bool = false
         var cableIsBlendSnap: Bool = false
 
+        // Marquee selection rectangle (screen coords, normalized to positive w/h).
+        var marqueeRect: CGRect?
+        var marqueePreviewIds: Set<String> = []
+
         override var isFlipped: Bool { true }
 
         override func draw(_ dirtyRect: NSRect) {
-            guard let from = cableFromPos, let to = cableToPos,
-                  let context = NSGraphicsContext.current?.cgContext else { return }
+            guard let context = NSGraphicsContext.current?.cgContext else { return }
+
+            // Draw marquee selection rectangle
+            if let rect = marqueeRect {
+                let cornerRadius: CGFloat = 4
+
+                // Fill
+                let fillPath = CGPath(roundedRect: rect, cornerWidth: cornerRadius, cornerHeight: cornerRadius, transform: nil)
+                context.saveGState()
+                context.addPath(fillPath)
+                context.setFillColor(NSColor.controlAccentColor.withAlphaComponent(0.08).cgColor)
+                context.fillPath()
+                context.restoreGState()
+
+                // Stroke
+                context.saveGState()
+                context.addPath(fillPath)
+                context.setStrokeColor(NSColor.controlAccentColor.withAlphaComponent(0.6).cgColor)
+                context.setLineWidth(1.5)
+                context.setLineDash(phase: 0, lengths: [6, 3])
+                context.strokePath()
+                context.restoreGState()
+
+                // Draw highlight rings around nodes that would be selected
+                if let coord = coordinator {
+                    let vm = coord.viewModel
+                    for nodeId in marqueePreviewIds {
+                        guard let node = vm.nodes.first(where: { $0.id == nodeId }) else { continue }
+                        let cx = node.position.x * vm.canvasScale + vm.canvasOffset.x
+                        let cy = node.position.y * vm.canvasScale + vm.canvasOffset.y
+                        let sw = coord.nodeWidth * vm.canvasScale
+                        let sh = coord.totalNodeHeight * vm.canvasScale
+                        let nodeRect = CGRect(x: cx - sw / 2 - 3, y: cy - sh / 2 - 3, width: sw + 6, height: sh + 6)
+                        let ringPath = CGPath(roundedRect: nodeRect, cornerWidth: 10, cornerHeight: 10, transform: nil)
+                        context.saveGState()
+                        context.addPath(ringPath)
+                        context.setStrokeColor(NSColor.controlAccentColor.withAlphaComponent(0.5).cgColor)
+                        context.setLineWidth(2)
+                        context.setLineDash(phase: 0, lengths: [])
+                        context.strokePath()
+                        context.restoreGState()
+                    }
+                }
+            }
+
+            guard let from = cableFromPos, let to = cableToPos else { return }
 
             let startPos = cableFromIsOutput ? from : to
             let endPos = cableFromIsOutput ? to : from
@@ -615,10 +684,10 @@ struct NodeDragOverlayView: NSViewRepresentable {
             let dy = abs(endPos.y - startPos.y)
             let controlOffset = max(dx * 0.5, dy * 0.25, 60)
 
-            // Cable color: green when snapped to valid target, cyan otherwise
+            // Cable color: green when snapped to valid target, theme accent otherwise
             let cableColor: NSColor = cableSnapped
                 ? NSColor.systemGreen.withAlphaComponent(0.9)
-                : NSColor.systemCyan.withAlphaComponent(0.7)
+                : accentNSColor.withAlphaComponent(0.7)
 
             // Glow layer (wider, semi-transparent)
             context.saveGState()
@@ -664,7 +733,7 @@ struct NodeDragOverlayView: NSViewRepresentable {
                     let font = NSFont.systemFont(ofSize: 13, weight: .semibold)
                     let attrs: [NSAttributedString.Key: Any] = [
                         .font: font,
-                        .foregroundColor: NSColor.white,
+                        .foregroundColor: NSColor.labelColor,
                     ]
                     let size = label.size(withAttributes: attrs)
                     let padding: CGFloat = 6
@@ -727,6 +796,9 @@ struct NodeDragOverlayView: NSViewRepresentable {
         }
 
         override func mouseDown(with event: NSEvent) {
+            // Resign first responder to dismiss any focused text fields
+            window?.makeFirstResponder(nil)
+
             guard let coordinator else { return }
             let point = convert(event.locationInWindow, from: nil)
             let isCmd = event.modifierFlags.contains(.command)
@@ -793,9 +865,18 @@ struct NodeDragOverlayView: NSViewRepresentable {
                     }
                 }
             } else {
-                // Empty canvas — deselect and forward event for window management
-                coordinator.viewModel.deselectAll()
-                super.mouseDown(with: event)
+                // Empty canvas — start marquee selection
+                if isCmd {
+                    // Cmd+drag: add to existing selection
+                    coordinator.marqueeBaseSelection = coordinator.viewModel.selectedNodeIds
+                } else {
+                    coordinator.viewModel.selectedNodeIds.removeAll()
+                    coordinator.marqueeBaseSelection = []
+                }
+                coordinator.isDragging = true
+                coordinator.isMarqueeSelecting = true
+                coordinator.marqueeOrigin = point
+                coordinator.dragStartMousePoint = point
             }
         }
 
@@ -804,6 +885,23 @@ struct NodeDragOverlayView: NSViewRepresentable {
                   let startMouse = coordinator.dragStartMousePoint else { return }
 
             let point = convert(event.locationInWindow, from: nil)
+
+            // Marquee selection drag — update rect and live-select enclosed nodes
+            if coordinator.isMarqueeSelecting, let origin = coordinator.marqueeOrigin {
+                let rect = CGRect(
+                    x: min(origin.x, point.x),
+                    y: min(origin.y, point.y),
+                    width: abs(point.x - origin.x),
+                    height: abs(point.y - origin.y)
+                )
+                marqueeRect = rect
+                let enclosed = coordinator.nodesInRect(rect)
+                marqueePreviewIds = enclosed
+                // Live-update selection (union with base for Cmd+drag)
+                coordinator.viewModel.selectedNodeIds = coordinator.marqueeBaseSelection.union(enclosed)
+                needsDisplay = true
+                return
+            }
 
             // Pin drag — update cable endpoint with magnetic snap
             if coordinator.isDraggingPin {
@@ -840,6 +938,24 @@ struct NodeDragOverlayView: NSViewRepresentable {
 
         override func mouseUp(with event: NSEvent) {
             guard let coordinator else { return }
+
+            // Marquee selection end — selection was already live-updated during drag
+            if coordinator.isMarqueeSelecting {
+                // Select first node in engine for inspector
+                if let first = coordinator.viewModel.selectedNodeIds.first {
+                    coordinator.viewModel.refreshInspector()
+                }
+
+                coordinator.isMarqueeSelecting = false
+                coordinator.marqueeOrigin = nil
+                coordinator.marqueeBaseSelection = []
+                coordinator.isDragging = false
+                coordinator.dragStartMousePoint = nil
+                marqueeRect = nil
+                marqueePreviewIds = []
+                needsDisplay = true
+                return
+            }
 
             // Pin drag end — use snapped pin or hit-test target, then create connection
             if coordinator.isDraggingPin {
@@ -950,6 +1066,7 @@ struct NodeDragOverlayView: NSViewRepresentable {
 
 struct NodeEditorView: View {
     @Environment(NodeEditorViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var theme
 
     var body: some View {
         ZStack {
@@ -965,7 +1082,7 @@ struct NodeEditorView: View {
             // Layer 4: Node drag overlay (left-click drag on nodes + pins, AppKit-based)
             // Also draws the in-progress drag cable via Core Graphics (not SwiftUI)
             // because SwiftUI defers view updates during AppKit mouse tracking.
-            NodeDragOverlayView(viewModel: viewModel)
+            NodeDragOverlayView(viewModel: viewModel, accentColor: theme.colors.accent)
 
             // Layer 5: Right-click pan + context menu + scroll zoom + pinch zoom overlay
             CanvasPanGestureView(canvasOffset: viewModel.canvasOffset, viewModel: viewModel) { newOffset in
@@ -974,12 +1091,12 @@ struct NodeEditorView: View {
         }
         .coordinateSpace(name: "nodeEditor")
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.textBackgroundColor).opacity(0.3))
+        .background(theme.colors.background)
         .overlay {
             if viewModel.isDropTargetActive {
                 RoundedRectangle(cornerRadius: 8)
-                    .strokeBorder(Color.accentColor.opacity(0.6), lineWidth: 2, antialiased: true)
-                    .background(Color.accentColor.opacity(0.05))
+                    .strokeBorder(theme.colors.accent.opacity(0.6), lineWidth: 2, antialiased: true)
+                    .background(theme.colors.accent.opacity(0.05))
                     .allowsHitTesting(false)
                     .transition(.opacity)
             }

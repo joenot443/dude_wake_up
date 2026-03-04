@@ -1,18 +1,11 @@
 #version 150
 
-// Relative size of the halftone dot
-#define DOTSIZE 1.48
 // Converts degrees to radians
 #define D2R(d) radians(d)
 // Minimum scale/size for halftone pattern
 #define MIN_S 0.0
 // Maximum scale/size for halftone pattern
 #define MAX_S 19.0
-
-// Center of the smoothstep transition range
-#define SMOOTHSTEP_CENTER 0.888
-// Half the width of the smoothstep transition range
-#define SMOOTHSTEP_HALF_WIDTH 0.288
 
 uniform sampler2D tex;
 uniform vec2 dimensions;
@@ -21,6 +14,9 @@ uniform float amount; // Unused in this shader
 uniform float speed;
 uniform float rotate;
 uniform float radius;
+uniform float dotSize;
+uniform float contrast;
+uniform float softness;
 
 in vec2 coord; // Fragment coordinates in pixels
 out vec4 outputColor;
@@ -61,8 +57,8 @@ vec2 snapToGrid(in vec2 pixelCoords, float gridSize)
 // Applies a smoothstep function to the input value.
 vec4 applySmoothstep(in vec4 value)
 {
-  float lowerEdge = SMOOTHSTEP_CENTER - SMOOTHSTEP_HALF_WIDTH;
-  float upperEdge = SMOOTHSTEP_CENTER + SMOOTHSTEP_HALF_WIDTH;
+  float lowerEdge = contrast - softness;
+  float upperEdge = contrast + softness;
   return smoothstep(lowerEdge, upperEdge, value);
 }
 
@@ -81,7 +77,7 @@ vec4 calculateHalftonePattern(in vec2 fragCoordCentered, in mat2 rotationMat, fl
 
   // Calculate normalized distance from fragment to the transformed cell sample point.
   // This forms the basic shape of the dot (0 at center, 1 at edge).
-  float dotShapeFactor = min(length(fragCoordCentered - transformedCellSamplePoint) / (DOTSIZE * 0.5 * currentScale), 1.0);
+  float dotShapeFactor = min(length(fragCoordCentered - transformedCellSamplePoint) / (dotSize * 0.5 * currentScale), 1.0);
 
   // Sample the texture at the screen-space position corresponding to the transformed cell sample point.
   vec3 textureColorAtCell = texture(tex, pixelToUvCoordinates(transformedCellSamplePoint + ORIGIN)).rgb;

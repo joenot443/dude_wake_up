@@ -54,6 +54,7 @@ struct GameboyShader: Shader {
     shader.load("shaders/Gameboy");
     settings->textureOptions = TextureService::getService()->availableTextureNames();
     settings->textureOptions.insert(settings->textureOptions.begin(), "No Texture");
+    settings->texture->options = settings->textureOptions;
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {

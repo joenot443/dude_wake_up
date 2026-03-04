@@ -3,6 +3,8 @@
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
+uniform float specularPower;
+uniform float reflectivity;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -66,14 +68,14 @@ void main() {
         vec3 envColor = mix(vec3(0.8, 0.4, 0.8), vec3(1.0), 0.5 + 0.5 * reflectDir.y);
 
         // Specular highlight
-        float spec = pow(max(dot(reflectDir, lightDir), 0.0), 32.0);
+        float spec = pow(max(dot(reflectDir, lightDir), 0.0), specularPower);
 
         // Funky palette color using original method
         vec4 baseColor = (1.0 + sin(0.5 * q.z + length(p.xyz - q.xyz) + vec4(0,4,3,6)))
                        / (0.5 + 2.0 * dot(q.xy, q.xy));
 
         // Combine base color + environment reflection + specular highlight
-        vec3 finalColor = baseColor.rgb * 0.1 + envColor * 0.9 + vec3(spec) * 1.2;
+        vec3 finalColor = baseColor.rgb * (1.0 - reflectivity) + envColor * reflectivity + vec3(spec) * 1.2;
 
         // Brightness weighted accumulation
         col.rgb += finalColor / d;

@@ -13,20 +13,18 @@ struct NodeView: View {
     var scale: CGFloat = 1.0
 
     @Environment(NodeEditorViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var theme
 
     // Base dimensions (at scale 1.0)
     private let baseNodeWidth: CGFloat = 260
-    private let basePreviewHeight: CGFloat = 146
-    private let baseCornerRadius: CGFloat = 12
+    private let baseNodeHeight: CGFloat = 146
+    private let baseCornerRadius: CGFloat = 14
+    private let basePinSize: CGFloat = 10
 
     private var nodeWidth: CGFloat { baseNodeWidth * scale }
-    private var previewHeight: CGFloat { basePreviewHeight * scale }
+    private var nodeHeight: CGFloat { baseNodeHeight * scale }
     private var cornerRadius: CGFloat { baseCornerRadius * scale }
-
-    private var borderColor: Color {
-        if isSelected { return .white }
-        return node.isSource ? .blue : .purple
-    }
+    private var pinSize: CGFloat { basePinSize * scale }
 
     private var connectedInputSlots: Set<Int> {
         Set(viewModel.connections.filter { $0.endNodeId == node.id }.map(\.inputSlot))
@@ -41,9 +39,7 @@ struct NodeView: View {
     }
 
     private var isSwapTarget: Bool {
-        viewModel.swapTargetNodeId == node.id &&
-        viewModel.browserMode == .swap &&
-        (viewModel.showShaderBrowser || viewModel.showSourceBrowser)
+        viewModel.swapTargetNodeId == node.id
     }
 
     // Scaled font helper
@@ -53,57 +49,140 @@ struct NodeView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Preview
-            ZStack {
+            // Main node: ZStack with preview filling entire area
+            ZStack(alignment: .bottom) {
+                // Full-bleed preview
                 TextureDisplayView(connectableId: node.id)
-                    .frame(width: nodeWidth, height: previewHeight)
+                    .frame(width: nodeWidth, height: nodeHeight)
                     .clipped()
                     .allowsHitTesting(false)
                     .opacity(node.isActive ? 1.0 : 0.4)
 
+                // Download overlay
                 if let progress = node.downloadProgress {
                     NodeDownloadOverlay(
                         progress: progress,
                         isPaused: node.downloadPaused
                     )
-                    .frame(width: nodeWidth, height: previewHeight)
+                    .frame(width: nodeWidth, height: nodeHeight)
                     .allowsHitTesting(false)
                 }
-            }
 
-            // Pin bar
-            HStack(spacing: 0) {
-                // Input pins
-                HStack(spacing: 4 * scale) {
-                    if node.inputCount > 0 {
+                // Bottom gradient overlay with title + actions
+                VStack(spacing: 4 * scale) {
+                    // Title row
+                    HStack(spacing: 4 * scale) {
+                        Circle()
+                            .fill(node.isSource ? Color.green : theme.colors.accent)
+                            .frame(width: 6 * scale, height: 6 * scale)
+                        Text(node.name)
+                            .font(scaledFont(11, weight: .bold))
+                            .foregroundStyle(theme.colors.textOnAccent)
+                            .shadow(color: .black.opacity(0.8), radius: 3, y: 1)
+                            .lineLimit(1)
+                        Spacer()
+                    }
+
+                    // Action buttons row
+                    HStack(spacing: 6 * scale) {
+                        Button {
+                            viewModel.toggleActiveState(node.id)
+                        } label: {
+                            Image(systemName: node.isActive ? "pause.fill" : "play.fill")
+                                .font(scaledFont(10, weight: .medium))
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(theme.colors.textOnAccent.opacity(0.7))
+
+                        Button {
+                            if isSwapTarget {
+                                viewModel.swapTargetNodeId = nil
+                            } else {
+                                viewModel.swapTargetNodeId = node.id
+                            }
+                        } label: {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                                .font(scaledFont(10, weight: .medium))
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(isSwapTarget ? theme.colors.accent : theme.colors.textOnAccent.opacity(0.7))
+                        .help(node.isShader ? "Swap shader type" : "Swap source type")
+
+                        Spacer()
+
+                        Button {
+                            viewModel.deleteNode(node.id)
+                        } label: {
+                            Image(systemName: "trash")
+                                .font(scaledFont(10, weight: .medium))
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(Color.red.opacity(0.7))
+                    }
+                }
+                .padding(.horizontal, 10 * scale)
+                .padding(.bottom, 6 * scale)
+                .padding(.top, 20 * scale)
+                .background(
+                    LinearGradient(
+                        stops: [
+                            .init(color: .clear, location: 0.0),
+                            .init(color: .black.opacity(0.6), location: 0.2),
+                            .init(color: .black.opacity(0.85), location: 1.0),
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+            }
+            .frame(width: nodeWidth, height: nodeHeight)
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+            // Subtle border for definition
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .strokeBorder(theme.colors.border.opacity(0.4), lineWidth: 1)
+            )
+            // Selection glow border
+            .overlay(
+                Group {
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: cornerRadius)
+                            .strokeBorder(theme.colors.accent, lineWidth: 2.5 * scale)
+                        RoundedRectangle(cornerRadius: cornerRadius + 2)
+                            .strokeBorder(theme.colors.accent.opacity(0.3), lineWidth: 4 * scale)
+                            .blur(radius: 6)
+                            .padding(-2)
+                    }
+                }
+            )
+            // Edge-mounted input pins (left)
+            .overlay(alignment: .leading) {
+                if node.inputCount > 0 {
+                    VStack(spacing: 4 * scale) {
                         ForEach(0..<node.inputCount, id: \.self) { slot in
                             PinView(
                                 nodeId: node.id,
                                 slotIndex: slot,
                                 isOutput: false,
                                 isConnected: connectedInputSlots.contains(slot),
-                                scale: scale
+                                scale: scale,
+                                positionOffset: -pinSize / 2
                             )
                         }
                     }
+                    .offset(x: -pinSize / 2)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-                // Node name
-                Text(node.name)
-                    .font(scaledFont(11, weight: .medium))
-                    .lineLimit(1)
-                    .foregroundStyle(.primary)
-                    .frame(maxWidth: .infinity)
-
-                // Output pins
-                HStack(spacing: 4 * scale) {
+            }
+            // Edge-mounted output pins (right)
+            .overlay(alignment: .trailing) {
+                VStack(spacing: 4 * scale) {
                     PinView(
                         nodeId: node.id,
                         slotIndex: 0,
                         isOutput: true,
                         isConnected: hasOutputConnection,
-                        scale: scale
+                        scale: scale,
+                        positionOffset: pinSize / 2
                     )
                     if node.supportsAuxOutput {
                         PinView(
@@ -111,111 +190,52 @@ struct NodeView: View {
                             slotIndex: 10,
                             isOutput: true,
                             isConnected: hasAuxOutputConnection,
-                            scale: scale
+                            scale: scale,
+                            positionOffset: pinSize / 2
                         )
                         .overlay(
                             Text("A")
-                                .font(scaledFont(7, weight: .bold))
-                                .foregroundStyle(.white)
+                                .font(scaledFont(6, weight: .bold))
+                                .foregroundStyle(theme.colors.textOnAccent)
                                 .allowsHitTesting(false)
                         )
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .trailing)
+                .offset(x: pinSize / 2)
             }
-            .padding(.horizontal, 8 * scale)
-            .padding(.vertical, 6 * scale)
-            .background(Color(.windowBackgroundColor).opacity(0.9))
+            // Shadow
+            .shadow(color: .black.opacity(0.4), radius: 8 * scale, y: 4 * scale)
 
-            // Action buttons
-            HStack(spacing: 8 * scale) {
-                Button {
-                    viewModel.toggleActiveState(node.id)
-                } label: {
-                    Image(systemName: node.isActive ? "pause.fill" : "play.fill")
-                        .font(scaledFont(11))
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(.secondary)
-
-                Button {
-                    if isSwapTarget {
-                        closeBrowser()
-                    } else {
-                        viewModel.swapTargetNodeId = node.id
-                        viewModel.browserMode = .swap
-                        if node.isShader {
-                            viewModel.showShaderBrowser = true
-                            viewModel.showSourceBrowser = false
-                        } else {
-                            viewModel.showSourceBrowser = true
-                            viewModel.showShaderBrowser = false
-                        }
-                    }
-                } label: {
-                    Image(systemName: "arrow.triangle.2.circlepath")
-                        .font(scaledFont(11))
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(isSwapTarget ? Color.accentColor : Color.secondary)
-                .help(node.isShader ? "Swap shader type" : "Swap source type")
-
-                Spacer()
-
-                Button {
-                    viewModel.deleteNode(node.id)
-                } label: {
-                    Image(systemName: "trash")
-                        .font(scaledFont(11))
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(.red.opacity(0.7))
-            }
-            .padding(.horizontal, 10 * scale)
-            .padding(.vertical, 4 * scale)
-            .background(Color(.windowBackgroundColor).opacity(0.8))
-
-            // Inline swap browser — expands from the node itself
+            // Inline swap browser — expands below the node
             if isSwapTarget {
                 NodeInlineBrowserView(
-                    isShaderBrowser: viewModel.showShaderBrowser,
+                    isShaderBrowser: node.isShader,
                     onSelect: { shaderType in
                         if node.isShader {
                             viewModel.swapShader(nodeId: node.id, newType: shaderType)
                         } else {
                             viewModel.swapSource(nodeId: node.id, newType: shaderType)
                         }
-                        closeBrowser()
+                        viewModel.swapTargetNodeId = nil
                     },
                     onCancel: {
-                        closeBrowser()
+                        viewModel.swapTargetNodeId = nil
                     }
                 )
             }
         }
         .frame(width: nodeWidth)
-        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-        .overlay(
-            RoundedRectangle(cornerRadius: cornerRadius)
-                .strokeBorder(borderColor, lineWidth: (isSelected ? 2 : 1) * scale)
-        )
-        .shadow(color: .black.opacity(0.3), radius: (isSelected ? 8 : 4) * scale, y: 2 * scale)
         .contentShape(RoundedRectangle(cornerRadius: cornerRadius))
         .accessibilityIdentifier("node-\(node.name)")
     }
 
-    private func closeBrowser() {
-        viewModel.showShaderBrowser = false
-        viewModel.showSourceBrowser = false
-        viewModel.browserMode = .add
-        viewModel.swapTargetNodeId = nil
-    }
 }
 
 // MARK: - Download Progress Overlay
 
 /// Overlay shown on library source nodes while downloading.
 private struct NodeDownloadOverlay: View {
+    @Environment(ThemeManager.self) var theme
     let progress: Float
     let isPaused: Bool
 
@@ -225,20 +245,20 @@ private struct NodeDownloadOverlay: View {
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.7)
+            theme.colors.background.opacity(0.8)
 
             VStack(spacing: 8) {
                 ZStack {
                     // Background ring
                     Circle()
-                        .stroke(Color.white.opacity(0.2), lineWidth: 4)
+                        .stroke(theme.colors.textTertiary.opacity(0.3), lineWidth: 4)
                         .frame(width: 50, height: 50)
 
                     // Progress ring
                     Circle()
                         .trim(from: 0, to: CGFloat(progress))
                         .stroke(
-                            isPaused ? Color.orange : Color.accentColor,
+                            isPaused ? Color.orange : theme.colors.accent,
                             style: StrokeStyle(lineWidth: 4, lineCap: .round)
                         )
                         .frame(width: 50, height: 50)
@@ -247,12 +267,12 @@ private struct NodeDownloadOverlay: View {
                     // Percentage
                     Text(percentText)
                         .font(.system(size: 14, weight: .semibold, design: .monospaced))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(theme.colors.textPrimary)
                 }
 
                 Text(isPaused ? "Paused" : "Downloading...")
                     .font(.system(size: 11))
-                    .foregroundStyle(.white.opacity(0.8))
+                    .foregroundStyle(theme.colors.textSecondary)
             }
         }
     }
@@ -267,6 +287,7 @@ struct NodeInlineBrowserView: View {
     let onSelect: (Int) -> Void
     let onCancel: () -> Void
 
+    @Environment(ThemeManager.self) private var theme
     @State private var searchText = ""
     @State private var selectedCategory = "All"
     private let previewManager = BrowserPreviewManager.shared
@@ -345,8 +366,8 @@ struct NodeInlineBrowserView: View {
                                 .font(.system(size: 9, weight: selectedCategory == cat ? .semibold : .regular))
                                 .padding(.horizontal, 7)
                                 .padding(.vertical, 3)
-                                .background(selectedCategory == cat ? Color.accentColor : Color(.controlBackgroundColor))
-                                .foregroundStyle(selectedCategory == cat ? .white : .primary)
+                                .background(selectedCategory == cat ? theme.colors.accent : Color(.controlBackgroundColor))
+                                .foregroundStyle(selectedCategory == cat ? theme.colors.textOnAccent : .primary)
                                 .clipShape(Capsule())
                         }
                         .buttonStyle(.plain)

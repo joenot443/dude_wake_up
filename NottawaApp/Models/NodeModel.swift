@@ -14,6 +14,7 @@ struct NodeModel: Identifiable, Hashable {
     let inputCount: Int
     var position: CGPoint
     var isActive: Bool
+    var isBypassed: Bool = false
     var supportsAuxOutput: Bool
     var downloadProgress: Float? = nil   // nil = not downloading, 0.0-1.0 = downloading
     var downloadPaused: Bool = false
@@ -42,6 +43,7 @@ struct NodeModel: Identifiable, Hashable {
         lhs.id == rhs.id
         && lhs.position == rhs.position
         && lhs.isActive == rhs.isActive
+        && lhs.isBypassed == rhs.isBypassed
         && lhs.supportsAuxOutput == rhs.supportsAuxOutput
         && lhs.downloadProgress == rhs.downloadProgress
         && lhs.downloadPaused == rhs.downloadPaused
@@ -75,4 +77,16 @@ struct NodeModel: Identifiable, Hashable {
             supportsAuxOutput: false
         )
     }
+}
+
+// MARK: - Chain Strip (Stage Mode)
+
+struct ChainStrip: Identifiable {
+    let chainIndex: Int       // Which chain (for multi-chain graphs)
+    let depth: Int            // 0 = source, 1 = first shader, etc.
+    let node: NodeModel
+    let favoriteParams: [ParameterInfo]
+    let allParams: [ParameterInfo]
+    let isTerminal: Bool      // True if no outgoing connections (leaf node)
+    var id: String { node.id }
 }

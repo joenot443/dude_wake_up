@@ -21,11 +21,15 @@ struct WarpspeedSettings: public ShaderSettings {
   std::shared_ptr<Parameter> speed;
   std::shared_ptr<WaveformOscillator> speedOscillator;
 
+  std::shared_ptr<Parameter> bgColor;
+
   WarpspeedSettings(std::string shaderId, json j) :
   speed(std::make_shared<Parameter>("speed", 1.0, 0.0, 5.0)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
+  bgColor(std::make_shared<Parameter>("Background Color", ParameterType_Color)),
   ShaderSettings(shaderId, j, "Warpspeed") {
-    parameters = { speed };
+    bgColor->setColor({0.0, 0.0, 0.0, 1.0});
+    parameters = { speed, bgColor };
     oscillators = { speedOscillator };
     load(j);
     registerParameters();
@@ -47,6 +51,7 @@ struct WarpspeedShader: Shader {
     shader.setUniform1f("speed", settings->speed->value);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
+    shader.setUniform3f("bgColor", settings->bgColor->color->data()[0], settings->bgColor->color->data()[1], settings->bgColor->color->data()[2]);
     frame->draw(0, 0);
     shader.end();
     canvas->end();
@@ -68,6 +73,7 @@ struct WarpspeedShader: Shader {
     
 
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
+    CommonViews::ShaderColor(settings->bgColor);
   }
 };
 

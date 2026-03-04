@@ -4,6 +4,8 @@
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
+uniform float zOffset;
+uniform float turbulence;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -28,7 +30,7 @@ void main() {
   for (; ++stepCount < 88.0; rayDepth += distToSurface/8.0) {
     // Calculate ray direction from camera through pixel
     rayPos = rayDepth * normalize(vec3(coord - 0.5 * resolution.xy, resolution.y));
-    rayPos.z -= 4.0;
+    rayPos.z -= zOffset;
     basePos = rayPos;
     
     // Apply space transformation
@@ -38,7 +40,7 @@ void main() {
     // Apply turbulence using fractal noise
     distToSurface = turbulence = 9.0;
     for(; --turbulence > 5.0; distToSurface /= 0.8) {
-      rayPos += 0.4 * (rayPos.y + 2.0) * cos(rayPos.zxy * distToSurface - 3.0 * currentTime) / distToSurface;
+      rayPos += turbulence * (rayPos.y + 2.0) * cos(rayPos.zxy * distToSurface - 3.0 * currentTime) / distToSurface;
     }
     
     // Calculate distance field

@@ -206,6 +206,7 @@ struct AvailableShaderInfo: Identifiable, Hashable {
     let name: String
     let category: String?
     let shaderTypeRaw: Int
+    var isFavorited: Bool
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
@@ -220,6 +221,7 @@ struct AvailableShaderInfo: Identifiable, Hashable {
         self.name = String(cString: c.name)
         self.category = c.category != nil ? String(cString: c.category) : nil
         self.shaderTypeRaw = Int(c.shaderTypeRaw)
+        self.isFavorited = c.isFavorited != 0
     }
 }
 
@@ -381,6 +383,7 @@ struct AvailableNonShaderSourceInfo: Identifiable, Hashable {
     let name: String
     let icon: String
     let sourceType: Int
+    var isFavorited: Bool
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
@@ -557,6 +560,7 @@ struct ExtendedAudioAnalysisSnapshot {
     let frequencyRelease: Float
     let frequencyScale: Float
     let loudnessRelease: Float
+    let loudnessScale: Float
 
     let audioActive: Bool
     let audioSourceType: AudioSourceType
@@ -582,6 +586,7 @@ struct ExtendedAudioAnalysisSnapshot {
         self.frequencyRelease = c.frequencyRelease
         self.frequencyScale = c.frequencyScale
         self.loudnessRelease = c.loudnessRelease
+        self.loudnessScale = c.loudnessScale
 
         self.audioActive = c.audioActive
         self.audioSourceType = AudioSourceType(rawValue: Int(c.audioSourceType)) ?? .microphone
@@ -611,7 +616,7 @@ struct ExtendedAudioAnalysisSnapshot {
     static let zero = ExtendedAudioAnalysisSnapshot(
         rms: 0, lows: 0, mids: 0, highs: 0, bpm: 120, beatPulse: 0, beatCount: 0,
         bpmMode: .auto, bpmLocked: false, bpmNudge: 0, bpmEnabled: true,
-        smoothingMode: .movingAverage, frequencyRelease: 0.7, frequencyScale: 1.0, loudnessRelease: 0.6,
+        smoothingMode: .movingAverage, frequencyRelease: 0.7, frequencyScale: 1.0, loudnessRelease: 0.6, loudnessScale: 1.0,
         audioActive: false, audioSourceType: .microphone,
         melSpectrum: [], waveform: []
     )
@@ -619,14 +624,14 @@ struct ExtendedAudioAnalysisSnapshot {
     // Direct init for .zero
     private init(rms: Float, lows: Float, mids: Float, highs: Float, bpm: Float, beatPulse: Float, beatCount: UInt32,
                  bpmMode: BpmMode, bpmLocked: Bool, bpmNudge: Float, bpmEnabled: Bool,
-                 smoothingMode: SmoothingMode, frequencyRelease: Float, frequencyScale: Float, loudnessRelease: Float,
+                 smoothingMode: SmoothingMode, frequencyRelease: Float, frequencyScale: Float, loudnessRelease: Float, loudnessScale: Float,
                  audioActive: Bool, audioSourceType: AudioSourceType,
                  melSpectrum: [Float], waveform: [Float]) {
         self.rms = rms; self.lows = lows; self.mids = mids; self.highs = highs
         self.bpm = bpm; self.beatPulse = beatPulse; self.beatCount = beatCount
         self.bpmMode = bpmMode; self.bpmLocked = bpmLocked; self.bpmNudge = bpmNudge; self.bpmEnabled = bpmEnabled
         self.smoothingMode = smoothingMode; self.frequencyRelease = frequencyRelease
-        self.frequencyScale = frequencyScale; self.loudnessRelease = loudnessRelease
+        self.frequencyScale = frequencyScale; self.loudnessRelease = loudnessRelease; self.loudnessScale = loudnessScale
         self.audioActive = audioActive; self.audioSourceType = audioSourceType
         self.melSpectrum = melSpectrum; self.waveform = waveform
     }

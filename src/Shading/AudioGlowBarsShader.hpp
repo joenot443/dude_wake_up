@@ -23,12 +23,27 @@ struct AudioGlowBarsSettings: public ShaderSettings {
   std::shared_ptr<Parameter> shaderValue;
   std::shared_ptr<WaveformOscillator> shaderValueOscillator;
 
+  std::shared_ptr<Parameter> barHeight;
+  std::shared_ptr<WaveformOscillator> barHeightOscillator;
+
+  std::shared_ptr<Parameter> bloomIntensity;
+  std::shared_ptr<WaveformOscillator> bloomIntensityOscillator;
+
+  std::shared_ptr<Parameter> bloomSize;
+  std::shared_ptr<WaveformOscillator> bloomSizeOscillator;
+
   AudioGlowBarsSettings(std::string shaderId, json j) :
   shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
   shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
+  barHeight(std::make_shared<Parameter>("Bar Height", 0.7, 0.1, 1.0)),
+  barHeightOscillator(std::make_shared<WaveformOscillator>(barHeight)),
+  bloomIntensity(std::make_shared<Parameter>("Bloom Intensity", 0.3, 0.0, 1.0)),
+  bloomIntensityOscillator(std::make_shared<WaveformOscillator>(bloomIntensity)),
+  bloomSize(std::make_shared<Parameter>("Bloom Size", 12.0, 1.0, 30.0)),
+  bloomSizeOscillator(std::make_shared<WaveformOscillator>(bloomSize)),
   ShaderSettings(shaderId, j, "AudioGlowBars") {
-    parameters = { shaderValue };
-    oscillators = { shaderValueOscillator };
+    parameters = { shaderValue, barHeight, bloomIntensity, bloomSize };
+    oscillators = { shaderValueOscillator, barHeightOscillator, bloomIntensityOscillator, bloomSizeOscillator };
     load(j);
     registerParameters();
   };
@@ -56,6 +71,9 @@ struct AudioGlowBarsShader: Shader {
 
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("shaderValue", settings->shaderValue->value);
+    shader.setUniform1f("barHeight", settings->barHeight->value);
+    shader.setUniform1f("bloomIntensity", settings->bloomIntensity->value);
+    shader.setUniform1f("bloomSize", settings->bloomSize->value);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
@@ -77,7 +95,9 @@ struct AudioGlowBarsShader: Shader {
 
   void drawSettings() override {
     CommonViews::H3Title("AudioGlowBars");
-
+    CommonViews::ShaderParameter(settings->barHeight, settings->barHeightOscillator);
+    CommonViews::ShaderParameter(settings->bloomIntensity, settings->bloomIntensityOscillator);
+    CommonViews::ShaderParameter(settings->bloomSize, settings->bloomSizeOscillator);
   }
 };
 

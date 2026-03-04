@@ -9,6 +9,7 @@
 import SwiftUI
 
 struct FileSourceControlsView: View {
+    @Environment(ThemeManager.self) private var theme
     let state: FileSourceState
     let sourceId: String
 
@@ -27,24 +28,23 @@ struct FileSourceControlsView: View {
                 .buttonStyle(.plain)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Slider(
+                    DSSlider(
                         value: Binding(
                             get: { state.position },
                             set: { engine.setFileSourcePosition(sourceId: sourceId, position: $0) }
                         ),
-                        in: 0...1
+                        range: 0...1
                     )
-                    .controlSize(.small)
 
                     HStack {
                         Text(formatTime(state.position * state.duration))
                             .font(.caption2)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(theme.colors.textSecondary)
                             .monospacedDigit()
                         Spacer()
                         Text(formatTime(state.duration))
                             .font(.caption2)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(theme.colors.textSecondary)
                             .monospacedDigit()
                     }
                 }
@@ -60,14 +60,13 @@ struct FileSourceControlsView: View {
                 }
                 .buttonStyle(.plain)
 
-                Slider(
+                DSSlider(
                     value: Binding(
                         get: { state.volume },
                         set: { engine.setFileSourceVolume(sourceId: sourceId, volume: $0) }
                     ),
-                    in: 0...1
+                    range: 0...1
                 )
-                .controlSize(.small)
                 .disabled(state.isMuted)
                 .opacity(state.isMuted ? 0.5 : 1.0)
             }
@@ -76,18 +75,17 @@ struct FileSourceControlsView: View {
             HStack(spacing: 8) {
                 Text(String(format: "%.1fx", state.speed))
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(theme.colors.textSecondary)
                     .monospacedDigit()
                     .frame(width: 32, alignment: .center)
 
-                Slider(
+                DSSlider(
                     value: Binding(
                         get: { state.speed },
                         set: { engine.setFileSourceSpeed(sourceId: sourceId, speed: $0) }
                     ),
-                    in: 0...2
+                    range: 0...2
                 )
-                .controlSize(.small)
             }
         }
         .padding(.horizontal, 16)

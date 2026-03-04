@@ -39,7 +39,7 @@ public:
     auto source = AudioSourceService::getService()->selectedAudioSource;
     canvas->begin();
     shader.begin();
-    if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() > 0)
+    if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() >= 256)
       shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0], 256);
     frame->draw(0, 0);
     shader.end();

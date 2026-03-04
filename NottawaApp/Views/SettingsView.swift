@@ -2,12 +2,13 @@
 //  SettingsView.swift
 //  NottawaApp
 //
-//  Settings window with resolution picker.
+//  Settings window with resolution picker and theme selection.
 //
 
 import SwiftUI
 
 struct SettingsView: View {
+    @Environment(ThemeManager.self) private var theme
     @State private var resolutionIndex = 2
 
     private let resolutionOptions = [
@@ -20,14 +21,22 @@ struct SettingsView: View {
     ]
 
     var body: some View {
+        @Bindable var theme = theme
+
         Form {
-            Picker("Resolution", selection: $resolutionIndex) {
-                ForEach(resolutionOptions, id: \.index) { option in
-                    Text(option.name).tag(option.index)
-                }
-            }
+            DSPicker(
+                selection: $resolutionIndex,
+                options: resolutionOptions.map { DSPickerOption(value: $0.index, label: $0.name) },
+                label: "Resolution", style: .menu
+            )
             .onChange(of: resolutionIndex) { _, newValue in
                 NottawaEngine.shared.setResolution(settingIndex: newValue)
+            }
+
+            Picker("Theme", selection: $theme.preset) {
+                ForEach(ThemePreset.allCases) { preset in
+                    Text(preset.rawValue).tag(preset)
+                }
             }
         }
         .formStyle(.grouped)

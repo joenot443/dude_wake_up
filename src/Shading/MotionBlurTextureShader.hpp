@@ -48,6 +48,7 @@ struct MotionBlurTextureShader: Shader {
   void setup() override {
     texture = TextureService::getService()->textureWithName("bark1.png");
     settings->textureOptions = TextureService::getService()->availableTextureNames();
+    settings->texture->options = settings->textureOptions;
     shader.load("shaders/MotionBlurTexture");
   }
 

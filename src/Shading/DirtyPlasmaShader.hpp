@@ -60,6 +60,7 @@ struct DirtyPlasmaShader: Shader {
   void setup() override {
     texture = TextureService::getService()->textureWithName("Granite");
     settings->textureOptions = TextureService::getService()->availableTextureNames();
+    settings->texture->options = settings->textureOptions;
     shader.load("shaders/DirtyPlasma");
   }
 

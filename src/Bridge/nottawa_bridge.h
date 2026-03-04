@@ -76,6 +76,7 @@ typedef struct {
   const char* name;        // Owned by caller - must free
   const char* category;    // Owned by caller - must free (may be NULL for shaders)
   int shaderTypeRaw;       // ShaderType enum value
+  int isFavorited;         // 1 if this shader/source type is favorited
 } NTWAvailableShaderInfo;
 
 typedef struct {
@@ -235,6 +236,15 @@ void ntw_redo(void);
 bool ntw_can_undo(void);
 bool ntw_can_redo(void);
 
+// Copy selected connectables to internal clipboard.
+void ntw_copy_connectables(const char** ids, int count);
+
+// Paste copied connectables. Returns new IDs (caller must free with ntw_free_string_array).
+char** ntw_paste_connectables(int* outCount);
+
+// Returns true if the internal clipboard has connectables.
+bool ntw_has_copied_connectables(void);
+
 // ---------------------------------------------------------------------------
 // MARK: - Queries: Shaders
 // ---------------------------------------------------------------------------
@@ -329,6 +339,13 @@ void ntw_set_connectable_position(const char* connectableId, float x, float y);
 void ntw_set_connectable_active(const char* connectableId, bool active);
 bool ntw_get_connectable_active(const char* connectableId);
 
+// Set/get whether a shader is bypassed (passes input through without processing).
+void ntw_set_shader_bypassed(const char* shaderId, int bypassed);
+int ntw_get_shader_bypassed(const char* shaderId);
+
+// Get the depth of a shader in its chain (0 = directly connected to source).
+int ntw_get_shader_depth(const char* shaderId);
+
 // Remove a connectable by ID (works for both shaders and video sources).
 void ntw_remove_connectable(const char* connectableId);
 
@@ -386,6 +403,7 @@ typedef struct {
   float frequencyRelease;
   float frequencyScale;
   float loudnessRelease;
+  float loudnessScale;
 
   // Beat detection
   uint32_t beatCount;   // Increments on each detected beat
@@ -445,6 +463,7 @@ void ntw_set_smoothing_mode(int mode);
 void ntw_set_frequency_release(float value);
 void ntw_set_frequency_scale(float value);
 void ntw_set_loudness_release(float value);
+void ntw_set_loudness_scale(float value);
 void ntw_select_sample_track(int index);
 void ntw_set_file_audio_volume(float volume);
 void ntw_toggle_file_audio_pause(void);
@@ -724,10 +743,20 @@ typedef struct {
     const char* name;     // Owned by caller - must free
     const char* icon;     // SF Symbol name - owned by caller - must free
     int sourceType;       // VideoSourceType enum value
+    int isFavorited;      // 1 if this source type is favorited
 } NTWAvailableNonShaderSourceInfo;
 
 NTWAvailableNonShaderSourceInfo* ntw_get_available_non_shader_sources(int* outCount);
 void ntw_free_available_non_shader_source_info_array(NTWAvailableNonShaderSourceInfo* array, int count);
+
+// ---------------------------------------------------------------------------
+// MARK: - Favorites (Shader Types & Source Types)
+// ---------------------------------------------------------------------------
+
+void ntw_toggle_favorite_shader_type(int shaderTypeRaw);
+int ntw_is_shader_type_favorited(int shaderTypeRaw);
+void ntw_toggle_favorite_source_type(int sourceType);
+int ntw_is_source_type_favorited(int sourceType);
 
 // ---------------------------------------------------------------------------
 // MARK: - Strand Sharing & Community
