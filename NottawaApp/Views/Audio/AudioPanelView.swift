@@ -125,6 +125,7 @@ struct AudioPanelView: View {
     // never reads their @Observable properties, so it never re-evaluates.
     @State private var graphs = AudioGraphData()
     @State private var controls = AudioControlData()
+    var onToggleAudio: (() -> Void)?
 
     private let fastTimer = Timer.publish(every: 1.0 / 15.0, on: .main, in: .common).autoconnect()
     private let slowTimer = Timer.publish(every: 1.0 / 3.0, on: .main, in: .common).autoconnect()
@@ -133,39 +134,45 @@ struct AudioPanelView: View {
         VStack(spacing: 0) {
             theme.colors.border.frame(height: 1)
 
-            AudioPanelTopBar(data: controls)
+            AudioPanelTopBar(data: controls, onToggleAudio: onToggleAudio)
 
             theme.colors.border.frame(height: 1)
 
-            HStack(spacing: 12) {
-                // Loudness column
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Loudness")
-                        .font(.caption).fontWeight(.semibold).foregroundStyle(theme.colors.textSecondary)
-                    LoudnessGraphView(data: graphs)
-                        .frame(maxHeight: .infinity)
-                    LoudnessControlsView(data: controls)
-                }
-                .frame(maxWidth: .infinity)
+            GeometryReader { geo in
+                let graphHeight = max(40, geo.size.height - 100)
 
-                theme.colors.border.frame(width: 1)
-
-                // BPM column
-                VStack(spacing: 6) {
-                    ZStack {
-                        BeatIndicatorView(data: graphs)
-                        BpmOverlayView(data: controls)
+                HStack(spacing: 12) {
+                    // Loudness column
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Loudness")
+                            .font(.caption).fontWeight(.semibold).foregroundStyle(theme.colors.textSecondary)
+                        LoudnessGraphView(data: graphs)
+                            .frame(height: graphHeight)
+                        LoudnessControlsView(data: controls)
                     }
-                    .frame(maxHeight: .infinity)
-                    BpmControlsView(data: controls)
+                    .frame(maxWidth: .infinity)
+
+                    theme.colors.border.frame(width: 1)
+
+                    // BPM column
+                    VStack(alignment: .leading) {
+                        Text("BPM")
+                            .font(.caption).fontWeight(.semibold).foregroundStyle(theme.colors.textSecondary)
+                        ZStack {
+                            BeatIndicatorView(data: graphs)
+                            BpmOverlayView(data: controls)
+                        }
+                        .frame(maxHeight: .infinity)
+                        BpmControlsView(data: controls)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: geo.size.height)
+
+                    theme.colors.border.frame(width: 1)
+
+                    // Frequency column
+                    FrequencyColumnView(graphs: graphs, controls: controls, graphHeight: graphHeight)
+                        .frame(maxWidth: .infinity)
                 }
-                .frame(maxWidth: .infinity)
-
-                theme.colors.border.frame(width: 1)
-
-                // Frequency column
-                FrequencyColumnView(graphs: graphs, controls: controls)
-                    .frame(minWidth: 300, maxWidth: .infinity)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
@@ -280,7 +287,7 @@ struct BpmOverlayView: View {
                         .font(.caption)
                         .foregroundStyle(.white.opacity(snapshot.bpmLocked ? 0.7 : 0.4))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.plainHitArea)
                 .help(snapshot.bpmLocked ? "Unlock BPM" : "Lock BPM")
                 Spacer()
                 Button {
@@ -290,7 +297,7 @@ struct BpmOverlayView: View {
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.4))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.plainHitArea)
                 .help(snapshot.bpmEnabled ? "Pause BPM" : "Resume BPM")
             }
             .padding(8)

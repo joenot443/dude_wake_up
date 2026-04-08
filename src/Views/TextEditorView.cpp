@@ -228,7 +228,8 @@ void TextEditorView::draw() {
   }
   
   CommonViews::MultiSlider("Position", displayText->id, displayText->xPosition, displayText->yPosition, displayText->xPositionOscillator, displayText->yPositionOscillator, 0.5625);
-  
+  CommonViews::ShaderCheckbox(displayText->cropToText);
+
   if (displayText->font.name != FontService::getService()->fonts[displayText->fontSelector->intValue].name) {
     displayText->font = FontService::getService()->fonts[displayText->fontSelector->intValue];
     font.load(displayText->font.path, displayText->fontSize);

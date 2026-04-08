@@ -20,16 +20,11 @@
 #include <stdio.h>
 
 struct MotionBlurTextureSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
-  
   std::shared_ptr<Parameter> texture;
   std::vector<std::string> textureOptions;
 
   MotionBlurTextureSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
   texture(std::make_shared<Parameter>("texture", 0.0, 0.0, 1000.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   ShaderSettings(shaderId, j, "MotionBlurTexture") {
     parameters = { texture };
     oscillators = { };
@@ -58,7 +53,6 @@ struct MotionBlurTextureShader: Shader {
     if (texture != nullptr) {
       shader.setUniformTexture("tex", texture->fbo.getTexture(), 4);
     }
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);

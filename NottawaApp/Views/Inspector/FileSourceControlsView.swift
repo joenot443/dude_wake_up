@@ -25,7 +25,7 @@ struct FileSourceControlsView: View {
                     Image(systemName: state.isPlaying ? "pause.fill" : "play.fill")
                         .frame(width: 20, height: 20)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.plainHitArea)
 
                 VStack(alignment: .leading, spacing: 2) {
                     DSSlider(
@@ -58,7 +58,7 @@ struct FileSourceControlsView: View {
                     Image(systemName: volumeIcon)
                         .frame(width: 20, height: 20)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.plainHitArea)
 
                 DSSlider(
                     value: Binding(
@@ -100,6 +100,7 @@ struct FileSourceControlsView: View {
     }
 
     private func formatTime(_ seconds: Float) -> String {
+        guard seconds.isFinite else { return "0:00" }
         let totalSeconds = max(0, Int(seconds))
         let mins = totalSeconds / 60
         let secs = totalSeconds % 60

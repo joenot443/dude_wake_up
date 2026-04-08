@@ -27,9 +27,12 @@ public:
 
   std::shared_ptr<Parameter> verticalFlip;
   std::shared_ptr<Parameter> horizontalFlip;
-  
+
   std::shared_ptr<Parameter> scale;
+  std::shared_ptr<Parameter> scaleFromCenter;
   std::shared_ptr<Parameter> mode;
+  std::shared_ptr<Parameter> backgroundEnabled;
+  std::shared_ptr<Parameter> backgroundColor;
   std::shared_ptr<WaveformOscillator> minXOscillator;
   std::shared_ptr<WaveformOscillator> maxXOscillator;
   std::shared_ptr<WaveformOscillator> minYOscillator;
@@ -38,19 +41,22 @@ public:
   std::shared_ptr<WaveformOscillator> translateYOscillator;
   std::shared_ptr<WaveformOscillator> scaleOscillator;
 
-  
+
   TransformSettings(std::string shaderId, json j, std::string name)
   : minX(std::make_shared<Parameter>("Min X", 0.0, 0.0, 1.0)),
   maxX(std::make_shared<Parameter>("Max X", 1.0, 0.0, 1.0)),
   minY(std::make_shared<Parameter>("Min Y", 0.0, 0.0, 1.0)),
   maxY(std::make_shared<Parameter>("Max Y", 1.0, 0.0, 1.0)),
-  translateX(std::make_shared<Parameter>("X", 0.0, 0.0, 1.0)),
-  translateY(std::make_shared<Parameter>("Y", 0.0, 0.0, 1.0)),
+  translateX(std::make_shared<Parameter>("X", 0.0, -1.0, 1.0)),
+  translateY(std::make_shared<Parameter>("Y", 0.0, -1.0, 1.0)),
   verticalFlip(std::make_shared<Parameter>("Vertical Flip", 0.0, 0.0, 1.0, ParameterType_Bool)),
   horizontalFlip(std::make_shared<Parameter>("Horizontal Flip", 0.0, 0.0, 1.0, ParameterType_Bool)),
   scale(std::make_shared<Parameter>("Scale", 1.0, 0.0, 5.0)),
+  scaleFromCenter(std::make_shared<Parameter>("Scale From Center", 0.0, 0.0, 1.0, ParameterType_Bool)),
   mode(std::make_shared<Parameter>("Mode", 0, ParameterType_Int)),
   center(std::make_shared<Parameter>("Center", ParameterType_Bool)),
+  backgroundEnabled(std::make_shared<Parameter>("Background Enabled", 0.0, 0.0, 1.0, ParameterType_Bool)),
+  backgroundColor(std::make_shared<Parameter>("Background Color", ParameterType_Color)),
   minXOscillator(std::make_shared<WaveformOscillator>(minX)),
   maxXOscillator(std::make_shared<WaveformOscillator>(maxX)),
   minYOscillator(std::make_shared<WaveformOscillator>(minY)),
@@ -60,7 +66,7 @@ public:
   scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
   ShaderSettings(shaderId, j, name) {
     mode->options = {"Standard", "Fill", "Fit", "Fill + Aspect"};
-    parameters = {minX, maxX, minY, maxY, scale, translateX, translateY, mode, center, verticalFlip, horizontalFlip};
+    parameters = {minX, maxX, minY, maxY, scale, scaleFromCenter, translateX, translateY, mode, center, verticalFlip, horizontalFlip, backgroundEnabled, backgroundColor};
     oscillators = {minXOscillator, maxXOscillator, minYOscillator, maxYOscillator, translateXOscillator, translateYOscillator, scaleOscillator};
     load(j);
     audioReactiveParameter = scale;
@@ -127,12 +133,24 @@ public:
       ofScale(-1, 1);
     }
     
-    ofClear(0, 0, 0, 0);
+    if (settings->backgroundEnabled->boolValue) {
+      auto c = settings->backgroundColor->color->data();
+      ofClear(c[0] * 255, c[1] * 255, c[2] * 255, c[3] * 255);
+    } else {
+      ofClear(0, 0, 0, 0);
+    }
     ofPushMatrix();
+    // Offset draw position so scaling is applied from the center of the drawn region
+    float drawX = translateX;
+    float drawY = translateY;
+    if (settings->scaleFromCenter->boolValue) {
+      drawX -= (drawWidth - cropWidth) / 2.0f;
+      drawY -= (drawHeight - cropHeight) / 2.0f;
+    }
     // Draw the cropped and scaled texture
-    texture.drawSubsection(translateX, translateY,
-                           settings->scale->value * cropWidth,
-                           settings->scale->value * cropHeight,
+    texture.drawSubsection(drawX, drawY,
+                           drawWidth,
+                           drawHeight,
                            cropX, cropY,
                            cropWidth, cropHeight);
     
@@ -175,16 +193,22 @@ public:
     CommonViews::MiniSlider(settings->maxY);
     
     CommonViews::ShaderParameter(settings->scale, settings->scaleOscillator);
-    
+    CommonViews::ShaderCheckbox(settings->scaleFromCenter);
+
     CommonViews::MultiSlider("Position", settings->shaderId, settings->translateX, settings->translateY, settings->translateXOscillator, settings->translateYOscillator, 0.5625);
 
     CommonViews::ShaderCheckbox(settings->verticalFlip);
     CommonViews::ShaderCheckbox(settings->horizontalFlip);
-    
+
     // Add mode selector
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 5.0);
     CommonViews::ShaderCheckbox(settings->center);
     CommonViews::Selector(settings->mode, settings->mode->options);
+
+    CommonViews::ShaderCheckbox(settings->backgroundEnabled);
+    if (settings->backgroundEnabled->boolValue) {
+      CommonViews::ShaderColor(settings->backgroundColor);
+    }
   }
   
   void clear() override {}

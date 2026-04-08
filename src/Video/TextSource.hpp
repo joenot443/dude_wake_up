@@ -30,6 +30,8 @@ public:
 
   std::shared_ptr<DisplayText> displayText;
 
+  void centerText();
+
 protected:
   TextEditorView textEditorView;
   ofTrueTypeFont font;

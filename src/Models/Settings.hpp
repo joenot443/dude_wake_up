@@ -110,7 +110,12 @@ public:
       // Find the parameter with the name
       auto p = findParameter(it.key());
       if (p != NULL) {
+        std::string oldParamId = p->paramId;
         p->load(it.value());
+        // Re-register if paramId changed (load() restores saved paramId)
+        if (p->paramId != oldParamId) {
+          ParameterService::getService()->registerParameter(p);
+        }
         // If the parameter has a midiDescriptor, add it to the MidiService
         if (p->midiDescriptor != "") {
           MidiService::getService()->saveAssignment(p, p->midiDescriptor);

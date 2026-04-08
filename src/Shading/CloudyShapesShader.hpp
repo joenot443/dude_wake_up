@@ -18,19 +18,15 @@
 #include <stdio.h>
 
 struct CloudyShapesSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
   std::shared_ptr<Parameter> speed;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
   std::shared_ptr<WaveformOscillator> speedOscillator;
 
   CloudyShapesSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
   speed(std::make_shared<Parameter>("Speed", 1.0, 0.0, 2.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   ShaderSettings(shaderId, j, "CloudyShapes") {
-    parameters = { shaderValue, speed };
-    oscillators = { shaderValueOscillator, speedOscillator };
+    parameters = { speed };
+    oscillators = { speedOscillator };
     load(j);
     registerParameters();
   };
@@ -49,7 +45,6 @@ struct CloudyShapesShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value * settings->speed->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);

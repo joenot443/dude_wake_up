@@ -99,8 +99,8 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
   void addDriver(std::shared_ptr<Parameter> dr)
   {
     driver = dr;
-    shift = std::make_shared<Parameter>("shift", 0.5, -1.0, 1.0);
-    scale = std::make_shared<Parameter>("scale", 0.2, 0.0, 2.0);
+    shift = std::make_shared<Parameter>("shift", 0.5, 0.0, 1.0);
+    scale = std::make_shared<Parameter>("scale", 1.0, 0.0, 2.0);
   }
   
   bool hasDriver() { return driver != nullptr; }
@@ -215,7 +215,9 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
   void scaleAudioValue(float percent)
   {
     float range = max - min;
-    setValue(fmax(min, fmin(percent * range * scale->value + shift->value * range, max)));
+    float center = shift->value * range + min;
+    float driven = center + (percent - 0.5f) * range * scale->value * 0.1f;
+    setValue(fmax(min, fmin(driven, max)));
   }
 
   /// Returns 1 if our boolValue is true, otherwise the normal float value

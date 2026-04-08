@@ -11,16 +11,16 @@ import SwiftUI
 struct OscillatorControlsView: View {
     @Environment(ThemeManager.self) private var theme
     let param: ParameterInfo
+    @Binding var enabled: Bool
 
-    @State private var enabled: Bool
     @State private var waveShape: WaveShape
     @State private var frequency: Float
     @State private var minOutput: Float
     @State private var maxOutput: Float
 
-    init(param: ParameterInfo) {
+    init(param: ParameterInfo, enabled: Binding<Bool>) {
         self.param = param
-        self._enabled = State(initialValue: param.oscillatorEnabled)
+        self._enabled = enabled
         self._waveShape = State(initialValue: param.oscillatorWaveShape)
         self._frequency = State(initialValue: param.oscillatorFrequency)
         self._minOutput = State(initialValue: param.oscillatorMinOutput)
@@ -90,9 +90,6 @@ struct OscillatorControlsView: View {
         .background(theme.colors.surface)
         .clipShape(RoundedRectangle(cornerRadius: 6))
         .accessibilityIdentifier("osc-controls-\(param.id)")
-        .onChange(of: param.oscillatorEnabled) { _, newValue in
-            enabled = newValue
-        }
         .onChange(of: param.oscillatorFrequency) { _, newValue in
             frequency = newValue
         }

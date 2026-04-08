@@ -13,6 +13,7 @@ struct FrequencyColumnView: View {
     @Environment(ThemeManager.self) private var theme
     let graphs: AudioGraphData
     let controls: AudioControlData
+    var graphHeight: CGFloat? = nil
 
     @State private var viewMode: FreqViewMode = .bands
 
@@ -25,32 +26,30 @@ struct FrequencyColumnView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 8) {
-                Text("Frequency")
-                    .font(.caption).fontWeight(.semibold).foregroundStyle(theme.colors.textSecondary)
-                Spacer()
-                DSPicker(
-                    selection: $viewMode,
-                    options: FreqViewMode.allCases.map { DSPickerOption(value: $0, label: $0.rawValue) },
-                    style: .segmented, size: .sm
-                )
-                .frame(width: 200)
-            }
+            Text("Frequency")
+                .font(.caption).fontWeight(.semibold).foregroundStyle(theme.colors.textSecondary)
 
             // Graph area — only reads from graphs (15fps)
-            switch viewMode {
-            case .bands:
-                FreqBandsGraphView(data: graphs)
-                    .frame(maxHeight: .infinity)
-            case .bars:
-                FreqBarsGraphView(data: graphs)
-                    .frame(maxHeight: .infinity)
-            case .waveform:
-                FreqWaveformGraphView(data: graphs)
-                    .frame(maxHeight: .infinity)
+            Group {
+                switch viewMode {
+                case .bands:
+                    FreqBandsGraphView(data: graphs)
+                case .bars:
+                    FreqBarsGraphView(data: graphs)
+                case .waveform:
+                    FreqWaveformGraphView(data: graphs)
+                }
             }
+            .frame(height: graphHeight)
+            .frame(maxHeight: graphHeight == nil ? .infinity : .none)
 
             // Controls — only reads from controls (3fps)
+            DSPicker(
+                selection: $viewMode,
+                options: FreqViewMode.allCases.map { DSPickerOption(value: $0, label: $0.rawValue) },
+                style: .segmented, size: .sm
+            )
+
             FreqControlsView(data: controls)
         }
     }

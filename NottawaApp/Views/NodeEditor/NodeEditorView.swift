@@ -183,7 +183,7 @@ struct CanvasPanGestureView: NSViewRepresentable {
                 // Swap shader/source
                 if node?.isShader == true {
                     let swapItem = NSMenuItem(
-                        title: "Swap Shader...",
+                        title: "Swap Effect...",
                         action: #selector(PanNSView.contextMenuSwapShader(_:)),
                         keyEquivalent: ""
                     )
@@ -193,7 +193,7 @@ struct CanvasPanGestureView: NSViewRepresentable {
 
                     // Edit Shader File
                     let editItem = NSMenuItem(
-                        title: "Edit Shader File",
+                        title: "Edit Effect File",
                         action: #selector(PanNSView.contextMenuEditShaderFile(_:)),
                         keyEquivalent: ""
                     )
@@ -245,7 +245,7 @@ struct CanvasPanGestureView: NSViewRepresentable {
             } else {
                 // Canvas context menu (no node)
                 let addShaderItem = NSMenuItem(
-                    title: "Add Shader...",
+                    title: "Add Effect...",
                     action: #selector(PanNSView.contextMenuAddShader(_:)),
                     keyEquivalent: ""
                 )
@@ -434,16 +434,21 @@ struct CanvasPanGestureView: NSViewRepresentable {
         @objc func contextMenuSaveStrand(_ sender: NSMenuItem) {
             guard let nodeId = sender.representedObject as? String else { return }
             let nodeName = coordinator?.viewModel.nodes.first(where: { $0.id == nodeId })?.name ?? "Strand"
-            DispatchQueue.main.async {
-                let panel = NSSavePanel()
-                panel.nameFieldStringValue = "\(nodeName).strand"
-                panel.allowedContentTypes = [.json]
-                panel.begin { response in
-                    if response == .OK, let url = panel.url {
-                        NottawaEngine.shared.saveStrand(nodeId: nodeId, path: url.path, name: nodeName)
-                    }
-                }
+            guard let folderURL = NottawaEngine.shared.strandsFolderURL() else { return }
+
+            // Build a unique filename to avoid overwriting existing strands
+            var filename = "\(nodeName).json"
+            var fileURL = folderURL.appendingPathComponent(filename)
+            var counter = 2
+            while FileManager.default.fileExists(atPath: fileURL.path) {
+                filename = "\(nodeName) \(counter).json"
+                fileURL = folderURL.appendingPathComponent(filename)
+                counter += 1
             }
+
+            let saveName = fileURL.deletingPathExtension().lastPathComponent
+            NottawaEngine.shared.saveStrand(nodeId: nodeId, path: fileURL.path, name: saveName)
+            NSWorkspace.shared.selectFile(fileURL.path, inFileViewerRootedAtPath: folderURL.path)
         }
 
         @objc func contextMenuShareStrand(_ sender: NSMenuItem) {
@@ -482,6 +487,7 @@ struct CanvasPanGestureView: NSViewRepresentable {
 struct NodeDragOverlayView: NSViewRepresentable {
     let viewModel: NodeEditorViewModel
     var accentColor: Color = .accentColor
+    var surfaceColor: Color = .gray
 
     func makeCoordinator() -> Coordinator {
         Coordinator(viewModel: viewModel)
@@ -494,11 +500,13 @@ struct NodeDragOverlayView: NSViewRepresentable {
         view.layerContentsRedrawPolicy = .onSetNeedsDisplay
         view.registerForDraggedTypes([.string])
         view.accentNSColor = NSColor(accentColor)
+        view.surfaceNSColor = NSColor(surfaceColor)
         return view
     }
 
     func updateNSView(_ nsView: NodeDragNSView, context: Context) {
         nsView.accentNSColor = NSColor(accentColor)
+        nsView.surfaceNSColor = NSColor(surfaceColor)
     }
 
     // MARK: - Coordinator
@@ -514,6 +522,10 @@ struct NodeDragOverlayView: NSViewRepresentable {
         // Pin drag state
         var isDraggingPin = false
 
+        // Cut mode state (Option+drag)
+        var isCutting = false
+        var cutStart: CGPoint?
+
         // Marquee selection state
         var isMarqueeSelecting = false
         var marqueeOrigin: CGPoint?
@@ -527,14 +539,22 @@ struct NodeDragOverlayView: NSViewRepresentable {
             self.viewModel = viewModel
         }
 
-        /// Returns IDs of all nodes whose screen-space center falls within the given rect.
+        /// Returns IDs of all nodes whose screen-space rect overlaps the given rect.
         func nodesInRect(_ rect: CGRect) -> Set<String> {
             let vm = viewModel
             var result = Set<String>()
             for node in vm.nodes {
                 let cx = node.position.x * vm.canvasScale + vm.canvasOffset.x
                 let cy = node.position.y * vm.canvasScale + vm.canvasOffset.y
-                if rect.contains(CGPoint(x: cx, y: cy)) {
+                let scaledW = nodeWidth * vm.canvasScale
+                let scaledH = totalNodeHeight * vm.canvasScale
+                let nodeRect = CGRect(
+                    x: cx - scaledW / 2,
+                    y: cy - scaledH / 2,
+                    width: scaledW,
+                    height: scaledH
+                )
+                if rect.intersects(nodeRect) {
                     result.insert(node.id)
                 }
             }
@@ -606,6 +626,73 @@ struct NodeDragOverlayView: NSViewRepresentable {
             }
             return nil
         }
+
+        /// Hit-test for a cable at the given screen point. Returns the connection ID if within threshold.
+        func hitTestCable(at viewPoint: CGPoint) -> String? {
+            let vm = viewModel
+            let threshold: CGFloat = 8
+            for connection in vm.connections {
+                let outKey = PinKey(nodeId: connection.startNodeId, slotIndex: connection.outputSlot, isOutput: true)
+                let inKey = PinKey(nodeId: connection.endNodeId, slotIndex: connection.inputSlot, isOutput: false)
+                guard let startPos = vm.pinPositions[outKey],
+                      let endPos = vm.pinPositions[inKey] else { continue }
+
+                let path = cablePath(from: startPos, to: endPos)
+                let cgPath = path.cgPath
+                let strokedPath = cgPath.copy(strokingWithWidth: threshold * 2, lineCap: .round, lineJoin: .round, miterLimit: 0)
+                if strokedPath.contains(viewPoint) {
+                    return connection.id
+                }
+            }
+            return nil
+        }
+
+        /// Find all connection IDs whose cables intersect a line segment (for cut mode).
+        func cablesIntersectingLine(from lineStart: CGPoint, to lineEnd: CGPoint) -> [String] {
+            let vm = viewModel
+            var result: [String] = []
+            for connection in vm.connections {
+                let outKey = PinKey(nodeId: connection.startNodeId, slotIndex: connection.outputSlot, isOutput: true)
+                let inKey = PinKey(nodeId: connection.endNodeId, slotIndex: connection.inputSlot, isOutput: false)
+                guard let startPos = vm.pinPositions[outKey],
+                      let endPos = vm.pinPositions[inKey] else { continue }
+
+                // Flatten the Bezier into line segments and test intersection
+                let segments = 20
+                let dx = abs(endPos.x - startPos.x)
+                let dy = abs(endPos.y - startPos.y)
+                let controlOffset = max(dx * 0.5, dy * 0.25, 60)
+                let cp1 = CGPoint(x: startPos.x + controlOffset, y: startPos.y)
+                let cp2 = CGPoint(x: endPos.x - controlOffset, y: endPos.y)
+
+                var prev = startPos
+                for i in 1...segments {
+                    let t = CGFloat(i) / CGFloat(segments)
+                    let mt = 1 - t
+                    let x = mt*mt*mt*startPos.x + 3*mt*mt*t*cp1.x + 3*mt*t*t*cp2.x + t*t*t*endPos.x
+                    let y = mt*mt*mt*startPos.y + 3*mt*mt*t*cp1.y + 3*mt*t*t*cp2.y + t*t*t*endPos.y
+                    let cur = CGPoint(x: x, y: y)
+                    if lineSegmentsIntersect(lineStart, lineEnd, prev, cur) {
+                        result.append(connection.id)
+                        break
+                    }
+                    prev = cur
+                }
+            }
+            return result
+        }
+
+        /// Standard line-segment intersection test.
+        private func lineSegmentsIntersect(_ p1: CGPoint, _ p2: CGPoint, _ p3: CGPoint, _ p4: CGPoint) -> Bool {
+            let d1x = p2.x - p1.x, d1y = p2.y - p1.y
+            let d2x = p4.x - p3.x, d2y = p4.y - p3.y
+            let cross = d1x * d2y - d1y * d2x
+            guard abs(cross) > 1e-10 else { return false }
+            let dx = p3.x - p1.x, dy = p3.y - p1.y
+            let t = (dx * d2y - dy * d2x) / cross
+            let u = (dx * d1y - dy * d1x) / cross
+            return t >= 0 && t <= 1 && u >= 0 && u <= 1
+        }
     }
 
     // MARK: - NSView
@@ -613,8 +700,9 @@ struct NodeDragOverlayView: NSViewRepresentable {
     class NodeDragNSView: NSView {
         var coordinator: Coordinator?
 
-        // Theme accent color for cable rendering (updated from SwiftUI)
+        // Theme colors for cable rendering (updated from SwiftUI)
         var accentNSColor: NSColor = .systemCyan
+        var surfaceNSColor: NSColor = .windowBackgroundColor
 
         // Drag cable endpoints for Core Graphics rendering.
         // Stored directly on the NSView so draw() doesn't need SwiftUI.
@@ -627,6 +715,10 @@ struct NodeDragOverlayView: NSViewRepresentable {
         // Marquee selection rectangle (screen coords, normalized to positive w/h).
         var marqueeRect: CGRect?
         var marqueePreviewIds: Set<String> = []
+
+        // Cut line endpoints for Option+drag cable cutting.
+        var cutLineStart: CGPoint?
+        var cutLineEnd: CGPoint?
 
         override var isFlipped: Bool { true }
 
@@ -676,6 +768,23 @@ struct NodeDragOverlayView: NSViewRepresentable {
                 }
             }
 
+            // Draw cut line for Option+drag cable cutting
+            if let cutStart = cutLineStart, let cutEnd = cutLineEnd {
+                context.saveGState()
+                context.setStrokeColor(NSColor.systemOrange.withAlphaComponent(0.9).cgColor)
+                context.setLineWidth(2.5)
+                context.setLineDash(phase: 0, lengths: [6, 4])
+                context.move(to: cutStart)
+                context.addLine(to: cutEnd)
+                context.strokePath()
+                context.restoreGState()
+
+                // Draw small scissor dots at endpoints
+                context.setFillColor(NSColor.systemOrange.cgColor)
+                context.fillEllipse(in: CGRect(x: cutStart.x - 3, y: cutStart.y - 3, width: 6, height: 6))
+                context.fillEllipse(in: CGRect(x: cutEnd.x - 3, y: cutEnd.y - 3, width: 6, height: 6))
+            }
+
             guard let from = cableFromPos, let to = cableToPos else { return }
 
             let startPos = cableFromIsOutput ? from : to
@@ -716,12 +825,21 @@ struct NodeDragOverlayView: NSViewRepresentable {
             )
             context.strokePath()
 
-            // Snap indicator dot at endpoint when snapped
-            if cableSnapped {
-                let dotRadius: CGFloat = 5
+            // Snap indicator dot drawn directly at the snapped pin's reported position
+            if cableSnapped,
+               let snapKey = coordinator?.viewModel.dragSnapPinKey,
+               let pinCenter = coordinator?.viewModel.pinPositions[snapKey] {
+                let dotRadius: CGFloat = 6
+                // Glow ring
+                context.setFillColor(cableColor.withAlphaComponent(0.3).cgColor)
+                context.fillEllipse(in: CGRect(
+                    x: pinCenter.x - dotRadius * 1.5, y: pinCenter.y - dotRadius * 1.5,
+                    width: dotRadius * 3, height: dotRadius * 3
+                ))
+                // Solid dot
                 context.setFillColor(cableColor.cgColor)
                 context.fillEllipse(in: CGRect(
-                    x: endPos.x - dotRadius, y: endPos.y - dotRadius,
+                    x: pinCenter.x - dotRadius, y: pinCenter.y - dotRadius,
                     width: dotRadius * 2, height: dotRadius * 2
                 ))
 
@@ -744,12 +862,16 @@ struct NodeDragOverlayView: NSViewRepresentable {
                         height: size.height + padding * 2
                     )
 
-                    // Pill background
+                    // Pill background (white fill + border)
                     context.saveGState()
                     let pillPath = CGPath(roundedRect: pillRect, cornerWidth: 8, cornerHeight: 8, transform: nil)
                     context.addPath(pillPath)
-                    context.setFillColor(NSColor.systemPurple.withAlphaComponent(0.85).cgColor)
+                    context.setFillColor(surfaceNSColor.withAlphaComponent(0.95).cgColor)
                     context.fillPath()
+                    context.addPath(pillPath)
+                    context.setStrokeColor(NSColor.separatorColor.cgColor)
+                    context.setLineWidth(1)
+                    context.strokePath()
                     context.restoreGState()
 
                     // Text
@@ -765,6 +887,9 @@ struct NodeDragOverlayView: NSViewRepresentable {
         }
 
         override func hitTest(_ point: NSPoint) -> NSView? {
+            // Only handle events within our actual frame
+          guard isMousePoint(point, in: frame) else { return nil }
+
             guard let coordinator else { return nil }
 
             // Pass all events through when browser is open so SwiftUI overlay receives clicks
@@ -851,7 +976,8 @@ struct NodeDragOverlayView: NSViewRepresentable {
                     // Click on unselected node: exclusive select
                     coordinator.viewModel.selectNode(nodeId)
                 }
-                // If clicking on an already-selected node (no Cmd), keep selection for multi-drag
+                // Always clear cable selection when clicking a node
+                coordinator.viewModel.selectedConnectionId = nil
 
                 // Set up for multi-drag if multiple are selected
                 if coordinator.viewModel.selectedNodeIds.count > 1 &&
@@ -865,12 +991,32 @@ struct NodeDragOverlayView: NSViewRepresentable {
                     }
                 }
             } else {
-                // Empty canvas — start marquee selection
+                let isOption = event.modifierFlags.contains(.option)
+
+                // Option+drag on empty canvas → cable cut mode
+                if isOption {
+                    coordinator.isDragging = true
+                    coordinator.isCutting = true
+                    coordinator.cutStart = point
+                    coordinator.dragStartMousePoint = point
+                    cutLineStart = point
+                    cutLineEnd = point
+                    needsDisplay = true
+                    return
+                }
+
+                // Click on cable → select it
+                if let connId = coordinator.hitTestCable(at: point) {
+                    coordinator.viewModel.selectConnection(connId)
+                    return
+                }
+
+                // Empty canvas — deselect and start marquee selection
                 if isCmd {
                     // Cmd+drag: add to existing selection
                     coordinator.marqueeBaseSelection = coordinator.viewModel.selectedNodeIds
                 } else {
-                    coordinator.viewModel.selectedNodeIds.removeAll()
+                    coordinator.viewModel.deselectAll()
                     coordinator.marqueeBaseSelection = []
                 }
                 coordinator.isDragging = true
@@ -885,6 +1031,13 @@ struct NodeDragOverlayView: NSViewRepresentable {
                   let startMouse = coordinator.dragStartMousePoint else { return }
 
             let point = convert(event.locationInWindow, from: nil)
+
+            // Cut mode drag — update cut line
+            if coordinator.isCutting {
+                cutLineEnd = point
+                needsDisplay = true
+                return
+            }
 
             // Marquee selection drag — update rect and live-select enclosed nodes
             if coordinator.isMarqueeSelecting, let origin = coordinator.marqueeOrigin {
@@ -938,6 +1091,23 @@ struct NodeDragOverlayView: NSViewRepresentable {
 
         override func mouseUp(with event: NSEvent) {
             guard let coordinator else { return }
+
+            // Cut mode end — remove intersected cables
+            if coordinator.isCutting, let cutStart = coordinator.cutStart {
+                let cutEnd = convert(event.locationInWindow, from: nil)
+                let intersected = coordinator.cablesIntersectingLine(from: cutStart, to: cutEnd)
+                for connId in intersected {
+                    coordinator.viewModel.removeConnection(connId)
+                }
+                coordinator.isCutting = false
+                coordinator.cutStart = nil
+                coordinator.isDragging = false
+                coordinator.dragStartMousePoint = nil
+                cutLineStart = nil
+                cutLineEnd = nil
+                needsDisplay = true
+                return
+            }
 
             // Marquee selection end — selection was already live-updated during drag
             if coordinator.isMarqueeSelecting {
@@ -1039,12 +1209,43 @@ struct NodeDragOverlayView: NSViewRepresentable {
         }
 
         override func draggingUpdated(_ sender: NSDraggingInfo) -> NSDragOperation {
+            let point = convert(sender.draggingLocation, from: nil)
+            let hoveredNode = coordinator?.hitTestNode(at: point)
+
+            // Only check for shader payloads (effects can be inserted into cables)
+            let payload = sender.draggingPasteboard.string(forType: .string) ?? ""
+            let isShaderDrop = payload.hasPrefix("shader:")
+
+            // Cable hit-test: only when not hovering a node and dragging a shader
+            var hoveredCable: String?
+            var insertionPt: CGPoint?
+            if hoveredNode == nil && isShaderDrop, let coord = coordinator {
+                if let cableId = coord.hitTestCable(at: point),
+                   let conn = coord.viewModel.connections.first(where: { $0.id == cableId }) {
+                    hoveredCable = cableId
+                    let outKey = PinKey(nodeId: conn.startNodeId, slotIndex: conn.outputSlot, isOutput: true)
+                    let inKey = PinKey(nodeId: conn.endNodeId, slotIndex: conn.inputSlot, isOutput: false)
+                    if let startPos = coord.viewModel.pinPositions[outKey],
+                       let endPos = coord.viewModel.pinPositions[inKey] {
+                        insertionPt = closestPointOnCable(from: startPos, to: endPos, point: point)
+                    }
+                }
+            }
+
+            DispatchQueue.main.async { [weak self] in
+                self?.coordinator?.viewModel.dropHoverNodeId = hoveredNode
+                self?.coordinator?.viewModel.dropHoverCableId = hoveredCable
+                self?.coordinator?.viewModel.dropCableInsertionPoint = insertionPt
+            }
             return .copy
         }
 
         override func draggingExited(_ sender: NSDraggingInfo?) {
             DispatchQueue.main.async { [weak self] in
                 self?.coordinator?.viewModel.isDropTargetActive = false
+                self?.coordinator?.viewModel.dropHoverNodeId = nil
+                self?.coordinator?.viewModel.dropHoverCableId = nil
+                self?.coordinator?.viewModel.dropCableInsertionPoint = nil
             }
         }
 
@@ -1053,9 +1254,18 @@ struct NodeDragOverlayView: NSViewRepresentable {
                   let payload = sender.draggingPasteboard.string(forType: .string) else { return false }
             let dropPoint = convert(sender.draggingLocation, from: nil)
             let targetNodeId = coordinator.hitTestNode(at: dropPoint)
+            let targetCableId = coordinator.viewModel.dropHoverCableId
             DispatchQueue.main.async {
                 coordinator.viewModel.isDropTargetActive = false
-                coordinator.viewModel.addNodeFromDrop(payload: payload, at: CGPoint(x: dropPoint.x, y: dropPoint.y), targetNodeId: targetNodeId)
+                coordinator.viewModel.dropHoverNodeId = nil
+                coordinator.viewModel.dropHoverCableId = nil
+                coordinator.viewModel.dropCableInsertionPoint = nil
+                coordinator.viewModel.addNodeFromDrop(
+                    payload: payload,
+                    at: CGPoint(x: dropPoint.x, y: dropPoint.y),
+                    targetNodeId: targetNodeId,
+                    targetCableId: targetCableId
+                )
             }
             return true
         }
@@ -1082,7 +1292,7 @@ struct NodeEditorView: View {
             // Layer 4: Node drag overlay (left-click drag on nodes + pins, AppKit-based)
             // Also draws the in-progress drag cable via Core Graphics (not SwiftUI)
             // because SwiftUI defers view updates during AppKit mouse tracking.
-            NodeDragOverlayView(viewModel: viewModel, accentColor: theme.colors.accent)
+            NodeDragOverlayView(viewModel: viewModel, accentColor: theme.colors.accent, surfaceColor: theme.colors.surface)
 
             // Layer 5: Right-click pan + context menu + scroll zoom + pinch zoom overlay
             CanvasPanGestureView(canvasOffset: viewModel.canvasOffset, viewModel: viewModel) { newOffset in
@@ -1102,7 +1312,7 @@ struct NodeEditorView: View {
             }
         }
         .animation(.easeInOut(duration: 0.15), value: viewModel.isDropTargetActive)
-        .clipped()
+        .clipShape(Rectangle()) // Clips both rendering AND hit-testing to visible bounds
         .onPreferenceChange(PinPositionPreferenceKey.self) { positions in
             viewModel.pinPositions = positions
         }

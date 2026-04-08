@@ -18,7 +18,7 @@ struct StageModeView: View {
                 Image(systemName: "slider.horizontal.3")
                     .font(.system(size: 40))
                     .foregroundStyle(theme.colors.textTertiary)
-                Text("Add shaders in the node editor to use Stage Mode")
+                Text("No active chains yet. Set up your visuals in the node editor, then come back here to perform.")
                     .font(.callout)
                     .foregroundStyle(theme.colors.textSecondary)
                 Button("Exit Stage Mode") {
@@ -26,7 +26,7 @@ struct StageModeView: View {
                         viewModel.toggleStageMode()
                     }
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.plainHitArea)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
                 .background(theme.colors.surface)
@@ -47,7 +47,7 @@ struct StageModeView: View {
                                 .font(.system(size: 13))
                                 .foregroundStyle(viewModel.stageShowAllParams ? theme.colors.textSecondary : theme.colors.accent)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.plainHitArea)
                         .help(viewModel.stageShowAllParams ? "Show favorites only" : "Showing favorites only")
 
                         Text(viewModel.stageShowAllParams ? "All Parameters" : "Favorites Only")
@@ -64,7 +64,7 @@ struct StageModeView: View {
                                     .font(.system(size: 11))
                                     .foregroundStyle(theme.colors.textSecondary)
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(.plainHitArea)
                             .help("Reset to default order")
                         }
                     }

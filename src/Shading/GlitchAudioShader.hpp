@@ -19,9 +19,6 @@
 #include <stdio.h>
 
 struct GlitchAudioSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
-
   // New Parameters
   std::shared_ptr<Parameter> noiseScale;
   std::shared_ptr<Parameter> noiseXOffset;
@@ -45,8 +42,6 @@ struct GlitchAudioSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> noiseOffsetBOscillator;
 
   GlitchAudioSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   // Initialize new parameters
   noiseScale(std::make_shared<Parameter>("Noise Scale", 2.2, 0.0, 10.0)),
   noiseXOffset(std::make_shared<Parameter>("Noise X Offset", 0.0, -10.0, 10.0)),
@@ -68,8 +63,8 @@ struct GlitchAudioSettings: public ShaderSettings {
   noiseOffsetGOscillator(std::make_shared<WaveformOscillator>(noiseOffsetG)),
   noiseOffsetBOscillator(std::make_shared<WaveformOscillator>(noiseOffsetB)),
   ShaderSettings(shaderId, j, "GlitchAudio") {
-    parameters = { shaderValue, noiseScale, noiseXOffset, noiseYOffset, audioThreshold, displacementExponent, displacementScale, noiseOffsetR, noiseOffsetG, noiseOffsetB };
-    oscillators = { shaderValueOscillator, noiseScaleOscillator, noiseXOffsetOscillator, noiseYOffsetOscillator, audioThresholdOscillator, displacementExponentOscillator, displacementScaleOscillator, noiseOffsetROscillator, noiseOffsetGOscillator, noiseOffsetBOscillator };
+    parameters = { noiseScale, noiseXOffset, noiseYOffset, audioThreshold, displacementExponent, displacementScale, noiseOffsetR, noiseOffsetG, noiseOffsetB };
+    oscillators = { noiseScaleOscillator, noiseXOffsetOscillator, noiseYOffsetOscillator, audioThresholdOscillator, displacementExponentOscillator, displacementScaleOscillator, noiseOffsetROscillator, noiseOffsetGOscillator, noiseOffsetBOscillator };
     load(j);
     registerParameters();
   };
@@ -88,7 +83,6 @@ struct GlitchAudioShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
 
@@ -103,9 +97,8 @@ struct GlitchAudioShader: Shader {
     shader.setUniform1f("noiseOffsetG", settings->noiseOffsetG->value);
     shader.setUniform1f("noiseOffsetB", settings->noiseOffsetB->value);
 
-    if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() >= 256)
-      shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0],
-                           256);
+    if (source != nullptr)
+      shader.setUniform1fv("audio", source->audioAnalysis.renderSpectrum.data(), 256);
     frame->draw(0, 0);
     shader.end();
     canvas->end();

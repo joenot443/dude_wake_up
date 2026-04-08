@@ -102,6 +102,16 @@ final class BrowserPreviewManager {
 
     // MARK: - Startup Preloading
 
+    /// Clear all cached snapshots and re-capture them using the given source.
+    /// Pass the selected video source node ID so effect previews use it as input.
+    func refreshAllSnapshots(preferredSourceId: String? = nil) {
+        engine.setPreferredPreviewSource(sourceId: preferredSourceId)
+        snapshots.removeAll()
+        destroyAll()
+        isPreloading = false
+        preloadAllSnapshots()
+    }
+
     /// Preload snapshots for all available shaders and sources.
     /// Processes in small batches to avoid exhausting GPU resources.
     func preloadAllSnapshots() {

@@ -51,7 +51,7 @@ struct BlendSettings: public ShaderSettings {
   BlendSettings(std::string shaderId, json j) :
   mode(std::make_shared<Parameter>("Mode", 4.0, 0.0, 13.0, ParameterType_Int)),
   flip(std::make_shared<Parameter>("Flip", 0.0, 0.0, 1.0, ParameterType_Bool)),
-  alpha(std::make_shared<Parameter>("Alpha", 1.0, 0.0, 1.0)),
+  alpha(std::make_shared<Parameter>("Alpha", 1.0, 0.0, 1.0, ParameterType_Bool)),
   amount(std::make_shared<Parameter>("Amount", 0.5, 0.0, 1.0)),
   alphaSwap(std::make_shared<Parameter>("Alpha Swap", 0.0, 0.0, 1.0, ParameterType_Bool)),
   alphaOscillator(std::make_shared<WaveformOscillator>(alpha)),
@@ -132,7 +132,7 @@ struct BlendShader: Shader {
       // Use the specific blendModeIndex for the preview
       shader.setUniform1i("mode", blendModeIndex);
       shader.setUniform1f("time", TimeService::getService()->timeParam->value);
-      shader.setUniform1f("alpha", settings->alpha->value);
+      shader.setUniform1f("alpha", settings->alpha->boolValue ? 1.0f : 0.0f);
       shader.setUniform2f("dimensions", destFbo->getWidth(), destFbo->getHeight());
 
       // Set textures based on flip setting
@@ -255,7 +255,7 @@ struct BlendShader: Shader {
       shader.begin();
       shader.setUniform1i("mode", settings->mode->intValue);
       shader.setUniform1f("time", TimeService::getService()->timeParam->value);
-      shader.setUniform1f("alpha", settings->alpha->value);
+      shader.setUniform1f("alpha", settings->alpha->boolValue ? 1.0f : 0.0f);
       shader.setUniform1f("amount", settings->amount->value);
       shader.setUniform1i("alphaSwap", settings->alphaSwap->boolValue ? 1 : 0);
       shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());

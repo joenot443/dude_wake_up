@@ -91,6 +91,21 @@ std::shared_ptr<VideoSourceSettings> Shader::sourceSettings() {
 
 void Shader::load(json j)
 {
+  if (!j.is_object()) return;
+
+  // Restore optional shaders (enabled state + parameters)
+  if (j.contains("optionalShaders") && j["optionalShaders"].is_array()) {
+    auto& optJson = j["optionalShaders"];
+    for (size_t i = 0; i < optJson.size() && i < optionalShaders.size(); i++) {
+      auto& entry = optJson[i];
+      if (entry.contains("enabled")) {
+        optionalShaders[i]->optionallyEnabled = entry["enabled"].get<bool>();
+      }
+      if (entry.contains("settings")) {
+        optionalShaders[i]->settings->load(entry["settings"]);
+      }
+    }
+  }
 }
 
 json Shader::serialize()
@@ -107,6 +122,19 @@ json Shader::serialize()
   // Always serialize x/y from settings (bridge sets these in NottawaApp).
   j["x"] = settings->x->value;
   j["y"] = settings->y->value;
+
+  // Serialize optional shaders (enabled state + parameters)
+  if (!optionalShaders.empty()) {
+    json optJson = json::array();
+    for (auto& opt : optionalShaders) {
+      json entry;
+      entry["type"] = opt->type();
+      entry["enabled"] = opt->optionallyEnabled;
+      entry["settings"] = opt->settings->serialize();
+      optJson.push_back(entry);
+    }
+    j["optionalShaders"] = optJson;
+  }
 
   return j;
 };
@@ -280,5 +308,11 @@ void Shader::setAudioUniform(std::vector<float> *audio) {
   std::vector<float> audioCopy = *audio;
   if (audioCopy.size() == 256) {
     shader.setUniform1fv("audio", &audioCopy[0], 256);
+  }
+}
+
+void Shader::setAudioUniform(const float *data, size_t count) {
+  if (data != nullptr && count > 0) {
+    shader.setUniform1fv("audio", data, std::min(count, (size_t)256));
   }
 }

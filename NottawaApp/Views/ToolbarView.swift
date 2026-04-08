@@ -42,6 +42,7 @@ struct ToolbarView: View {
             } label: {
                 Image(systemName: "sidebar.leading")
             }
+            .disabled(viewModel.stageModeEnabled)
             .help("Toggle Browser Sidebar")
             .accessibilityIdentifier("sidebar-toggle")
 
@@ -74,13 +75,21 @@ struct ToolbarView: View {
             } label: {
                 Image(systemName: "trash")
             }
-            .disabled(viewModel.selectedNodeIds.isEmpty)
+            .disabled(viewModel.selectedNodeIds.isEmpty && viewModel.selectedConnectionId == nil)
             .help("Delete selected (Delete)")
             .accessibilityIdentifier("delete-button")
 
             Spacer()
+
+            // Workspace name indicator
+            if let name = viewModel.currentWorkspaceName {
+                Text(name)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(theme.colors.textSecondary)
+                    .accessibilityIdentifier("workspace-name")
+            }
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.plainHitArea)
         .font(.system(size: 14))
         .foregroundStyle(theme.colors.textSecondary)
         .padding(.horizontal, 16)

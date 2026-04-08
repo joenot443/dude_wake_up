@@ -196,6 +196,19 @@ struct TextSourceControlsView: View {
                         .font(.caption)
                         .foregroundStyle(theme.colors.textSecondary)
                     Spacer()
+                    Button {
+                        engine.centerTextSource(sourceId: sourceId)
+                    } label: {
+                        Label("Center", systemImage: "rectangle.center.inset.filled")
+                            .font(.caption)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(theme.colors.surface)
+                            .clipShape(Capsule())
+                            .overlay(Capsule().strokeBorder(theme.colors.border, lineWidth: 0.5))
+                    }
+                    .buttonStyle(.plain)
+                    .help("Center text")
                     Text(String(format: "%.2f, %.2f", xPosition, yPosition))
                         .font(.caption)
                         .foregroundStyle(theme.colors.textTertiary)

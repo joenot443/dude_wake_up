@@ -164,6 +164,7 @@ public:
   void populateLastFrame();
 
   void setAudioUniform(std::vector<float> *audio);
+  void setAudioUniform(const float *data, size_t count);
 };
 
 #endif

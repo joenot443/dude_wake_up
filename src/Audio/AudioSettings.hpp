@@ -8,6 +8,7 @@
 #ifndef AudioSettings_h
 #define AudioSettings_h
 
+#include <array>
 #include <cmath>
 #include <chrono>
 #include <iostream>
@@ -135,6 +136,13 @@ struct AudioAnalysis {
   std::vector<float> waveform;
   std::vector<float> smoothWaveform;
 
+  // Fixed-size render-safe buffers — shaders read these instead of the vectors above.
+  // std::array never reallocates, so cross-thread reads can't crash.
+  static constexpr size_t kSpectrumSize = 256;
+  std::array<float, kSpectrumSize> renderSpectrum = {};
+  std::array<float, kSpectrumSize> renderMelSpectrum = {};
+  std::array<float, kSpectrumSize> renderWaveform = {};
+
   // Smoothing buffers for different modes
   std::deque<std::vector<float>> spectrumHistory;
   std::deque<std::vector<float>> melSpectrumHistory;
@@ -239,6 +247,14 @@ struct AudioAnalysis {
             result[i] /= history.size();
           }
         }
+
+        // Apply release decay: exponential blend toward current value
+        // rel=0 → instant (no hold), rel=1 → infinite hold
+        float rel = frequencyRelease->value;
+        for (size_t i = 0; i < result.size() && i < previous.size(); i++) {
+          // Exponential smoothing: blend previous toward current
+          result[i] = result[i] * (1.0f - rel) + previous[i] * rel;
+        }
         break;
       }
 
@@ -288,7 +304,6 @@ struct AudioAnalysis {
     }
 
     smoothMelSpectrum = applySmoothing(melFrequencySpectrum, smoothMelSpectrum, melSpectrumHistory, peakMelSpectrum);
-    smoothMelSpectrum = Vectors::scalarMultiply(smoothMelSpectrum, frequencyScale->value);
     // Clamp mel spectrum to [0, 1] to prevent out-of-bounds spikes
     for (size_t i = 0; i < smoothMelSpectrum.size(); i++) {
       smoothMelSpectrum[i] = std::max(0.0f, std::min(1.0f, smoothMelSpectrum[i]));
@@ -307,12 +322,28 @@ struct AudioAnalysis {
       smoothWaveform = waveform;
     }
     
+    // Copy into fixed-size render buffers (safe for cross-thread reads)
+    {
+      size_t n = std::min(smoothSpectrum.size(), kSpectrumSize);
+      std::copy_n(smoothSpectrum.begin(), n, renderSpectrum.begin());
+      if (n < kSpectrumSize) std::fill(renderSpectrum.begin() + n, renderSpectrum.end(), 0.0f);
+
+      n = std::min(smoothMelSpectrum.size(), kSpectrumSize);
+      std::copy_n(smoothMelSpectrum.begin(), n, renderMelSpectrum.begin());
+      if (n < kSpectrumSize) std::fill(renderMelSpectrum.begin() + n, renderMelSpectrum.end(), 0.0f);
+
+      n = std::min(smoothWaveform.size(), kSpectrumSize);
+      std::copy_n(smoothWaveform.begin(), n, renderWaveform.begin());
+      if (n < kSpectrumSize) std::fill(renderWaveform.begin() + n, renderWaveform.end(), 0.0f);
+    }
+
     rmsAnalysisParam.tick(gist->rootMeanSquare());
     rms->value = std::min(1.0f, rms->value * loudnessScale->value);
     std::vector<float> buckets = splitAndAverage(smoothMelSpectrum, 3);
-    lows->setValue(buckets[0]);
-    mids->setValue(buckets[1]);
-    highs->setValue(buckets[2]);
+    float fScale = frequencyScale->value;
+    lows->setValue(std::min(1.0f, buckets[0] * fScale));
+    mids->setValue(std::min(1.0f, buckets[1] * fScale));
+    highs->setValue(std::min(1.0f, buckets[2] * fScale));
   }
 
   float bpmPct() {

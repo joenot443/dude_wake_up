@@ -51,7 +51,7 @@ struct PreviewTileView: View {
                     .strokeBorder(Color(.separatorColor), lineWidth: 0.5)
             )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.plainHitArea)
         .onAppear {
             previewId = previewManager.previewId(for: shaderTypeRaw, isSource: isSource)
         }

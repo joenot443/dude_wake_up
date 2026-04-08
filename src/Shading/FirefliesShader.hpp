@@ -18,15 +18,11 @@
 #include <stdio.h>
 
 struct FirefliesSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
 
   FirefliesSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   ShaderSettings(shaderId, j, "Fireflies") {
-    parameters = { shaderValue };
-    oscillators = { shaderValueOscillator };
+    parameters = { };
+    oscillators = { };
     load(j);
     registerParameters();
   };
@@ -44,7 +40,6 @@ struct FirefliesShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
@@ -66,8 +61,6 @@ struct FirefliesShader: Shader {
 
   void drawSettings() override {
     CommonViews::H3Title("Fireflies");
-
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
   }
 };
 

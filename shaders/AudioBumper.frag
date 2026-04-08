@@ -3,6 +3,7 @@
 uniform sampler2D tex;
 uniform vec3 minColor;
 uniform vec3 maxColor;
+uniform float boost;
 in vec2 coord;
 uniform float audio[256];
 out vec4 outputColor;
@@ -15,8 +16,14 @@ void main() {
   p.x = floor(coord.x * bands) / bands;
   p.y = floor(coord.y * segs) / segs;
 
-  // read frequency data from first row of texture
-  float fft = audio[int(p.x * 256.)];
+  // read frequency data with logarithmic scaling, skipping sub-bass
+  float t = p.x;
+  float logValue = pow(t, 0.5);
+  int index = int(logValue * 223.0) + 32;
+  float fft = audio[clamp(index, 32, 255)];
+
+  // Boost and clamp so bars use the full visual range
+  fft = clamp(fft * boost, 0.0, 1.0);
 
   // led color
   vec3 color = mix(minColor, maxColor, sqrt(coord.y));

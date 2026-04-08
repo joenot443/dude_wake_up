@@ -48,6 +48,10 @@ typedef struct {
   float driverShift;           // -1.0 to 1.0
   float driverScale;           // 0.0 to 2.0
 
+  // MIDI binding info
+  int hasMidiBinding;          // 1 if parameter has a MIDI pairing
+  const char* midiDescriptor;  // Owned by caller - must free. NULL if no binding
+
   // Options (for int params with named choices, e.g. font selector)
   const char** options;        // Array of option strings (NULL if none) - caller must free each + array
   int optionCount;             // 0 if no options
@@ -191,6 +195,8 @@ char* ntw_get_shader_file_path(const char* shaderId);
 
 // Check if a shader supports auxiliary output.
 bool ntw_supports_aux_output(const char* shaderId);
+bool ntw_is_audio_reactive(const char* connectableId);
+bool ntw_is_audio_active(void);
 
 // ---------------------------------------------------------------------------
 // MARK: - Video Source Mutations (via ActionService)
@@ -292,6 +298,9 @@ void ntw_set_parameter_bool(const char* paramId, bool value);
 void ntw_set_parameter_color(const char* paramId,
                              float r, float g, float b, float a);
 void ntw_toggle_parameter_favorite(const char* paramId);
+void ntw_reset_parameter(const char* paramId);
+void ntw_reset_all_parameters(const char* connectableId);
+void ntw_clear_feedback_buffer(const char* shaderId);
 
 // ---------------------------------------------------------------------------
 // MARK: - Oscillator Control
@@ -525,9 +534,16 @@ void ntw_destroy_all_previews(void);
 // Tick all preview instances (called from engine loop).
 void ntw_tick_previews(void);
 
+// Set the preferred video source ID for effect preview input.
+// Pass NULL to clear the preference (falls back to any active source).
+void ntw_set_preferred_preview_source(const char* sourceId);
+
 // ---------------------------------------------------------------------------
 // MARK: - Strand Operations
 // ---------------------------------------------------------------------------
+
+// Get the strands folder path. Caller must free the returned string.
+char* ntw_get_strands_folder_path(void);
 
 // Save a strand from a node to a file.
 // Returns true on success.
@@ -733,6 +749,24 @@ void ntw_set_text_source_text(const char* sourceId, const char* text);
 void ntw_set_text_source_font_size(const char* sourceId, int fontSize);
 void ntw_set_text_source_font_index(const char* sourceId, int fontIndex);
 void ntw_set_text_source_position(const char* sourceId, float x, float y);
+void ntw_center_text_source(const char* sourceId);
+
+// ---------------------------------------------------------------------------
+// MARK: - Icon Source State
+// ---------------------------------------------------------------------------
+
+typedef struct {
+    int isIconSource;       // 1 if this connectable is an IconSource
+    int selectedIndex;      // Currently selected icon index
+    int iconCount;          // Total available icons
+    const char** iconNames;     // Array of icon name strings (owned, must free)
+    const char** iconPaths;     // Array of absolute file paths (owned, must free)
+    const char** iconCategories; // Array of category strings (owned, must free)
+} NTWIconSourceState;
+
+NTWIconSourceState ntw_get_icon_source_state(const char* sourceId);
+void ntw_free_icon_source_state(NTWIconSourceState* state);
+void ntw_set_icon_source_icon(const char* sourceId, int iconIndex);
 
 // ---------------------------------------------------------------------------
 // MARK: - Available Non-Shader Sources (for sidebar browser)
@@ -810,6 +844,30 @@ char** ntw_load_strand_from_json(const char* jsonStr, int* outCount);
 
 // Get serialized strand JSON for a node. Caller must free with ntw_free_string().
 char* ntw_get_strand_json_for_node(const char* nodeId);
+
+// ---------------------------------------------------------------------------
+// MARK: - MIDI Control
+// ---------------------------------------------------------------------------
+
+// Begin MIDI learning for a parameter (next MIDI input will bind to it).
+void ntw_begin_midi_learning(const char* paramId);
+
+// Stop MIDI learning without binding.
+void ntw_stop_midi_learning(void);
+
+// Returns 1 if currently in MIDI learning mode.
+int ntw_is_midi_learning(void);
+
+// Returns the param ID currently being learned, or NULL if not learning.
+// Caller must free.
+char* ntw_get_midi_learning_param_id(void);
+
+// Remove the MIDI binding from a parameter.
+void ntw_remove_midi_binding(const char* paramId);
+
+// Callback fired when a MIDI binding is learned.
+typedef void (*NTWMidiLearnedCallback)(const char* paramId, const char* descriptor);
+void ntw_register_midi_learned_callback(NTWMidiLearnedCallback callback);
 
 // ---------------------------------------------------------------------------
 // MARK: - Texture Sharing (IOSurface)

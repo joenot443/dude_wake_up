@@ -87,7 +87,7 @@ public:
   keyThresholdOscillator(std::make_shared<WaveformOscillator>(keyThreshold)),
   delayAmount(std::make_shared<Parameter>("Delay Amount", 20.0, 0.0, 28.0)),
   delayAmountOscillator(std::make_shared<WaveformOscillator>(delayAmount)),
-  lumaKeyEnabled(std::make_shared<Parameter>("Luma Key Enabled", 0.0, 0.0, 0.0)),
+  lumaKeyEnabled(std::make_shared<Parameter>("Luma Key Enabled", ParameterType_Bool)),
   xPosition(std::make_shared<Parameter>("X", 0.0, -1.0, 1.0)),
   yPosition(std::make_shared<Parameter>("Y", 0.0, -1.0, 1.0)),
   xPositionOscillator(std::make_shared<WaveformOscillator>(xPosition)),
@@ -95,7 +95,7 @@ public:
   positionDropdown(std::make_shared<Parameter>("Position Dropdown")),
   scale(std::make_shared<Parameter>("Scale", 1.0, 0.0, 2.0)),
   scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
-  sourceSelection(std::make_shared<Parameter>("Source", 1.0, 0.0, 3.0)),
+  sourceSelection(std::make_shared<Parameter>("Source", 1.0, 0.0, 3.0, ParameterType_Int)),
   shouldClearFeedbackBuffer(std::make_shared<Parameter>("Clear Feedback Buffer", ParameterType_Bool)),
   allowAuxillary(std::make_shared<Parameter>("Allow Auxillary", ParameterType_Bool)),
   shaderId(shaderId),
@@ -104,7 +104,7 @@ public:
     blendMode->options = {"Mix", "Multiply", "Screen", "Darken", "Lighten", "Difference", "Exclusion", "Overlay", "Hard Light", "Soft Light", "Color Dodge", "Linear Dodge", "Burn", "Linear Burn"};
     sourceSelection->options = {"Origin Source", "Feedback", "Final Node", "Original"};
 
-    parameters = {mainAlpha, feedbackMix, feedbackAlpha, keyValue, keyThreshold, delayAmount, lumaKeyEnabled, xPosition, yPosition, scale, sourceSelection, blendMode, priority, rotation, allowAuxillary};
+    parameters = {allowAuxillary, mainAlpha, feedbackMix, feedbackAlpha, keyValue, keyThreshold, delayAmount, lumaKeyEnabled, xPosition, yPosition, scale, sourceSelection, blendMode, priority, rotation};
     oscillators = {mainAlphaOscillator, feedbackMixOscillator, feedbackAlphaOscillator, keyValueOscillator, keyThresholdOscillator, delayAmountOscillator, xPositionOscillator, yPositionOscillator, scaleOscillator, rotationOscillator };
 
     load(j);

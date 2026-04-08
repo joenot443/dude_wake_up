@@ -19,9 +19,6 @@
 #include <stdio.h>
 
 struct LavaSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
-
   std::shared_ptr<Parameter> smoothness;
   std::shared_ptr<WaveformOscillator> smoothnessOscillator;
 
@@ -29,15 +26,13 @@ struct LavaSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> blobCountOscillator;
 
   LavaSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   smoothness(std::make_shared<Parameter>("Smoothness", 0.4, 0.1, 1.0)),
   smoothnessOscillator(std::make_shared<WaveformOscillator>(smoothness)),
   blobCount(std::make_shared<Parameter>("Blob Count", 8.0, 2.0, 16.0, ParameterType_Int)),
   blobCountOscillator(std::make_shared<WaveformOscillator>(blobCount)),
   ShaderSettings(shaderId, j, "Lava") {
-    parameters = { shaderValue, smoothness, blobCount };
-    oscillators = { shaderValueOscillator, smoothnessOscillator, blobCountOscillator };
+    parameters = { smoothness, blobCount };
+    oscillators = { smoothnessOscillator, blobCountOscillator };
     load(j);
     registerParameters();
   };
@@ -55,7 +50,6 @@ struct LavaShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("smoothness", settings->smoothness->value);
     shader.setUniform1f("blobCount", settings->blobCount->value);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);

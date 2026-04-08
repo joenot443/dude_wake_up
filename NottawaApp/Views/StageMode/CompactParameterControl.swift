@@ -80,7 +80,7 @@ struct CompactParameterControl: View {
                                 .frame(width: 16, height: 16)
                                 .background(theme.colors.surface, in: RoundedRectangle(cornerRadius: 3))
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.plainHitArea)
                         .disabled(intValue <= Int(param.minValue))
 
                         DSSlider(
@@ -102,7 +102,7 @@ struct CompactParameterControl: View {
                                 .frame(width: 16, height: 16)
                                 .background(theme.colors.surface, in: RoundedRectangle(cornerRadius: 3))
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.plainHitArea)
                         .disabled(intValue >= Int(param.maxValue))
 
                         Text("\(intValue)")
@@ -179,7 +179,7 @@ struct CompactParameterControl: View {
                     .font(.system(size: 9))
                     .foregroundStyle(param.oscillatorEnabled ? .cyan : .secondary)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.plainHitArea)
         }
     }
 
@@ -191,7 +191,7 @@ struct CompactParameterControl: View {
                 .font(.system(size: 9))
                 .foregroundStyle(theme.colors.warning)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.plainHitArea)
         .help("Remove from favorites")
     }
 }

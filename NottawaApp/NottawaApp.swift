@@ -12,11 +12,12 @@ import UniformTypeIdentifiers
 struct NottawaApp: App {
     @State private var viewModel = NodeEditorViewModel()
     @State private var themeManager = ThemeManager()
+    @State private var helpGuide = HelpGuideViewModel()
     @State private var engineStatus: EngineStatus = .idle
     @State private var stretchPreviewWindows = false
 
     var body: some Scene {
-        WindowGroup {
+        Window("Nottawa", id: "main") {
             ColorSchemeObserver(themeManager: themeManager) {
                 Group {
                     switch engineStatus {
@@ -24,6 +25,7 @@ struct NottawaApp: App {
                         MainEditorView()
                             .environment(viewModel)
                             .environment(themeManager)
+                            .environment(helpGuide)
                             .navigationTitle(viewModel.currentWorkspaceName ?? "Nottawa")
                             .overlay {
                                 if viewModel.showWelcomeScreen {
@@ -86,9 +88,17 @@ struct NottawaApp: App {
                     let panel = NSOpenPanel()
                     panel.allowedContentTypes = [.json]
                     panel.allowsMultipleSelection = false
-                    panel.begin { response in
-                        if response == .OK, let url = panel.url {
-                            viewModel.openWorkspace(url: url)
+                    if let window = NSApp.keyWindow ?? NSApp.mainWindow {
+                        panel.beginSheetModal(for: window) { response in
+                            if response == .OK, let url = panel.url {
+                                viewModel.openWorkspace(url: url)
+                            }
+                        }
+                    } else {
+                        panel.begin { response in
+                            if response == .OK, let url = panel.url {
+                                viewModel.openWorkspace(url: url)
+                            }
                         }
                     }
                 }
@@ -162,6 +172,21 @@ struct NottawaApp: App {
             engine.start()
             engineStatus = .ready
             viewModel.setup()
+            helpGuide.viewModel = viewModel
+
+            // GLFW creates a hidden window for the GL context that registers
+            // raw accessibility elements, preventing XCUITest from seeing the
+            // SwiftUI window. Strip accessibility from GLFW windows.
+            DispatchQueue.main.async {
+                for window in NSApp.windows where window.contentViewController == nil {
+                    // Remove all accessibility children and hide the window
+                    window.setAccessibilityChildren([])
+                    window.setAccessibilityWindows([])
+                    window.setAccessibilityElement(false)
+                    window.setAccessibilityHidden(true)
+                    window.orderOut(nil)
+                }
+            }
         } else {
             engineStatus = .error("Failed to initialize engine")
         }
@@ -171,9 +196,17 @@ struct NottawaApp: App {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.json]
         panel.nameFieldStringValue = "Workspace-\(dateString()).json"
-        panel.begin { response in
-            if response == .OK, let url = panel.url {
-                viewModel.saveWorkspaceAs(url: url)
+        if let window = NSApp.keyWindow ?? NSApp.mainWindow {
+            panel.beginSheetModal(for: window) { response in
+                if response == .OK, let url = panel.url {
+                    self.viewModel.saveWorkspaceAs(url: url)
+                }
+            }
+        } else {
+            panel.begin { response in
+                if response == .OK, let url = panel.url {
+                    self.viewModel.saveWorkspaceAs(url: url)
+                }
             }
         }
     }

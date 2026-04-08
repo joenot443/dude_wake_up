@@ -229,10 +229,8 @@ void EngineLoop::tick() {
   // 8. Update audio analysis
   AudioSourceService::getService()->update();
 
-  // 9. Update MIDI (skip in NottawaApp — MIDI init calls std::terminate)
-#ifndef NOTTAWA_ENGINE_ONLY
+  // 9. Update MIDI
   MidiService::getService()->update();
-#endif
 }
 
 void EngineLoop::releaseContext() {

@@ -19,15 +19,11 @@
 
 struct HilbertSettings: public ShaderSettings {
 	public:
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderWaveformOscillator;
 
   HilbertSettings(std::string shaderId, json j, std::string name) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 1.0  , -1.0, 2.0)),
-  shaderWaveformOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   ShaderSettings(shaderId, j, name) {
-    parameters = { shaderValue };
-    oscillators = { shaderWaveformOscillator };
+    parameters = { };
+    oscillators = { };
     load(j);
     registerParameters();
   };
@@ -45,7 +41,6 @@ struct HilbertShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("color", settings->shaderValue->value);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
@@ -65,9 +60,6 @@ ShaderType type() override {
   }
 
   void drawSettings() override {
-    
-
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderWaveformOscillator);
   }
 };
 

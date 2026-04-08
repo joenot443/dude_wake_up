@@ -19,9 +19,6 @@
 #include <stdio.h>
 
 struct GlassySettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
-
   std::shared_ptr<Parameter> specularPower;
   std::shared_ptr<WaveformOscillator> specularPowerOscillator;
 
@@ -29,15 +26,13 @@ struct GlassySettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> reflectivityOscillator;
 
   GlassySettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   specularPower(std::make_shared<Parameter>("Specular Power", 32.0, 4.0, 128.0)),
   specularPowerOscillator(std::make_shared<WaveformOscillator>(specularPower)),
   reflectivity(std::make_shared<Parameter>("Reflectivity", 0.9, 0.0, 1.0)),
   reflectivityOscillator(std::make_shared<WaveformOscillator>(reflectivity)),
   ShaderSettings(shaderId, j, "Glassy") {
-    parameters = { shaderValue, specularPower, reflectivity };
-    oscillators = { shaderValueOscillator, specularPowerOscillator, reflectivityOscillator };
+    parameters = { specularPower, reflectivity };
+    oscillators = { specularPowerOscillator, reflectivityOscillator };
     load(j);
     registerParameters();
   };
@@ -55,7 +50,6 @@ struct GlassyShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("specularPower", settings->specularPower->value);
     shader.setUniform1f("reflectivity", settings->reflectivity->value);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);

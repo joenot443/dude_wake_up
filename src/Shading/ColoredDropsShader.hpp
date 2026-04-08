@@ -31,8 +31,8 @@ struct ColoredDropsSettings: public ShaderSettings {
   zoom(std::make_shared<Parameter>("Zoom", 1.0, 0.1, 10.0)), // Initialize new parameter
   brightness(std::make_shared<Parameter>("Brightness", 1.0, 0.0, 2.0)), // Initialize new parameter
   speed(std::make_shared<Parameter>("Speed", 0.5, 0.0, 2.0)), // Add speed initialization
-  color1(std::make_shared<Parameter>("Color 1")), // Initialize color1
-  color2(std::make_shared<Parameter>("Color 2")), // Initialize color2
+  color1(std::make_shared<Parameter>("Color 1", ParameterType_Color)), // Initialize color1
+  color2(std::make_shared<Parameter>("Color 2", ParameterType_Color)), // Initialize color2
   zoomOscillator(std::make_shared<WaveformOscillator>(zoom)), // Initialize new oscillator
   brightnessOscillator(std::make_shared<WaveformOscillator>(brightness)), // Initialize new oscillator
   speedOscillator(std::make_shared<WaveformOscillator>(speed)), // Initialize speedOscillator

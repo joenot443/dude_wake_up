@@ -231,14 +231,7 @@ void AudioSourceService::loadConfig(json j) {
     }
   }
 
-  // Restore the active state
-  if (j.contains("active")) {
-    bool wasActive = j["active"];
-    // Don't set active first - setup() will set it to true
-    if (wasActive) {
-      selectedAudioSource->setup();
-    }
-  }
+  // Always start with audio analysis off — user must enable manually
 
   // Restore audio analysis settings (release/scale values)
   if (j.contains("frequencyRelease")) {

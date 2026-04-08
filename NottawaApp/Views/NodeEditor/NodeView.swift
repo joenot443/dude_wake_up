@@ -14,6 +14,7 @@ struct NodeView: View {
 
     @Environment(NodeEditorViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var theme
+    @Environment(HelpGuideViewModel.self) private var helpGuide
 
     // Base dimensions (at scale 1.0)
     private let baseNodeWidth: CGFloat = 260
@@ -42,6 +43,24 @@ struct NodeView: View {
         viewModel.swapTargetNodeId == node.id
     }
 
+    private var isDropHoverTarget: Bool {
+        viewModel.dropHoverNodeId == node.id
+    }
+
+    private var inputSlots: [PinSlot] {
+        (0..<node.inputCount).map { slot in
+            PinSlot(slotIndex: slot, isConnected: connectedInputSlots.contains(slot))
+        }
+    }
+
+    private var outputSlots: [PinSlot] {
+        var slots = [PinSlot(slotIndex: 0, isConnected: hasOutputConnection)]
+        if node.supportsAuxOutput {
+            slots.append(PinSlot(slotIndex: 10, isConnected: hasAuxOutputConnection, label: "A"))
+        }
+        return slots
+    }
+
     // Scaled font helper
     private func scaledFont(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
         .system(size: size * scale, weight: weight)
@@ -58,6 +77,44 @@ struct NodeView: View {
                     .allowsHitTesting(false)
                     .opacity(node.isActive ? 1.0 : 0.4)
 
+                // Disconnected shader overlay — prompt to connect input
+                if node.isShader && node.inputCount > 0 && connectedInputSlots.isEmpty {
+                    ZStack {
+                        theme.colors.background.opacity(0.6)
+                        VStack(spacing: 4 * scale) {
+                            Image(systemName: "cable.connector.horizontal")
+                                .font(scaledFont(20))
+                                .foregroundStyle(theme.colors.textTertiary)
+                            Text("Connect a source")
+                                .font(scaledFont(10, weight: .medium))
+                                .foregroundStyle(theme.colors.textSecondary)
+                        }
+                    }
+                    .frame(width: nodeWidth, height: nodeHeight)
+                    .allowsHitTesting(false)
+                }
+
+                // Audio-reactive overlay — hint to enable audio
+                if node.isAudioReactive && !viewModel.isAudioActive {
+                    // Don't show if the "connect a source" overlay is visible
+                    let showsDisconnected = node.isShader && node.inputCount > 0 && connectedInputSlots.isEmpty
+                    if !showsDisconnected {
+                        ZStack {
+                            theme.colors.background.opacity(0.6)
+                            VStack(spacing: 4 * scale) {
+                                Image(systemName: "waveform")
+                                    .font(scaledFont(20))
+                                    .foregroundStyle(theme.colors.accent.opacity(0.8))
+                                Text("Requires audio input")
+                                    .font(scaledFont(9, weight: .medium))
+                                    .foregroundStyle(theme.colors.textSecondary)
+                            }
+                        }
+                        .allowsHitTesting(false)
+                        .frame(width: nodeWidth, height: nodeHeight)
+                    }
+                }
+
                 // Download overlay
                 if let progress = node.downloadProgress {
                     NodeDownloadOverlay(
@@ -73,7 +130,9 @@ struct NodeView: View {
                     // Title row
                     HStack(spacing: 4 * scale) {
                         Circle()
-                            .fill(node.isSource ? Color.green : theme.colors.accent)
+                            .fill(node.isActive
+                                  ? (node.isSource ? Color.green : theme.colors.accent)
+                                  : theme.colors.textTertiary)
                             .frame(width: 6 * scale, height: 6 * scale)
                         Text(node.name)
                             .font(scaledFont(11, weight: .bold))
@@ -83,57 +142,82 @@ struct NodeView: View {
                         Spacer()
                     }
 
-                    // Action buttons row
-                    HStack(spacing: 6 * scale) {
-                        Button {
-                            viewModel.toggleActiveState(node.id)
-                        } label: {
-                            Image(systemName: node.isActive ? "pause.fill" : "play.fill")
-                                .font(scaledFont(10, weight: .medium))
-                        }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(theme.colors.textOnAccent.opacity(0.7))
-
-                        Button {
-                            if isSwapTarget {
-                                viewModel.swapTargetNodeId = nil
-                            } else {
-                                viewModel.swapTargetNodeId = node.id
+                    // Action buttons row (selected only)
+                    if isSelected {
+                        HStack(spacing: 6 * scale) {
+                            Button {
+                                viewModel.toggleActiveState(node.id)
+                            } label: {
+                                Image(systemName: node.isActive ? "pause.fill" : "play.fill")
+                                    .font(scaledFont(10, weight: .medium))
                             }
-                        } label: {
-                            Image(systemName: "arrow.triangle.2.circlepath")
-                                .font(scaledFont(10, weight: .medium))
-                        }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(isSwapTarget ? theme.colors.accent : theme.colors.textOnAccent.opacity(0.7))
-                        .help(node.isShader ? "Swap shader type" : "Swap source type")
+                            .buttonStyle(.plainHitArea)
+                            .foregroundStyle(theme.colors.textOnAccent.opacity(0.7))
 
-                        Spacer()
+                            Button {
+                                if isSwapTarget {
+                                    viewModel.swapTargetNodeId = nil
+                                } else {
+                                    viewModel.swapTargetNodeId = node.id
+                                }
+                            } label: {
+                                Image(systemName: "arrow.triangle.2.circlepath")
+                                    .font(scaledFont(10, weight: .medium))
+                            }
+                            .buttonStyle(.plainHitArea)
+                            .foregroundStyle(isSwapTarget ? theme.colors.accent : theme.colors.textOnAccent.opacity(0.7))
+                            .help(node.isShader ? "Swap effect type" : "Swap source type")
+                            .popover(isPresented: Binding(
+                                get: { isSwapTarget },
+                                set: { if !$0 { viewModel.swapTargetNodeId = nil } }
+                            ), arrowEdge: .bottom) {
+                                NodeInlineBrowserView(
+                                    isShaderBrowser: node.isShader,
+                                    onSelect: { shaderType in
+                                        if node.isShader {
+                                            viewModel.swapShader(nodeId: node.id, newType: shaderType)
+                                        } else {
+                                            viewModel.swapSource(nodeId: node.id, newType: shaderType)
+                                        }
+                                        viewModel.swapTargetNodeId = nil
+                                    },
+                                    onCancel: {
+                                        viewModel.swapTargetNodeId = nil
+                                    }
+                                )
+                                .frame(width: 300, height: 420)
+                            }
 
-                        Button {
-                            viewModel.deleteNode(node.id)
-                        } label: {
-                            Image(systemName: "trash")
-                                .font(scaledFont(10, weight: .medium))
+                            Spacer()
+
+                            Button {
+                                viewModel.deleteNode(node.id)
+                            } label: {
+                                Image(systemName: "trash")
+                                    .font(scaledFont(10, weight: .medium))
+                            }
+                            .buttonStyle(.plainHitArea)
+                            .foregroundStyle(Color.red.opacity(0.7))
                         }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(Color.red.opacity(0.7))
+                        .transition(.opacity)
                     }
                 }
                 .padding(.horizontal, 10 * scale)
                 .padding(.bottom, 6 * scale)
-                .padding(.top, 20 * scale)
+                .padding(.top, isSelected ? 20 * scale : 4 * scale)
                 .background(
                     LinearGradient(
                         stops: [
                             .init(color: .clear, location: 0.0),
-                            .init(color: .black.opacity(0.6), location: 0.2),
-                            .init(color: .black.opacity(0.85), location: 1.0),
+                            .init(color: .black.opacity(isSelected ? 0.6 : 0.3), location: 0.2),
+                            .init(color: .black.opacity(isSelected ? 0.85 : 0.5), location: 1.0),
                         ],
                         startPoint: .top,
                         endPoint: .bottom
                     )
                 )
+                .opacity(isSelected ? 1.0 : 0.2)
+                .animation(.easeInOut(duration: 0.2), value: isSelected)
             }
             .frame(width: nodeWidth, height: nodeHeight)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
@@ -155,77 +239,56 @@ struct NodeView: View {
                     }
                 }
             )
-            // Edge-mounted input pins (left)
+            // Drop-on-node chain highlight
+            .overlay(
+                Group {
+                    if isDropHoverTarget {
+                        RoundedRectangle(cornerRadius: cornerRadius)
+                            .strokeBorder(theme.colors.success, lineWidth: 2.5 * scale)
+                        RoundedRectangle(cornerRadius: cornerRadius + 2)
+                            .strokeBorder(theme.colors.success.opacity(0.3), lineWidth: 4 * scale)
+                            .blur(radius: 6)
+                            .padding(-2)
+                    }
+                }
+            )
+            .animation(.easeInOut(duration: 0.15), value: isDropHoverTarget)
+            // Edge-mounted input strip (left)
             .overlay(alignment: .leading) {
                 if node.inputCount > 0 {
-                    VStack(spacing: 4 * scale) {
-                        ForEach(0..<node.inputCount, id: \.self) { slot in
-                            PinView(
-                                nodeId: node.id,
-                                slotIndex: slot,
-                                isOutput: false,
-                                isConnected: connectedInputSlots.contains(slot),
-                                scale: scale,
-                                positionOffset: -pinSize / 2
-                            )
-                        }
-                    }
+                    PinStripView(
+                        nodeId: node.id,
+                        isOutput: false,
+                        slots: inputSlots,
+                        scale: scale,
+                        positionOffset: -pinSize / 2
+                    )
                     .offset(x: -pinSize / 2)
                 }
             }
-            // Edge-mounted output pins (right)
+            // Edge-mounted output strip (right)
             .overlay(alignment: .trailing) {
-                VStack(spacing: 4 * scale) {
-                    PinView(
-                        nodeId: node.id,
-                        slotIndex: 0,
-                        isOutput: true,
-                        isConnected: hasOutputConnection,
-                        scale: scale,
-                        positionOffset: pinSize / 2
-                    )
-                    if node.supportsAuxOutput {
-                        PinView(
-                            nodeId: node.id,
-                            slotIndex: 10,
-                            isOutput: true,
-                            isConnected: hasAuxOutputConnection,
-                            scale: scale,
-                            positionOffset: pinSize / 2
-                        )
-                        .overlay(
-                            Text("A")
-                                .font(scaledFont(6, weight: .bold))
-                                .foregroundStyle(theme.colors.textOnAccent)
-                                .allowsHitTesting(false)
-                        )
-                    }
-                }
+                PinStripView(
+                    nodeId: node.id,
+                    isOutput: true,
+                    slots: outputSlots,
+                    scale: scale,
+                    positionOffset: pinSize / 2
+                )
                 .offset(x: pinSize / 2)
             }
             // Shadow
             .shadow(color: .black.opacity(0.4), radius: 8 * scale, y: 4 * scale)
 
-            // Inline swap browser — expands below the node
-            if isSwapTarget {
-                NodeInlineBrowserView(
-                    isShaderBrowser: node.isShader,
-                    onSelect: { shaderType in
-                        if node.isShader {
-                            viewModel.swapShader(nodeId: node.id, newType: shaderType)
-                        } else {
-                            viewModel.swapSource(nodeId: node.id, newType: shaderType)
-                        }
-                        viewModel.swapTargetNodeId = nil
-                    },
-                    onCancel: {
-                        viewModel.swapTargetNodeId = nil
-                    }
-                )
-            }
         }
         .frame(width: nodeWidth)
         .contentShape(RoundedRectangle(cornerRadius: cornerRadius))
+        .overlay {
+            if let tooltip = helpGuide.tooltip(for: node) {
+                NodeHelpTooltip(tooltip: tooltip, nodeWidth: nodeWidth, nodeHeight: nodeHeight, scale: scale)
+                    .allowsHitTesting(false)
+            }
+        }
         .accessibilityIdentifier("node-\(node.name)")
     }
 
@@ -370,7 +433,7 @@ struct NodeInlineBrowserView: View {
                                 .foregroundStyle(selectedCategory == cat ? theme.colors.textOnAccent : .primary)
                                 .clipShape(Capsule())
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.plainHitArea)
                     }
                 }
                 .padding(.horizontal, 8)
@@ -412,11 +475,48 @@ struct NodeInlineBrowserView: View {
                     .padding(.vertical, 5)
                     .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.plainHitArea)
         }
         .background(Color(.windowBackgroundColor))
         .onDisappear {
             previewManager.destroyAll()
+        }
+    }
+}
+
+// MARK: - Help Tooltip Attached to Node
+
+/// Tooltip card + animated arrow positioned relative to the node it's attached to.
+private struct NodeHelpTooltip: View {
+    let tooltip: HelpGuideViewModel.NodeTooltip
+    let nodeWidth: CGFloat
+    let nodeHeight: CGFloat
+    let scale: CGFloat
+
+    var body: some View {
+        Group {
+            switch tooltip.side {
+            case .trailing:
+                HStack(spacing: 8) {
+                    HelpArrowView(direction: .left)
+                    HelpStepCardView(title: tooltip.title, bodyText: tooltip.bodyText)
+                }
+                .offset(x: nodeWidth / 2 + 180)
+
+            case .leading:
+                HStack(spacing: 8) {
+                    HelpStepCardView(title: tooltip.title, bodyText: tooltip.bodyText)
+                    HelpArrowView(direction: .right)
+                }
+                .offset(x: -(nodeWidth / 2 + 180))
+
+            case .below:
+                VStack(spacing: 8) {
+                    HelpArrowView(direction: .up)
+                    HelpStepCardView(title: tooltip.title, bodyText: tooltip.bodyText)
+                }
+                .offset(y: nodeHeight / 2 + 80)
+            }
         }
     }
 }

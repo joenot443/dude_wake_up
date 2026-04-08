@@ -35,37 +35,28 @@ vec3 hsv2rgb(vec3 c) {
 }
 
 void main() {
-  float audioData = 0.0;
-  vec2 uv = coord.xy / dimensions.xy;
+  vec2 uv = coord;
 
-  for (int i = 0; i < 256; i++) {
-    audioData += audio[int(uv.x * 256.)] * amount;}
-  
-  audioData /= 256.0;
-  
+  // Sample audio at this horizontal position
+  float audioData = audio[int(uv.x * 255.0)] * amount;
+
+  // Compute pixel grid size from audio level
   float pixelsize = smoothstep(-1.0, 1.0, audioData) * audioData * 80.0;
-  
-  if (audioData <= 0.2) {audioData = 0.0;}
-  
-  if (audioData <= 0.3) {pixelsize = 1.0;}
-  
-  vec2 gridSize = vec2(pixelsize, pixelsize);
-  
-  outputColor = vec4(0.0, 0.0, 0.0, 1.0);
-  
-  vec2 gridPos = floor(coord / gridSize) * gridSize;
-  
-  vec2 webcamCoord = (gridPos + 0.5 * gridSize) / dimensions.xy;
-  
-  vec3 webcamColor = texture(tex, coord).rgb;
-  
+
+  if (audioData <= 0.2) { audioData = 0.0; }
+  if (audioData <= 0.3) { pixelsize = 1.0; }
+
+  // Convert pixel size to UV-space grid size
+  vec2 gridSize = vec2(pixelsize) / dimensions;
+
+  // Snap to grid for pixelation effect
+  vec2 gridUV = floor(uv / gridSize) * gridSize + 0.5 * gridSize;
+
+  vec3 webcamColor = texture(tex, gridUV).rgb;
+
   vec3 hsvColor = rgb2hsv(webcamColor);
-  
   hsvColor.x += audioData * 11.5;
-  
   vec3 finalColor = hsv2rgb(hsvColor);
-  
-//  finalColor *= audioData;
-  
+
   outputColor = vec4(finalColor, 1.0);
 }

@@ -43,13 +43,6 @@ void TextSource::setup() {
 }
 
 void TextSource::saveFrame() {
-  // Changed resolution or antialiasing settings
-  if (static_cast<int>(fbo->getWidth()) != LayoutStateService::getService()->resolution.x ||
-      lastSampleCount != displayText->textSmoothing->value) {
-    lastSampleCount = displayText->textSmoothing->value;
-    setup();
-  }
-
   // Sync font from fontSelector (normally done by ImGui TextEditorView,
   // but NottawaApp doesn't run ImGui).
   if (displayText->fontSelector->intValue >= 0 &&
@@ -59,7 +52,72 @@ void TextSource::saveFrame() {
       displayText->font = selectedFont;
     }
   }
-  
+
+  // Reload font if size or path changed
+  bool fontChanged = false;
+  if (!font.isLoaded() ||
+      font.getSize() != displayText->fontSize
+      || fontPath != displayText->font.path) {
+    fontPath = displayText->font.path;
+    font.load(displayText->font.path, displayText->fontSize, true, true, true);
+    fontChanged = true;
+  }
+
+  // Determine target FBO size
+  int targetWidth = LayoutStateService::getService()->resolution.x;
+  int targetHeight = LayoutStateService::getService()->resolution.y;
+
+  if (displayText->cropToText->boolValue && font.isLoaded() && !displayText->text.empty()) {
+    ofRectangle bounds = font.getStringBoundingBox(displayText->text, 0, 0);
+    // Add padding for stroke weight and edge softness
+    float padding = displayText->strokeEnabled->boolValue
+      ? displayText->strokeWeight->value + displayText->edgeSoftness->value
+      : displayText->edgeSoftness->value;
+    int pad = static_cast<int>(ceil(padding)) + 2;
+    targetWidth = std::max(1, static_cast<int>(ceil(bounds.width)) + pad * 2);
+    targetHeight = std::max(1, static_cast<int>(ceil(bounds.height)) + pad * 2);
+  }
+
+  // Reallocate FBOs if size or antialiasing changed
+  if (static_cast<int>(fbo->getWidth()) != targetWidth ||
+      static_cast<int>(fbo->getHeight()) != targetHeight ||
+      lastSampleCount != displayText->textSmoothing->value) {
+    lastSampleCount = displayText->textSmoothing->value;
+
+    ofFbo::Settings fboSettings;
+    fboSettings.width = targetWidth;
+    fboSettings.height = targetHeight;
+    fboSettings.internalformat = GL_RGBA;
+    fboSettings.numSamples = max(4, static_cast<int>(displayText->textSmoothing->value));
+    fboSettings.useDepth = false;
+    fboSettings.useStencil = false;
+    fboSettings.minFilter = GL_LINEAR;
+    fboSettings.maxFilter = GL_LINEAR;
+
+    fbo->allocate(fboSettings);
+    optionalFbo->allocate(fboSettings);
+    tempFbo.allocate(fboSettings);
+
+    font.setLetterSpacing(1.0);
+    strokeShader.load("shaders/Stroke");
+  }
+
+  // Compute draw position
+  float drawX, drawY;
+  if (displayText->cropToText->boolValue && font.isLoaded() && !displayText->text.empty()) {
+    ofRectangle bounds = font.getStringBoundingBox(displayText->text, 0, 0);
+    float padding = displayText->strokeEnabled->boolValue
+      ? displayText->strokeWeight->value + displayText->edgeSoftness->value
+      : displayText->edgeSoftness->value;
+    int pad = static_cast<int>(ceil(padding)) + 2;
+    // Offset so text is centered in the tight FBO
+    drawX = pad - bounds.x;
+    drawY = pad - bounds.y;
+  } else {
+    drawX = fbo->getWidth() * displayText->xPosition->value;
+    drawY = fbo->getHeight() * displayText->yPosition->value;
+  }
+
   tempFbo.begin();
 
   // Enable smooth rendering
@@ -67,60 +125,27 @@ void TextSource::saveFrame() {
   ofEnableAlphaBlending();
   ofEnableAntiAliasing();
 
-  bool shouldClear = false;
-  
-  // Clear if we've changed font size
-  if (!font.isLoaded() ||
-      font.getSize() != displayText->fontSize
-      || fontPath != displayText->font.path) {
-    fontPath = displayText->font.path;
-    font.load(displayText->font.path, displayText->fontSize, true, true, true); // antialiased
-    shouldClear = true;
-  }
-  
-  
-  // Clear if our text has changed
-  if (displayText->text != lastText) {
-    lastText = displayText->text;
-    shouldClear = true;
-  }
-  
-  // Clear if we've moved
-  if (
-      xPos != settings->width->intValue * displayText->xPosition->value ||
-      yPos != settings->height->intValue * (displayText->yPosition->value)) {
-        xPos = fbo->getWidth() * displayText->xPosition->value;
-        yPos = fbo->getHeight() * displayText->yPosition->value;
-        shouldClear = true;
-      }
-  
-  if (shouldClear) {
-    if (displayText->backgroundEnabled->boolValue) {
-      auto bg = displayText->backgroundColor->color->data();
-      ofClear(bg[0] * 255.0, bg[1] * 255.0, bg[2] * 255.0, bg[3] * 255.0);
-    } else {
-      ofClear(0, 0.);
-    }
+  // Update cached position
+  xPos = drawX;
+  yPos = drawY;
+
+  // Always clear — color, font, position, or text changes all require a fresh canvas
+  if (displayText->backgroundEnabled->boolValue) {
+    auto bg = displayText->backgroundColor->color->data();
+    ofClear(bg[0] * 255.0, bg[1] * 255.0, bg[2] * 255.0, bg[3] * 255.0);
   } else {
-    if (displayText->backgroundEnabled->boolValue) {
-      auto bg = displayText->backgroundColor->color->data();
-      ofSetColor(bg[0] * 255.0, bg[1] * 255.0, bg[2] * 255.0, bg[3] * 255.0);
-    } else {
-      ofSetColor(0, 0, 0, 0);
-    }
-    ofDrawRectangle(0, 0, fbo->getWidth(), fbo->getHeight());
+    ofClear(0, 0.);
   }
-  
+
   // Draw the text
   ofSetColor(ofColor(255.0 * displayText->color->color->data()[0], 255.0 * displayText->color->color->data()[1], 255.0 * displayText->color->color->data()[2], 255.0 * displayText->color->color->data()[3]));
-  
-  // Flip y for OF style coordinates
+
   font.drawString(displayText->text, xPos, yPos);
 
   // Restore rendering settings
   ofDisableAntiAliasing();
   tempFbo.end();
-  
+
   fbo->begin();
   if (displayText->backgroundEnabled->boolValue) {
     auto bg = displayText->backgroundColor->color->data();
@@ -147,12 +172,10 @@ void TextSource::saveFrame() {
     tempFbo.draw(0,0);
     strokeShader.end();
   } else {
-    // When stroke is disabled, still use the stroke shader for its antialiasing
-    // but with a very small weight to preserve text quality
     strokeShader.begin();
     strokeShader.setUniform4f("backgroundColor", displayText->color->color->data()[0], displayText->color->color->data()[1], displayText->color->color->data()[2], 0.0);
-    strokeShader.setUniform4f("strokeColor", displayText->color->color->data()[0], displayText->color->color->data()[1], displayText->color->color->data()[2], 0.0); // Same as text color
-    strokeShader.setUniform1f("weight", 0.5); // Very small weight for edge smoothing only
+    strokeShader.setUniform4f("strokeColor", displayText->color->color->data()[0], displayText->color->color->data()[1], displayText->color->color->data()[2], 0.0);
+    strokeShader.setUniform1f("weight", 0.5);
     strokeShader.setUniform1f("fineness", 64.0);
     strokeShader.setUniform1f("edgeSoftness", displayText->edgeSoftness->value);
     strokeShader.setUniform2f("dimensions", fbo->getWidth(), fbo->getHeight());
@@ -185,6 +208,7 @@ json TextSource::serialize() {
   j["backgroundEnabled"] = displayText->backgroundEnabled->boolValue;
   j["edgeSoftness"] = displayText->edgeSoftness->value;
   j["textSmoothing"] = displayText->textSmoothing->value;
+  j["cropToText"] = displayText->cropToText->boolValue;
   auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);
   if (node != nullptr) {
     j["x"] = node->position.x;
@@ -242,6 +266,9 @@ void TextSource::load(json j) {
   if (j.contains("textSmoothing")) {
     displayText->textSmoothing->value = j["textSmoothing"];
   }
+  if (j.contains("cropToText")) {
+    displayText->cropToText->setBoolValue(j["cropToText"]);
+  }
   if (j.contains("x")) {
     auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);
     if (node != nullptr) {
@@ -254,6 +281,19 @@ void TextSource::load(json j) {
       node->position.y = j["y"];
     }
   }
+}
+
+void TextSource::centerText() {
+  if (!font.isLoaded() || displayText->text.empty()) return;
+  if (!fbo->isAllocated()) return;
+
+  ofRectangle bounds = font.getStringBoundingBox(displayText->text, 0, 0);
+  float fboW = fbo->getWidth();
+  float fboH = fbo->getHeight();
+  if (fboW <= 0 || fboH <= 0) return;
+
+  displayText->xPosition->value = ((fboW - bounds.width) / 2.0f - bounds.x) / fboW;
+  displayText->yPosition->value = ((fboH - bounds.height) / 2.0f - bounds.y) / fboH;
 }
 
 void TextSource::drawSettings() {

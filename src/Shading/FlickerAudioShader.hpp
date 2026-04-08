@@ -22,7 +22,7 @@ struct FlickerAudioSettings: public ShaderSettings {
   std::shared_ptr<Parameter> enableAudio;
 
   FlickerAudioSettings(std::string shaderId, json j) :
-  enableAudio(std::make_shared<Parameter>("Enable Audio", 0.5, 0.0, 1.0)),
+  enableAudio(std::make_shared<Parameter>("Enable Audio", ParameterType_Bool)),
   ShaderSettings(shaderId, j, "FlickerAudio") {
     parameters = { enableAudio };
     oscillators = { };
@@ -43,9 +43,8 @@ struct FlickerAudioShader: Shader {
     canvas->begin();
     shader.begin();
     auto source = AudioSourceService::getService()->selectedAudioSource;
-    if (settings->enableAudio->boolValue && source != nullptr && source->audioAnalysis.smoothSpectrum.size() >= 256)
-      shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0],
-                           256);
+    if (settings->enableAudio->boolValue && source != nullptr)
+      shader.setUniform1fv("audio", source->audioAnalysis.renderSpectrum.data(), 256);
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1i("enableAudio", settings->enableAudio->intValue);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);

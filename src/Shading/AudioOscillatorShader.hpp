@@ -20,17 +20,12 @@
 #include <stdio.h>
 
 struct AudioOscillatorSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
-
   std::shared_ptr<Parameter> baseColor;
   std::shared_ptr<Parameter> outlineColor;
   std::shared_ptr<Parameter> outlineThickness;
   std::shared_ptr<WaveformOscillator> outlineThicknessOscillator;
 
   AudioOscillatorSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   baseColor(std::make_shared<Parameter>("Base Color", ParameterType_Color)),
   outlineColor(std::make_shared<Parameter>("Outline Color", ParameterType_Color)),
   outlineThickness(std::make_shared<Parameter>("Outline Thickness", 2.0, 0.0, 10.0)),
@@ -38,8 +33,8 @@ struct AudioOscillatorSettings: public ShaderSettings {
   ShaderSettings(shaderId, j, "AudioOscillator") {
     baseColor->setColor({1.0, 1.0, 1.0, 1.0});
     outlineColor->setColor({0.0, 1.0, 1.0, 1.0});
-    parameters = { shaderValue, baseColor, outlineColor, outlineThickness };
-    oscillators = { shaderValueOscillator, outlineThicknessOscillator };
+    parameters = { baseColor, outlineColor, outlineThickness };
+    oscillators = { outlineThicknessOscillator };
     load(j);
     registerParameters();
   };
@@ -58,7 +53,6 @@ struct AudioOscillatorShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform3f("baseColor",
@@ -71,7 +65,7 @@ struct AudioOscillatorShader: Shader {
                         settings->outlineColor->color->data()[2]);
     shader.setUniform1f("outlineThickness", settings->outlineThickness->value);
     if (source != nullptr) {
-      setAudioUniform(&source->audioAnalysis.smoothWaveform);
+      setAudioUniform(source->audioAnalysis.renderWaveform.data(), source->audioAnalysis.kSpectrumSize);
     }
     frame->draw(0, 0);
     shader.end();

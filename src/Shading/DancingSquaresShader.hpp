@@ -42,8 +42,8 @@ public:
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     auto source = AudioSourceService::getService()->selectedAudioSource;
-    if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() >= 256)
-      shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0], 256);
+    if (source != nullptr)
+      shader.setUniform1fv("audio", source->audioAnalysis.renderSpectrum.data(), 256);
     
     frame->draw(0, 0);
     shader.end();

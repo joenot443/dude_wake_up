@@ -19,9 +19,6 @@
 #include <stdio.h>
 
 struct CircleBlurSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
-
   std::shared_ptr<Parameter> blurRadius;
   std::shared_ptr<WaveformOscillator> blurRadiusOscillator;
 
@@ -44,8 +41,6 @@ struct CircleBlurSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> chromaticStrengthOscillator;
 
   CircleBlurSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   blurRadius(std::make_shared<Parameter>("Blur Radius", 0.05, 0.0, 0.2)),
   blurRadiusOscillator(std::make_shared<WaveformOscillator>(blurRadius)),
   channelSeparation(std::make_shared<Parameter>("Channel Separation", 1.0, 0.0, 1.0)),
@@ -61,8 +56,8 @@ struct CircleBlurSettings: public ShaderSettings {
   chromaticStrength(std::make_shared<Parameter>("Chromatic Strength", 1.0, 0.0, 1.0)),
   chromaticStrengthOscillator(std::make_shared<WaveformOscillator>(chromaticStrength)),
   ShaderSettings(shaderId, j, "CircleBlur") {
-    parameters = { shaderValue, blurRadius, channelSeparation, threshold, rotation, spiral, hueShift, chromaticStrength };
-    oscillators = { shaderValueOscillator, blurRadiusOscillator, channelSeparationOscillator, thresholdOscillator, rotationOscillator, spiralOscillator, hueShiftOscillator, chromaticStrengthOscillator };
+    parameters = { blurRadius, channelSeparation, threshold, rotation, spiral, hueShift, chromaticStrength };
+    oscillators = { blurRadiusOscillator, channelSeparationOscillator, thresholdOscillator, rotationOscillator, spiralOscillator, hueShiftOscillator, chromaticStrengthOscillator };
     load(j);
     registerParameters();
   };
@@ -82,7 +77,6 @@ struct CircleBlurShader: Shader {
     ofClear(0, 0, 0, 0);
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("blurRadius", settings->blurRadius->value);
     shader.setUniform1f("channelSeparation", settings->channelSeparation->value);
     shader.setUniform1f("threshold", settings->threshold->value);

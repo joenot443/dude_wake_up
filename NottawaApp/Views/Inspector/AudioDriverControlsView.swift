@@ -10,21 +10,26 @@ import SwiftUI
 
 struct AudioDriverControlsView: View {
     @Environment(ThemeManager.self) private var theme
+    @Environment(NodeEditorViewModel.self) private var viewModel
     let param: ParameterInfo
 
+    @State private var isActive: Bool
+    @State private var activeName: String?
     @State private var shift: Float
     @State private var scale: Float
     @State private var availableDrivers: [AudioDriverOption] = []
 
     init(param: ParameterInfo) {
         self.param = param
+        self._isActive = State(initialValue: param.hasDriver)
+        self._activeName = State(initialValue: param.driverName)
         self._shift = State(initialValue: param.driverShift)
         self._scale = State(initialValue: param.driverScale)
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            if param.hasDriver, let driverName = param.driverName {
+            if isActive, let driverName = activeName {
                 // Active driver header
                 HStack {
                     Image(systemName: "waveform.path")
@@ -36,16 +41,17 @@ struct AudioDriverControlsView: View {
                     Spacer()
                     Button {
                         NottawaEngine.shared.removeParameterDriver(paramId: param.id)
+                        viewModel.refreshInspector()
                     } label: {
                         Image(systemName: "xmark.circle.fill")
                             .font(.caption)
                             .foregroundStyle(theme.colors.textSecondary)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.plainHitArea)
                 }
 
                 // Shift slider
-                DSSlider(value: $shift, range: -1...1, label: "Shift", showValue: true)
+                DSSlider(value: $shift, range: 0...1, label: "Shift", showValue: true)
                     .onChange(of: shift) { _, newValue in
                         NottawaEngine.shared.setParameterDriverShift(paramId: param.id, shift: newValue)
                     }
@@ -73,6 +79,7 @@ struct AudioDriverControlsView: View {
                                         paramId: param.id,
                                         audioParamName: driver.name
                                     )
+                                    viewModel.refreshInspector()
                                 }
                             }
                         } label: {
@@ -92,11 +99,12 @@ struct AudioDriverControlsView: View {
         .onAppear {
             availableDrivers = NottawaEngine.shared.availableAudioDrivers()
         }
-        .onChange(of: param.driverShift) { _, newValue in
-            shift = newValue
-        }
-        .onChange(of: param.driverScale) { _, newValue in
-            scale = newValue
+        .onReceive(NotificationCenter.default.publisher(for: .parameterRefresh)) { _ in
+            guard let fresh = viewModel.inspectorParameters.first(where: { $0.id == param.id }) else { return }
+            if fresh.hasDriver != isActive { isActive = fresh.hasDriver }
+            if fresh.driverName != activeName { activeName = fresh.driverName }
+            if fresh.driverShift != shift { shift = fresh.driverShift }
+            if fresh.driverScale != scale { scale = fresh.driverScale }
         }
     }
 }

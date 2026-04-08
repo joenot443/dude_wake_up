@@ -23,7 +23,7 @@ struct PinTooltipView: View {
                     .font(.caption)
                     .foregroundStyle(.red)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.plainHitArea)
             .help("Break connection")
         }
         .padding(.horizontal, 10)

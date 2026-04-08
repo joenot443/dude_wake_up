@@ -9,6 +9,7 @@
 #define MidiService_hpp
 
 #include <stdio.h>
+#include <functional>
 #include "ofxMidi.h"
 #include "ofMain.h"
 #include "MidiPairing.hpp"
@@ -41,16 +42,18 @@ private:
   void midiInputRemoved(std::string name, bool isNetwork) override;
   void midiOutputAdded(std::string nam, bool isNetwork) override;
   void midiOutputRemoved(std::string name, bool isNetwork) override;
-  void removePairing(std::shared_ptr<Parameter> param);
-  
 public:
   void setup();
   void update();
   void stopLearning();
   void beginLearning(std::shared_ptr<Parameter> parameter);
   void saveAssignment(std::shared_ptr<Parameter> param, std::string descriptor);
+  void removePairing(std::shared_ptr<Parameter> param);
   bool isLearning();
   void initializeMidiPorts();
+
+  // Optional callback fired when a MIDI binding is learned (for bridge layer).
+  std::function<void(const std::string&, const std::string&)> onMidiLearned;
 
   bool hasPairingForDescriptor(std::string descriptor);
   bool hasPairingForParameterId(std::string paramId);

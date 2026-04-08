@@ -33,7 +33,7 @@ private struct SidebarTabButton: View {
             .padding(.vertical, 4)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.plainHitArea)
     }
 }
 
@@ -62,7 +62,7 @@ private struct SectionHeaderView: View {
             .background(theme.colors.backgroundSecondary.opacity(0.95))
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.plainHitArea)
     }
 }
 
@@ -182,7 +182,7 @@ struct SidebarBrowserView: View {
         VStack(spacing: 0) {
             // Icon tab bar
             HStack(spacing: 0) {
-                SidebarTabButton(icon: "sparkles", label: "Shaders",
+                SidebarTabButton(icon: "sparkles", label: "Effects",
                                  isActive: viewModel.sidebarActiveTab == .shaders) {
                     viewModel.sidebarActiveTab = .shaders
                 }
@@ -225,7 +225,7 @@ struct SidebarBrowserView: View {
                 if searchVisible {
                     HStack(spacing: 4) {
                         TextField(
-                            viewModel.sidebarActiveTab == .shaders ? "Search shaders..." : "Search sources...",
+                            viewModel.sidebarActiveTab == .shaders ? "Search effects..." : "Search sources...",
                             text: $searchText
                         )
                         .textFieldStyle(.roundedBorder)
@@ -240,7 +240,7 @@ struct SidebarBrowserView: View {
                                 .font(.system(size: 12))
                                 .foregroundStyle(theme.colors.textSecondary)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.plainHitArea)
                     }
                     .padding(.horizontal, 10)
                     .padding(.bottom, 6)
@@ -286,7 +286,7 @@ struct SidebarBrowserView: View {
                     .font(.system(size: 12))
                     .foregroundStyle(searchVisible ? theme.colors.accent : theme.colors.textSecondary)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.plainHitArea)
 
             // Favorites filter toggle
             Button {
@@ -300,7 +300,7 @@ struct SidebarBrowserView: View {
                     .font(.system(size: 12))
                     .foregroundStyle(isFavoritesActive ? theme.colors.warning : theme.colors.textSecondary)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.plainHitArea)
             .help(isFavoritesActive ? "Showing Favorites" : "Show Favorites")
 
             // Category dropdown
@@ -309,6 +309,20 @@ struct SidebarBrowserView: View {
             } else {
                 sourceCategoryMenu
             }
+
+            // Refresh previews using selected source node (if any) as input
+            Button {
+                let selectedSourceId = viewModel.selectedNodeId.flatMap { id in
+                    viewModel.nodes.first(where: { $0.id == id && $0.isSource })?.id
+                }
+                BrowserPreviewManager.shared.refreshAllSnapshots(preferredSourceId: selectedSourceId)
+            } label: {
+                Image(systemName: "arrow.clockwise")
+                    .font(.system(size: 12))
+                    .foregroundStyle(theme.colors.textSecondary)
+            }
+            .buttonStyle(.plainHitArea)
+            .help("Refresh Previews")
 
             Spacer()
 
@@ -337,13 +351,9 @@ struct SidebarBrowserView: View {
                 }
             }
         } label: {
-            HStack(spacing: 3) {
-                Text(Self.shaderCategories.first { $0.1 == selectedShaderCategory }?.0 ?? "All")
-                    .font(.system(size: 11))
-                Image(systemName: "chevron.down")
-                    .font(.system(size: 8))
-            }
-            .foregroundStyle(theme.colors.textPrimary)
+            Text(Self.shaderCategories.first { $0.1 == selectedShaderCategory }?.0 ?? "All")
+                .font(.system(size: 11))
+                .foregroundStyle(theme.colors.textPrimary)
         }
         .menuStyle(.borderlessButton)
         .fixedSize()
@@ -363,13 +373,9 @@ struct SidebarBrowserView: View {
                 }
             }
         } label: {
-            HStack(spacing: 3) {
-                Text(selectedSourceCategory)
-                    .font(.system(size: 11))
-                Image(systemName: "chevron.down")
-                    .font(.system(size: 8))
-            }
-            .foregroundStyle(theme.colors.textPrimary)
+            Text(selectedSourceCategory)
+                .font(.system(size: 11))
+                .foregroundStyle(theme.colors.textPrimary)
         }
         .menuStyle(.borderlessButton)
         .fixedSize()
@@ -596,7 +602,7 @@ struct SidebarTileView: View {
                         .shadow(color: .black.opacity(0.5), radius: 1, x: 0, y: 0.5)
                         .padding(3)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.plainHitArea)
             }
 
             Text(name)
@@ -685,7 +691,7 @@ struct NonShaderSourceTileView: View {
                         .shadow(color: .black.opacity(0.5), radius: 1, x: 0, y: 0.5)
                         .padding(3)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.plainHitArea)
             }
 
             Text(name)

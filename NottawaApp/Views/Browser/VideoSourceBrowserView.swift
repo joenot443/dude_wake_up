@@ -80,7 +80,7 @@ struct VideoSourceBrowserView: View {
                                 .foregroundStyle(selectedCategory == cat ? .white : .primary)
                                 .clipShape(Capsule())
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.plainHitArea)
                     }
                 }
                 .padding(.horizontal)

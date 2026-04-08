@@ -19,6 +19,8 @@ final class PreviewWindowManager {
 
     private init() {}
 
+    private var closeObservers: [String: Any] = [:]
+
     func openPreview(for nodeId: String, nodeName: String) {
         // If already open, bring to front
         if let existing = windows[nodeId] {
@@ -57,26 +59,45 @@ final class PreviewWindowManager {
 
         windows[nodeId] = window
 
-        NotificationCenter.default.addObserver(
+        let observer = NotificationCenter.default.addObserver(
             forName: NSWindow.willCloseNotification,
             object: window,
             queue: .main
         ) { [weak self] notification in
-            guard let closedWindow = notification.object as? NSWindow else { return }
-            self?.windows = self?.windows.filter { $0.value !== closedWindow } ?? [:]
+            guard let self,
+                  let closedWindow = notification.object as? NSWindow else { return }
+            // Tear down the MTKView to stop its display link
+            closedWindow.contentView = nil
+            // Remove from tracking
+            if let closedId = self.windows.first(where: { $0.value === closedWindow })?.key {
+                self.windows.removeValue(forKey: closedId)
+                if let obs = self.closeObservers.removeValue(forKey: closedId) {
+                    NotificationCenter.default.removeObserver(obs)
+                }
+            }
         }
+        closeObservers[nodeId] = observer
     }
 
     func closePreview(for nodeId: String) {
+        windows[nodeId]?.contentView = nil
         windows[nodeId]?.close()
         windows.removeValue(forKey: nodeId)
+        if let obs = closeObservers.removeValue(forKey: nodeId) {
+            NotificationCenter.default.removeObserver(obs)
+        }
     }
 
     func closeAll() {
         for (_, window) in windows {
+            window.contentView = nil
             window.close()
         }
         windows.removeAll()
+        for (_, obs) in closeObservers {
+            NotificationCenter.default.removeObserver(obs)
+        }
+        closeObservers.removeAll()
     }
 
     /// Toggle between stretch-to-fill and aspect-fit modes for all preview windows.

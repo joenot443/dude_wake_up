@@ -2,18 +2,17 @@
 //  WelcomeView.swift
 //  NottawaApp
 //
-//  Welcome screen shown on launch with intro video, action buttons,
-//  and two-column strand browsers (Templates + Recent).
+//  Welcome screen shown on launch with a live strand preview header,
+//  action buttons, and two-column strand browsers (Templates + Recent).
 //
 
 import SwiftUI
-import AVKit
 
 struct WelcomeView: View {
     @Environment(NodeEditorViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var theme
 
-    @State private var player: AVPlayer?
+    @State private var currentWelcomeIndex: Int = 0
 
     var body: some View {
         ZStack {
@@ -23,14 +22,15 @@ struct WelcomeView: View {
                 .onTapGesture {
                     viewModel.dismissWelcomeScreen()
                 }
+                .accessibilityIdentifier("welcome-scrim")
 
             GeometryReader { geo in
                 let panelWidth = geo.size.width * 0.60
                 let panelHeight = geo.size.height * 0.80
 
                 VStack(spacing: 0) {
-                    // MARK: - Header Video
-                    headerVideo(width: panelWidth)
+                    // MARK: - Live Strand Preview Header
+                    livePreviewHeader(width: panelWidth)
 
                     Spacer().frame(height: 16)
 
@@ -50,30 +50,52 @@ struct WelcomeView: View {
             }
         }
         .onAppear {
-            setupPlayer()
             viewModel.fetchTemplateStrands()
             viewModel.fetchStrands()
+            // Load the first template strand for live preview
+            loadCurrentWelcomeStrand()
         }
-        .onDisappear {
-            player?.pause()
+        .onExitCommand {
+            viewModel.dismissWelcomeScreen()
         }
     }
 
-    // MARK: - Header Video
+    // MARK: - Live Preview Header
 
     @ViewBuilder
-    private func headerVideo(width: CGFloat) -> some View {
-        let headerHeight = width * 0.30
+    private func livePreviewHeader(width: CGFloat) -> some View {
+        let aspectRatio = viewModel.welcomePreviewAspectRatio
+        let headerHeight = width / aspectRatio
 
         ZStack(alignment: .bottom) {
-            if let player = player {
-                LoopingVideoView(player: player)
+            // Black background behind the live texture
+            Color.black
+                .frame(width: width, height: headerHeight)
+
+            // Live texture from the engine
+            if let outputId = viewModel.welcomePreviewOutputId {
+                TextureDisplayView(connectableId: outputId)
+                    .aspectRatio(aspectRatio, contentMode: .fit)
                     .frame(width: width, height: headerHeight)
                     .clipped()
-            } else {
-                Rectangle()
-                    .fill(Color.black)
-                    .frame(width: width, height: headerHeight)
+            }
+
+            // Strand name overlay at top-left
+            if !viewModel.templateStrandsList.isEmpty {
+                VStack {
+                    HStack {
+                        Text(currentStrandName)
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background(.black.opacity(0.5), in: Capsule())
+                        Spacer()
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.top, 10)
+                    Spacer()
+                }
             }
 
             // Bottom overlay bar
@@ -88,11 +110,44 @@ struct WelcomeView: View {
 
                 Spacer()
 
-                // Try this out button
-                Button("Try this out") {
-                    viewModel.loadDemoStrand()
+                // Navigation arrows
+                if viewModel.templateStrandsList.count > 1 {
+                    HStack(spacing: 4) {
+                        Button {
+                            navigateStrand(delta: -1)
+                        } label: {
+                            Image(systemName: "chevron.left")
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(.white)
+                                .frame(width: 28, height: 28)
+                                .background(.white.opacity(0.2), in: Circle())
+                        }
+                        .buttonStyle(.plainHitArea)
+
+                        Text("\(currentWelcomeIndex + 1)/\(viewModel.templateStrandsList.count)")
+                            .font(.caption2.weight(.medium).monospacedDigit())
+                            .foregroundStyle(.white.opacity(0.8))
+
+                        Button {
+                            navigateStrand(delta: 1)
+                        } label: {
+                            Image(systemName: "chevron.right")
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(.white)
+                                .frame(width: 28, height: 28)
+                                .background(.white.opacity(0.2), in: Circle())
+                        }
+                        .buttonStyle(.plainHitArea)
+                    }
                 }
-                .buttonStyle(.plain)
+
+                Spacer()
+
+                // Use this strand button
+                Button("Use this") {
+                    viewModel.dismissWelcomeScreen()
+                }
+                .buttonStyle(.plainHitArea)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 4)
                 .background(theme.colors.accent)
@@ -116,12 +171,12 @@ struct WelcomeView: View {
     private func actionButtons() -> some View {
         HStack(spacing: 24) {
             Button {
-                viewModel.dismissWelcomeScreen()
+                viewModel.resumePreviousWorkspace()
             } label: {
                 Text("Resume Workspace")
                     .frame(width: 160, height: 36)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.plainHitArea)
             .background(theme.colors.surface)
             .foregroundStyle(theme.colors.textPrimary)
             .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -133,7 +188,7 @@ struct WelcomeView: View {
                 Text("New Workspace")
                     .frame(width: 160, height: 36)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.plainHitArea)
             .background(theme.colors.surface)
             .foregroundStyle(theme.colors.textPrimary)
             .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -144,7 +199,7 @@ struct WelcomeView: View {
                 Text("Open Workspace")
                     .frame(width: 160, height: 36)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.plainHitArea)
             .background(theme.colors.surface)
             .foregroundStyle(theme.colors.textPrimary)
             .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -223,28 +278,27 @@ struct WelcomeView: View {
 
     // MARK: - Helpers
 
-    private func setupPlayer() {
-        // The intro video is copied to Resources/data/images/intro/ by copy_resources.sh
-        let dataPath = Bundle.main.resourcePath.map { $0 + "/data/images/intro/intro.mov" }
-        if let path = dataPath, FileManager.default.fileExists(atPath: path) {
-            let url = URL(fileURLWithPath: path)
-            let avPlayer = AVPlayer(url: url)
-            avPlayer.isMuted = true
-            avPlayer.actionAtItemEnd = .none
-
-            // Loop the video
-            NotificationCenter.default.addObserver(
-                forName: .AVPlayerItemDidPlayToEndTime,
-                object: avPlayer.currentItem,
-                queue: .main
-            ) { _ in
-                avPlayer.seek(to: .zero)
-                avPlayer.play()
-            }
-
-            avPlayer.play()
-            self.player = avPlayer
+    private var currentStrandName: String {
+        guard !viewModel.templateStrandsList.isEmpty,
+              currentWelcomeIndex < viewModel.templateStrandsList.count else {
+            return ""
         }
+        return viewModel.templateStrandsList[currentWelcomeIndex].name
+    }
+
+    private func loadCurrentWelcomeStrand() {
+        guard !viewModel.templateStrandsList.isEmpty else { return }
+        let index = currentWelcomeIndex.clamped(to: 0..<viewModel.templateStrandsList.count)
+        currentWelcomeIndex = index
+        let strand = viewModel.templateStrandsList[index]
+        viewModel.loadWelcomeStrand(id: strand.id)
+    }
+
+    private func navigateStrand(delta: Int) {
+        guard !viewModel.templateStrandsList.isEmpty else { return }
+        let count = viewModel.templateStrandsList.count
+        currentWelcomeIndex = (currentWelcomeIndex + delta + count) % count
+        loadCurrentWelcomeStrand()
     }
 
     private func openWorkspacePanel() {
@@ -260,20 +314,8 @@ struct WelcomeView: View {
     }
 }
 
-// MARK: - Looping Video (no controls)
-
-private struct LoopingVideoView: NSViewRepresentable {
-    let player: AVPlayer
-
-    func makeNSView(context: Context) -> NSView {
-        let view = NSView()
-        let playerLayer = AVPlayerLayer(player: player)
-        playerLayer.videoGravity = .resizeAspectFill
-        playerLayer.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
-        view.wantsLayer = true
-        view.layer?.addSublayer(playerLayer)
-        return view
+private extension Int {
+    func clamped(to range: Range<Int>) -> Int {
+        Swift.max(range.lowerBound, Swift.min(self, range.upperBound - 1))
     }
-
-    func updateNSView(_ nsView: NSView, context: Context) {}
 }

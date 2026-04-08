@@ -29,6 +29,7 @@ public:
   std::shared_ptr<Parameter> strokeEnabled;
   std::shared_ptr<Parameter> edgeSoftness;
   std::shared_ptr<Parameter> textSmoothing;
+  std::shared_ptr<Parameter> cropToText;
 
   int fontSize = 72;
   Font font;
@@ -53,6 +54,7 @@ public:
   strokeEnabled(std::make_shared<Parameter>("Stroke", ParameterType_Bool)),
   edgeSoftness(std::make_shared<Parameter>("Edge Smoothing", 0.8, 0.0, 2.0)),
   textSmoothing(std::make_shared<Parameter>("Text Antialiasing", 8.0, 0.0, 16.0)),
+  cropToText(std::make_shared<Parameter>("Crop To Text", ParameterType_Bool)),
   xPositionOscillator(std::make_shared<WaveformOscillator>(xPosition)),
   yPositionOscillator(std::make_shared<WaveformOscillator>(yPosition)),
   fontSelector(std::make_shared<Parameter>("Font", 0.0, 0.0, 0.0, ParameterType_Hidden))
@@ -91,7 +93,7 @@ public:
     }
 
     oscillators = {xPositionOscillator, yPositionOscillator};
-    parameters = {xPosition, yPosition, color, backgroundColor, backgroundEnabled, strokeColor, strokeWeight, strokeEnabled, fontSelector, edgeSoftness, textSmoothing};
+    parameters = {xPosition, yPosition, color, backgroundColor, backgroundEnabled, strokeColor, strokeWeight, strokeEnabled, fontSelector, edgeSoftness, textSmoothing, cropToText};
     registerParameters();
   };
 };

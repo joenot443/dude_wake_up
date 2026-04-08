@@ -61,7 +61,7 @@ struct LibrarySidebarView: View {
                         .font(.system(size: 12))
                         .foregroundStyle(searchVisible ? Color.accentColor : .secondary)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.plainHitArea)
 
                 // Category dropdown
                 if categories.count > 1 {
@@ -88,7 +88,7 @@ struct LibrarySidebarView: View {
                             .font(.system(size: 12))
                             .foregroundStyle(.secondary)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.plainHitArea)
                 }
                 .padding(.horizontal, 10)
                 .padding(.bottom, 6)
@@ -229,7 +229,7 @@ private struct LibrarySectionHeaderView: View {
             .background(.ultraThinMaterial)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.plainHitArea)
     }
 }
 

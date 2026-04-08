@@ -35,7 +35,7 @@ struct ShaderBrowserView: View {
         VStack(spacing: 0) {
             // Header
             HStack {
-                Text(isSwapMode ? "Swap Shader" : "Add Shader")
+                Text(isSwapMode ? "Swap Effect" : "Add Effect")
                     .font(.title2)
                     .fontWeight(.semibold)
                 Spacer()
@@ -47,7 +47,7 @@ struct ShaderBrowserView: View {
             .padding()
 
             // Search
-            TextField("Search shaders...", text: $searchText)
+            TextField("Search effects...", text: $searchText)
                 .textFieldStyle(.roundedBorder)
                 .padding(.horizontal)
 

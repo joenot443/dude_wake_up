@@ -16,37 +16,35 @@
 using json = nlohmann::json;
 
 void MidiService::initializeMidiPorts() {
-  // list the number of available input & output ports
-  ofxMidiIn input;
-  ofxMidiOut output;
-  input.listInPorts();
-  output.listOutPorts();
   learningParam = nullptr;
-  
-  // create and open input ports
-  for(int i = 0; i < input.getNumInPorts(); ++i) {
-    // new object
-    inputs.push_back(new ofxMidiIn);
-    
-    // set this class to receive incoming midi events
-    inputs[i]->addListener(this);
-    
-    // open input port via port number
-    inputs[i]->openPort(i);
+
+  try {
+    // list the number of available input & output ports
+    ofxMidiIn input;
+    ofxMidiOut output;
+    input.listInPorts();
+    output.listOutPorts();
+
+    // create and open input ports
+    for(int i = 0; i < input.getNumInPorts(); ++i) {
+      inputs.push_back(new ofxMidiIn);
+      inputs[i]->addListener(this);
+      inputs[i]->openPort(i);
+    }
+
+    // create and open output ports
+    for(int i = 0; i < output.getNumOutPorts(); ++i) {
+      outputs.push_back(new ofxMidiOut);
+      outputs[i]->openPort(i);
+    }
+
+    // set this class to receive midi device (dis)connection events
+    ofxMidi::setConnectionListener(this);
+  } catch (const std::exception& e) {
+    ofLogError("MidiService") << "MIDI port initialization failed: " << e.what();
+  } catch (...) {
+    ofLogError("MidiService") << "MIDI port initialization failed (unknown error)";
   }
-  
-  // create and open output ports
-  for(int i = 0; i < output.getNumOutPorts(); ++i) {
-    
-    // new object
-    outputs.push_back(new ofxMidiOut);
-    
-    // open input port via port number
-    outputs[i]->openPort(i);
-  }
-  
-  // set this class to receieve midi device (dis)connection events
-  ofxMidi::setConnectionListener(this);
 }
 
 void MidiService::setup() {
@@ -212,6 +210,12 @@ void MidiService::saveAssignment(std::shared_ptr<Parameter> param, std::string d
   parameterIdToPairing[param->paramId] = pairing;
   
   ConfigService::getService()->saveDefaultConfigFile();
+
+  // Notify bridge layer (fires Swift callback)
+  if (onMidiLearned) {
+    onMidiLearned(param->paramId, descriptor);
+  }
+
   stopLearning();
 }
 

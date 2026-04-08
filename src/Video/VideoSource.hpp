@@ -58,7 +58,7 @@ public:
 
   virtual void setup(){};
   void update() {
-    if (fbo->getTexture().getWidth() != settings->width->value) {
+    if (!fbo->isAllocated()) {
       setup();
     }
   }

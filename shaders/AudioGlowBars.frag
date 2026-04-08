@@ -7,6 +7,8 @@ uniform float audio[256];
 uniform float barHeight;
 uniform float bloomIntensity;
 uniform float bloomSize;
+uniform vec4 bgColor;
+uniform float boost;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -64,7 +66,8 @@ float getFrequencySamplePosition(int barIndex) {
 float getFrequency(int barIndex) {
     float samplePos = getFrequencySamplePosition(barIndex);
     samplePos = clamp(samplePos, 0.0, 1.0);
-    return audio[min(int(samplePos * 256.) + 32, 255)];
+    int index = clamp(int(samplePos * 223.0) + 32, 32, 255);
+    return clamp(audio[index] * boost, 0.0, 1.0);
 }
 
 // HSV to RGB conversion for rainbow colors
@@ -245,5 +248,8 @@ void main() {
     // Clamp alpha to valid range
     finalAlpha = clamp(finalAlpha, 0.0, 1.0);
     
-    outputColor = vec4(finalColor, finalAlpha);
+    // Blend bars over background color
+    vec3 blended = mix(bgColor.rgb, finalColor, finalAlpha);
+    float alpha = max(finalAlpha, bgColor.a);
+    outputColor = vec4(blended, alpha);
 }

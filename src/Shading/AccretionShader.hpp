@@ -19,20 +19,15 @@
 #include <stdio.h>
 
 struct AccretionSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
-
   std::shared_ptr<Parameter> brightness;
   std::shared_ptr<WaveformOscillator> brightnessOscillator;
 
   AccretionSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   brightness(std::make_shared<Parameter>("Brightness", 400.0, 50.0, 1000.0)),
   brightnessOscillator(std::make_shared<WaveformOscillator>(brightness)),
   ShaderSettings(shaderId, j, "Accretion") {
-    parameters = { shaderValue, brightness };
-    oscillators = { shaderValueOscillator, brightnessOscillator };
+    parameters = { brightness };
+    oscillators = { brightnessOscillator };
     load(j);
     registerParameters();
   };
@@ -50,7 +45,6 @@ struct AccretionShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("brightness", settings->brightness->value);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
@@ -74,7 +68,6 @@ struct AccretionShader: Shader {
 
   void drawSettings() override {
     CommonViews::H3Title("Accretion");
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
     CommonViews::ShaderParameter(settings->brightness, settings->brightnessOscillator);
   }
 };

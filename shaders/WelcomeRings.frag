@@ -5,6 +5,11 @@ uniform vec2 dimensions;
 uniform float time;
 uniform float cycles;
 uniform int palette;
+uniform float zoom;
+uniform float ringFrequency;
+uniform float glowIntensity;
+uniform float glowSharpness;
+uniform float speed;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -63,16 +68,16 @@ void main(  ) {
     vec3 finalColor = vec3(0.0);
     
     for (float i = 0.0; i < cycles; i++) {
-        uv = fract(uv * 1.5) - 0.5;
+        uv = fract(uv * zoom) - 0.5;
 
         float d = length(uv) * exp(-length(uv0));
 
-        vec3 col = palette_vec(length(uv0) + i*.4 + time*.4);
+        vec3 col = palette_vec(length(uv0) + i*speed + time*speed);
 
-        d = sin(d*8. + time)/8.;
+        d = sin(d*ringFrequency + time)/ringFrequency;
         d = abs(d);
 
-        d = pow(0.01 / d, 1.2);
+        d = pow(glowIntensity / d, glowSharpness);
 
         finalColor += col * d;
     }

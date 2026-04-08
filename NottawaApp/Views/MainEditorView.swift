@@ -10,9 +10,11 @@ import SwiftUI
 struct MainEditorView: View {
     @Environment(NodeEditorViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var theme
+    @Environment(HelpGuideViewModel.self) private var helpGuide
     @State private var shiftHeld = false
     @State private var fpsCounter = FPSCounter()
     @State private var canvasSize: CGSize = CGSize(width: 800, height: 600)
+    @State private var monitorsInstalled = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -46,7 +48,13 @@ struct MainEditorView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background {
                             GeometryReader { geo in
-                                Color.clear.onAppear { canvasSize = geo.size }
+                                Color.clear.onAppear {
+                                        canvasSize = geo.size
+                                        if viewModel.needsInitialZoomToFit {
+                                            viewModel.needsInitialZoomToFit = false
+                                            viewModel.zoomToFit(canvasSize: geo.size)
+                                        }
+                                    }
                                     .onChange(of: geo.size) { _, newSize in canvasSize = newSize }
                             }
                         }
@@ -84,6 +92,11 @@ struct MainEditorView: View {
                                 }
                             }
                         }
+                        .overlay {
+                            if helpGuide.isActive {
+                                HelpOverlayView()
+                            }
+                        }
                         .transition(.opacity)
                 }
 
@@ -116,7 +129,9 @@ struct MainEditorView: View {
                     minHeight: 150,
                     maxHeight: 400
                 )
-                AudioPanelView()
+                AudioPanelView(onToggleAudio: {
+                    viewModel.isAudioActive = NottawaEngine.shared.isAudioActive
+                })
                     .frame(height: viewModel.audioPanelHeight)
                     .transition(.move(edge: .bottom))
             }
@@ -129,7 +144,17 @@ struct MainEditorView: View {
         )) {
             ShareStrandSheet()
         }
-        .onAppear { installModifierMonitor() }
+        .onChange(of: helpGuide.requiredSidebarTab) { _, tab in
+            guard let tab else { return }
+            viewModel.sidebarActiveTab = tab
+            viewModel.showSidebar = true
+        }
+        .onAppear {
+            if !monitorsInstalled {
+                monitorsInstalled = true
+                installModifierMonitor()
+            }
+        }
     }
 
     private func clampedBrowserPosition(in containerSize: CGSize) -> CGPoint {
@@ -162,10 +187,13 @@ struct MainEditorView: View {
         NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
             let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
 
-            // Command-key shortcuts (work regardless of focus)
+            // Command-key shortcuts
             if flags.contains(.command) {
+                let textFocused = MainEditorView.isTextFieldFocused()
+
                 switch event.charactersIgnoringModifiers {
                 case "z":
+                    if textFocused { return event }
                     if flags.contains(.shift) {
                         vm.redo()
                     } else {
@@ -181,18 +209,19 @@ struct MainEditorView: View {
                     }
                     return event
                 case "c":
-                    if !flags.contains(.shift) && !MainEditorView.isTextFieldFocused() {
+                    if !flags.contains(.shift) && !textFocused {
                         vm.copySelected()
                         return nil
                     }
                     return event
                 case "v":
-                    if !flags.contains(.shift) && !MainEditorView.isTextFieldFocused() {
+                    if !flags.contains(.shift) && !textFocused {
                         vm.pasteNodes()
                         return nil
                     }
                     return event
                 case "a":
+                    if textFocused { return event }
                     if !flags.contains(.shift) {
                         vm.selectAll()
                         return nil

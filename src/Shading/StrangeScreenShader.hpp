@@ -18,20 +18,15 @@
 #include <stdio.h>
 
 struct StrangeScreenSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
-
   std::shared_ptr<Parameter> cellCount;
   std::shared_ptr<WaveformOscillator> cellCountOscillator;
 
   StrangeScreenSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   cellCount(std::make_shared<Parameter>("Cell Count", 39.0, 5.0, 80.0, ParameterType_Int)),
   cellCountOscillator(std::make_shared<WaveformOscillator>(cellCount)),
   ShaderSettings(shaderId, j, "StrangeScreen") {
-    parameters = { shaderValue, cellCount };
-    oscillators = { shaderValueOscillator, cellCountOscillator };
+    parameters = { cellCount };
+    oscillators = { cellCountOscillator };
     load(j);
     registerParameters();
   };
@@ -49,7 +44,6 @@ struct StrangeScreenShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("cellCount", settings->cellCount->value);
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
@@ -72,7 +66,6 @@ struct StrangeScreenShader: Shader {
 
   void drawSettings() override {
     CommonViews::H3Title("StrangeScreen");
-    CommonViews::ShaderParameter(settings->shaderValue, settings->shaderValueOscillator);
     CommonViews::ShaderIntParameter(settings->cellCount);
   }
 };

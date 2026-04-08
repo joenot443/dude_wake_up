@@ -11,6 +11,7 @@ import SwiftUI
 struct AudioPanelTopBar: View {
     @Environment(ThemeManager.self) private var theme
     let data: AudioControlData
+    var onToggleAudio: (() -> Void)?
 
     private let engine = NottawaEngine.shared
 
@@ -18,13 +19,14 @@ struct AudioPanelTopBar: View {
         HStack(spacing: 12) {
             Button {
                 engine.toggleAudioSource()
+                onToggleAudio?()
             } label: {
                 HStack(spacing: 4) {
                     Image(systemName: data.snapshot.audioActive ? "stop.fill" : "play.fill")
                     Text(data.snapshot.audioActive ? "Stop" : "Start")
                 }
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.plainHitArea)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(data.snapshot.audioActive ? Color.red.opacity(0.2) : Color.green.opacity(0.2))
@@ -98,6 +100,7 @@ struct AudioPanelTopBar: View {
     }
 
     private func formatTime(_ seconds: Float) -> String {
+        guard seconds.isFinite else { return "0:00" }
         let totalSec = Int(max(0, seconds))
         return String(format: "%d:%02d", totalSec / 60, totalSec % 60)
     }

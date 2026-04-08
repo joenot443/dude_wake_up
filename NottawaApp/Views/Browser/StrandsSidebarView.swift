@@ -93,7 +93,7 @@ struct StrandsSidebarView: View {
                         .font(.system(size: 12))
                         .foregroundStyle(searchVisible ? Color.accentColor : .secondary)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.plainHitArea)
 
                 Text("\(viewModel.strandsList.count) strands")
                     .font(.system(size: 11))
@@ -117,7 +117,7 @@ struct StrandsSidebarView: View {
                             .font(.system(size: 12))
                             .foregroundStyle(.secondary)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.plainHitArea)
                 }
                 .padding(.horizontal, 10)
                 .padding(.bottom, 6)

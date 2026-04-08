@@ -8,7 +8,11 @@
 #include "ShaderChainerService.hpp"
 #include "Models/Strand.hpp"
 #include "AsciiShader.hpp"
+#include "AuroraShader.hpp"
 #include "NeonShader.hpp"
+#include "ScrapbookShader.hpp"
+#include "FlockingShader.hpp"
+#include "AudioCymaticsShader.hpp"
 #include "RuttEtraShader.hpp"
 #include "WindowsShader.hpp"
 #include "CircleBlurShader.hpp"
@@ -146,6 +150,7 @@
 #include "GlitchShader.hpp"
 #include "HSBShader.hpp"
 #include "KaleidoscopeShader.hpp"
+#include "CrystalKaleidoscopeShader.hpp"
 #include "LiquidShader.hpp"
 #include "MelterShader.hpp"
 #include "MirrorShader.hpp"
@@ -486,10 +491,13 @@ std::vector<std::string> ShaderChainerService::idsFromLoadingConfig(json j) {
     std::string shaderId = key;
     
     auto shader = shaderForType(shaderType, shaderId, val);
-    
+
     if (shader == nullptr) continue;
     addShader(shader);
-    
+
+    // Restore optional shaders (must be after addShader which calls generateOptionalShaders)
+    shader->load(val);
+
     // Set the position of the Shader
     if (val["x"].is_number() && val["y"].is_number())
     {
@@ -498,7 +506,7 @@ std::vector<std::string> ShaderChainerService::idsFromLoadingConfig(json j) {
       shader->settings->x->value = x;
       shader->settings->y->value = y;
     }
-    
+
     shader->settings->load(val);
     ids.push_back(shader->shaderId);
   }
@@ -1033,9 +1041,33 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeAurora: {
+      auto settings = new AuroraSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AuroraShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeAudioCymatics: {
+      auto settings = new AudioCymaticsSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AudioCymaticsShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeNeon: {
       auto settings = new NeonSettings(shaderId, shaderJson);
       auto shader = std::make_shared<NeonShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeScrapbook: {
+      auto settings = new ScrapbookSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<ScrapbookShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeFlocking: {
+      auto settings = new FlockingSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<FlockingShader>(settings);
       shader->setup();
       return shader;
     }
@@ -1982,6 +2014,13 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
     {
       auto settings = new KaleidoscopeSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<KaleidoscopeShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeCrystalKaleidoscope:
+    {
+      auto settings = new CrystalKaleidoscopeSettings(shaderId, shaderJson, shaderTypeName(shaderType));
+      auto shader = std::make_shared<CrystalKaleidoscopeShader>(settings);
       shader->setup();
       return shader;
     }

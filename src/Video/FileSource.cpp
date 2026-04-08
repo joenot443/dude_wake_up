@@ -32,7 +32,8 @@ void FileSource::setup()
   }
   player.setPosition(start);
   player.play();
-  player.setVolume(0.5);
+  player.setVolume(0.0);
+  mute->setValue(1.0);
   player.setLoopState(OF_LOOP_NORMAL);
   playing = true;
   fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);

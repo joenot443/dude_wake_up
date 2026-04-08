@@ -20,9 +20,6 @@
 #include <stdio.h>
 
 struct GlitchDigitalSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
-  
   std::shared_ptr<Parameter> texture;
   std::vector<std::string> textureOptions;
 
@@ -33,9 +30,6 @@ struct GlitchDigitalSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> thresholdOscillator;
 
   GlitchDigitalSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
-
   amount(std::make_shared<Parameter>("amount", 0.5, 0.0, 1.0)),
   amountOscillator(std::make_shared<WaveformOscillator>(amount)),
 
@@ -70,7 +64,6 @@ struct GlitchDigitalShader: Shader {
     if (texture != nullptr) {
       shader.setUniformTexture("tex2", texture->fbo.getTexture(), 8);
     }
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform1f("amount", settings->amount->value);
     shader.setUniform1f("threshold", settings->threshold->value);

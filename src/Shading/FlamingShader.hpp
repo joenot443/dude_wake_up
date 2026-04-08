@@ -19,9 +19,6 @@
 #include <stdio.h>
 
 struct FlamingSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
-
   std::shared_ptr<Parameter> zOffset;
   std::shared_ptr<WaveformOscillator> zOffsetOscillator;
 
@@ -29,15 +26,13 @@ struct FlamingSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> turbulenceOscillator;
 
   FlamingSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   zOffset(std::make_shared<Parameter>("Z Offset", 4.0, 1.0, 10.0)),
   zOffsetOscillator(std::make_shared<WaveformOscillator>(zOffset)),
   turbulence(std::make_shared<Parameter>("Turbulence", 0.4, 0.1, 1.0)),
   turbulenceOscillator(std::make_shared<WaveformOscillator>(turbulence)),
   ShaderSettings(shaderId, j, "Flaming") {
-    parameters = { shaderValue, zOffset, turbulence };
-    oscillators = { shaderValueOscillator, zOffsetOscillator, turbulenceOscillator };
+    parameters = { zOffset, turbulence };
+    oscillators = { zOffsetOscillator, turbulenceOscillator };
     load(j);
     registerParameters();
   };
@@ -55,7 +50,6 @@ struct FlamingShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("zOffset", settings->zOffset->value);
     shader.setUniform1f("turbulence", settings->turbulence->value);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);

@@ -46,9 +46,8 @@ struct PixelAudioPartyShader: Shader {
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("amount", settings->amount->value);
-    if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() >= 256)
-      shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0],
-                           256);
+    if (source != nullptr)
+      shader.setUniform1fv("audio", source->audioAnalysis.renderSpectrum.data(), 256);
 
     shader.setUniform1f("time", ofGetElapsedTimef());
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());

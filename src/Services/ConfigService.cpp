@@ -707,7 +707,15 @@ void ConfigService::loadConfigFile(std::string path)
     try {
       std::string workspaceName = data[WorkspaceJsonKey]["name"];
       std::string workspacePath = data[WorkspaceJsonKey]["path"];
+#ifdef NOTTAWA_ENGINE_ONLY
+      // In NottawaApp, just restore the workspace metadata without re-loading
+      // the workspace file. The config.json already has the latest auto-saved
+      // state; re-loading the workspace file would overwrite it with stale data.
+      // Also avoids ofSetWindowTitle() crash from engine thread.
+      currentWorkspace = std::make_shared<Workspace>(workspaceName, workspacePath);
+#else
       loadWorkspace(std::make_shared<Workspace>(workspaceName, workspacePath));
+#endif
     } catch (const json::exception& e) {
         std::cerr << "Error loading Workspace config: " << e.what() << std::endl;
     }

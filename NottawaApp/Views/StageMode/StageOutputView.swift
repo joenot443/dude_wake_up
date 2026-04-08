@@ -71,7 +71,7 @@ struct StageOutputView: View {
                     .background(.yellow, in: Capsule())
                     .foregroundStyle(.black)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.plainHitArea)
                 .help("Click to clear solo")
             }
 
@@ -93,7 +93,7 @@ struct StageOutputView: View {
                 .padding(.vertical, 4)
                 .background(theme.colors.surface, in: RoundedRectangle(cornerRadius: 6))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.plainHitArea)
             .help("Open in a separate window")
             .disabled(viewModel.stageOutputId == nil)
         }
@@ -224,7 +224,7 @@ struct StageOutputView: View {
                                 .font(.caption)
                                 .foregroundStyle(theme.colors.textSecondary)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.plainHitArea)
                     }
                     .padding(.vertical, 4)
                     .padding(.horizontal, 8)

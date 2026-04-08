@@ -57,13 +57,16 @@
 		059672AD1A8E41FC85077708 /* imgui_node_editor_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028651442D9468DB000CE0D4 /* imgui_node_editor_api.cpp */; };
 		05C16AEB62A84E53A8188415 /* FileAudioSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "7F50B89F-0348-43F2-A58C-1C5504692393" /* FileAudioSource.cpp */; };
 		"079B0752-2526-4BBA-9324-CE639AE697AC" /* StrandBrowserWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "2F9BBD61-7014-4808-BAE7-47E7E9C9D814" /* StrandBrowserWindow.cpp */; };
+		07F48380489A2DCFC0528367 /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000002 /* ThemeManager.swift */; };
 		08663C55E2894757BC9939AA /* Strings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "804FFFCE-C5A3-4BCF-A22E-30678AAD65E3" /* Strings.cpp */; };
 		0917CD6A84454EC59413A9EF /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0A5C2CE6E1B74DA19E4A0525 /* MetalKit.framework */; };
 		"0A7A065D-785F-489A-914F-8B1EDF273782" /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "04CA78A1-FF25-425E-B2D1-041597750E58" /* CoreMIDI.framework */; };
+		0ABD6BB6A5F760FA4396EC24 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0ABD6BB6A5F760FA4396EC23 /* Assets.xcassets */; };
 		0AECC98CFB2447E0B19BC6F3 /* IconService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "E3B7CE1B-23B7-4815-B0D2-BE8398422FE3" /* IconService.cpp */; };
 		0B09B37A5A424983B78E1481 /* TextEditorView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "AB1FEA1E-B05D-47B5-A370-6FB26D8B0688" /* TextEditorView.cpp */; };
 		0B19A27AC3A94BB1A50B18A8 /* IOSurfaceTextureManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19DA7BE368B24562A3550878 /* IOSurfaceTextureManager.cpp */; };
 		"0B6D8459-08C2-45E1-A0E8-02C35E15C373" /* imgui_impl_opengl2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "77F52448-E7CA-417B-AB9A-2A2EF239DAB4" /* imgui_impl_opengl2.cpp */; };
+		0C77727E760A3B436BF0C464 /* DSNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000010 /* DSNodeView.swift */; };
 		"0DD26806-FE9C-4B5D-8B71-48DF4D89DC14" /* FileSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "C9927FA0-1983-4A65-B903-432C39D44284" /* FileSource.cpp */; };
 		0E6420B5520544E7BB5E1E02 /* HelpService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "7FE534A8-B397-4F3A-9052-8FB8FBBA14CD" /* HelpService.cpp */; };
 		0E6CFDC06D574B3787B2E183 /* ofxBaseMidi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "B3FDEC5F-B3E9-4056-B20D-99691648BE2C" /* ofxBaseMidi.cpp */; };
@@ -85,6 +88,7 @@
 		19F5982E574F4103B19260D4 /* SystemAudioSource.mm in Sources */ = {isa = PBXBuildFile; fileRef = 021162762E6CC3A000B15198 /* SystemAudioSource.mm */; };
 		"1BBA5C49-4387-4DF1-B018-9F6E016F444A" /* FileAudioSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "7F50B89F-0348-43F2-A58C-1C5504692393" /* FileAudioSource.cpp */; };
 		1E4CEF1DC2744889B46CB0A3 /* TileBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "C0C10A63-424F-4447-B591-0A9CC6766A15" /* TileBrowserView.cpp */; };
+		1EE5F08D950518B3D3576703 /* ThemePresets.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000003 /* ThemePresets.swift */; };
 		"201BA7D8-7AC0-4851-BA33-523C3122F549" /* MicrophoneAudioSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "B19D76F5-D648-45E6-A505-7EEDF67F1CC8" /* MicrophoneAudioSource.cpp */; };
 		"20978F2F-9BFD-48B6-B8EC-48AA83AD51EF" /* RtMidi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "10278D86-DBB3-488C-A39E-C04AC0E634C7" /* RtMidi.cpp */; };
 		21C5D5BFA59642798A1DBE1E /* CoreTimeDomainFeatures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028651542D946945000CE0D4 /* CoreTimeDomainFeatures.cpp */; };
@@ -99,7 +103,9 @@
 		25F8F6245748461CBB575432 /* DiffusionShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02145B002E525040009C1855 /* DiffusionShader.cpp */; };
 		26CB5D8F2D874B4ABDD1AF4A /* StrandBrowserWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "2F9BBD61-7014-4808-BAE7-47E7E9C9D814" /* StrandBrowserWindow.cpp */; };
 		"272BC713-7A80-44ED-845D-9EE3BC0BC0A3" /* TileBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "C0C10A63-424F-4447-B591-0A9CC6766A15" /* TileBrowserView.cpp */; };
+		27C82FB7F345F4C20606DE8C /* DSColorPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A981E3B12C66ACA36E618A2A /* DSColorPicker.swift */; };
 		"2987286D-D5D8-4C62-BF41-954D098CE626" /* FeedbackShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "3F2BC593-F00E-4D44-A56B-FD29676B6B15" /* FeedbackShader.cpp */; };
+		2A24FD76FA9BF3DACE082C48 /* DSColorPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A981E3B12C66ACA36E618A2A /* DSColorPicker.swift */; };
 		2A95FFF1D77845BABF9A45BB /* TimePanelView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F157C72E1722E0003B6C2A /* TimePanelView.cpp */; };
 		2AE8D17FCF1A42CB9F28CBF3 /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "F707ECA5-D537-42D2-9AFF-9A2998EE3AA1" /* imgui.cpp */; };
 		"2BB774E8-FDFF-4197-9168-9B722B65B875" /* MidiPairing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "C4B026A5-684D-40FC-85EA-85E780460543" /* MidiPairing.cpp */; };
@@ -119,6 +125,7 @@
 		"35FD0CF0-2F97-46A7-8DA6-D0111EC2A7A8" /* ofxMidiIn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "8A2EB1C4-3640-432E-AC71-592FE6B1BB57" /* ofxMidiIn.cpp */; };
 		"36750A7E-4B44-404F-BF71-7DFA33F6927D" /* WebcamSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "76CAB13B-D857-4FC9-BE15-A320CEF0574D" /* WebcamSource.cpp */; };
 		36A379C45BF8497192819110 /* imgui_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "39143AC4-A6EF-45D0-AAEA-DA640E9D82B4" /* imgui_demo.cpp */; };
+		36A384FEE0AA0F00837A4098 /* DSText.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000006 /* DSText.swift */; };
 		3736F2DF886B4B18B63E067A /* PlaylistSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02EF52762E6B706400ECC53A /* PlaylistSource.cpp */; };
 		"37795008-81F2-42A8-9474-26349D3C97F7" /* ModulationService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "CB9E62D6-660B-4826-AE6E-F35B9E73A0A6" /* ModulationService.cpp */; };
 		"38353823-B5F9-47F4-A7C1-61C6BC60F9A1" /* VideoSourceBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "CA805C31-5499-470F-9AF7-B97303D77AC3" /* VideoSourceBrowserView.cpp */; };
@@ -127,6 +134,7 @@
 		3A53FD5E7A6F44A8A06C78BF /* ofxFastFboReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024FAE592DA0207D00DE3197 /* ofxFastFboReader.cpp */; };
 		3B26E8E87DE74D55A75DEF68 /* imgui_stdlib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "0CCD9E21-BAFF-48C3-9B29-476CDA9D9273" /* imgui_stdlib.cpp */; };
 		3BDB3FC58CA44F3EA3B37093 /* ConnectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 079DAA675BFE42E5A430B80F /* ConnectionModel.swift */; };
+		3D1A0ED5E7F95DD0C48554D6 /* DSPin.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC0000000000010000000F /* DSPin.swift */; };
 		3E28FD334D8D41E9AA7F30F9 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "04CA78A1-FF25-425E-B2D1-041597750E58" /* CoreMIDI.framework */; };
 		410493164C324B19866CCBFC /* ConnectionCablesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D2685B760F74E248FC774AC /* ConnectionCablesView.swift */; };
 		"41241707-80AE-4431-A8DB-C2B2E8C879BB" /* BaseEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "4E6A85DC-F4A6-46A6-AB9B-F0E59F678CD9" /* BaseEngine.cpp */; };
@@ -151,6 +159,7 @@
 		"4B11A9CA-F59F-4F2F-87EF-E6FF2E265A05" /* TextureService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "7781352D-8ED2-4588-B25C-17029F165EB4" /* TextureService.cpp */; };
 		"4B2727B3-72E6-4C10-B1EB-901578401336" /* ParameterService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "DEB101B8-D2AC-46C6-8101-333BB80113FD" /* ParameterService.cpp */; };
 		4B30EA23353241D491942960 /* FeedbackSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "B33977A8-A963-4BE7-B324-459B9C2F3050" /* FeedbackSource.cpp */; };
+		4CC28E0679F3E5F498BF2784 /* WorkspaceUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BFBA3C545B2CE7C6CF537A7 /* WorkspaceUITests.swift */; };
 		4EFBCED9493647BF95B99E09 /* imgui_impl_glfw_context_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "C7A03344-FBDE-416D-BC03-5B18007A3367" /* imgui_impl_glfw_context_support.cpp */; };
 		"522DAC64-183B-4131-852C-1DC95FA2DE79" /* OptionalShadersHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "7C4428A7-07B1-4DE2-939C-B5261DB638F7" /* OptionalShadersHelper.cpp */; };
 		536075BE1189431FB34F6F19 /* BookmarkService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "A8B85E9B-4E38-4AA9-9F54-33AC116D95FF" /* BookmarkService.cpp */; };
@@ -165,6 +174,7 @@
 		598963FBA4CB45AB9DFEBB5C /* NodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B8B26CF91D6439BA3057C56 /* NodeView.swift */; };
 		5C8ACCF6EE0E4A6F8695EC62 /* WebcamSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "76CAB13B-D857-4FC9-BE15-A320CEF0574D" /* WebcamSource.cpp */; };
 		"5D839E37-0743-40C7-BCF2-0D79D89AC0F4" /* imgui_stdlib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "0CCD9E21-BAFF-48C3-9B29-476CDA9D9273" /* imgui_stdlib.cpp */; };
+		5DE4956B9F327D96CD7B2217 /* ChannelStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04AD3BADCAA0F1EA5788259E /* ChannelStripView.swift */; };
 		5EF8882981134B93B28822D4 /* AVFRecorder.m in Sources */ = {isa = PBXBuildFile; fileRef = 024FAE892DA02CF600DE3197 /* AVFRecorder.m */; };
 		5F84D13E50C24695B2041F8C /* EngineGLFW.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "21C8867F-75B3-43EC-B0CA-2A3F104B64C2" /* EngineGLFW.cpp */; };
 		"62A1DBBF-D3A4-4B32-8D5D-F6A7A86DBCA0" /* ofxMidiMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "C9C70BB5-F65F-43CB-8160-A5190E577D10" /* ofxMidiMessage.cpp */; };
@@ -172,16 +182,20 @@
 		632562C76BB544A3AA553016 /* WaveformOscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "D449A71C-24A5-4A4F-AD4A-1D39871039B0" /* WaveformOscillator.cpp */; };
 		64079416A79745B8B0EB20B2 /* CoreFrequencyDomainFeatures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028651522D946945000CE0D4 /* CoreFrequencyDomainFeatures.cpp */; };
 		"64B7AB4A-1741-423B-9912-54C68CA78467" /* PagedTileBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "94C7EEF9-55B5-46D5-A0A4-8FA0970B934E" /* PagedTileBrowserView.cpp */; };
+		651CACE35636C322E76C4152 /* DSCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000007 /* DSCard.swift */; };
 		65343614B91A40EF81DCCEE5 /* BTrackOnsetDetectionFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02CED25C2E6F94C80010EC68 /* BTrackOnsetDetectionFunction.cpp */; };
 		65B4AA4A5D574B8490A92B97 /* StrandService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "CB8A8FEB-43D7-45EA-8167-6DA30320942A" /* StrandService.cpp */; };
 		6656EFFFB90742EFA331DD4E /* DefaultTheme.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "8825362F-6151-4ED0-BA75-CA3FC3E6FDAE" /* DefaultTheme.cpp */; };
 		674742F9E2CA47C9932421C7 /* BTrackDetector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02CED2732E6F95FD0010EC68 /* BTrackDetector.cpp */; };
 		682581AE48264EB8810A3322 /* ConfigService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "D46400BB-47CF-4D36-B131-04511A2C67EA" /* ConfigService.cpp */; };
 		"68363D6E-D6F1-4CFD-8AB7-36140854C129" /* MainStageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "42ED44B0-B1D8-4B3E-AC0C-46CE88659031" /* MainStageView.cpp */; };
+		6864274AD40D03A5BD5A4249 /* MidiControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE690A620B9F4EAF0E98269C /* MidiControlsView.swift */; };
 		"690390A2-E65E-4CC8-ABDB-7E2E7110F0F3" /* VideoSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "837E3528-6579-423A-B146-4C0FA0F11D6F" /* VideoSource.cpp */; };
 		6AAA71A242D64AFC85CF091E /* FeedbackSourceService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "1AEF988C-B399-44D0-8818-7033B62D67BF" /* FeedbackSourceService.cpp */; };
+		6B36E8C0ED5E7479EBCEC421 /* HelpOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B70C94BED4306208FBEF16 /* HelpOverlayView.swift */; };
 		6B47AE4B575C4F9685792D7C /* ofxMidi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "C7CD4322-87E6-450A-88F5-AAE6FBEFB24D" /* ofxMidi.cpp */; };
 		"6B5C2CB4-112C-42E6-BBBC-6A7072193C5D" /* AvailableVideoSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "79354DE8-7C04-4DEA-9956-69113F7BC799" /* AvailableVideoSource.cpp */; };
+		6C2E3D6138B246985E91BA40 /* StageOutputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FCBE50AE5E3C50C9262756E /* StageOutputView.swift */; };
 		6C6C154F08BC4241BAB958A4 /* ScrollingTextSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0208F6402EB3D0B600529661 /* ScrollingTextSource.cpp */; };
 		6D30EE41242143B0866D4A0A /* AudioSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "0265D595-A18D-41DE-BCDF-9B6017808CC8" /* AudioSource.cpp */; };
 		"6D94E3C1-5770-4476-8604-5293607533E1" /* Connection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "34E96EBB-E4ED-4A15-86A8-85B750BAF593" /* Connection.cpp */; };
@@ -196,6 +210,7 @@
 		729F12959F204B15A5AEF4E2 /* EngineOpenFrameworks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "CEB14DCA-F0ED-4B35-8D8F-1EF592B5FDC2" /* EngineOpenFrameworks.cpp */; };
 		747E0416EB8442F8A527D289 /* VideoSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "837E3528-6579-423A-B146-4C0FA0F11D6F" /* VideoSource.cpp */; };
 		74F865831E534E78B33ACC92 /* TimeService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F157CA2E1722FE003B6C2A /* TimeService.cpp */; };
+		759F0757DC34159F428B66FF /* DSSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000005 /* DSSlider.swift */; };
 		75B291F689AB436A9FA1396C /* AVFRecorderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 024FAE8B2DA02CF600DE3197 /* AVFRecorderWrapper.mm */; };
 		76E74A8995024B2F83A39E68 /* kiss_fft.c in Sources */ = {isa = PBXBuildFile; fileRef = 028651722D94699B000CE0D4 /* kiss_fft.c */; };
 		"790DBE16-E73B-4C5E-BF78-804335431710" /* DefaultTheme.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "8825362F-6151-4ED0-BA75-CA3FC3E6FDAE" /* DefaultTheme.cpp */; };
@@ -230,6 +245,7 @@
 		90B74546D1A9429786196D68 /* FavoriteParameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "FC160E05-F2DF-4918-8C97-DEA02D05D3EA" /* FavoriteParameter.cpp */; };
 		"90D4DB31-9DEB-42CA-840D-A7C1B4C527D4" /* ValueOscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "4B4A57F0-9929-4710-9CCE-99453D8C037A" /* ValueOscillator.cpp */; };
 		"912A58AE-8DD4-4B5B-82C4-85E44708C835" /* IconService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "E3B7CE1B-23B7-4815-B0D2-BE8398422FE3" /* IconService.cpp */; };
+		913F8AC6FCBB3E18C7806DBC /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000001 /* Theme.swift */; };
 		"91E0E9A7-70FE-4C51-BD57-EB473B0BCA7D" /* BookmarkService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "A8B85E9B-4E38-4AA9-9F54-33AC116D95FF" /* BookmarkService.cpp */; };
 		92B65930D33B4A109928D309 /* implot_items.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0286516C2D946978000CE0D4 /* implot_items.cpp */; };
 		946CAF30CA1A402AA5F14800 /* NodeShaderBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "B4C24936-3A60-49E4-992C-A47A70D7A969" /* NodeShaderBrowserView.cpp */; };
@@ -240,6 +256,7 @@
 		99C1E1A19E9D4C3E955221CB /* ModulationService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "CB9E62D6-660B-4826-AE6E-F35B9E73A0A6" /* ModulationService.cpp */; };
 		99F0EB53FFA142988600E0EA /* nottawa_bridge.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8131616D9B99423DB44B78F6 /* nottawa_bridge.cpp */; };
 		9A06E3A628E14B0EA05C1D83 /* ParameterService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "DEB101B8-D2AC-46C6-8101-333BB80113FD" /* ParameterService.cpp */; };
+		9A73EC22FAF79CC0853DEBFA /* HelpStrings.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E27D17A45F81A75C85F2D9 /* HelpStrings.swift */; };
 		9C18CD15C7C74F42999AF60F /* PinView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACF2E4C0495D4BC9B934978B /* PinView.swift */; };
 		9C655CE65F0E444EA4B454EB /* ofxMidiMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "C9C70BB5-F65F-43CB-8160-A5190E577D10" /* ofxMidiMessage.cpp */; };
 		9CAB32595C2B4750AB2E748B /* MarkdownService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "B1E9BFCB-0FA5-4D73-841D-D4CE73F743A9" /* MarkdownService.cpp */; };
@@ -253,7 +270,10 @@
 		"A4F0C022-839E-40AC-94AA-F5618732CB3F" /* Strings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "804FFFCE-C5A3-4BCF-A22E-30678AAD65E3" /* Strings.cpp */; };
 		A680A3051DC343DE87D8CE1C /* Pulser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "3B4CF4CC-9D2A-4263-AEDF-7CE75C411C29" /* Pulser.cpp */; };
 		A7B3294B92D7469BBB51E472 /* VideoSourceBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE1FC305CD764F50BAF5ABA6 /* VideoSourceBrowserView.swift */; };
+		A7B3C8D2E1F4059638214B7C /* DSToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000014 /* DSToggle.swift */; };
+		A7C3E91D4F8B2A06E5D71C83 /* CompactOscillatorControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2D8F40E7A1C5963D4E08B17 /* CompactOscillatorControls.swift */; };
 		A7FFCFF68E544F25B171D52B /* MainStageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "42ED44B0-B1D8-4B3E-AC0C-46CE88659031" /* MainStageView.cpp */; };
+		A82EDE2991B390BC5B55A339 /* HelpStepCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5534EFDB481DE82863290972 /* HelpStepCardView.swift */; };
 		A8EEB78A96044026A2B485F8 /* AvailableShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "DD8CFBE4-765F-42FA-80F8-ED65AF8DBA7E" /* AvailableShader.cpp */; };
 		"AA7CFDF3-ACEF-402B-8209-E46EB9E7E58B" /* LibraryService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "76000294-1C4C-43F1-8CD4-97A8E2D0F249" /* LibraryService.cpp */; };
 		AA8639D720194845901AF968 /* PagedTileBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "94C7EEF9-55B5-46D5-A0A4-8FA0970B934E" /* PagedTileBrowserView.cpp */; };
@@ -273,10 +293,13 @@
 		AUD0A1B2C3D4E5F6A700000A /* FrequencyColumnView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUD0A1B2C3D4E5F6A7000009 /* FrequencyColumnView.swift */; };
 		AUD0A1B2C3D4E5F6A700000C /* ScrollingGraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUD0A1B2C3D4E5F6A700000B /* ScrollingGraphView.swift */; };
 		AUD0A1B2C3D4E5F6A700000E /* BarChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUD0A1B2C3D4E5F6A700000D /* BarChartView.swift */; };
+		B04DEBE8A556F592BE1B9386 /* PinStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40148AE7C65712ACF882C9DF /* PinStripView.swift */; };
 		"B09A2EED-CC6A-4AE4-B332-D7B3D4EC602F" /* ImageService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "CE7045C6-7787-4774-8161-F6F0E9E09577" /* ImageService.cpp */; };
 		B2C3D4E5F6A748B9C0D1E2F3 /* PreviewWindowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2D3C4B5A6F7988990A1B2C3 /* PreviewWindowManager.swift */; };
+		B37192BBF978394AE437AE0D /* StageModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 823513EDE000886C04125412 /* StageModeView.swift */; };
 		B67D5D1570694524836EC31C /* Gui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "CE80E7A3-09AE-48C4-93D1-2AA8CF94468B" /* Gui.cpp */; };
 		B83D71E00320450B8C268A4C /* ShaderConfigSelectionView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "98CA4613-C5B4-4A6D-BB96-069FD8A8A425" /* ShaderConfigSelectionView.cpp */; };
+		B8C4D9E3F2050A7749325C8D /* DSPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000015 /* DSPicker.swift */; };
 		"BACC44F3-4998-44C2-B2A6-DBAB1170A60F" /* ImageTexture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "072650AD-B603-49DC-89AE-8525A2728A41" /* ImageTexture.cpp */; };
 		BB1A3BE19845420AAFD010D9 /* PulseOscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "E2B1E4A8-ECE3-4345-AB6E-A953D5B3553E" /* PulseOscillator.cpp */; };
 		"BD30B747-77F0-463B-98DB-98DD809A658A" /* Shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "F1B70289-4B57-4B7F-BB42-3B5510552EDA" /* Shader.cpp */; };
@@ -286,6 +309,8 @@
 		BEBD07C81ED74EF9A8E3E1C3 /* TextureProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14CBB713E9374F12B59F29C7 /* TextureProvider.swift */; };
 		"BFB5A457-0FBA-4ED4-A184-8C5C5B8D5250" /* AudioSourceBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "32CE084C-0E3C-4F0E-9ADE-E5794EBC2839" /* AudioSourceBrowserView.cpp */; };
 		C01CAE5BA1204780B9C9A779 /* CommonViews.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "84E8D57B-1E0D-4E8E-A2C5-F15E320B20BE" /* CommonViews.cpp */; };
+		C0928C9039F16373A1FF0CC1 /* DSIconButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC0000000000010000000E /* DSIconButton.swift */; };
+		C2D8D0ED04D6CEC606753E86 /* HelpArrowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA37E2D902DA8587C6B22B86 /* HelpArrowView.swift */; };
 		"C30D5929-5BA1-465D-BD06-8D9DBD0B5F44" /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "F707ECA5-D537-42D2-9AFF-9A2998EE3AA1" /* imgui.cpp */; };
 		C33372E6E02D416E83673AD8 /* ShaderInfoView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "E8C64843-7699-4637-A9A4-C21FA5289557" /* ShaderInfoView.cpp */; };
 		C3D4E5F6A7B849C0D1E2F3A4 /* BrowserPreviewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E5F6A7B8C9D0E1F2A3B4C5 /* BrowserPreviewManager.swift */; };
@@ -301,12 +326,15 @@
 		CC7ABCA0C9A54F469AC29DA9 /* EngineThread.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DFD24E1A6604C8A932C769A /* EngineThread.swift */; };
 		CCD3C481D9B2400280220BB0 /* FileSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "C9927FA0-1983-4A65-B903-432C39D44284" /* FileSource.cpp */; };
 		CE2D1C5D43914048B4ACF215 /* imgui_tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "F8A3A827-0794-473D-8F41-EE36B01B4974" /* imgui_tables.cpp */; };
+		CF3D05388911006211C8EAAE /* HelpGuideViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE4CFFCA9364199BA9EF1B89 /* HelpGuideViewModel.swift */; };
 		COM0B1A2B3C4D5E678901111 /* CommunityStrandListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = COM0F1A2B3C4D5E678901111 /* CommunityStrandListView.swift */; };
 		COM0B1A2B3C4D5E678902222 /* CommunityStrandTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = COM0F1A2B3C4D5E678902222 /* CommunityStrandTileView.swift */; };
 		D000493AC0E2411B8CD18505 /* imgui_impl_glfw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "66C79E52-4DAE-4B7C-9F5C-32232BDA95FF" /* imgui_impl_glfw.cpp */; };
 		"D19444EB-11C9-4930-B137-E59CB53E5227" /* ofxRtMidiIn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "7FFA1464-9814-4782-BC85-6F9A9DBC1E96" /* ofxRtMidiIn.cpp */; };
+		D1C1D62BF20D382047437FD0 /* DSCable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000013 /* DSCable.swift */; };
 		D3273B8312EF43888E0D2FAC /* AudioSourceBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "32CE084C-0E3C-4F0E-9ADE-E5794EBC2839" /* AudioSourceBrowserView.cpp */; };
 		D411AE52F1594EA1957561F8 /* TextSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "073A32C0-5C47-41FD-8EF5-43463ED7D2E7" /* TextSource.cpp */; };
+		D464D46F1E4EE5F686A43FDE /* DSButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000004 /* DSButton.swift */; };
 		"D48318CA-CC82-4848-9998-B3B0AC372659" /* StrandService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "CB8A8FEB-43D7-45EA-8167-6DA30320942A" /* StrandService.cpp */; };
 		"D527D466-386F-4118-B77B-3EC8042F86AE" /* EngineGLFW.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "21C8867F-75B3-43EC-B0CA-2A3F104B64C2" /* EngineGLFW.cpp */; };
 		D5E6F7A8B9CA01D2E3F4A5B6 /* PreviewTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6F7A8B9CADB12E3F4A5B6C7 /* PreviewTileView.swift */; };
@@ -320,68 +348,6 @@
 		DA0D70FB5A8D43A1B9D9351A /* ParameterTileBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "4B22978F-2BD8-4D6A-ABB3-02EA71BA8257" /* ParameterTileBrowserView.cpp */; };
 		DB5A7A620CC248FDB73E8581 /* ofxRtMidiOut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "A89FBB3B-826C-4127-B9AF-712E5BF8C37E" /* ofxRtMidiOut.cpp */; };
 		"DC518C46-16A7-4897-BE4A-BDA838873EEE" /* BarPlotView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "6AA88847-35AD-4AED-8FA7-DAF1469E1A9C" /* BarPlotView.cpp */; };
-		DE72B9DF9A7943EEB48618FA /* nottawa_bridge.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8131616D9B99423DB44B78F6 /* nottawa_bridge.cpp */; };
-		DEAC2D6D11364A89BA214A62 /* FileBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "2F0D025E-ADA8-46D3-91CF-FEBAE4407C84" /* FileBrowserView.cpp */; };
-		"DFDBF8BD-CC82-4007-AE4D-955255BAA54A" /* OutputWindow.mm in Sources */ = {isa = PBXBuildFile; fileRef = "916A4FFE-6D66-4ED1-9195-FBE7721C8A2E" /* OutputWindow.mm */; };
-		E11589B2D6614113AD454409 /* imgui_impl_opengl2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "77F52448-E7CA-417B-AB9A-2A2EF239DAB4" /* imgui_impl_opengl2.cpp */; };
-		"E15EE7B5-E10E-43A8-A52A-38B76437E87B" /* ShaderSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "517FA119-0D87-4B31-9B75-3F5D6326DC21" /* ShaderSource.cpp */; };
-		E2FF2231579445568352283D /* GraphModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4CF33713ED543A4A4887E28 /* GraphModel.swift */; };
-		E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E4B69E1D0A3A1BDC003C02F2 /* main.cpp */; };
-		E5735D2CE9E442EABD86BB15 /* EngineLoop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3BB68144C9174FEB8EE07AB6 /* EngineLoop.cpp */; };
-		E5D7736231BC408185E48E40 /* TextureDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D2A563EF69465BAD0288F5 /* TextureDisplayView.swift */; };
-		E6F48017A92B4700AD04FDE3 /* BTrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02CED17A2E6F33530010EC68 /* BTrack.cpp */; };
-		"E7B3E01F-1018-43D5-87D9-23BBAFCD1822" /* Pulser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "3B4CF4CC-9D2A-4263-AEDF-7CE75C411C29" /* Pulser.cpp */; };
-		"E7B87C4A-5ADF-4A0E-A4E9-DAC4FBE9C4C9" /* NodeLayoutView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "E062E616-4929-4E0B-A839-AD8BDB840B7F" /* NodeLayoutView.cpp */; };
-		E874AB74DD794EEBABE9F944 /* NodeModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 472DBBD4ABA9453B92C30A03 /* NodeModel.swift */; };
-		E8CBB37558024309B4370D01 /* StageParameterView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "A94567DF-8B24-4452-AB6C-9DA3F84A4B1A" /* StageParameterView.cpp */; };
-		E91A915B9A6143ABBFD04646 /* NodeLayoutView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "E062E616-4929-4E0B-A839-AD8BDB840B7F" /* NodeLayoutView.cpp */; };
-		E9F99A4DD60848A8A62ECB45 /* OscillatorView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "91E735FF-FDA3-4403-BEA6-E219909A2C93" /* OscillatorView.cpp */; };
-		EAE4A7BD5079413796929DE5 /* CreditView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02AB2F0E2DE0DA2A004EDB3F /* CreditView.cpp */; };
-		"EB55E4F5-7A3B-4C23-95E9-2826088E4576" /* imgui_tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "F8A3A827-0794-473D-8F41-EE36B01B4974" /* imgui_tables.cpp */; };
-		EB5EC5DD7A05446E8AD2DB49 /* BridgeTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7CCDFC9AC743CFBEBA05A5 /* BridgeTypes.swift */; };
-		EB80F923215F413BA22FCFCE /* LibrarySource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "BE45FBBE-A989-464B-981F-486A5C82B403" /* LibrarySource.cpp */; };
-		"EBADD458-BAE7-43C7-8BFF-BE0AFAF9F0D5" /* HelpService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "7FE534A8-B397-4F3A-9052-8FB8FBBA14CD" /* HelpService.cpp */; };
-		"ED8949F5-517B-4439-BC72-2C6BF3CF9B5D" /* EngineOpenGLES.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "45178C3F-2498-4B5D-835A-0E8839A4D238" /* EngineOpenGLES.cpp */; };
-		"EDAC7014-A151-4A82-83A8-0161F4447AE2" /* EngineOpenFrameworks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "CEB14DCA-F0ED-4B35-8D8F-1EF592B5FDC2" /* EngineOpenFrameworks.cpp */; };
-		EECAEF8CA1674FA7B814857A /* ofxMidiClock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "3234C328-0EC1-45B9-9D5F-7459553A13A1" /* ofxMidiClock.cpp */; };
-		"F0851AF3-D330-475E-94E6-D4CB1CC6B9F3" /* ImHelpers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "093B42EA-2413-467D-B91C-4A7C724D5009" /* ImHelpers.cpp */; };
-		"F08D5994-F004-4F98-A6FE-599CDA2D5442" /* LibraryFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "66CB4877-908C-4328-A3A7-0355363EECE0" /* LibraryFile.cpp */; };
-		"F20277E3-15E5-420A-91E5-4667B015B3B4" /* Parameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "30B6FE5F-DA3E-43CB-B72E-EEDA8B5BC281" /* Parameter.cpp */; };
-		"F291B4B3-9384-43E4-8D8C-B28A47CCBA4B" /* AudioSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "0265D595-A18D-41DE-BCDF-9B6017808CC8" /* AudioSource.cpp */; };
-		F2FED13B83824003BE79D976 /* AccelerateFFT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0286514F2D946945000CE0D4 /* AccelerateFFT.cpp */; };
-		"F34A9289-C6E0-4D92-A616-ADEEBD698279" /* LayoutStateService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "F26D92D4-0BF5-453C-82F9-870B5A8D0249" /* LayoutStateService.cpp */; };
-		F34AF9FE376C40D380268742 /* NottawaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDBBB706B1804D19A9F0F5C3 /* NottawaApp.swift */; };
-		"F5423EB3-96DC-4F94-B9DF-EDB11F0354B4" /* ofxImGuiLoggerChannel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "B034341D-4BA9-447C-A2AE-AF4B9203CD08" /* ofxImGuiLoggerChannel.cpp */; };
-		F81365F91FB844828689E4D4 /* WindowFunctions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0286515C2D946945000CE0D4 /* WindowFunctions.cpp */; };
-		F92DB1F35EEA47158C373DF7 /* Icon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "DDA70437-F285-4126-B071-138C7E6862B3" /* Icon.cpp */; };
-		F952088B05B24FBD94DA49DD /* OscillationService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "A285604B-C7AC-419D-8DF7-22588461A748" /* OscillationService.cpp */; };
-		FA18D59035A04A1FBE62F866 /* CanvasGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD04E99EE814FB99F5193F1 /* CanvasGridView.swift */; };
-		FB4AB6543D104E4A9AD91369 /* src_linear.c in Sources */ = {isa = PBXBuildFile; fileRef = 02CED27C2E6F9E580010EC68 /* src_linear.c */; };
-		FB6B5A47EEE74534B18CEDC5 /* StrandBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "97D22C33-ED8E-4936-B68B-40824B88B349" /* StrandBrowserView.cpp */; };
-		FC5E01CC2178420DAFBE303C /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "43FB1791-2C87-4DEB-A1C1-81CF4EDCE275" /* imgui_draw.cpp */; };
-		"FDA66C1A-DAA1-4A88-B691-491E99EA0516" /* ShaderInfoView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "E8C64843-7699-4637-A9A4-C21FA5289557" /* ShaderInfoView.cpp */; };
-		FEAB8664872A472D92ADE7AF /* Parameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "30B6FE5F-DA3E-43CB-B72E-EEDA8B5BC281" /* Parameter.cpp */; };
-		FF1D0613C2CB47B3A6A5F963 /* EngineOpenGLES.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "45178C3F-2498-4B5D-835A-0E8839A4D238" /* EngineOpenGLES.cpp */; };
-		FFB030E2A8CD43A88934DD75 /* WelcomeScreenView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "79F37553-4B76-4BC1-A659-1D5123680B60" /* WelcomeScreenView.cpp */; };
-		FSC0A1B2C3D4E5F6A7B8C9D2 /* FileSourceControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FSC0A1B2C3D4E5F6A7B8C9D0 /* FileSourceControlsView.swift */; };
-		LIB0B1A2B3C4D5E678901111 /* LibrarySidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = LIB0F1A2B3C4D5E678901111 /* LibrarySidebarView.swift */; };
-		LIB0B1A2B3C4D5E678902222 /* LibraryTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = LIB0F1A2B3C4D5E678902222 /* LibraryTileView.swift */; };
-		OCV0A1B2C3D4E5F6A7B8C9D2 /* OscillatorControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OCV0A1B2C3D4E5F6A7B8C9D0 /* OscillatorControlsView.swift */; };
-		OSC0B1A2B3C4D5E678905678 /* OscillatorsSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OSC0F1A2B3C4D5E678901234 /* OscillatorsSidebarView.swift */; };
-		SBV0B1A2B3C4D5E678905678 /* SidebarBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SBV0F1A2B3C4D5E678901234 /* SidebarBrowserView.swift */; };
-		SETT000100010001ABCD0001 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SETT000100010001ABCD0002 /* SettingsView.swift */; };
-		WEL0A1B2C3D4E5F6A7B80001 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WEL0A1B2C3D4E5F6A7B80002 /* WelcomeView.swift */; };
-		SHR0B1A2B3C4D5E678901111 /* ShareStrandSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHR0F1A2B3C4D5E678901111 /* ShareStrandSheet.swift */; };
-		STR0B1A2B3C4D5E678901111 /* StrandsSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = STR0F1A2B3C4D5E678901111 /* StrandsSidebarView.swift */; };
-		STR0B1A2B3C4D5E678902222 /* StrandTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = STR0F1A2B3C4D5E678902222 /* StrandTileView.swift */; };
-		TSC0A1B2C3D4E5F6A7B8C9D2 /* TextSourceControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TSC0A1B2C3D4E5F6A7B8C9D0 /* TextSourceControlsView.swift */; };
-		WPV0A1B2C3D4E5F6A7B8C9D2 /* WaveformPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WPV0A1B2C3D4E5F6A7B8C9D0 /* WaveformPreviewView.swift */; };
-		B37192BBF978394AE437AE0D /* StageModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 823513EDE000886C04125412 /* StageModeView.swift */; };
-		5DE4956B9F327D96CD7B2217 /* ChannelStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04AD3BADCAA0F1EA5788259E /* ChannelStripView.swift */; };
-		E974EBB052574E74A2BE9438 /* CompactParameterControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5341016A589857CE37B2D0A2 /* CompactParameterControl.swift */; };
-		A7C3E91D4F8B2A06E5D71C83 /* CompactOscillatorControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2D8F40E7A1C5963D4E08B17 /* CompactOscillatorControls.swift */; };
-		6C2E3D6138B246985E91BA40 /* StageOutputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FCBE50AE5E3C50C9262756E /* StageOutputView.swift */; };
-		EC44FA4961FD79BB456AF2FF /* StageBottomBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1D25A317F9F3B3285E6D8EA /* StageBottomBarView.swift */; };
 		DDCC00000000000200000000 /* DesignLibraryApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000000 /* DesignLibraryApp.swift */; };
 		DDCC00000000000200000001 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000001 /* Theme.swift */; };
 		DDCC00000000000200000002 /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000002 /* ThemeManager.swift */; };
@@ -402,23 +368,70 @@
 		DDCC00000000000200000011 /* IconButtonShowcase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000011 /* IconButtonShowcase.swift */; };
 		DDCC00000000000200000012 /* NodeShowcase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000012 /* NodeShowcase.swift */; };
 		DDCC00000000000200000013 /* DSCable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000013 /* DSCable.swift */; };
-		913F8AC6FCBB3E18C7806DBC /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000001 /* Theme.swift */; };
-		07F48380489A2DCFC0528367 /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000002 /* ThemeManager.swift */; };
-		1EE5F08D950518B3D3576703 /* ThemePresets.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000003 /* ThemePresets.swift */; };
-		D464D46F1E4EE5F686A43FDE /* DSButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000004 /* DSButton.swift */; };
-		759F0757DC34159F428B66FF /* DSSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000005 /* DSSlider.swift */; };
-		36A384FEE0AA0F00837A4098 /* DSText.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000006 /* DSText.swift */; };
-		651CACE35636C322E76C4152 /* DSCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000007 /* DSCard.swift */; };
-		C0928C9039F16373A1FF0CC1 /* DSIconButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC0000000000010000000E /* DSIconButton.swift */; };
-		3D1A0ED5E7F95DD0C48554D6 /* DSPin.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC0000000000010000000F /* DSPin.swift */; };
-		0C77727E760A3B436BF0C464 /* DSNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000010 /* DSNodeView.swift */; };
-		D1C1D62BF20D382047437FD0 /* DSCable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000013 /* DSCable.swift */; };
 		DDCC00000000000200000014 /* DSToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000014 /* DSToggle.swift */; };
 		DDCC00000000000200000015 /* DSPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000015 /* DSPicker.swift */; };
 		DDCC00000000000200000016 /* ToggleShowcase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000016 /* ToggleShowcase.swift */; };
 		DDCC00000000000200000017 /* PickerShowcase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000017 /* PickerShowcase.swift */; };
-		A7B3C8D2E1F4059638214B7C /* DSToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000014 /* DSToggle.swift */; };
-		B8C4D9E3F2050A7749325C8D /* DSPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000015 /* DSPicker.swift */; };
+		DE72B9DF9A7943EEB48618FA /* nottawa_bridge.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8131616D9B99423DB44B78F6 /* nottawa_bridge.cpp */; };
+		DEAC2D6D11364A89BA214A62 /* FileBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "2F0D025E-ADA8-46D3-91CF-FEBAE4407C84" /* FileBrowserView.cpp */; };
+		"DFDBF8BD-CC82-4007-AE4D-955255BAA54A" /* OutputWindow.mm in Sources */ = {isa = PBXBuildFile; fileRef = "916A4FFE-6D66-4ED1-9195-FBE7721C8A2E" /* OutputWindow.mm */; };
+		DFEFD16D244CBDFEB8324CDA /* HelpCompletionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB2D1DE5C8786FABAA6A46F /* HelpCompletionView.swift */; };
+		E11589B2D6614113AD454409 /* imgui_impl_opengl2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "77F52448-E7CA-417B-AB9A-2A2EF239DAB4" /* imgui_impl_opengl2.cpp */; };
+		"E15EE7B5-E10E-43A8-A52A-38B76437E87B" /* ShaderSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "517FA119-0D87-4B31-9B75-3F5D6326DC21" /* ShaderSource.cpp */; };
+		E2FF2231579445568352283D /* GraphModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4CF33713ED543A4A4887E28 /* GraphModel.swift */; };
+		E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E4B69E1D0A3A1BDC003C02F2 /* main.cpp */; };
+		E5735D2CE9E442EABD86BB15 /* EngineLoop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3BB68144C9174FEB8EE07AB6 /* EngineLoop.cpp */; };
+		E5D7736231BC408185E48E40 /* TextureDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D2A563EF69465BAD0288F5 /* TextureDisplayView.swift */; };
+		E6F48017A92B4700AD04FDE3 /* BTrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02CED17A2E6F33530010EC68 /* BTrack.cpp */; };
+		"E7B3E01F-1018-43D5-87D9-23BBAFCD1822" /* Pulser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "3B4CF4CC-9D2A-4263-AEDF-7CE75C411C29" /* Pulser.cpp */; };
+		"E7B87C4A-5ADF-4A0E-A4E9-DAC4FBE9C4C9" /* NodeLayoutView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "E062E616-4929-4E0B-A839-AD8BDB840B7F" /* NodeLayoutView.cpp */; };
+		E874AB74DD794EEBABE9F944 /* NodeModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 472DBBD4ABA9453B92C30A03 /* NodeModel.swift */; };
+		E8CBB37558024309B4370D01 /* StageParameterView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "A94567DF-8B24-4452-AB6C-9DA3F84A4B1A" /* StageParameterView.cpp */; };
+		E91A915B9A6143ABBFD04646 /* NodeLayoutView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "E062E616-4929-4E0B-A839-AD8BDB840B7F" /* NodeLayoutView.cpp */; };
+		E974EBB052574E74A2BE9438 /* CompactParameterControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5341016A589857CE37B2D0A2 /* CompactParameterControl.swift */; };
+		E9F99A4DD60848A8A62ECB45 /* OscillatorView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "91E735FF-FDA3-4403-BEA6-E219909A2C93" /* OscillatorView.cpp */; };
+		EAE4A7BD5079413796929DE5 /* CreditView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02AB2F0E2DE0DA2A004EDB3F /* CreditView.cpp */; };
+		"EB55E4F5-7A3B-4C23-95E9-2826088E4576" /* imgui_tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "F8A3A827-0794-473D-8F41-EE36B01B4974" /* imgui_tables.cpp */; };
+		EB5EC5DD7A05446E8AD2DB49 /* BridgeTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7CCDFC9AC743CFBEBA05A5 /* BridgeTypes.swift */; };
+		EB80F923215F413BA22FCFCE /* LibrarySource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "BE45FBBE-A989-464B-981F-486A5C82B403" /* LibrarySource.cpp */; };
+		"EBADD458-BAE7-43C7-8BFF-BE0AFAF9F0D5" /* HelpService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "7FE534A8-B397-4F3A-9052-8FB8FBBA14CD" /* HelpService.cpp */; };
+		EC44FA4961FD79BB456AF2FF /* StageBottomBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1D25A317F9F3B3285E6D8EA /* StageBottomBarView.swift */; };
+		"ED8949F5-517B-4439-BC72-2C6BF3CF9B5D" /* EngineOpenGLES.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "45178C3F-2498-4B5D-835A-0E8839A4D238" /* EngineOpenGLES.cpp */; };
+		"EDAC7014-A151-4A82-83A8-0161F4447AE2" /* EngineOpenFrameworks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "CEB14DCA-F0ED-4B35-8D8F-1EF592B5FDC2" /* EngineOpenFrameworks.cpp */; };
+		EECAEF8CA1674FA7B814857A /* ofxMidiClock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "3234C328-0EC1-45B9-9D5F-7459553A13A1" /* ofxMidiClock.cpp */; };
+		"F0851AF3-D330-475E-94E6-D4CB1CC6B9F3" /* ImHelpers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "093B42EA-2413-467D-B91C-4A7C724D5009" /* ImHelpers.cpp */; };
+		"F08D5994-F004-4F98-A6FE-599CDA2D5442" /* LibraryFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "66CB4877-908C-4328-A3A7-0355363EECE0" /* LibraryFile.cpp */; };
+		"F20277E3-15E5-420A-91E5-4667B015B3B4" /* Parameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "30B6FE5F-DA3E-43CB-B72E-EEDA8B5BC281" /* Parameter.cpp */; };
+		"F291B4B3-9384-43E4-8D8C-B28A47CCBA4B" /* AudioSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "0265D595-A18D-41DE-BCDF-9B6017808CC8" /* AudioSource.cpp */; };
+		F2FED13B83824003BE79D976 /* AccelerateFFT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0286514F2D946945000CE0D4 /* AccelerateFFT.cpp */; };
+		"F34A9289-C6E0-4D92-A616-ADEEBD698279" /* LayoutStateService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "F26D92D4-0BF5-453C-82F9-870B5A8D0249" /* LayoutStateService.cpp */; };
+		F34AF9FE376C40D380268742 /* NottawaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDBBB706B1804D19A9F0F5C3 /* NottawaApp.swift */; };
+		"F5423EB3-96DC-4F94-B9DF-EDB11F0354B4" /* ofxImGuiLoggerChannel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "B034341D-4BA9-447C-A2AE-AF4B9203CD08" /* ofxImGuiLoggerChannel.cpp */; };
+		F747758EE36967AF7563E254 /* IconSourceControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F076C6AD7A705651844AD75D /* IconSourceControlsView.swift */; };
+		F81365F91FB844828689E4D4 /* WindowFunctions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0286515C2D946945000CE0D4 /* WindowFunctions.cpp */; };
+		F92DB1F35EEA47158C373DF7 /* Icon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "DDA70437-F285-4126-B071-138C7E6862B3" /* Icon.cpp */; };
+		F952088B05B24FBD94DA49DD /* OscillationService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "A285604B-C7AC-419D-8DF7-22588461A748" /* OscillationService.cpp */; };
+		FA18D59035A04A1FBE62F866 /* CanvasGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD04E99EE814FB99F5193F1 /* CanvasGridView.swift */; };
+		FB4AB6543D104E4A9AD91369 /* src_linear.c in Sources */ = {isa = PBXBuildFile; fileRef = 02CED27C2E6F9E580010EC68 /* src_linear.c */; };
+		FB6B5A47EEE74534B18CEDC5 /* StrandBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "97D22C33-ED8E-4936-B68B-40824B88B349" /* StrandBrowserView.cpp */; };
+		FC5E01CC2178420DAFBE303C /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "43FB1791-2C87-4DEB-A1C1-81CF4EDCE275" /* imgui_draw.cpp */; };
+		"FDA66C1A-DAA1-4A88-B691-491E99EA0516" /* ShaderInfoView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "E8C64843-7699-4637-A9A4-C21FA5289557" /* ShaderInfoView.cpp */; };
+		FEAB8664872A472D92ADE7AF /* Parameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "30B6FE5F-DA3E-43CB-B72E-EEDA8B5BC281" /* Parameter.cpp */; };
+		FF1D0613C2CB47B3A6A5F963 /* EngineOpenGLES.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "45178C3F-2498-4B5D-835A-0E8839A4D238" /* EngineOpenGLES.cpp */; };
+		FFB030E2A8CD43A88934DD75 /* WelcomeScreenView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "79F37553-4B76-4BC1-A659-1D5123680B60" /* WelcomeScreenView.cpp */; };
+		FSC0A1B2C3D4E5F6A7B8C9D2 /* FileSourceControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FSC0A1B2C3D4E5F6A7B8C9D0 /* FileSourceControlsView.swift */; };
+		LIB0B1A2B3C4D5E678901111 /* LibrarySidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = LIB0F1A2B3C4D5E678901111 /* LibrarySidebarView.swift */; };
+		LIB0B1A2B3C4D5E678902222 /* LibraryTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = LIB0F1A2B3C4D5E678902222 /* LibraryTileView.swift */; };
+		OCV0A1B2C3D4E5F6A7B8C9D2 /* OscillatorControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OCV0A1B2C3D4E5F6A7B8C9D0 /* OscillatorControlsView.swift */; };
+		OSC0B1A2B3C4D5E678905678 /* OscillatorsSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OSC0F1A2B3C4D5E678901234 /* OscillatorsSidebarView.swift */; };
+		SBV0B1A2B3C4D5E678905678 /* SidebarBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SBV0F1A2B3C4D5E678901234 /* SidebarBrowserView.swift */; };
+		SETT000100010001ABCD0001 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SETT000100010001ABCD0002 /* SettingsView.swift */; };
+		SHR0B1A2B3C4D5E678901111 /* ShareStrandSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHR0F1A2B3C4D5E678901111 /* ShareStrandSheet.swift */; };
+		STR0B1A2B3C4D5E678901111 /* StrandsSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = STR0F1A2B3C4D5E678901111 /* StrandsSidebarView.swift */; };
+		STR0B1A2B3C4D5E678902222 /* StrandTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = STR0F1A2B3C4D5E678902222 /* StrandTileView.swift */; };
+		TSC0A1B2C3D4E5F6A7B8C9D2 /* TextSourceControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TSC0A1B2C3D4E5F6A7B8C9D0 /* TextSourceControlsView.swift */; };
+		WEL0A1B2C3D4E5F6A7B80001 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WEL0A1B2C3D4E5F6A7B80002 /* WelcomeView.swift */; };
+		WPV0A1B2C3D4E5F6A7B8C9D2 /* WaveformPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WPV0A1B2C3D4E5F6A7B8C9D0 /* WaveformPreviewView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -460,6 +473,13 @@
 		022DF2862EE10F2800F110CC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 022DE16F2EE10EDA00F110CC /* btrack~.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2FBBEAE508F335360078DB84;
+			remoteInfo = "max-external";
+		};
+		027B07BE2F7B3C9A00FB4B24 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 027BF6A22F786ED600FB4B24 /* btrack~.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 2FBBEAE508F335360078DB84;
 			remoteInfo = "max-external";
@@ -549,6 +569,7 @@
 		024FAE8A2DA02CF600DE3197 /* AVFRecorderWrapper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AVFRecorderWrapper.hpp; sourceTree = "<group>"; };
 		024FAE8B2DA02CF600DE3197 /* AVFRecorderWrapper.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = AVFRecorderWrapper.mm; sourceTree = "<group>"; };
 		"0265D595-A18D-41DE-BCDF-9B6017808CC8" /* AudioSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AudioSource.cpp; sourceTree = "<group>"; };
+		027BF6A22F786ED600FB4B24 /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
 		02864DEE2D94611B000CE0D4 /* MSABPMTapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSABPMTapper.h; sourceTree = "<group>"; };
 		02864DEF2D94611B000CE0D4 /* MSABPMTapper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MSABPMTapper.cpp; sourceTree = "<group>"; };
 		02864DF02D94611B000CE0D4 /* MSATimer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSATimer.h; sourceTree = "<group>"; };
@@ -661,6 +682,7 @@
 		"032514A0-BDF2-4207-8C2E-4E219F57DDB7" /* ShaderType.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ShaderType.hpp; sourceTree = "<group>"; };
 		"035910F8-2281-4AB1-BC6E-A929EF8696B3" /* DiffractorShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DiffractorShader.hpp; sourceTree = "<group>"; };
 		"04688250-5838-4B1B-92ED-5B96B4C2ED1D" /* EngineGLFW.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = EngineGLFW.h; sourceTree = "<group>"; };
+		04AD3BADCAA0F1EA5788259E /* ChannelStripView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChannelStripView.swift; path = NottawaApp/Views/StageMode/ChannelStripView.swift; sourceTree = "<group>"; };
 		"04CA78A1-FF25-425E-B2D1-041597750E58" /* CoreMIDI.framework */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
 		"058CCFC2-4BAF-42DD-AAC9-ADD5B51D884A" /* CopyCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CopyCommand.hpp; sourceTree = "<group>"; };
 		"0692B4CE-DC5F-4C6F-B9EA-D17BFCD620D0" /* SwirlShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SwirlShader.hpp; sourceTree = "<group>"; };
@@ -675,6 +697,7 @@
 		"094AC0D1-F853-4351-A65E-4ECF31EF80E8" /* FileSource.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = FileSource.hpp; sourceTree = "<group>"; };
 		0A5C2CE6E1B74DA19E4A0525 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		"0AA7A882-BD9A-41E0-A115-62E1A3466CCC" /* MotionBlurTextureShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MotionBlurTextureShader.hpp; sourceTree = "<group>"; };
+		0ABD6BB6A5F760FA4396EC23 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = NottawaApp/Assets.xcassets; sourceTree = "<group>"; };
 		"0B852B3B-B9CD-44A7-940C-C53B01078253" /* Strings.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Strings.hpp; sourceTree = "<group>"; };
 		"0B9188F0-FDF0-4762-8DF4-D5439AC75882" /* AudioSourceService.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AudioSourceService.hpp; sourceTree = "<group>"; };
 		"0BBD8B79-B57D-41E9-8CB4-89403EE02B06" /* Console.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Console.hpp; sourceTree = "<group>"; };
@@ -705,6 +728,7 @@
 		"1A309EE0-1E54-446E-A33E-AFBB7080E828" /* PlasmaShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PlasmaShader.hpp; sourceTree = "<group>"; };
 		"1AEF988C-B399-44D0-8818-7033B62D67BF" /* FeedbackSourceService.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FeedbackSourceService.cpp; sourceTree = "<group>"; };
 		1D2685B760F74E248FC774AC /* ConnectionCablesView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ConnectionCablesView.swift; path = NottawaApp/Views/NodeEditor/ConnectionCablesView.swift; sourceTree = "<group>"; };
+		1DB2D1DE5C8786FABAA6A46F /* HelpCompletionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = HelpCompletionView.swift; path = NottawaApp/Views/HelpOverlay/HelpCompletionView.swift; sourceTree = "<group>"; };
 		"1F05EF6E-E9D1-48B8-9DC4-828B9E197FED" /* WelcomeScreenView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = WelcomeScreenView.hpp; sourceTree = "<group>"; };
 		"1FA5F73B-9504-4D70-9F1D-38E56D3D45D3" /* HalfToneShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = HalfToneShader.hpp; sourceTree = "<group>"; };
 		"217D7E82-6B36-46FE-9D75-E41A7D156296" /* FrequencyVisualizerShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = FrequencyVisualizerShader.hpp; sourceTree = "<group>"; };
@@ -752,6 +776,7 @@
 		"3CBB6DFA-CE8C-4755-A8BF-A0EA6AEB087F" /* RGBShiftShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = RGBShiftShader.hpp; sourceTree = "<group>"; };
 		"3EFC8DF4-1A73-4B91-8393-71411B563DAE" /* SimpleBarsShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SimpleBarsShader.hpp; sourceTree = "<group>"; };
 		"3F2BC593-F00E-4D44-A56B-FD29676B6B15" /* FeedbackShader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FeedbackShader.cpp; sourceTree = "<group>"; };
+		40148AE7C65712ACF882C9DF /* PinStripView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PinStripView.swift; path = NottawaApp/Views/NodeEditor/PinStripView.swift; sourceTree = "<group>"; };
 		"40443630-3C81-4790-A02B-F7FCBBD4232D" /* OctahedronShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = OctahedronShader.hpp; sourceTree = "<group>"; };
 		40D2A563EF69465BAD0288F5 /* TextureDisplayView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TextureDisplayView.swift; path = NottawaApp/Views/TextureDisplayView.swift; sourceTree = "<group>"; };
 		"40EF84FC-5E2B-4A29-B8A1-F8FF3ECF0CED" /* ShaderConfigSelectionView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ShaderConfigSelectionView.hpp; sourceTree = "<group>"; };
@@ -786,7 +811,9 @@
 		520EA3DA17B5417AA6C0D7C9 /* ParameterControlView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ParameterControlView.swift; path = NottawaApp/Views/Inspector/ParameterControlView.swift; sourceTree = "<group>"; };
 		"523A9F92-6D65-4A8C-9743-56ABCD3D4984" /* StageModeView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StageModeView.cpp; sourceTree = "<group>"; };
 		"52F363D4-B133-4945-8DED-D207F20639A9" /* TissueShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TissueShader.hpp; sourceTree = "<group>"; };
+		5341016A589857CE37B2D0A2 /* CompactParameterControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CompactParameterControl.swift; path = NottawaApp/Views/StageMode/CompactParameterControl.swift; sourceTree = "<group>"; };
 		"54C66E77-9737-482D-A3D5-2FD2CD2A9B4E" /* LumaMaskMakerShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = LumaMaskMakerShader.hpp; sourceTree = "<group>"; };
+		5534EFDB481DE82863290972 /* HelpStepCardView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = HelpStepCardView.swift; path = NottawaApp/Views/HelpOverlay/HelpStepCardView.swift; sourceTree = "<group>"; };
 		"5647A2D2-E8F6-4D37-9424-E13AB6E2DCB7" /* TwistedCubesShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TwistedCubesShader.hpp; sourceTree = "<group>"; };
 		"56AAF1BC-EBAC-4FD3-B7C0-D23C2A8497D5" /* StageParameterView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = StageParameterView.hpp; sourceTree = "<group>"; };
 		"56BEAE56-3996-4B55-A768-2B9603045FDA" /* AddImageVideoSourceCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AddImageVideoSourceCommand.hpp; sourceTree = "<group>"; };
@@ -800,6 +827,7 @@
 		5CBC397FF88E48CB95EA5471 /* NodeEditorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = NodeEditorView.swift; path = NottawaApp/Views/NodeEditor/NodeEditorView.swift; sourceTree = "<group>"; };
 		"5EA3A3ED-464B-485A-941D-B6C57ED59D63" /* SliderShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SliderShader.hpp; sourceTree = "<group>"; };
 		"5F11C9E7-FEA0-4802-9D81-6EB1B1840614" /* MultiSource.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MultiSource.hpp; sourceTree = "<group>"; };
+		5FCBE50AE5E3C50C9262756E /* StageOutputView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StageOutputView.swift; path = NottawaApp/Views/StageMode/StageOutputView.swift; sourceTree = "<group>"; };
 		"6096167C-6F80-4FC1-A784-475C9401F1CD" /* Image.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Image.hpp; sourceTree = "<group>"; };
 		"60FC8BE0-2713-44AC-920C-C82E11B80302" /* Oscillator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Oscillator.hpp; sourceTree = "<group>"; };
 		"610AF48D-F62F-4009-A171-72967697BAB6" /* ColorStepperShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ColorStepperShader.hpp; sourceTree = "<group>"; };
@@ -809,6 +837,7 @@
 		"62872B2B-8A02-4243-A179-BCE31A08AD74" /* LimboShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = LimboShader.hpp; sourceTree = "<group>"; };
 		"62B9A22D-EB99-44E8-8A21-DC574718F88E" /* WobbleShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = WobbleShader.hpp; sourceTree = "<group>"; };
 		"6327DF85-833E-4011-A227-02C2CBE506F0" /* ImGuiExtensions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ImGuiExtensions.cpp; sourceTree = "<group>"; };
+		63B70C94BED4306208FBEF16 /* HelpOverlayView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = HelpOverlayView.swift; path = NottawaApp/Views/HelpOverlay/HelpOverlayView.swift; sourceTree = "<group>"; };
 		"63EED7F9-64DD-495B-9ED4-23DFC70EE848" /* imgui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = imgui.h; sourceTree = "<group>"; };
 		"63F7E21F-B4FD-4A96-85F2-613DDC51F809" /* BarPlotView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BarPlotView.hpp; sourceTree = "<group>"; };
 		"642F1A54-FC61-42BD-8662-9F60E94FA59A" /* PixelPlayShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PixelPlayShader.hpp; sourceTree = "<group>"; };
@@ -859,6 +888,7 @@
 		"804FFFCE-C5A3-4BCF-A22E-30678AAD65E3" /* Strings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Strings.cpp; sourceTree = "<group>"; };
 		8131616D9B99423DB44B78F6 /* nottawa_bridge.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nottawa_bridge.cpp; path = src/Bridge/nottawa_bridge.cpp; sourceTree = "<group>"; };
 		"817FA850-464B-41BD-A9D0-6B7D2E7D4B5E" /* OnOffShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = OnOffShader.hpp; sourceTree = "<group>"; };
+		823513EDE000886C04125412 /* StageModeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StageModeView.swift; path = NottawaApp/Views/StageMode/StageModeView.swift; sourceTree = "<group>"; };
 		"8259C4E4-EE3C-43AD-9A07-8431DF99AB84" /* HSBShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = HSBShader.hpp; sourceTree = "<group>"; };
 		"8338202B-E30A-4984-9E87-9CD5BA7BA2D8" /* VideoSourceService.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VideoSourceService.cpp; sourceTree = "<group>"; };
 		"837E3528-6579-423A-B146-4C0FA0F11D6F" /* VideoSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VideoSource.cpp; sourceTree = "<group>"; };
@@ -904,6 +934,7 @@
 		"98CA4613-C5B4-4A6D-BB96-069FD8A8A425" /* ShaderConfigSelectionView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderConfigSelectionView.cpp; sourceTree = "<group>"; };
 		"9BC2CE01-87E0-42C6-A1DF-CC8081084CA8" /* OverlayShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = OverlayShader.hpp; sourceTree = "<group>"; };
 		"9BCE714A-B5B2-4D72-B57C-B4993A16B553" /* AerogelShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AerogelShader.hpp; sourceTree = "<group>"; };
+		9BFBA3C545B2CE7C6CF537A7 /* WorkspaceUITests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WorkspaceUITests.swift; sourceTree = "<group>"; };
 		"9D64AD3F-7236-459A-963C-DCBC5F1869BE" /* AddWebcamVideoSourceCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AddWebcamVideoSourceCommand.hpp; sourceTree = "<group>"; };
 		"9E962E99-CBD4-4D9D-9D2E-B843D0177B3B" /* Image.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Image.hpp; sourceTree = "<group>"; };
 		"9F09B156-D28C-4BC6-8F08-F11A0D7DE851" /* LibrarySource.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = LibrarySource.hpp; sourceTree = "<group>"; };
@@ -926,6 +957,7 @@
 		"A8F7BA64-25FF-48C0-A36F-96B9A582B1B5" /* ASCIIShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ASCIIShader.hpp; sourceTree = "<group>"; };
 		"A94567DF-8B24-4452-AB6C-9DA3F84A4B1A" /* StageParameterView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StageParameterView.cpp; sourceTree = "<group>"; };
 		A979B8FAF3E947638A398C31 /* MainEditorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MainEditorView.swift; path = NottawaApp/Views/MainEditorView.swift; sourceTree = "<group>"; };
+		A981E3B12C66ACA36E618A2A /* DSColorPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSColorPicker.swift; sourceTree = "<group>"; };
 		"AA75AAF3-1E8C-4744-B712-97DDC12301BE" /* ofApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ofApp.h; sourceTree = "<group>"; };
 		AABB00000000000000000001 /* NottawaAppUITests.app */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NottawaAppUITests.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AABB00000000000000000002 /* NottawaAppUITests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NottawaAppUITests.swift; sourceTree = "<group>"; };
@@ -936,6 +968,7 @@
 		AC7CCDFC9AC743CFBEBA05A5 /* BridgeTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BridgeTypes.swift; path = NottawaApp/Engine/BridgeTypes.swift; sourceTree = "<group>"; };
 		ACF2E4C0495D4BC9B934978B /* PinView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PinView.swift; path = NottawaApp/Views/NodeEditor/PinView.swift; sourceTree = "<group>"; };
 		ADV0A1B2C3D4E5F6A7B8C9D1 /* AudioDriverControlsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AudioDriverControlsView.swift; path = NottawaApp/Views/Inspector/AudioDriverControlsView.swift; sourceTree = "<group>"; };
+		AE4CFFCA9364199BA9EF1B89 /* HelpGuideViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = HelpGuideViewModel.swift; path = NottawaApp/ViewModels/HelpGuideViewModel.swift; sourceTree = "<group>"; };
 		AE54079B38484FEE82F949A3 /* IOSurface.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOSurface.framework; path = System/Library/Frameworks/IOSurface.framework; sourceTree = SDKROOT; };
 		"AE837481-B4F3-4175-BDAC-C9BAC1772200" /* ListBrowserView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ListBrowserView.cpp; sourceTree = "<group>"; };
 		"AF8FD029-3215-4BD9-97E8-EE0D7FF555DE" /* VertexShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VertexShader.hpp; sourceTree = "<group>"; };
@@ -958,6 +991,7 @@
 		"B1E9BFCB-0FA5-4D73-841D-D4CE73F743A9" /* MarkdownService.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MarkdownService.cpp; sourceTree = "<group>"; };
 		"B25B4475-BE15-4A78-BC1B-7C5006E86A61" /* KaleidoscopeShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = KaleidoscopeShader.hpp; sourceTree = "<group>"; };
 		"B28F8EA4-890C-44E9-BD53-A66E038223D3" /* FramePreview.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = FramePreview.hpp; sourceTree = "<group>"; };
+		B2D8F40E7A1C5963D4E08B17 /* CompactOscillatorControls.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CompactOscillatorControls.swift; path = NottawaApp/Views/StageMode/CompactOscillatorControls.swift; sourceTree = "<group>"; };
 		"B2DD5482-7C0C-4FF3-B7A5-F3FA99F835BB" /* ofxImGui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ofxImGui.h; sourceTree = "<group>"; };
 		"B33977A8-A963-4BE7-B324-459B9C2F3050" /* FeedbackSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FeedbackSource.cpp; sourceTree = "<group>"; };
 		"B3A7D9DF-8A81-45BB-BA15-3B9D06D83FB3" /* CosmosShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CosmosShader.hpp; sourceTree = "<group>"; };
@@ -972,6 +1006,7 @@
 		"B8804CBE-2948-4F4E-88F8-6DCD717B498C" /* HeptagonsShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = HeptagonsShader.hpp; sourceTree = "<group>"; };
 		"B8F2741B-9264-4695-A327-CEEBABAE69AA" /* MistShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MistShader.hpp; sourceTree = "<group>"; };
 		"BA13CC69-7502-4DAE-9C31-233E681DFE7F" /* ofxMidiTimecode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ofxMidiTimecode.h; sourceTree = "<group>"; };
+		BA37E2D902DA8587C6B22B86 /* HelpArrowView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = HelpArrowView.swift; path = NottawaApp/Views/HelpOverlay/HelpArrowView.swift; sourceTree = "<group>"; };
 		BB3E637A717A4352AB02FFEB /* NottawaEngine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = NottawaEngine.swift; path = NottawaApp/Engine/NottawaEngine.swift; sourceTree = "<group>"; };
 		"BC9953CB-322C-4A99-A53C-1DB3F5C51341" /* ModulationService.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ModulationService.hpp; sourceTree = "<group>"; };
 		"BCB486A3-08CD-4754-830E-C9AC9D88DC08" /* SpiralShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SpiralShader.hpp; sourceTree = "<group>"; };
@@ -1016,6 +1051,7 @@
 		COM0F1A2B3C4D5E678902222 /* CommunityStrandTileView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CommunityStrandTileView.swift; path = NottawaApp/Views/Browser/CommunityStrandTileView.swift; sourceTree = "<group>"; };
 		"D129EA6B-751E-4D65-B4EC-A600A18C8C45" /* CannyShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CannyShader.hpp; sourceTree = "<group>"; };
 		"D13FBAEA-0808-484F-8148-D2A5C7F171E1" /* FontService.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = FontService.hpp; sourceTree = "<group>"; };
+		D1D25A317F9F3B3285E6D8EA /* StageBottomBarView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StageBottomBarView.swift; path = NottawaApp/Views/StageMode/StageBottomBarView.swift; sourceTree = "<group>"; };
 		"D227D11A-6466-4430-BA24-DFE46AC0E4F1" /* Connection.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Connection.hpp; sourceTree = "<group>"; };
 		"D3049920-27DD-4D01-9E10-8A1573A28FA9" /* SmokeRingShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SmokeRingShader.hpp; sourceTree = "<group>"; };
 		"D3429DED-6BAD-4A9F-8B50-0E6D1A76CE6F" /* AddFileVideoSourceCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AddFileVideoSourceCommand.hpp; sourceTree = "<group>"; };
@@ -1032,6 +1068,7 @@
 		"D5DBC6A6-C775-4A13-BB47-569AF99041D6" /* ofxImGuiLoggerChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ofxImGuiLoggerChannel.h; sourceTree = "<group>"; };
 		"D6256C0A-396F-4604-83EE-22406D60EEDD" /* EmptyShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = EmptyShader.hpp; sourceTree = "<group>"; };
 		"D7ABE7B6-3771-469E-B209-FDCB3491827D" /* GlitchDigitalShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GlitchDigitalShader.hpp; sourceTree = "<group>"; };
+		D8E27D17A45F81A75C85F2D9 /* HelpStrings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = HelpStrings.swift; path = NottawaApp/Resources/HelpStrings.swift; sourceTree = "<group>"; };
 		"D94DD336-4C0B-4303-95BA-2BFE32DD949B" /* Parameter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Parameter.hpp; sourceTree = "<group>"; };
 		"DADA2607-11D3-4EE2-A411-A587CA92727B" /* DiscoShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DiscoShader.hpp; sourceTree = "<group>"; };
 		"DAF586C1-F9A1-4F00-8962-419D506000DF" /* ColorPassShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ColorPassShader.hpp; sourceTree = "<group>"; };
@@ -1043,6 +1080,31 @@
 		"DD8CFBE4-765F-42FA-80F8-ED65AF8DBA7E" /* AvailableShader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AvailableShader.cpp; sourceTree = "<group>"; };
 		"DDA70437-F285-4126-B071-138C7E6862B3" /* Icon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Icon.cpp; sourceTree = "<group>"; };
 		"DDC5B81E-37AA-491D-891A-25BBCC3F5958" /* WebcamSource.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = WebcamSource.hpp; sourceTree = "<group>"; };
+		DDCC00000000000000000008 /* DesignLibrary.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DesignLibrary.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DDCC00000000000100000000 /* DesignLibraryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignLibraryApp.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000001 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000002 /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000003 /* ThemePresets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemePresets.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000004 /* DSButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSButton.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000005 /* DSSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSSlider.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000006 /* DSText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSText.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000007 /* DSCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSCard.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000008 /* ShowcaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowcaseView.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000009 /* TypographyShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypographyShowcase.swift; sourceTree = "<group>"; };
+		DDCC0000000000010000000A /* ColorShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorShowcase.swift; sourceTree = "<group>"; };
+		DDCC0000000000010000000B /* ButtonShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonShowcase.swift; sourceTree = "<group>"; };
+		DDCC0000000000010000000C /* SliderShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderShowcase.swift; sourceTree = "<group>"; };
+		DDCC0000000000010000000D /* SpacingShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpacingShowcase.swift; sourceTree = "<group>"; };
+		DDCC0000000000010000000E /* DSIconButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSIconButton.swift; sourceTree = "<group>"; };
+		DDCC0000000000010000000F /* DSPin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSPin.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000010 /* DSNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSNodeView.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000011 /* IconButtonShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconButtonShowcase.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000012 /* NodeShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeShowcase.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000013 /* DSCable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSCable.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000014 /* DSToggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSToggle.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000015 /* DSPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSPicker.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000016 /* ToggleShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToggleShowcase.swift; sourceTree = "<group>"; };
+		DDCC00000000000100000017 /* PickerShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerShowcase.swift; sourceTree = "<group>"; };
 		DDD04E99EE814FB99F5193F1 /* CanvasGridView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CanvasGridView.swift; path = NottawaApp/Views/NodeEditor/CanvasGridView.swift; sourceTree = "<group>"; };
 		"DEB101B8-D2AC-46C6-8101-333BB80113FD" /* ParameterService.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParameterService.cpp; sourceTree = "<group>"; };
 		"DEC679B2-4E8F-40FA-8D8C-E6BFD149C367" /* GameboyShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GameboyShader.hpp; sourceTree = "<group>"; };
@@ -1077,6 +1139,7 @@
 		"EE85A0E7-4E92-4632-AA46-C4E37AD8A358" /* PulseOscillator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PulseOscillator.hpp; sourceTree = "<group>"; };
 		"EF23586B-6CE4-4C80-8F85-E14E581C96D1" /* ofxBaseMidi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ofxBaseMidi.h; sourceTree = "<group>"; };
 		"EFDFEBFD-FCCE-41DD-BBC2-BAC52A764A9F" /* ofxMidiConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ofxMidiConstants.h; sourceTree = "<group>"; };
+		F076C6AD7A705651844AD75D /* IconSourceControlsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = IconSourceControlsView.swift; path = NottawaApp/Views/Inspector/IconSourceControlsView.swift; sourceTree = "<group>"; };
 		"F09CD1B4-2D86-4CB2-BA8B-F1C749819FA6" /* WarpspeedShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = WarpspeedShader.hpp; sourceTree = "<group>"; };
 		"F15C62B1-1AB2-49D7-BA2C-904F952AE369" /* SolidColorShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SolidColorShader.hpp; sourceTree = "<group>"; };
 		"F186DA34-0207-40EC-90A8-A617F8DC78FF" /* MakeConnectionCommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MakeConnectionCommand.hpp; sourceTree = "<group>"; };
@@ -1107,6 +1170,7 @@
 		"FD6EC6F7-7527-417D-A979-F3010844668F" /* FloatingSparksShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = FloatingSparksShader.hpp; sourceTree = "<group>"; };
 		"FDD44985-F98F-48CA-B904-6E18AFF3CEA7" /* MarkdownService.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MarkdownService.hpp; sourceTree = "<group>"; };
 		"FDEEDC99-BA4A-4C82-AA2B-F1546563C1CD" /* EngineOpenGLES.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = EngineOpenGLES.h; sourceTree = "<group>"; };
+		FE690A620B9F4EAF0E98269C /* MidiControlsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MidiControlsView.swift; path = NottawaApp/Views/Inspector/MidiControlsView.swift; sourceTree = "<group>"; };
 		FEE510EAA51A43B28F5220C0 /* NodeEditorViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = NodeEditorViewModel.swift; path = NottawaApp/ViewModels/NodeEditorViewModel.swift; sourceTree = "<group>"; };
 		"FF29EBF1-9685-47E7-9491-2D418AB586C0" /* Gui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Gui.h; sourceTree = "<group>"; };
 		FSC0A1B2C3D4E5F6A7B8C9D0 /* FileSourceControlsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FileSourceControlsView.swift; path = NottawaApp/Views/Inspector/FileSourceControlsView.swift; sourceTree = "<group>"; };
@@ -1116,43 +1180,12 @@
 		OSC0F1A2B3C4D5E678901234 /* OscillatorsSidebarView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = OscillatorsSidebarView.swift; path = NottawaApp/Views/Browser/OscillatorsSidebarView.swift; sourceTree = "<group>"; };
 		SBV0F1A2B3C4D5E678901234 /* SidebarBrowserView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SidebarBrowserView.swift; path = NottawaApp/Views/Browser/SidebarBrowserView.swift; sourceTree = "<group>"; };
 		SETT000100010001ABCD0002 /* SettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SettingsView.swift; path = NottawaApp/Views/SettingsView.swift; sourceTree = "<group>"; };
-		WEL0A1B2C3D4E5F6A7B80002 /* WelcomeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WelcomeView.swift; path = NottawaApp/Views/WelcomeView.swift; sourceTree = "<group>"; };
 		SHR0F1A2B3C4D5E678901111 /* ShareStrandSheet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ShareStrandSheet.swift; path = NottawaApp/Views/Browser/ShareStrandSheet.swift; sourceTree = "<group>"; };
 		STR0F1A2B3C4D5E678901111 /* StrandsSidebarView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StrandsSidebarView.swift; path = NottawaApp/Views/Browser/StrandsSidebarView.swift; sourceTree = "<group>"; };
 		STR0F1A2B3C4D5E678902222 /* StrandTileView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StrandTileView.swift; path = NottawaApp/Views/Browser/StrandTileView.swift; sourceTree = "<group>"; };
 		TSC0A1B2C3D4E5F6A7B8C9D0 /* TextSourceControlsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TextSourceControlsView.swift; path = NottawaApp/Views/Inspector/TextSourceControlsView.swift; sourceTree = "<group>"; };
+		WEL0A1B2C3D4E5F6A7B80002 /* WelcomeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WelcomeView.swift; path = NottawaApp/Views/WelcomeView.swift; sourceTree = "<group>"; };
 		WPV0A1B2C3D4E5F6A7B8C9D0 /* WaveformPreviewView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WaveformPreviewView.swift; path = NottawaApp/Views/Inspector/WaveformPreviewView.swift; sourceTree = "<group>"; };
-		823513EDE000886C04125412 /* StageModeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StageModeView.swift; path = NottawaApp/Views/StageMode/StageModeView.swift; sourceTree = "<group>"; };
-		04AD3BADCAA0F1EA5788259E /* ChannelStripView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChannelStripView.swift; path = NottawaApp/Views/StageMode/ChannelStripView.swift; sourceTree = "<group>"; };
-		5341016A589857CE37B2D0A2 /* CompactParameterControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CompactParameterControl.swift; path = NottawaApp/Views/StageMode/CompactParameterControl.swift; sourceTree = "<group>"; };
-		B2D8F40E7A1C5963D4E08B17 /* CompactOscillatorControls.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CompactOscillatorControls.swift; path = NottawaApp/Views/StageMode/CompactOscillatorControls.swift; sourceTree = "<group>"; };
-		5FCBE50AE5E3C50C9262756E /* StageOutputView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StageOutputView.swift; path = NottawaApp/Views/StageMode/StageOutputView.swift; sourceTree = "<group>"; };
-		D1D25A317F9F3B3285E6D8EA /* StageBottomBarView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StageBottomBarView.swift; path = NottawaApp/Views/StageMode/StageBottomBarView.swift; sourceTree = "<group>"; };
-		DDCC00000000000100000000 /* DesignLibraryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignLibraryApp.swift; sourceTree = "<group>"; };
-		DDCC00000000000100000001 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
-		DDCC00000000000100000002 /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
-		DDCC00000000000100000003 /* ThemePresets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemePresets.swift; sourceTree = "<group>"; };
-		DDCC00000000000100000004 /* DSButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSButton.swift; sourceTree = "<group>"; };
-		DDCC00000000000100000005 /* DSSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSSlider.swift; sourceTree = "<group>"; };
-		DDCC00000000000100000006 /* DSText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSText.swift; sourceTree = "<group>"; };
-		DDCC00000000000100000007 /* DSCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSCard.swift; sourceTree = "<group>"; };
-		DDCC00000000000100000008 /* ShowcaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowcaseView.swift; sourceTree = "<group>"; };
-		DDCC00000000000100000009 /* TypographyShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypographyShowcase.swift; sourceTree = "<group>"; };
-		DDCC0000000000010000000A /* ColorShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorShowcase.swift; sourceTree = "<group>"; };
-		DDCC0000000000010000000B /* ButtonShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonShowcase.swift; sourceTree = "<group>"; };
-		DDCC0000000000010000000C /* SliderShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderShowcase.swift; sourceTree = "<group>"; };
-		DDCC0000000000010000000D /* SpacingShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpacingShowcase.swift; sourceTree = "<group>"; };
-		DDCC00000000000000000008 /* DesignLibrary.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DesignLibrary.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		DDCC0000000000010000000E /* DSIconButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSIconButton.swift; sourceTree = "<group>"; };
-		DDCC0000000000010000000F /* DSPin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSPin.swift; sourceTree = "<group>"; };
-		DDCC00000000000100000010 /* DSNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSNodeView.swift; sourceTree = "<group>"; };
-		DDCC00000000000100000011 /* IconButtonShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconButtonShowcase.swift; sourceTree = "<group>"; };
-		DDCC00000000000100000012 /* NodeShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeShowcase.swift; sourceTree = "<group>"; };
-		DDCC00000000000100000013 /* DSCable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSCable.swift; sourceTree = "<group>"; };
-		DDCC00000000000100000014 /* DSToggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSToggle.swift; sourceTree = "<group>"; };
-		DDCC00000000000100000015 /* DSPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DSPicker.swift; sourceTree = "<group>"; };
-		DDCC00000000000100000016 /* ToggleShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToggleShowcase.swift; sourceTree = "<group>"; };
-		DDCC00000000000100000017 /* PickerShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerShowcase.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -1180,6 +1213,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DDCC00000000000000000003 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E4B69B590A3A1756003C02F2 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1187,13 +1227,6 @@
 				02D0803B2EE9B015003AD114 /* Sparkle.framework in Frameworks */,
 				"0A7A065D-785F-489A-914F-8B1EDF273782" /* CoreMIDI.framework in Frameworks */,
 				CA766C53643A48B6849A73A2 /* IOSurface.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		DDCC00000000000000000003 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1224,6 +1257,7 @@
 				19DA7BE368B24562A3550878 /* IOSurfaceTextureManager.cpp */,
 				8131616D9B99423DB44B78F6 /* nottawa_bridge.cpp */,
 				AE54079B38484FEE82F949A3 /* IOSurface.framework */,
+				0ABD6BB6A5F760FA4396EC23 /* Assets.xcassets */,
 				CDBBB706B1804D19A9F0F5C3 /* NottawaApp.swift */,
 				AC7CCDFC9AC743CFBEBA05A5 /* BridgeTypes.swift */,
 				BB3E637A717A4352AB02FFEB /* NottawaEngine.swift */,
@@ -1239,11 +1273,18 @@
 				SETT000100010001ABCD0002 /* SettingsView.swift */,
 				WEL0A1B2C3D4E5F6A7B80002 /* WelcomeView.swift */,
 				ABV0F1A2B3C4D5E678905678 /* ActionBarView.swift */,
+				D8E27D17A45F81A75C85F2D9 /* HelpStrings.swift */,
+				AE4CFFCA9364199BA9EF1B89 /* HelpGuideViewModel.swift */,
+				BA37E2D902DA8587C6B22B86 /* HelpArrowView.swift */,
+				5534EFDB481DE82863290972 /* HelpStepCardView.swift */,
+				1DB2D1DE5C8786FABAA6A46F /* HelpCompletionView.swift */,
+				63B70C94BED4306208FBEF16 /* HelpOverlayView.swift */,
 				5CBC397FF88E48CB95EA5471 /* NodeEditorView.swift */,
 				DDD04E99EE814FB99F5193F1 /* CanvasGridView.swift */,
 				7B8B26CF91D6439BA3057C56 /* NodeView.swift */,
 				84644588FBEA46048FF419A7 /* NodeOverlayView.swift */,
 				ACF2E4C0495D4BC9B934978B /* PinView.swift */,
+				40148AE7C65712ACF882C9DF /* PinStripView.swift */,
 				F1E2D3C4B5A6978889A0B1C2 /* PinTooltipView.swift */,
 				E2D3C4B5A6F7988990A1B2C3 /* PreviewWindowManager.swift */,
 				D4E5F6A7B8C9D0E1F2A3B4C5 /* BrowserPreviewManager.swift */,
@@ -1255,8 +1296,10 @@
 				520EA3DA17B5417AA6C0D7C9 /* ParameterControlView.swift */,
 				OCV0A1B2C3D4E5F6A7B8C9D0 /* OscillatorControlsView.swift */,
 				ADV0A1B2C3D4E5F6A7B8C9D1 /* AudioDriverControlsView.swift */,
+				FE690A620B9F4EAF0E98269C /* MidiControlsView.swift */,
 				WPV0A1B2C3D4E5F6A7B8C9D0 /* WaveformPreviewView.swift */,
 				FSC0A1B2C3D4E5F6A7B8C9D0 /* FileSourceControlsView.swift */,
+				F076C6AD7A705651844AD75D /* IconSourceControlsView.swift */,
 				TSC0A1B2C3D4E5F6A7B8C9D0 /* TextSourceControlsView.swift */,
 				ED110DBF5B3449788F9CC2D7 /* ShaderBrowserView.swift */,
 				BE1FC305CD764F50BAF5ABA6 /* VideoSourceBrowserView.swift */,
@@ -1355,6 +1398,14 @@
 				024FAE8B2DA02CF600DE3197 /* AVFRecorderWrapper.mm */,
 			);
 			path = Recording;
+			sourceTree = "<group>";
+		};
+		027B05692F786ED600FB4B24 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				027B07BF2F7B3C9A00FB4B24 /* btrack~.mxo */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		0286513B2D9468C8000CE0D4 /* node-editor */ = {
@@ -1702,6 +1753,19 @@
 			path = rtmidi;
 			sourceTree = "<group>";
 		};
+		7D34ABB5DD238CFC95FEDAAD /* StageMode */ = {
+			isa = PBXGroup;
+			children = (
+				823513EDE000886C04125412 /* StageModeView.swift */,
+				04AD3BADCAA0F1EA5788259E /* ChannelStripView.swift */,
+				5341016A589857CE37B2D0A2 /* CompactParameterControl.swift */,
+				B2D8F40E7A1C5963D4E08B17 /* CompactOscillatorControls.swift */,
+				5FCBE50AE5E3C50C9262756E /* StageOutputView.swift */,
+				D1D25A317F9F3B3285E6D8EA /* StageBottomBarView.swift */,
+			);
+			name = StageMode;
+			sourceTree = "<group>";
+		};
 		"841E7815-3983-46EF-8781-05F551EF2044" /* Services */ = {
 			isa = PBXGroup;
 			children = (
@@ -1804,6 +1868,7 @@
 			isa = PBXGroup;
 			children = (
 				AABB00000000000000000002 /* NottawaAppUITests.swift */,
+				9BFBA3C545B2CE7C6CF537A7 /* WorkspaceUITests.swift */,
 			);
 			path = NottawaAppUITests;
 			sourceTree = "<group>";
@@ -2118,6 +2183,70 @@
 			path = src;
 			sourceTree = "<group>";
 		};
+		DDCC00000000000000000009 /* DesignLibrary */ = {
+			isa = PBXGroup;
+			children = (
+				DDCC0000000000000000000A /* App */,
+				DDCC0000000000000000000B /* Theme */,
+				DDCC0000000000000000000C /* Components */,
+				DDCC0000000000000000000D /* Showcase */,
+			);
+			path = DesignLibrary;
+			sourceTree = "<group>";
+		};
+		DDCC0000000000000000000A /* App */ = {
+			isa = PBXGroup;
+			children = (
+				DDCC00000000000100000000 /* DesignLibraryApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		DDCC0000000000000000000B /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				DDCC00000000000100000001 /* Theme.swift */,
+				DDCC00000000000100000002 /* ThemeManager.swift */,
+				DDCC00000000000100000003 /* ThemePresets.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		DDCC0000000000000000000C /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				DDCC00000000000100000004 /* DSButton.swift */,
+				DDCC00000000000100000005 /* DSSlider.swift */,
+				A981E3B12C66ACA36E618A2A /* DSColorPicker.swift */,
+				DDCC00000000000100000006 /* DSText.swift */,
+				DDCC00000000000100000007 /* DSCard.swift */,
+				DDCC0000000000010000000E /* DSIconButton.swift */,
+				DDCC0000000000010000000F /* DSPin.swift */,
+				DDCC00000000000100000010 /* DSNodeView.swift */,
+				DDCC00000000000100000013 /* DSCable.swift */,
+				DDCC00000000000100000014 /* DSToggle.swift */,
+				DDCC00000000000100000015 /* DSPicker.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		DDCC0000000000000000000D /* Showcase */ = {
+			isa = PBXGroup;
+			children = (
+				DDCC00000000000100000008 /* ShowcaseView.swift */,
+				DDCC00000000000100000009 /* TypographyShowcase.swift */,
+				DDCC0000000000010000000A /* ColorShowcase.swift */,
+				DDCC0000000000010000000B /* ButtonShowcase.swift */,
+				DDCC0000000000010000000C /* SliderShowcase.swift */,
+				DDCC0000000000010000000D /* SpacingShowcase.swift */,
+				DDCC00000000000100000011 /* IconButtonShowcase.swift */,
+				DDCC00000000000100000012 /* NodeShowcase.swift */,
+				DDCC00000000000100000016 /* ToggleShowcase.swift */,
+				DDCC00000000000100000017 /* PickerShowcase.swift */,
+			);
+			path = Showcase;
+			sourceTree = "<group>";
+		};
 		"E45AF115-8335-4B8A-A884-9E949CC0E8CD" /* Midi */ = {
 			isa = PBXGroup;
 			children = (
@@ -2201,82 +2330,6 @@
 			path = backends;
 			sourceTree = "<group>";
 		};
-		7D34ABB5DD238CFC95FEDAAD /* StageMode */ = {
-			isa = PBXGroup;
-			children = (
-				823513EDE000886C04125412 /* StageModeView.swift */,
-				04AD3BADCAA0F1EA5788259E /* ChannelStripView.swift */,
-				5341016A589857CE37B2D0A2 /* CompactParameterControl.swift */,
-				B2D8F40E7A1C5963D4E08B17 /* CompactOscillatorControls.swift */,
-				5FCBE50AE5E3C50C9262756E /* StageOutputView.swift */,
-				D1D25A317F9F3B3285E6D8EA /* StageBottomBarView.swift */,
-			);
-			name = StageMode;
-			sourceTree = "<group>";
-		};
-		DDCC00000000000000000009 /* DesignLibrary */ = {
-			isa = PBXGroup;
-			children = (
-				DDCC0000000000000000000A /* App */,
-				DDCC0000000000000000000B /* Theme */,
-				DDCC0000000000000000000C /* Components */,
-				DDCC0000000000000000000D /* Showcase */,
-			);
-			path = DesignLibrary;
-			sourceTree = "<group>";
-		};
-		DDCC0000000000000000000A /* App */ = {
-			isa = PBXGroup;
-			children = (
-				DDCC00000000000100000000 /* DesignLibraryApp.swift */,
-			);
-			path = App;
-			sourceTree = "<group>";
-		};
-		DDCC0000000000000000000B /* Theme */ = {
-			isa = PBXGroup;
-			children = (
-				DDCC00000000000100000001 /* Theme.swift */,
-				DDCC00000000000100000002 /* ThemeManager.swift */,
-				DDCC00000000000100000003 /* ThemePresets.swift */,
-			);
-			path = Theme;
-			sourceTree = "<group>";
-		};
-		DDCC0000000000000000000C /* Components */ = {
-			isa = PBXGroup;
-			children = (
-				DDCC00000000000100000004 /* DSButton.swift */,
-				DDCC00000000000100000005 /* DSSlider.swift */,
-				DDCC00000000000100000006 /* DSText.swift */,
-				DDCC00000000000100000007 /* DSCard.swift */,
-				DDCC0000000000010000000E /* DSIconButton.swift */,
-				DDCC0000000000010000000F /* DSPin.swift */,
-				DDCC00000000000100000010 /* DSNodeView.swift */,
-				DDCC00000000000100000013 /* DSCable.swift */,
-				DDCC00000000000100000014 /* DSToggle.swift */,
-				DDCC00000000000100000015 /* DSPicker.swift */,
-			);
-			path = Components;
-			sourceTree = "<group>";
-		};
-		DDCC0000000000000000000D /* Showcase */ = {
-			isa = PBXGroup;
-			children = (
-				DDCC00000000000100000008 /* ShowcaseView.swift */,
-				DDCC00000000000100000009 /* TypographyShowcase.swift */,
-				DDCC0000000000010000000A /* ColorShowcase.swift */,
-				DDCC0000000000010000000B /* ButtonShowcase.swift */,
-				DDCC0000000000010000000C /* SliderShowcase.swift */,
-				DDCC0000000000010000000D /* SpacingShowcase.swift */,
-				DDCC00000000000100000011 /* IconButtonShowcase.swift */,
-				DDCC00000000000100000012 /* NodeShowcase.swift */,
-				DDCC00000000000100000016 /* ToggleShowcase.swift */,
-				DDCC00000000000100000017 /* PickerShowcase.swift */,
-			);
-			path = Showcase;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -2316,6 +2369,23 @@
 			productReference = AABB00000000000000000001 /* NottawaAppUITests.app */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		DDCC00000000000000000001 /* DesignLibrary */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DDCC00000000000000000005 /* Build configuration list for PBXNativeTarget "DesignLibrary" */;
+			buildPhases = (
+				DDCC00000000000000000002 /* Sources */,
+				DDCC00000000000000000003 /* Frameworks */,
+				DDCC00000000000000000004 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DesignLibrary;
+			productName = DesignLibrary;
+			productReference = DDCC00000000000000000008 /* DesignLibrary.app */;
+			productType = "com.apple.product-type.application";
+		};
 		E4B69B5A0A3A1756003C02F2 /* dude_wake_up */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = E4B69B5F0A3A1757003C02F2 /* Build configuration list for PBXNativeTarget "dude_wake_up" */;
@@ -2336,23 +2406,6 @@
 			name = dude_wake_up;
 			productName = myOFApp;
 			productReference = 028651AE2D95E0EE000CE0D4 /* Nottawa (Debug).app */;
-			productType = "com.apple.product-type.application";
-		};
-		DDCC00000000000000000001 /* DesignLibrary */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = DDCC00000000000000000005 /* Build configuration list for PBXNativeTarget "DesignLibrary" */;
-			buildPhases = (
-				DDCC00000000000000000002 /* Sources */,
-				DDCC00000000000000000003 /* Frameworks */,
-				DDCC00000000000000000004 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = DesignLibrary;
-			productName = DesignLibrary;
-			productReference = DDCC00000000000000000008 /* DesignLibrary.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -2425,6 +2478,10 @@
 					ProductGroup = 028947A72E8B3C6F005299A6 /* Products */;
 					ProjectRef = 028938E12E8B3C6F005299A6 /* btrack~.xcodeproj */;
 				},
+				{
+					ProductGroup = 027B05692F786ED600FB4B24 /* Products */;
+					ProjectRef = 027BF6A22F786ED600FB4B24 /* btrack~.xcodeproj */;
+				},
 			);
 			projectRoot = "";
 			targets = (
@@ -2479,6 +2536,13 @@
 			remoteRef = 022DF2862EE10F2800F110CC /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		027B07BF2F7B3C9A00FB4B24 /* btrack~.mxo */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "btrack~.mxo";
+			remoteRef = 027B07BE2F7B3C9A00FB4B24 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		028949EC2E8D5A04005299A6 /* btrack~.mxo */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
@@ -2509,6 +2573,7 @@
 			files = (
 				024FAE772DA0207D00DE3197 /* .gitignore in Resources */,
 				028651B12D95E331000CE0D4 /* icon.icns in Resources */,
+				0ABD6BB6A5F760FA4396EC24 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2627,6 +2692,7 @@
 				1EE5F08D950518B3D3576703 /* ThemePresets.swift in Sources */,
 				D464D46F1E4EE5F686A43FDE /* DSButton.swift in Sources */,
 				759F0757DC34159F428B66FF /* DSSlider.swift in Sources */,
+				27C82FB7F345F4C20606DE8C /* DSColorPicker.swift in Sources */,
 				36A384FEE0AA0F00837A4098 /* DSText.swift in Sources */,
 				651CACE35636C322E76C4152 /* DSCard.swift in Sources */,
 				C0928C9039F16373A1FF0CC1 /* DSIconButton.swift in Sources */,
@@ -2635,7 +2701,6 @@
 				D1C1D62BF20D382047437FD0 /* DSCable.swift in Sources */,
 				A7B3C8D2E1F4059638214B7C /* DSToggle.swift in Sources */,
 				B8C4D9E3F2050A7749325C8D /* DSPicker.swift in Sources */,
-
 				18420F6015C64C20A92878DF /* ServiceStatics.cpp in Sources */,
 				556C0B8272934AA8B9577701 /* MainApp.cpp in Sources */,
 				6D30EE41242143B0866D4A0A /* AudioSource.cpp in Sources */,
@@ -2808,6 +2873,7 @@
 				598963FBA4CB45AB9DFEBB5C /* NodeView.swift in Sources */,
 				44879E4D9A0349EA888DD56D /* NodeOverlayView.swift in Sources */,
 				9C18CD15C7C74F42999AF60F /* PinView.swift in Sources */,
+				B04DEBE8A556F592BE1B9386 /* PinStripView.swift in Sources */,
 				A1B2C3D4E5F647A8B9C0D1E2 /* PinTooltipView.swift in Sources */,
 				B2C3D4E5F6A748B9C0D1E2F3 /* PreviewWindowManager.swift in Sources */,
 				C3D4E5F6A7B849C0D1E2F3A4 /* BrowserPreviewManager.swift in Sources */,
@@ -2819,8 +2885,10 @@
 				19068B801B2A49B8A626F986 /* ParameterControlView.swift in Sources */,
 				OCV0A1B2C3D4E5F6A7B8C9D2 /* OscillatorControlsView.swift in Sources */,
 				ADV0A1B2C3D4E5F6A7B8C9D3 /* AudioDriverControlsView.swift in Sources */,
+				6864274AD40D03A5BD5A4249 /* MidiControlsView.swift in Sources */,
 				WPV0A1B2C3D4E5F6A7B8C9D2 /* WaveformPreviewView.swift in Sources */,
 				FSC0A1B2C3D4E5F6A7B8C9D2 /* FileSourceControlsView.swift in Sources */,
+				F747758EE36967AF7563E254 /* IconSourceControlsView.swift in Sources */,
 				TSC0A1B2C3D4E5F6A7B8C9D2 /* TextSourceControlsView.swift in Sources */,
 				148FA678FB0D43D98F194C66 /* ShaderBrowserView.swift in Sources */,
 				A7B3294B92D7469BBB51E472 /* VideoSourceBrowserView.swift in Sources */,
@@ -2846,6 +2914,12 @@
 				A7C3E91D4F8B2A06E5D71C83 /* CompactOscillatorControls.swift in Sources */,
 				6C2E3D6138B246985E91BA40 /* StageOutputView.swift in Sources */,
 				EC44FA4961FD79BB456AF2FF /* StageBottomBarView.swift in Sources */,
+				9A73EC22FAF79CC0853DEBFA /* HelpStrings.swift in Sources */,
+				CF3D05388911006211C8EAAE /* HelpGuideViewModel.swift in Sources */,
+				C2D8D0ED04D6CEC606753E86 /* HelpArrowView.swift in Sources */,
+				A82EDE2991B390BC5B55A339 /* HelpStepCardView.swift in Sources */,
+				DFEFD16D244CBDFEB8324CDA /* HelpCompletionView.swift in Sources */,
+				6B36E8C0ED5E7479EBCEC421 /* HelpOverlayView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2854,6 +2928,39 @@
 			buildActionMask = 2147483647;
 			files = (
 				AABB00000000000000000003 /* NottawaAppUITests.swift in Sources */,
+				4CC28E0679F3E5F498BF2784 /* WorkspaceUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DDCC00000000000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DDCC00000000000200000000 /* DesignLibraryApp.swift in Sources */,
+				DDCC00000000000200000001 /* Theme.swift in Sources */,
+				DDCC00000000000200000002 /* ThemeManager.swift in Sources */,
+				DDCC00000000000200000003 /* ThemePresets.swift in Sources */,
+				DDCC00000000000200000004 /* DSButton.swift in Sources */,
+				DDCC00000000000200000005 /* DSSlider.swift in Sources */,
+				2A24FD76FA9BF3DACE082C48 /* DSColorPicker.swift in Sources */,
+				DDCC00000000000200000006 /* DSText.swift in Sources */,
+				DDCC00000000000200000007 /* DSCard.swift in Sources */,
+				DDCC00000000000200000008 /* ShowcaseView.swift in Sources */,
+				DDCC00000000000200000009 /* TypographyShowcase.swift in Sources */,
+				DDCC0000000000020000000A /* ColorShowcase.swift in Sources */,
+				DDCC0000000000020000000B /* ButtonShowcase.swift in Sources */,
+				DDCC0000000000020000000C /* SliderShowcase.swift in Sources */,
+				DDCC0000000000020000000D /* SpacingShowcase.swift in Sources */,
+				DDCC0000000000020000000E /* DSIconButton.swift in Sources */,
+				DDCC0000000000020000000F /* DSPin.swift in Sources */,
+				DDCC00000000000200000010 /* DSNodeView.swift in Sources */,
+				DDCC00000000000200000011 /* IconButtonShowcase.swift in Sources */,
+				DDCC00000000000200000012 /* NodeShowcase.swift in Sources */,
+				DDCC00000000000200000013 /* DSCable.swift in Sources */,
+				DDCC00000000000200000014 /* DSToggle.swift in Sources */,
+				DDCC00000000000200000015 /* DSPicker.swift in Sources */,
+				DDCC00000000000200000016 /* ToggleShowcase.swift in Sources */,
+				DDCC00000000000200000017 /* PickerShowcase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3014,37 +3121,6 @@
 				6FB54051EBA94AD394E848D2 /* ServiceStatics.cpp in Sources */,
 				CA2B8CB0615046AB820F5191 /* IOSurfaceTextureManager.cpp in Sources */,
 				99F0EB53FFA142988600E0EA /* nottawa_bridge.cpp in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		DDCC00000000000000000002 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				DDCC00000000000200000000 /* DesignLibraryApp.swift in Sources */,
-				DDCC00000000000200000001 /* Theme.swift in Sources */,
-				DDCC00000000000200000002 /* ThemeManager.swift in Sources */,
-				DDCC00000000000200000003 /* ThemePresets.swift in Sources */,
-				DDCC00000000000200000004 /* DSButton.swift in Sources */,
-				DDCC00000000000200000005 /* DSSlider.swift in Sources */,
-				DDCC00000000000200000006 /* DSText.swift in Sources */,
-				DDCC00000000000200000007 /* DSCard.swift in Sources */,
-				DDCC00000000000200000008 /* ShowcaseView.swift in Sources */,
-				DDCC00000000000200000009 /* TypographyShowcase.swift in Sources */,
-				DDCC0000000000020000000A /* ColorShowcase.swift in Sources */,
-				DDCC0000000000020000000B /* ButtonShowcase.swift in Sources */,
-				DDCC0000000000020000000C /* SliderShowcase.swift in Sources */,
-				DDCC0000000000020000000D /* SpacingShowcase.swift in Sources */,
-				DDCC0000000000020000000E /* DSIconButton.swift in Sources */,
-				DDCC0000000000020000000F /* DSPin.swift in Sources */,
-				DDCC00000000000200000010 /* DSNodeView.swift in Sources */,
-				DDCC00000000000200000011 /* IconButtonShowcase.swift in Sources */,
-				DDCC00000000000200000012 /* NodeShowcase.swift in Sources */,
-				DDCC00000000000200000013 /* DSCable.swift in Sources */,
-				DDCC00000000000200000014 /* DSToggle.swift in Sources */,
-				DDCC00000000000200000015 /* DSPicker.swift in Sources */,
-				DDCC00000000000200000016 /* ToggleShowcase.swift in Sources */,
-				DDCC00000000000200000017 /* PickerShowcase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3296,6 +3372,49 @@
 			};
 			name = Release;
 		};
+		DDCC00000000000000000006 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7VUCELU5PL;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Design Library";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.joecrozier.designlibrary;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		DDCC00000000000000000007 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7VUCELU5PL;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Design Library";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.joecrozier.designlibrary;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 		E4B69B4E0A3A1720003C02F2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E4EB6923138AFD0F00A09F29 /* Project.xcconfig */;
@@ -3531,49 +3650,6 @@
 			};
 			name = Release;
 		};
-		DDCC00000000000000000006 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 7VUCELU5PL;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Design Library";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.joecrozier.designlibrary;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-			};
-			name = Debug;
-		};
-		DDCC00000000000000000007 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 7VUCELU5PL;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Design Library";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.joecrozier.designlibrary;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -3595,6 +3671,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		DDCC00000000000000000005 /* Build configuration list for PBXNativeTarget "DesignLibrary" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DDCC00000000000000000006 /* Debug */,
+				DDCC00000000000000000007 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		E4B69B4D0A3A1720003C02F2 /* Build configuration list for PBXProject "dude_wake_up" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -3609,15 +3694,6 @@
 			buildConfigurations = (
 				E4B69B600A3A1757003C02F2 /* Debug */,
 				E4B69B610A3A1757003C02F2 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		DDCC00000000000000000005 /* Build configuration list for PBXNativeTarget "DesignLibrary" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				DDCC00000000000000000006 /* Debug */,
-				DDCC00000000000000000007 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

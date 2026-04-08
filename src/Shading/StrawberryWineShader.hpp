@@ -19,9 +19,6 @@
 #include <stdio.h>
 
 struct StrawberryWineSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
-
   std::shared_ptr<Parameter> colorDesaturation;
   std::shared_ptr<WaveformOscillator> colorDesaturationOscillator;
 
@@ -32,8 +29,6 @@ struct StrawberryWineSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> redIntensityOscillator;
 
   StrawberryWineSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   colorDesaturation(std::make_shared<Parameter>("Color Desaturation", 0.5, 0.0, 1.0)),
   colorDesaturationOscillator(std::make_shared<WaveformOscillator>(colorDesaturation)),
   channelMix(std::make_shared<Parameter>("Channel Mix", 0.5, 0.0, 1.0)),
@@ -41,8 +36,8 @@ struct StrawberryWineSettings: public ShaderSettings {
   redIntensity(std::make_shared<Parameter>("Red Intensity", 1.0, 0.0, 2.0)),
   redIntensityOscillator(std::make_shared<WaveformOscillator>(redIntensity)),
   ShaderSettings(shaderId, j, "StrawberryWine") {
-    parameters = { shaderValue, colorDesaturation, channelMix, redIntensity };
-    oscillators = { shaderValueOscillator, colorDesaturationOscillator, channelMixOscillator, redIntensityOscillator };
+    parameters = { colorDesaturation, channelMix, redIntensity };
+    oscillators = { colorDesaturationOscillator, channelMixOscillator, redIntensityOscillator };
     load(j);
     registerParameters();
   };
@@ -60,7 +55,6 @@ struct StrawberryWineShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("colorDesaturation", settings->colorDesaturation->value);
     shader.setUniform1f("channelMix", settings->channelMix->value);
     shader.setUniform1f("redIntensity", settings->redIntensity->value);

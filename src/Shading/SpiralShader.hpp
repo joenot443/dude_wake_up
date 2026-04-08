@@ -22,7 +22,6 @@ struct SpiralSettings: public ShaderSettings {
   std::shared_ptr<Parameter> secondaryColor;
   std::shared_ptr<Parameter> speed;
   std::shared_ptr<Parameter> size;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
   std::shared_ptr<WaveformOscillator> speedOscillator;
   std::shared_ptr<WaveformOscillator> sizeOscillator;
 

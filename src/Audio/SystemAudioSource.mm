@@ -172,17 +172,14 @@ bool SystemAudioSource::setupAudioDevice() {
         NSString* tapUUID = [[tapDescription UUID] UUIDString];
         NSUUID* aggregateUID = [NSUUID UUID];
         
+        // Only include the output device and tap — no input device (microphone).
+        // Including the input device causes mic audio to bleed into the capture.
         NSDictionary* aggregateDescription = @{
             @(kAudioAggregateDeviceUIDKey): [aggregateUID UUIDString],
             @(kAudioAggregateDeviceIsPrivateKey): @(1),
             @(kAudioAggregateDeviceIsStackedKey): @(0),
-            @(kAudioAggregateDeviceMasterSubDeviceKey): (__bridge NSString*)inputUID,
+            @(kAudioAggregateDeviceMasterSubDeviceKey): (__bridge NSString*)outputUID,
             @(kAudioAggregateDeviceSubDeviceListKey): @[
-                @{
-                    @(kAudioSubDeviceUIDKey): (__bridge NSString*)inputUID,
-                    @(kAudioSubDeviceDriftCompensationKey): @(1),
-                    @(kAudioSubDeviceDriftCompensationQualityKey): @(kAudioSubDeviceDriftCompensationMaxQuality),
-                },
                 @{
                     @(kAudioSubDeviceUIDKey): (__bridge NSString*)outputUID,
                     @(kAudioSubDeviceDriftCompensationKey): @(1),

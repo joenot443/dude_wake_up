@@ -1086,7 +1086,11 @@ void CommonViews::BlendModeSelector(std::shared_ptr<Parameter> blendMode, std::s
     ImGui::NewLine();
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15.0);
     // Use amount if we're on Mix
-    blendMode->intValue == 0 ? CommonViews::ShaderParameter(amount, amountOscillator) : CommonViews::ShaderParameter(alpha, alphaOscillator);
+    if (blendMode->intValue == 0) {
+      CommonViews::ShaderParameter(amount, amountOscillator);
+    } else {
+      CommonViews::ShaderCheckbox(alpha);
+    }
     ImGui::NewLine();
   }
 }

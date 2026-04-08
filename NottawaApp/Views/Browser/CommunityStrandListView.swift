@@ -48,7 +48,7 @@ struct CommunityStrandListView: View {
                     Image(systemName: "arrow.clockwise")
                         .font(.system(size: 12))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.plainHitArea)
                 .foregroundStyle(.secondary)
                 .disabled(viewModel.communityLoading)
             }
@@ -76,14 +76,14 @@ struct CommunityStrandListView: View {
                 ScrollView {
                     LazyVStack(spacing: 8) {
                         ForEach(viewModel.sortedCommunityStrands) { strand in
-                            CommunityStrandTileView(slug: strand.slug)
+                            CommunityStrandTileView(strand: strand)
                         }
 
                         if viewModel.communityPage < viewModel.communityTotalPages {
                             Button("Load More") {
                                 viewModel.fetchCommunityFeed(page: viewModel.communityPage + 1)
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(.plainHitArea)
                             .font(.system(size: 12, weight: .medium))
                             .foregroundStyle(Color.accentColor)
                             .padding(.vertical, 8)

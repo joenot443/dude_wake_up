@@ -141,3 +141,18 @@ struct DSPressStyle: ButtonStyle {
             .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
     }
 }
+
+/// Like `.plain` but with a generous hit area (4pt padding + contentShape).
+/// Use instead of `.buttonStyle(.plain)` for icon-only buttons.
+struct DSPlainHitAreaStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .padding(4)
+            .contentShape(Rectangle())
+            .opacity(configuration.isPressed ? 0.6 : 1.0)
+    }
+}
+
+extension ButtonStyle where Self == DSPlainHitAreaStyle {
+    static var plainHitArea: DSPlainHitAreaStyle { DSPlainHitAreaStyle() }
+}

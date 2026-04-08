@@ -19,9 +19,6 @@
 #include <stdio.h>
 
 struct RetroPCSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
-
   std::shared_ptr<Parameter> gamma;
   std::shared_ptr<WaveformOscillator> gammaOscillator;
 
@@ -32,8 +29,6 @@ struct RetroPCSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> ditherAmountOscillator;
 
   RetroPCSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   gamma(std::make_shared<Parameter>("gamma", 1.0, 0.1, 3.0)),
   gammaOscillator(std::make_shared<WaveformOscillator>(gamma)),
   pixelSize(std::make_shared<Parameter>("pixelSize", 4.0, 1.0, 16.0)),
@@ -41,8 +36,8 @@ struct RetroPCSettings: public ShaderSettings {
   ditherAmount(std::make_shared<Parameter>("ditherAmount", 1.0, 0.0, 1.0)),
   ditherAmountOscillator(std::make_shared<WaveformOscillator>(ditherAmount)),
   ShaderSettings(shaderId, j, "RetroPC") {
-    parameters = { shaderValue, gamma, pixelSize, ditherAmount };
-    oscillators = { shaderValueOscillator, gammaOscillator, pixelSizeOscillator, ditherAmountOscillator };
+    parameters = { gamma, pixelSize, ditherAmount };
+    oscillators = { gammaOscillator, pixelSizeOscillator, ditherAmountOscillator };
     load(j);
     registerParameters();
   };
@@ -60,7 +55,6 @@ struct RetroPCShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("gamma", settings->gamma->value);
     shader.setUniform1f("pixelSize", settings->pixelSize->value);
     shader.setUniform1f("ditherAmount", settings->ditherAmount->value);

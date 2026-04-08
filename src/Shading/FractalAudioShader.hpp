@@ -21,11 +21,9 @@
 
 struct FractalAudioSettings: public ShaderSettings {
   std::shared_ptr<Parameter> enableAudio;
-  std::shared_ptr<WaveformOscillator> enableAudioOscillator;
-  
+
   FractalAudioSettings(std::string shaderId, json j) :
-  enableAudio(std::make_shared<Parameter>("Enable Audio", 0.5, 0.0, 1.0)),
-  enableAudioOscillator(std::make_shared<WaveformOscillator>(enableAudio)),
+  enableAudio(std::make_shared<Parameter>("Enable Audio", ParameterType_Bool)),
   ShaderSettings(shaderId, j, "FractalAudio") {
     parameters = { enableAudio };
     oscillators = { };

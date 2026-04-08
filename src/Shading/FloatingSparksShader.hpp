@@ -18,9 +18,6 @@
 #include <stdio.h>
 
 struct FloatingSparksSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
-
   std::shared_ptr<Parameter> distancePower;
   std::shared_ptr<WaveformOscillator> distancePowerOscillator;
 
@@ -37,8 +34,6 @@ struct FloatingSparksSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> blueMultiplierOscillator;
 
   FloatingSparksSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("Shader Value", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   distancePower(std::make_shared<Parameter>("Glow", 0.2, 0.0, 1.0)),
   distancePowerOscillator(std::make_shared<WaveformOscillator>(distancePower)),
   radius(std::make_shared<Parameter>("Radius", 0.5, 0.0, 2.0)),
@@ -50,8 +45,8 @@ struct FloatingSparksSettings: public ShaderSettings {
   blueMultiplier(std::make_shared<Parameter>("Blue", 1.0, 0.0, 2.0)),
   blueMultiplierOscillator(std::make_shared<WaveformOscillator>(blueMultiplier)),
   ShaderSettings(shaderId, j, "Floating Sparks") {
-    parameters = { shaderValue, distancePower, radius, redMultiplier, greenMultiplier, blueMultiplier };
-    oscillators = { shaderValueOscillator, distancePowerOscillator, radiusOscillator, redMultiplierOscillator, greenMultiplierOscillator, blueMultiplierOscillator };
+    parameters = { distancePower, radius, redMultiplier, greenMultiplier, blueMultiplier };
+    oscillators = { distancePowerOscillator, radiusOscillator, redMultiplierOscillator, greenMultiplierOscillator, blueMultiplierOscillator };
     load(j);
     registerParameters();
   };
@@ -69,7 +64,6 @@ struct FloatingSparksShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("distancePower", settings->distancePower->value);

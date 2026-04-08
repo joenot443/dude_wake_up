@@ -18,9 +18,6 @@
 #include <stdio.h>
 
 struct CosmosSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
-
   // Cosmos specific params
   std::shared_ptr<Parameter> warp;
   std::shared_ptr<WaveformOscillator> warpOscillator;
@@ -43,8 +40,6 @@ struct CosmosSettings: public ShaderSettings {
 
 
   CosmosSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   warp(std::make_shared<Parameter>("Warp", 0.03, 0.0, 0.2)),
   warpOscillator(std::make_shared<WaveformOscillator>(warp)),
   sunSize(std::make_shared<Parameter>("Sun Size", 3.25, 0.0, 10.0)),
@@ -64,8 +59,8 @@ struct CosmosSettings: public ShaderSettings {
   starBrightness(std::make_shared<Parameter>("Star Brightness", 0.7, 0.0, 2.0)),
   starBrightnessOscillator(std::make_shared<WaveformOscillator>(starBrightness)),
   ShaderSettings(shaderId, j, "Cosmos") {
-    parameters = { shaderValue, warp, sunSize, sunColorR, sunColorG, sunColorB, sunSpread, starCount, starScale, starBrightness };
-    oscillators = { shaderValueOscillator, warpOscillator, sunSizeOscillator, sunColorROscillator, sunColorGOscillator, sunColorBOscillator, sunSpreadOscillator, starCountOscillator, starScaleOscillator, starBrightnessOscillator };
+    parameters = { warp, sunSize, sunColorR, sunColorG, sunColorB, sunSpread, starCount, starScale, starBrightness };
+    oscillators = { warpOscillator, sunSizeOscillator, sunColorROscillator, sunColorGOscillator, sunColorBOscillator, sunSpreadOscillator, starCountOscillator, starScaleOscillator, starBrightnessOscillator };
     load(j);
     registerParameters();
   };
@@ -83,7 +78,6 @@ struct CosmosShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     shader.setUniform1f("u_warp", settings->warp->value);

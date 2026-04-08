@@ -106,7 +106,7 @@ private struct OscillatorRowView: View {
                 }
                 .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.plainHitArea)
 
             // Waveform preview
             WaveformPreviewView(

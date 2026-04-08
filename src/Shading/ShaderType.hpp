@@ -175,6 +175,11 @@ enum ShaderType {
   ShaderTypeWindows,
   ShaderTypeRuttEtra,
   ShaderTypeNeon,
+  ShaderTypeScrapbook,
+  ShaderTypeFlocking,
+  ShaderTypeAudioCymatics,
+  ShaderTypeAurora,
+  ShaderTypeCrystalKaleidoscope,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -204,6 +209,7 @@ static const ShaderType AvailableMixShaderTypes[] = {
   ShaderTypeFeedback,
   ShaderTypeCircleMix,
   ShaderTypeStage,
+  ShaderTypeScrapbook,
 };
 
 static const ShaderType AvailableMaskShaderTypes[] = {
@@ -235,6 +241,7 @@ static const ShaderType AvailableTransformShaderTypes[] = {
   ShaderTypeFishEye, // Generated
   ShaderTypeTile,
   ShaderTypeKaleidoscope,
+  ShaderTypeCrystalKaleidoscope,
   ShaderTypeSlider, // Generated
   ShaderTypeLiquid,
   ShaderTypeSwirl,
@@ -313,6 +320,14 @@ static std::vector<ShaderType> AllShaderTypes() {
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) { // ShaderNames
+    case ShaderTypeAurora:
+      return "Aurora";
+    case ShaderTypeAudioCymatics:
+      return "Audio Cymatics";
+    case ShaderTypeFlocking:
+      return "Flocking";
+    case ShaderTypeScrapbook:
+      return "Scrapbook";
     case ShaderTypeNeon:
       return "Neon";
     case ShaderTypeRuttEtra:
@@ -615,6 +630,8 @@ static std::string shaderTypeName(ShaderType type) {
       return "ASCII";
     case ShaderTypeKaleidoscope:
       return "Kaleidoscope";
+    case ShaderTypeCrystalKaleidoscope:
+      return "Crystal Kaleidoscope";
     case ShaderTypeTile:
       return "Tile";
     case ShaderTypeMix:
@@ -654,6 +671,34 @@ static bool shaderTypeSupportsFeedback(ShaderType type) {
   if (type == ShaderTypeFeedback)
   {return true;}
   return false;
+}
+
+static bool shaderTypeIsAudioReactive(ShaderType type) {
+  switch (type) {
+    case ShaderTypeAudioWaveform:
+    case ShaderTypeAudioBumper:
+    case ShaderTypeAudioMountains:
+    case ShaderTypeAudioCircle:
+    case ShaderTypeAudioBlocks:
+    case ShaderTypeFractalAudio:
+    case ShaderTypeFlickerAudio:
+    case ShaderTypeDiscoAudio:
+    case ShaderTypeGlitchAudio:
+    case ShaderTypePixelAudioParty:
+    case ShaderTypeAudioBall:
+    case ShaderTypeAudioGlowBars:
+    case ShaderTypeAudioOscillator:
+    case ShaderTypeAudioGraph:
+    case ShaderTypeFrequencyVisualizer:
+    case ShaderTypeSimpleBars:
+    case ShaderTypeSpectrumClash:
+    case ShaderTypeSynthwave:
+    case ShaderTypeGlowBeat:
+    case ShaderTypeAudioCymatics:
+      return true;
+    default:
+      return false;
+  }
 }
 
 // clang-format on

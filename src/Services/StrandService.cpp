@@ -12,6 +12,10 @@ std::shared_ptr<AvailableStrand> StrandService::availableStrandForId(std::string
   {
     return folderMap[id];
   }
+  if (templateMap.count(id) != 0)
+  {
+    return templateMap[id];
+  }
   return nullptr;
 }
 

@@ -233,6 +233,18 @@ final class NottawaEngine {
         ntw_toggle_parameter_favorite(paramId)
     }
 
+    func resetParameter(paramId: String) {
+        ntw_reset_parameter(paramId)
+    }
+
+    func resetAllParameters(connectableId: String) {
+        ntw_reset_all_parameters(connectableId)
+    }
+
+    func clearFeedbackBuffer(shaderId: String) {
+        ntw_clear_feedback_buffer(shaderId)
+    }
+
     // MARK: - Oscillator Control
 
     func setOscillatorEnabled(paramId: String, enabled: Bool) {
@@ -370,6 +382,14 @@ final class NottawaEngine {
         return result
     }
 
+    var isAudioActive: Bool {
+        ntw_is_audio_active()
+    }
+
+    func isAudioReactive(connectableId: String) -> Bool {
+        ntw_is_audio_reactive(connectableId)
+    }
+
     func supportsAuxOutput(shaderId: String) -> Bool {
         ntw_supports_aux_output(shaderId)
     }
@@ -384,6 +404,15 @@ final class NottawaEngine {
     }
 
     // MARK: - Strand Operations
+
+    func strandsFolderURL() -> URL? {
+        guard let cStr = ntw_get_strands_folder_path() else { return nil }
+        defer { free(cStr) }
+        let path = String(cString: cStr)
+        let url = URL(fileURLWithPath: path, isDirectory: true)
+        try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        return url
+    }
 
     @discardableResult
     func saveStrand(nodeId: String, path: String, name: String) -> Bool {
@@ -489,13 +518,23 @@ final class NottawaEngine {
         }
     }
 
+    fileprivate var feedRequestId: UInt64 = 0
+
     func fetchCommunityFeed(page: Int, limit: Int, voterId: String,
                             completion: @escaping ([SharedStrandInfo], Int) -> Void) {
+        feedRequestId &+= 1
         pendingFeedCompletion = completion
         ntw_fetch_community_feed(Int32(page), Int32(limit), voterId) { success, ptr, count, totalPages in
             DispatchQueue.main.async {
-                guard let cb = NottawaEngine.shared.pendingFeedCompletion else { return }
-                NottawaEngine.shared.pendingFeedCompletion = nil
+                let engine = NottawaEngine.shared
+                guard let cb = engine.pendingFeedCompletion else {
+                    // Stale response — free C memory and discard
+                    if let ptr = ptr, count > 0 {
+                        ntw_free_shared_strand_info_array(ptr, count)
+                    }
+                    return
+                }
+                engine.pendingFeedCompletion = nil
                 guard success, let ptr = ptr, count > 0 else {
                     cb([], Int(totalPages))
                     return
@@ -603,6 +642,14 @@ final class NottawaEngine {
 
     func destroyAllPreviews() {
         ntw_destroy_all_previews()
+    }
+
+    func setPreferredPreviewSource(sourceId: String?) {
+        if let sourceId {
+            ntw_set_preferred_preview_source(sourceId)
+        } else {
+            ntw_set_preferred_preview_source(nil)
+        }
     }
 
     // MARK: - Available Shader Sources
@@ -937,6 +984,39 @@ final class NottawaEngine {
         ntw_set_text_source_position(sourceId, x, y)
     }
 
+    func centerTextSource(sourceId: String) {
+        ntw_center_text_source(sourceId)
+    }
+
+    // MARK: - Icon Source State
+
+    func iconSourceState(sourceId: String) -> IconSourceState? {
+        var s = ntw_get_icon_source_state(sourceId)
+        defer { ntw_free_icon_source_state(&s) }
+        guard s.isIconSource != 0 else { return nil }
+
+        var icons: [IconInfo] = []
+        if let names = s.iconNames, let paths = s.iconPaths, let cats = s.iconCategories {
+            for i in 0..<Int(s.iconCount) {
+                icons.append(IconInfo(
+                    id: i,
+                    name: names[i] != nil ? String(cString: names[i]!) : "",
+                    path: paths[i] != nil ? String(cString: paths[i]!) : "",
+                    category: cats[i] != nil ? String(cString: cats[i]!) : ""
+                ))
+            }
+        }
+
+        return IconSourceState(
+            selectedIndex: Int(s.selectedIndex),
+            icons: icons
+        )
+    }
+
+    func setIconSourceIcon(sourceId: String, iconIndex: Int) {
+        ntw_set_icon_source_icon(sourceId, Int32(iconIndex))
+    }
+
     // MARK: - Available Non-Shader Sources
 
     func availableNonShaderSources() -> [AvailableNonShaderSourceInfo] {
@@ -963,6 +1043,44 @@ final class NottawaEngine {
     func toggleFavoriteSourceType(sourceType: Int) {
         ntw_toggle_favorite_source_type(Int32(sourceType))
     }
+
+    // MARK: - MIDI Control
+
+    func beginMidiLearning(paramId: String) {
+        ntw_begin_midi_learning(paramId)
+    }
+
+    func stopMidiLearning() {
+        ntw_stop_midi_learning()
+    }
+
+    var isMidiLearning: Bool {
+        ntw_is_midi_learning() != 0
+    }
+
+    var midiLearningParamId: String? {
+        guard let cStr = ntw_get_midi_learning_param_id() else { return nil }
+        defer { ntw_free_string(cStr) }
+        return String(cString: cStr)
+    }
+
+    func removeMidiBinding(paramId: String) {
+        ntw_remove_midi_binding(paramId)
+    }
+
+    func registerMidiLearnedCallback(_ callback: @escaping (String, String) -> Void) {
+        midiLearnedHandler = callback
+        ntw_register_midi_learned_callback { paramId, descriptor in
+            guard let paramId = paramId, let descriptor = descriptor else { return }
+            let pid = String(cString: paramId)
+            let desc = String(cString: descriptor)
+            DispatchQueue.main.async {
+                NottawaEngine.shared.midiLearnedHandler?(pid, desc)
+            }
+        }
+    }
+
+    private var midiLearnedHandler: ((String, String) -> Void)?
 
     // MARK: - Texture Sharing
 

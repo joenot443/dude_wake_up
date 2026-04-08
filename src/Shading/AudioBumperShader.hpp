@@ -20,16 +20,21 @@
 struct AudioBumperSettings : public ShaderSettings {
   std::shared_ptr<Parameter> minColor;
   std::shared_ptr<Parameter> maxColor;
-  
+  std::shared_ptr<Parameter> boost;
+  std::shared_ptr<Oscillator> boostOscillator;
+
 public:
   AudioBumperSettings(std::string shaderId, json j, std::string name)
   :
   minColor(std::make_shared<Parameter>("Minimum Color", ParameterType_Color)),
   maxColor(std::make_shared<Parameter>("Maximum Color", ParameterType_Color)),
+  boost(std::make_shared<Parameter>("Boost", 3.0, 1.0, 10.0)),
+  boostOscillator(std::make_shared<WaveformOscillator>(boost)),
   ShaderSettings(shaderId, j, name){
     minColor->color = std::make_shared<std::array<float, 4>>(std::array<float, 4>({1.0f, 0.5f, 1.0f, 1.0f}));
     maxColor->color = std::make_shared<std::array<float, 4>>(std::array<float, 4>({0.5f, 1.0f, 1.0f, 1.0f}));
-    parameters = { minColor, maxColor };
+    parameters = { minColor, maxColor, boost };
+    oscillators = { boostOscillator };
     registerParameters();
     load(j);
   };
@@ -51,11 +56,11 @@ public:
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() >= 256)
-      shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0],
-                           256);
+    if (source != nullptr)
+      shader.setUniform1fv("audio", source->audioAnalysis.renderSpectrum.data(), 256);
     shader.setUniform3f("minColor", settings->minColor->color->data()[0], settings->minColor->color->data()[1], settings->minColor->color->data()[2]);
     shader.setUniform3f("maxColor", settings->maxColor->color->data()[0], settings->maxColor->color->data()[1], settings->maxColor->color->data()[2]);
+    shader.setUniform1f("boost", settings->boost->value);
     // Flip the frame vertically
     ofPushMatrix();
     ofTranslate(0, frame->getHeight());
@@ -77,6 +82,7 @@ public:
     
     CommonViews::ShaderColor(settings->minColor);
     CommonViews::ShaderColor(settings->maxColor);
+    CommonViews::ShaderParameter(settings->boost, settings->boostOscillator);
   }
 };
 

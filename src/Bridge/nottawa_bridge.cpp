@@ -10,6 +10,7 @@
 
 #include "IOSurfaceTextureManager.hpp"
 #include "ActionService.hpp"
+#include "ClearGraphCommand.hpp"
 #include "AudioSourceService.hpp"
 #include "ConfigService.hpp"
 #include "EngineLoop.hpp"
@@ -19,11 +20,13 @@
 #include "VideoSourceService.hpp"
 #include "ShaderSource.hpp"
 #include "BlendShader.hpp"
+#include "FeedbackShader.hpp"
 #include "OscillationService.hpp"
 #include "WaveformOscillator.hpp"
 #include "Strand.hpp"
 #include "StrandService.hpp"
 #include "Workspace.hpp"
+#include "MidiService.hpp"
 
 #include <filesystem>
 #include "LibraryService.hpp"
@@ -31,6 +34,8 @@
 #include "FileSource.hpp"
 #include "FileAudioSource.hpp"
 #include "TextSource.hpp"
+#include "IconSource.hpp"
+#include "IconService.hpp"
 #include "ofMain.h"
 
 #include "httplib.h"
@@ -161,6 +166,7 @@ void ntw_free_parameter_info(NTWParameterInfo* info) {
   free((void*)info->id);
   free((void*)info->name);
   if (info->driverName) free((void*)info->driverName);
+  if (info->midiDescriptor) free((void*)info->midiDescriptor);
   if (info->options) {
     for (int i = 0; i < info->optionCount; i++) {
       free((void*)info->options[i]);
@@ -380,6 +386,28 @@ char* ntw_get_shader_file_path(const char* shaderId) {
 
   std::string path = ofToDataPath("shaders/" + shader->fileName() + ".frag");
   return strdup_safe(path);
+}
+
+bool ntw_is_audio_active(void) {
+  auto source = AudioSourceService::getService()->selectedAudioSource;
+  return source != nullptr && source->active;
+}
+
+bool ntw_is_audio_reactive(const char* connectableId) {
+  if (!connectableId) return false;
+  std::string cid(connectableId);
+
+  auto shader = ShaderChainerService::getService()->shaderForId(cid);
+  if (shader) return shaderTypeIsAudioReactive(shader->type());
+
+  auto source = VideoSourceService::getService()->videoSourceForId(cid);
+  if (source && source->type == VideoSource_shader) {
+    auto shaderSource = std::dynamic_pointer_cast<ShaderSource>(source);
+    if (shaderSource && shaderSource->shader) {
+      return shaderTypeIsAudioReactive(shaderSource->shader->type());
+    }
+  }
+  return false;
 }
 
 bool ntw_supports_aux_output(const char* shaderId) {
@@ -809,12 +837,21 @@ static void populateOscillatorDriverFields(NTWParameterInfo& info, const std::sh
     info.hasDriver = 1;
     info.driverName = strdup_safe(p->driver->name);
     info.driverShift = p->shift ? p->shift->value : 0.5f;
-    info.driverScale = p->scale ? p->scale->value : 0.2f;
+    info.driverScale = p->scale ? p->scale->value : 1.0f;
   } else {
     info.hasDriver = 0;
     info.driverName = nullptr;
     info.driverShift = 0.5f;
-    info.driverScale = 0.2f;
+    info.driverScale = 1.0f;
+  }
+
+  // MIDI binding lookup
+  if (!p->midiDescriptor.empty()) {
+    info.hasMidiBinding = 1;
+    info.midiDescriptor = strdup_safe(p->midiDescriptor);
+  } else {
+    info.hasMidiBinding = 0;
+    info.midiDescriptor = nullptr;
   }
 }
 
@@ -904,9 +941,33 @@ void ntw_set_parameter_bool(const char* paramId, bool value) {
 void ntw_set_parameter_color(const char* paramId,
                              float r, float g, float b, float a) {
   if (!paramId) return;
-  auto param = ParameterService::getService()->parameterForId(std::string(paramId));
+  std::string pid(paramId);
+  auto param = ParameterService::getService()->parameterForId(pid);
+  if (!param) {
+    // Fallback: search connectable settings directly by paramId
+    auto findInSettings = [&](std::shared_ptr<Settings> settings) -> std::shared_ptr<Parameter> {
+      if (!settings) return nullptr;
+      for (auto& p : settings->parameters) {
+        if (p && p->paramId == pid) return p;
+      }
+      return nullptr;
+    };
+    for (auto& source : VideoSourceService::getService()->videoSources()) {
+      param = findInSettings(source->settingsRef());
+      if (param) break;
+    }
+    if (!param) {
+      for (auto& shader : ShaderChainerService::getService()->shaders()) {
+        param = findInSettings(shader->settingsRef());
+        if (param) break;
+      }
+    }
+  }
   if (param) {
-    param->setColor({r, g, b, a});
+    (*param->color)[0] = r;
+    (*param->color)[1] = g;
+    (*param->color)[2] = b;
+    (*param->color)[3] = a;
   }
 }
 
@@ -922,6 +983,38 @@ void ntw_toggle_parameter_favorite(const char* paramId) {
     ParameterService::getService()->addFavoriteParameter(param);
     param->favorited = true;
   }
+}
+
+void ntw_reset_parameter(const char* paramId) {
+  if (!paramId) return;
+  auto param = ParameterService::getService()->parameterForId(std::string(paramId));
+  if (param) {
+    param->resetValue();
+  }
+}
+
+void ntw_reset_all_parameters(const char* connectableId) {
+  if (!connectableId) return;
+  auto connectable = findConnectable(connectableId);
+  if (!connectable) return;
+  auto settings = connectable->settingsRef();
+  if (!settings) return;
+  for (auto& param : settings->parameters) {
+    param->resetValue();
+  }
+}
+
+void ntw_clear_feedback_buffer(const char* shaderId) {
+  if (!shaderId) return;
+  std::string sid(shaderId);
+  runOnEngineThread([sid]() {
+    auto shader = ShaderChainerService::getService()->shaderForId(sid);
+    if (!shader) return;
+    auto* feedback = dynamic_cast<FeedbackShader*>(shader.get());
+    if (feedback) {
+      feedback->clearFrameBuffer();
+    }
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -1668,9 +1761,8 @@ bool ntw_load_workspace(const char* path) {
 
 void ntw_clear_graph(void) {
   runOnEngineThread([]() {
-    VideoSourceService::getService()->clear();
-    ShaderChainerService::getService()->clear();
-    ConfigService::getService()->closeWorkspace();
+    auto command = std::make_shared<ClearGraphCommand>();
+    ActionService::getService()->executeCommand(command);
   });
   notifyGraphChanged();
 }
@@ -1921,10 +2013,34 @@ void ntw_destroy_all_previews(void) {
   });
 }
 
-// Find the most recently drawn active VideoSource's frame to use as
-// input for effect shader previews. Returns nullptr if no sources exist.
+// Preferred video source ID for effect previews (set from Swift when user selects a source node).
+static std::string preferredPreviewSourceId;
+
+void ntw_set_preferred_preview_source(const char* sourceId) {
+  if (sourceId) {
+    preferredPreviewSourceId = std::string(sourceId);
+  } else {
+    preferredPreviewSourceId.clear();
+  }
+}
+
+// Find the best active VideoSource frame for effect previews.
+// Prefers the user-selected source; falls back to any active source.
 static std::shared_ptr<ofFbo> getMostRecentVideoSourceFrame() {
-  auto sources = VideoSourceService::getService()->videoSources();
+  auto* svc = VideoSourceService::getService();
+  auto sources = svc->videoSources();
+
+  // Try the preferred source first
+  if (!preferredPreviewSourceId.empty()) {
+    for (auto& src : sources) {
+      if (src->connId() == preferredPreviewSourceId && src->active) {
+        auto f = src->frame();
+        if (f && f->getWidth() > 0) return f;
+      }
+    }
+  }
+
+  // Fall back to last active source
   for (auto it = sources.rbegin(); it != sources.rend(); ++it) {
     if ((*it)->active) {
       auto f = (*it)->frame();
@@ -2044,26 +2160,35 @@ void ntw_tick_previews(void) {
 // MARK: - Strand Operations
 // ---------------------------------------------------------------------------
 
+// Strands updated callback
+static NTWStrandsUpdatedCallback strandsUpdatedCallback = nullptr;
+
+static void notifyStrandsChanged() {
+  if (strandsUpdatedCallback) strandsUpdatedCallback();
+}
+
+char* ntw_get_strands_folder_path(void) {
+  std::string path = ConfigService::getService()->strandsFolderFilePath();
+  return strdup(path.c_str());
+}
+
 bool ntw_save_strand_from_node(const char* nodeId, const char* path, const char* name) {
   if (!nodeId || !path || !name) return false;
   std::string sid(nodeId), spath(path), sname(name);
 
-  return runOnEngineThread([sid, spath, sname]() -> bool {
+  bool result = runOnEngineThread([sid, spath, sname]() -> bool {
     auto connectable = findConnectable(sid.c_str());
     if (!connectable) return false;
 
     auto strand = ShaderChainerService::getService()->strandForConnectable(connectable);
     strand.name = sname;
     ConfigService::getService()->saveStrandFile(strand, spath, "");
+    StrandService::getService()->populate();
     return true;
   });
-}
 
-// Strands updated callback
-static NTWStrandsUpdatedCallback strandsUpdatedCallback = nullptr;
-
-static void notifyStrandsChanged() {
-  if (strandsUpdatedCallback) strandsUpdatedCallback();
+  if (result) notifyStrandsChanged();
+  return result;
 }
 
 NTWAvailableStrandInfo* ntw_get_available_strands(int* outCount) {
@@ -2215,15 +2340,25 @@ void ntw_register_strands_updated_callback(NTWStrandsUpdatedCallback callback) {
 // MARK: - Optional Shaders
 // ---------------------------------------------------------------------------
 
+// Helper to find optional shaders for either a shader or video source.
+static std::vector<std::shared_ptr<Shader>>* findOptionalShaders(const std::string& id) {
+  auto shader = ShaderChainerService::getService()->shaderForId(id);
+  if (shader) return &shader->optionalShaders;
+
+  auto source = VideoSourceService::getService()->videoSourceForId(id);
+  if (source) return &source->optionalShadersHelper.optionalShaders;
+
+  return nullptr;
+}
+
 NTWOptionalShaderInfo* ntw_get_optional_shaders(const char* connectableId, int* outCount) {
   if (outCount) *outCount = 0;
   if (!connectableId) return nullptr;
 
-  auto shader = ShaderChainerService::getService()->shaderForId(std::string(connectableId));
-  if (!shader) return nullptr;
+  auto* optionals = findOptionalShaders(std::string(connectableId));
+  if (!optionals) return nullptr;
 
-  auto& optionals = shader->optionalShaders;
-  int count = static_cast<int>(optionals.size());
+  int count = static_cast<int>(optionals->size());
   if (outCount) *outCount = count;
   if (count == 0) return nullptr;
 
@@ -2231,8 +2366,8 @@ NTWOptionalShaderInfo* ntw_get_optional_shaders(const char* connectableId, int* 
     calloc(count, sizeof(NTWOptionalShaderInfo)));
 
   for (int i = 0; i < count; i++) {
-    result[i].name = strdup_safe(optionals[i]->name());
-    result[i].enabled = optionals[i]->optionallyEnabled;
+    result[i].name = strdup_safe((*optionals)[i]->name());
+    result[i].enabled = (*optionals)[i]->optionallyEnabled;
     result[i].index = i;
   }
 
@@ -2252,12 +2387,11 @@ void ntw_toggle_optional_shader(const char* connectableId, int index) {
   std::string sid(connectableId);
 
   runOnEngineThread([sid, index]() {
-    auto shader = ShaderChainerService::getService()->shaderForId(sid);
-    if (!shader) return;
+    auto* optionals = findOptionalShaders(sid);
+    if (!optionals) return;
 
-    auto& optionals = shader->optionalShaders;
-    if (index >= 0 && index < static_cast<int>(optionals.size())) {
-      optionals[index]->optionallyEnabled = !optionals[index]->optionallyEnabled;
+    if (index >= 0 && index < static_cast<int>(optionals->size())) {
+      (*optionals)[index]->optionallyEnabled = !(*optionals)[index]->optionallyEnabled;
     }
   });
 }
@@ -2266,13 +2400,12 @@ NTWParameterInfo* ntw_get_optional_shader_parameters(const char* connectableId, 
   if (outCount) *outCount = 0;
   if (!connectableId) return nullptr;
 
-  auto shader = ShaderChainerService::getService()->shaderForId(std::string(connectableId));
-  if (!shader) return nullptr;
+  auto* optionals = findOptionalShaders(std::string(connectableId));
+  if (!optionals) return nullptr;
 
-  auto& optionals = shader->optionalShaders;
-  if (optionalIndex < 0 || optionalIndex >= static_cast<int>(optionals.size())) return nullptr;
+  if (optionalIndex < 0 || optionalIndex >= static_cast<int>(optionals->size())) return nullptr;
 
-  auto optShader = optionals[optionalIndex];
+  auto optShader = (*optionals)[optionalIndex];
   auto settings = optShader->settingsRef();
   if (!settings) return nullptr;
 
@@ -2613,6 +2746,96 @@ void ntw_set_text_source_position(const char* sourceId, float x, float y) {
   textSrc->displayText->yPosition->value = y;
 }
 
+void ntw_center_text_source(const char* sourceId) {
+  if (!sourceId) return;
+  std::string sid(sourceId);
+  auto src = VideoSourceService::getService()->videoSourceForId(sid);
+  if (!src || src->type != VideoSource_text) return;
+  auto* textSrc = dynamic_cast<TextSource*>(src.get());
+  if (!textSrc) return;
+  textSrc->centerText();
+}
+
+// ---------------------------------------------------------------------------
+// MARK: - Icon Source State
+// ---------------------------------------------------------------------------
+
+NTWIconSourceState ntw_get_icon_source_state(const char* sourceId) {
+  NTWIconSourceState result = {};
+  result.isIconSource = 0;
+  result.iconNames = nullptr;
+  result.iconPaths = nullptr;
+  result.iconCategories = nullptr;
+  result.iconCount = 0;
+  result.selectedIndex = 0;
+  if (!sourceId) return result;
+
+  auto src = VideoSourceService::getService()->videoSourceForId(std::string(sourceId));
+  if (!src || src->type != VideoSource_icon) return result;
+
+  auto* iconSrc = dynamic_cast<IconSource*>(src.get());
+  if (!iconSrc) return result;
+
+  result.isIconSource = 1;
+  result.selectedIndex = iconSrc->settings->icon->intValue;
+
+  auto icons = IconService::getService()->availableIcons();
+  int count = static_cast<int>(icons.size());
+  result.iconCount = count;
+
+  if (count > 0) {
+    result.iconNames = static_cast<const char**>(calloc(count, sizeof(const char*)));
+    result.iconPaths = static_cast<const char**>(calloc(count, sizeof(const char*)));
+    result.iconCategories = static_cast<const char**>(calloc(count, sizeof(const char*)));
+    for (int i = 0; i < count; i++) {
+      result.iconNames[i] = strdup_safe(icons[i]->name);
+      result.iconPaths[i] = strdup_safe(ofToDataPath(icons[i]->path, true));
+      result.iconCategories[i] = strdup_safe(icons[i]->category);
+    }
+  }
+
+  return result;
+}
+
+void ntw_free_icon_source_state(NTWIconSourceState* state) {
+  if (!state) return;
+  if (state->iconNames) {
+    for (int i = 0; i < state->iconCount; i++) {
+      free((void*)state->iconNames[i]);
+    }
+    free((void*)state->iconNames);
+  }
+  if (state->iconPaths) {
+    for (int i = 0; i < state->iconCount; i++) {
+      free((void*)state->iconPaths[i]);
+    }
+    free((void*)state->iconPaths);
+  }
+  if (state->iconCategories) {
+    for (int i = 0; i < state->iconCount; i++) {
+      free((void*)state->iconCategories[i]);
+    }
+    free((void*)state->iconCategories);
+  }
+}
+
+void ntw_set_icon_source_icon(const char* sourceId, int iconIndex) {
+  if (!sourceId) return;
+  std::string sid(sourceId);
+  int idx = iconIndex;
+  runOnEngineThread([sid, idx]() {
+    auto src = VideoSourceService::getService()->videoSourceForId(sid);
+    if (!src || src->type != VideoSource_icon) return;
+    auto* iconSrc = dynamic_cast<IconSource*>(src.get());
+    if (!iconSrc) return;
+    auto icons = IconService::getService()->availableIcons();
+    if (idx < 0 || idx >= static_cast<int>(icons.size())) return;
+    iconSrc->settings->icon->intValue = idx;
+    iconSrc->settings->icon->value = static_cast<float>(idx);
+    iconSrc->updateSource();
+  });
+}
+
 // ---------------------------------------------------------------------------
 // MARK: - Available Non-Shader Sources
 // ---------------------------------------------------------------------------
@@ -2631,6 +2854,7 @@ NTWAvailableNonShaderSourceInfo* ntw_get_available_non_shader_sources(int* outCo
   static const NonShaderSourceDef defs[] = {
     { VideoSource_text,          "Text",           "textformat" },
     { VideoSource_icon,          "Icon",           "face.smiling" },
+    { VideoSource_image,         "Image",          "photo" },
     { VideoSource_webcam,        "Webcam",         "web.camera" },
   };
 
@@ -2943,6 +3167,61 @@ char* ntw_get_strand_json_for_node(const char* nodeId) {
     auto strand = ShaderChainerService::getService()->strandForConnectable(connectable);
     return strdup_safe(strand.serialize().dump());
   });
+}
+
+// ---------------------------------------------------------------------------
+// MARK: - MIDI Control
+// ---------------------------------------------------------------------------
+
+static NTWMidiLearnedCallback midiLearnedCallback = nullptr;
+
+void ntw_begin_midi_learning(const char* paramId) {
+  if (!paramId) return;
+  std::string pid(paramId);
+  runOnEngineThread([pid]() {
+    auto param = ParameterService::getService()->parameterForId(pid);
+    if (param) {
+      MidiService::getService()->beginLearning(param);
+    }
+  });
+}
+
+void ntw_stop_midi_learning(void) {
+  runOnEngineThread([]() {
+    MidiService::getService()->stopLearning();
+  });
+}
+
+int ntw_is_midi_learning(void) {
+  return MidiService::getService()->isLearning() ? 1 : 0;
+}
+
+char* ntw_get_midi_learning_param_id(void) {
+  auto param = MidiService::getService()->learningParam;
+  if (!param) return nullptr;
+  return strdup_safe(param->paramId);
+}
+
+void ntw_remove_midi_binding(const char* paramId) {
+  if (!paramId) return;
+  std::string pid(paramId);
+  runOnEngineThread([pid]() {
+    auto param = ParameterService::getService()->parameterForId(pid);
+    if (param) {
+      MidiService::getService()->removePairing(param);
+      param->midiDescriptor = "";
+    }
+  });
+}
+
+void ntw_register_midi_learned_callback(NTWMidiLearnedCallback callback) {
+  midiLearnedCallback = callback;
+  // Wire into MidiService so saveAssignment fires our callback.
+  MidiService::getService()->onMidiLearned = [](const std::string& paramId, const std::string& descriptor) {
+    if (midiLearnedCallback) {
+      midiLearnedCallback(paramId.c_str(), descriptor.c_str());
+    }
+  };
 }
 
 // ---------------------------------------------------------------------------

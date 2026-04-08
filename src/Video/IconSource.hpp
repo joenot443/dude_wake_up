@@ -41,7 +41,10 @@ class IconSource : public VideoSource
 public:
   IconSource(std::string id, std::string name) : VideoSource(id, name, VideoSource_icon),
                                                  settings(std::make_shared<IconSourceSettings>(id, 0)),
-                                                 imageTexture(std::make_shared<ImageTexture>(IconService::getService()->availableIcons()[0])){};
+                                                 imageTexture(std::make_shared<ImageTexture>(IconService::getService()->availableIcons()[0])){
+    // Set base class settings to our IconSourceSettings so settingsRef() returns the correct parameters
+    VideoSource::settings = settings;
+  };
 
   std::shared_ptr<IconSourceSettings> settings;
   void setup() override;

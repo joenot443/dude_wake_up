@@ -37,6 +37,7 @@ final class NodeEditorViewModel {
 
     // MARK: - Selection
     var selectedNodeIds: Set<String> = []
+    var selectedConnectionId: String?
 
     // MARK: - Drag Connection
     var dragConnection: DragConnectionState?
@@ -60,6 +61,7 @@ final class NodeEditorViewModel {
     // MARK: - Action Bar State
     var actionBarExpanded = true
     var helpEnabled = false
+    var deletedBlendNodeId: String?
 
     // MARK: - Sidebar State
     var showSidebar = true
@@ -89,6 +91,11 @@ final class NodeEditorViewModel {
 
     // MARK: - Canvas Drop Highlight
     var isDropTargetActive = false
+    var dropHoverNodeId: String?
+    /// Connection ID hovered during sidebar drag (for cable insertion).
+    var dropHoverCableId: String?
+    /// Screen-space position on the cable where the insertion indicator should appear.
+    var dropCableInsertionPoint: CGPoint?
 
     // MARK: - Welcome Screen
     var showWelcomeScreen: Bool = true
@@ -98,6 +105,9 @@ final class NodeEditorViewModel {
         }
     }
     var templateStrandsList: [StrandInfo] = []
+
+    // MARK: - Initial Zoom
+    var needsInitialZoomToFit = false
 
     // MARK: - Stage Mode
     var stageModeEnabled: Bool = false
@@ -112,12 +122,14 @@ final class NodeEditorViewModel {
 
     // MARK: - Audio Panel
     var showAudioPanel = false
+    var isAudioActive = false
     var audioPanelHeight: CGFloat = 250
 
     // MARK: - Inspector
     var inspectorParameters: [ParameterInfo] = []
     var fileSourceState: FileSourceState?
     var textSourceState: TextSourceState?
+    var iconSourceState: IconSourceState?
 
     // MARK: - Community State
     var communityStrands: [SharedStrandInfo] = []
@@ -172,7 +184,13 @@ final class NodeEditorViewModel {
     private var sharingTextureIds: Set<String> = []
 
     init() {
-        self.welcomeScreenEnabled = UserDefaults.standard.object(forKey: "nottawa_welcome_enabled") as? Bool ?? true
+        // Use object(forKey:) to distinguish "not set" (nil → default true) from "set to false"
+        // UserDefaults launch arguments (-key value) store strings; bool(forKey:) handles "NO"/"0"
+        if UserDefaults.standard.object(forKey: "nottawa_welcome_enabled") != nil {
+            self.welcomeScreenEnabled = UserDefaults.standard.bool(forKey: "nottawa_welcome_enabled")
+        } else {
+            self.welcomeScreenEnabled = true
+        }
         self.showWelcomeScreen = self.welcomeScreenEnabled
     }
 
@@ -191,8 +209,21 @@ final class NodeEditorViewModel {
         engine.registerStrandsUpdatedCallback { [weak self] in
             self?.refreshStrands()
         }
+        engine.registerMidiLearnedCallback { [weak self] paramId, descriptor in
+            self?.refreshInspector()
+        }
+
+        // Restore workspace metadata from the engine (set during config load)
+        currentWorkspacePath = engine.currentWorkspacePath
+        currentWorkspaceName = engine.currentWorkspaceName
+
         refresh()
         fetchTemplateStrands()
+        isAudioActive = engine.isAudioActive
+
+        if !nodes.isEmpty {
+            needsInitialZoomToFit = true
+        }
     }
 
     // MARK: - Refresh from Engine
@@ -241,6 +272,7 @@ final class NodeEditorViewModel {
 
         nodes = allNodes
         connections = conns.map { ConnectionModel.from($0) }
+        isAudioActive = engine.isAudioActive
 
         // Clean up selection for removed nodes
         selectedNodeIds = selectedNodeIds.intersection(newIds)
@@ -283,12 +315,22 @@ final class NodeEditorViewModel {
         } else {
             selectedNodeIds.insert(id)
         }
+        selectedConnectionId = nil
         engine.selectConnectable(id: id)
         refreshInspector()
     }
 
+    func selectConnection(_ id: String) {
+        selectedConnectionId = id
+        selectedNodeIds.removeAll()
+        inspectorParameters = []
+        fileSourceState = nil
+        textSourceState = nil
+    }
+
     func deselectAll() {
         selectedNodeIds.removeAll()
+        selectedConnectionId = nil
         engine.deselectConnectable()
         inspectorParameters = []
         fileSourceState = nil
@@ -296,6 +338,7 @@ final class NodeEditorViewModel {
     }
 
     func toggleNodeSelection(_ id: String) {
+        selectedConnectionId = nil
         if selectedNodeIds.contains(id) {
             selectedNodeIds.remove(id)
             if selectedNodeIds.isEmpty {
@@ -315,11 +358,13 @@ final class NodeEditorViewModel {
             inspectorParameters = []
             fileSourceState = nil
             textSourceState = nil
+            iconSourceState = nil
             return
         }
         inspectorParameters = engine.parameters(for: nodeId)
         fileSourceState = engine.fileSourceState(sourceId: nodeId)
         textSourceState = engine.textSourceState(sourceId: nodeId)
+        iconSourceState = engine.iconSourceState(sourceId: nodeId)
     }
 
     // MARK: - Node Actions
@@ -338,6 +383,20 @@ final class NodeEditorViewModel {
     }
 
     func deleteSelected() {
+        // Delete selected connection if any
+        if let connId = selectedConnectionId {
+            removeConnection(connId)
+            selectedConnectionId = nil
+            return
+        }
+        // Track blend deletion for help guide
+        for id in selectedNodeIds {
+            if let node = nodes.first(where: { $0.id == id }),
+               case .shader(let raw) = node.nodeType, raw == 80 {
+                deletedBlendNodeId = id
+            }
+        }
+        // Delete selected nodes
         for id in selectedNodeIds {
             engine.stopTextureSharing(connectableId: id)
             sharingTextureIds.remove(id)
@@ -583,15 +642,50 @@ final class NodeEditorViewModel {
         return id
     }
 
+    @discardableResult
+    func addImageVideoSource(path: String, at position: CGPoint? = nil) -> String? {
+        let name = (path as NSString).lastPathComponent
+        guard let id = engine.addImageVideoSource(name: name, path: path) else { return nil }
+        let pos = position ?? nextAutoPosition()
+        engine.setConnectablePosition(id: id, x: Float(pos.x), y: Float(pos.y))
+        lastAddedNodePosition = pos
+        refresh()
+        return id
+    }
+
     /// Add a non-shader video source by VideoSourceType enum value.
     @discardableResult
     func addNonShaderSource(type: Int, at position: CGPoint? = nil) -> String? {
-        // VideoSourceType: 0=webcam, 3=icon, 5=text
+        // VideoSourceType: 0=webcam, 1=file, 2=image, 3=icon, 5=text
         switch type {
         case 5: return addTextVideoSource(at: position)
         case 3: return addIconVideoSource(at: position)
+        case 2:
+            // Image source needs a file picker
+            showImageFilePicker(at: position)
+            return nil
         case 0: return addWebcamVideoSource(at: position)
         default: return nil
+        }
+    }
+
+    /// Show NSOpenPanel to pick an image file, then create the ImageSource.
+    func showImageFilePicker(at position: CGPoint? = nil) {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.image]
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.message = "Choose an image file"
+        panel.begin { [weak self] response in
+            guard response == .OK, let url = panel.url else { return }
+            // Start security-scoped access so the engine thread can create a bookmark
+            let accessing = url.startAccessingSecurityScopedResource()
+            DispatchQueue.main.async {
+                self?.addImageVideoSource(path: url.path, at: position)
+                if accessing {
+                    url.stopAccessingSecurityScopedResource()
+                }
+            }
         }
     }
 
@@ -599,7 +693,9 @@ final class NodeEditorViewModel {
     /// Payload format: "shader:<typeInt>" or "source:<typeInt>"
     /// If targetNodeId is provided and the payload is a shader (effect),
     /// the new shader is chained after the target (output 0 → input 0).
-    func addNodeFromDrop(payload: String, at screenPoint: CGPoint, targetNodeId: String? = nil) {
+    /// If targetCableId is provided and the payload is a shader,
+    /// the new shader is inserted into that cable (splice).
+    func addNodeFromDrop(payload: String, at screenPoint: CGPoint, targetNodeId: String? = nil, targetCableId: String? = nil) {
         let canvasPos = screenToCanvas(screenPoint)
         let parts = payload.split(separator: ":", maxSplits: 1)
         guard parts.count == 2 else { return }
@@ -633,6 +729,10 @@ final class NodeEditorViewModel {
                         inputSlot: 0
                     )
                     refresh()
+                } else if let cableId = targetCableId,
+                          let conn = connections.first(where: { $0.id == cableId }) {
+                    // Dropped onto a cable — splice the new effect into it
+                    insertShaderIntoCable(shaderType: typeInt, connection: conn, at: canvasPos)
                 } else {
                     addShader(type: typeInt, at: canvasPos)
                 }
@@ -640,6 +740,44 @@ final class NodeEditorViewModel {
                 addShaderVideoSource(type: typeInt, at: canvasPos)
             }
         }
+    }
+
+    /// Insert a new shader into an existing connection, splicing it between
+    /// the two connected nodes.
+    private func insertShaderIntoCable(shaderType: Int, connection: ConnectionModel, at canvasPos: CGPoint) {
+        // 1. Create the new shader at the drop position
+        guard let newId = addShader(type: shaderType, at: canvasPos) else { return }
+
+        // 2. Remember the original connection endpoints
+        let startId = connection.startNodeId
+        let endId = connection.endNodeId
+        let origInputSlot = connection.inputSlot
+        let origOutputSlot = connection.outputSlot
+        let startNode = nodes.first(where: { $0.id == startId })
+        let startIsSource = startNode?.isSource ?? false
+
+        // 3. Remove the original connection
+        engine.removeConnection(id: connection.id)
+
+        // 4. Connect: original start → new shader (input 0)
+        engine.makeConnection(
+            startId: startId,
+            endId: newId,
+            connectionType: startIsSource ? 1 : 0,
+            outputSlot: origOutputSlot,
+            inputSlot: 0
+        )
+
+        // 5. Connect: new shader → original end (same input slot)
+        engine.makeConnection(
+            startId: newId,
+            endId: endId,
+            connectionType: 0,  // shader-to-shader
+            outputSlot: 0,
+            inputSlot: origInputSlot
+        )
+
+        refresh()
     }
 
     // MARK: - Undo / Redo
@@ -783,6 +921,7 @@ final class NodeEditorViewModel {
     var hasWorkspace: Bool { currentWorkspacePath != nil }
 
     func newWorkspace() {
+        showWelcomeScreen = false
         for node in nodes {
             engine.stopTextureSharing(connectableId: node.id)
         }
@@ -947,30 +1086,33 @@ final class NodeEditorViewModel {
     }
 
     func voteOnStrand(slug: String, vote: String) {
-        // Optimistic update
-        if let idx = communityStrands.firstIndex(where: { $0.slug == slug }) {
-            let current = communityStrands[idx].userVote
-            if vote == "up" {
-                communityStrands[idx].userVote = current == "up" ? nil : "up"
-                communityStrands[idx].score += current == "up" ? -1 : (current == "down" ? 2 : 1)
-                communityStrands[idx].upvotes += current == "up" ? -1 : 1
-                if current == "down" { communityStrands[idx].downvotes -= 1 }
-            } else if vote == "down" {
-                communityStrands[idx].userVote = current == "down" ? nil : "down"
-                communityStrands[idx].score += current == "down" ? 1 : (current == "up" ? -2 : -1)
-                communityStrands[idx].downvotes += current == "down" ? -1 : 1
-                if current == "up" { communityStrands[idx].upvotes -= 1 }
-            }
+        // Optimistic update — mutate a copy and assign once to minimize observation churn
+        guard let idx = communityStrands.firstIndex(where: { $0.slug == slug }) else { return }
+        var updated = communityStrands
+        let current = updated[idx].userVote
+        if vote == "up" {
+            updated[idx].userVote = current == "up" ? nil : "up"
+            updated[idx].score += current == "up" ? -1 : (current == "down" ? 2 : 1)
+            updated[idx].upvotes += current == "up" ? -1 : 1
+            if current == "down" { updated[idx].downvotes -= 1 }
+        } else if vote == "down" {
+            updated[idx].userVote = current == "down" ? nil : "down"
+            updated[idx].score += current == "down" ? 1 : (current == "up" ? -2 : -1)
+            updated[idx].downvotes += current == "down" ? -1 : 1
+            if current == "up" { updated[idx].upvotes -= 1 }
         }
+        communityStrands = updated
 
-        let voteAction = communityStrands.first(where: { $0.slug == slug })?.userVote == nil ? "none" : vote
+        let voteAction = communityStrands[idx].userVote ?? "none"
         engine.voteOnStrand(slug: slug, voterId: voterId, vote: voteAction) { [weak self] success, upvotes, downvotes, score, userVote in
             guard let self, success else { return }
-            if let idx = self.communityStrands.firstIndex(where: { $0.slug == slug }) {
-                self.communityStrands[idx].upvotes = upvotes
-                self.communityStrands[idx].downvotes = downvotes
-                self.communityStrands[idx].score = score
-                self.communityStrands[idx].userVote = userVote
+            if let i = self.communityStrands.firstIndex(where: { $0.slug == slug }) {
+                var batch = self.communityStrands
+                batch[i].upvotes = upvotes
+                batch[i].downvotes = downvotes
+                batch[i].score = score
+                batch[i].userVote = userVote
+                self.communityStrands = batch
             }
         }
     }
@@ -1023,6 +1165,62 @@ final class NodeEditorViewModel {
     }
 
     func dismissWelcomeScreen() {
+        showWelcomeScreen = false
+    }
+
+    /// Stored output ID for the welcome strand live preview.
+    var welcomePreviewOutputId: String?
+
+    /// Aspect ratio (width/height) of the welcome strand's output texture.
+    var welcomePreviewAspectRatio: CGFloat {
+        guard let outputId = welcomePreviewOutputId else { return 16.0 / 9.0 }
+        let w = engine.textureWidth(connectableId: outputId)
+        let h = engine.textureHeight(connectableId: outputId)
+        guard w > 0, h > 0 else { return 16.0 / 9.0 }
+        return CGFloat(w) / CGFloat(h)
+    }
+
+    /// Load a welcome template strand for live preview, clearing the graph first.
+    func loadWelcomeStrand(id: String) {
+        // Stop sharing old textures
+        for node in nodes {
+            engine.stopTextureSharing(connectableId: node.id)
+        }
+        sharingTextureIds.removeAll()
+        TextureProvider.shared.invalidateAll()
+        welcomePreviewOutputId = nil
+
+        engine.clearGraph()
+        let newIds = engine.loadStrand(id: id)
+        refresh()
+
+        // Find the terminal node (no outgoing connections) — that's the final output.
+        let endNodeIds = Set(connections.map(\.startNodeId))
+        let nodeIds = Set(nodes.map(\.id))
+        let terminals = nodeIds.subtracting(endNodeIds)
+        // Prefer a shader terminal over a source terminal
+        let shaderIds = Set(nodes.filter(\.isShader).map(\.id))
+        let outputId = terminals.first(where: { shaderIds.contains($0) })
+            ?? terminals.first
+            ?? newIds.last
+
+        if let outputId {
+            engine.startTextureSharing(connectableId: outputId)
+            sharingTextureIds.insert(outputId)
+            welcomePreviewOutputId = outputId
+        }
+    }
+
+    /// Resume the workspace that was loaded before the welcome screen appeared.
+    func resumePreviousWorkspace() {
+        for node in nodes {
+            engine.stopTextureSharing(connectableId: node.id)
+        }
+        sharingTextureIds.removeAll()
+        TextureProvider.shared.invalidateAll()
+        engine.clearGraph()
+        engine.loadDefaultConfig()
+        refresh()
         showWelcomeScreen = false
     }
 

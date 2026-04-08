@@ -30,7 +30,7 @@ struct SimpleBarsSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> barSpacingOscillator;
   
   SimpleBarsSettings(std::string shaderId, json j) :
-  orientation(std::make_shared<Parameter>("Orientation", 0, 0, 1)), // 0: Horizontal, 1: Vertical
+  orientation(std::make_shared<Parameter>("Vertical", ParameterType_Bool)),
   barCount(std::make_shared<Parameter>("Bar Count", 10, 1, 100, ParameterType_Int)),
   barWidth(std::make_shared<Parameter>("Bar Width", 25.0, 1.0, 500.0)),
   barSpacing(std::make_shared<Parameter>("Bar Spacing", 20.0, 0.0, 200.0)),
@@ -62,7 +62,7 @@ struct SimpleBarsShader: Shader {
     int count = static_cast<int>(settings->barCount->value);
     float width = settings->barWidth->value;
     float spacing = settings->barSpacing->value;
-    bool isHorizontal = settings->orientation->intValue == 0;
+    bool isHorizontal = !settings->orientation->boolValue;
     
     ofSetColor(settings->fillColor->color->data()[0] * 255, settings->fillColor->color->data()[1] * 255, settings->fillColor->color->data()[2] * 255, settings->fillColor->color->data()[3] * 255);
     
@@ -104,7 +104,7 @@ struct SimpleBarsShader: Shader {
       randomizeOscillators();
     }
     
-    CommonViews::Selector(settings->orientation, {"Horizontal", "Vertical"});
+    CommonViews::ShaderCheckbox(settings->orientation);
     CommonViews::ShaderIntParameter(settings->barCount);
     CommonViews::ShaderParameter(settings->barWidth, settings->barWidthOscillator);
     CommonViews::ShaderParameter(settings->barSpacing, settings->barSpacingOscillator);
@@ -112,7 +112,7 @@ struct SimpleBarsShader: Shader {
   }
   
   void random() {
-    settings->orientation->setValue(ofRandom(0, 2)); // Random orientation: 0 or 1
+    settings->orientation->setBoolValue(ofRandom(1.0) > 0.5); // Random orientation
     settings->barCount->setValue(ofRandom(1, 100)); // Random bar count between 1 and 100
     settings->barWidth->setValue(ofRandom(1.0, 50.0)); // Random bar width between 1.0 and 50.0
     settings->barSpacing->setValue(ofRandom(0.0, 20.0)); // Random bar spacing between 0.0 and 20.0

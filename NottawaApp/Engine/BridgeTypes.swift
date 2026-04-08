@@ -77,6 +77,10 @@ struct ParameterInfo: Identifiable, Hashable {
     var driverShift: Float
     var driverScale: Float
 
+    // MIDI binding
+    var hasMidiBinding: Bool
+    var midiDescriptor: String?
+
     // Options (for int params with named choices, e.g. font selector)
     var options: [String]
 
@@ -119,6 +123,9 @@ struct ParameterInfo: Identifiable, Hashable {
         self.driverName = c.driverName != nil ? String(cString: c.driverName) : nil
         self.driverShift = c.driverShift
         self.driverScale = c.driverScale
+
+        self.hasMidiBinding = c.hasMidiBinding != 0
+        self.midiDescriptor = c.midiDescriptor != nil ? String(cString: c.midiDescriptor) : nil
 
         if c.optionCount > 0, let opts = c.options {
             self.options = (0..<Int(c.optionCount)).compactMap { idx in
@@ -374,6 +381,20 @@ struct TextSourceState: Equatable {
     let yPosition: Float
     let fontIndex: Int
     let fontNames: [String]
+}
+
+// MARK: - Icon Source State
+
+struct IconInfo: Identifiable {
+    let id: Int       // index in the icon list
+    let name: String
+    let path: String  // absolute path to icon image file
+    let category: String
+}
+
+struct IconSourceState {
+    let selectedIndex: Int
+    let icons: [IconInfo]
 }
 
 // MARK: - Available Non-Shader Source

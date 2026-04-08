@@ -19,9 +19,6 @@
 #include <stdio.h>
 
 struct AudioBallSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> shaderValue;
-  std::shared_ptr<WaveformOscillator> shaderValueOscillator;
-
   std::shared_ptr<Parameter> dotCount;
   std::shared_ptr<WaveformOscillator> dotCountOscillator;
 
@@ -31,18 +28,24 @@ struct AudioBallSettings: public ShaderSettings {
   std::shared_ptr<Parameter> dotBrightness;
   std::shared_ptr<WaveformOscillator> dotBrightnessOscillator;
 
+  std::shared_ptr<Parameter> audioScale;
+  std::shared_ptr<WaveformOscillator> audioScaleOscillator;
+
+  std::shared_ptr<Parameter> backgroundColor;
+
   AudioBallSettings(std::string shaderId, json j) :
-  shaderValue(std::make_shared<Parameter>("shaderValue", 0.5, 0.0, 1.0)),
-  shaderValueOscillator(std::make_shared<WaveformOscillator>(shaderValue)),
   dotCount(std::make_shared<Parameter>("Dot Count", 40.0, 5.0, 80.0, ParameterType_Int)),
   dotCountOscillator(std::make_shared<WaveformOscillator>(dotCount)),
   ringRadius(std::make_shared<Parameter>("Ring Radius", 0.25, 0.05, 0.5)),
   ringRadiusOscillator(std::make_shared<WaveformOscillator>(ringRadius)),
   dotBrightness(std::make_shared<Parameter>("Dot Brightness", 0.02, 0.005, 0.1)),
   dotBrightnessOscillator(std::make_shared<WaveformOscillator>(dotBrightness)),
+  audioScale(std::make_shared<Parameter>("Audio Scale", 1.0, 0.0, 5.0)),
+  audioScaleOscillator(std::make_shared<WaveformOscillator>(audioScale)),
+  backgroundColor(std::make_shared<Parameter>("Background Color", ParameterType_Color)),
   ShaderSettings(shaderId, j, "AudioBall") {
-    parameters = { shaderValue, dotCount, ringRadius, dotBrightness };
-    oscillators = { shaderValueOscillator, dotCountOscillator, ringRadiusOscillator, dotBrightnessOscillator };
+    parameters = { dotCount, ringRadius, dotBrightness, audioScale, backgroundColor };
+    oscillators = { dotCountOscillator, ringRadiusOscillator, dotBrightnessOscillator, audioScaleOscillator };
     load(j);
     registerParameters();
   };
@@ -62,15 +65,16 @@ struct AudioBallShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
-    if (source != nullptr && source->audioAnalysis.smoothSpectrum.size() > 254)
-      shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum[0],
-                           256);
-    shader.setUniform1f("shaderValue", settings->shaderValue->value);
+    if (source != nullptr)
+      shader.setUniform1fv("audio", source->audioAnalysis.renderSpectrum.data(), 256);
     shader.setUniform1f("dotCount", settings->dotCount->value);
     shader.setUniform1f("ringRadius", settings->ringRadius->value);
     shader.setUniform1f("dotBrightness", settings->dotBrightness->value);
+    shader.setUniform1f("audioScale", settings->audioScale->value);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
+    auto bg = settings->backgroundColor->color->data();
+    shader.setUniform4f("bgColor", bg[0], bg[1], bg[2], bg[3]);
     frame->draw(0, 0);
     shader.end();
     canvas->end();
@@ -93,6 +97,8 @@ struct AudioBallShader: Shader {
     CommonViews::ShaderIntParameter(settings->dotCount);
     CommonViews::ShaderParameter(settings->ringRadius, settings->ringRadiusOscillator);
     CommonViews::ShaderParameter(settings->dotBrightness, settings->dotBrightnessOscillator);
+    CommonViews::ShaderParameter(settings->audioScale, settings->audioScaleOscillator);
+    CommonViews::ShaderColor(settings->backgroundColor);
   }
 };
 

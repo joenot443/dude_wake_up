@@ -6,8 +6,10 @@ uniform float time;
 uniform float dotCount;
 uniform float ringRadius;
 uniform float dotBrightness;
+uniform float audioScale;
 in vec2 coord;
 uniform float audio[256];
+uniform vec4 bgColor;
 out vec4 outputColor;
 
 //convert HSV to RGB
@@ -20,13 +22,13 @@ vec3 hsv2rgb(vec3 c){
 void main(  ) {
 
   vec2 p=(coord.xy-.5*dimensions.xy)/min(dimensions.x,dimensions.y);
-  vec3 c=vec3(0,0,0.1); //background color
+  vec3 c=bgColor.rgb; //background color
 
   for(float i=0.;i<dotCount; i++){
 
     //read frequency for this dot from audio input channel
     //based on its index in the circle
-    float vol = audio[int(i/dotCount * 256.)];
+    float vol = audio[int(i/dotCount * 256.)] * audioScale;
     float b = vol * dotBrightness;
 
     //get location of dot

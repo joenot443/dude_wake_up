@@ -10,6 +10,7 @@ public:
     if (!videoSource) {
       videoSource = VideoSourceService::getService()->makeImageVideoSource(name, path);
     }
+    if (!videoSource) return;
     VideoSourceService::getService()->addVideoSource(videoSource, videoSource->id, 0);
   }
 

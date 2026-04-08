@@ -16,6 +16,7 @@ struct NodeModel: Identifiable, Hashable {
     var isActive: Bool
     var isBypassed: Bool = false
     var supportsAuxOutput: Bool
+    var isAudioReactive: Bool = false
     var downloadProgress: Float? = nil   // nil = not downloading, 0.0-1.0 = downloading
     var downloadPaused: Bool = false
     var libraryFileId: String? = nil
@@ -44,6 +45,7 @@ struct NodeModel: Identifiable, Hashable {
         && lhs.position == rhs.position
         && lhs.isActive == rhs.isActive
         && lhs.isBypassed == rhs.isBypassed
+        && lhs.inputCount == rhs.inputCount
         && lhs.supportsAuxOutput == rhs.supportsAuxOutput
         && lhs.downloadProgress == rhs.downloadProgress
         && lhs.downloadPaused == rhs.downloadPaused
@@ -61,7 +63,8 @@ struct NodeModel: Identifiable, Hashable {
             inputCount: info.inputCount,
             position: CGPoint(x: CGFloat(info.posX), y: CGFloat(info.posY)),
             isActive: true,
-            supportsAuxOutput: isShader ? NottawaEngine.shared.supportsAuxOutput(shaderId: info.id) : false
+            supportsAuxOutput: isShader ? NottawaEngine.shared.supportsAuxOutput(shaderId: info.id) : false,
+            isAudioReactive: NottawaEngine.shared.isAudioReactive(connectableId: info.id)
         )
     }
 
@@ -74,7 +77,8 @@ struct NodeModel: Identifiable, Hashable {
             inputCount: info.inputCount,
             position: CGPoint(x: CGFloat(info.posX), y: CGFloat(info.posY)),
             isActive: true,
-            supportsAuxOutput: false
+            supportsAuxOutput: false,
+            isAudioReactive: NottawaEngine.shared.isAudioReactive(connectableId: info.id)
         )
     }
 }

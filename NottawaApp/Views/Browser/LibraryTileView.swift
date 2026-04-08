@@ -53,7 +53,7 @@ struct LibraryTileView: View {
                     .strokeBorder(Color(.separatorColor), lineWidth: 0.5)
             )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.plainHitArea)
         .accessibilityIdentifier("library-tile-\(file.name)")
         .onDrag {
             NSItemProvider(object: dragPayload as NSString)

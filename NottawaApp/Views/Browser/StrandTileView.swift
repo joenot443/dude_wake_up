@@ -56,7 +56,7 @@ struct StrandTileView: View {
                     .strokeBorder(Color(.separatorColor), lineWidth: 0.5)
             )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.plainHitArea)
         .onDrag {
             NSItemProvider(object: dragPayload as NSString)
         }

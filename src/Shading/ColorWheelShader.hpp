@@ -30,7 +30,7 @@ struct ColorWheelSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> speedOscillator;
 
   ColorWheelSettings(std::string shaderId, json j) :
-  enableAudio(std::make_shared<Parameter>("Enable Audio", 0.5, 0.0, 1.0)),
+  enableAudio(std::make_shared<Parameter>("Enable Audio", ParameterType_Bool)),
   amount(std::make_shared<Parameter>("Amount", 1.0, 0.0, 5.0)),
   amountOscillator(std::make_shared<WaveformOscillator>(amount)),
   ballDistance(std::make_shared<Parameter>("Ball Distance", 1.0, 0.0, 5.0)),
@@ -58,9 +58,8 @@ struct ColorWheelShader: Shader {
     canvas->begin();
     shader.begin();
     auto source = AudioSourceService::getService()->selectedAudioSource;
-    if (settings->enableAudio->boolValue && source != nullptr && source->audioAnalysis.smoothSpectrum.size() >= 256) {
-      shader.setUniform1fv("audio", &source->audioAnalysis.smoothSpectrum.data()[0],
-                           256);
+    if (settings->enableAudio->boolValue && source != nullptr) {
+      shader.setUniform1fv("audio", source->audioAnalysis.renderSpectrum.data(), 256);
       shader.setUniform1f("amount", settings->amount->value);
     }
     else {

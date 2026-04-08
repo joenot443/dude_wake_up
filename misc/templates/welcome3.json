@@ -1,0 +1,449 @@
+{
+    "configType": "strand",
+    "connections": {
+        "31781031-b427-a2ac-409a-8f8887a5efd9": {
+            "end": "ea18bf59-8304-feb7-ecdc-54af2e3453cc",
+            "id": "31781031-b427-a2ac-409a-8f8887a5efd9",
+            "inputSlot": 0,
+            "outputSlot": 0,
+            "start": "41e369f0-90ef-e7a9-7910-c5e90a2f6dee",
+            "type": 1
+        },
+        "9186a597-23a3-6f06-7ece-aaf83fd63e93": {
+            "end": "837db52f-0c65-eb48-0e2f-608e43692b58",
+            "id": "9186a597-23a3-6f06-7ece-aaf83fd63e93",
+            "inputSlot": 0,
+            "outputSlot": 0,
+            "start": "7a467888-4045-65f0-d4df-4600eb92ff43",
+            "type": 1
+        },
+        "9ac43533-948c-1985-f563-979ebd15b5b1": {
+            "end": "cb41676d-de3f-77f8-b0ab-130edf97d89a",
+            "id": "9ac43533-948c-1985-f563-979ebd15b5b1",
+            "inputSlot": 1,
+            "outputSlot": 0,
+            "start": "ea18bf59-8304-feb7-ecdc-54af2e3453cc",
+            "type": 0
+        },
+        "af2552e3-9203-d307-7df0-8ee1d461b51f": {
+            "end": "cb41676d-de3f-77f8-b0ab-130edf97d89a",
+            "id": "af2552e3-9203-d307-7df0-8ee1d461b51f",
+            "inputSlot": 0,
+            "outputSlot": 0,
+            "start": "837db52f-0c65-eb48-0e2f-608e43692b58",
+            "type": 0
+        }
+    },
+    "parameters": {
+        "favoriteParameters": [],
+        "favoriteShaders": [
+            73,
+            102
+        ],
+        "favoriteSources": [],
+        "stageShaders": []
+    },
+    "preview": "",
+    "shaders": {
+        "837db52f-0c65-eb48-0e2f-608e43692b58": {
+            "osc": {},
+            "param": {
+                "Flow Speed": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Flow Speed",
+                    "paramId": "Flow Speed-f6cd1097",
+                    "r": 0.0,
+                    "value": 0.23160991072654724
+                },
+                "Intensity": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Intensity",
+                    "paramId": "Intensity-b845e32d",
+                    "r": 0.0,
+                    "value": 0.08790291100740433
+                },
+                "Turbulence": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Turbulence",
+                    "paramId": "Turbulence-81c234b4",
+                    "r": 0.0,
+                    "value": 0.5549823045730591
+                }
+            },
+            "shaderId": "837db52f-0c65-eb48-0e2f-608e43692b58",
+            "shaderType": 31,
+            "x": 531.9297485351563,
+            "y": 401.6632995605469
+        },
+        "cb41676d-de3f-77f8-b0ab-130edf97d89a": {
+            "osc": {},
+            "param": {
+                "Alpha": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 1,
+                    "midiDescriptor": "",
+                    "name": "Alpha",
+                    "paramId": "Alpha-82772f7b",
+                    "r": 0.0,
+                    "value": 1.0
+                },
+                "Alpha Swap": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": false,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Alpha Swap",
+                    "paramId": "Alpha Swap-7930a9e5",
+                    "r": 0.0,
+                    "value": 0.0
+                },
+                "Amount": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": false,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Amount",
+                    "paramId": "Amount-63cebcc6",
+                    "r": 0.0,
+                    "value": 0.0
+                },
+                "Flip": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": false,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Flip",
+                    "paramId": "Flip-61ca3e2b",
+                    "r": 0.0,
+                    "value": 0.0
+                },
+                "Mode": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": false,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Mode",
+                    "paramId": "Mode-2c1ffcc0",
+                    "r": 0.0,
+                    "value": 0.0
+                }
+            },
+            "shaderId": "cb41676d-de3f-77f8-b0ab-130edf97d89a",
+            "shaderType": 80,
+            "x": 1300.2578125,
+            "y": 339.6686096191406
+        },
+        "ea18bf59-8304-feb7-ecdc-54af2e3453cc": {
+            "osc": {},
+            "param": {
+                "Accumulate": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 1,
+                    "midiDescriptor": "",
+                    "name": "Accumulate",
+                    "paramId": "Accumulate-65221e1c",
+                    "r": 0.0,
+                    "value": 1.0
+                },
+                "Interval": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Interval",
+                    "paramId": "Interval-0863da94",
+                    "r": 0.0,
+                    "value": 0.15782535076141357
+                },
+                "Max Size": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Max Size",
+                    "paramId": "Max Size-b45b3da9",
+                    "r": 0.0,
+                    "value": 0.5
+                },
+                "Min Size": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Min Size",
+                    "paramId": "Min Size-28dd7d8b",
+                    "r": 0.0,
+                    "value": 0.3862050473690033
+                }
+            },
+            "shaderId": "ea18bf59-8304-feb7-ecdc-54af2e3453cc",
+            "shaderType": 162,
+            "x": 979.241455078125,
+            "y": 359.78631591796875
+        }
+    },
+    "sources": {
+        "41e369f0-90ef-e7a9-7910-c5e90a2f6dee": {
+            "boomerang": false,
+            "id": "41e369f0-90ef-e7a9-7910-c5e90a2f6dee",
+            "libraryFile": {
+                "category": "Nature",
+                "filename": "EJ6qwn_NWQs_final.mp4",
+                "id": "https://www.youtube.com/watch?v=EJ6qwn_NWQs",
+                "name": "Peony Blooming",
+                "thumbnailFilename": "EJ6qwn_NWQs_final.jpg",
+                "thumbnailUrl": "https://nottawa.app/media/EJ6qwn_NWQs_final.jpg",
+                "url": "https://nottawa.app/media/EJ6qwn_NWQs_final.mp4"
+            },
+            "libraryFileId": "https://www.youtube.com/watch?v=EJ6qwn_NWQs",
+            "mute": false,
+            "path": "/Users/jcrozier/Library/Containers/com.joecrozier.nottawaapp/Data/nottawa/videos/EJ6qwn_NWQs_final.mp4",
+            "settings": {
+                "osc": {},
+                "param": {
+                    "end": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": true,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 1,
+                        "midiDescriptor": "",
+                        "name": "end",
+                        "paramId": "end-6a3448dd",
+                        "r": 0.0,
+                        "value": 1.0
+                    },
+                    "height": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": true,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 480,
+                        "midiDescriptor": "",
+                        "name": "height",
+                        "paramId": "height-355eaf00",
+                        "r": 0.0,
+                        "value": 480.0
+                    },
+                    "start": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": false,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 0,
+                        "midiDescriptor": "",
+                        "name": "start",
+                        "paramId": "start-c6d0e58f",
+                        "r": 0.0,
+                        "value": 0.0
+                    },
+                    "width": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": true,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 720,
+                        "midiDescriptor": "",
+                        "name": "width",
+                        "paramId": "width-c59c8636",
+                        "r": 0.0,
+                        "value": 720.0
+                    }
+                }
+            },
+            "sourceName": "Peony Blooming",
+            "videoSourceType": 8,
+            "volume": 0.5,
+            "x": 382.4586486816406,
+            "y": 73.95922088623047
+        },
+        "5e8a4b73-881f-c4c5-80df-5cecce6b515f": {
+            "id": "5e8a4b73-881f-c4c5-80df-5cecce6b515f",
+            "shader": {
+                "osc": {},
+                "param": {}
+            },
+            "shaderSourceType": 20,
+            "videoSourceType": 4,
+            "x": 365.2698059082031,
+            "y": 571.6583251953125
+        },
+        "7a467888-4045-65f0-d4df-4600eb92ff43": {
+            "backgroundColor": {
+                "a": 1.0,
+                "b": 0.0,
+                "boolValue": false,
+                "favorited": false,
+                "g": 0.0,
+                "intValue": 0,
+                "midiDescriptor": "",
+                "name": "Background Color",
+                "paramId": "Background Color-d25b3033",
+                "r": 0.0,
+                "value": 0.0
+            },
+            "backgroundEnabled": false,
+            "color": {
+                "a": 1.0,
+                "b": 1.0,
+                "boolValue": false,
+                "favorited": false,
+                "g": 1.0,
+                "intValue": 0,
+                "midiDescriptor": "",
+                "name": "Color",
+                "paramId": "Color-9de03f93",
+                "r": 1.0,
+                "value": 0.0
+            },
+            "cropToText": false,
+            "displayX": 0.10000000149011612,
+            "displayY": 0.4000000059604645,
+            "edgeSoftness": 0.800000011920929,
+            "fontName": "Roboto",
+            "fontSelector": {
+                "a": 1.0,
+                "b": 0.0,
+                "boolValue": false,
+                "favorited": false,
+                "g": 0.0,
+                "intValue": 35,
+                "midiDescriptor": "",
+                "name": "Font",
+                "paramId": "Font-bcb6421a",
+                "r": 0.0,
+                "value": 35.0
+            },
+            "fontSize": 72,
+            "id": "7a467888-4045-65f0-d4df-4600eb92ff43",
+            "settings": {
+                "osc": {},
+                "param": {
+                    "end": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": true,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 1,
+                        "midiDescriptor": "",
+                        "name": "end",
+                        "paramId": "end-995b1461",
+                        "r": 0.0,
+                        "value": 1.0
+                    },
+                    "height": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": true,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 480,
+                        "midiDescriptor": "",
+                        "name": "height",
+                        "paramId": "height-84b77b27",
+                        "r": 0.0,
+                        "value": 480.0
+                    },
+                    "start": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": false,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 0,
+                        "midiDescriptor": "",
+                        "name": "start",
+                        "paramId": "start-d721f2db",
+                        "r": 0.0,
+                        "value": 0.0
+                    },
+                    "width": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": true,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 720,
+                        "midiDescriptor": "",
+                        "name": "width",
+                        "paramId": "width-4c8edd7c",
+                        "r": 0.0,
+                        "value": 720.0
+                    }
+                }
+            },
+            "sourceName": "Text",
+            "strokeColor": {
+                "a": 1.0,
+                "b": 0.0,
+                "boolValue": false,
+                "favorited": false,
+                "g": 0.0,
+                "intValue": 0,
+                "midiDescriptor": "",
+                "name": "Stroke Color",
+                "paramId": "Stroke Color-d8669bfe",
+                "r": 0.0,
+                "value": 0.0
+            },
+            "strokeEnabled": true,
+            "text": "welcome to nottawa",
+            "textSmoothing": 8.0,
+            "videoSourceType": 5,
+            "x": 86.3661117553711,
+            "y": 382.46453857421875
+        }
+    }
+}
