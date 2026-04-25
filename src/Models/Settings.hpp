@@ -122,13 +122,14 @@ public:
         }
         
         
-        // // Check if the Oscillator for that Parameter has been saved
-        // if (oscJ[p->name].is_object()) {
-        //   std::shared_ptr<Oscillator> osc = findOscillator(p->name);
-        //   osc->load(oscJ[p->name]);
-        //   // Enable the Oscillator
-        //   osc->enabled->setBoolValue(true);
-        // }
+        // Check if the Oscillator for that Parameter has been saved
+        if (oscJ[p->name].is_object()) {
+          std::shared_ptr<Oscillator> osc = findOscillator(p->name);
+          if (osc != nullptr) {
+            osc->load(oscJ[p->name]);
+            osc->enabled->setBoolValue(true);
+          }
+        }
       }
     }
     

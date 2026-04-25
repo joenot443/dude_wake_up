@@ -61,6 +61,10 @@ public:
   
   std::shared_ptr<Connectable> selectedConnectable;
 
+  // Global view setting: when true, breaking the last Main input connection
+  // to a Shader clears its output frame so stale pixels don't linger.
+  bool clearOnDisconnect = true;
+
   // Removes all ShaderChainers and Shaders
   void reset();
 

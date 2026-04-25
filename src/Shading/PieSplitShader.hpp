@@ -18,11 +18,20 @@
 #include <stdio.h>
 
 struct PieSplitSettings: public ShaderSettings {
-  
+  std::shared_ptr<Parameter> rotation;
+  std::shared_ptr<Parameter> autoRotate;
+
+  std::shared_ptr<WaveformOscillator> rotationOscillator;
+  std::shared_ptr<WaveformOscillator> autoRotateOscillator;
+
   PieSplitSettings(std::string shaderId, json j) :
+  rotation(std::make_shared<Parameter>("Rotation", 0.0, -360.0, 360.0)),
+  autoRotate(std::make_shared<Parameter>("Auto-Rotate", 0.0, -2.0, 2.0)),
+  rotationOscillator(std::make_shared<WaveformOscillator>(rotation)),
+  autoRotateOscillator(std::make_shared<WaveformOscillator>(autoRotate)),
   ShaderSettings(shaderId, j, "PieSplit") {
-    parameters = { };
-    oscillators = { };
+    parameters = { rotation, autoRotate };
+    oscillators = { rotationOscillator, autoRotateOscillator };
     load(j);
     registerParameters();
   };
@@ -49,8 +58,14 @@ struct PieSplitShader: Shader {
       loadTextureAt(slot);
     }
     
+    float rotationDegrees = settings->rotation->value;
+    if (std::abs(settings->autoRotate->value) > 0.0001) {
+      rotationDegrees += ofGetElapsedTimef() * settings->autoRotate->value * 50.0;
+    }
+
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
+    shader.setUniform1f("rotation", rotationDegrees);
     frame->draw(0, 0);
     shader.end();
     canvas->end();
@@ -72,7 +87,11 @@ struct PieSplitShader: Shader {
   }
   
   int inputCount() override {
-    return std::max(2, std::min(10, static_cast<int>(activeInputs.size() + 1)));
+    int needed = 1;
+    for (auto const& [slot, _] : inputs) {
+      needed = std::max(needed, static_cast<int>(slot) + 2);
+    }
+    return std::max(2, std::min(10, needed));
   }
   
   ShaderType type() override {
@@ -80,7 +99,8 @@ struct PieSplitShader: Shader {
   }
 
   void drawSettings() override {
-    
+    CommonViews::ShaderParameter(settings->rotation, settings->rotationOscillator);
+    CommonViews::ShaderParameter(settings->autoRotate, settings->autoRotateOscillator);
   }
 };
 

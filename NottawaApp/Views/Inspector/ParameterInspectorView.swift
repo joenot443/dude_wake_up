@@ -53,8 +53,40 @@ struct ParameterInspectorView: View {
                             .tint(theme.colors.accent)
                         }
 
-                        ForEach(viewModel.inspectorParameters.filter { $0.parameterType != .hidden }) { param in
-                            ParameterControlView(param: param)
+                        // Reset Position button (Bounce shader only)
+                        if let node = selectedNode, isBounceShader(node) {
+                            Button {
+                                NottawaEngine.shared.resetBouncePosition(shaderId: node.id)
+                            } label: {
+                                Label("Reset Position", systemImage: "arrow.counterclockwise")
+                                    .font(.caption)
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.bordered)
+                            .tint(theme.colors.accent)
+                        }
+
+                        ForEach(viewModel.inspectorParameters.filter { param in
+                            guard param.parameterType != .hidden else { return false }
+                            // Shader-controlled runtime hide (e.g. Blend hides unconnected input strengths).
+                            if param.hiddenFromNode { return false }
+                            // Text sources render their own position pad in TextSourceControlsView,
+                            // so hide the duplicate X/Y params (and their pad) from the list.
+                            if viewModel.textSourceState != nil,
+                               isPositionXParam(param) || isPositionYParam(param) {
+                                return false
+                            }
+                            return !isPositionYParam(param)
+                        }) { param in
+                            if isPositionXParam(param), let yParam = matchingYParam(for: param) {
+                                PositionPadControl(
+                                    xParam: param,
+                                    yParam: yParam,
+                                    connectableId: selectedNode?.id
+                                )
+                            } else {
+                                ParameterControlView(param: param)
+                            }
                         }
 
                         // Optional Shaders section
@@ -77,6 +109,23 @@ struct ParameterInspectorView: View {
         }
     }
 
+    // MARK: - Position Pad Detection
+
+    private func isPositionXParam(_ param: ParameterInfo) -> Bool {
+        (param.name == "X Position" || param.name == "X") && param.minValue >= 0 && param.maxValue <= 1.0
+    }
+
+    private func isPositionYParam(_ param: ParameterInfo) -> Bool {
+        (param.name == "Y Position" || param.name == "Y") && param.minValue >= 0 && param.maxValue <= 1.0
+    }
+
+    private func matchingYParam(for xParam: ParameterInfo) -> ParameterInfo? {
+        let yName = xParam.name == "X" ? "Y" : "Y Position"
+        return viewModel.inspectorParameters.first {
+            $0.name == yName && $0.parameterType != .hidden && $0.minValue >= 0 && $0.maxValue <= 1.0
+        }
+    }
+
     private var isSelectedNodeBlend: Bool {
         guard let node = selectedNode,
               case .shader(let raw) = node.nodeType else { return false }
@@ -85,6 +134,11 @@ struct ParameterInspectorView: View {
 
     private func isFeedbackShader(_ node: NodeModel) -> Bool {
         if case .shader(let raw) = node.nodeType { return raw == 7 }
+        return false
+    }
+
+    private func isBounceShader(_ node: NodeModel) -> Bool {
+        if case .shader(let raw) = node.nodeType { return raw == 58 }
         return false
     }
 
@@ -357,7 +411,8 @@ struct ParameterPositionPadView: View {
         self.yParam = yParam
         self.connectableId = connectableId
         self._padX = State(initialValue: Self.toNormalized(xParam.value, min: xParam.minValue, max: xParam.maxValue))
-        self._padY = State(initialValue: Self.toNormalized(yParam.value, min: yParam.minValue, max: yParam.maxValue))
+        // Invert Y: pad Y=0 is top (screen), but GL Y increases upward
+        self._padY = State(initialValue: 1.0 - Self.toNormalized(yParam.value, min: yParam.minValue, max: yParam.maxValue))
     }
 
     private static func toNormalized(_ value: Float, min: Float, max: Float) -> Float {
@@ -388,7 +443,7 @@ struct ParameterPositionPadView: View {
                     engine.setParameterValue(paramId: xParam.id, value: Self.fromNormalized(newValue, min: xParam.minValue, max: xParam.maxValue))
                 }
                 .onChange(of: padY) { _, newValue in
-                    engine.setParameterValue(paramId: yParam.id, value: Self.fromNormalized(newValue, min: yParam.minValue, max: yParam.maxValue))
+                    engine.setParameterValue(paramId: yParam.id, value: Self.fromNormalized(1.0 - newValue, min: yParam.minValue, max: yParam.maxValue))
                 }
         }
         .padding(.horizontal, 16)
@@ -398,7 +453,7 @@ struct ParameterPositionPadView: View {
             if padX != norm { padX = norm }
         }
         .onChange(of: yParam.value) { _, newValue in
-            let norm = Self.toNormalized(newValue, min: yParam.minValue, max: yParam.maxValue)
+            let norm = 1.0 - Self.toNormalized(newValue, min: yParam.minValue, max: yParam.maxValue)
             if padY != norm { padY = norm }
         }
     }
@@ -422,6 +477,65 @@ struct OptionalShaderParametersView: View {
                 connectableId: nodeId,
                 optionalIndex: optionalIndex
             )
+        }
+    }
+}
+
+// MARK: - Position Pad Control
+
+/// Wraps PositionPadView for use with ParameterInfo X/Y pairs in the inspector.
+private struct PositionPadControl: View {
+    @Environment(ThemeManager.self) private var theme
+    let xParam: ParameterInfo
+    let yParam: ParameterInfo
+    let connectableId: String?
+
+    @State private var xValue: Float
+    @State private var yValue: Float
+
+    init(xParam: ParameterInfo, yParam: ParameterInfo, connectableId: String?) {
+        self.xParam = xParam
+        self.yParam = yParam
+        self.connectableId = connectableId
+        self._xValue = State(initialValue: xParam.value)
+        self._yValue = State(initialValue: yParam.value)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Position")
+                .font(.caption)
+                .foregroundStyle(theme.colors.textSecondary)
+
+            PositionPadView(
+                x: $xValue,
+                y: Binding(
+                    get: { 1.0 - yValue },
+                    set: { yValue = 1.0 - $0 }
+                ),
+                connectableId: connectableId
+            )
+                .onChange(of: xValue) { _, newValue in
+                    NottawaEngine.shared.setParameterValue(paramId: xParam.id, value: newValue)
+                }
+                .onChange(of: yValue) { _, newValue in
+                    NottawaEngine.shared.setParameterValue(paramId: yParam.id, value: newValue)
+                }
+
+            HStack {
+                Text("X: \(String(format: "%.2f", xValue))")
+                    .font(.caption2)
+                    .foregroundStyle(theme.colors.textTertiary)
+                    .monospacedDigit()
+                Spacer()
+                Text("Y: \(String(format: "%.2f", yValue))")
+                    .font(.caption2)
+                    .foregroundStyle(theme.colors.textTertiary)
+                    .monospacedDigit()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .parameterRefresh)) { _ in
+            // Sync from engine (oscillator/driver may be changing values)
         }
     }
 }

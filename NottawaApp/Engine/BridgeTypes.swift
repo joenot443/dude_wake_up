@@ -62,6 +62,7 @@ struct ParameterInfo: Identifiable, Hashable {
     var boolValue: Bool
     var isFavorited: Bool
     var color: (r: Float, g: Float, b: Float, a: Float)
+    var stringValue: String
 
     // Oscillator
     var hasOscillator: Bool
@@ -84,12 +85,16 @@ struct ParameterInfo: Identifiable, Hashable {
     // Options (for int params with named choices, e.g. font selector)
     var options: [String]
 
+    // Runtime-hidden by the shader (e.g. Blend hides unconnected input strengths)
+    var hiddenFromNode: Bool
+
     enum ParameterType: Int {
         case standard = 0
         case int_ = 1
         case bool_ = 2
         case color = 3
         case hidden = 4
+        case text = 5
     }
 
     func hash(into hasher: inout Hasher) {
@@ -110,6 +115,7 @@ struct ParameterInfo: Identifiable, Hashable {
         self.intValue = Int(c.intValue)
         self.boolValue = c.boolValue != 0
         self.isFavorited = c.isFavorited != 0
+        self.stringValue = c.stringValue != nil ? String(cString: c.stringValue) : ""
         self.color = (c.colorR, c.colorG, c.colorB, c.colorA)
 
         self.hasOscillator = c.hasOscillator != 0
@@ -135,6 +141,8 @@ struct ParameterInfo: Identifiable, Hashable {
         } else {
             self.options = []
         }
+
+        self.hiddenFromNode = c.hiddenFromNode != 0
     }
 }
 
@@ -313,6 +321,49 @@ struct ActiveOscillatorInfo: Identifiable {
         self.paramMin = c.paramMin
         self.paramMax = c.paramMax
         self.currentValue = c.currentValue
+    }
+}
+
+// MARK: - MIDI Info
+
+struct MidiInputInfo: Identifiable {
+    let name: String
+    let port: Int
+    let isOpen: Bool
+    var id: Int { port }
+
+    init(from c: NTWMidiInputInfo) {
+        self.name = String(cString: c.name)
+        self.port = Int(c.port)
+        self.isOpen = c.isOpen != 0
+    }
+}
+
+struct MidiAssignmentInfo: Identifiable {
+    let paramId: String
+    let paramName: String
+    let ownerName: String
+    let midiDescriptor: String
+    var id: String { paramId }
+
+    /// Human-readable label parsed from descriptor "portNum:portName:status:channel:control:$"
+    var controlLabel: String {
+        let parts = midiDescriptor.split(separator: ":")
+        guard parts.count >= 5 else { return midiDescriptor }
+        let portName = parts[1]
+        let control = parts[4]
+        let status = Int(parts[2]) ?? 0
+        if status == 224 { // Pitch bend
+            return "Pitch Bend on \(portName)"
+        }
+        return "CC \(control) on \(portName)"
+    }
+
+    init(from c: NTWMidiAssignmentInfo) {
+        self.paramId = String(cString: c.paramId)
+        self.paramName = String(cString: c.paramName)
+        self.ownerName = String(cString: c.ownerName)
+        self.midiDescriptor = String(cString: c.midiDescriptor)
     }
 }
 

@@ -184,6 +184,7 @@
 		"64B7AB4A-1741-423B-9912-54C68CA78467" /* PagedTileBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "94C7EEF9-55B5-46D5-A0A4-8FA0970B934E" /* PagedTileBrowserView.cpp */; };
 		651CACE35636C322E76C4152 /* DSCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000007 /* DSCard.swift */; };
 		65343614B91A40EF81DCCEE5 /* BTrackOnsetDetectionFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02CED25C2E6F94C80010EC68 /* BTrackOnsetDetectionFunction.cpp */; };
+		656B21E9FFDE1916B22D8672 /* IOSurfaceOutputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B4D2E036B8BD23D0A6040BA /* IOSurfaceOutputView.swift */; };
 		65B4AA4A5D574B8490A92B97 /* StrandService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "CB8A8FEB-43D7-45EA-8167-6DA30320942A" /* StrandService.cpp */; };
 		6656EFFFB90742EFA331DD4E /* DefaultTheme.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "8825362F-6151-4ED0-BA75-CA3FC3E6FDAE" /* DefaultTheme.cpp */; };
 		674742F9E2CA47C9932421C7 /* BTrackDetector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02CED2732E6F95FD0010EC68 /* BTrackDetector.cpp */; };
@@ -477,6 +478,13 @@
 			remoteGlobalIDString = 2FBBEAE508F335360078DB84;
 			remoteInfo = "max-external";
 		};
+		02370B942F9D25BD0019828E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0237FA6B2F9BC23F0019828E /* btrack~.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2FBBEAE508F335360078DB84;
+			remoteInfo = "max-external";
+		};
 		027B07BE2F7B3C9A00FB4B24 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 027BF6A22F786ED600FB4B24 /* btrack~.xcodeproj */;
@@ -487,6 +495,13 @@
 		028949EB2E8D5A04005299A6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 028938E12E8B3C6F005299A6 /* btrack~.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2FBBEAE508F335360078DB84;
+			remoteInfo = "max-external";
+		};
+		02BBFE5D2F9D3AB7000B5E05 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 02BBED2E2F9D2EE6000B5E05 /* btrack~.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 2FBBEAE508F335360078DB84;
 			remoteInfo = "max-external";
@@ -559,6 +574,7 @@
 		02145B032E5D55C7009C1855 /* AddPlaylistVideoSourceCommand.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AddPlaylistVideoSourceCommand.hpp; sourceTree = "<group>"; };
 		021A59222DAD815500CAA5E3 /* Font.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Font.hpp; sourceTree = "<group>"; };
 		022DE16F2EE10EDA00F110CC /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
+		0237FA6B2F9BC23F0019828E /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
 		"023ECAF6-5671-4C7D-89EB-33526DA42A8B" /* IsoFractShader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IsoFractShader.cpp; sourceTree = "<group>"; };
 		024219E02DB8362B00A19C28 /* WavyShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = WavyShader.hpp; sourceTree = "<group>"; };
 		024FAE582DA0207D00DE3197 /* ofxFastFboReader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ofxFastFboReader.h; sourceTree = "<group>"; };
@@ -643,6 +659,7 @@
 		02AB2F0C2DE0C4D7004EDB3F /* strings.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = strings.json; path = misc/strings.json; sourceTree = "<group>"; };
 		02AB2F0D2DE0DA2A004EDB3F /* CreditView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CreditView.hpp; sourceTree = "<group>"; };
 		02AB2F0E2DE0DA2A004EDB3F /* CreditView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CreditView.cpp; sourceTree = "<group>"; };
+		02BBED2E2F9D2EE6000B5E05 /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
 		02CED1792E6F33530010EC68 /* BTrack.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BTrack.h; sourceTree = "<group>"; };
 		02CED17A2E6F33530010EC68 /* BTrack.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BTrack.cpp; sourceTree = "<group>"; };
 		02CED2462E6F94C80010EC68 /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
@@ -698,6 +715,7 @@
 		0A5C2CE6E1B74DA19E4A0525 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		"0AA7A882-BD9A-41E0-A115-62E1A3466CCC" /* MotionBlurTextureShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MotionBlurTextureShader.hpp; sourceTree = "<group>"; };
 		0ABD6BB6A5F760FA4396EC23 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = NottawaApp/Assets.xcassets; sourceTree = "<group>"; };
+		0B4D2E036B8BD23D0A6040BA /* IOSurfaceOutputView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = IOSurfaceOutputView.swift; path = NottawaApp/Views/IOSurfaceOutputView.swift; sourceTree = "<group>"; };
 		"0B852B3B-B9CD-44A7-940C-C53B01078253" /* Strings.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Strings.hpp; sourceTree = "<group>"; };
 		"0B9188F0-FDF0-4762-8DF4-D5439AC75882" /* AudioSourceService.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AudioSourceService.hpp; sourceTree = "<group>"; };
 		"0BBD8B79-B57D-41E9-8CB4-89403EE02B06" /* Console.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Console.hpp; sourceTree = "<group>"; };
@@ -1287,6 +1305,7 @@
 				40148AE7C65712ACF882C9DF /* PinStripView.swift */,
 				F1E2D3C4B5A6978889A0B1C2 /* PinTooltipView.swift */,
 				E2D3C4B5A6F7988990A1B2C3 /* PreviewWindowManager.swift */,
+				0B4D2E036B8BD23D0A6040BA /* IOSurfaceOutputView.swift */,
 				D4E5F6A7B8C9D0E1F2A3B4C5 /* BrowserPreviewManager.swift */,
 				E6F7A8B9CADB12E3F4A5B6C7 /* PreviewTileView.swift */,
 				3652453C6EE44172BD812B26 /* FPSOverlayView.swift */,
@@ -1367,6 +1386,14 @@
 			isa = PBXGroup;
 			children = (
 				022DF2872EE10F2800F110CC /* btrack~.mxo */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		023709322F9BC23F0019828E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				02370B952F9D25BD0019828E /* btrack~.mxo */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1522,6 +1549,14 @@
 			isa = PBXGroup;
 			children = (
 				028949EC2E8D5A04005299A6 /* btrack~.mxo */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		02BBFBF52F9D2EE6000B5E05 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				02BBFE5E2F9D3AB7000B5E05 /* btrack~.mxo */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2459,6 +2494,14 @@
 					ProjectRef = 020FA6682F4910BF00DE1990 /* btrack~.xcodeproj */;
 				},
 				{
+					ProductGroup = 023709322F9BC23F0019828E /* Products */;
+					ProjectRef = 0237FA6B2F9BC23F0019828E /* btrack~.xcodeproj */;
+				},
+				{
+					ProductGroup = 02BBFBF52F9D2EE6000B5E05 /* Products */;
+					ProjectRef = 02BBED2E2F9D2EE6000B5E05 /* btrack~.xcodeproj */;
+				},
+				{
 					ProductGroup = 02CED26A2E6F94C80010EC68 /* Products */;
 					ProjectRef = 02CED2462E6F94C80010EC68 /* btrack~.xcodeproj */;
 				},
@@ -2536,6 +2579,13 @@
 			remoteRef = 022DF2862EE10F2800F110CC /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		02370B952F9D25BD0019828E /* btrack~.mxo */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "btrack~.mxo";
+			remoteRef = 02370B942F9D25BD0019828E /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		027B07BF2F7B3C9A00FB4B24 /* btrack~.mxo */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
@@ -2548,6 +2598,13 @@
 			fileType = wrapper.cfbundle;
 			path = "btrack~.mxo";
 			remoteRef = 028949EB2E8D5A04005299A6 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		02BBFE5E2F9D3AB7000B5E05 /* btrack~.mxo */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "btrack~.mxo";
+			remoteRef = 02BBFE5D2F9D3AB7000B5E05 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		02CED26E2E6F94C80010EC68 /* btrack~.mxo */ = {
@@ -2876,6 +2933,7 @@
 				B04DEBE8A556F592BE1B9386 /* PinStripView.swift in Sources */,
 				A1B2C3D4E5F647A8B9C0D1E2 /* PinTooltipView.swift in Sources */,
 				B2C3D4E5F6A748B9C0D1E2F3 /* PreviewWindowManager.swift in Sources */,
+				656B21E9FFDE1916B22D8672 /* IOSurfaceOutputView.swift in Sources */,
 				C3D4E5F6A7B849C0D1E2F3A4 /* BrowserPreviewManager.swift in Sources */,
 				D5E6F7A8B9CA01D2E3F4A5B6 /* PreviewTileView.swift in Sources */,
 				2DC874BFD9F241C187D0217B /* FPSOverlayView.swift in Sources */,

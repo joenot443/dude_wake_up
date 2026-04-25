@@ -161,7 +161,11 @@ struct MultiMixShader: Shader {
   }
   
   int inputCount() override {
-    return std::max(2, std::min(10, static_cast<int>(activeInputs.size() + 1)));
+    int needed = 1;
+    for (auto const& [slot, _] : inputs) {
+      needed = std::max(needed, static_cast<int>(slot) + 2);
+    }
+    return std::max(2, std::min(10, needed));
   }
   
   ShaderType type() override {

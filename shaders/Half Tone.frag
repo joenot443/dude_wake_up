@@ -12,7 +12,6 @@ uniform vec2 dimensions;
 uniform float time;
 uniform float amount; // Unused in this shader
 uniform float speed;
-uniform float rotate;
 uniform float radius;
 uniform float dotSize;
 uniform float contrast;
@@ -103,23 +102,22 @@ mat2 rotationMatrix2D(in float angleRadians)
 
 void main()
 {
+  // Grid cell size in pixels. radius is the user-facing knob (range 0..10);
+  // we add a base of (MAX_S - MIN_S) so radius=0 still produces a visible grid.
+  float baseScale = MIN_S + radius + (MAX_S - MIN_S);
+
   float currentScale;
   float currentRotationAngle;
 
-  // Determine current scale and rotation based on speed and time, or other parameters
   if (speed < 0.1) {
-    // This calculation for S depends on dimensions.x.
-    // If dimensions.x is large, `abs(0.5 - ORIGIN.x)` is approx `0.5 * dimensions.x`.
-    // Then `2.0 * abs(0.5 - ORIGIN.x) / dimensions.x` is approx `1.0`.
-    currentScale = radius + MIN_S + (MAX_S - MIN_S) * 2.0 * abs(0.5 - ORIGIN.x) / dimensions.x;
-    
-    // This calculation for R has a component that evaluates to a constant:
-    // `(0.5 * ORIGIN.y) / dimensions.y` simplifies to `0.25`.
-    // So, effectively `D2R(180.0 * 0.25)` or `D2R(45.0)`.
-    currentRotationAngle = D2R(180.0 * (0.5 * ORIGIN.y) / dimensions.y) * rotate;
+    // Static halftone: no rotation, fixed scale.
+    currentScale = baseScale;
+    currentRotationAngle = 0.0;
   } else {
+    // Animated halftone: spinning grid that breathes ±25% around baseScale,
+    // never reaching zero (which would divide-by-zero in the dot calculation).
     currentRotationAngle = speed * 0.333 * time;
-    currentScale = MIN_S + (MAX_S - MIN_S) * (0.5 - 0.5 * cos(time * speed));
+    currentScale = baseScale * (1.0 + 0.25 * sin(time * speed));
   }
   
   vec2 fragCoordCentered = coord.xy - ORIGIN;

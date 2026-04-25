@@ -5,6 +5,16 @@ uniform vec2 dimensions;
 uniform float time;
 uniform float orbX;
 uniform float orbY;
+uniform float flowSpeed;
+uniform float twistSpeed;
+uniform float cameraSway;
+uniform float zoom;
+uniform int layerCount;
+uniform int repetition;
+uniform float glowIntensity;
+uniform float thickness;
+uniform float fogDecay;
+uniform float hueShift;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -83,28 +93,27 @@ vec3 skyColor(vec3 ro, vec3 rd) {
 }
 
 vec3 color(vec3 ww, vec3 uu, vec3 vv, vec3 ro, vec2 p) {
-  const float rdd = 2.0;
-  const float mm = 4.0;
-  const float rep = 27.0;
+  float rep = float(repetition);
 
-  vec3 rd = normalize(-p.x*uu + p.y*vv + rdd*ww);
-  
+  vec3 rd = normalize(-p.x*uu + p.y*vv + zoom*ww);
+
   vec3 skyCol = skyColor(ro, rd);
 
-  rd.yx *= ROT(0.1*TIME);
+  rd.yx *= ROT(twistSpeed*TIME);
 
   vec3 col = skyCol;
 
   // I read somewhere that if you call atan in a shader you got no business writing shader code.
   //  I even call it in a loop :)
   float a = atan(rd.y, rd.x);
-  for(float i = 0.0; i < mm; ++i) {
+  for(int i = 0; i < layerCount; ++i) {
+    float fi = float(i);
     float ma = a;
-    float sz = rep+i*6.0;
-    float slices = TAU/sz; 
+    float sz = rep+fi*6.0;
+    float slices = TAU/sz;
     float na = mod1(ma, slices);
 
-    float h1 = hash(na+13.0*i+123.4);
+    float h1 = hash(na+13.0*fi+123.4);
     float h2 = fract(h1*3677.0);
     float h3 = fract(h1*8677.0);
 
@@ -112,8 +121,8 @@ vec3 color(vec3 ww, vec3 uu, vec3 vv, vec3 ro, vec2 p) {
     vec2 tc = rayCylinder(ro, rd, ro, vec3(0.0, 0.0, 1.0), tr);
     vec3 tcp = ro + tc.y*rd;
     vec2 tcp2 = vec2(tcp.z, atan(tcp.y, tcp.x));
-  
-    float zz = mix(0.025, 0.05, sqrt(h1))*rep/sz;
+
+    float zz = mix(0.025, 0.05, sqrt(h1))*rep/sz*thickness;
     float tnpy = mod1(tcp2.y, slices);
     float fo = smoothstep(0.5*slices, 0.25*slices, abs(tcp2.y));
     tcp2.x += -h2*TIME;
@@ -125,11 +134,12 @@ vec3 color(vec3 ww, vec3 uu, vec3 vv, vec3 ro, vec2 p) {
     d = abs(d);
     d *= zz;
 
-    vec3 bcol = (1.0+cos(vec3(0.0, 1.0, 2.0)+TAU*h3+0.5*h2*h2*tcp.z))*0.00005;
+    vec3 bcol = (1.0+cos(vec3(0.0, 1.0, 2.0)+TAU*(h3+hueShift)+0.5*h2*h2*tcp.z))*0.00005;
     bcol /= max(d*d, 0.000+5E-7*tc.y*tc.y);
-    bcol *= exp(-0.04*tc.y*tc.y);
+    bcol *= exp(-fogDecay*tc.y*tc.y);
     bcol *= smoothstep(-0.5, 1.0, sin(mix(0.125, 1.0, h2)*tcp.z));
     bcol *= fo;
+    bcol *= glowIntensity;
     col += bcol;
   }
 
@@ -154,11 +164,11 @@ vec3 aces_approx(vec3 v) {
 }
 
 vec3 effect(vec2 p, vec2 pp) {
-  float tm = 1.5*TIME+12.3;
+  float tm = flowSpeed*TIME+12.3;
   vec3 ro   = vec3(0.0, 0.0, tm);
   vec3 dro  = normalize(vec3(1.0, 0.0, 3.0));
-  dro.xz *= ROT(0.2*sin(0.05*tm));
-  dro.yz *= ROT(0.2*sin(0.05*tm*sqrt(0.5)));
+  dro.xz *= ROT(cameraSway*sin(0.05*tm));
+  dro.yz *= ROT(cameraSway*sin(0.05*tm*sqrt(0.5)));
   const vec3 up = vec3(0.0,1.0,0.0);
   vec3 ww = normalize(dro);
   vec3 uu = normalize(cross(up, ww));

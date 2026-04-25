@@ -235,6 +235,84 @@ struct MainEditorView: View {
             // Non-command shortcuts — skip when a text field is focused
             guard !MainEditorView.isTextFieldFocused() else { return event }
 
+            // Ctrl-Tab / Ctrl-Shift-Tab: cycle node selection (left-to-right,
+            // top-to-bottom by canvas position). Checked before plain Tab below.
+            if event.keyCode == 48 && flags.contains(.control) {
+                let ordered = vm.nodes.sorted {
+                    if $0.position.y != $1.position.y { return $0.position.y < $1.position.y }
+                    return $0.position.x < $1.position.x
+                }
+                if !ordered.isEmpty {
+                    let shift = flags.contains(.shift)
+                    let current = ordered.firstIndex(where: { $0.id == vm.selectedNodeId })
+                    let next: Int
+                    if let cur = current {
+                        next = (cur + (shift ? 1 : -1) + ordered.count) % ordered.count
+                    } else {
+                        next = shift ? 0 : ordered.count - 1
+                    }
+                    vm.selectNode(ordered[next].id, exclusive: true)
+                    return nil
+                }
+            }
+
+            // Tab / Shift-Tab: navigate between parameters. Source depends on
+            // whether the inspector (normal mode) or stage panel is active.
+            if event.keyCode == 48 {
+                let navigable = vm.stageModeEnabled
+                    ? vm.stageNavigableParameters
+                    : MainEditorView.navigableParameters(vm.inspectorParameters)
+                if !navigable.isEmpty {
+                    let shift = flags.contains(.shift)
+                    let current = navigable.firstIndex(where: { $0.id == vm.selectedParameterId })
+                    let next: Int
+                    if let cur = current {
+                        next = (cur + (shift ? -1 : 1) + navigable.count) % navigable.count
+                    } else {
+                        next = shift ? navigable.count - 1 : 0
+                    }
+                    vm.selectedParameterId = navigable[next].id
+                    return nil
+                }
+            }
+
+            // Parameter-selection keyboard shortcuts (arrows to step, digit/-/. to edit,
+            // Escape to clear parameter selection before falling through to node deselect).
+            let paramSource = vm.stageModeEnabled ? vm.stageNavigableParameters : vm.inspectorParameters
+            if let paramId = vm.selectedParameterId,
+               let param = paramSource.first(where: { $0.id == paramId }) {
+                switch event.keyCode {
+                case 126: // Up
+                    MainEditorView.stepSelectedParameter(param: param, direction: 1, flags: flags, vm: vm)
+                    return nil
+                case 125: // Down
+                    MainEditorView.stepSelectedParameter(param: param, direction: -1, flags: flags, vm: vm)
+                    return nil
+                case 53: // Escape
+                    vm.selectedParameterId = nil
+                    return nil
+                default:
+                    break
+                }
+
+                // Typing a digit / minus / period on a float param begins inline edit.
+                // Only the inspector's ParameterControlView currently handles inline edit;
+                // CompactParameterControl (stage mode) doesn't, so skip there.
+                if !vm.stageModeEnabled,
+                   param.parameterType == .standard,
+                   flags.isDisjoint(with: [.command, .option, .control]),
+                   let chars = event.charactersIgnoringModifiers,
+                   let first = chars.first,
+                   first.isNumber || first == "-" || first == "." {
+                    NotificationCenter.default.post(
+                        name: .parameterBeginEdit,
+                        object: nil,
+                        userInfo: ["paramId": param.id, "initialText": String(first)]
+                    )
+                    return nil
+                }
+            }
+
             switch event.keyCode {
             case 51, 117: // 51 = Backspace (Delete), 117 = Forward Delete
                 vm.deleteSelected()
@@ -261,6 +339,64 @@ struct MainEditorView: View {
             default:
                 return event
             }
+        }
+    }
+
+    /// Params eligible for Tab navigation (matches ParameterInspectorView's visible rows).
+    /// Skips hidden params and skips Y-position halves that are rolled into a PositionPad.
+    private static func navigableParameters(_ all: [ParameterInfo]) -> [ParameterInfo] {
+        all.filter { p in
+            p.parameterType != .hidden &&
+            !((p.name == "Y Position" || p.name == "Y") && p.minValue >= 0 && p.maxValue <= 1.0)
+        }
+    }
+
+    /// Adjust a selected parameter by one keyboard step.
+    /// Modifier conventions: Shift = coarse (10%), Option = fine (0.1%), else normal (1%).
+    private static func stepSelectedParameter(param: ParameterInfo,
+                                              direction: Float,
+                                              flags: NSEvent.ModifierFlags,
+                                              vm: NodeEditorViewModel) {
+        switch param.parameterType {
+        case .standard:
+            let range = param.maxValue - param.minValue
+            let fraction: Float = flags.contains(.shift) ? 0.1
+                                : flags.contains(.option) ? 0.001
+                                : 0.01
+            let step = max(range * fraction, .ulpOfOne)
+            let newValue = min(max(param.value + direction * step, param.minValue), param.maxValue)
+            NottawaEngine.shared.setParameterValue(paramId: param.id, value: newValue)
+            NotificationCenter.default.post(
+                name: .parameterStepAnimated,
+                object: nil,
+                userInfo: ["paramId": param.id, "value": newValue]
+            )
+
+        case .int_:
+            let step: Int = flags.contains(.shift) ? 10 : 1
+            let minInt = Int(param.minValue)
+            let maxInt = Int(param.maxValue)
+            let delta = Int(direction) * step
+            let newValue = min(max(param.intValue + delta, minInt), maxInt)
+            NottawaEngine.shared.setParameterInt(paramId: param.id, value: newValue)
+            NotificationCenter.default.post(
+                name: .parameterStepAnimated,
+                object: nil,
+                userInfo: ["paramId": param.id, "intValue": newValue]
+            )
+
+        case .bool_:
+            let newValue = direction > 0
+            NottawaEngine.shared.setParameterBool(paramId: param.id, value: newValue)
+            vm.refresh()
+            NotificationCenter.default.post(
+                name: .parameterStepAnimated,
+                object: nil,
+                userInfo: ["paramId": param.id, "boolValue": newValue]
+            )
+
+        default:
+            break
         }
     }
 }

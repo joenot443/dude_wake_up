@@ -15,6 +15,8 @@ struct NottawaApp: App {
     @State private var helpGuide = HelpGuideViewModel()
     @State private var engineStatus: EngineStatus = .idle
     @State private var stretchPreviewWindows = false
+    @AppStorage("showNodeHints") private var showNodeHints: Bool = true
+    @AppStorage("clearOnDisconnect") private var clearOnDisconnect: Bool = true
 
     var body: some Scene {
         Window("Nottawa", id: "main") {
@@ -128,6 +130,11 @@ struct NottawaApp: App {
                     .onChange(of: stretchPreviewWindows) { _, newValue in
                         PreviewWindowManager.shared.setStretchToFill(newValue)
                     }
+                Toggle("Show Node Hints", isOn: $showNodeHints)
+                Toggle("Clear on Disconnect", isOn: $clearOnDisconnect)
+                    .onChange(of: clearOnDisconnect) { _, newValue in
+                        NottawaEngine.shared.setClearOnDisconnect(newValue)
+                    }
             }
 
             CommandGroup(replacing: .undoRedo) {
@@ -170,6 +177,7 @@ struct NottawaApp: App {
 
         if success {
             engine.start()
+            engine.setClearOnDisconnect(clearOnDisconnect)
             engineStatus = .ready
             viewModel.setup()
             helpGuide.viewModel = viewModel

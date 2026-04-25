@@ -20,6 +20,7 @@
 #include "VideoSourceService.hpp"
 #include "ShaderSource.hpp"
 #include "BlendShader.hpp"
+#include "BounceShader.hpp"
 #include "FeedbackShader.hpp"
 #include "OscillationService.hpp"
 #include "WaveformOscillator.hpp"
@@ -165,6 +166,7 @@ void ntw_free_parameter_info(NTWParameterInfo* info) {
   if (!info) return;
   free((void*)info->id);
   free((void*)info->name);
+  if (info->stringValue) free((void*)info->stringValue);
   if (info->driverName) free((void*)info->driverName);
   if (info->midiDescriptor) free((void*)info->midiDescriptor);
   if (info->options) {
@@ -890,10 +892,12 @@ NTWParameterInfo* ntw_get_parameters(const char* connectableId, int* outCount) {
     result[i].intValue = p->intValue;
     result[i].boolValue = p->boolValue ? 1 : 0;
     result[i].isFavorited = p->favorited ? 1 : 0;
+    result[i].stringValue = p->stringValue.empty() ? nullptr : strdup_safe(p->stringValue);
     result[i].colorR = p->color->at(0);
     result[i].colorG = p->color->at(1);
     result[i].colorB = p->color->at(2);
     result[i].colorA = p->color->at(3);
+    result[i].hiddenFromNode = p->hiddenFromNode ? 1 : 0;
     populateOscillatorDriverFields(result[i], p);
 
     // Populate options (e.g. font names for font selector)
@@ -936,6 +940,12 @@ void ntw_set_parameter_bool(const char* paramId, bool value) {
   if (!paramId) return;
   auto param = ParameterService::getService()->parameterForId(std::string(paramId));
   if (param) param->setBoolValue(value);
+}
+
+void ntw_set_parameter_string(const char* paramId, const char* value) {
+  if (!paramId || !value) return;
+  auto param = ParameterService::getService()->parameterForId(std::string(paramId));
+  if (param) param->stringValue = std::string(value);
 }
 
 void ntw_set_parameter_color(const char* paramId,
@@ -1013,6 +1023,19 @@ void ntw_clear_feedback_buffer(const char* shaderId) {
     auto* feedback = dynamic_cast<FeedbackShader*>(shader.get());
     if (feedback) {
       feedback->clearFrameBuffer();
+    }
+  });
+}
+
+void ntw_reset_bounce_position(const char* shaderId) {
+  if (!shaderId) return;
+  std::string sid(shaderId);
+  runOnEngineThread([sid]() {
+    auto shader = ShaderChainerService::getService()->shaderForId(sid);
+    if (!shader) return;
+    auto* bounce = dynamic_cast<BounceShader*>(shader.get());
+    if (bounce) {
+      bounce->resetPosition();
     }
   });
 }
@@ -1265,6 +1288,14 @@ int ntw_get_shader_bypassed(const char* shaderId) {
   std::string sid(shaderId);
   auto shader = ShaderChainerService::getService()->shaderForId(sid);
   return shader ? (shader->bypassed ? 1 : 0) : 0;
+}
+
+void ntw_set_clear_on_disconnect(int enabled) {
+  ShaderChainerService::getService()->clearOnDisconnect = (enabled != 0);
+}
+
+int ntw_get_clear_on_disconnect(void) {
+  return ShaderChainerService::getService()->clearOnDisconnect ? 1 : 0;
 }
 
 int ntw_get_shader_depth(const char* shaderId) {
@@ -2059,14 +2090,12 @@ void ntw_tick_previews(void) {
   // falling back to the shared plasma source if no sources exist on canvas.
   std::shared_ptr<ofFbo> effectInputFrame = getMostRecentVideoSourceFrame();
   if (!effectInputFrame) {
-    // No video sources on canvas — fall back to plasma
     if (!sharedPlasmaSource) {
       auto plasma = std::make_shared<ShaderSource>("preview_plasma_shared", ShaderSource_plasma);
       plasma->setup();
       sharedPlasmaSource = std::dynamic_pointer_cast<VideoSource>(plasma);
     }
     if (sharedPlasmaSource) {
-      // Render plasma directly, bypassing saveFrame()'s resolution check.
       auto plasmaSrc = std::dynamic_pointer_cast<ShaderSource>(sharedPlasmaSource);
       if (plasmaSrc && plasmaSrc->shader && plasmaSrc->fbo && plasmaSrc->fbo->isAllocated()
           && plasmaSrc->canvas && plasmaSrc->canvas->isAllocated()
@@ -2125,9 +2154,12 @@ void ntw_tick_previews(void) {
                        && lastFrame->getTexture().getTextureData().textureID;
 
       if (canRender) {
-        inst.shader->clearLastFrame();
-        // Re-clear to opaque black so unwritten pixels don't show
-        // the macOS debug-pink from the transparent clear.
+        // Ensure lastFrame matches input dimensions so the effect fills the preview
+        int inputW = effectInputFrame->getWidth();
+        int inputH = effectInputFrame->getHeight();
+        if (lastFrame->getWidth() != inputW || lastFrame->getHeight() != inputH) {
+          lastFrame->allocate(inputW, inputH, GL_RGBA);
+        }
         lastFrame->begin();
         ofClear(0, 0, 0, 255);
         lastFrame->end();
@@ -2136,11 +2168,11 @@ void ntw_tick_previews(void) {
         if (!resultFrame || !resultFrame->isAllocated()) resultFrame = nullptr;
       }
 
-      // If shader couldn't render, clear its frame to black
+      // If shader couldn't render, clear its frame to neutral gray
       if (!resultFrame && lastFrame && lastFrame->isAllocated()
           && lastFrame->getTexture().getTextureData().textureID) {
         lastFrame->begin();
-        ofClear(0, 0, 0, 255);
+        ofClear(38, 38, 38, 255);
         lastFrame->end();
         resultFrame = lastFrame;
       }
@@ -2430,10 +2462,12 @@ NTWParameterInfo* ntw_get_optional_shader_parameters(const char* connectableId, 
     result[i].intValue = p->intValue;
     result[i].boolValue = p->boolValue ? 1 : 0;
     result[i].isFavorited = p->favorited ? 1 : 0;
+    result[i].stringValue = p->stringValue.empty() ? nullptr : strdup_safe(p->stringValue);
     result[i].colorR = p->color->at(0);
     result[i].colorG = p->color->at(1);
     result[i].colorB = p->color->at(2);
     result[i].colorA = p->color->at(3);
+    result[i].hiddenFromNode = p->hiddenFromNode ? 1 : 0;
     populateOscillatorDriverFields(result[i], p);
   }
 
@@ -3222,6 +3256,70 @@ void ntw_register_midi_learned_callback(NTWMidiLearnedCallback callback) {
       midiLearnedCallback(paramId.c_str(), descriptor.c_str());
     }
   };
+}
+
+// ---------------------------------------------------------------------------
+// MARK: - MIDI Device & Assignment Queries
+// ---------------------------------------------------------------------------
+
+NTWMidiInputInfo* ntw_get_midi_inputs(int* outCount) {
+  if (outCount) *outCount = 0;
+  return runOnEngineThread([outCount]() -> NTWMidiInputInfo* {
+    auto& inputs = MidiService::getService()->getInputs();
+    int count = static_cast<int>(inputs.size());
+    if (outCount) *outCount = count;
+    if (count == 0) return nullptr;
+
+    auto* result = static_cast<NTWMidiInputInfo*>(calloc(count, sizeof(NTWMidiInputInfo)));
+    for (int i = 0; i < count; i++) {
+      result[i].name = strdup_safe(inputs[i]->getName());
+      result[i].port = inputs[i]->getPort();
+      result[i].isOpen = inputs[i]->isOpen() ? 1 : 0;
+    }
+    return result;
+  });
+}
+
+void ntw_free_midi_input_info_array(NTWMidiInputInfo* array, int count) {
+  if (!array) return;
+  for (int i = 0; i < count; i++) {
+    free((void*)array[i].name);
+  }
+  free(array);
+}
+
+NTWMidiAssignmentInfo* ntw_get_midi_assignments(int* outCount) {
+  if (outCount) *outCount = 0;
+  return runOnEngineThread([outCount]() -> NTWMidiAssignmentInfo* {
+    auto& pairings = MidiService::getService()->getPairings();
+    int count = static_cast<int>(pairings.size());
+    if (outCount) *outCount = count;
+    if (count == 0) return nullptr;
+
+    auto* result = static_cast<NTWMidiAssignmentInfo*>(calloc(count, sizeof(NTWMidiAssignmentInfo)));
+    int i = 0;
+    for (auto& [paramId, pairing] : pairings) {
+      result[i].paramId = strdup_safe(pairing.paramId);
+      result[i].midiDescriptor = strdup_safe(pairing.descriptor);
+
+      auto param = ParameterService::getService()->parameterForId(pairing.paramId);
+      result[i].paramName = strdup_safe(param ? param->name : "Unknown");
+      result[i].ownerName = strdup_safe(param ? param->ownerName : "Unknown");
+      i++;
+    }
+    return result;
+  });
+}
+
+void ntw_free_midi_assignment_info_array(NTWMidiAssignmentInfo* array, int count) {
+  if (!array) return;
+  for (int i = 0; i < count; i++) {
+    free((void*)array[i].paramId);
+    free((void*)array[i].paramName);
+    free((void*)array[i].ownerName);
+    free((void*)array[i].midiDescriptor);
+  }
+  free(array);
 }
 
 // ---------------------------------------------------------------------------

@@ -61,13 +61,24 @@ void AudioSource::audioIn(ofSoundBuffer &soundBuffer) {
 }
 
 void AudioSource::processFrame(const std::vector<float>& frame) {
-  // Gist expects frames of exactly 512 samples
-  // Process the buffer in chunks, calling BTrack for EACH chunk
+  // Gist expects frames of exactly 512 samples.
+  // The audio callback may deliver any frame count (e.g. file playback at a
+  // non-device sample rate often yields <512-frame buffers). Accumulate and
+  // slice into fixed 512-sample chunks so the FFT always has full input.
   const size_t gistFrameSize = 512;
 
-  // Process the buffer in chunks
-  for (size_t offset = 0; offset + gistFrameSize <= frame.size(); offset += gistFrameSize) {
-    std::vector<float> chunk(frame.begin() + offset, frame.begin() + offset + gistFrameSize);
+  gistAccumulator.insert(gistAccumulator.end(), frame.begin(), frame.end());
+
+  // Guard against unbounded growth if the processor can't keep up.
+  const size_t maxAccumulator = gistFrameSize * 8;
+  if (gistAccumulator.size() > maxAccumulator) {
+    gistAccumulator.erase(gistAccumulator.begin(),
+                          gistAccumulator.end() - gistFrameSize);
+  }
+
+  while (gistAccumulator.size() >= gistFrameSize) {
+    std::vector<float> chunk(gistAccumulator.begin(),
+                             gistAccumulator.begin() + gistFrameSize);
 
     gist.processAudioFrame(chunk);
     audioAnalysis.analyzeFrame(&gist);
@@ -76,18 +87,15 @@ void AudioSource::processFrame(const std::vector<float>& frame) {
     audioAnalysis.waveform.clear();
     audioAnalysis.waveform.reserve(256);
     for (size_t i = 0; i < 256; i++) {
-      // Downsample by averaging pairs of samples
       size_t idx = i * 2;
       float avg = (chunk[idx] + chunk[idx + 1]) * 0.5f;
       audioAnalysis.waveform.push_back(avg);
     }
 
-    // Run beat detection only in Auto mode
-    // BTrack expects to be called once per hop (512 samples)
+    // Run beat detection only in Auto mode. BTrack expects one call per 512-sample hop.
     if (audioAnalysis.bpmEnabled && audioAnalysis.bpmMode == BpmMode_Auto) {
       SimpleBeat beat = btrackDetector.processAudioFrame(chunk);
 
-      // Store the detected beat info for use by AudioSourceService
       if (beat.bpm > 0 && beat.bpm >= 50 && beat.bpm <= 200) {
         lastDetectedBpm = beat.bpm;
       }
@@ -97,8 +105,6 @@ void AudioSource::processFrame(const std::vector<float>& frame) {
         auto msSinceLast = std::chrono::duration_cast<std::chrono::milliseconds>(
             now - lastBeatTime).count();
         // Debounce: reject beats within 60% of a beat duration.
-        // This also gates lastBeatTime, preventing bpmStartTime resync
-        // from causing a second beatPulse spike.
         float minIntervalMs = 36000.0f / std::max(1.0f, audioAnalysis.bpm->value);
         if (msSinceLast > minIntervalMs) {
           lastBeatTime = now;
@@ -106,6 +112,9 @@ void AudioSource::processFrame(const std::vector<float>& frame) {
         }
       }
     }
+
+    gistAccumulator.erase(gistAccumulator.begin(),
+                          gistAccumulator.begin() + gistFrameSize);
   }
 }
 

@@ -270,7 +270,7 @@ void Shader::generateOptionalShaders() {
   if (isOptional) return;
   if (!optionalShaders.empty()) return;
   
-  std::vector<ShaderType> optionalShaderTypes = {ShaderTypeHSB, ShaderTypeBackground, ShaderTypeTransform, ShaderTypeRotate, ShaderTypeDoubleBlur, ShaderTypeMirror, ShaderTypeColorKeyMaskMaker, ShaderTypeLumaMaskMaker};
+  std::vector<ShaderType> optionalShaderTypes = {ShaderTypeHSB, ShaderTypeBackground, ShaderTypeTransform, ShaderTypeRotate, ShaderTypeDoubleBlur, ShaderTypeMirror, ShaderTypeColorKeyMaskMaker, ShaderTypeLumaMaskMaker, ShaderTypeLighten, ShaderTypeDarken};
   
   for (ShaderType type : optionalShaderTypes) {
     std::shared_ptr<Shader> newShader = ShaderChainerService::getService()->shaderForType(type, UUID::generateUUID(), 0);

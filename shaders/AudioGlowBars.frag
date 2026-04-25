@@ -30,8 +30,14 @@ out vec4 outputColor;
 #define SINGLE_COLOR vec3(1.0, 1.0, 1.0)  // White for single color mode
 
 // SCALING CONFIGURATION
-#define USE_LOGARITHMIC_SCALE 1  // 1 = logarithmic, 0 = linear
-#define LOG_SCALE_FACTOR 0.5     // Higher = more emphasis on low frequencies
+#define USE_LOGARITHMIC_SCALE 1  // 1 = logarithmic (octave-equal), 0 = linear
+
+// Bins to display. The full FFT runs to bin 255 (Nyquist), but typical music
+// has essentially no energy above ~13 kHz, so mapping bars all the way to bin
+// 255 leaves the right half of the visualization permanently flat for sample
+// tracks. We restrict to the musical range below.
+#define BIN_MIN 2.0     // ~190 Hz at 48 kHz / ~170 Hz at 44.1 kHz
+#define BIN_MAX 140.0   // ~13 kHz at 48 kHz / ~12 kHz at 44.1 kHz
 
 // Center line settings
 #define CENTER_LINE_THICKNESS 0.006  // Thickness of center line
@@ -48,25 +54,18 @@ out vec4 outputColor;
 #define COLOR_MID vec3(1.0, 1.0, 0.2)    // Yellow for mid frequencies  
 #define COLOR_HIGH vec3(0.2, 0.4, 1.0)   // Blue for high frequencies
 
-// Convert bar index to frequency sampling position
-float getFrequencySamplePosition(int barIndex) {
-    float t = float(barIndex) / float(NUM_BARS - 1); // 0.0 to 1.0
-    
-    if (USE_LOGARITHMIC_SCALE == 1) {
-        // Logarithmic scaling - exponential curve
-        float logValue = pow(t, LOG_SCALE_FACTOR);
-        return logValue;
-    } else {
-        // Linear scaling - direct mapping
-        return t;
-    }
-}
-
-// Get audio frequency for a specific bar
+// Get audio frequency for a specific bar.
+// Bars are distributed exponentially from BIN_MIN to BIN_MAX so each octave
+// of musical content gets roughly the same number of bars.
 float getFrequency(int barIndex) {
-    float samplePos = getFrequencySamplePosition(barIndex);
-    samplePos = clamp(samplePos, 0.0, 1.0);
-    int index = clamp(int(samplePos * 223.0) + 32, 32, 255);
+    float t = float(barIndex) / float(NUM_BARS - 1); // 0.0 to 1.0
+    float bin;
+    if (USE_LOGARITHMIC_SCALE == 1) {
+        bin = BIN_MIN * pow(BIN_MAX / BIN_MIN, t);
+    } else {
+        bin = mix(BIN_MIN, BIN_MAX, t);
+    }
+    int index = clamp(int(bin), 0, 255);
     return clamp(audio[index] * boost, 0.0, 1.0);
 }
 

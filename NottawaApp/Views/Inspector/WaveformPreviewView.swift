@@ -11,6 +11,7 @@
 import SwiftUI
 
 struct WaveformPreviewView: View {
+    @Environment(ThemeManager.self) private var theme
     let waveShape: WaveShape
     let frequency: Float
     let minOutput: Float
@@ -37,19 +38,37 @@ struct WaveformPreviewView: View {
                     paramMin: paramMin,
                     paramMax: paramMax,
                     phase: phase,
-                    randOffset: randOffset
+                    randOffset: randOffset,
+                    accentColor: theme.colors.accent,
+                    bgColor: theme.colors.backgroundSecondary,
+                    gridColor: theme.colors.border,
+                    successColor: theme.colors.success,
+                    warningColor: theme.colors.warning
                 )
             }
             .frame(height: height)
-            .clipShape(RoundedRectangle(cornerRadius: 4))
+            .clipShape(RoundedRectangle(cornerRadius: theme.radii.md))
+            .overlay(
+                RoundedRectangle(cornerRadius: theme.radii.md)
+                    .strokeBorder(theme.colors.borderSubtle, lineWidth: 1)
+            )
         } else {
-            RoundedRectangle(cornerRadius: 4)
-                .fill(Color.black.opacity(0.15))
+            RoundedRectangle(cornerRadius: theme.radii.md)
+                .fill(theme.colors.backgroundSecondary.opacity(0.5))
                 .frame(height: height)
                 .overlay(
-                    Text("Oscillator Off")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                    VStack(spacing: 4) {
+                        Image(systemName: "waveform.path")
+                            .font(.system(size: 16))
+                            .foregroundStyle(theme.colors.textTertiary)
+                        Text("Oscillator Off")
+                            .font(.caption2)
+                            .foregroundStyle(theme.colors.textTertiary)
+                    }
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: theme.radii.md)
+                        .strokeBorder(theme.colors.borderSubtle.opacity(0.5), lineWidth: 1)
                 )
         }
     }
@@ -67,6 +86,11 @@ private struct WaveformCanvas: View {
     let paramMax: Float
     let phase: Double
     let randOffset: Double
+    let accentColor: Color
+    let bgColor: Color
+    let gridColor: Color
+    let successColor: Color
+    let warningColor: Color
 
     var body: some View {
         Canvas { context, size in
@@ -75,9 +99,20 @@ private struct WaveformCanvas: View {
 
             // Background
             context.fill(
-                Path(roundedRect: CGRect(origin: .zero, size: size), cornerRadius: 4),
-                with: .color(.black.opacity(0.3))
+                Path(roundedRect: CGRect(origin: .zero, size: size), cornerRadius: 6),
+                with: .color(bgColor)
             )
+
+            // Subtle grid lines
+            let gridLineCount = 4
+            for i in 1..<gridLineCount {
+                let y = h * CGFloat(i) / CGFloat(gridLineCount)
+                var gridLine = Path()
+                gridLine.move(to: CGPoint(x: 0, y: y))
+                gridLine.addLine(to: CGPoint(x: w, y: y))
+                context.stroke(gridLine, with: .color(gridColor.opacity(0.3)),
+                               style: StrokeStyle(lineWidth: 0.5))
+            }
 
             let actualMin = Double(Swift.min(minOutput, maxOutput))
             let actualMax = Double(Swift.max(minOutput, maxOutput))
@@ -94,7 +129,7 @@ private struct WaveformCanvas: View {
 
             // -- Min/Max horizontal lines --
             let isInBounds = actualMin >= pMin && actualMax <= pMax
-            let lineColor: Color = isInBounds ? .green.opacity(0.5) : .red.opacity(0.5)
+            let lineColor = isInBounds ? successColor.opacity(0.6) : warningColor.opacity(0.6)
 
             let minY = yPos(actualMin)
             let maxY = yPos(actualMax)
@@ -111,15 +146,15 @@ private struct WaveformCanvas: View {
 
             // Labels
             context.draw(
-                Text(String(format: "%.1f", minOutput)).font(.system(size: 8)).foregroundStyle(lineColor),
+                Text(String(format: "%.1f", minOutput)).font(.system(size: 8, weight: .medium, design: .monospaced)).foregroundStyle(lineColor),
                 at: CGPoint(x: w - 18, y: minY + 7)
             )
             context.draw(
-                Text(String(format: "%.1f", maxOutput)).font(.system(size: 8)).foregroundStyle(lineColor),
+                Text(String(format: "%.1f", maxOutput)).font(.system(size: 8, weight: .medium, design: .monospaced)).foregroundStyle(lineColor),
                 at: CGPoint(x: w - 18, y: maxY - 7)
             )
 
-            // -- Waveform line --
+            // -- Waveform glow (wider, faded stroke behind the main line) --
             let sampleCount = Int(w)
             guard sampleCount > 1 else { return }
 
@@ -149,9 +184,17 @@ private struct WaveformCanvas: View {
                 }
             }
 
+            // Glow layer
             context.stroke(
                 waveformPath,
-                with: .color(.cyan),
+                with: .color(accentColor.opacity(0.25)),
+                style: StrokeStyle(lineWidth: 5, lineCap: .round, lineJoin: .round)
+            )
+
+            // Main waveform
+            context.stroke(
+                waveformPath,
+                with: .color(accentColor),
                 style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round)
             )
         }
@@ -180,7 +223,6 @@ private struct WaveformCanvas: View {
         case .exponentialSine:
             let s = sin(freqT)
             let raw = s * exp(s)
-            // Normalize: actual range ~[-0.37, 2.72] → map center ~1.175, half-range ~1.55
             return Swift.min(1.0, Swift.max(-1.0, (raw - 1.175) / 1.55))
 
         case .harmonicStack:
@@ -191,7 +233,6 @@ private struct WaveformCanvas: View {
             return 2.0 * abs(sin(freqT)) - 1.0
 
         case .noiseModulatedSine:
-            // Pseudo-noise (no Perlin in Swift) — sum of incommensurate sines
             let pseudoNoise = sin(t * 0.73) * 0.5 + sin(t * 1.31) * 0.3
             return sin(freqT + pseudoNoise * 5.0)
 

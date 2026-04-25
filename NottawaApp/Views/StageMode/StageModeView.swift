@@ -73,32 +73,47 @@ struct StageModeView: View {
 
                     theme.colors.border.frame(height: 1)
 
-                    ScrollView {
-                        LazyVStack(spacing: 0) {
-                            ForEach(Array(viewModel.orderedChainStrips.enumerated()), id: \.element.id) { index, strip in
+                    GeometryReader { geo in
+                        ScrollViewReader { proxy in
+                            ScrollView {
                                 VStack(spacing: 0) {
-                                    // Drop indicator above this strip
-                                    if dropTargetIndex == index {
-                                        dropIndicator
-                                    }
+                                    Spacer(minLength: 0)
+                                    LazyVStack(spacing: 0) {
+                                        ForEach(Array(viewModel.orderedChainStrips.enumerated()), id: \.element.id) { index, strip in
+                                            VStack(spacing: 0) {
+                                                // Drop indicator above this strip
+                                                if dropTargetIndex == index {
+                                                    dropIndicator
+                                                }
 
-                                    ChannelStripView(strip: strip, index: index, total: viewModel.orderedChainStrips.count)
-                                        .padding(.vertical, 4)
-                                        .onDrop(of: [.text], delegate: StripDropDelegate(
-                                            targetIndex: index,
-                                            viewModel: viewModel,
-                                            dropTargetIndex: $dropTargetIndex
-                                        ))
+                                                ChannelStripView(strip: strip, index: index, total: viewModel.orderedChainStrips.count)
+                                                    .padding(.vertical, 4)
+                                                    .onDrop(of: [.text], delegate: StripDropDelegate(
+                                                        targetIndex: index,
+                                                        viewModel: viewModel,
+                                                        dropTargetIndex: $dropTargetIndex
+                                                    ))
+                                            }
+                                        }
+
+                                        // Drop indicator after last strip
+                                        if dropTargetIndex == viewModel.orderedChainStrips.count {
+                                            dropIndicator
+                                        }
+                                    }
+                                    Spacer(minLength: 0)
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 4)
+                                .frame(minHeight: geo.size.height)
+                            }
+                            .onChange(of: viewModel.selectedParameterId) { _, newId in
+                                guard let id = newId else { return }
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    proxy.scrollTo(id, anchor: .center)
                                 }
                             }
-
-                            // Drop indicator after last strip
-                            if dropTargetIndex == viewModel.orderedChainStrips.count {
-                                dropIndicator
-                            }
                         }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 4)
                     }
                 }
                 .frame(minWidth: 350, idealWidth: 450)

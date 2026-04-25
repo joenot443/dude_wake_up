@@ -38,6 +38,7 @@ final class NodeEditorViewModel {
     // MARK: - Selection
     var selectedNodeIds: Set<String> = []
     var selectedConnectionId: String?
+    var selectedParameterId: String? = nil
 
     // MARK: - Drag Connection
     var dragConnection: DragConnectionState?
@@ -118,6 +119,15 @@ final class NodeEditorViewModel {
     var openPreviewWindowIds: Set<String> = []
     var stageStripOrder: [String]? = nil   // user-defined ordering (node IDs)
     private var stageRefreshTimer: Timer?
+
+    /// Flat ordered list of parameters visible in stage mode, used for Tab
+    /// navigation and keyboard stepping (mirrors the inspector's behavior).
+    var stageNavigableParameters: [ParameterInfo] {
+        orderedChainStrips.flatMap { strip in
+            (stageShowAllParams ? strip.allParams : strip.favoriteParams)
+                .filter { $0.parameterType != .hidden && !$0.hiddenFromNode }
+        }
+    }
     private var savedSidebarState: Bool?
 
     // MARK: - Audio Panel
@@ -316,6 +326,7 @@ final class NodeEditorViewModel {
             selectedNodeIds.insert(id)
         }
         selectedConnectionId = nil
+        selectedParameterId = nil
         engine.selectConnectable(id: id)
         refreshInspector()
     }
@@ -323,6 +334,7 @@ final class NodeEditorViewModel {
     func selectConnection(_ id: String) {
         selectedConnectionId = id
         selectedNodeIds.removeAll()
+        selectedParameterId = nil
         inspectorParameters = []
         fileSourceState = nil
         textSourceState = nil
@@ -331,6 +343,7 @@ final class NodeEditorViewModel {
     func deselectAll() {
         selectedNodeIds.removeAll()
         selectedConnectionId = nil
+        selectedParameterId = nil
         engine.deselectConnectable()
         inspectorParameters = []
         fileSourceState = nil
@@ -339,6 +352,7 @@ final class NodeEditorViewModel {
 
     func toggleNodeSelection(_ id: String) {
         selectedConnectionId = nil
+        selectedParameterId = nil
         if selectedNodeIds.contains(id) {
             selectedNodeIds.remove(id)
             if selectedNodeIds.isEmpty {
@@ -359,12 +373,17 @@ final class NodeEditorViewModel {
             fileSourceState = nil
             textSourceState = nil
             iconSourceState = nil
+            selectedParameterId = nil
             return
         }
         inspectorParameters = engine.parameters(for: nodeId)
         fileSourceState = engine.fileSourceState(sourceId: nodeId)
         textSourceState = engine.textSourceState(sourceId: nodeId)
         iconSourceState = engine.iconSourceState(sourceId: nodeId)
+        if let selected = selectedParameterId,
+           !inspectorParameters.contains(where: { $0.id == selected }) {
+            selectedParameterId = nil
+        }
     }
 
     // MARK: - Node Actions
@@ -643,6 +662,16 @@ final class NodeEditorViewModel {
     }
 
     @discardableResult
+    func addFileVideoSource(path: String, at position: CGPoint? = nil) -> String? {
+        let name = (path as NSString).lastPathComponent
+        guard let id = engine.addFileVideoSource(name: name, path: path) else { return nil }
+        let pos = position ?? nextAutoPosition()
+        engine.setConnectablePosition(id: id, x: Float(pos.x), y: Float(pos.y))
+        lastAddedNodePosition = pos
+        refresh()
+        return id
+    }
+
     func addImageVideoSource(path: String, at position: CGPoint? = nil) -> String? {
         let name = (path as NSString).lastPathComponent
         guard let id = engine.addImageVideoSource(name: name, path: path) else { return nil }
@@ -1049,10 +1078,19 @@ final class NodeEditorViewModel {
 
     func loadStrand(id: String, at position: CGPoint? = nil) {
         let newIds = engine.loadStrand(id: id)
-        if let pos = position {
-            // Position the first new node at the drop location
-            if let firstId = newIds.first {
-                engine.setConnectablePosition(id: firstId, x: Float(pos.x), y: Float(pos.y))
+        if let dropPos = position, !newIds.isEmpty {
+            // Refresh to get the saved positions of the newly loaded nodes
+            refresh()
+            let newNodes = nodes.filter { newIds.contains($0.id) }
+            if let minX = newNodes.map({ $0.position.x }).min(),
+               let minY = newNodes.map({ $0.position.y }).min() {
+                let offsetX = dropPos.x - minX
+                let offsetY = dropPos.y - minY
+                for node in newNodes {
+                    let newX = Float(node.position.x + offsetX)
+                    let newY = Float(node.position.y + offsetY)
+                    engine.setConnectablePosition(id: node.id, x: newX, y: newY)
+                }
             }
         }
         refresh()

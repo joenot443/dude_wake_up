@@ -22,25 +22,29 @@ public:
   std::shared_ptr<Parameter> scale;
   std::shared_ptr<Parameter> sides;
   std::shared_ptr<Parameter> rotation;
+  std::shared_ptr<Parameter> autorotate;
   std::shared_ptr<Parameter> shift;
 
   std::shared_ptr<Oscillator> scaleOscillator;
   std::shared_ptr<Oscillator> sidesOscillator;
   std::shared_ptr<Oscillator> rotationOscillator;
+  std::shared_ptr<Oscillator> autorotateOscillator;
   std::shared_ptr<Oscillator> shiftOscillator;
 
   CrystalKaleidoscopeSettings(std::string shaderId, json j, std::string name = "CrystalKaleidoscope") :
   scale(std::make_shared<Parameter>("Scale", 3.0, 1.0, 10.0)),
   sides(std::make_shared<Parameter>("Sides", 3.0, 3.0, 12.0, ParameterType_Int)),
   rotation(std::make_shared<Parameter>("Rotation", 0.0, 0.0, TWO_PI)),
+  autorotate(std::make_shared<Parameter>("Autorotate", 0.0, 0.0, 2.0)),
   shift(std::make_shared<Parameter>("Shift", 0.0, -1.0, 1.0)),
   scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
   sidesOscillator(std::make_shared<WaveformOscillator>(sides)),
   rotationOscillator(std::make_shared<WaveformOscillator>(rotation)),
+  autorotateOscillator(std::make_shared<WaveformOscillator>(autorotate)),
   shiftOscillator(std::make_shared<WaveformOscillator>(shift)),
   ShaderSettings(shaderId, j, name) {
-    parameters = {scale, sides, rotation, shift};
-    oscillators = {scaleOscillator, sidesOscillator, rotationOscillator, shiftOscillator};
+    parameters = {scale, sides, rotation, autorotate, shift};
+    oscillators = {scaleOscillator, sidesOscillator, rotationOscillator, autorotateOscillator, shiftOscillator};
     load(j);
     registerParameters();
   };
@@ -66,6 +70,8 @@ public:
     shader.setUniform1f("scale", settings->scale->value);
     shader.setUniform1f("sides", settings->sides->value);
     shader.setUniform1f("rotation", settings->rotation->value);
+    shader.setUniform1f("autorotate", settings->autorotate->value);
+    shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform1f("shift", settings->shift->value);
     shader.setUniformTexture("tex", *frame, 0);
     frame->draw(0, 0);
@@ -85,6 +91,7 @@ public:
     CommonViews::ShaderParameter(settings->scale, settings->scaleOscillator);
     CommonViews::ShaderIntParameter(settings->sides);
     CommonViews::ShaderParameter(settings->rotation, settings->rotationOscillator);
+    CommonViews::ShaderParameter(settings->autorotate, settings->autorotateOscillator);
     CommonViews::ShaderParameter(settings->shift, settings->shiftOscillator);
   }
 };

@@ -5,9 +5,12 @@
 
 #include "AudioBumperShader.hpp"
 #include "AuroraShader.hpp"
+#include "CyberWarehouseShader.hpp"
 #include "AudioGraphShader.hpp"
 #include "FlockingShader.hpp"
 #include "AudioCymaticsShader.hpp"
+#include "AudioAuroraShader.hpp"
+#include "AudioPulseGridShader.hpp"
 #include "AudioOscillatorShader.hpp"
 #include "LavaShader.hpp"
 #include "AudioGlowBarsShader.hpp"
@@ -190,6 +193,9 @@ enum ShaderSourceType {
   ShaderSource_Flocking, //source enum,
   ShaderSource_AudioCymatics, //source enum,
   ShaderSource_Aurora, //source enum,
+  ShaderSource_CyberWarehouse, //source enum,
+  ShaderSource_AudioAurora, //source enum,
+  ShaderSource_AudioPulseGrid, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -277,13 +283,22 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_Flocking, // Available
   ShaderSource_AudioCymatics, // Available
   ShaderSource_Aurora, // Available
+  ShaderSource_CyberWarehouse, // Available
+  ShaderSource_AudioAurora, // Available
+  ShaderSource_AudioPulseGrid, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
       // shaderTypeForShaderSourceType
+  case ShaderSource_CyberWarehouse: //type enum
+    return ShaderTypeCyberWarehouse;
   case ShaderSource_Aurora: //type enum
     return ShaderTypeAurora;
+  case ShaderSource_AudioPulseGrid: //type enum
+    return ShaderTypeAudioPulseGrid;
+  case ShaderSource_AudioAurora: //type enum
+    return ShaderTypeAudioAurora;
   case ShaderSource_AudioCymatics: //type enum
     return ShaderTypeAudioCymatics;
   case ShaderSource_Flocking: //type enum
@@ -466,6 +481,10 @@ static ShaderSourceType shaderSourceTypeForShaderType(ShaderType type) {
       return ShaderSource_Flocking;
     case ShaderTypeAudioCymatics:
       return ShaderSource_AudioCymatics;
+    case ShaderTypeAudioAurora:
+      return ShaderSource_AudioAurora;
+    case ShaderTypeAudioPulseGrid:
+      return ShaderSource_AudioPulseGrid;
     case ShaderTypeSpiral:
       return ShaderSource_Spiral;
     case ShaderTypeSimpleBars:
@@ -618,6 +637,8 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     case ShaderSource_AudioGraph:
     case ShaderSource_AudioOscillator:
     case ShaderSource_AudioCymatics:
+    case ShaderSource_AudioAurora:
+    case ShaderSource_AudioPulseGrid:
       return "Audio Reactive";
       
       // Particles
@@ -727,6 +748,12 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_CyberWarehouse: { // Settings
+      auto settings = new CyberWarehouseSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<CyberWarehouseShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_Aurora: { // Settings
       auto settings = new AuroraSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<AuroraShader>(settings);
@@ -760,6 +787,18 @@ public:
     case ShaderSource_AudioGlowBars: { // Settings
       auto settings = new AudioGlowBarsSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<AudioGlowBarsShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_AudioPulseGrid: { // Settings
+      auto settings = new AudioPulseGridSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<AudioPulseGridShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_AudioAurora: { // Settings
+      auto settings = new AudioAuroraSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<AudioAuroraShader>(settings);
       shader->setup();
       return;
     }

@@ -26,6 +26,7 @@ uniform int tex10_active;
 
 uniform vec2 dimensions;
 uniform float time;
+uniform float rotation;
 
 in vec2 coord;
 out vec4 outputColor;
@@ -37,6 +38,8 @@ void main() {
     vec2 texCoord = coord;
     float currentAngle = atan(texCoord.y - center.y, texCoord.x - center.x);
 
+    currentAngle -= radians(rotation);
+    currentAngle = mod(currentAngle, 2.0 * PI);
     if (currentAngle < 0.0) {
         currentAngle += 2.0 * PI;
     }

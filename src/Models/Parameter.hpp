@@ -22,7 +22,8 @@ typedef enum {
   ParameterType_Int,
   ParameterType_Bool,
   ParameterType_Color,
-  ParameterType_Hidden
+  ParameterType_Hidden,
+  ParameterType_Text
 } ParameterType;
 
 struct Parameter : public std::enable_shared_from_this<Parameter>

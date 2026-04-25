@@ -573,7 +573,7 @@ struct SidebarTileView: View {
             ZStack(alignment: .topTrailing) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 6)
-                        .fill(isSource ? Color.blue.opacity(0.15) : Color.purple.opacity(0.15))
+                        .fill(theme.colors.backgroundTertiary)
                         .aspectRatio(16.0 / 9.0, contentMode: .fit)
 
                     if livePreview, let pid = previewId {
@@ -589,7 +589,7 @@ struct SidebarTileView: View {
                     } else {
                         Image(systemName: isSource ? "video.fill" : "sparkles")
                             .font(.caption)
-                            .foregroundStyle(isSource ? .blue : .purple)
+                            .foregroundStyle(theme.colors.textTertiary)
                     }
                 }
 

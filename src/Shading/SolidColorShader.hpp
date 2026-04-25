@@ -23,19 +23,21 @@ struct SolidColorSettings: public ShaderSettings {
   std::shared_ptr<Parameter> mix;
   std::shared_ptr<Parameter> alpha;
   std::shared_ptr<Parameter> colorTransparentPixels;
-  
+
   std::shared_ptr<WaveformOscillator> alphaOscillator;
   std::shared_ptr<WaveformOscillator> mixOscillator;
 
   SolidColorSettings(std::string shaderId, json j, std::string name) :
-  color(std::make_shared<Parameter>("Color", 1.0, -1.0, 2.0)),
+  color(std::make_shared<Parameter>("Color", ParameterType_Color)),
   mix(std::make_shared<Parameter>("Mix", 0.5, 0.0, 1.0)),
   alpha(std::make_shared<Parameter>("Alpha", 1.0, 0.0, 1.0)),
   colorTransparentPixels(std::make_shared<Parameter>("Color Transparent Pixels", ParameterType_Bool)),
   alphaOscillator(std::make_shared<WaveformOscillator>(alpha)),
   mixOscillator(std::make_shared<WaveformOscillator>(mix)),
   ShaderSettings(shaderId, j, name) {
-    parameters = { color, colorTransparentPixels };
+    color->setColor({1.0f, 0.5f, 0.5f, 1.0f});
+    parameters = { color, mix, alpha, colorTransparentPixels };
+    oscillators = { mixOscillator, alphaOscillator };
     load(j);
     registerParameters();
   };

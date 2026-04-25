@@ -21,19 +21,23 @@ void FileSource::setup()
   }
 
   applyRanges();
+  if (player.isLoaded()) {
+    player.close();
+  }
   player.setPixelFormat(OF_PIXELS_RGB);
   bool loaded = player.load(path);
   log("FileSource::setup() - loaded %s from path: %s", loaded ? "successfully" : "FAILED", path.c_str());
-  if (loaded && player.getWidth() > 0 && player.getHeight() > 0) {
+  if (!loaded) return;
+  if (player.getWidth() > 0 && player.getHeight() > 0) {
     auto currentRes = LayoutStateService::getService()->resolution;
     if (currentRes.x != player.getWidth() || currentRes.y != player.getHeight()) {
       LayoutStateService::getService()->setCustomResolution(player.getWidth(), player.getHeight());
     }
   }
-  player.setPosition(start);
-  player.play();
   player.setVolume(0.0);
   mute->setValue(1.0);
+  player.setPosition(start);
+  player.play();
   player.setLoopState(OF_LOOP_NORMAL);
   playing = true;
   fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
@@ -51,10 +55,11 @@ void FileSource::updateSettings()
 
 void FileSource::saveFrame()
 {
-  // If our width or height has changed, setup again
+  // If resolution changed, just reallocate FBOs — don't reload the video player
   if (fbo->getWidth() != LayoutStateService::getService()->resolution.x ||
       fbo->getHeight() != LayoutStateService::getService()->resolution.y) {
-    setup();
+    fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
+    optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   }
   
   if (player.getSpeed() != speed->value) {

@@ -28,9 +28,10 @@ typedef struct {
   float value;
   float minValue;
   float maxValue;
-  int parameterType;       // 0=Standard, 1=Int, 2=Bool, 3=Color, 4=Hidden
+  int parameterType;       // 0=Standard, 1=Int, 2=Bool, 3=Color, 4=Hidden, 5=Text
   int intValue;
   int boolValue;
+  const char* stringValue; // Owned by caller - must free. NULL if empty
   int isFavorited;
   float colorR, colorG, colorB, colorA;
 
@@ -55,6 +56,9 @@ typedef struct {
   // Options (for int params with named choices, e.g. font selector)
   const char** options;        // Array of option strings (NULL if none) - caller must free each + array
   int optionCount;             // 0 if no options
+
+  // Runtime-hidden by the shader (e.g. Blend hides unconnected input strengths)
+  int hiddenFromNode;
 } NTWParameterInfo;
 
 typedef struct {
@@ -295,12 +299,14 @@ NTWParameterInfo* ntw_get_parameters(const char* connectableId, int* outCount);
 void ntw_set_parameter_value(const char* paramId, float value);
 void ntw_set_parameter_int(const char* paramId, int value);
 void ntw_set_parameter_bool(const char* paramId, bool value);
+void ntw_set_parameter_string(const char* paramId, const char* value);
 void ntw_set_parameter_color(const char* paramId,
                              float r, float g, float b, float a);
 void ntw_toggle_parameter_favorite(const char* paramId);
 void ntw_reset_parameter(const char* paramId);
 void ntw_reset_all_parameters(const char* connectableId);
 void ntw_clear_feedback_buffer(const char* shaderId);
+void ntw_reset_bounce_position(const char* shaderId);
 
 // ---------------------------------------------------------------------------
 // MARK: - Oscillator Control
@@ -351,6 +357,12 @@ bool ntw_get_connectable_active(const char* connectableId);
 // Set/get whether a shader is bypassed (passes input through without processing).
 void ntw_set_shader_bypassed(const char* shaderId, int bypassed);
 int ntw_get_shader_bypassed(const char* shaderId);
+
+// Global view setting: when enabled, breaking a shader's main input
+// connection clears its output frame to black instead of leaving the
+// last-rendered pixels onscreen. Default: enabled.
+void ntw_set_clear_on_disconnect(int enabled);
+int ntw_get_clear_on_disconnect(void);
 
 // Get the depth of a shader in its chain (0 = directly connected to source).
 int ntw_get_shader_depth(const char* shaderId);
@@ -868,6 +880,26 @@ void ntw_remove_midi_binding(const char* paramId);
 // Callback fired when a MIDI binding is learned.
 typedef void (*NTWMidiLearnedCallback)(const char* paramId, const char* descriptor);
 void ntw_register_midi_learned_callback(NTWMidiLearnedCallback callback);
+
+// MIDI device and assignment queries
+typedef struct {
+    const char* name;    // Owned by caller - must free
+    int port;
+    int isOpen;
+} NTWMidiInputInfo;
+
+typedef struct {
+    const char* paramId;        // Owned by caller - must free
+    const char* paramName;      // Owned by caller - must free
+    const char* ownerName;      // Owned by caller - must free
+    const char* midiDescriptor; // Owned by caller - must free
+} NTWMidiAssignmentInfo;
+
+NTWMidiInputInfo* ntw_get_midi_inputs(int* outCount);
+void ntw_free_midi_input_info_array(NTWMidiInputInfo* array, int count);
+
+NTWMidiAssignmentInfo* ntw_get_midi_assignments(int* outCount);
+void ntw_free_midi_assignment_info_array(NTWMidiAssignmentInfo* array, int count);
 
 // ---------------------------------------------------------------------------
 // MARK: - Texture Sharing (IOSurface)

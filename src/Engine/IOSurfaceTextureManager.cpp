@@ -130,7 +130,7 @@ void IOSurfaceTextureManager::blitTrackedTextures() {
       if (!tex.surface) continue;
     }
 
-    // Blit from source FBO to IOSurface FBO
+      // Blit from source FBO to IOSurface FBO
     GLuint srcFboId = fbo->getId();
     glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFboId);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, tex.glFbo);
@@ -259,6 +259,12 @@ void IOSurfaceTextureManager::setupSharedTexture(SharedTexture& tex, int width, 
     tex.surface = nullptr;
     return;
   }
+
+  // Clear the IOSurface FBO to black so it doesn't show uninitialized pink
+  glBindFramebuffer(GL_FRAMEBUFFER, tex.glFbo);
+  glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   tex.width = width;
   tex.height = height;

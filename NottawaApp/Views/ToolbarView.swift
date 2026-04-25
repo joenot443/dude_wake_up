@@ -42,6 +42,7 @@ struct ToolbarView: View {
             } label: {
                 Image(systemName: "sidebar.leading")
             }
+            .foregroundStyle(viewModel.showSidebar ? theme.colors.accent : theme.colors.textSecondary)
             .disabled(viewModel.stageModeEnabled)
             .help("Toggle Browser Sidebar")
             .accessibilityIdentifier("sidebar-toggle")
@@ -52,6 +53,7 @@ struct ToolbarView: View {
             } label: {
                 Image(systemName: "waveform")
             }
+            .foregroundStyle(viewModel.showAudioPanel ? theme.colors.accent : theme.colors.textSecondary)
             .help("Toggle Audio Panel")
             .accessibilityIdentifier("audio-panel-toggle")
 
@@ -67,17 +69,19 @@ struct ToolbarView: View {
             .help("Stage Mode (Cmd+Shift+S)")
             .accessibilityIdentifier("stage-mode-toggle")
 
-            theme.colors.border.frame(width: 1, height: 20)
+            if !viewModel.selectedNodeIds.isEmpty || viewModel.selectedConnectionId != nil {
+                theme.colors.border.frame(width: 1, height: 20)
 
-            // Delete selected
-            Button {
-                viewModel.deleteSelected()
-            } label: {
-                Image(systemName: "trash")
+                // Delete selected
+                Button {
+                    viewModel.deleteSelected()
+                } label: {
+                    Image(systemName: "trash")
+                }
+                .foregroundStyle(theme.colors.destructive)
+                .help("Delete selected (Delete)")
+                .accessibilityIdentifier("delete-button")
             }
-            .disabled(viewModel.selectedNodeIds.isEmpty && viewModel.selectedConnectionId == nil)
-            .help("Delete selected (Delete)")
-            .accessibilityIdentifier("delete-button")
 
             Spacer()
 

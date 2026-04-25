@@ -39,28 +39,36 @@ static std::vector<std::string> BlendModeNames = {
 };
 
 struct BlendSettings: public ShaderSettings {
-  std::shared_ptr<Parameter> mode;
-  std::shared_ptr<Parameter> flip;
-  std::shared_ptr<Parameter> amount;
-  std::shared_ptr<Parameter> alpha;
-  std::shared_ptr<Parameter> alphaSwap;
+  static const int MaxBlendInputs = 8;
 
-  std::shared_ptr<WaveformOscillator> alphaOscillator;
-  std::shared_ptr<WaveformOscillator> amountOscillator;
+  std::shared_ptr<Parameter> mode;
+  std::shared_ptr<Parameter> swapInputs;
+  std::shared_ptr<Parameter> mainStrength;
+  std::shared_ptr<WaveformOscillator> mainStrengthOscillator;
+  std::shared_ptr<Parameter> inputStrength[MaxBlendInputs];
+  std::shared_ptr<WaveformOscillator> inputStrengthOscillator[MaxBlendInputs];
 
   BlendSettings(std::string shaderId, json j) :
   mode(std::make_shared<Parameter>("Mode", 4.0, 0.0, 13.0, ParameterType_Int)),
-  flip(std::make_shared<Parameter>("Flip", 0.0, 0.0, 1.0, ParameterType_Bool)),
-  alpha(std::make_shared<Parameter>("Alpha", 1.0, 0.0, 1.0, ParameterType_Bool)),
-  amount(std::make_shared<Parameter>("Amount", 0.5, 0.0, 1.0)),
-  alphaSwap(std::make_shared<Parameter>("Alpha Swap", 0.0, 0.0, 1.0, ParameterType_Bool)),
-  alphaOscillator(std::make_shared<WaveformOscillator>(alpha)),
+  swapInputs(std::make_shared<Parameter>("Swap Inputs", 0.0, 0.0, 1.0, ParameterType_Bool)),
+  mainStrength(std::make_shared<Parameter>("Main Input Strength", 1.0, 0.0, 1.0)),
+  mainStrengthOscillator(std::make_shared<WaveformOscillator>(mainStrength)),
   ShaderSettings(shaderId, j, "Blend") {
     mode->options = BlendModeNames;
-    parameters = { mode, flip, alpha, amount, alphaSwap };
-    oscillators = { alphaOscillator, amountOscillator };
-    audioReactiveParameter = alpha;
     mode->buttonsVisible = true;
+
+    parameters = { mode, swapInputs, mainStrength };
+    oscillators = { mainStrengthOscillator };
+
+    for (int i = 0; i < MaxBlendInputs; i++) {
+      std::string name = "Input " + std::to_string(i + 2) + " Strength";
+      inputStrength[i] = std::make_shared<Parameter>(name, 1.0, 0.0, 1.0);
+      inputStrengthOscillator[i] = std::make_shared<WaveformOscillator>(inputStrength[i]);
+      parameters.push_back(inputStrength[i]);
+      oscillators.push_back(inputStrengthOscillator[i]);
+    }
+
+    audioReactiveParameter = inputStrength[0];
     load(j);
     registerParameters();
   };
@@ -107,37 +115,40 @@ struct BlendShader: Shader {
     ofClear(0, 0, 0, 0);
     previewOptionalFrame->end();
 
-    // Start with the main frame in the target FBO
+    // Start with the main frame in the target FBO, scaled by mainStrength
     targetFbo->begin();
+    ofSetColor(255, 255, 255, (unsigned char)(255.0f * settings->mainStrength->value));
     mainInput->draw(0, 0);
+    ofSetColor(255);
     targetFbo->end();
 
     bool useOptionalAsSource = false;
+    int previewInputIndex = 0;
 
     // For each possible input slot after the main one
     for (InputSlot slot : AllInputSlots) {
-      if (slot == InputSlotMain) continue; // Skip main input as it's already drawn
-      if (!hasInputAtSlot(slot)) continue; // Skip if no input at this slot
+      if (slot == InputSlotMain) continue;
+      if (!hasInputAtSlot(slot)) continue;
 
-      // Determine source and destination FBOs for this preview step
       std::shared_ptr<ofFbo> sourceFbo = useOptionalAsSource ? previewOptionalFrame : targetFbo;
       std::shared_ptr<ofFbo> destFbo = useOptionalAsSource ? targetFbo : previewOptionalFrame;
 
       std::shared_ptr<ofFbo> nextFrame = inputAtSlot(slot)->frame();
-      if (!nextFrame || !nextFrame->isAllocated()) continue; // Skip if input frame isn't ready
+      if (!nextFrame || !nextFrame->isAllocated()) continue;
+
+      float strength = (previewInputIndex < BlendSettings::MaxBlendInputs)
+        ? settings->inputStrength[previewInputIndex]->value : 1.0f;
 
       destFbo->begin();
       shader.begin();
 
-      // Use the specific blendModeIndex for the preview
       shader.setUniform1i("mode", blendModeIndex);
-      shader.setUniform1f("time", TimeService::getService()->timeParam->value);
-      shader.setUniform1f("alpha", settings->alpha->boolValue ? 1.0f : 0.0f);
+      shader.setUniform1f("strength", strength);
       shader.setUniform2f("dimensions", destFbo->getWidth(), destFbo->getHeight());
 
-      // Set textures based on flip setting
-      ofTexture mainTexture = settings->flip->boolValue ? nextFrame->getTexture() : sourceFbo->getTexture();
-      ofTexture secondaryTexture = settings->flip->boolValue ? sourceFbo->getTexture() : nextFrame->getTexture();
+      // Set textures based on swap setting
+      ofTexture mainTexture = settings->swapInputs->boolValue ? nextFrame->getTexture() : sourceFbo->getTexture();
+      ofTexture secondaryTexture = settings->swapInputs->boolValue ? sourceFbo->getTexture() : nextFrame->getTexture();
 
       shader.setUniformTexture("tex", mainTexture, 4);
       shader.setUniformTexture("tex2", secondaryTexture, 5);
@@ -148,12 +159,11 @@ struct BlendShader: Shader {
       shader.end();
       destFbo->end();
 
-      // Toggle which FBO we use as source for the next iteration
       useOptionalAsSource = !useOptionalAsSource;
+      previewInputIndex++;
     }
 
     // Final copy to targetFbo if needed
-    // If useOptionalAsSource is true, the last draw was into previewOptionalFrame
     if (useOptionalAsSource) {
       targetFbo->begin();
       // Don't clear, just draw the result from the optional frame
@@ -177,6 +187,17 @@ struct BlendShader: Shader {
   }
   
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
+    // Update visibility of per-input strength parameters based on connections
+    settings->mainStrength->hiddenFromNode = !hasInputAtSlot(InputSlotMain);
+    int connectedCount = 0;
+    for (InputSlot slot : AllInputSlots) {
+      if (slot == InputSlotMain) continue;
+      if (hasInputAtSlot(slot)) connectedCount++;
+    }
+    for (int i = 0; i < BlendSettings::MaxBlendInputs; i++) {
+      settings->inputStrength[i]->hiddenFromNode = (i >= connectedCount);
+    }
+
     // Guard: bail if FBOs aren't allocated yet (startup race)
     if (!frame || !canvas || !frame->isAllocated() || !canvas->isAllocated()) return;
     if (!optionalFrame || !optionalFrame->isAllocated()) return;
@@ -231,48 +252,50 @@ struct BlendShader: Shader {
     ofClear(0, 0, 0, 0);
     optionalFrame->end();
     
-    // Start with the main frame in the canvas
+    // Start with the main frame in the canvas, scaled by mainStrength
     canvas->begin();
+    ofSetColor(255, 255, 255, (unsigned char)(255.0f * settings->mainStrength->value));
     frame->draw(0, 0);
+    ofSetColor(255);
     canvas->end();
-    
+
     bool useOptionalAsSource = false;
-    
+    int inputIndex = 0;
+
     // For each possible input slot after the main one
     for (InputSlot slot : AllInputSlots) {
-      if (slot == InputSlotMain) continue; // Skip main input as it's already drawn
-      if (!hasInputAtSlot(slot)) continue; // Skip if no input at this slot
-      
+      if (slot == InputSlotMain) continue;
+      if (!hasInputAtSlot(slot)) continue;
+
       // Determine source and destination FBOs
       std::shared_ptr<ofFbo> sourceFbo = useOptionalAsSource ? optionalFrame : canvas;
       std::shared_ptr<ofFbo> destFbo = useOptionalAsSource ? canvas : optionalFrame;
-      
+
       std::shared_ptr<ofFbo> nextFrame = inputAtSlot(slot)->frame();
       if (!nextFrame || !nextFrame->isAllocated()) continue;
       if (nextFrame->getTexture().getTextureData().textureID == 0) continue;
 
+      float strength = (inputIndex < BlendSettings::MaxBlendInputs)
+        ? settings->inputStrength[inputIndex]->value : 1.0f;
+
       destFbo->begin();
       shader.begin();
       shader.setUniform1i("mode", settings->mode->intValue);
-      shader.setUniform1f("time", TimeService::getService()->timeParam->value);
-      shader.setUniform1f("alpha", settings->alpha->boolValue ? 1.0f : 0.0f);
-      shader.setUniform1f("amount", settings->amount->value);
-      shader.setUniform1i("alphaSwap", settings->alphaSwap->boolValue ? 1 : 0);
+      shader.setUniform1f("strength", strength);
       shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
 
-      // Set textures based on flip setting
-      ofTexture mainTexture = settings->flip->boolValue ? nextFrame->getTexture() : sourceFbo->getTexture();
-      ofTexture secondaryTexture = settings->flip->boolValue ? sourceFbo->getTexture() : nextFrame->getTexture();
-      
+      ofTexture mainTexture = settings->swapInputs->boolValue ? nextFrame->getTexture() : sourceFbo->getTexture();
+      ofTexture secondaryTexture = settings->swapInputs->boolValue ? sourceFbo->getTexture() : nextFrame->getTexture();
+
       shader.setUniformTexture("tex", mainTexture, 4);
       shader.setUniformTexture("tex2", secondaryTexture, 5);
-      
+
       sourceFbo->draw(0, 0);
       shader.end();
       destFbo->end();
-      
-      // Toggle which FBO we use as source for next iteration
+
       useOptionalAsSource = !useOptionalAsSource;
+      inputIndex++;
     }
     
     // Final copy to canvas if needed
@@ -299,12 +322,24 @@ struct BlendShader: Shader {
   }
   
   void drawSettings() override {
-    // Display the main blend mode selector controls
-    CommonViews::BlendModeSelector(settings->mode, settings->flip, settings->alpha, settings->alphaOscillator, settings->amount, settings->amountOscillator);
-    CommonViews::FlipButton("alphaSwap", settings->alphaSwap);
-    ImGui::SameLine();
-    ImGui::Text("Swap Alpha");
-    ImGui::Dummy(ImVec2(1.0, 30.0));
+    CommonViews::ShaderCheckbox(settings->swapInputs);
+
+    // Main input strength (shown when main is connected)
+    if (hasInputAtSlot(InputSlotMain)) {
+      CommonViews::ShaderParameter(settings->mainStrength, settings->mainStrengthOscillator);
+    }
+
+    // Show per-input strength sliders for connected inputs
+    int inputIndex = 0;
+    for (InputSlot slot : AllInputSlots) {
+      if (slot == InputSlotMain) continue;
+      if (!hasInputAtSlot(slot)) continue;
+      if (inputIndex < BlendSettings::MaxBlendInputs) {
+        CommonViews::ShaderParameter(settings->inputStrength[inputIndex], settings->inputStrengthOscillator[inputIndex]);
+      }
+      inputIndex++;
+    }
+    ImGui::Dummy(ImVec2(1.0, 10.0));
     // Add a collapsible header for the previews
     if (ImGui::CollapsingHeader("Blend Previews")) {
       float availableWidth = ImGui::GetContentRegionAvail().x - 40.0;

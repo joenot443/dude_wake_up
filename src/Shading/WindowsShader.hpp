@@ -24,7 +24,6 @@ struct WindowsSettings: public ShaderSettings {
   std::shared_ptr<Parameter> buttonText;
   std::shared_ptr<Parameter> buttonText2;
   std::shared_ptr<Parameter> buttonText3;
-  std::shared_ptr<Parameter> contentScale;
   std::shared_ptr<Parameter> floating;
   std::shared_ptr<Parameter> scale;
   std::shared_ptr<Parameter> xPosition;
@@ -34,11 +33,10 @@ struct WindowsSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> yPositionOscillator;
 
   WindowsSettings(std::string shaderId, json j) :
-  windowTitle(std::make_shared<Parameter>("Window Title")),
-  buttonText(std::make_shared<Parameter>("Button Text")),
-  buttonText2(std::make_shared<Parameter>("Button Text 2")),
-  buttonText3(std::make_shared<Parameter>("Button Text 3")),
-  contentScale(std::make_shared<Parameter>("Content Scale", 0.8, 0.5, 1.0)),
+  windowTitle(std::make_shared<Parameter>("Window Title", ParameterType_Text)),
+  buttonText(std::make_shared<Parameter>("Button Text", ParameterType_Text)),
+  buttonText2(std::make_shared<Parameter>("Button Text 2", ParameterType_Text)),
+  buttonText3(std::make_shared<Parameter>("Button Text 3", ParameterType_Text)),
   floating(std::make_shared<Parameter>("Floating", 0.0, ParameterType_Bool)),
   scale(std::make_shared<Parameter>("Scale", 1.0, 0.1, 2.0)),
   xPosition(std::make_shared<Parameter>("X Position", 0.5, 0.0, 1.0)),
@@ -51,7 +49,7 @@ struct WindowsSettings: public ShaderSettings {
     buttonText->stringValue = "OK";
     buttonText2->stringValue = "";
     buttonText3->stringValue = "";
-    parameters = { windowTitle, buttonText, buttonText2, buttonText3, contentScale, floating, scale, xPosition, yPosition };
+    parameters = { windowTitle, buttonText, buttonText2, buttonText3, floating, scale, xPosition, yPosition };
     oscillators = { scaleOscillator, xPositionOscillator, yPositionOscillator };
     load(j);
     registerParameters();
@@ -66,51 +64,100 @@ struct WindowsShader: Shader {
   WindowsShader(WindowsSettings *settings) : settings(settings), Shader(settings) {};
 
   void setup() override {
-    std::string verdanaPath = FontService::getService()->fontPathByName("windows");
-    if (!verdanaPath.empty()) {
-      titleFont.load(verdanaPath, 11, true, true);
-      buttonFont.load(verdanaPath, 11, true, true);
+    std::string fontPath = FontService::getService()->fontPathByName("windows");
+    if (!fontPath.empty()) {
+      titleFont.load(fontPath, 16, true, true);
+      buttonFont.load(fontPath, 14, true, true);
     }
   }
 
+  // Win2K 4-level raised bevel: white → light gray → dark gray → black
   void drawBeveledRect(float x, float y, float w, float h, bool raised) {
-    // Main face
+    // Face
     ofSetColor(192, 192, 192);
     ofDrawRectangle(x, y, w, h);
 
-    // 3D beveled edges
     if (raised) {
-      // Light top and left edges
+      // Outer highlight
       ofSetColor(255, 255, 255);
-      ofDrawLine(x, y, x + w, y); // top
-      ofDrawLine(x, y, x, y + h); // left
+      ofDrawLine(x, y, x + w - 1, y);
+      ofDrawLine(x, y, x, y + h - 1);
+      // Inner highlight
       ofSetColor(223, 223, 223);
-      ofDrawLine(x + 1, y + 1, x + w - 1, y + 1); // top inner
-      ofDrawLine(x + 1, y + 1, x + 1, y + h - 1); // left inner
-
-      // Dark bottom and right edges
-      ofSetColor(64, 64, 64);
-      ofDrawLine(x, y + h, x + w, y + h); // bottom
-      ofDrawLine(x + w, y, x + w, y + h); // right
+      ofDrawLine(x + 1, y + 1, x + w - 2, y + 1);
+      ofDrawLine(x + 1, y + 1, x + 1, y + h - 2);
+      // Inner shadow
       ofSetColor(128, 128, 128);
-      ofDrawLine(x + 1, y + h - 1, x + w - 1, y + h - 1); // bottom inner
-      ofDrawLine(x + w - 1, y + 1, x + w - 1, y + h - 1); // right inner
+      ofDrawLine(x + 1, y + h - 2, x + w - 2, y + h - 2);
+      ofDrawLine(x + w - 2, y + 1, x + w - 2, y + h - 2);
+      // Outer shadow
+      ofSetColor(0, 0, 0);
+      ofDrawLine(x, y + h - 1, x + w, y + h - 1);
+      ofDrawLine(x + w - 1, y, x + w - 1, y + h);
     } else {
-      // Inverted for pressed buttons
-      ofSetColor(64, 64, 64);
-      ofDrawLine(x, y, x + w, y);
-      ofDrawLine(x, y, x, y + h);
+      // Outer shadow (top-left)
       ofSetColor(128, 128, 128);
-      ofDrawLine(x + 1, y + 1, x + w - 1, y + 1);
-      ofDrawLine(x + 1, y + 1, x + 1, y + h - 1);
-
-      ofSetColor(255, 255, 255);
-      ofDrawLine(x, y + h, x + w, y + h);
-      ofDrawLine(x + w, y, x + w, y + h);
+      ofDrawLine(x, y, x + w - 1, y);
+      ofDrawLine(x, y, x, y + h - 1);
+      // Inner shadow
+      ofSetColor(0, 0, 0);
+      ofDrawLine(x + 1, y + 1, x + w - 2, y + 1);
+      ofDrawLine(x + 1, y + 1, x + 1, y + h - 2);
+      // Inner highlight (bottom-right)
       ofSetColor(223, 223, 223);
-      ofDrawLine(x + 1, y + h - 1, x + w - 1, y + h - 1);
-      ofDrawLine(x + w - 1, y + 1, x + w - 1, y + h - 1);
+      ofDrawLine(x + 1, y + h - 2, x + w - 2, y + h - 2);
+      ofDrawLine(x + w - 2, y + 1, x + w - 2, y + h - 2);
+      // Outer highlight
+      ofSetColor(255, 255, 255);
+      ofDrawLine(x, y + h - 1, x + w, y + h - 1);
+      ofDrawLine(x + w - 1, y, x + w - 1, y + h);
     }
+  }
+
+  // Sunken inset border (Win2K content well)
+  void drawSunkenRect(float x, float y, float w, float h) {
+    // Dark top-left
+    ofSetColor(128, 128, 128);
+    ofDrawLine(x, y, x + w - 1, y);
+    ofDrawLine(x, y, x, y + h - 1);
+    // Darker inner top-left
+    ofSetColor(0, 0, 0);
+    ofDrawLine(x + 1, y + 1, x + w - 2, y + 1);
+    ofDrawLine(x + 1, y + 1, x + 1, y + h - 2);
+    // Light bottom-right
+    ofSetColor(255, 255, 255);
+    ofDrawLine(x, y + h - 1, x + w, y + h - 1);
+    ofDrawLine(x + w - 1, y, x + w - 1, y + h);
+    // Inner light bottom-right
+    ofSetColor(223, 223, 223);
+    ofDrawLine(x + 1, y + h - 2, x + w - 2, y + h - 2);
+    ofDrawLine(x + w - 2, y + 1, x + w - 2, y + h - 2);
+  }
+
+  // Etched horizontal line separator
+  void drawEtchedLine(float x1, float x2, float y) {
+    ofSetColor(128, 128, 128);
+    ofDrawLine(x1, y, x2, y);
+    ofSetColor(255, 255, 255);
+    ofDrawLine(x1, y + 1, x2, y + 1);
+  }
+
+  // Dotted focus rectangle
+  void drawFocusRect(float x, float y, float w, float h) {
+    ofSetColor(0, 0, 0);
+    for (float px = x; px < x + w; px += 2) {
+      ofDrawRectangle(px, y, 1, 1);
+      ofDrawRectangle(px, y + h - 1, 1, 1);
+    }
+    for (float py = y; py < y + h; py += 2) {
+      ofDrawRectangle(x, py, 1, 1);
+      ofDrawRectangle(x + w - 1, py, 1, 1);
+    }
+  }
+
+  // Small title bar button (minimize, maximize, close)
+  void drawTitleButton(float x, float y, float size) {
+    drawBeveledRect(x, y, size, size, true);
   }
 
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -120,126 +167,184 @@ struct WindowsShader: Shader {
     float canvasW = canvas->getWidth();
     float canvasH = canvas->getHeight();
 
-    // Calculate window dimensions and position based on floating mode
-    float w, h, offsetX, offsetY;
+    // Win2K chrome dimensions
+    float titleBarHeight = 30;
+    float borderSize = 4;
+    float bottomBarHeight = 54;
+    float titleBtnSize = 20;
+    float titleBtnSpacing = 2;
+    float sunkenInset = 2; // sunken border around content
+    float chromeH = borderSize * 2 + titleBarHeight + bottomBarHeight + sunkenInset * 2;
 
+    // Size the window to wrap the input frame's aspect ratio
+    float frameAspect = frame->getWidth() / (float)frame->getHeight();
+    float scale = settings->scale->value;
+
+    float availH = canvasH - chromeH;
+    float availW = canvasW - borderSize * 2 - sunkenInset * 2;
+    float contentW, contentH;
+    if (frameAspect > availW / availH) {
+      contentW = availW * scale;
+      contentH = contentW / frameAspect;
+    } else {
+      contentH = availH * scale;
+      contentW = contentH * frameAspect;
+    }
+
+    float w = contentW + borderSize * 2 + sunkenInset * 2;
+    float h = contentH + chromeH;
+
+    float offsetX, offsetY;
     if (settings->floating->boolValue) {
-      // Floating mode: use scale and position parameters
-      w = canvasW * settings->scale->value;
-      h = canvasH * settings->scale->value;
       offsetX = (settings->xPosition->value * canvasW) - (w / 2);
       offsetY = (settings->yPosition->value * canvasH) - (h / 2);
     } else {
-      // Fixed mode: fill entire canvas
-      w = canvasW;
-      h = canvasH;
-      offsetX = 0;
-      offsetY = 0;
+      offsetX = (canvasW - w) / 2;
+      offsetY = (canvasH - h) / 2;
     }
 
-    // Window dimensions
-    float titleBarHeight = 28;
-    float borderSize = 4;
-    float bottomBarHeight = 50;
-    float closeButtonSize = 16;
-
-    // Outer window border (3D frame)
+    // ---- Window face ----
     ofSetColor(192, 192, 192);
     ofDrawRectangle(offsetX, offsetY, w, h);
 
-    // Title bar gradient (Windows blue)
+    // ---- Outer 4-level border (Win2K style) ----
+    // Outermost highlight
+    ofSetColor(255, 255, 255);
+    ofDrawLine(offsetX, offsetY, offsetX + w - 1, offsetY);
+    ofDrawLine(offsetX, offsetY, offsetX, offsetY + h - 1);
+    // Inner highlight
+    ofSetColor(223, 223, 223);
+    ofDrawLine(offsetX + 1, offsetY + 1, offsetX + w - 2, offsetY + 1);
+    ofDrawLine(offsetX + 1, offsetY + 1, offsetX + 1, offsetY + h - 2);
+    // Inner shadow
+    ofSetColor(128, 128, 128);
+    ofDrawLine(offsetX + 1, offsetY + h - 2, offsetX + w - 2, offsetY + h - 2);
+    ofDrawLine(offsetX + w - 2, offsetY + 1, offsetX + w - 2, offsetY + h - 2);
+    // Outermost shadow
+    ofSetColor(0, 0, 0);
+    ofDrawLine(offsetX, offsetY + h - 1, offsetX + w, offsetY + h - 1);
+    ofDrawLine(offsetX + w - 1, offsetY, offsetX + w - 1, offsetY + h);
+
+    // ---- Title bar gradient (Win2K: navy → medium blue) ----
+    float tbX = offsetX + borderSize;
+    float tbY = offsetY + borderSize;
+    float tbW = w - borderSize * 2;
+
     ofMesh gradient;
     gradient.setMode(OF_PRIMITIVE_TRIANGLE_STRIP);
-    gradient.addVertex(glm::vec3(offsetX + borderSize, offsetY + borderSize, 0));
-    gradient.addColor(ofColor(0, 84, 227));
-    gradient.addVertex(glm::vec3(offsetX + borderSize, offsetY + borderSize + titleBarHeight, 0));
-    gradient.addColor(ofColor(0, 84, 227));
-    gradient.addVertex(glm::vec3(offsetX + w - borderSize, offsetY + borderSize, 0));
-    gradient.addColor(ofColor(10, 130, 255));
-    gradient.addVertex(glm::vec3(offsetX + w - borderSize, offsetY + borderSize + titleBarHeight, 0));
-    gradient.addColor(ofColor(10, 130, 255));
+    gradient.addVertex(glm::vec3(tbX, tbY, 0));
+    gradient.addColor(ofColor(0, 0, 128));
+    gradient.addVertex(glm::vec3(tbX, tbY + titleBarHeight, 0));
+    gradient.addColor(ofColor(0, 0, 128));
+    gradient.addVertex(glm::vec3(tbX + tbW, tbY, 0));
+    gradient.addColor(ofColor(16, 132, 208));
+    gradient.addVertex(glm::vec3(tbX + tbW, tbY + titleBarHeight, 0));
+    gradient.addColor(ofColor(16, 132, 208));
     gradient.draw();
 
-    // Title text
+    // ---- System menu icon (small placeholder square) ----
+    float iconSize = 14;
+    float iconX = tbX + 4;
+    float iconY = tbY + (titleBarHeight - iconSize) / 2;
+    ofSetColor(192, 192, 192);
+    ofDrawRectangle(iconX, iconY, iconSize, iconSize);
+    ofSetColor(0, 0, 128);
+    ofDrawRectangle(iconX + 2, iconY + 2, iconSize - 4, iconSize - 4);
+
+    // ---- Title text (bold, white) ----
     if (titleFont.isLoaded()) {
       ofSetColor(255, 255, 255);
-      titleFont.drawString(settings->windowTitle->stringValue, offsetX + borderSize + 8, offsetY + borderSize + 18);
+      auto titleBbox = titleFont.getStringBoundingBox(settings->windowTitle->stringValue, 0, 0);
+      float titleTextY = tbY + (titleBarHeight - titleBbox.height) / 2 - titleBbox.y;
+      titleFont.drawString(settings->windowTitle->stringValue,
+                           iconX + iconSize + 6,
+                           titleTextY);
     }
 
-    // Close button (X)
-    float closeX = offsetX + w - borderSize - closeButtonSize - 6;
-    float closeY = offsetY + borderSize + 6;
-    drawBeveledRect(closeX, closeY, closeButtonSize, closeButtonSize, true);
+    // ---- Title bar buttons: minimize, maximize, close ----
+    float btnY = tbY + (titleBarHeight - titleBtnSize) / 2;
+    float closeX = tbX + tbW - titleBtnSize - 2;
+    float maxX = closeX - titleBtnSize - titleBtnSpacing;
+    float minX = maxX - titleBtnSize - titleBtnSpacing;
+
+    // Minimize button _
+    drawTitleButton(minX, btnY, titleBtnSize);
     ofSetColor(0, 0, 0);
-    ofDrawLine(closeX + 4, closeY + 4, closeX + closeButtonSize - 4, closeY + closeButtonSize - 4);
-    ofDrawLine(closeX + closeButtonSize - 4, closeY + 4, closeX + 4, closeY + closeButtonSize - 4);
+    ofSetLineWidth(1);
+    ofDrawLine(minX + 4, btnY + titleBtnSize - 5, minX + titleBtnSize - 4, btnY + titleBtnSize - 5);
 
-    // Content area background
-    float contentX = offsetX + borderSize;
-    float contentY = offsetY + borderSize + titleBarHeight;
-    float contentW = w - borderSize * 2;
-    float contentH = h - borderSize * 2 - titleBarHeight - bottomBarHeight;
+    // Maximize button □
+    drawTitleButton(maxX, btnY, titleBtnSize);
+    ofSetColor(0, 0, 0);
+    ofNoFill();
+    ofDrawRectangle(maxX + 3, btnY + 3, titleBtnSize - 7, titleBtnSize - 7);
+    ofDrawLine(maxX + 3, btnY + 5, maxX + titleBtnSize - 4, btnY + 5); // thicker top bar
+    ofFill();
 
+    // Close button X
+    drawTitleButton(closeX, btnY, titleBtnSize);
+    ofSetColor(0, 0, 0);
+    ofDrawLine(closeX + 4, btnY + 4, closeX + titleBtnSize - 5, btnY + titleBtnSize - 5);
+    ofDrawLine(closeX + titleBtnSize - 5, btnY + 4, closeX + 4, btnY + titleBtnSize - 5);
+    // Thicken the X
+    ofDrawLine(closeX + 5, btnY + 4, closeX + titleBtnSize - 4, btnY + titleBtnSize - 5);
+    ofDrawLine(closeX + titleBtnSize - 4, btnY + 4, closeX + 5, btnY + titleBtnSize - 5);
+
+    // ---- Content area with sunken border ----
+    float sunkenX = offsetX + borderSize;
+    float sunkenY = offsetY + borderSize + titleBarHeight;
+    float sunkenW = w - borderSize * 2;
+    float sunkenH = contentH + sunkenInset * 2;
+
+    // White content background (inside the sunken border)
     ofSetColor(255, 255, 255);
-    ofDrawRectangle(contentX, contentY, contentW, contentH);
+    ofDrawRectangle(sunkenX + sunkenInset, sunkenY + sunkenInset, contentW, contentH);
 
-    // Draw input frame scaled inside content area
-    float scale = settings->contentScale->value;
-    float scaledW = contentW * scale;
-    float scaledH = contentH * scale;
-    float frameX = contentX + (contentW - scaledW) / 2;
-    float frameY = contentY + (contentH - scaledH) / 2;
+    // Draw the sunken inset border
+    drawSunkenRect(sunkenX, sunkenY, sunkenW, sunkenH);
 
+    // Draw input frame filling the content area
     ofSetColor(255, 255, 255);
-    frame->draw(frameX, frameY, scaledW, scaledH);
+    frame->draw(sunkenX + sunkenInset, sunkenY + sunkenInset, contentW, contentH);
 
-    // Bottom bar
+    // ---- Etched separator line between content and button bar ----
+    float sepY = sunkenY + sunkenH + 4;
+    drawEtchedLine(offsetX + borderSize + 6, offsetX + w - borderSize - 6, sepY);
+
+    // ---- Bottom button bar ----
     float bottomY = offsetY + h - borderSize - bottomBarHeight;
-    ofSetColor(192, 192, 192);
-    ofDrawRectangle(offsetX + borderSize, bottomY, w - borderSize * 2, bottomBarHeight);
 
-    // Buttons - collect non-empty button texts
+    // Buttons
     std::vector<std::string> buttonTexts;
     if (!settings->buttonText->stringValue.empty()) buttonTexts.push_back(settings->buttonText->stringValue);
     if (!settings->buttonText2->stringValue.empty()) buttonTexts.push_back(settings->buttonText2->stringValue);
     if (!settings->buttonText3->stringValue.empty()) buttonTexts.push_back(settings->buttonText3->stringValue);
 
     if (buttonTexts.size() > 0 && buttonFont.isLoaded()) {
-      float buttonW = 80;
-      float buttonH = 24;
-      float buttonSpacing = 10;
+      float buttonW = 95;
+      float buttonH = 30;
+      float buttonSpacing = 6;
       float totalButtonsWidth = buttonTexts.size() * buttonW + (buttonTexts.size() - 1) * buttonSpacing;
-      float startX = offsetX + (w - totalButtonsWidth) / 2;
+      float startX = offsetX + w - borderSize - 10 - totalButtonsWidth; // Right-aligned (Win2K style)
 
-      for (int i = 0; i < buttonTexts.size(); i++) {
-        float buttonX = startX + i * (buttonW + buttonSpacing);
-        float buttonY = bottomY + (bottomBarHeight - buttonH) / 2;
+      for (int i = 0; i < (int)buttonTexts.size(); i++) {
+        float bx = startX + i * (buttonW + buttonSpacing);
+        float by = bottomY + (bottomBarHeight - buttonH) / 2;
 
-        drawBeveledRect(buttonX, buttonY, buttonW, buttonH, true);
+        drawBeveledRect(bx, by, buttonW, buttonH, true);
+
+        // Dotted focus rect on first button (default button)
+        if (i == 0) {
+          drawFocusRect(bx + 4, by + 4, buttonW - 8, buttonH - 8);
+        }
 
         ofSetColor(0, 0, 0);
         auto bbox = buttonFont.getStringBoundingBox(buttonTexts[i], 0, 0);
-        float textX = buttonX + (buttonW - bbox.width) / 2;
-        float textY = buttonY + (buttonH + bbox.height) / 2 - 2;
+        float textX = bx + (buttonW - bbox.width) / 2 - bbox.x;
+        float textY = by + (buttonH - bbox.height) / 2 - bbox.y;
         buttonFont.drawString(buttonTexts[i], textX, textY);
       }
     }
-
-    // Outer 3D border
-    // Outer highlight
-    ofSetColor(223, 223, 223);
-    ofDrawLine(offsetX, offsetY, offsetX + w, offsetY); // top
-    ofDrawLine(offsetX, offsetY, offsetX, offsetY + h); // left
-
-    // Outer shadow
-    ofSetColor(64, 64, 64);
-    ofDrawLine(offsetX, offsetY + h - 1, offsetX + w, offsetY + h - 1); // bottom
-    ofDrawLine(offsetX + w - 1, offsetY, offsetX + w - 1, offsetY + h); // right
-
-    // Inner shadow (just inside the window)
-    ofSetColor(128, 128, 128);
-    ofDrawLine(offsetX + borderSize - 1, offsetY + borderSize - 1, offsetX + w - borderSize + 1, offsetY + borderSize - 1); // top
-    ofDrawLine(offsetX + borderSize - 1, offsetY + borderSize - 1, offsetX + borderSize - 1, offsetY + h - borderSize + 1); // left
 
     canvas->end();
   }
@@ -288,9 +393,6 @@ struct WindowsShader: Shader {
     if (ImGui::InputText("Button Text 3", buttonBuffer3, 256)) {
       settings->buttonText3->stringValue = std::string(buttonBuffer3);
     }
-
-    // Content scale slider
-    CommonViews::ShaderParameter(settings->contentScale, nullptr);
 
     // Floating mode toggle
     CommonViews::ShaderCheckbox(settings->floating);

@@ -225,6 +225,10 @@ final class NottawaEngine {
         ntw_set_parameter_bool(paramId, value)
     }
 
+    func setParameterString(paramId: String, value: String) {
+        ntw_set_parameter_string(paramId, value)
+    }
+
     func setParameterColor(paramId: String, r: Float, g: Float, b: Float, a: Float) {
         ntw_set_parameter_color(paramId, r, g, b, a)
     }
@@ -243,6 +247,10 @@ final class NottawaEngine {
 
     func clearFeedbackBuffer(shaderId: String) {
         ntw_clear_feedback_buffer(shaderId)
+    }
+
+    func resetBouncePosition(shaderId: String) {
+        ntw_reset_bounce_position(shaderId)
     }
 
     // MARK: - Oscillator Control
@@ -343,6 +351,16 @@ final class NottawaEngine {
 
     func isShaderBypassed(id: String) -> Bool {
         ntw_get_shader_bypassed(id) != 0
+    }
+
+    // MARK: - Clear On Disconnect (global view setting)
+
+    func setClearOnDisconnect(_ enabled: Bool) {
+        ntw_set_clear_on_disconnect(enabled ? 1 : 0)
+    }
+
+    var isClearOnDisconnect: Bool {
+        ntw_get_clear_on_disconnect() != 0
     }
 
     func shaderDepth(id: String) -> Int {
@@ -1066,6 +1084,20 @@ final class NottawaEngine {
 
     func removeMidiBinding(paramId: String) {
         ntw_remove_midi_binding(paramId)
+    }
+
+    func midiInputs() -> [MidiInputInfo] {
+        var count: Int32 = 0
+        guard let ptr = ntw_get_midi_inputs(&count), count > 0 else { return [] }
+        defer { ntw_free_midi_input_info_array(ptr, count) }
+        return (0..<Int(count)).map { MidiInputInfo(from: ptr[$0]) }
+    }
+
+    func midiAssignments() -> [MidiAssignmentInfo] {
+        var count: Int32 = 0
+        guard let ptr = ntw_get_midi_assignments(&count), count > 0 else { return [] }
+        defer { ntw_free_midi_assignment_info_array(ptr, count) }
+        return (0..<Int(count)).map { MidiAssignmentInfo(from: ptr[$0]) }
     }
 
     func registerMidiLearnedCallback(_ callback: @escaping (String, String) -> Void) {

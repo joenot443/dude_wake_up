@@ -191,9 +191,9 @@ struct PreviewWindowContentView: View {
     var body: some View {
         Group {
             if stretchToFill {
-                TextureDisplayView(connectableId: connectableId)
+                IOSurfaceOutputView(connectableId: connectableId)
             } else {
-                TextureDisplayView(connectableId: connectableId)
+                IOSurfaceOutputView(connectableId: connectableId)
                     .aspectRatio(aspect, contentMode: .fit)
             }
         }

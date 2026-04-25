@@ -8,11 +8,17 @@
 #include "ShaderChainerService.hpp"
 #include "Models/Strand.hpp"
 #include "AsciiShader.hpp"
+#include "DarkenShader.hpp"
+#include "LightenShader.hpp"
+#include "SolarWaveShader.hpp"
+#include "ChromaCompassShader.hpp"
 #include "AuroraShader.hpp"
 #include "NeonShader.hpp"
 #include "ScrapbookShader.hpp"
 #include "FlockingShader.hpp"
 #include "AudioCymaticsShader.hpp"
+#include "AudioAuroraShader.hpp"
+#include "AudioPulseGridShader.hpp"
 #include "RuttEtraShader.hpp"
 #include "WindowsShader.hpp"
 #include "CircleBlurShader.hpp"
@@ -151,6 +157,7 @@
 #include "HSBShader.hpp"
 #include "KaleidoscopeShader.hpp"
 #include "CrystalKaleidoscopeShader.hpp"
+#include "CyberWarehouseShader.hpp"
 #include "LiquidShader.hpp"
 #include "MelterShader.hpp"
 #include "MirrorShader.hpp"
@@ -982,9 +989,24 @@ void ShaderChainerService::breakConnectionForConnectionId(std::string connection
     connectionMap.erase(it);
     return;
   }
+  auto endConnectable = connection->end;
+  InputSlot disconnectedSlot = connection->inputSlot;
   connection->start->removeConnection(connection);
   connection->end->removeConnection(connection);
   connectionMap.erase(it);
+
+  // If a Main input was just removed and the global "Clear on Disconnect"
+  // view setting is enabled, zero the end shader's output frame so stale
+  // pixels don't linger after disconnection.
+  if (clearOnDisconnect && endConnectable && disconnectedSlot == InputSlotMain &&
+      endConnectable->connectableType() == ConnectableTypeShader) {
+    auto shader = std::dynamic_pointer_cast<Shader>(endConnectable);
+    if (shader && !shader->hasInputAtSlot(InputSlotMain) &&
+        shader->lastFrame && shader->lastFrame->isAllocated()) {
+      shader->clearLastFrame();
+    }
+  }
+
   ConfigService::getService()->saveDefaultConfigFile();
 }
 
@@ -1041,9 +1063,45 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeDarken: {
+      auto settings = new DarkenSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<DarkenShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeLighten: {
+      auto settings = new LightenSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<LightenShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeSolarWave: {
+      auto settings = new SolarWaveSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<SolarWaveShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeChromaCompass: {
+      auto settings = new ChromaCompassSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<ChromaCompassShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeAurora: {
       auto settings = new AuroraSettings(shaderId, shaderJson);
       auto shader = std::make_shared<AuroraShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeAudioPulseGrid: {
+      auto settings = new AudioPulseGridSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AudioPulseGridShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeAudioAurora: {
+      auto settings = new AudioAuroraSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AudioAuroraShader>(settings);
       shader->setup();
       return shader;
     }
@@ -2021,6 +2079,13 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
     {
       auto settings = new CrystalKaleidoscopeSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<CrystalKaleidoscopeShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeCyberWarehouse:
+    {
+      auto settings = new CyberWarehouseSettings(shaderId, shaderJson, shaderTypeName(shaderType));
+      auto shader = std::make_shared<CyberWarehouseShader>(settings);
       shader->setup();
       return shader;
     }

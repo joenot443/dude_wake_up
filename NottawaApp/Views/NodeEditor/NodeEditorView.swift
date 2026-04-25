@@ -498,7 +498,7 @@ struct NodeDragOverlayView: NSViewRepresentable {
         view.coordinator = context.coordinator
         view.wantsLayer = true
         view.layerContentsRedrawPolicy = .onSetNeedsDisplay
-        view.registerForDraggedTypes([.string])
+        view.registerForDraggedTypes([.string, .fileURL])
         view.accentNSColor = NSColor(accentColor)
         view.surfaceNSColor = NSColor(surfaceColor)
         return view
@@ -1250,24 +1250,52 @@ struct NodeDragOverlayView: NSViewRepresentable {
         }
 
         override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
-            guard let coordinator,
-                  let payload = sender.draggingPasteboard.string(forType: .string) else { return false }
+            guard let coordinator else { return false }
             let dropPoint = convert(sender.draggingLocation, from: nil)
-            let targetNodeId = coordinator.hitTestNode(at: dropPoint)
-            let targetCableId = coordinator.viewModel.dropHoverCableId
-            DispatchQueue.main.async {
-                coordinator.viewModel.isDropTargetActive = false
-                coordinator.viewModel.dropHoverNodeId = nil
-                coordinator.viewModel.dropHoverCableId = nil
-                coordinator.viewModel.dropCableInsertionPoint = nil
-                coordinator.viewModel.addNodeFromDrop(
-                    payload: payload,
-                    at: CGPoint(x: dropPoint.x, y: dropPoint.y),
-                    targetNodeId: targetNodeId,
-                    targetCableId: targetCableId
-                )
+            let canvasPoint = CGPoint(x: dropPoint.x, y: dropPoint.y)
+
+            // Check for string payload first (sidebar shaders, sources, strands)
+            if let payload = sender.draggingPasteboard.string(forType: .string), !payload.isEmpty {
+                let targetNodeId = coordinator.hitTestNode(at: dropPoint)
+                let targetCableId = coordinator.viewModel.dropHoverCableId
+                DispatchQueue.main.async {
+                    coordinator.viewModel.isDropTargetActive = false
+                    coordinator.viewModel.dropHoverNodeId = nil
+                    coordinator.viewModel.dropHoverCableId = nil
+                    coordinator.viewModel.dropCableInsertionPoint = nil
+                    coordinator.viewModel.addNodeFromDrop(
+                        payload: payload,
+                        at: canvasPoint,
+                        targetNodeId: targetNodeId,
+                        targetCableId: targetCableId
+                    )
+                }
+                return true
             }
-            return true
+
+            // Fall back to file URL drops (video/image from Finder)
+            if let urls = sender.draggingPasteboard.readObjects(forClasses: [NSURL.self]) as? [URL],
+               let fileURL = urls.first, fileURL.isFileURL {
+                let path = fileURL.path
+                let ext = fileURL.pathExtension.lowercased()
+                let videoExts: Set = ["mp4", "mov", "avi", "mkv", "flv", "wmv"]
+                let imageExts: Set = ["png", "jpg", "jpeg", "gif"]
+
+                DispatchQueue.main.async {
+                    coordinator.viewModel.isDropTargetActive = false
+                    coordinator.viewModel.dropHoverNodeId = nil
+                    coordinator.viewModel.dropHoverCableId = nil
+                    coordinator.viewModel.dropCableInsertionPoint = nil
+                    if videoExts.contains(ext) {
+                        coordinator.viewModel.addFileVideoSource(path: path, at: coordinator.viewModel.screenToCanvas(canvasPoint))
+                    } else if imageExts.contains(ext) {
+                        coordinator.viewModel.addImageVideoSource(path: path, at: coordinator.viewModel.screenToCanvas(canvasPoint))
+                    }
+                }
+                return true
+            }
+
+            return false
         }
     }
 }

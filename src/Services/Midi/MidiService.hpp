@@ -61,6 +61,8 @@ public:
   
   MidiPairing* pairingForParameterId(std::string paramId);
   MidiPairing* pairingForDescriptor(std::string descriptor);
+  const std::map<std::string, MidiPairing>& getPairings() const { return parameterIdToPairing; }
+  const std::vector<ofxMidiIn*>& getInputs() const { return inputs; }
   
   /// Parameter currently being learned.
   std::shared_ptr<Parameter> learningParam;

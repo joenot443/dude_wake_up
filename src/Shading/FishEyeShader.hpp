@@ -22,13 +22,13 @@ public:
   std::shared_ptr<Oscillator> amountOscillator;
   
   FishEyeSettings(std::string shaderId, json j, std::string name) :
-  amount(std::make_shared<Parameter>("Amount", 0.5, 0.1, 1.0)),
+  amount(std::make_shared<Parameter>("Amount", 0.5, 0.0, 1.0)),
   amountOscillator(std::make_shared<WaveformOscillator>(amount)),
   ShaderSettings(shaderId, j, name) {
     parameters = { amount };
     oscillators = { amountOscillator };
-    registerParameters();
     load(j);
+    registerParameters();
   };
 };
 
@@ -40,7 +40,6 @@ public:
 
   void setup() override {
     shader.load("shaders/FishEye");
-    shader.load("shaders/FishEye");
   }
   
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
@@ -48,7 +47,7 @@ public:
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
-    shader.setUniform1f("amount", fmin(settings->amount->value, 0.999));
+    shader.setUniform1f("amount", settings->amount->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
     shader.end();

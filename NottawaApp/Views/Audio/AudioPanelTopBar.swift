@@ -43,6 +43,24 @@ struct AudioPanelTopBar: View {
             )
             .frame(width: 180)
 
+            if data.snapshot.audioActive {
+                ListeningIndicator(sourceName: data.audioSources.first(where: { $0.id == data.selectedSourceId })?.name)
+            } else {
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(theme.colors.textTertiary)
+                        .frame(width: 8, height: 8)
+                    Text("Inactive")
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                        .foregroundStyle(theme.colors.textTertiary)
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(theme.colors.backgroundTertiary.opacity(0.5))
+                .clipShape(Capsule())
+            }
+
             if data.fileState.isFileSource {
                 theme.colors.border.frame(width: 1, height: 20)
 
@@ -103,5 +121,39 @@ struct AudioPanelTopBar: View {
         guard seconds.isFinite else { return "0:00" }
         let totalSec = Int(max(0, seconds))
         return String(format: "%d:%02d", totalSec / 60, totalSec % 60)
+    }
+}
+
+// MARK: - Listening Indicator
+
+private struct ListeningIndicator: View {
+    @Environment(ThemeManager.self) private var theme
+    let sourceName: String?
+    @State private var pulse = false
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Circle()
+                .fill(Color.red)
+                .frame(width: 8, height: 8)
+                .opacity(pulse ? 1.0 : 0.4)
+                .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: pulse)
+                .onAppear { pulse = true }
+
+            Text("Listening")
+                .font(.caption2)
+                .fontWeight(.medium)
+                .foregroundStyle(theme.colors.textSecondary)
+
+            if let name = sourceName {
+                Text("via \(name)")
+                    .font(.caption2)
+                    .foregroundStyle(theme.colors.textTertiary)
+            }
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(Color.red.opacity(0.08))
+        .clipShape(Capsule())
     }
 }

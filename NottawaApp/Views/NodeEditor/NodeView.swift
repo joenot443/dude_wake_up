@@ -15,6 +15,7 @@ struct NodeView: View {
     @Environment(NodeEditorViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var theme
     @Environment(HelpGuideViewModel.self) private var helpGuide
+    @AppStorage("showNodeHints") private var showNodeHints: Bool = true
 
     // Base dimensions (at scale 1.0)
     private let baseNodeWidth: CGFloat = 260
@@ -78,7 +79,7 @@ struct NodeView: View {
                     .opacity(node.isActive ? 1.0 : 0.4)
 
                 // Disconnected shader overlay — prompt to connect input
-                if node.isShader && node.inputCount > 0 && connectedInputSlots.isEmpty {
+                if showNodeHints && node.isShader && node.inputCount > 0 && connectedInputSlots.isEmpty {
                     ZStack {
                         theme.colors.background.opacity(0.6)
                         VStack(spacing: 4 * scale) {
@@ -95,7 +96,7 @@ struct NodeView: View {
                 }
 
                 // Audio-reactive overlay — hint to enable audio
-                if node.isAudioReactive && !viewModel.isAudioActive {
+                if showNodeHints && node.isAudioReactive && !viewModel.isAudioActive {
                     // Don't show if the "connect a source" overlay is visible
                     let showsDisconnected = node.isShader && node.inputCount > 0 && connectedInputSlots.isEmpty
                     if !showsDisconnected {
@@ -104,8 +105,8 @@ struct NodeView: View {
                             VStack(spacing: 4 * scale) {
                                 Image(systemName: "waveform")
                                     .font(scaledFont(20))
-                                    .foregroundStyle(theme.colors.accent.opacity(0.8))
-                                Text("Requires audio input")
+                                    .foregroundStyle(theme.colors.textSecondary.opacity(0.3))
+                                Text("Enable audio from the menu bar")
                                     .font(scaledFont(9, weight: .medium))
                                     .foregroundStyle(theme.colors.textSecondary)
                             }
@@ -216,7 +217,7 @@ struct NodeView: View {
                         endPoint: .bottom
                     )
                 )
-                .opacity(isSelected ? 1.0 : 0.2)
+                .opacity(isSelected ? 1.0 : 0.6)
                 .animation(.easeInOut(duration: 0.2), value: isSelected)
             }
             .frame(width: nodeWidth, height: nodeHeight)

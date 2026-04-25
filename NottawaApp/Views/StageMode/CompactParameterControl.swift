@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CompactParameterControl: View {
     @Environment(ThemeManager.self) private var theme
+    @Environment(NodeEditorViewModel.self) private var viewModel
     let param: ParameterInfo
 
     @State private var sliderValue: Float
@@ -29,7 +30,47 @@ struct CompactParameterControl: View {
         ))
     }
 
+    private var isSelected: Bool {
+        viewModel.selectedParameterId == param.id
+    }
+
     var body: some View {
+        if param.parameterType == .hidden {
+            EmptyView()
+        } else {
+            content
+                .padding(.horizontal, 4)
+                .padding(.vertical, 2)
+                .background(
+                    RoundedRectangle(cornerRadius: 5)
+                        .fill(isSelected ? theme.colors.accent.opacity(0.08) : Color.clear)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 5)
+                        .strokeBorder(isSelected ? theme.colors.accent.opacity(0.6) : Color.clear, lineWidth: 1)
+                )
+                .contentShape(Rectangle())
+                .id(param.id)
+                .simultaneousGesture(
+                    TapGesture().onEnded {
+                        viewModel.selectedParameterId = param.id
+                    }
+                )
+                .onReceive(NotificationCenter.default.publisher(for: .parameterStepAnimated)) { note in
+                    guard let info = note.userInfo,
+                          let targetId = info["paramId"] as? String,
+                          targetId == param.id else { return }
+                    withAnimation(.easeOut(duration: 0.18)) {
+                        if let v = info["value"] as? Float { sliderValue = v }
+                        if let v = info["intValue"] as? Int { intValue = v }
+                        if let v = info["boolValue"] as? Bool { boolValue = v }
+                    }
+                }
+        }
+    }
+
+    @ViewBuilder
+    private var content: some View {
         switch param.parameterType {
         case .hidden:
             EmptyView()
@@ -137,6 +178,19 @@ struct CompactParameterControl: View {
                         )
                     }
                 unfavoriteButton
+            }
+
+        case .text:
+            VStack(alignment: .leading, spacing: 1) {
+                Text(param.name)
+                    .font(.caption2)
+                    .lineLimit(1)
+                TextField(param.name, text: Binding(
+                    get: { param.stringValue },
+                    set: { NottawaEngine.shared.setParameterString(paramId: param.id, value: $0) }
+                ))
+                .textFieldStyle(.roundedBorder)
+                .font(.caption2)
             }
 
         case .standard:

@@ -132,6 +132,9 @@ void LibrarySource::runSetupOnMainThread(ofEventArgs & args)
 }
 
 void LibrarySource::teardown() {
+  if (libraryFile && (libraryFile->isDownloading || state == LibrarySourceState_Downloading)) {
+    LibraryService::getService()->pauseDownload(libraryFile);
+  }
   FileSource::teardown();
 }
 
