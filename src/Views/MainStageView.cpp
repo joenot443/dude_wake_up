@@ -28,7 +28,6 @@
 #include "ShaderType.hpp"
 #include "UUID.hpp"
 #include "VideoSourceService.hpp"
-#include "../Services/SparkleUpdater.h"
 #include "implot.h"
 #include "FramePreview.hpp"
 
@@ -327,12 +326,6 @@ void MainStageView::drawMenu()
         VideoSourceService::getService()->clear();
         ConfigService::getService()->closeWorkspace();
       }
-      #ifdef TARGET_OSX
-      if (ImGui::MenuItem("Check for Updates..."))
-      {
-        SparkleUpdaterService::getInstance().checkForUpdates();
-      }
-      #endif
       ImGui::EndMenu();
     }
     

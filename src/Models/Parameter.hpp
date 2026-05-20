@@ -11,6 +11,7 @@
 #include <string>
 #include <memory>
 #include "ofMain.h"
+#include "LifecycleCounter.hpp"
 
 #ifndef BaseField_h
 #define BaseField_h
@@ -97,20 +98,11 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
     return j;
   }
 
-  void addDriver(std::shared_ptr<Parameter> dr)
-  {
-    driver = dr;
-    shift = std::make_shared<Parameter>("shift", 0.5, 0.0, 1.0);
-    scale = std::make_shared<Parameter>("scale", 1.0, 0.0, 2.0);
-  }
-  
+  void addDriver(std::shared_ptr<Parameter> dr);
+
   bool hasDriver() { return driver != nullptr; }
-  
-  void removeDriver() {
-    driver = nullptr;
-    shift = nullptr;
-    scale = nullptr;
-  }
+
+  void removeDriver();
 
   void load(json j)
   {
@@ -268,6 +260,7 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
 
 private:
   Parameter(){};
+  LIFECYCLE_TRACK("Parameter");
 };
 
 #endif /* BaseField_h */

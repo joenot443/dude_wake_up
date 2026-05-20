@@ -9,18 +9,28 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(ThemeManager.self) private var theme
-    @State private var resolutionIndex = 2
+    @State private var resolutionIndex = 3
     @State private var midiInputs: [MidiInputInfo] = []
     @State private var midiAssignments: [MidiAssignmentInfo] = []
+    @State private var midiSmoothingEnabled: Bool = false
+    @State private var midiSmoothingDurationMs: Double = 80.0
     @AppStorage("showNodeHints") private var showNodeHints: Bool = true
+    @AppStorage("autoAdvanceOutputWindow") private var autoAdvanceOutputWindow: Bool = true
+    @AppStorage("outputWindowFadeDuration") private var outputWindowFadeDuration: Double = 0.3
+    @State private var screenshotService = ScreenshotService.shared
+    @State private var screenshotFolderPath: String?
 
-    private let resolutionOptions = [
-        (name: "480p", index: 0),
-        (name: "540p", index: 1),
-        (name: "720p", index: 2),
-        (name: "1080p", index: 3),
-        (name: "1440p", index: 4),
-        (name: "4K", index: 5),
+    // Index → label table mirrors LayoutStateService.cpp::updateResolutionSettings.
+    // Previously these labels were offset by two against the actual C++ mapping,
+    // so picking "480p" silently set the engine to 240p, etc.
+    private let resolutionOptions: [(name: String, index: Int)] = [
+        ("240p",  0),
+        ("360p",  1),
+        ("480p",  2),
+        ("720p",  3),
+        ("1080p", 4),
+        ("1440p", 5),
+        ("4K",    6),
     ]
 
     var body: some View {
@@ -46,6 +56,77 @@ struct SettingsView: View {
                 }
 
                 Toggle("Show Node Hints", isOn: $showNodeHints)
+                Toggle("Automatically advance output window", isOn: $autoAdvanceOutputWindow)
+
+                HStack {
+                    Text("Advance Fade")
+                    Slider(value: $outputWindowFadeDuration, in: 0...2)
+                        .disabled(!autoAdvanceOutputWindow)
+                    Text(String(format: "%.1fs", outputWindowFadeDuration))
+                        .font(.caption)
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                        .frame(width: 36, alignment: .trailing)
+                }
+            }
+
+            // MARK: - Screenshots
+
+            Section("Screenshots") {
+                LabeledContent("Folder") {
+                    HStack(spacing: 6) {
+                        Text(screenshotFolderPath ?? "Not set — chosen on first capture")
+                            .font(.caption)
+                            .foregroundStyle(screenshotFolderPath == nil ? .secondary : .primary)
+                            .lineLimit(1)
+                            .truncationMode(.head)
+                        Button("Change…") {
+                            if let url = screenshotService.chooseFolder() {
+                                screenshotFolderPath = url.path
+                            }
+                        }
+                        .controlSize(.small)
+                    }
+                }
+
+                Picker("Format", selection: Binding(
+                    get: { screenshotService.format },
+                    set: { screenshotService.format = $0 }
+                )) {
+                    Text("PNG").tag(ScreenshotFormat.png)
+                    Text("JPEG").tag(ScreenshotFormat.jpeg)
+                }
+
+                Text("In a preview window: S to save, ⇧S to choose folder, C to copy.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+
+            // MARK: - MIDI Smoothing
+
+            Section("MIDI Smoothing") {
+                Toggle("Enable Smoothing", isOn: $midiSmoothingEnabled)
+                    .onChange(of: midiSmoothingEnabled) { _, newValue in
+                        NottawaEngine.shared.midiSmoothingEnabled = newValue
+                    }
+
+                HStack {
+                    Text("Duration")
+                    Slider(value: $midiSmoothingDurationMs, in: 0...500)
+                        .disabled(!midiSmoothingEnabled)
+                        .onChange(of: midiSmoothingDurationMs) { _, newValue in
+                            NottawaEngine.shared.midiSmoothingDurationMs = Float(newValue)
+                        }
+                    Text(String(format: "%.0f ms", midiSmoothingDurationMs))
+                        .font(.caption)
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                        .frame(width: 56, alignment: .trailing)
+                }
+
+                Text("Eases MIDI knob/fader changes over the chosen duration. Helpful for 7-bit CC stepping; bypassed for toggles.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
             }
 
             // MARK: - MIDI Devices
@@ -102,7 +183,10 @@ struct SettingsView: View {
         .frame(width: 380)
         .onAppear {
             resolutionIndex = NottawaEngine.shared.resolutionSettingIndex
+            midiSmoothingEnabled = NottawaEngine.shared.midiSmoothingEnabled
+            midiSmoothingDurationMs = Double(NottawaEngine.shared.midiSmoothingDurationMs)
             refreshMidi()
+            screenshotFolderPath = screenshotService.currentFolderDisplayPath
         }
     }
 

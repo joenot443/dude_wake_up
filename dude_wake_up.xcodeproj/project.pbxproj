@@ -18,6 +18,10 @@
 		024FAE812DA0207D00DE3197 /* ofxFastFboReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024FAE592DA0207D00DE3197 /* ofxFastFboReader.cpp */; };
 		024FAE8D2DA02CF600DE3197 /* AVFRecorderWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 024FAE8B2DA02CF600DE3197 /* AVFRecorderWrapper.mm */; };
 		024FAE8E2DA02CF600DE3197 /* AVFRecorder.m in Sources */ = {isa = PBXBuildFile; fileRef = 024FAE892DA02CF600DE3197 /* AVFRecorder.m */; };
+		024FAE942DA02CF600DE3197 /* FileSourceCacheBuilder.mm in Sources */ = {isa = PBXBuildFile; fileRef = 024FAE932DA02CF600DE3197 /* FileSourceCacheBuilder.mm */; };
+		024FAE952DA02CF600DE3197 /* FileSourceCacheBuilder.mm in Sources */ = {isa = PBXBuildFile; fileRef = 024FAE932DA02CF600DE3197 /* FileSourceCacheBuilder.mm */; };
+		024FAEA22DA02CF600DE3197 /* IOSurfaceVideoPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 024FAEA12DA02CF600DE3197 /* IOSurfaceVideoPlayer.mm */; };
+		024FAEA32DA02CF600DE3197 /* IOSurfaceVideoPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 024FAEA12DA02CF600DE3197 /* IOSurfaceVideoPlayer.mm */; };
 		02864DF12D94611B000CE0D4 /* MSABPMTapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02864DEF2D94611B000CE0D4 /* MSABPMTapper.cpp */; };
 		028651362D94673B000CE0D4 /* ofxAudioFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028651352D94673B000CE0D4 /* ofxAudioFile.cpp */; };
 		028651472D9468DB000CE0D4 /* imgui_canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0286513F2D9468DB000CE0D4 /* imgui_canvas.cpp */; };
@@ -45,13 +49,12 @@
 		02CED2802E6F9E580010EC68 /* src_sinc.c in Sources */ = {isa = PBXBuildFile; fileRef = 02CED27D2E6F9E580010EC68 /* src_sinc.c */; };
 		02CED2812E6F9E580010EC68 /* src_linear.c in Sources */ = {isa = PBXBuildFile; fileRef = 02CED27C2E6F9E580010EC68 /* src_linear.c */; };
 		02CED2822E6F9E580010EC68 /* samplerate.c in Sources */ = {isa = PBXBuildFile; fileRef = 02CED27B2E6F9E580010EC68 /* samplerate.c */; };
-		02D080382EE85937003AD114 /* SparkleUpdater.mm in Sources */ = {isa = PBXBuildFile; fileRef = 02D080372EE85937003AD114 /* SparkleUpdater.mm */; };
-		02D0803B2EE9B015003AD114 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 02D080342EE857C3003AD114 /* Sparkle.framework */; };
 		02D0803C2FFAA000003AD114 /* URLSchemeHandler.mm in Sources */ = {isa = PBXBuildFile; fileRef = 02D0803A2FFAA000003AD114 /* URLSchemeHandler.mm */; };
 		02EF52772E6B706400ECC53A /* PlaylistSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02EF52762E6B706400ECC53A /* PlaylistSource.cpp */; };
 		02F157C82E1722E0003B6C2A /* TimePanelView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F157C72E1722E0003B6C2A /* TimePanelView.cpp */; };
 		02F157CB2E1722FE003B6C2A /* TimeService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02F157CA2E1722FE003B6C2A /* TimeService.cpp */; };
 		"02F78074-12C3-4CFB-8B4D-C894E1498010" /* MidiService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "DD20483B-50DE-4F4F-85AC-74CAF3C8F56E" /* MidiService.cpp */; };
+		"C1D2E3F4-5678-4ABC-DEF0-1A2B3C4D5E6F" /* MidiSmoothingService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "A1B2C3D4-5678-4ABC-DEF0-1A2B3C4D5E6F" /* MidiSmoothingService.cpp */; };
 		03C3F83E05DC486ABCC05BB7 /* InlineBrowserContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5BCE57617B743CDBBD6F8E5 /* InlineBrowserContainer.swift */; };
 		"049D0DB9-223D-432B-B78A-7CACA8EF4DC2" /* ShaderChainerService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "7AA1FB17-DC75-48A4-A385-A676D62B3120" /* ShaderChainerService.cpp */; };
 		059672AD1A8E41FC85077708 /* imgui_node_editor_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028651442D9468DB000CE0D4 /* imgui_node_editor_api.cpp */; };
@@ -80,7 +83,6 @@
 		148FA678FB0D43D98F194C66 /* ShaderBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED110DBF5B3449788F9CC2D7 /* ShaderBrowserView.swift */; };
 		168C774F02554C6A9FBE37F7 /* URLSchemeHandler.mm in Sources */ = {isa = PBXBuildFile; fileRef = 02D0803A2FFAA000003AD114 /* URLSchemeHandler.mm */; };
 		"16985793-8C39-4F12-BF84-E3615EA51B00" /* CommonStrings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "B4EB9BB5-31F5-468B-A9CB-D669322825CA" /* CommonStrings.cpp */; };
-		16DEF7F555CE45389C87A23A /* SparkleUpdater.mm in Sources */ = {isa = PBXBuildFile; fileRef = 02D080372EE85937003AD114 /* SparkleUpdater.mm */; };
 		18420F6015C64C20A92878DF /* ServiceStatics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C6E8941DB9784D20AC9ABAEA /* ServiceStatics.cpp */; };
 		19068B801B2A49B8A626F986 /* ParameterControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520EA3DA17B5417AA6C0D7C9 /* ParameterControlView.swift */; };
 		19763EE3730D42918A9ADD2E /* ofxAudioFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028651352D94673B000CE0D4 /* ofxAudioFile.cpp */; };
@@ -154,6 +156,7 @@
 		"490D2AA0-72C3-4FBF-A054-652CAB6089DD" /* ConfigService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "D46400BB-47CF-4D36-B131-04511A2C67EA" /* ConfigService.cpp */; };
 		"491D95F3-48E6-4F6A-A114-441E7FCFCAF1" /* imgui_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "39143AC4-A6EF-45D0-AAEA-DA640E9D82B4" /* imgui_demo.cpp */; };
 		493B99F75B1F447E8AA4E7FB /* MidiService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "DD20483B-50DE-4F4F-85AC-74CAF3C8F56E" /* MidiService.cpp */; };
+		"D1E2F3A4-5678-4ABC-DEF0-1A2B3C4D5E6F" /* MidiSmoothingService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "A1B2C3D4-5678-4ABC-DEF0-1A2B3C4D5E6F" /* MidiSmoothingService.cpp */; };
 		4A91D9165E4C49D4AA8B1B91 /* ImHelpers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "093B42EA-2413-467D-B91C-4A7C724D5009" /* ImHelpers.cpp */; };
 		"4AC435AC-7F45-44DC-8113-B5D5311C7047" /* OscillatorView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "91E735FF-FDA3-4403-BEA6-E219909A2C93" /* OscillatorView.cpp */; };
 		"4B11A9CA-F59F-4F2F-87EF-E6FF2E265A05" /* TextureService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "7781352D-8ED2-4588-B25C-17029F165EB4" /* TextureService.cpp */; };
@@ -216,6 +219,8 @@
 		76E74A8995024B2F83A39E68 /* kiss_fft.c in Sources */ = {isa = PBXBuildFile; fileRef = 028651722D94699B000CE0D4 /* kiss_fft.c */; };
 		"790DBE16-E73B-4C5E-BF78-804335431710" /* DefaultTheme.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "8825362F-6151-4ED0-BA75-CA3FC3E6FDAE" /* DefaultTheme.cpp */; };
 		"79FDB964-430A-434A-83C2-8189E221D78B" /* StageModeView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "523A9F92-6D65-4A8C-9743-56ABCD3D4984" /* StageModeView.cpp */; };
+		7A1B2C3D4E5F6A7B8C9D0E1F /* ScreenshotService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7E3F1A8B2D4E5F6A7B8C9D /* ScreenshotService.swift */; };
+		84C606F0BEE0E97201E01227 /* RecentWorkspacesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBE44CFC89A0F95F4D4C6A14 /* RecentWorkspacesService.swift */; };
 		"7AB682D1-3FEB-4225-B47A-9C28A710EFAF" /* MultiSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "166E0882-F427-4D90-8DD3-6F8508D27C84" /* MultiSource.cpp */; };
 		"7C74A5D5-6A58-4B5B-B780-CEC42B7474C9" /* ofxMidiClock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "3234C328-0EC1-45B9-9D5F-7459553A13A1" /* ofxMidiClock.cpp */; };
 		7CC043A8A25C47038A1F194F /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 028651AF2D95E208000CE0D4 /* icon.icns */; };
@@ -250,7 +255,6 @@
 		"91E0E9A7-70FE-4C51-BD57-EB473B0BCA7D" /* BookmarkService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "A8B85E9B-4E38-4AA9-9F54-33AC116D95FF" /* BookmarkService.cpp */; };
 		92B65930D33B4A109928D309 /* implot_items.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0286516C2D946978000CE0D4 /* implot_items.cpp */; };
 		946CAF30CA1A402AA5F14800 /* NodeShaderBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "B4C24936-3A60-49E4-992C-A47A70D7A969" /* NodeShaderBrowserView.cpp */; };
-		94FBBFF197A94048BA6A2105 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 02D080342EE857C3003AD114 /* Sparkle.framework */; };
 		95B9C475B8B74A3EA3AAA2AF /* Yin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0286515E2D946945000CE0D4 /* Yin.cpp */; };
 		97317D9B95434BE7A8219DC5 /* src_zoh.c in Sources */ = {isa = PBXBuildFile; fileRef = 02CED27E2E6F9E580010EC68 /* src_zoh.c */; };
 		987D9A32AA5B4F99BEFC0F21 /* RtMidi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "10278D86-DBB3-488C-A39E-C04AC0E634C7" /* RtMidi.cpp */; };
@@ -261,6 +265,9 @@
 		9C18CD15C7C74F42999AF60F /* PinView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACF2E4C0495D4BC9B934978B /* PinView.swift */; };
 		9C655CE65F0E444EA4B454EB /* ofxMidiMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "C9C70BB5-F65F-43CB-8160-A5190E577D10" /* ofxMidiMessage.cpp */; };
 		9CAB32595C2B4750AB2E748B /* MarkdownService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "B1E9BFCB-0FA5-4D73-841D-D4CE73F743A9" /* MarkdownService.cpp */; };
+		9F0E1D2C3B4A5968778695A4 /* ScreenshotFlashOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9F0A1B2C3D4E5F6A7B8C9D /* ScreenshotFlashOverlay.swift */; };
+		D3E4F5A6B7C890123456789A /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F5A6B7C8D90123456789AB /* ToastView.swift */; };
+		F5A6B7C8D9E0123456789ABC /* ShaderCodeEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6B7C8D9E0F1234567890ABC /* ShaderCodeEditorView.swift */; };
 		9FDDE5C2D294424DAB0D900E /* IOSurface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AE54079B38484FEE82F949A3 /* IOSurface.framework */; };
 		A0A410FE935643FE8D66DE2B /* ValueOscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "4B4A57F0-9929-4710-9CCE-99453D8C037A" /* ValueOscillator.cpp */; };
 		"A0BBE0F2-0ED9-44F9-97A1-46E639579F0B" /* AudioSourceService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "2A3F25C1-6CD6-49EF-8B45-D1542CF0EF20" /* AudioSourceService.cpp */; };
@@ -296,6 +303,7 @@
 		AUD0A1B2C3D4E5F6A700000E /* BarChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUD0A1B2C3D4E5F6A700000D /* BarChartView.swift */; };
 		B04DEBE8A556F592BE1B9386 /* PinStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40148AE7C65712ACF882C9DF /* PinStripView.swift */; };
 		"B09A2EED-CC6A-4AE4-B332-D7B3D4EC602F" /* ImageService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "CE7045C6-7787-4774-8161-F6F0E9E09577" /* ImageService.cpp */; };
+		B1C2D3E4F5A678901234B5C6 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C2D3E4F5A6B7890123456789 /* PrivacyInfo.xcprivacy */; };
 		B2C3D4E5F6A748B9C0D1E2F3 /* PreviewWindowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2D3C4B5A6F7988990A1B2C3 /* PreviewWindowManager.swift */; };
 		B37192BBF978394AE437AE0D /* StageModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 823513EDE000886C04125412 /* StageModeView.swift */; };
 		B67D5D1570694524836EC31C /* Gui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "CE80E7A3-09AE-48C4-93D1-2AA8CF94468B" /* Gui.cpp */; };
@@ -415,6 +423,7 @@
 		FA18D59035A04A1FBE62F866 /* CanvasGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD04E99EE814FB99F5193F1 /* CanvasGridView.swift */; };
 		FB4AB6543D104E4A9AD91369 /* src_linear.c in Sources */ = {isa = PBXBuildFile; fileRef = 02CED27C2E6F9E580010EC68 /* src_linear.c */; };
 		FB6B5A47EEE74534B18CEDC5 /* StrandBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "97D22C33-ED8E-4936-B68B-40824B88B349" /* StrandBrowserView.cpp */; };
+		FBAUXBLD1B2C3D4E5F708190 /* FeedbackAuxStrandView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBAUXFRA1B2C3D4E5F708190 /* FeedbackAuxStrandView.swift */; };
 		FC5E01CC2178420DAFBE303C /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "43FB1791-2C87-4DEB-A1C1-81CF4EDCE275" /* imgui_draw.cpp */; };
 		"FDA66C1A-DAA1-4A88-B691-491E99EA0516" /* ShaderInfoView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "E8C64843-7699-4637-A9A4-C21FA5289557" /* ShaderInfoView.cpp */; };
 		FEAB8664872A472D92ADE7AF /* Parameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "30B6FE5F-DA3E-43CB-B72E-EEDA8B5BC281" /* Parameter.cpp */; };
@@ -433,6 +442,7 @@
 		TSC0A1B2C3D4E5F6A7B8C9D2 /* TextSourceControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TSC0A1B2C3D4E5F6A7B8C9D0 /* TextSourceControlsView.swift */; };
 		WEL0A1B2C3D4E5F6A7B80001 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WEL0A1B2C3D4E5F6A7B80002 /* WelcomeView.swift */; };
 		WPV0A1B2C3D4E5F6A7B8C9D2 /* WaveformPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WPV0A1B2C3D4E5F6A7B8C9D0 /* WaveformPreviewView.swift */; };
+		XFRMCRPBLD1B2C3D4E5F6071 /* TransformCropPadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = XFRMCRPFRA1B2C3D4E5F6071 /* TransformCropPadView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -481,6 +491,13 @@
 		02370B942F9D25BD0019828E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0237FA6B2F9BC23F0019828E /* btrack~.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2FBBEAE508F335360078DB84;
+			remoteInfo = "max-external";
+		};
+		0261D4172FB4F8EC0067A00A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0261C2E82FB4F8D60067A00A /* btrack~.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 2FBBEAE508F335360078DB84;
 			remoteInfo = "max-external";
@@ -584,6 +601,11 @@
 		024FAE892DA02CF600DE3197 /* AVFRecorder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AVFRecorder.m; sourceTree = "<group>"; };
 		024FAE8A2DA02CF600DE3197 /* AVFRecorderWrapper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AVFRecorderWrapper.hpp; sourceTree = "<group>"; };
 		024FAE8B2DA02CF600DE3197 /* AVFRecorderWrapper.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = AVFRecorderWrapper.mm; sourceTree = "<group>"; };
+		024FAE922DA02CF600DE3197 /* FileSourceCacheBuilder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FileSourceCacheBuilder.hpp; sourceTree = "<group>"; };
+		024FAE932DA02CF600DE3197 /* FileSourceCacheBuilder.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FileSourceCacheBuilder.mm; sourceTree = "<group>"; };
+		024FAEA02DA02CF600DE3197 /* IOSurfaceVideoPlayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IOSurfaceVideoPlayer.hpp; sourceTree = "<group>"; };
+		024FAEA12DA02CF600DE3197 /* IOSurfaceVideoPlayer.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = IOSurfaceVideoPlayer.mm; sourceTree = "<group>"; };
+		0261C2E82FB4F8D60067A00A /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
 		"0265D595-A18D-41DE-BCDF-9B6017808CC8" /* AudioSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AudioSource.cpp; sourceTree = "<group>"; };
 		027BF6A22F786ED600FB4B24 /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
 		02864DEE2D94611B000CE0D4 /* MSABPMTapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSABPMTapper.h; sourceTree = "<group>"; };
@@ -842,6 +864,8 @@
 		"5B2B3D96-6A0F-4202-B11B-9F20DC4786A8" /* FlickerAudioShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = FlickerAudioShader.hpp; sourceTree = "<group>"; };
 		"5B5111E7-FE21-4A34-9529-5D26A19D1179" /* 16bitShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = 16bitShader.hpp; sourceTree = "<group>"; };
 		"5BA75C12-E200-4722-9570-11118DF3DCDB" /* CurlySquaresShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CurlySquaresShader.hpp; sourceTree = "<group>"; };
+		5C7E3F1A8B2D4E5F6A7B8C9D /* ScreenshotService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ScreenshotService.swift; path = NottawaApp/Engine/ScreenshotService.swift; sourceTree = "<group>"; };
+		FBE44CFC89A0F95F4D4C6A14 /* RecentWorkspacesService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RecentWorkspacesService.swift; path = NottawaApp/Engine/RecentWorkspacesService.swift; sourceTree = "<group>"; };
 		5CBC397FF88E48CB95EA5471 /* NodeEditorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = NodeEditorView.swift; path = NottawaApp/Views/NodeEditor/NodeEditorView.swift; sourceTree = "<group>"; };
 		"5EA3A3ED-464B-485A-941D-B6C57ED59D63" /* SliderShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SliderShader.hpp; sourceTree = "<group>"; };
 		"5F11C9E7-FEA0-4802-9D81-6EB1B1840614" /* MultiSource.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MultiSource.hpp; sourceTree = "<group>"; };
@@ -930,6 +954,9 @@
 		"8A86B903-6BB0-4B9C-840D-F7BCA32C183F" /* MaskShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MaskShader.hpp; sourceTree = "<group>"; };
 		"8ACF587F-7953-4FA2-88C1-9B3771E04139" /* ValueOscillator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ValueOscillator.hpp; sourceTree = "<group>"; };
 		"8B48D91A-B331-41C7-86E3-55F107D8E0CA" /* LayoutStateService.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = LayoutStateService.hpp; sourceTree = "<group>"; };
+		8E9F0A1B2C3D4E5F6A7B8C9D /* ScreenshotFlashOverlay.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ScreenshotFlashOverlay.swift; path = NottawaApp/Views/ScreenshotFlashOverlay.swift; sourceTree = "<group>"; };
+		E4F5A6B7C8D90123456789AB /* ToastView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ToastView.swift; path = NottawaApp/Views/ToastView.swift; sourceTree = "<group>"; };
+		A6B7C8D9E0F1234567890ABC /* ShaderCodeEditorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ShaderCodeEditorView.swift; path = NottawaApp/Views/Inspector/ShaderCodeEditorView.swift; sourceTree = "<group>"; };
 		"8F352EFB-9B56-401F-816B-E95D0A4467C3" /* MarkdownView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MarkdownView.hpp; sourceTree = "<group>"; };
 		"906945BE-FBAE-4184-86AB-E64196F7B47B" /* AvailableShaderConfig.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AvailableShaderConfig.hpp; sourceTree = "<group>"; };
 		"908D5E1F-9C55-492B-B413-92DACD7E1073" /* ofxRtMidiIn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ofxRtMidiIn.h; sourceTree = "<group>"; };
@@ -942,6 +969,7 @@
 		"9203F61D-59DD-47F7-960C-982E025859C8" /* ColorSwapShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ColorSwapShader.hpp; sourceTree = "<group>"; };
 		"9267A6A8-D1B4-4DAE-B541-A917CF0A27E3" /* BlurShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BlurShader.hpp; sourceTree = "<group>"; };
 		"93401E3E-7B78-48F8-8198-C8B581994935" /* MidiService.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MidiService.hpp; sourceTree = "<group>"; };
+		"B1C2D3E4-5678-4ABC-DEF0-1A2B3C4D5E6F" /* MidiSmoothingService.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MidiSmoothingService.hpp; sourceTree = "<group>"; };
 		"94280153-2113-4EA9-B975-87254BC6B283" /* GlitchAudioShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GlitchAudioShader.hpp; sourceTree = "<group>"; };
 		"94C7EEF9-55B5-46D5-A0A4-8FA0970B934E" /* PagedTileBrowserView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PagedTileBrowserView.cpp; sourceTree = "<group>"; };
 		"95089A32-6140-4FDD-B414-2AD7DEA8A8E5" /* TileShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TileShader.hpp; sourceTree = "<group>"; };
@@ -1039,6 +1067,7 @@
 		C0EA4081EB5D43659596CABF /* ToolbarView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ToolbarView.swift; path = NottawaApp/Views/ToolbarView.swift; sourceTree = "<group>"; };
 		"C12DDDBE-B4DB-4ECA-A07D-B0240F531ACA" /* StrandService.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = StrandService.hpp; sourceTree = "<group>"; };
 		"C2CD41D3-DA73-464D-8E93-6AC377BDEA27" /* ofxMidiTimecode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxMidiTimecode.cpp; sourceTree = "<group>"; };
+		C2D3E4F5A6B7890123456789 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = NottawaApp/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		"C303289E-35DA-4917-80E0-02C3B95EADE2" /* TransformShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TransformShader.hpp; sourceTree = "<group>"; };
 		"C3289DF9-1C99-446F-994C-A2F4E1DE213B" /* SobelShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SobelShader.hpp; sourceTree = "<group>"; };
 		"C3730E2D-3C8A-406F-860C-9ED55A3A60E0" /* FeedbackSource.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = FeedbackSource.hpp; sourceTree = "<group>"; };
@@ -1095,6 +1124,7 @@
 		"DB8C7E8D-2CF9-4C35-AA07-49A9D5FF60DB" /* OldTVShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = OldTVShader.hpp; sourceTree = "<group>"; };
 		"DD0E5152-25D3-4A5D-806F-DF9F12263555" /* RotateShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = RotateShader.hpp; sourceTree = "<group>"; };
 		"DD20483B-50DE-4F4F-85AC-74CAF3C8F56E" /* MidiService.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MidiService.cpp; sourceTree = "<group>"; };
+		"A1B2C3D4-5678-4ABC-DEF0-1A2B3C4D5E6F" /* MidiSmoothingService.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MidiSmoothingService.cpp; sourceTree = "<group>"; };
 		"DD8CFBE4-765F-42FA-80F8-ED65AF8DBA7E" /* AvailableShader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AvailableShader.cpp; sourceTree = "<group>"; };
 		"DDA70437-F285-4126-B071-138C7E6862B3" /* Icon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Icon.cpp; sourceTree = "<group>"; };
 		"DDC5B81E-37AA-491D-891A-25BBCC3F5958" /* WebcamSource.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = WebcamSource.hpp; sourceTree = "<group>"; };
@@ -1179,6 +1209,7 @@
 		"FA01FF2F-C520-4AA5-AC95-BE3A36992FC7" /* ofxMidiClock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ofxMidiClock.h; sourceTree = "<group>"; };
 		"FAB19008-CE87-4037-B0E7-BA9EC8F76835" /* MicrophoneAudioSource.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MicrophoneAudioSource.hpp; sourceTree = "<group>"; };
 		"FB65B537-B9E5-4D67-876C-85EB230B8531" /* macro_scope.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = macro_scope.hpp; sourceTree = "<group>"; };
+		FBAUXFRA1B2C3D4E5F708190 /* FeedbackAuxStrandView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FeedbackAuxStrandView.swift; path = NottawaApp/Views/Inspector/FeedbackAuxStrandView.swift; sourceTree = "<group>"; };
 		"FBE0ED10-9BAC-4A9D-AFCE-BD4D9AFA1F1B" /* Backblaze.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Backblaze.hpp; sourceTree = "<group>"; };
 		"FC160E05-F2DF-4918-8C97-DEA02D05D3EA" /* FavoriteParameter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FavoriteParameter.cpp; sourceTree = "<group>"; };
 		"FC98FF09-D12A-4FCE-99EE-2E6AB3ABC8E9" /* OscillatorPanelView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = OscillatorPanelView.hpp; sourceTree = "<group>"; };
@@ -1204,6 +1235,7 @@
 		TSC0A1B2C3D4E5F6A7B8C9D0 /* TextSourceControlsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TextSourceControlsView.swift; path = NottawaApp/Views/Inspector/TextSourceControlsView.swift; sourceTree = "<group>"; };
 		WEL0A1B2C3D4E5F6A7B80002 /* WelcomeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WelcomeView.swift; path = NottawaApp/Views/WelcomeView.swift; sourceTree = "<group>"; };
 		WPV0A1B2C3D4E5F6A7B8C9D0 /* WaveformPreviewView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WaveformPreviewView.swift; path = NottawaApp/Views/Inspector/WaveformPreviewView.swift; sourceTree = "<group>"; };
+		XFRMCRPFRA1B2C3D4E5F6071 /* TransformCropPadView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TransformCropPadView.swift; path = NottawaApp/Views/Inspector/TransformCropPadView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -1216,7 +1248,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				94FBBFF197A94048BA6A2105 /* Sparkle.framework in Frameworks */,
 				3E28FD334D8D41E9AA7F30F9 /* CoreMIDI.framework in Frameworks */,
 				9FDDE5C2D294424DAB0D900E /* IOSurface.framework in Frameworks */,
 				460B7C06F5FA4617B1471971 /* Metal.framework in Frameworks */,
@@ -1242,7 +1273,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				02D0803B2EE9B015003AD114 /* Sparkle.framework in Frameworks */,
 				"0A7A065D-785F-489A-914F-8B1EDF273782" /* CoreMIDI.framework in Frameworks */,
 				CA766C53643A48B6849A73A2 /* IOSurface.framework in Frameworks */,
 			);
@@ -1282,6 +1312,12 @@
 				4DFD24E1A6604C8A932C769A /* EngineThread.swift */,
 				A4CF33713ED543A4A4887E28 /* GraphModel.swift */,
 				14CBB713E9374F12B59F29C7 /* TextureProvider.swift */,
+				5C7E3F1A8B2D4E5F6A7B8C9D /* ScreenshotService.swift */,
+				FBE44CFC89A0F95F4D4C6A14 /* RecentWorkspacesService.swift */,
+				8E9F0A1B2C3D4E5F6A7B8C9D /* ScreenshotFlashOverlay.swift */,
+				E4F5A6B7C8D90123456789AB /* ToastView.swift */,
+				A6B7C8D9E0F1234567890ABC /* ShaderCodeEditorView.swift */,
+				C2D3E4F5A6B7890123456789 /* PrivacyInfo.xcprivacy */,
 				40D2A563EF69465BAD0288F5 /* TextureDisplayView.swift */,
 				472DBBD4ABA9453B92C30A03 /* NodeModel.swift */,
 				079DAA675BFE42E5A430B80F /* ConnectionModel.swift */,
@@ -1320,6 +1356,8 @@
 				FSC0A1B2C3D4E5F6A7B8C9D0 /* FileSourceControlsView.swift */,
 				F076C6AD7A705651844AD75D /* IconSourceControlsView.swift */,
 				TSC0A1B2C3D4E5F6A7B8C9D0 /* TextSourceControlsView.swift */,
+				FBAUXFRA1B2C3D4E5F708190 /* FeedbackAuxStrandView.swift */,
+				XFRMCRPFRA1B2C3D4E5F6071 /* TransformCropPadView.swift */,
 				ED110DBF5B3449788F9CC2D7 /* ShaderBrowserView.swift */,
 				BE1FC305CD764F50BAF5ABA6 /* VideoSourceBrowserView.swift */,
 				SBV0F1A2B3C4D5E678901234 /* SidebarBrowserView.swift */,
@@ -1425,6 +1463,14 @@
 				024FAE8B2DA02CF600DE3197 /* AVFRecorderWrapper.mm */,
 			);
 			path = Recording;
+			sourceTree = "<group>";
+		};
+		0261D1AF2FB4F8D60067A00A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				0261D4182FB4F8EC0067A00A /* btrack~.mxo */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		027B05692F786ED600FB4B24 /* Products */ = {
@@ -1640,6 +1686,10 @@
 				02EF52762E6B706400ECC53A /* PlaylistSource.cpp */,
 				"C9927FA0-1983-4A65-B903-432C39D44284" /* FileSource.cpp */,
 				"094AC0D1-F853-4351-A65E-4ECF31EF80E8" /* FileSource.hpp */,
+				024FAE922DA02CF600DE3197 /* FileSourceCacheBuilder.hpp */,
+				024FAE932DA02CF600DE3197 /* FileSourceCacheBuilder.mm */,
+				024FAEA02DA02CF600DE3197 /* IOSurfaceVideoPlayer.hpp */,
+				024FAEA12DA02CF600DE3197 /* IOSurfaceVideoPlayer.mm */,
 				"0790BB8A-209E-4016-974C-B76CF3AA8B99" /* IconSource.cpp */,
 				"0DAEB29E-2AF2-4859-9A8C-AB8B4F59A9C8" /* IconSource.hpp */,
 				"E7D3D1E3-A87B-4B2B-A36F-96B88831E69F" /* ImageSource.cpp */,
@@ -2289,6 +2339,8 @@
 				"D4F1F898-9956-4BBD-BFB5-C4E1648D0FFF" /* MidiPairing.hpp */,
 				"DD20483B-50DE-4F4F-85AC-74CAF3C8F56E" /* MidiService.cpp */,
 				"93401E3E-7B78-48F8-8198-C8B581994935" /* MidiService.hpp */,
+				"A1B2C3D4-5678-4ABC-DEF0-1A2B3C4D5E6F" /* MidiSmoothingService.cpp */,
+				"B1C2D3E4-5678-4ABC-DEF0-1A2B3C4D5E6F" /* MidiSmoothingService.hpp */,
 			);
 			path = Midi;
 			sourceTree = "<group>";
@@ -2522,6 +2574,10 @@
 					ProjectRef = 028938E12E8B3C6F005299A6 /* btrack~.xcodeproj */;
 				},
 				{
+					ProductGroup = 0261D1AF2FB4F8D60067A00A /* Products */;
+					ProjectRef = 0261C2E82FB4F8D60067A00A /* btrack~.xcodeproj */;
+				},
+				{
 					ProductGroup = 027B05692F786ED600FB4B24 /* Products */;
 					ProjectRef = 027BF6A22F786ED600FB4B24 /* btrack~.xcodeproj */;
 				},
@@ -2586,6 +2642,13 @@
 			remoteRef = 02370B942F9D25BD0019828E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		0261D4182FB4F8EC0067A00A /* btrack~.mxo */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "btrack~.mxo";
+			remoteRef = 0261D4172FB4F8EC0067A00A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		027B07BF2F7B3C9A00FB4B24 /* btrack~.mxo */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
@@ -2639,6 +2702,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7CC043A8A25C47038A1F194F /* icon.icns in Resources */,
+				B1C2D3E4F5A678901234B5C6 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2686,7 +2750,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"$OF_PATH/scripts/osx/xcode_project.sh\"\nNOTTAWA_DIR=\"/Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up\"\n\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n# Copy Sparkle - with proper error checking\nSOURCE=\"/Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up/lib/Sparkle.framework\"\nDEST=\"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks\"\n\necho \"Copying from: $SOURCE\"\necho \"Copying to: $DEST\"\n\nif [ -d \"$SOURCE\" ]; then\n    mkdir -p \"$DEST\"\n\n    # Use ditto instead of cp - it's what Xcode uses internally\n    ditto \"$SOURCE\" \"$DEST/Sparkle.framework\"\n\n    # Remove bin\n    rm -rf \"$DEST/Sparkle.framework/bin\"\n\n    # Verify it's there\n    if [ -d \"$DEST/Sparkle.framework\" ]; then\n        echo \"Sparkle.framework successfully copied\"\n        codesign --force --sign - \"$DEST/Sparkle.framework\"\n    else\n        echo \"ERROR: Sparkle.framework not found after copy!\"\n        exit 1\n    fi\nelse\n    echo \"ERROR: Source not found at $SOURCE\"\n    exit 1\nfi\n\necho \"$GCC_PREPROCESSOR_DEFINITIONS\";\n\n\n# Copy the shaders folder into Resources/data\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/\"\n\ncp -R \"$NOTTAWA_DIR/images/\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/images\"\n\n\ncp -R \"$NOTTAWA_DIR/shaders/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/shaders\"\n\n# Copy the markdown folder into Resources/data\ncp -R \"$NOTTAWA_DIR/markdown/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/markdown\"\n\n# Copy the fonts folder into Resources/data\ncp -R \"$NOTTAWA_DIR/fonts/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/fonts\"\n\n# Copy the misc folder into Resources/data\ncp -R \"$NOTTAWA_DIR/misc/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/misc\"\n\n# Copy the audio folder into Resources/data\ncp -R \"$NOTTAWA_DIR/audio/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/audio\"\n";
+			shellScript = "\"$OF_PATH/scripts/osx/xcode_project.sh\"\nNOTTAWA_DIR=\"/Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up\"\n\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n\n# Copy resources into Resources/data\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/\"\n\ncp -R \"$NOTTAWA_DIR/images/\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/images\"\ncp -R \"$NOTTAWA_DIR/shaders/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/shaders\"\ncp -R \"$NOTTAWA_DIR/markdown/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/markdown\"\ncp -R \"$NOTTAWA_DIR/fonts/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/fonts\"\ncp -R \"$NOTTAWA_DIR/misc/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/misc\"\ncp -R \"$NOTTAWA_DIR/audio/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/audio\"\n";
 			showEnvVarsInLog = 0;
 		};
 		50BDB473A67E43A1B61ADF61 /* Run Script — Compile OF */ = {
@@ -2800,6 +2864,7 @@
 				9CAB32595C2B4750AB2E748B /* MarkdownService.cpp in Sources */,
 				2E41F7D8A64549A38D01A49E /* MidiPairing.cpp in Sources */,
 				493B99F75B1F447E8AA4E7FB /* MidiService.cpp in Sources */,
+				"D1E2F3A4-5678-4ABC-DEF0-1A2B3C4D5E6F" /* MidiSmoothingService.cpp in Sources */,
 				99C1E1A19E9D4C3E955221CB /* ModulationService.cpp in Sources */,
 				F952088B05B24FBD94DA49DD /* OscillationService.cpp in Sources */,
 				9A06E3A628E14B0EA05C1D83 /* ParameterService.cpp in Sources */,
@@ -2818,6 +2883,8 @@
 				48BDB3B9C55D47E190E5D158 /* AvailableVideoSource.cpp in Sources */,
 				25F8F6245748461CBB575432 /* DiffusionShader.cpp in Sources */,
 				CCD3C481D9B2400280220BB0 /* FileSource.cpp in Sources */,
+				024FAE942DA02CF600DE3197 /* FileSourceCacheBuilder.mm in Sources */,
+				024FAEA22DA02CF600DE3197 /* IOSurfaceVideoPlayer.mm in Sources */,
 				3736F2DF886B4B18B63E067A /* PlaylistSource.cpp in Sources */,
 				74F865831E534E78B33ACC92 /* TimeService.cpp in Sources */,
 				33AF0713B1174F259505B3C5 /* IconSource.cpp in Sources */,
@@ -2834,7 +2901,6 @@
 				D3273B8312EF43888E0D2FAC /* AudioSourceBrowserView.cpp in Sources */,
 				7248CE39E7B043C7AA9FBC6F /* imgui_canvas.cpp in Sources */,
 				8BEF568324514BFC85E53097 /* imgui_node_editor.cpp in Sources */,
-				16DEF7F555CE45389C87A23A /* SparkleUpdater.mm in Sources */,
 				168C774F02554C6A9FBE37F7 /* URLSchemeHandler.mm in Sources */,
 				059672AD1A8E41FC85077708 /* imgui_node_editor_api.cpp in Sources */,
 				A8EEB78A96044026A2B485F8 /* AvailableShader.cpp in Sources */,
@@ -2937,6 +3003,11 @@
 				C3D4E5F6A7B849C0D1E2F3A4 /* BrowserPreviewManager.swift in Sources */,
 				D5E6F7A8B9CA01D2E3F4A5B6 /* PreviewTileView.swift in Sources */,
 				2DC874BFD9F241C187D0217B /* FPSOverlayView.swift in Sources */,
+				7A1B2C3D4E5F6A7B8C9D0E1F /* ScreenshotService.swift in Sources */,
+				84C606F0BEE0E97201E01227 /* RecentWorkspacesService.swift in Sources */,
+				9F0E1D2C3B4A5968778695A4 /* ScreenshotFlashOverlay.swift in Sources */,
+				D3E4F5A6B7C890123456789A /* ToastView.swift in Sources */,
+				F5A6B7C8D9E0123456789ABC /* ShaderCodeEditorView.swift in Sources */,
 				03C3F83E05DC486ABCC05BB7 /* InlineBrowserContainer.swift in Sources */,
 				410493164C324B19866CCBFC /* ConnectionCablesView.swift in Sources */,
 				1432A722DF804496877EA287 /* ParameterInspectorView.swift in Sources */,
@@ -2948,6 +3019,8 @@
 				FSC0A1B2C3D4E5F6A7B8C9D2 /* FileSourceControlsView.swift in Sources */,
 				F747758EE36967AF7563E254 /* IconSourceControlsView.swift in Sources */,
 				TSC0A1B2C3D4E5F6A7B8C9D2 /* TextSourceControlsView.swift in Sources */,
+				FBAUXBLD1B2C3D4E5F708190 /* FeedbackAuxStrandView.swift in Sources */,
+				XFRMCRPBLD1B2C3D4E5F6071 /* TransformCropPadView.swift in Sources */,
 				148FA678FB0D43D98F194C66 /* ShaderBrowserView.swift in Sources */,
 				A7B3294B92D7469BBB51E472 /* VideoSourceBrowserView.swift in Sources */,
 				SBV0B1A2B3C4D5E678905678 /* SidebarBrowserView.swift in Sources */,
@@ -3068,6 +3141,7 @@
 				"396E058B-4B2F-431A-ABCF-F489D5796A1E" /* MarkdownService.cpp in Sources */,
 				"2BB774E8-FDFF-4197-9168-9B722B65B875" /* MidiPairing.cpp in Sources */,
 				"02F78074-12C3-4CFB-8B4D-C894E1498010" /* MidiService.cpp in Sources */,
+				"C1D2E3F4-5678-4ABC-DEF0-1A2B3C4D5E6F" /* MidiSmoothingService.cpp in Sources */,
 				"37795008-81F2-42A8-9474-26349D3C97F7" /* ModulationService.cpp in Sources */,
 				"8A6308AD-DA76-4542-954F-7EC4A67FBA1C" /* OscillationService.cpp in Sources */,
 				"4B2727B3-72E6-4C10-B1EB-901578401336" /* ParameterService.cpp in Sources */,
@@ -3086,6 +3160,8 @@
 				"6B5C2CB4-112C-42E6-BBBC-6A7072193C5D" /* AvailableVideoSource.cpp in Sources */,
 				02145B012E525064009C1855 /* DiffusionShader.cpp in Sources */,
 				"0DD26806-FE9C-4B5D-8B71-48DF4D89DC14" /* FileSource.cpp in Sources */,
+				024FAE952DA02CF600DE3197 /* FileSourceCacheBuilder.mm in Sources */,
+				024FAEA32DA02CF600DE3197 /* IOSurfaceVideoPlayer.mm in Sources */,
 				02EF52772E6B706400ECC53A /* PlaylistSource.cpp in Sources */,
 				02F157CB2E1722FE003B6C2A /* TimeService.cpp in Sources */,
 				"6E71B313-9099-46C2-831A-3BD4AB9435AF" /* IconSource.cpp in Sources */,
@@ -3102,7 +3178,6 @@
 				"BFB5A457-0FBA-4ED4-A184-8C5C5B8D5250" /* AudioSourceBrowserView.cpp in Sources */,
 				028651472D9468DB000CE0D4 /* imgui_canvas.cpp in Sources */,
 				028651482D9468DB000CE0D4 /* imgui_node_editor.cpp in Sources */,
-				02D080382EE85937003AD114 /* SparkleUpdater.mm in Sources */,
 				02D0803C2FFAA000003AD114 /* URLSchemeHandler.mm in Sources */,
 				028651492D9468DB000CE0D4 /* imgui_node_editor_api.cpp in Sources */,
 				"45643836-DB4D-4615-84BD-406FD1FC93B3" /* AvailableShader.cpp in Sources */,
@@ -3201,14 +3276,12 @@
 				CC = "$(OF_PATH)/scripts/osx/cxx.sh";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 33;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEPLOYMENT_POSTPROCESSING = YES;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=macosx*]" = 7VUCELU5PL;
+				DEVELOPMENT_TEAM = 7VUCELU5PL;
 				ENABLE_DEBUG_DYLIB = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = NO;
@@ -3265,10 +3338,10 @@
 					"lib/ableton/**",
 					lib/ableton/asio,
 				);
-				INFOPLIST_KEY_CFBundleDisplayName = NottawaApp;
+				INFOPLIST_KEY_CFBundleDisplayName = Nottawa;
 				INFOPLIST_KEY_CFBundleIconFile = icon;
-				INFOPLIST_KEY_NSCameraUsageDescription = "NottawaApp can use your camera as a video source";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "NottawaApp can use your microphone for live music analysis";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Nottawa can use your camera as a video source";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Nottawa can use your microphone for live music analysis";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(LD_RUNPATH_SEARCH_PATHS_$(IS_MACCATALYST))",
 					"@executable_path/../Frameworks",
@@ -3277,7 +3350,7 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 2.0.0;
 				OTHER_CFLAGS = "-DofxAddons_ENABLE_IMGUI";
 				OTHER_CPLUSPLUSFLAGS = "-D__MACOSX_CORE__";
 				OTHER_LDFLAGS = (
@@ -3285,8 +3358,9 @@
 					"$(OF_CORE_FRAMEWORKS)",
 					"$(LIB_OF_RELEASE)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.joecrozier.nottawaapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.joecrozier.nottawa;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				RELEASE = 1;
 				SWIFT_OBJC_BRIDGING_HEADER = "NottawaApp/NottawaApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
@@ -3303,7 +3377,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 33;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 7VUCELU5PL;
 				ENABLE_DEBUG_DYLIB = NO;
@@ -3362,10 +3436,10 @@
 					"lib/ableton/**",
 					lib/ableton/asio,
 				);
-				INFOPLIST_KEY_CFBundleDisplayName = NottawaApp;
+				INFOPLIST_KEY_CFBundleDisplayName = Nottawa;
 				INFOPLIST_KEY_CFBundleIconFile = icon;
-				INFOPLIST_KEY_NSCameraUsageDescription = "NottawaApp can use your camera as a video source";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "NottawaApp can use your microphone for live music analysis";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Nottawa can use your camera as a video source";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Nottawa can use your microphone for live music analysis";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(LD_RUNPATH_SEARCH_PATHS_$(IS_MACCATALYST))",
 					"@executable_path/../Frameworks",
@@ -3374,7 +3448,7 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 2.0.0;
 				OTHER_CFLAGS = "-DofxAddons_ENABLE_IMGUI";
 				OTHER_CPLUSPLUSFLAGS = "-D__MACOSX_CORE__";
 				OTHER_LDFLAGS = (
@@ -3382,8 +3456,9 @@
 					"$(OF_CORE_FRAMEWORKS)",
 					"$(LIB_OF_DEBUG)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.joecrozier.nottawaapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.joecrozier.nottawa;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "NottawaApp/NottawaApp-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -3526,14 +3601,13 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CC = "$(OF_PATH)/scripts/osx/cxx.sh";
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
-				CODE_SIGN_STYLE = Manual;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 30;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEPLOYMENT_POSTPROCESSING = YES;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=macosx*]" = 7VUCELU5PL;
+				DEVELOPMENT_TEAM = 7VUCELU5PL;
 				ENABLE_HARDENED_RUNTIME = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3621,14 +3695,13 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CC = "$(OF_PATH)/scripts/osx/cxx.sh";
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
-				CODE_SIGN_STYLE = Manual;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 30;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEPLOYMENT_POSTPROCESSING = YES;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=macosx*]" = 7VUCELU5PL;
+				DEVELOPMENT_TEAM = 7VUCELU5PL;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",

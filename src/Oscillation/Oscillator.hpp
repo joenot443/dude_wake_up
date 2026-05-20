@@ -12,6 +12,7 @@
 #include <memory>
 #include "imgui.h"
 #include "json.hpp"
+#include "LifecycleCounter.hpp"
 #include <stdio.h>
 
 using json = nlohmann::json;
@@ -100,8 +101,12 @@ public:
     yRange = {value->min, value->max};
   }
 
+  virtual ~Oscillator() = default;
+
 private:
   void pushValue(float value);
+
+  LIFECYCLE_TRACK("Oscillator");
 };
 
 #endif /* Oscillator_hpp */

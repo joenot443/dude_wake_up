@@ -1,0 +1,867 @@
+{
+    "audio": {
+        "active": false,
+        "bpmLocked": true,
+        "bpmNudge": 0.0,
+        "frequencyRelease": 0.699999988079071,
+        "frequencyScale": 1.0,
+        "loudnessRelease": 0.6000000238418579,
+        "selectedAudioSourceId": "file-audio-source",
+        "smoothingMode": 1
+    },
+    "configType": "full",
+    "connections": {
+        "d06cebac-786d-894c-bd15-bd799798310e": {
+            "end": "5095ecf5-e9c1-4774-f3f3-58a9a0b3de0c",
+            "id": "d06cebac-786d-894c-bd15-bd799798310e",
+            "inputSlot": 0,
+            "outputSlot": 0,
+            "start": "331c9cdc-65bd-5991-6076-3cc5d4a53674",
+            "type": 1
+        }
+    },
+    "layout": {
+        "OutputWindowUpdatesAutomatically": true,
+        "abletonBPMEnabled": true,
+        "actionBarExpanded": true,
+        "allParametersInStageMode": true,
+        "colorHistory": [
+            [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ]
+        ],
+        "flowEnabled": true,
+        "helpEnabled": false,
+        "libraryPath": "/Users/jcrozier/Pictures",
+        "midiEnabled": true,
+        "portrait": false,
+        "resolution": 3,
+        "showAudioSettings": false,
+        "stageModeEnabled": false,
+        "welcomeScreenEnabled": false
+    },
+    "midi": {},
+    "osc": {
+        "Orb X-c51acb55": {
+            "freq": 0.014000000432133675,
+            "maxOutput": 0.800000011920929,
+            "minOutput": -0.800000011920929
+        },
+        "Orb Y-9fddbda9": {
+            "freq": 0.04100000113248825,
+            "maxOutput": 0.800000011920929,
+            "minOutput": -0.800000011920929
+        }
+    },
+    "parameters": {
+        "favoriteParameters": [],
+        "favoriteShaders": [
+            73,
+            102
+        ],
+        "favoriteSources": [],
+        "stageShaders": []
+    },
+    "shaders": {
+        "5095ecf5-e9c1-4774-f3f3-58a9a0b3de0c": {
+            "optionalShaders": [
+                {
+                    "enabled": false,
+                    "settings": {
+                        "osc": {},
+                        "param": {
+                            "Amount": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": true,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 1,
+                                "midiDescriptor": "",
+                                "name": "Amount",
+                                "paramId": "Amount-89918bc9",
+                                "r": 0.0,
+                                "value": 1.0
+                            },
+                            "Brightness": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": true,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 1,
+                                "midiDescriptor": "",
+                                "name": "Brightness",
+                                "paramId": "Brightness-3e389893",
+                                "r": 0.0,
+                                "value": 1.0
+                            },
+                            "Hue": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Hue",
+                                "paramId": "Hue-ddf5bb37",
+                                "r": 0.0,
+                                "value": 0.0
+                            },
+                            "Saturation": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": true,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 1,
+                                "midiDescriptor": "",
+                                "name": "Saturation",
+                                "paramId": "Saturation-c8208220",
+                                "r": 0.0,
+                                "value": 1.0
+                            }
+                        }
+                    },
+                    "type": 1
+                },
+                {
+                    "enabled": false,
+                    "settings": {
+                        "osc": {},
+                        "param": {
+                            "Color": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Color",
+                                "paramId": "Color-f55d8421",
+                                "r": 0.0,
+                                "value": 0.0
+                            }
+                        }
+                    },
+                    "type": 124
+                },
+                {
+                    "enabled": false,
+                    "settings": {
+                        "osc": {},
+                        "param": {
+                            "Background Color": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Background Color",
+                                "paramId": "Background Color-6205bb3b",
+                                "r": 0.0,
+                                "value": 0.0
+                            },
+                            "Background Enabled": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Background Enabled",
+                                "paramId": "Background Enabled-66ba4c2c",
+                                "r": 0.0,
+                                "value": 0.0
+                            },
+                            "Center": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Center",
+                                "paramId": "Center-1d72d116",
+                                "r": 0.0,
+                                "value": 0.0
+                            },
+                            "Horizontal Flip": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Horizontal Flip",
+                                "paramId": "Horizontal Flip-bd8e0e86",
+                                "r": 0.0,
+                                "value": 0.0
+                            },
+                            "Max X": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": true,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 1,
+                                "midiDescriptor": "",
+                                "name": "Max X",
+                                "paramId": "Max X-2017bca3",
+                                "r": 0.0,
+                                "value": 1.0
+                            },
+                            "Max Y": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": true,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 1,
+                                "midiDescriptor": "",
+                                "name": "Max Y",
+                                "paramId": "Max Y-2a0dd910",
+                                "r": 0.0,
+                                "value": 1.0
+                            },
+                            "Min X": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Min X",
+                                "paramId": "Min X-2c952197",
+                                "r": 0.0,
+                                "value": 0.0
+                            },
+                            "Min Y": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Min Y",
+                                "paramId": "Min Y-3604c142",
+                                "r": 0.0,
+                                "value": 0.0
+                            },
+                            "Mode": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Mode",
+                                "paramId": "Mode-5800d6bd",
+                                "r": 0.0,
+                                "value": 0.0
+                            },
+                            "Scale": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": true,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 1,
+                                "midiDescriptor": "",
+                                "name": "Scale",
+                                "paramId": "Scale-f6ed9d88",
+                                "r": 0.0,
+                                "value": 1.0
+                            },
+                            "Scale From Center": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Scale From Center",
+                                "paramId": "Scale From Center-3dcb9533",
+                                "r": 0.0,
+                                "value": 0.0
+                            },
+                            "Vertical Flip": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Vertical Flip",
+                                "paramId": "Vertical Flip-f3a58216",
+                                "r": 0.0,
+                                "value": 0.0
+                            },
+                            "X": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "X",
+                                "paramId": "X-29666ede",
+                                "r": 0.0,
+                                "value": 0.0
+                            },
+                            "Y": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Y",
+                                "paramId": "Y-979726b6",
+                                "r": 0.0,
+                                "value": 0.0
+                            }
+                        }
+                    },
+                    "type": 6
+                },
+                {
+                    "enabled": false,
+                    "settings": {
+                        "osc": {},
+                        "param": {
+                            "Auto-Rotate": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Auto-Rotate",
+                                "paramId": "Auto-Rotate-b43382da",
+                                "r": 0.0,
+                                "value": 0.0
+                            },
+                            "Center": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Center",
+                                "paramId": "Center-1452cbc1",
+                                "r": 0.0,
+                                "value": 0.0
+                            },
+                            "Rotate": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Rotate",
+                                "paramId": "Rotate-1a80152e",
+                                "r": 0.0,
+                                "value": 0.0
+                            },
+                            "Scale": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": true,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 1,
+                                "midiDescriptor": "",
+                                "name": "Scale",
+                                "paramId": "Scale-33586586",
+                                "r": 0.0,
+                                "value": 1.0
+                            }
+                        }
+                    },
+                    "type": 75
+                },
+                {
+                    "enabled": false,
+                    "settings": {
+                        "osc": {},
+                        "param": {
+                            "Amount": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": true,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 5,
+                                "midiDescriptor": "",
+                                "name": "Amount",
+                                "paramId": "Amount-581a4dab",
+                                "r": 0.0,
+                                "value": 5.0
+                            },
+                            "Brightness": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": true,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 1,
+                                "midiDescriptor": "",
+                                "name": "Brightness",
+                                "paramId": "Brightness-b5fa7fe3",
+                                "r": 0.0,
+                                "value": 1.0
+                            }
+                        }
+                    },
+                    "type": 101
+                },
+                {
+                    "enabled": false,
+                    "settings": {
+                        "osc": {},
+                        "param": {
+                            "Mirror Type": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Mirror Type",
+                                "paramId": "Mirror Type-f0a92265",
+                                "r": 0.0,
+                                "value": 0.0
+                            },
+                            "Offset X": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Offset X",
+                                "paramId": "Offset X-069566ac",
+                                "r": 0.0,
+                                "value": 0.0
+                            },
+                            "Offset Y": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Offset Y",
+                                "paramId": "Offset Y-3151c4a0",
+                                "r": 0.0,
+                                "value": 0.0
+                            }
+                        }
+                    },
+                    "type": 5
+                },
+                {
+                    "enabled": false,
+                    "settings": {
+                        "osc": {},
+                        "param": {
+                            "Color": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Color",
+                                "paramId": "Color-a52bd177",
+                                "r": 0.0,
+                                "value": 0.0
+                            },
+                            "Draw Match": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": true,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 1,
+                                "midiDescriptor": "",
+                                "name": "Draw Match",
+                                "paramId": "Draw Match-fa2ce79d",
+                                "r": 0.0,
+                                "value": 1.0
+                            },
+                            "Draw Miss": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Draw Miss",
+                                "paramId": "Draw Miss-6cfc5eb9",
+                                "r": 0.0,
+                                "value": 0.0
+                            },
+                            "Invert": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Invert",
+                                "paramId": "Invert-c5259b0d",
+                                "r": 0.0,
+                                "value": 0.0
+                            },
+                            "Tolerance": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": true,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Tolerance",
+                                "paramId": "Tolerance-e3d30aed",
+                                "r": 0.0,
+                                "value": 0.10000000149011612
+                            }
+                        }
+                    },
+                    "type": 45
+                },
+                {
+                    "enabled": false,
+                    "settings": {
+                        "osc": {},
+                        "param": {
+                            "Draw Input": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": true,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 1,
+                                "midiDescriptor": "",
+                                "name": "Draw Input",
+                                "paramId": "Draw Input-a7555b80",
+                                "r": 0.0,
+                                "value": 1.0
+                            },
+                            "Invert": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Invert",
+                                "paramId": "Invert-8aa8096c",
+                                "r": 0.0,
+                                "value": 0.0
+                            },
+                            "Lower": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": true,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Lower",
+                                "paramId": "Lower-4b95635f",
+                                "r": 0.0,
+                                "value": 0.5
+                            },
+                            "Upper": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": true,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 1,
+                                "midiDescriptor": "",
+                                "name": "Upper",
+                                "paramId": "Upper-92e0b523",
+                                "r": 0.0,
+                                "value": 1.0
+                            }
+                        }
+                    },
+                    "type": 41
+                },
+                {
+                    "enabled": false,
+                    "settings": {
+                        "osc": {},
+                        "param": {
+                            "Amount": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Amount",
+                                "paramId": "Amount-ea0cb160",
+                                "r": 0.0,
+                                "value": 0.0
+                            }
+                        }
+                    },
+                    "type": 172
+                },
+                {
+                    "enabled": false,
+                    "settings": {
+                        "osc": {},
+                        "param": {
+                            "Amount": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Amount",
+                                "paramId": "Amount-ac99d4f8",
+                                "r": 0.0,
+                                "value": 0.0
+                            }
+                        }
+                    },
+                    "type": 173
+                }
+            ],
+            "osc": {},
+            "param": {
+                "Center X": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Center X",
+                    "paramId": "Center X-919198e6",
+                    "r": 0.0,
+                    "value": 0.5
+                },
+                "Center Y": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Center Y",
+                    "paramId": "Center Y-5422a923",
+                    "r": 0.0,
+                    "value": 0.5
+                },
+                "Decay": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 1,
+                    "midiDescriptor": "",
+                    "name": "Decay",
+                    "paramId": "Decay-3f0e2317",
+                    "r": 0.0,
+                    "value": 1.0
+                },
+                "Density": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Density",
+                    "paramId": "Density-8168db08",
+                    "r": 0.0,
+                    "value": 0.8999999761581421
+                },
+                "Threshold": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Threshold",
+                    "paramId": "Threshold-4f2c167a",
+                    "r": 0.0,
+                    "value": 0.699999988079071
+                },
+                "Weight": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Weight",
+                    "paramId": "Weight-328f9f5c",
+                    "r": 0.0,
+                    "value": 0.05000000074505806
+                }
+            },
+            "shaderId": "5095ecf5-e9c1-4774-f3f3-58a9a0b3de0c",
+            "shaderType": 129,
+            "x": 732.2147216796875,
+            "y": 213.1862335205078
+        }
+    },
+    "sources": {
+        "331c9cdc-65bd-5991-6076-3cc5d4a53674": {
+            "id": "331c9cdc-65bd-5991-6076-3cc5d4a53674",
+            "shader": {
+                "osc": {},
+                "param": {
+                    "Audio Scale": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": true,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 4,
+                        "midiDescriptor": "",
+                        "name": "Audio Scale",
+                        "paramId": "Audio Scale-28a39769",
+                        "r": 0.0,
+                        "value": 4.0
+                    },
+                    "Complexity": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": true,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 4,
+                        "midiDescriptor": "",
+                        "name": "Complexity",
+                        "paramId": "Complexity-85dfe13c",
+                        "r": 0.0,
+                        "value": 4.0
+                    },
+                    "Glow Tint": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": false,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 0,
+                        "midiDescriptor": "",
+                        "name": "Glow Tint",
+                        "paramId": "Glow Tint-b3a19cf4",
+                        "r": 0.0,
+                        "value": 0.0
+                    },
+                    "Palette Seed": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": false,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 0,
+                        "midiDescriptor": "",
+                        "name": "Palette Seed",
+                        "paramId": "Palette Seed-763e752a",
+                        "r": 0.0,
+                        "value": 0.0
+                    },
+                    "Saturation": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": true,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 1,
+                        "midiDescriptor": "",
+                        "name": "Saturation",
+                        "paramId": "Saturation-54b5cec9",
+                        "r": 0.0,
+                        "value": 1.0
+                    }
+                }
+            },
+            "shaderSourceType": 54,
+            "videoSourceType": 4,
+            "x": 106.21905517578125,
+            "y": 226.01303100585938
+        }
+    },
+    "strands": {
+        "Chrome Grill->Blend->Blend->AudioGlowBars->5118414-uhd_3840_2160_25fps (1)_12-08": {
+            "id": "da47134a-6988-69f4-c760-6e3d942d678e",
+            "imagePath": "/Users/jcrozier/Library/Containers/com.joecrozier.nottawa/Data/nottawa/strands/Chrome Grill->Blend->Blend->AudioGlowBars->5118414-uhd_3840_2160_25fps (1)_12-08.png",
+            "name": "Chrome Grill->Blend->Blend->AudioGlowBars->5118414-uhd_3840_2160_25fps (1)_12-08",
+            "path": "/Users/jcrozier/dev/nottawa-server/media/nottawa-strands/triple_dj.json"
+        },
+        "FaceTime HD Camera->1b-Dither->Synthwave->Synthfly_08-16": {
+            "id": "b3efc53c-429f-230b-1453-bfc61c908c79",
+            "imagePath": "/Users/jcrozier/Library/Containers/com.joecrozier.nottawa/Data/nottawa/strands/FaceTime HD Camera->1b-Dither->Synthwave->Synthfly_08-16.png",
+            "name": "FaceTime HD Camera->1b-Dither->Synthwave->Synthfly_08-16",
+            "path": "/Users/jcrozier/Documents/tron.json"
+        },
+        "Melter->Blend_08-10": {
+            "id": "bbf785fb-28a2-6ba0-99e5-fbced25bb967",
+            "imagePath": "/Users/jcrozier/Library/Containers/com.joecrozier.nottawa/Data/nottawa/strands/Melter->Blend_08-10.png",
+            "name": "Melter->Blend_08-10",
+            "path": "/Users/jcrozier/nottawa/Melter->Blend_08-10.json"
+        },
+        "Melter->Rotate_08-10": {
+            "id": "c506785c-d89f-625a-78b8-ecef1db4fc54",
+            "imagePath": "/Users/jcrozier/Library/Containers/com.joecrozier.nottawa/Data/nottawa/strands/Melter->Rotate_08-10.png",
+            "name": "Melter->Rotate_08-10",
+            "path": "/Users/jcrozier/nottawa/Melter->Rotate_08-10.json"
+        },
+        "leandro-navarro-p2o0mTKAEnM-unsplash.jpg_08-10": {
+            "id": "9617b706-cf3c-e5af-9ced-1e1b054c101c",
+            "imagePath": "/Users/jcrozier/Library/Containers/com.joecrozier.nottawa/Data/nottawa/strands/leandro-navarro-p2o0mTKAEnM-unsplash.jpg_08-10.png",
+            "name": "leandro-navarro-p2o0mTKAEnM-unsplash.jpg_08-10",
+            "path": "/Users/jcrozier/nottawa/leandro-navarro-p2o0mTKAEnM-unsplash.jpg_08-10.json"
+        }
+    }
+}

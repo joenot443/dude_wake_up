@@ -16,6 +16,12 @@ bool FeedbackSource::beingConsumed() {
 }
 
 void FeedbackSource::resizeIfNecessary() {
+  // Lazy allocation: setup() is only called now when we actually need the
+  // buffer. Empty buffer = first use → allocate. Otherwise check size.
+  if (frameBuffer.empty()) {
+    setup();
+    return;
+  }
   if (frameBuffer[0]->getWidth() != LayoutStateService::getService()->resolution.x) {
     setup();
   }

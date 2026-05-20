@@ -3,10 +3,12 @@
 uniform sampler2D tex;
 uniform vec2 dimensions;
 uniform float time;
-uniform float poly_u;
-uniform float poly_v;
-uniform float poly_w;
-uniform float poly_z;
+uniform float rotation_speed;
+uniform float poly_zoom;
+uniform float inner_sphere;
+uniform float refr_index;
+uniform int max_bounces;
+uniform int poly_type;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -19,24 +21,6 @@ out vec4 outputColor;
 //  Simplest solution is just to run run fullscreen on a 4K screen ;)
 
 // Function to generate the solid found here: https://www.shadertoy.com/view/MsKGzw
-
-// Tinker with these parameters to create different solids
-// -------------------------------------------------------
-const float rotation_speed= 0.25;
-
-float poly_U        = poly_u;   // [0, inf]
-float poly_V        = poly_v;  // [0, inf]
-float poly_W        = poly_w;  // [0, inf]
-const int   poly_type     = 3;    // [2, 5]
-float poly_zoom     = 2.0;
-
-const float inner_sphere  = 1.;
-
-const float refr_index    = 0.9;
-
-#define MAX_BOUNCES2        6
-// -------------------------------------------------------
-
 
 
 #define TIME        time
@@ -75,23 +59,37 @@ const vec3 topBoxCol    = HSV2RGB(vec3(0.60, 0.90, 1.))*1.;
 const vec3 glowCol0     = HSV2RGB(vec3(0.05 , 0.7, 1E-3))*1.;
 const vec3 glowCol1     = HSV2RGB(vec3(0.95, 0.7, 1E-3))*1.;
 const vec3 beerCol      = -HSV2RGB(vec3(0.15+0.5, 0.7, 2.));
-const float rrefr_index = 1./refr_index;
 
 
 // License: Unknown, author: knighty, found: https://www.shadertoy.com/view/MsKGzw
-const float poly_cospin   = cos(PI/float(poly_type));
-const float poly_scospin  = sqrt(0.75-poly_cospin*poly_cospin);
-const vec3  poly_nc       = vec3(-0.5, -poly_cospin, poly_scospin);
-const vec3  poly_pab      = vec3(0., 0., 1.);
-const vec3  poly_pbc_     = vec3(poly_scospin, 0., 0.5);
-const vec3  poly_pca_     = vec3(0., poly_scospin, poly_cospin);
-vec3  poly_p        = normalize((poly_U*poly_pab+poly_V*poly_pbc_+poly_W*poly_pca_));
-const vec3  poly_pbc      = normalize(poly_pbc_);
-const vec3  poly_pca      = normalize(poly_pca_);
+// poly_pab is truly constant; the rest depend on poly_type and are
+// initialized in initPoly() at the start of main().
+const vec3 poly_pab = vec3(0., 0., 1.);
+float poly_cospin;
+float poly_scospin;
+vec3  poly_nc;
+vec3  poly_pbc_;
+vec3  poly_pca_;
+vec3  poly_p;
+vec3  poly_pbc;
+vec3  poly_pca;
+float rrefr_index;
+
+void initPoly() {
+  poly_cospin  = cos(PI/float(poly_type));
+  poly_scospin = sqrt(0.75 - poly_cospin*poly_cospin);
+  poly_nc      = vec3(-0.5, -poly_cospin, poly_scospin);
+  poly_pbc_    = vec3(poly_scospin, 0., 0.5);
+  poly_pca_    = vec3(0., poly_scospin, poly_cospin);
+  poly_p       = normalize(poly_pbc_);
+  poly_pbc     = normalize(poly_pbc_);
+  poly_pca     = normalize(poly_pca_);
+  rrefr_index  = 1./refr_index;
+}
 
 mat3 g_rot;
 vec2 g_gd;
-  
+
 // License: MIT, author: Inigo Quilez, found: https://iquilezles.org/articles/noacos/
 mat3 rot(vec3 d, vec3 z) {
   vec3  v = cross( z, d );
@@ -124,16 +122,17 @@ float box(vec2 p, vec2 b) {
   vec2 d = abs(p)-b;
   return length(max(d,0.0)) + min(max(d.x,d.y),0.0);
 }
-  
+
 // License: Unknown, author: knighty, found: https://www.shadertoy.com/view/MsKGzw
 void poly_fold(inout vec3 pos) {
   vec3 p = pos;
 
-  for(int i = 0; i < poly_type; ++i){
+  for(int i = 0; i < 5; ++i){
+    if (i >= poly_type) break;
     p.xy  = abs(p.xy);
     p    -= 2.*min(0., dot(p,poly_nc)) * poly_nc;
   }
-  
+
   pos = p;
 }
 
@@ -174,7 +173,7 @@ vec3 shape(vec3 pos) {
 
 vec3 render0(vec3 ro, vec3 rd) {
   vec3 col = vec3(0.0);
-  
+
   float srd  = sign(rd.y);
   float tp   = -(ro.y-6.)/abs(rd.y);
 
@@ -186,7 +185,7 @@ vec3 render0(vec3 ro, vec3 rd) {
     vec3 pos  = ro + tp*rd;
     vec2 pp = pos.xz;
     float db = box(pp, vec2(5.0, 9.0))-3.0;
-    
+
     col += topBoxCol*rd.y*rd.y*smoothstep(0.25, 0.0, db);
     col += 0.2*topBoxCol*exp(-0.5*max(db, 0.0));
     col += 0.05*sqrt(topBoxCol)*max(-db, 0.0);
@@ -243,20 +242,21 @@ vec3 render2(vec3 ro, vec3 rd, float db) {
   vec3 agg = vec3(0.0);
   float ragg = 1.;
   float tagg = 0.;
-  
-  for (int bounce = 0; bounce < MAX_BOUNCES2; ++bounce) {
+
+  for (int bounce = 0; bounce < 10; ++bounce) {
+    if (bounce >= max_bounces) break;
     if (ragg < 0.1) break;
     g_gd      = vec2(1E3);
     float t2  = rayMarch2(ro, rd, min(db+0.05, 0.3));
     vec2 gd2  = g_gd;
     tagg      += t2;
-    
+
     vec3 p2   = ro+rd*t2;
     vec3 n2   = normal2(p2);
     vec3 r2   = reflect(rd, n2);
     vec3 rr2  = refract(rd, n2, rrefr_index);
     float fre2= 1.+dot(n2,rd);
-    
+
     vec3 beer = ragg*exp(0.2*beerCol*tagg);
     agg += glowCol1*beer*((1.+tagg*tagg*4E-2)*6./max(gd2.x, 5E-4+tagg*tagg*2E-4/ragg));
     vec3 ocol = 0.2*beer*render0(p2, rr2);
@@ -266,7 +266,7 @@ vec3 render2(vec3 ro, vec3 rd, float db) {
       agg     += ocol;
       ragg    *= 0.8;
     }
-    
+
     ro        = p2;
     rd        = r2;
     db        = gd2.x;
@@ -341,22 +341,22 @@ vec3 render3(vec3 ro, vec3 rd) {
 
 }
 
-  
+
 vec3 effect(vec2 p, vec2 pp) {
   const float fov = 2.0;
-  
+
   const vec3 up = vec3(0., 1., 0.);
   const vec3 la   = vec3(0.0);
 
   const vec3 ww = normalize(normalize(la-rayOrigin));
   const vec3 uu = normalize(cross(up, ww));
   const vec3 vv = cross(ww, uu);
-  
+
   vec3 rd = normalize(-p.x*uu + p.y*vv + fov*ww);
 
   vec3 col = vec3(0.0);
   col = render3(rayOrigin, rd);
-  
+
   col -= 2E-2*vec3(2.,3.,1.)*(length(p)+0.25);
   col = aces_approx(col);
   col = sqrt(col);
@@ -364,6 +364,8 @@ vec3 effect(vec2 p, vec2 pp) {
 }
 
 void main() {
+  initPoly();
+
   vec2 q = coord/RESOLUTION.xy;
   vec2 p = -1. + 2. * q;
   vec2 pp = p;
@@ -376,7 +378,7 @@ void main() {
   g_rot = rot;
 
   vec3 col = effect(p, pp);
-  
+
   outputColor = vec4(col, 1.0);
 }
 

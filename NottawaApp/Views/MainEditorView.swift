@@ -56,6 +56,12 @@ struct MainEditorView: View {
                                         }
                                     }
                                     .onChange(of: geo.size) { _, newSize in canvasSize = newSize }
+                                    .onChange(of: viewModel.needsInitialZoomToFit) { _, shouldFit in
+                                        if shouldFit && geo.size != .zero {
+                                            viewModel.needsInitialZoomToFit = false
+                                            viewModel.zoomToFit(canvasSize: geo.size)
+                                        }
+                                    }
                             }
                         }
                         .overlay(alignment: .bottomTrailing) {
@@ -138,11 +144,20 @@ struct MainEditorView: View {
         }
         .background(theme.colors.background)
         .animation(.easeInOut(duration: 0.2), value: viewModel.showAudioPanel)
+        .overlay(ToastView())
         .sheet(isPresented: Binding(
             get: { viewModel.showShareSheet },
             set: { viewModel.showShareSheet = $0 }
         )) {
             ShareStrandSheet()
+        }
+        .sheet(item: Binding(
+            get: { viewModel.shaderCodeEditorTarget },
+            set: { viewModel.shaderCodeEditorTarget = $0 }
+        )) { target in
+            ShaderCodeEditorView(shaderId: target.id, shaderName: target.name)
+                .environment(viewModel)
+                .environment(theme)
         }
         .onChange(of: helpGuide.requiredSidebarTab) { _, tab in
             guard let tab else { return }
@@ -234,6 +249,27 @@ struct MainEditorView: View {
 
             // Non-command shortcuts — skip when a text field is focused
             guard !MainEditorView.isTextFieldFocused() else { return event }
+
+            // Stage mode screenshot hotkeys — only fire if a preview window is
+            // not key (those are handled by PreviewWindowManager).
+            if vm.stageModeEnabled,
+               !(NSApp.keyWindow is PreviewWindow),
+               let outputId = vm.stageOutputId,
+               flags.subtracting(.shift).isEmpty {
+                switch event.charactersIgnoringModifiers?.lowercased() {
+                case "s":
+                    let mode: ScreenshotMode = flags.contains(.shift) ? .forcePicker : .quickSave
+                    ScreenshotService.shared.capture(connectableId: outputId, mode: mode)
+                    return nil
+                case "c":
+                    if !flags.contains(.shift) {
+                        ScreenshotService.shared.capture(connectableId: outputId, mode: .clipboard)
+                        return nil
+                    }
+                default:
+                    break
+                }
+            }
 
             // Ctrl-Tab / Ctrl-Shift-Tab: cycle node selection (left-to-right,
             // top-to-bottom by canvas position). Checked before plain Tab below.

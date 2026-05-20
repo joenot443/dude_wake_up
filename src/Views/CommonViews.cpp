@@ -185,7 +185,7 @@ void CommonViews::AudioParameterSelector(std::shared_ptr<Parameter> param, ImVec
   {
     if (TitledButton(param, param->driver->name.c_str(), size))
     {
-      param->driver = NULL;
+      param->removeDriver();
     }
     ImGui::SliderFloat(formatString("Shift##%s", param->paramId.c_str()).c_str(), &param->shift->value, param->shift->min, param->shift->max, "%.3f", ImGuiSliderFlags_Logarithmic);
     ImGui::SliderFloat(formatString("Scale##%s", param->paramId.c_str()).c_str(), &param->scale->value, param->scale->min, param->scale->max, "%.3f", ImGuiSliderFlags_Logarithmic);
@@ -956,7 +956,7 @@ void CommonViews::OscillateButton(std::string id, std::shared_ptr<Oscillator> o,
       ImGui::OpenPopup(p->oscPopupId().c_str());
     }
     
-    o->enabled->boolValue = !o->enabled->boolValue;
+    OscillationService::getService()->setEnabled(o, !o->enabled->boolValue);
     OscillationService::getService()->selectOscillator(o, p);
     LayoutStateService::getService()->utilityPanelTab = 1;
   }

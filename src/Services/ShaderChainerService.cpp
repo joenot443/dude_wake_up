@@ -646,11 +646,16 @@ void ShaderChainerService::addShader(std::shared_ptr<Shader> shader)
   shader->settings->selectorParam->setValue(shader->type());
   shadersMap[shader->shaderId] = shader;
   
-  // Subscribe the Shader's setup() to resolution updates
-  LayoutStateService::getService()->subscribeToResolutionUpdates([shader]() {
-    shader->allocateFrames();
-    shader->setup();
-  });
+  // Subscribe the Shader's setup() to resolution updates. Token stored on
+  // the shader so removeShader can unsubscribe explicitly.
+  std::weak_ptr<Shader> weakShader = shader;
+  shader->resolutionUpdateSubscription =
+    LayoutStateService::getService()->subscribeToResolutionUpdates([weakShader]() {
+      if (auto s = weakShader.lock()) {
+        s->allocateFrames();
+        s->setup();
+      }
+    });
   
   ConfigService::getService()->saveDefaultConfigFile();
 }
@@ -663,7 +668,21 @@ void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader, bool fro
         shader->shaderId.c_str());
     return;
   }
-  
+
+  // Unsubscribe from resolution updates so a stale shader (held alive by
+  // an undo command, etc.) can't have setup()/allocateFrames() re-run on it.
+  shader->resolutionUpdateSubscription = observable::unique_subscription{};
+
+  // Eagerly release the shader's GL FBOs (and any optional children). The
+  // shader shared_ptr typically lives on in the undo stack; without this,
+  // each removed shader pins ~32 MB per FBO × 2 FBOs × ~21 optional children
+  // for the lifetime of the undo entry.
+  shader->releaseFrames();
+
+  // Drop any consumer registration. FeedbackShader::populateSource calls
+  // setConsumer(shaderId, ...); without this, consumerMap pins the source
+  // forever and beingConsumed() stays true → frame buffer never tears down.
+  FeedbackSourceService::getService()->removeConsumerForShader(shader->shaderId);
 
   if (shader->feedbackDestination)
   {
@@ -681,8 +700,17 @@ void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader, bool fro
   }
   // --- END FIX ---
   
-  // Remove associated oscillators
-  OscillationService::getService()->removeOscillatorsFor(shader->settings->parameters);
+  // Remove associated oscillators + drop parameters from the parameter map.
+  // Without unregisterParameters() the map (and its hot lists) grow forever.
+  // Recurse into optional shader children — each has its own settings.
+  std::function<void(std::shared_ptr<Shader>)> cleanShader =
+    [&cleanShader](std::shared_ptr<Shader> s) {
+      if (!s || !s->settings) return;
+      OscillationService::getService()->removeOscillatorsFor(s->settings->parameters);
+      ParameterService::getService()->unregisterParameters(s->settings->parameters);
+      for (auto& opt : s->optionalShaders) cleanShader(opt);
+    };
+  cleanShader(shader);
   
   // Remove all connections associated with this shader
   // This internally calls breakConnectionForConnectionId, which removes
@@ -896,12 +924,9 @@ void ShaderChainerService::copyConnections(std::shared_ptr<Connectable> source, 
 
 std::shared_ptr<Shader> ShaderChainerService::shaderForId(std::string id)
 {
-  if (shadersMap.count(id) == 0)
-  {
-    log("Tried to get Shader %s, but it doesn't exist", id.c_str());
-    return nullptr;
-  }
-  return shadersMap[id];
+  auto it = shadersMap.find(id);
+  if (it == shadersMap.end()) return nullptr;
+  return it->second;
 }
 
 Strand ShaderChainerService::strandForConnectable(std::shared_ptr<Connectable> connectable) {

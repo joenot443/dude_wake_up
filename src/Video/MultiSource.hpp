@@ -29,6 +29,7 @@ public:
 private:
   std::vector<std::shared_ptr<VideoSource>> sources;
   std::shared_ptr<Parameter> selectedSource;
+  LIFECYCLE_TRACK("MultiSource");
 };
 
 #endif /* MultiSource_hpp */

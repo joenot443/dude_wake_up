@@ -49,7 +49,12 @@ void LayoutStateService::loadConfig(json j) {
   std::vector<std::array<float, 4>> colors = j[ColorHistoryJsonKey];
   colorHistory = colors;
   showWelcomeScreen = j[WelcomeScreenEnabledJsonKey];
-  resolutionSetting = j[ResolutionJsonKey];
+  // Go through updateResolutionSettings so the pixel-dimension ImVec2 stays
+  // in sync with the int index. Writing resolutionSetting directly was a
+  // long-standing bug: subsequent FBO allocations would use the still-default
+  // ImVec2 (1280×720) regardless of what the user had saved, until they
+  // happened to re-trigger setResolution through the Settings UI.
+  updateResolutionSettings(j[ResolutionJsonKey]);
   abletonLinkEnabled = j[AbletonLinkEnabledJsonKey];
   actionBarExpanded = j[ActionBarExpandedJsonKey];
   flowEnabled = j[FlowEnabledJsonKey];
@@ -82,28 +87,23 @@ bool LayoutStateService::shouldDrawShaderInfo() {
 }
 
 void LayoutStateService::updateResolutionSettings(int i) {
+  // Single source of truth for the index → pixel-dimension table. Anything
+  // changing resolution MUST go through here, never via direct writes to
+  // resolutionSetting (which would leave the ImVec2 stale).
+  static const ImVec2 sizes[] = {
+    {  426.0f,  240.0f }, // 0 — 240p
+    {  640.0f,  360.0f }, // 1 — 360p
+    {  854.0f,  480.0f }, // 2 — 480p
+    { 1280.0f,  720.0f }, // 3 — 720p
+    { 1920.0f, 1080.0f }, // 4 — 1080p
+    { 2560.0f, 1440.0f }, // 5 — 1440p
+    { 3840.0f, 2160.0f }, // 6 — 4K
+  };
+  if (i < 0 || i >= static_cast<int>(sizeof(sizes) / sizeof(sizes[0]))) {
+    return;
+  }
   resolutionSetting = i;
-  if (i == 0) {
-    resolution = ImVec2(426.0f, 240.0f);
-  }
-  else if (i == 1) {
-    resolution = ImVec2(640.0f, 360.0f);
-  }
-  else if (i == 2) {
-    resolution = ImVec2(854.0f, 480.0f);
-  }
-  else if (i == 3) {
-    resolution = ImVec2(1280.0f, 720.0f);
-  }
-  else if (i == 4) {
-    resolution = ImVec2(1920.0f, 1080.0f);
-  }
-  else if (i == 5) {
-    resolution = ImVec2(2560.0f, 1440.0f);
-  }
-  else if (i == 6) {
-    resolution = ImVec2(3840.0f, 2160.0f);
-  }
+  resolution = sizes[i];
   resolutionUpdateSubject.notify();
 }
 
@@ -116,8 +116,8 @@ void LayoutStateService::togglePortraitSetting() {
   resolutionUpdateSubject.notify();
 }
 
-void LayoutStateService::subscribeToResolutionUpdates(std::function<void ()> callback) {
-  resolutionUpdateSubject.subscribe(callback);
+observable::unique_subscription LayoutStateService::subscribeToResolutionUpdates(std::function<void ()> callback) {
+  return observable::unique_subscription(resolutionUpdateSubject.subscribe(callback));
 }
 
 ImVec2 LayoutStateService::nodeLayoutSize() {

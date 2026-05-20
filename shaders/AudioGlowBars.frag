@@ -30,14 +30,15 @@ out vec4 outputColor;
 #define SINGLE_COLOR vec3(1.0, 1.0, 1.0)  // White for single color mode
 
 // SCALING CONFIGURATION
-#define USE_LOGARITHMIC_SCALE 1  // 1 = logarithmic (octave-equal), 0 = linear
+// Mel scale is already perceptually log-Hz, so distribute bars linearly across
+// the mel bins.
+#define USE_LOGARITHMIC_SCALE 0
 
-// Bins to display. The full FFT runs to bin 255 (Nyquist), but typical music
-// has essentially no energy above ~13 kHz, so mapping bars all the way to bin
-// 255 leaves the right half of the visualization permanently flat for sample
-// tracks. We restrict to the musical range below.
-#define BIN_MIN 2.0     // ~190 Hz at 48 kHz / ~170 Hz at 44.1 kHz
-#define BIN_MAX 140.0   // ~13 kHz at 48 kHz / ~12 kHz at 44.1 kHz
+// We're now reading the mel spectrum, which has 11 useful bins (0..10) after
+// the engine drops the bottom two (DC + sub-bass). Bars sample across that
+// range with linear interpolation between bins.
+#define BIN_MIN 0.0
+#define BIN_MAX 10.0
 
 // Center line settings
 #define CENTER_LINE_THICKNESS 0.006  // Thickness of center line
@@ -61,12 +62,19 @@ float getFrequency(int barIndex) {
     float t = float(barIndex) / float(NUM_BARS - 1); // 0.0 to 1.0
     float bin;
     if (USE_LOGARITHMIC_SCALE == 1) {
-        bin = BIN_MIN * pow(BIN_MAX / BIN_MIN, t);
+        // Pow curve is undefined at bin=0, so guard against it.
+        float lo = max(BIN_MIN, 0.0001);
+        bin = lo * pow(BIN_MAX / lo, t);
     } else {
         bin = mix(BIN_MIN, BIN_MAX, t);
     }
-    int index = clamp(int(bin), 0, 255);
-    return clamp(audio[index] * boost, 0.0, 1.0);
+    // Linear interpolation between adjacent mel bins so 48 bars render
+    // smoothly across an 11-bin source.
+    int idxLo = clamp(int(floor(bin)), 0, 255);
+    int idxHi = clamp(idxLo + 1, 0, 255);
+    float frac = bin - float(idxLo);
+    float v = mix(audio[idxLo], audio[idxHi], frac);
+    return clamp(v * boost, 0.0, 1.0);
 }
 
 // HSV to RGB conversion for rainbow colors

@@ -192,7 +192,7 @@ struct FreqControlsView: View {
                     get: { snapshot.frequencyRelease },
                     set: { engine.setFrequencyRelease($0) }
                 ),
-                range: 0.01...1.0,
+                range: 0.0...2.0,
                 label: "Release",
                 showValue: true
             )

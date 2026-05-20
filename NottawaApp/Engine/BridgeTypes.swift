@@ -421,6 +421,9 @@ struct FileSourceState {
     let duration: Float
     let isMuted: Bool
     let isPlaying: Bool
+    let cacheAvailable: Bool
+    let useCachedMode: Bool
+    let cachedFrameCount: Int
 }
 
 // MARK: - Text Source State

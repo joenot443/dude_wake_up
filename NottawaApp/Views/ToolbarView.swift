@@ -91,6 +91,7 @@ struct ToolbarView: View {
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(theme.colors.textSecondary)
                     .accessibilityIdentifier("workspace-name")
+                    .accessibilityValue(viewModel.currentWorkspacePath ?? "")
             }
         }
         .buttonStyle(.plainHitArea)

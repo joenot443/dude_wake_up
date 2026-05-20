@@ -18,9 +18,21 @@
 #include <stdio.h>
 
 struct VHSSettings: public ShaderSettings {
+  /// Master wet/dry mix between the clean input frame and the fully
+  /// processed VHS chain. 0 → pass-through (every per-effect slider's
+  /// math is bypassed at the end of each pass), 1 → full effect, with
+  /// the individual sliders responsible for fine-tuning each component.
+  /// Implemented as a `mix(orig, processed, amount)` in both .frag files
+  /// rather than as a multiplier on individual effect-strength uniforms
+  /// — those uniforms aren't linear "0 = off" knobs (e.g. blurIntensity
+  /// in VHS2.frag multiplies the convolution sum, so 0 means full black,
+  /// not "no blur").
+  std::shared_ptr<Parameter> amount;
+  std::shared_ptr<WaveformOscillator> amountOscillator;
+
   std::shared_ptr<Parameter> hsyncJitter;
   std::shared_ptr<WaveformOscillator> hsyncJitterOscillator;
-  
+
   // VHS.frag parameters
   std::shared_ptr<Parameter> chromaEmphasis;
   std::shared_ptr<WaveformOscillator> chromaEmphasisOscillator;
@@ -30,7 +42,7 @@ struct VHSSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> noiseFrequencyOscillator;
   std::shared_ptr<Parameter> crossColorIntensity;
   std::shared_ptr<WaveformOscillator> crossColorIntensityOscillator;
-  
+
   // VHS2.frag parameters
   std::shared_ptr<Parameter> blurIntensity;
   std::shared_ptr<WaveformOscillator> blurIntensityOscillator;
@@ -42,6 +54,8 @@ struct VHSSettings: public ShaderSettings {
   std::shared_ptr<WaveformOscillator> kernelBiasOscillator;
 
   VHSSettings(std::string shaderId, json j, std::string name) :
+  amount(std::make_shared<Parameter>("Amount", 1.0, 0.0, 1.0)),
+  amountOscillator(std::make_shared<WaveformOscillator>(amount)),
   hsyncJitter(std::make_shared<Parameter>("Hsync Jitter", 0.5, 0.0, 1.0)),
   hsyncJitterOscillator(std::make_shared<WaveformOscillator>(hsyncJitter)),
   chromaEmphasis(std::make_shared<Parameter>("Chroma Emphasis", 0.5, 0.0, 2.0)),
@@ -62,19 +76,22 @@ struct VHSSettings: public ShaderSettings {
   kernelBiasOscillator(std::make_shared<WaveformOscillator>(kernelBias)),
 
   ShaderSettings(shaderId, j, name) {
-    // Initialize parameters with default values
-    parameters = { 
-      hsyncJitter, chromaEmphasis, noiseIntensity, noiseFrequency, 
-      crossColorIntensity, blurIntensity, jitterIntensity, 
-      jitterFrequency, kernelBias 
+    // Amount listed first so it appears at the top of the inspector as
+    // the master control.
+    parameters = {
+      amount,
+      hsyncJitter, chromaEmphasis, noiseIntensity, noiseFrequency,
+      crossColorIntensity, blurIntensity, jitterIntensity,
+      jitterFrequency, kernelBias
     };
-    
-    oscillators = { 
+
+    oscillators = {
+      amountOscillator,
       hsyncJitterOscillator, chromaEmphasisOscillator, noiseIntensityOscillator,
       noiseFrequencyOscillator, crossColorIntensityOscillator, blurIntensityOscillator,
       jitterIntensityOscillator, jitterFrequencyOscillator, kernelBiasOscillator
     };
-    
+
     load(j);
     registerParameters();
   };
@@ -96,7 +113,7 @@ struct VHSShader: Shader {
     if (!tempCanvas->isAllocated()) {
       tempCanvas->allocate(frame->getWidth(), frame->getHeight());
     }
-    
+
     // First pass - VHS.frag
     canvas->begin();
     shader.begin();
@@ -107,10 +124,11 @@ struct VHSShader: Shader {
     shader.setUniform1f("noiseIntensity", settings->noiseIntensity->value);
     shader.setUniform1f("noiseFrequency", settings->noiseFrequency->value);
     shader.setUniform1f("crossColorIntensity", settings->crossColorIntensity->value);
+    shader.setUniform1f("amount", settings->amount->value);
     frame->draw(0, 0);
     shader.end();
     canvas->end();
-    
+
     // Second pass - VHS2.frag
     tempCanvas->begin();
     shaderTwo.begin();
@@ -122,6 +140,7 @@ struct VHSShader: Shader {
     shaderTwo.setUniform1f("jitterIntensity", settings->jitterIntensity->value);
     shaderTwo.setUniform1f("jitterFrequency", settings->jitterFrequency->value);
     shaderTwo.setUniform1f("kernelBias", settings->kernelBias->value);
+    shaderTwo.setUniform1f("amount", settings->amount->value);
     canvas->draw(0, 0);
     shaderTwo.end();
     tempCanvas->end();
@@ -143,6 +162,7 @@ struct VHSShader: Shader {
   }
 
   void drawSettings() override {
+    CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
     CommonViews::ShaderParameter(settings->hsyncJitter, settings->hsyncJitterOscillator);
     CommonViews::ShaderParameter(settings->chromaEmphasis, settings->chromaEmphasisOscillator);
     CommonViews::ShaderParameter(settings->noiseIntensity, settings->noiseIntensityOscillator);

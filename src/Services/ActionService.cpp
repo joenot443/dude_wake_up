@@ -14,38 +14,43 @@ ActionService* ActionService::getService() {
 
 void ActionService::executeCommand(std::shared_ptr<Command> command) {
   command->execute();
-  undoStack.push(command);
-  // Clear the redo stack whenever a new command is executed
-  while (!redoStack.empty()) {
-    redoStack.pop();
+  undoStack.push_back(command);
+  // Cap the undo stack: drop oldest entries so removed connectables can
+  // actually be released instead of being pinned forever by the stack.
+  while (undoStack.size() > kMaxStackSize) {
+    undoStack.pop_front();
   }
+  // Clear the redo stack whenever a new command is executed.
+  redoStack.clear();
 }
 
 void ActionService::undo() {
   if (!undoStack.empty()) {
-    auto command = undoStack.top();
-    undoStack.pop();
+    auto command = undoStack.back();
+    undoStack.pop_back();
     command->undo();
-    redoStack.push(command);
+    redoStack.push_back(command);
+    while (redoStack.size() > kMaxStackSize) {
+      redoStack.pop_front();
+    }
   }
 }
 
 void ActionService::redo() {
   if (!redoStack.empty()) {
-    auto command = redoStack.top();
-    redoStack.pop();
+    auto command = redoStack.back();
+    redoStack.pop_back();
     command->execute();
-    undoStack.push(command);
+    undoStack.push_back(command);
+    while (undoStack.size() > kMaxStackSize) {
+      undoStack.pop_front();
+    }
   }
 }
 
 void ActionService::clear() {
-  while (!undoStack.empty()) {
-    undoStack.pop();
-  }
-  while (!redoStack.empty()) {
-    redoStack.pop();
-  }
+  undoStack.clear();
+  redoStack.clear();
 }
 
 bool ActionService::canUndo() const {

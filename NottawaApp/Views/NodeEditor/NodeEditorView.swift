@@ -191,7 +191,7 @@ struct CanvasPanGestureView: NSViewRepresentable {
                     swapItem.target = view
                     menu.addItem(swapItem)
 
-                    // Edit Shader File
+                    // Edit Shader File (external editor — original behavior)
                     let editItem = NSMenuItem(
                         title: "Edit Effect File",
                         action: #selector(PanNSView.contextMenuEditShaderFile(_:)),
@@ -200,6 +200,16 @@ struct CanvasPanGestureView: NSViewRepresentable {
                     editItem.representedObject = nodeId
                     editItem.target = view
                     menu.addItem(editItem)
+
+                    // Edit Shader Code (in-app live editor, session-only)
+                    let liveEditItem = NSMenuItem(
+                        title: "Edit Shader Code…",
+                        action: #selector(PanNSView.contextMenuEditShaderCode(_:)),
+                        keyEquivalent: ""
+                    )
+                    liveEditItem.representedObject = nodeId
+                    liveEditItem.target = view
+                    menu.addItem(liveEditItem)
                 } else if node?.isSource == true {
                     let swapItem = NSMenuItem(
                         title: "Swap Source...",
@@ -209,6 +219,19 @@ struct CanvasPanGestureView: NSViewRepresentable {
                     swapItem.representedObject = nodeId
                     swapItem.target = view
                     menu.addItem(swapItem)
+
+                    // Edit Shader Code — only for shader-source generators
+                    // (Plasma, Galaxy, etc.), which carry an editable Shader.
+                    if node?.isShaderSource == true {
+                        let liveEditItem = NSMenuItem(
+                            title: "Edit Shader Code…",
+                            action: #selector(PanNSView.contextMenuEditShaderCode(_:)),
+                            keyEquivalent: ""
+                        )
+                        liveEditItem.representedObject = nodeId
+                        liveEditItem.target = view
+                        menu.addItem(liveEditItem)
+                    }
                 }
 
                 menu.addItem(.separator())
@@ -420,6 +443,15 @@ struct CanvasPanGestureView: NSViewRepresentable {
             guard let nodeId = sender.representedObject as? String else { return }
             if let path = NottawaEngine.shared.shaderFilePath(shaderId: nodeId) {
                 NSWorkspace.shared.open(URL(fileURLWithPath: path))
+            }
+        }
+
+        @objc func contextMenuEditShaderCode(_ sender: NSMenuItem) {
+            guard let nodeId = sender.representedObject as? String,
+                  let vm = coordinator?.viewModel else { return }
+            let name = vm.nodes.first(where: { $0.id == nodeId })?.name ?? "Shader"
+            DispatchQueue.main.async {
+                vm.shaderCodeEditorTarget = ShaderCodeEditorTarget(id: nodeId, name: name)
             }
         }
 

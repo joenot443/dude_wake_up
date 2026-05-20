@@ -13,12 +13,12 @@ void ModulationService::addAudioAnalysis(AudioAnalysis *analysis) {
 
 void ModulationService::addMapping(std::shared_ptr<Parameter> videoParam, std::shared_ptr<Parameter> audioParam) {
   mappings[videoParam->name] = ModulationSetting(videoParam, audioParam);
-  videoParam->driver = audioParam;
+  videoParam->addDriver(audioParam);
 }
 
 void ModulationService::removeMapping(std::shared_ptr<Parameter> videoParam) {
   mappings.erase(videoParam->name);
-  videoParam->driver = NULL;
+  videoParam->removeDriver();
 }
 
 void ModulationService::tickMappings() {

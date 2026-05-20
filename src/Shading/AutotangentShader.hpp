@@ -18,6 +18,9 @@
 #include <stdio.h>
 
 struct AutotangentSettings: public ShaderSettings {
+  std::shared_ptr<Parameter> amount;
+  std::shared_ptr<WaveformOscillator> amountOscillator;
+
   std::shared_ptr<Parameter> brightness;
   std::shared_ptr<WaveformOscillator> brightnessOscillator;
 
@@ -27,6 +30,8 @@ struct AutotangentSettings: public ShaderSettings {
   std::shared_ptr<Parameter> color;
 
   AutotangentSettings(std::string shaderId, json j) :
+  amount(std::make_shared<Parameter>("Amount", 1.0, 0.0, 1.0)),
+  amountOscillator(std::make_shared<WaveformOscillator>(amount)),
   brightness(std::make_shared<Parameter>("Brightness", 0.2, 0.0, 3.0)),
   speed(std::make_shared<Parameter>("Speed", 1.0, 0.0, 2.0)),
   color(std::make_shared<Parameter>("Color", ParameterType_Color)),
@@ -34,8 +39,8 @@ struct AutotangentSettings: public ShaderSettings {
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
   ShaderSettings(shaderId, j, "Autotangent") {
     color->setColor({1.0, 1.0, 1.0, 1.0});
-    parameters = { brightness, speed, color };
-    oscillators = { brightnessOscillator, speedOscillator };
+    parameters = { amount, brightness, speed, color };
+    oscillators = { amountOscillator, brightnessOscillator, speedOscillator };
     load(j);
     registerParameters();
   };
@@ -53,6 +58,7 @@ struct AutotangentShader: Shader {
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
+    shader.setUniform1f("amount", settings->amount->value);
     shader.setUniform1f("brightness", settings->brightness->value);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform1f("speed", settings->speed->value);
@@ -79,6 +85,7 @@ struct AutotangentShader: Shader {
   }
 
   void drawSettings() override {
+    CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
     CommonViews::ShaderParameter(settings->brightness, settings->brightnessOscillator);
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
     CommonViews::ShaderColor(settings->color);

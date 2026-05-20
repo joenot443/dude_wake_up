@@ -70,3 +70,17 @@ void Parameter::tick() {
   }
 }
 
+void Parameter::addDriver(std::shared_ptr<Parameter> dr) {
+  driver = dr;
+  shift = std::make_shared<Parameter>("shift", 0.5, 0.0, 1.0);
+  scale = std::make_shared<Parameter>("scale", 1.0, 0.0, 2.0);
+  ParameterService::getService()->trackDriver(shared_from_this());
+}
+
+void Parameter::removeDriver() {
+  driver = nullptr;
+  shift = nullptr;
+  scale = nullptr;
+  ParameterService::getService()->untrackDriver(shared_from_this());
+}
+

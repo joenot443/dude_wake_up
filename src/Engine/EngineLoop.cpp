@@ -13,6 +13,7 @@
 #include "ImageService.hpp"
 #include "LayoutStateService.hpp"
 #include "MidiService.hpp"
+#include "MidiSmoothingService.hpp"
 #include "ModulationService.hpp"
 #include "OscillationService.hpp"
 #include "ParameterService.hpp"
@@ -28,6 +29,9 @@
 #include "GLFW/glfw3.h"
 #include <CoreFoundation/CoreFoundation.h>
 #include <sys/stat.h>
+#include <chrono>
+#include <cstdlib>
+#include <thread>
 
 // Hidden GLFW window for OpenGL context (NottawaApp only).
 static GLFWwindow* hiddenWindow = nullptr;
@@ -174,6 +178,24 @@ void EngineLoop::setup() {
   StringManager::loadStrings();
 
   setupComplete = true;
+
+  // Auto-run leak test if NTW_LEAK_TEST=N is set in the environment.
+  // The test runs on a detached thread; bridge functions dispatch back to
+  // the engine thread for actual mutations.
+  if (const char* env = std::getenv("NTW_LEAK_TEST")) {
+    int cycles = std::atoi(env);
+    if (cycles > 0) {
+      ofLogNotice("EngineLoop") << "NTW_LEAK_TEST=" << cycles << " — running leak test in 3s";
+      std::thread([cycles]() {
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+        char* result = ntw_run_leak_test(cycles);
+        if (result) {
+          ofLogNotice("EngineLoop") << "Leak test complete";
+          free(result);
+        }
+      }).detach();
+    }
+  }
 }
 
 void EngineLoop::tick() {
@@ -198,6 +220,9 @@ void EngineLoop::tick() {
   // 3. Update parameters
   ParameterService::getService()->tickParameters();
 
+  // 3b. Advance MIDI smoothings (eases stepped CC values toward their target).
+  MidiSmoothingService::getService()->tick();
+
   // 4. Update video sources (render to FBOs)
   VideoSourceService::getService()->updateVideoSources();
 
@@ -220,7 +245,11 @@ void EngineLoop::tick() {
   // Use time-based auto-save instead.
   if (now - lastAutoSaveTime >= autoSaveInterval && now >= 10.0) {
     lastAutoSaveTime = now;
-    ConfigService::getService()->saveDefaultConfigFile();
+    auto cs = ConfigService::getService();
+    auto cfg = cs->currentConfig();
+    if (cfg != cs->lastConfig) {
+      cs->saveDefaultConfigFile();
+    }
   }
 #else
   ConfigService::getService()->checkAndSaveDefaultConfigFile();

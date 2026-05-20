@@ -24,8 +24,8 @@ struct ScratchySettings: public ShaderSettings {
   
 
   ScratchySettings(std::string shaderId, json j) :
-  amount(std::make_shared<Parameter>("amount", 0.1, 0.0, 1.0)),
-  direction(std::make_shared<Parameter>("direction", ParameterType_Bool)),
+  amount(std::make_shared<Parameter>("Amount", 0.1, 0.0, 1.0)),
+  direction(std::make_shared<Parameter>("Direction", ParameterType_Bool)),
   amountOscillator(std::make_shared<WaveformOscillator>(amount)), // Initialize new oscillator
   ShaderSettings(shaderId, j, "Scratchy") {
     parameters = { amount, direction }; // Add amount to parameters

@@ -11,52 +11,52 @@
     },
     "configType": "full",
     "connections": {
-        "1bfa463b-5e0b-d3fc-1508-f1559d4e7034": {
-            "end": "ffd9db61-c119-0d09-caab-7e0953a433f4",
-            "id": "1bfa463b-5e0b-d3fc-1508-f1559d4e7034",
-            "inputSlot": 0,
-            "outputSlot": 0,
-            "start": "48291438-dfe5-d99a-92cb-49351edc273f",
-            "type": 0
-        },
-        "3bab1712-e87d-6e4f-2bbd-6c4f3eafefc4": {
-            "end": "7b18290a-d366-04bc-da51-d60efaa19fa0",
-            "id": "3bab1712-e87d-6e4f-2bbd-6c4f3eafefc4",
-            "inputSlot": 0,
-            "outputSlot": 0,
-            "start": "7bcbd8bd-8382-f2fd-bef8-aeedf5755a16",
-            "type": 1
-        },
-        "731df740-0bea-2f39-bfcc-c59ead53ed0e": {
+        "2d06ea52-c205-fc94-3a00-670873728627": {
             "end": "026fdeca-c0c7-a997-63a7-d52ccb4eaca9",
-            "id": "731df740-0bea-2f39-bfcc-c59ead53ed0e",
+            "id": "2d06ea52-c205-fc94-3a00-670873728627",
             "inputSlot": 1,
             "outputSlot": 0,
             "start": "50d38f7c-2342-9392-50b8-6e5370781fe2",
             "type": 0
         },
-        "754e5bce-f99f-da61-8c51-63b92f94fefa": {
-            "end": "50d38f7c-2342-9392-50b8-6e5370781fe2",
-            "id": "754e5bce-f99f-da61-8c51-63b92f94fefa",
-            "inputSlot": 0,
-            "outputSlot": 0,
-            "start": "ffd9db61-c119-0d09-caab-7e0953a433f4",
-            "type": 0
-        },
-        "a0fdf6e4-3635-c5ed-339f-9c1563c2f2ef": {
+        "3148c97a-4ed5-04aa-fec0-2698f2401925": {
             "end": "026fdeca-c0c7-a997-63a7-d52ccb4eaca9",
-            "id": "a0fdf6e4-3635-c5ed-339f-9c1563c2f2ef",
+            "id": "3148c97a-4ed5-04aa-fec0-2698f2401925",
             "inputSlot": 0,
             "outputSlot": 0,
             "start": "7b18290a-d366-04bc-da51-d60efaa19fa0",
             "type": 0
         },
-        "f8431aee-48be-4213-1171-a26f1c94b08c": {
+        "7af60cf4-464b-7022-226a-6132a8587baa": {
+            "end": "ffd9db61-c119-0d09-caab-7e0953a433f4",
+            "id": "7af60cf4-464b-7022-226a-6132a8587baa",
+            "inputSlot": 0,
+            "outputSlot": 0,
+            "start": "48291438-dfe5-d99a-92cb-49351edc273f",
+            "type": 0
+        },
+        "832d47f6-19b4-abec-5eb0-ae2190e66631": {
             "end": "48291438-dfe5-d99a-92cb-49351edc273f",
-            "id": "f8431aee-48be-4213-1171-a26f1c94b08c",
+            "id": "832d47f6-19b4-abec-5eb0-ae2190e66631",
             "inputSlot": 0,
             "outputSlot": 0,
             "start": "7ee8f4d2-f94c-abce-c353-015d8898437a",
+            "type": 1
+        },
+        "8e8fd0ba-6b72-d4c8-f76c-3138421d5921": {
+            "end": "50d38f7c-2342-9392-50b8-6e5370781fe2",
+            "id": "8e8fd0ba-6b72-d4c8-f76c-3138421d5921",
+            "inputSlot": 0,
+            "outputSlot": 0,
+            "start": "ffd9db61-c119-0d09-caab-7e0953a433f4",
+            "type": 0
+        },
+        "d16d8810-a7f5-06b1-4eb4-f9fc196e600c": {
+            "end": "7b18290a-d366-04bc-da51-d60efaa19fa0",
+            "id": "d16d8810-a7f5-06b1-4eb4-f9fc196e600c",
+            "inputSlot": 0,
+            "outputSlot": 0,
+            "start": "7bcbd8bd-8382-f2fd-bef8-aeedf5755a16",
             "type": 1
         }
     },
@@ -89,6 +89,16 @@
             "freq": 6.857907295227051,
             "maxOutput": 0.09178376942873001,
             "minOutput": 0.012623216956853867
+        },
+        "Orb X-c51acb55": {
+            "freq": 0.014000000432133675,
+            "maxOutput": 0.800000011920929,
+            "minOutput": -0.800000011920929
+        },
+        "Orb Y-9fddbda9": {
+            "freq": 0.04100000113248825,
+            "maxOutput": 0.800000011920929,
+            "minOutput": -0.800000011920929
         }
     },
     "parameters": {
@@ -165,7 +175,21 @@
                     "enabled": false,
                     "settings": {
                         "osc": {},
-                        "param": {}
+                        "param": {
+                            "Color": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Color",
+                                "paramId": "Color-0c26870f",
+                                "r": 0.0,
+                                "value": 0.0
+                            }
+                        }
                     },
                     "type": 124
                 },
@@ -638,10 +662,171 @@
                         }
                     },
                     "type": 41
+                },
+                {
+                    "enabled": false,
+                    "settings": {
+                        "osc": {},
+                        "param": {
+                            "Amount": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Amount",
+                                "paramId": "Amount-8be92b69",
+                                "r": 0.0,
+                                "value": 0.0
+                            }
+                        }
+                    },
+                    "type": 172
+                },
+                {
+                    "enabled": false,
+                    "settings": {
+                        "osc": {},
+                        "param": {
+                            "Amount": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Amount",
+                                "paramId": "Amount-ffc472bc",
+                                "r": 0.0,
+                                "value": 0.0
+                            }
+                        }
+                    },
+                    "type": 173
                 }
             ],
             "osc": {},
             "param": {
+                "Input 2 Strength": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 1,
+                    "midiDescriptor": "",
+                    "name": "Input 2 Strength",
+                    "paramId": "Input 2 Strength-eba19633",
+                    "r": 0.0,
+                    "value": 1.0
+                },
+                "Input 3 Strength": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 1,
+                    "midiDescriptor": "",
+                    "name": "Input 3 Strength",
+                    "paramId": "Input 3 Strength-2cfe2e18",
+                    "r": 0.0,
+                    "value": 1.0
+                },
+                "Input 4 Strength": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 1,
+                    "midiDescriptor": "",
+                    "name": "Input 4 Strength",
+                    "paramId": "Input 4 Strength-a1b6d9ea",
+                    "r": 0.0,
+                    "value": 1.0
+                },
+                "Input 5 Strength": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 1,
+                    "midiDescriptor": "",
+                    "name": "Input 5 Strength",
+                    "paramId": "Input 5 Strength-50dcecec",
+                    "r": 0.0,
+                    "value": 1.0
+                },
+                "Input 6 Strength": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 1,
+                    "midiDescriptor": "",
+                    "name": "Input 6 Strength",
+                    "paramId": "Input 6 Strength-6c04ec3c",
+                    "r": 0.0,
+                    "value": 1.0
+                },
+                "Input 7 Strength": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 1,
+                    "midiDescriptor": "",
+                    "name": "Input 7 Strength",
+                    "paramId": "Input 7 Strength-280c5c80",
+                    "r": 0.0,
+                    "value": 1.0
+                },
+                "Input 8 Strength": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 1,
+                    "midiDescriptor": "",
+                    "name": "Input 8 Strength",
+                    "paramId": "Input 8 Strength-6bf47fb1",
+                    "r": 0.0,
+                    "value": 1.0
+                },
+                "Input 9 Strength": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 1,
+                    "midiDescriptor": "",
+                    "name": "Input 9 Strength",
+                    "paramId": "Input 9 Strength-d76fe3e2",
+                    "r": 0.0,
+                    "value": 1.0
+                },
+                "Main Input Strength": {
+                    "a": 1.0,
+                    "b": 0.0,
+                    "boolValue": true,
+                    "favorited": false,
+                    "g": 0.0,
+                    "intValue": 0,
+                    "midiDescriptor": "",
+                    "name": "Main Input Strength",
+                    "paramId": "Main Input Strength-4d202c35",
+                    "r": 0.0,
+                    "value": 0.467409610748291
+                },
                 "Mode": {
                     "a": 1.0,
                     "b": 0.0,
@@ -654,19 +839,6 @@
                     "paramId": "Mode-d5c52084",
                     "r": 0.0,
                     "value": 4.0
-                },
-                "Strength": {
-                    "a": 1.0,
-                    "b": 0.0,
-                    "boolValue": true,
-                    "favorited": false,
-                    "g": 0.0,
-                    "intValue": 0,
-                    "midiDescriptor": "",
-                    "name": "Strength",
-                    "paramId": "Strength-4b481b72",
-                    "r": 0.0,
-                    "value": 0.39937105774879456
                 },
                 "Swap Inputs": {
                     "a": 1.0,
@@ -754,7 +926,21 @@
                     "enabled": false,
                     "settings": {
                         "osc": {},
-                        "param": {}
+                        "param": {
+                            "Color": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Color",
+                                "paramId": "Color-f7fb9e6a",
+                                "r": 0.0,
+                                "value": 0.0
+                            }
+                        }
                     },
                     "type": 124
                 },
@@ -1227,6 +1413,50 @@
                         }
                     },
                     "type": 41
+                },
+                {
+                    "enabled": false,
+                    "settings": {
+                        "osc": {},
+                        "param": {
+                            "Amount": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Amount",
+                                "paramId": "Amount-9ef5da18",
+                                "r": 0.0,
+                                "value": 0.0
+                            }
+                        }
+                    },
+                    "type": 172
+                },
+                {
+                    "enabled": false,
+                    "settings": {
+                        "osc": {},
+                        "param": {
+                            "Amount": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Amount",
+                                "paramId": "Amount-d6da26ac",
+                                "r": 0.0,
+                                "value": 0.0
+                            }
+                        }
+                    },
+                    "type": 173
                 }
             ],
             "osc": {
@@ -1284,7 +1514,7 @@
                     "name": "Amount",
                     "paramId": "Amount-0abe1e59",
                     "r": 0.0,
-                    "value": 0.04563974589109421
+                    "value": 0.058939456939697266
                 }
             },
             "shaderId": "48291438-dfe5-d99a-92cb-49351edc273f",
@@ -1359,7 +1589,21 @@
                     "enabled": false,
                     "settings": {
                         "osc": {},
-                        "param": {}
+                        "param": {
+                            "Color": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Color",
+                                "paramId": "Color-16104c90",
+                                "r": 0.0,
+                                "value": 0.0
+                            }
+                        }
                     },
                     "type": 124
                 },
@@ -1832,6 +2076,50 @@
                         }
                     },
                     "type": 41
+                },
+                {
+                    "enabled": false,
+                    "settings": {
+                        "osc": {},
+                        "param": {
+                            "Amount": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Amount",
+                                "paramId": "Amount-7747ece8",
+                                "r": 0.0,
+                                "value": 0.0
+                            }
+                        }
+                    },
+                    "type": 172
+                },
+                {
+                    "enabled": false,
+                    "settings": {
+                        "osc": {},
+                        "param": {
+                            "Amount": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Amount",
+                                "paramId": "Amount-e9c90b47",
+                                "r": 0.0,
+                                "value": 0.0
+                            }
+                        }
+                    },
+                    "type": 173
                 }
             ],
             "osc": {},
@@ -2104,7 +2392,21 @@
                     "enabled": false,
                     "settings": {
                         "osc": {},
-                        "param": {}
+                        "param": {
+                            "Color": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Color",
+                                "paramId": "Color-7228d3ac",
+                                "r": 0.0,
+                                "value": 0.0
+                            }
+                        }
                     },
                     "type": 124
                 },
@@ -2577,11 +2879,55 @@
                         }
                     },
                     "type": 41
+                },
+                {
+                    "enabled": false,
+                    "settings": {
+                        "osc": {},
+                        "param": {
+                            "Amount": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Amount",
+                                "paramId": "Amount-b2641534",
+                                "r": 0.0,
+                                "value": 0.0
+                            }
+                        }
+                    },
+                    "type": 172
+                },
+                {
+                    "enabled": false,
+                    "settings": {
+                        "osc": {},
+                        "param": {
+                            "Amount": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Amount",
+                                "paramId": "Amount-46ba166e",
+                                "r": 0.0,
+                                "value": 0.0
+                            }
+                        }
+                    },
+                    "type": 173
                 }
             ],
             "osc": {},
             "param": {
-                "amount": {
+                "Amount": {
                     "a": 1.0,
                     "b": 0.0,
                     "boolValue": true,
@@ -2589,12 +2935,12 @@
                     "g": 0.0,
                     "intValue": 0,
                     "midiDescriptor": "",
-                    "name": "amount",
-                    "paramId": "amount-971b5a1b",
+                    "name": "Amount",
+                    "paramId": "Amount-3edc0852",
                     "r": 0.0,
                     "value": 0.10000000149011612
                 },
-                "direction": {
+                "Direction": {
                     "a": 1.0,
                     "b": 0.0,
                     "boolValue": false,
@@ -2602,8 +2948,8 @@
                     "g": 0.0,
                     "intValue": 0,
                     "midiDescriptor": "",
-                    "name": "direction",
-                    "paramId": "direction-5fb62c70",
+                    "name": "Direction",
+                    "paramId": "Direction-b1d008c8",
                     "r": 0.0,
                     "value": 0.0
                 }
@@ -2680,7 +3026,21 @@
                     "enabled": false,
                     "settings": {
                         "osc": {},
-                        "param": {}
+                        "param": {
+                            "Color": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Color",
+                                "paramId": "Color-4af5236b",
+                                "r": 0.0,
+                                "value": 0.0
+                            }
+                        }
                     },
                     "type": 124
                 },
@@ -3153,6 +3513,50 @@
                         }
                     },
                     "type": 41
+                },
+                {
+                    "enabled": false,
+                    "settings": {
+                        "osc": {},
+                        "param": {
+                            "Amount": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Amount",
+                                "paramId": "Amount-b12b1f8c",
+                                "r": 0.0,
+                                "value": 0.0
+                            }
+                        }
+                    },
+                    "type": 172
+                },
+                {
+                    "enabled": false,
+                    "settings": {
+                        "osc": {},
+                        "param": {
+                            "Amount": {
+                                "a": 1.0,
+                                "b": 0.0,
+                                "boolValue": false,
+                                "favorited": false,
+                                "g": 0.0,
+                                "intValue": 0,
+                                "midiDescriptor": "",
+                                "name": "Amount",
+                                "paramId": "Amount-04c290a7",
+                                "r": 0.0,
+                                "value": 0.0
+                            }
+                        }
+                    },
+                    "type": 173
                 }
             ],
             "osc": {},
@@ -3352,6 +3756,84 @@
             "shader": {
                 "osc": {},
                 "param": {
+                    "Camera Sway": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": true,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 0,
+                        "midiDescriptor": "",
+                        "name": "Camera Sway",
+                        "paramId": "Camera Sway-387bb303",
+                        "r": 0.0,
+                        "value": 0.20000000298023224
+                    },
+                    "Flow Speed": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": true,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 1,
+                        "midiDescriptor": "",
+                        "name": "Flow Speed",
+                        "paramId": "Flow Speed-4a4d0795",
+                        "r": 0.0,
+                        "value": 1.5
+                    },
+                    "Fog Decay": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": true,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 0,
+                        "midiDescriptor": "",
+                        "name": "Fog Decay",
+                        "paramId": "Fog Decay-407d8159",
+                        "r": 0.0,
+                        "value": 0.03999999910593033
+                    },
+                    "Glow Intensity": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": true,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 1,
+                        "midiDescriptor": "",
+                        "name": "Glow Intensity",
+                        "paramId": "Glow Intensity-b081b41f",
+                        "r": 0.0,
+                        "value": 1.0
+                    },
+                    "Hue Shift": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": false,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 0,
+                        "midiDescriptor": "",
+                        "name": "Hue Shift",
+                        "paramId": "Hue Shift-5d7f04c0",
+                        "r": 0.0,
+                        "value": 0.0
+                    },
+                    "Layer Count": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": true,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 4,
+                        "midiDescriptor": "",
+                        "name": "Layer Count",
+                        "paramId": "Layer Count-176070e1",
+                        "r": 0.0,
+                        "value": 4.0
+                    },
                     "Orb X": {
                         "a": 1.0,
                         "b": 0.0,
@@ -3377,6 +3859,58 @@
                         "paramId": "Orb Y-65a5cf41",
                         "r": 0.0,
                         "value": 0.0
+                    },
+                    "Repetition": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": true,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 27,
+                        "midiDescriptor": "",
+                        "name": "Repetition",
+                        "paramId": "Repetition-53807432",
+                        "r": 0.0,
+                        "value": 27.0
+                    },
+                    "Thickness": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": true,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 1,
+                        "midiDescriptor": "",
+                        "name": "Thickness",
+                        "paramId": "Thickness-8d56bd96",
+                        "r": 0.0,
+                        "value": 1.0
+                    },
+                    "Twist Speed": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": true,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 0,
+                        "midiDescriptor": "",
+                        "name": "Twist Speed",
+                        "paramId": "Twist Speed-243246de",
+                        "r": 0.0,
+                        "value": 0.10000000149011612
+                    },
+                    "Zoom": {
+                        "a": 1.0,
+                        "b": 0.0,
+                        "boolValue": true,
+                        "favorited": false,
+                        "g": 0.0,
+                        "intValue": 2,
+                        "midiDescriptor": "",
+                        "name": "Zoom",
+                        "paramId": "Zoom-96e5001d",
+                        "r": 0.0,
+                        "value": 2.0
                     }
                 }
             },
@@ -3485,15 +4019,15 @@
                     "Font": {
                         "a": 1.0,
                         "b": 0.0,
-                        "boolValue": false,
+                        "boolValue": true,
                         "favorited": false,
                         "g": 0.0,
-                        "intValue": 35,
+                        "intValue": 27,
                         "midiDescriptor": "",
                         "name": "Font",
                         "paramId": "Font-7d3ab1d7",
                         "r": 0.0,
-                        "value": 35.0
+                        "value": 27.0
                     },
                     "Stroke": {
                         "a": 1.0,
@@ -3558,7 +4092,7 @@
                         "name": "X",
                         "paramId": "X-77a17a71",
                         "r": 0.0,
-                        "value": 0.06090375781059265
+                        "value": 0.2774597108364105
                     },
                     "Y": {
                         "a": 1.0,
@@ -3571,28 +4105,28 @@
                         "name": "Y",
                         "paramId": "Y-4e6dae82",
                         "r": 0.0,
-                        "value": 0.4776816964149475
+                        "value": 0.5368055701255798
                     }
                 }
             },
-            "displayX": 0.06090375781059265,
-            "displayY": 0.4776816964149475,
+            "displayX": 0.2774597108364105,
+            "displayY": 0.5368055701255798,
             "edgeSoftness": 0.800000011920929,
-            "fontName": "Roboto",
+            "fontName": "Lobster",
             "fontSelector": {
                 "a": 1.0,
                 "b": 0.0,
-                "boolValue": false,
+                "boolValue": true,
                 "favorited": false,
                 "g": 0.0,
-                "intValue": 35,
+                "intValue": 27,
                 "midiDescriptor": "",
                 "name": "Font",
                 "paramId": "Font-7d3ab1d7",
                 "r": 0.0,
-                "value": 35.0
+                "value": 27.0
             },
-            "fontSize": 75,
+            "fontSize": 56,
             "id": "7ee8f4d2-f94c-abce-c353-015d8898437a",
             "settings": {
                 "osc": {},
@@ -3685,6 +4219,36 @@
             "imagePath": "",
             "name": "Blend 3",
             "path": "/Users/jcrozier/Library/Containers/com.joecrozier.nottawaapp/Data/nottawa/strands/Blend 3.json"
+        },
+        "Chrome Grill->Blend->Blend->AudioGlowBars->5118414-uhd_3840_2160_25fps (1)_12-08": {
+            "id": "da47134a-6988-69f4-c760-6e3d942d678e",
+            "imagePath": "/Users/jcrozier/Library/Containers/com.joecrozier.nottawa/Data/nottawa/strands/Chrome Grill->Blend->Blend->AudioGlowBars->5118414-uhd_3840_2160_25fps (1)_12-08.png",
+            "name": "Chrome Grill->Blend->Blend->AudioGlowBars->5118414-uhd_3840_2160_25fps (1)_12-08",
+            "path": "/Users/jcrozier/dev/nottawa-server/media/nottawa-strands/triple_dj.json"
+        },
+        "FaceTime HD Camera->1b-Dither->Synthwave->Synthfly_08-16": {
+            "id": "b3efc53c-429f-230b-1453-bfc61c908c79",
+            "imagePath": "/Users/jcrozier/Library/Containers/com.joecrozier.nottawa/Data/nottawa/strands/FaceTime HD Camera->1b-Dither->Synthwave->Synthfly_08-16.png",
+            "name": "FaceTime HD Camera->1b-Dither->Synthwave->Synthfly_08-16",
+            "path": "/Users/jcrozier/Documents/tron.json"
+        },
+        "Melter->Blend_08-10": {
+            "id": "bbf785fb-28a2-6ba0-99e5-fbced25bb967",
+            "imagePath": "/Users/jcrozier/Library/Containers/com.joecrozier.nottawa/Data/nottawa/strands/Melter->Blend_08-10.png",
+            "name": "Melter->Blend_08-10",
+            "path": "/Users/jcrozier/nottawa/Melter->Blend_08-10.json"
+        },
+        "Melter->Rotate_08-10": {
+            "id": "c506785c-d89f-625a-78b8-ecef1db4fc54",
+            "imagePath": "/Users/jcrozier/Library/Containers/com.joecrozier.nottawa/Data/nottawa/strands/Melter->Rotate_08-10.png",
+            "name": "Melter->Rotate_08-10",
+            "path": "/Users/jcrozier/nottawa/Melter->Rotate_08-10.json"
+        },
+        "leandro-navarro-p2o0mTKAEnM-unsplash.jpg_08-10": {
+            "id": "9617b706-cf3c-e5af-9ced-1e1b054c101c",
+            "imagePath": "/Users/jcrozier/Library/Containers/com.joecrozier.nottawa/Data/nottawa/strands/leandro-navarro-p2o0mTKAEnM-unsplash.jpg_08-10.png",
+            "name": "leandro-navarro-p2o0mTKAEnM-unsplash.jpg_08-10",
+            "path": "/Users/jcrozier/nottawa/leandro-navarro-p2o0mTKAEnM-unsplash.jpg_08-10.json"
         }
     }
 }

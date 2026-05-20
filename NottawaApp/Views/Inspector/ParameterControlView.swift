@@ -18,8 +18,8 @@ struct ParameterControlView: View {
     @State private var boolValue: Bool
     @State private var colorValue: Color
     @State private var showOscillator = false
-    @State private var showAudioDriver = false
-    @State private var showMidi = false
+    @State private var showAudioDriver: Bool
+    @State private var showMidi: Bool
     @State private var isExternallyDriven: Bool
     @State private var oscEnabled: Bool
     @State private var driverActive: Bool
@@ -52,6 +52,12 @@ struct ParameterControlView: View {
         self._oscEnabled = State(initialValue: param.oscillatorEnabled)
         self._driverActive = State(initialValue: param.hasDriver)
         self._midiActive = State(initialValue: param.hasMidiBinding)
+        // Start the audio / MIDI panels open when the param is already
+        // bound so the toggle button has something to actually toggle —
+        // otherwise the panel was always forced visible by `|| midiActive`
+        // and clicking the button did nothing visible.
+        self._showAudioDriver = State(initialValue: param.hasDriver)
+        self._showMidi = State(initialValue: param.hasMidiBinding)
         self._stringValue = State(initialValue: param.stringValue)
     }
 
@@ -303,12 +309,12 @@ struct ParameterControlView: View {
                 .transition(.opacity.combined(with: .move(edge: .top)))
         }
 
-        if showAudioDriver || driverActive {
+        if showAudioDriver {
             AudioDriverControlsView(param: param)
                 .transition(.opacity.combined(with: .move(edge: .top)))
         }
 
-        if showMidi || midiActive {
+        if showMidi {
             MidiControlsView(param: param)
                 .transition(.opacity.combined(with: .move(edge: .top)))
         }

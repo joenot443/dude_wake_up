@@ -28,6 +28,7 @@
 #include "StrandService.hpp"
 #include "Workspace.hpp"
 #include "MidiService.hpp"
+#include "MidiSmoothingService.hpp"
 
 #include <filesystem>
 #include "LibraryService.hpp"
@@ -49,6 +50,7 @@
 #include <thread>
 #include <atomic>
 #include <future>
+#include <tuple>
 #include <type_traits>
 
 // ---------------------------------------------------------------------------
@@ -379,15 +381,91 @@ char* ntw_replace_shader(const char* shaderId, int newShaderTypeRaw) {
   return result;
 }
 
+// Resolves a connectable ID to the editable Shader. Covers both:
+//   • Effect shaders registered in ShaderChainerService (most cases).
+//   • Source-shaders — VideoSources of type VideoSource_shader (Plasma,
+//     Galaxy, etc.). Their inner Shader instance lives on ShaderSource
+//     and is fully compatible with the Shader override API.
+static std::shared_ptr<Shader> findEditableShader(const std::string& id) {
+  if (auto s = ShaderChainerService::getService()->shaderForId(id)) return s;
+  auto src = VideoSourceService::getService()->videoSourceForId(id);
+  if (!src || src->type != VideoSource_shader) return nullptr;
+  auto shaderSrc = std::dynamic_pointer_cast<ShaderSource>(src);
+  if (!shaderSrc) return nullptr;
+  return shaderSrc->shader;
+}
+
 char* ntw_get_shader_file_path(const char* shaderId) {
   if (!shaderId) return nullptr;
   std::string sid(shaderId);
 
-  auto shader = ShaderChainerService::getService()->shaderForId(sid);
+  auto shader = findEditableShader(sid);
   if (!shader) return nullptr;
 
   std::string path = ofToDataPath("shaders/" + shader->fileName() + ".frag");
   return strdup_safe(path);
+}
+
+// ---------------------------------------------------------------------------
+// MARK: - Live GLSL Editing
+// ---------------------------------------------------------------------------
+
+void ntw_free_shader_compile_result(NTWShaderCompileResult result) {
+  if (result.errorLog) free(result.errorLog);
+}
+
+char* ntw_get_shader_fragment_source(const char* shaderId) {
+  if (!shaderId) return nullptr;
+  std::string sid(shaderId);
+  // Read-only: a file read + a string copy. No engine-thread dispatch.
+  auto shader = findEditableShader(sid);
+  if (!shader) return nullptr;
+  std::string src = shader->currentFragmentSource();
+  if (src.empty()) return nullptr;
+  return strdup_safe(src);
+}
+
+NTWShaderCompileResult ntw_set_shader_fragment_source(const char* shaderId, const char* source) {
+  NTWShaderCompileResult result = {0, nullptr, 0};
+  if (!shaderId || !source) return result;
+  std::string sid(shaderId), src(source);
+
+  // GL compile + program link MUST happen on the engine thread that owns
+  // the GL context. The whole compile + atomic swap is done inside one
+  // lambda so shade() can never observe a partial state.
+  auto compiled = runOnEngineThread([sid, src]() -> std::tuple<bool, std::string, int> {
+    auto shader = findEditableShader(sid);
+    if (!shader) return {false, std::string("Shader not found"), 0};
+    bool ok = shader->applyFragmentSourceOverride(src);
+    return {ok, shader->lastCompileError, shader->lastCompileErrorLine};
+  });
+
+  result.ok = std::get<0>(compiled) ? 1 : 0;
+  const std::string& log = std::get<1>(compiled);
+  result.errorLine = std::get<2>(compiled);
+  if (!result.ok && !log.empty()) {
+    result.errorLog = strdup_safe(log);
+  }
+  return result;
+}
+
+void ntw_revert_shader_source(const char* shaderId) {
+  if (!shaderId) return;
+  std::string sid(shaderId);
+  runOnEngineThread([sid]() {
+    auto shader = findEditableShader(sid);
+    if (!shader) return;
+    shader->revertFragmentSource();
+  });
+}
+
+bool ntw_shader_has_session_override(const char* shaderId) {
+  if (!shaderId) return false;
+  std::string sid(shaderId);
+  // Read-only — just checking a bool on the shader instance.
+  auto shader = findEditableShader(sid);
+  if (!shader) return false;
+  return shader->hasSessionOverride();
 }
 
 bool ntw_is_audio_active(void) {
@@ -582,6 +660,114 @@ void ntw_remove_connection(const char* connectionId) {
     }
   });
   notifyGraphChanged();
+}
+
+// ---------------------------------------------------------------------------
+// MARK: - Leak Hunting
+// ---------------------------------------------------------------------------
+
+#include "LifecycleCounter.hpp"
+#include <mach/mach.h>
+
+char* ntw_dump_object_counts(void) {
+  std::string s = ::lifecycle::Registry::instance().dumpJson();
+  return strdup_safe(s);
+}
+
+void ntw_reset_object_counts(void) {
+  ::lifecycle::Registry::instance().resetCounters();
+}
+
+// Run a self-contained add+remove leak test. Adds a Plasma video source and
+// an HSB shader, connects them, ticks the engine a few frames, then removes
+// both. Repeats `cycles` times. Logs lifecycle deltas after each cycle so
+// they can be grepped from stdout.
+//
+// Note: returns a JSON string the caller must free.
+// Returns resident set size in MB.
+static double processRssMB() {
+  task_basic_info_data_t info;
+  mach_msg_type_number_t count = TASK_BASIC_INFO_COUNT;
+  if (task_info(mach_task_self(), TASK_BASIC_INFO, (task_info_t)&info, &count) != KERN_SUCCESS) {
+    return -1.0;
+  }
+  return info.resident_size / 1048576.0;
+}
+
+char* ntw_run_leak_test(int cycles) {
+  // Snapshot baseline before doing anything.
+  std::string baseline = ::lifecycle::Registry::instance().dumpJson();
+  double baselineRss = processRssMB();
+  log("LEAK_TEST_BASELINE: rss=%.1f MB %s", baselineRss, baseline.c_str());
+
+  for (int i = 0; i < cycles; ++i) {
+    // Each cycle is a self-contained add+remove. We dispatch all the work
+    // through the engine thread (synchronously) to mirror real user actions.
+
+    char* sourceIdC = ntw_add_shader_video_source(/* Plasma */ 12);
+    if (!sourceIdC) {
+      log("LEAK_TEST: failed to add source on cycle %d", i);
+      break;
+    }
+    std::string sourceId(sourceIdC);
+    free(sourceIdC);
+
+    char* shaderIdC = ntw_add_shader(/* HSB */ 1);
+    if (!shaderIdC) {
+      log("LEAK_TEST: failed to add shader on cycle %d", i);
+      ntw_remove_video_source(sourceId.c_str());
+      break;
+    }
+    std::string shaderId(shaderIdC);
+    free(shaderIdC);
+
+    // Connect source -> shader (main slot).
+    char* connIdC = ntw_make_connection(sourceId.c_str(), shaderId.c_str(),
+                                        /* Source-to-shader */ 1, 0, 0);
+    std::string connId = connIdC ? connIdC : "";
+    if (connIdC) free(connIdC);
+
+    // Let the engine run a few ticks so the source/shader settle.
+    // Sleep on the calling thread; engine thread is independent.
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    // Remove both — removing connectables also breaks the connection.
+    ntw_remove_video_source(sourceId.c_str());
+    ntw_remove_shader(shaderId.c_str());
+
+    // Give removal a moment to flush.
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+    // Log the live-count snapshot + memory delta.
+    std::string flat = ::lifecycle::Registry::instance().dumpFlat(false);
+    double rss = processRssMB();
+    log("LEAK_TEST_CYCLE %d: rss=%.1f MB (Δ%.1f) %s",
+        i + 1, rss, rss - baselineRss, flat.c_str());
+  }
+
+  std::string preClear = ::lifecycle::Registry::instance().dumpJson();
+  double preClearRss = processRssMB();
+  log("LEAK_TEST_FINAL_BEFORE_UNDO_CLEAR: rss=%.1f MB (Δ%.1f) %s",
+      preClearRss, preClearRss - baselineRss, preClear.c_str());
+
+  // Clear undo + redo stacks. If the leaks were "just" the undo holding refs
+  // for redo support, counters should drop back to baseline after this.
+  // Anything still elevated is a real leak.
+  runOnEngineThread([]() {
+    ActionService::getService()->clear();
+  });
+
+  // Give shared_ptrs that just dropped a chance to actually destruct.
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+  std::string finalDump = ::lifecycle::Registry::instance().dumpJson();
+  double finalRss = processRssMB();
+  log("LEAK_TEST_FINAL_AFTER_UNDO_CLEAR: rss=%.1f MB (Δ%.1f) %s",
+      finalRss, finalRss - baselineRss, finalDump.c_str());
+  log("LEAK_TEST_MAPS: oscillators=%zu parameterMap=%zu",
+      OscillationService::getService()->oscillators.size(),
+      ParameterService::getService()->parameterMap.size());
+  return strdup_safe(finalDump);
 }
 
 // ---------------------------------------------------------------------------
@@ -1051,7 +1237,9 @@ void ntw_set_oscillator_enabled(const char* paramId, bool enabled) {
     auto param = ParameterService::getService()->parameterForId(sid);
     if (!param) return;
     auto osc = OscillationService::getService()->oscillatorForParameter(param);
-    if (osc && osc->enabled) osc->enabled->setBoolValue(enabled);
+    // setEnabled keeps the enabledOscillators_ hot-list in sync;
+    // setting boolValue directly leaves tick() blind to the change.
+    if (osc) OscillationService::getService()->setEnabled(osc, enabled);
   });
 }
 
@@ -1323,6 +1511,12 @@ void ntw_remove_connectable(const char* connectableId) {
   if (!connectableId) return;
   std::string sid(connectableId);
   runOnEngineThread([sid]() {
+    // Drop the IOSurface tracking — Swift may not have called
+    // ntw_stop_texture_sharing yet (e.g. when the node disappears and the
+    // ViewModel hasn't run its cleanup). Without this, every removed
+    // connectable leaks an IOSurface (~8 MB at 1080p RGBA).
+    IOSurfaceTextureManager::getInstance()->stopSharing(sid);
+
     // Try video source first (avoids spurious log from shaderForId).
     auto source = VideoSourceService::getService()->videoSourceForId(sid);
     if (source) {
@@ -1764,11 +1958,18 @@ bool ntw_load_workspace(const char* path) {
       data.erase("workspace");
     }
 
-    // Write sanitized JSON to a temp file and load it.
-    std::string tmpPath = spath + ".ntw_tmp";
+    // Write sanitized JSON to a temp file and load it. Must use the sandbox's
+    // own writable tmp dir — NSOpenPanel grants read access to the picked file
+    // but not write access to its parent directory, so a sibling temp file
+    // fails in the sandbox. $TMPDIR resolves to the per-container tmp dir.
+    const char* tmpDir = std::getenv("TMPDIR");
+    std::string tmpBase = tmpDir ? tmpDir : "/tmp";
+    if (!tmpBase.empty() && tmpBase.back() != '/') tmpBase += '/';
+    std::string tmpPath = tmpBase + "ntw_load_" +
+      std::to_string((unsigned long long)ofGetElapsedTimeMillis()) + ".json";
     std::ofstream tmpOut(tmpPath);
     if (!tmpOut.is_open()) {
-      ofLogError("Bridge") << "ntw_load_workspace: failed to write temp file";
+      ofLogError("Bridge") << "ntw_load_workspace: failed to write temp file at " << tmpPath;
       return false;
     }
     tmpOut << data.dump();
@@ -1856,6 +2057,30 @@ float ntw_get_resolution_width(void) {
 
 float ntw_get_resolution_height(void) {
   return LayoutStateService::getService()->resolution.y;
+}
+
+// ---------------------------------------------------------------------------
+// MARK: - MIDI Smoothing
+// ---------------------------------------------------------------------------
+
+bool ntw_get_midi_smoothing_enabled(void) {
+  return MidiSmoothingService::getService()->isEnabled();
+}
+
+void ntw_set_midi_smoothing_enabled(bool enabled) {
+  runOnEngineThread([enabled]() {
+    MidiSmoothingService::getService()->setEnabled(enabled);
+  });
+}
+
+float ntw_get_midi_smoothing_duration_ms(void) {
+  return MidiSmoothingService::getService()->getDurationMs();
+}
+
+void ntw_set_midi_smoothing_duration_ms(float ms) {
+  runOnEngineThread([ms]() {
+    MidiSmoothingService::getService()->setDurationMs(ms);
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -1952,11 +2177,15 @@ void ntw_register_graph_changed_callback(NTWGraphChangedCallback callback) {
 }
 
 void ntw_register_resolution_changed_callback(NTWResolutionChangedCallback callback) {
+  static observable::unique_subscription bridgeResolutionSubscription;
   resolutionChangedCallback = callback;
+  // Reset first so re-registering replaces (rather than stacking) the subscription.
+  bridgeResolutionSubscription = observable::unique_subscription{};
   if (callback) {
-    LayoutStateService::getService()->subscribeToResolutionUpdates([callback]() {
-      callback();
-    });
+    bridgeResolutionSubscription =
+      LayoutStateService::getService()->subscribeToResolutionUpdates([callback]() {
+        callback();
+      });
   }
 }
 
@@ -1991,6 +2220,13 @@ std::shared_ptr<Connectable> ntw_find_preview_connectable(const std::string& id)
   return nullptr;
 }
 
+// Preview tile resolution. Tiles are 16:9 thumbnails — full resolution is wasteful
+// (1080p RGBA = ~8 MB per FBO, and ShaderSource/Shader allocate 3-5 FBOs each, so
+// ~24-40 MB per preview × 155 shader types ≈ 4 GB). 320×180 keeps each preview at
+// ~230 KB per FBO, ~1 MB total per preview.
+static constexpr int kPreviewWidth = 320;
+static constexpr int kPreviewHeight = 180;
+
 char* ntw_create_preview(int shaderTypeRaw, bool isSource) {
   return runOnEngineThread([shaderTypeRaw, isSource]() -> char* {
     std::string pid = "preview_" + std::to_string(++previewCounter);
@@ -2001,6 +2237,11 @@ char* ntw_create_preview(int shaderTypeRaw, bool isSource) {
       auto type = static_cast<ShaderSourceType>(shaderTypeRaw);
       auto src = std::make_shared<ShaderSource>(pid, type);
       src->setup();
+      // Reallocate to preview size. ofFbo::allocate calls clear() first, so the
+      // full-resolution FBOs that setup() allocated are released here.
+      if (src->fbo) src->fbo->allocate(kPreviewWidth, kPreviewHeight, GL_RGBA);
+      if (src->optionalFbo) src->optionalFbo->allocate(kPreviewWidth, kPreviewHeight, GL_RGBA);
+      if (src->canvas) src->canvas->allocate(kPreviewWidth, kPreviewHeight, GL_RGBA);
       inst.source = std::dynamic_pointer_cast<VideoSource>(src);
       inst.isSourceOnly = true;
 
@@ -2013,6 +2254,9 @@ char* ntw_create_preview(int shaderTypeRaw, bool isSource) {
       if (!shader) return nullptr;
       shader->setup();
       shader->allocateFrames();
+      // Reallocate to preview size (see comment above).
+      if (shader->lastFrame) shader->lastFrame->allocate(kPreviewWidth, kPreviewHeight, GL_RGBA);
+      if (shader->optionalFrame) shader->optionalFrame->allocate(kPreviewWidth, kPreviewHeight, GL_RGBA);
 
       inst.shader = shader;
 
@@ -2250,6 +2494,28 @@ void ntw_free_available_strand_info_array(NTWAvailableStrandInfo* array, int cou
     free((void*)array[i].imagePath);
   }
   free(array);
+}
+
+int ntw_strand_authored_resolution(const char* strandId) {
+  if (!strandId) return -1;
+  std::string sid(strandId);
+  // No engine-thread dispatch — just a file read. StrandService's map
+  // is built once at setup and only mutated on the engine thread when
+  // strands are added/removed, but availableStrandForId is read-only.
+  auto strand = StrandService::getService()->availableStrandForId(sid);
+  if (!strand) return -1;
+  std::fstream f(strand->path, std::ios::in);
+  if (!f.is_open()) return -1;
+  try {
+    nlohmann::json data;
+    f >> data;
+    if (data.contains(ResolutionJsonKey) && data[ResolutionJsonKey].is_number_integer()) {
+      return data[ResolutionJsonKey].get<int>();
+    }
+  } catch (...) {
+    // fall through
+  }
+  return -1;
 }
 
 char** ntw_load_strand(const char* strandId, int* outCount) {
@@ -2627,6 +2893,9 @@ NTWFileSourceState ntw_get_file_source_state(const char* sourceId) {
   result.duration = fileSrc->player.getDuration();
   result.mute = (fileSrc->mute && fileSrc->mute->boolValue) ? 1 : 0;
   result.playing = fileSrc->playing ? 1 : 0;
+  result.cacheAvailable = !fileSrc->cachedFrames.empty() ? 1 : 0;
+  result.useCachedMode = fileSrc->useCachedMode ? 1 : 0;
+  result.cachedFrameCount = static_cast<int>(fileSrc->cachedFrames.size());
 
   return result;
 }
@@ -2692,6 +2961,16 @@ void ntw_set_file_source_playing(const char* sourceId, int playing) {
       fileSrc->player.play();
     }
   });
+}
+
+void ntw_set_file_source_use_cached_mode(const char* sourceId, int enabled) {
+  if (!sourceId) return;
+  std::string sid(sourceId);
+  auto src = VideoSourceService::getService()->videoSourceForId(sid);
+  if (!src) return;
+  auto* fileSrc = dynamic_cast<FileSource*>(src.get());
+  if (!fileSrc) return;
+  fileSrc->useCachedMode = (enabled != 0);
 }
 
 // ---------------------------------------------------------------------------

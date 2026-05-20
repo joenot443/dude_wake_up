@@ -1281,7 +1281,17 @@ public:
   }
   
   void setup() override;
-  
+
+  void teardown() override {
+    // Release the three full-resolution FBOs (~24 MB at 1080p RGBA) plus
+    // the inner shader's lastFrame/optionalFrame and any optional children.
+    // Without this every removed ShaderSource pins ~50 MB on the undo stack.
+    if (fbo) fbo->clear();
+    if (optionalFbo) optionalFbo->clear();
+    if (canvas) canvas->clear();
+    if (shader) shader->releaseFrames();
+  }
+
   void saveFrame() override {
     // If our width or height has changed, setup again
     if (fbo->getWidth() != LayoutStateService::getService()->resolution.x ||
@@ -1320,8 +1330,9 @@ public:
   }
   
   void draw();
-  
+
   json serialize() override;
+  LIFECYCLE_TRACK("ShaderSource");
 };
 
 #endif /* ShaderSource_hpp */

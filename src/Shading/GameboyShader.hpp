@@ -23,19 +23,38 @@ struct GameboySettings: public ShaderSettings {
 
   std::shared_ptr<Parameter> scale;
   std::shared_ptr<WaveformOscillator> scaleOscillator;
-  
+
   std::shared_ptr<Parameter> mode;
   std::vector<std::string> textureOptions;
+
+  std::shared_ptr<Parameter> tintColor;
+
+  std::shared_ptr<Parameter> levels;
+  std::shared_ptr<WaveformOscillator> levelsOscillator;
+
+  std::shared_ptr<Parameter> ditherAmount;
+  std::shared_ptr<WaveformOscillator> ditherAmountOscillator;
+
+  std::shared_ptr<Parameter> pixelGrid;
+  std::shared_ptr<WaveformOscillator> pixelGridOscillator;
 
   GameboySettings(std::string shaderId, json j, std::string name) :
   scale(std::make_shared<Parameter>("Scale", 1.0, 0.0, 5.0)),
   texture(std::make_shared<Parameter>("Texture", 0.0, 0.0, 1000.0)),
   mode(std::make_shared<Parameter>("Color", 1.0, 0.0, 1.0, ParameterType_Bool)),
   scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
+  tintColor(std::make_shared<Parameter>("Tint Color", ParameterType_Color)),
+  levels(std::make_shared<Parameter>("Levels", 4.0, 2.0, 8.0, ParameterType_Int)),
+  levelsOscillator(std::make_shared<WaveformOscillator>(levels)),
+  ditherAmount(std::make_shared<Parameter>("Dither Amount", 1.0, 0.0, 1.0)),
+  ditherAmountOscillator(std::make_shared<WaveformOscillator>(ditherAmount)),
+  pixelGrid(std::make_shared<Parameter>("Pixel Grid", 0.0, 0.0, 1.0)),
+  pixelGridOscillator(std::make_shared<WaveformOscillator>(pixelGrid)),
   textureOptions({}),
   ShaderSettings(shaderId, j, name) {
-    parameters = { };
-    oscillators = { };
+    tintColor->setColor({1.0f, 1.0f, 1.0f, 1.0f});
+    parameters = { tintColor, levels, ditherAmount, pixelGrid };
+    oscillators = { levelsOscillator, ditherAmountOscillator, pixelGridOscillator };
     load(j);
     audioReactiveParameter = scale;
     registerParameters();
@@ -71,6 +90,14 @@ struct GameboyShader: Shader {
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform1f("scale", settings->scale->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
+    shader.setUniform4f("tintColor",
+                        settings->tintColor->color->data()[0],
+                        settings->tintColor->color->data()[1],
+                        settings->tintColor->color->data()[2],
+                        settings->tintColor->color->data()[3]);
+    shader.setUniform1i("levels", std::max(2, settings->levels->intValue));
+    shader.setUniform1f("ditherAmount", settings->ditherAmount->value);
+    shader.setUniform1f("pixelGrid", settings->pixelGrid->value);
     frame->draw(0, 0);
     shader.end();
     canvas->end();
@@ -99,6 +126,10 @@ ShaderType type() override {
         texture = nullptr;
       }
     }
+    CommonViews::ShaderColor(settings->tintColor);
+    CommonViews::ShaderIntParameter(settings->levels);
+    CommonViews::ShaderParameter(settings->ditherAmount, settings->ditherAmountOscillator);
+    CommonViews::ShaderParameter(settings->pixelGrid, settings->pixelGridOscillator);
   }
 };
 

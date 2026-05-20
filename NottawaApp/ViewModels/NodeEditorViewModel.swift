@@ -106,6 +106,39 @@ final class NodeEditorViewModel {
         }
     }
     var templateStrandsList: [StrandInfo] = []
+    /// Set once per app launch after a welcome strand load changes the resolution —
+    /// suppresses repeated toasts when the user cycles through templates.
+    var welcomeResolutionToastShown: Bool = false
+
+    // MARK: - Toast
+    var toastMessage: String?
+    private var toastTask: Task<Void, Never>?
+
+    func showToast(_ message: String, duration: Double = 3.0) {
+        toastTask?.cancel()
+        toastMessage = message
+        toastTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
+            if !Task.isCancelled {
+                self?.toastMessage = nil
+            }
+        }
+    }
+
+    /// Maps a LayoutStateService resolution index (0-6) to its human label.
+    /// Mirrors the table in src/Services/LayoutStateService.cpp:updateResolutionSettings.
+    static func resolutionLabel(for index: Int) -> String {
+        switch index {
+        case 0: return "240p"
+        case 1: return "360p"
+        case 2: return "480p"
+        case 3: return "720p"
+        case 4: return "1080p"
+        case 5: return "1440p"
+        case 6: return "4K"
+        default: return "custom"
+        }
+    }
 
     // MARK: - Initial Zoom
     var needsInitialZoomToFit = false
@@ -151,6 +184,10 @@ final class NodeEditorViewModel {
     var shareInProgress: Bool = false
     var shareResult: ShareResult? = nil
     var showShareSheet: Bool = false
+
+    /// When non-nil, MainEditorView presents the ShaderCodeEditor sheet for
+    /// this shader. Set from the inspector button or the right-click menu.
+    var shaderCodeEditorTarget: ShaderCodeEditorTarget?
     var shareNodeId: String? = nil
 
     enum StrandViewMode {
@@ -415,16 +452,29 @@ final class NodeEditorViewModel {
                 deletedBlendNodeId = id
             }
         }
-        // Delete selected nodes
-        for id in selectedNodeIds {
-            engine.stopTextureSharing(connectableId: id)
-            sharingTextureIds.remove(id)
-            TextureProvider.shared.invalidate(connectableId: id)
-            engine.removeConnectable(id: id)
+
+        // Split into nodes with a retreat fade vs. ones we can delete
+        // immediately. The retreat fade needs the engine to keep the
+        // connectable alive (and its IOSurface flowing) for the fade
+        // duration, so we defer those deletions.
+        let allIds = selectedNodeIds
+        var deferredIds: [String] = []
+        for id in allIds {
+            if attemptRetreatFade(forNodeId: id, deletingIds: allIds) {
+                deferredIds.append(id)
+            } else {
+                deleteConnectableImmediately(id)
+            }
         }
+
         selectedNodeIds.removeAll()
         inspectorParameters = []
         refresh()
+        refreshOpenWindows()
+
+        if !deferredIds.isEmpty {
+            scheduleDeferredDeletion(deferredIds)
+        }
     }
 
     func toggleActiveState(_ id: String) {
@@ -435,12 +485,89 @@ final class NodeEditorViewModel {
     }
 
     func deleteNode(_ id: String) {
+        if attemptRetreatFade(forNodeId: id, deletingIds: [id]) {
+            // Window is fading out — keep the engine connectable alive long
+            // enough for the outgoing IOSurface to keep producing frames
+            // through the fade, then tear it down.
+            selectedNodeIds.remove(id)
+            refreshOpenWindows()
+            scheduleDeferredDeletion([id])
+        } else {
+            deleteConnectableImmediately(id)
+            selectedNodeIds.remove(id)
+            refresh()
+        }
+    }
+
+    // MARK: - Delete helpers
+
+    /// Engine + sharing teardown for a single connectable. Same sequence the
+    /// original `deleteNode` performed inline.
+    private func deleteConnectableImmediately(_ id: String) {
         engine.stopTextureSharing(connectableId: id)
         sharingTextureIds.remove(id)
         TextureProvider.shared.invalidate(connectableId: id)
         engine.removeConnectable(id: id)
-        selectedNodeIds.remove(id)
-        refresh()
+    }
+
+    /// Schedule the engine-side deletion of a batch of connectables to run
+    /// after the configured fade duration has elapsed (plus a small buffer
+    /// so the fade's own cleanup runs first and clears the outgoing surface
+    /// before its source is torn down).
+    private func scheduleDeferredDeletion(_ ids: [String]) {
+        let duration = UserDefaults.standard.double(forKey: "outputWindowFadeDuration")
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration + 0.1) { [weak self] in
+            guard let self else { return }
+            for id in ids {
+                self.deleteConnectableImmediately(id)
+            }
+            self.refresh()
+            self.refreshOpenWindows()
+        }
+    }
+
+    /// Try to start a retreat-fade on the output window attached to `id`
+    /// (if any). Returns true when a fade was started and the caller should
+    /// defer the engine-side deletion of `id` until after the fade.
+    /// `deletingIds` is the full batch being deleted in this call, so we
+    /// can walk upstream past any node that's about to disappear and land
+    /// on something that'll still exist when the fade completes.
+    @discardableResult
+    private func attemptRetreatFade(forNodeId id: String, deletingIds: Set<String>) -> Bool {
+        let enabled = UserDefaults.standard.object(forKey: "autoAdvanceOutputWindow") as? Bool ?? true
+        guard enabled else { return false }
+        let duration = UserDefaults.standard.double(forKey: "outputWindowFadeDuration")
+        guard duration > 0 else { return false }
+        guard PreviewWindowManager.shared.openNodeIds.contains(id) else { return false }
+
+        let fallbackId = resolveRetreatFallback(forNodeId: id, excluding: deletingIds)
+        let fallbackName = fallbackId.flatMap { fid in
+            nodes.first(where: { $0.id == fid })?.name
+        }
+
+        return PreviewWindowManager.shared.retreatWindow(
+            deletedNodeId: id,
+            fallbackId: fallbackId,
+            fallbackName: fallbackName,
+            duration: duration
+        )
+    }
+
+    /// Walk upstream from `id` along main-input connections, skipping any
+    /// connectable that's part of `excluding` (the current delete batch),
+    /// and return the first non-deleted ancestor. Returns `nil` if we
+    /// reach the root of the chain or run out of viable upstreams.
+    private func resolveRetreatFallback(forNodeId id: String, excluding: Set<String>) -> String? {
+        var visited: Set<String> = [id]
+        var current = id
+        while let upstream = connections.first(where: { $0.endNodeId == current && $0.inputSlot == 0 })?.startNodeId {
+            // Defend against cycles, however unlikely.
+            if visited.contains(upstream) { return nil }
+            visited.insert(upstream)
+            if !excluding.contains(upstream) { return upstream }
+            current = upstream
+        }
+        return nil
     }
 
     // MARK: - Connection Helpers
@@ -458,10 +585,51 @@ final class NodeEditorViewModel {
 
     // MARK: - Connection Actions
 
+    /// If the user has "Automatically advance output window" enabled, and the
+    /// node we just connected an effect to had an open preview window, move
+    /// that window onto the new downstream node. Only fires for main-output
+    /// connections (outputSlot 0) — auxiliary strand wiring shouldn't hijack
+    /// the main preview. The fade duration comes from the "Advance Fade"
+    /// slider in Settings (`outputWindowFadeDuration`); 0 = instant.
+    private func advanceOutputWindowIfApplicable(fromNodeId: String, toNodeId: String, outputSlot: Int) {
+        guard outputSlot == 0 else { return }
+        let enabled = UserDefaults.standard.object(forKey: "autoAdvanceOutputWindow") as? Bool ?? true
+        guard enabled else { return }
+        guard PreviewWindowManager.shared.openNodeIds.contains(fromNodeId) else { return }
+        // Names come from this VM's current node list; if the new node isn't
+        // there yet (mid-refresh race), fall back to a generic title.
+        let name = nodes.first(where: { $0.id == toNodeId })?.name ?? "Preview"
+        // UserDefaults.double returns 0 if the key isn't set — same as
+        // "no fade", which is a safe default for installs predating the
+        // setting.
+        let duration = UserDefaults.standard.double(forKey: "outputWindowFadeDuration")
+        let advanced = PreviewWindowManager.shared.advanceWindow(
+            from: fromNodeId,
+            to: toNodeId,
+            newNodeName: name,
+            duration: duration
+        )
+        if advanced {
+            refreshOpenWindows()
+        }
+    }
+
     func makeConnection(startId: String, endId: String, outputSlot: Int, inputSlot: Int) {
         // Determine connection type based on node types
         let startNode = nodes.first(where: { $0.id == startId })
         let connectionType: Int = startNode?.isSource == true ? 1 : 0
+
+        // When wiring an aux connection (slot 10 == OutputSlotAux), keep the
+        // ImGui frontend's `Allow Auxillary` checkbox in sync so opening the
+        // same workspace there still shows the aux pin.
+        if outputSlot == 10 {
+            if let allowAux = engine.parameters(for: startId)
+                .first(where: { $0.name == "Allow Auxillary" }),
+               !allowAux.boolValue {
+                engine.setParameterBool(paramId: allowAux.id, value: true)
+            }
+        }
+
         engine.makeConnection(
             startId: startId,
             endId: endId,
@@ -469,7 +637,51 @@ final class NodeEditorViewModel {
             outputSlot: outputSlot,
             inputSlot: inputSlot
         )
+        advanceOutputWindowIfApplicable(fromNodeId: startId, toNodeId: endId, outputSlot: outputSlot)
         refresh()
+    }
+
+    // MARK: - Auxiliary Strand
+
+    /// Walk the chain of shaders connected to a node's auxiliary output (slot 10).
+    /// Defended against cycles via a seen-set; returns nodes in order from the
+    /// aux pin onward, following each shader's main output (slot 0) forward.
+    /// Mirrors how `FeedbackShader::feedbackTexture()` walks the chain via
+    /// `terminalDescendent()` (`src/Shading/Connection.hpp:286-290`).
+    func auxChain(forNodeId nodeId: String) -> [NodeModel] {
+        var chain: [NodeModel] = []
+        var seen: Set<String> = [nodeId]
+        var nextId = connections
+            .first(where: { $0.startNodeId == nodeId && $0.outputSlot == 10 })?
+            .endNodeId
+        while let id = nextId, !seen.contains(id),
+              let node = nodes.first(where: { $0.id == id }) {
+            chain.append(node)
+            seen.insert(id)
+            nextId = connections
+                .first(where: { $0.startNodeId == id && $0.outputSlot == 0 })?
+                .endNodeId
+        }
+        return chain
+    }
+
+    /// Find the connection that links `chainNodeId` to its predecessor in the
+    /// aux chain rooted at `parentNodeId`. The first chain node is anchored by
+    /// the parent's aux-pin connection (outputSlot 10); subsequent nodes are
+    /// anchored by the previous node's main-output connection (outputSlot 0).
+    func auxChainIncomingConnection(parentNodeId: String,
+                                    chainNodeId: String) -> ConnectionModel? {
+        let chain = auxChain(forNodeId: parentNodeId)
+        guard let idx = chain.firstIndex(where: { $0.id == chainNodeId }) else {
+            return nil
+        }
+        let predecessorId = idx == 0 ? parentNodeId : chain[idx - 1].id
+        let outputSlot = idx == 0 ? 10 : 0
+        return connections.first(where: {
+            $0.startNodeId == predecessorId &&
+            $0.endNodeId == chainNodeId &&
+            $0.outputSlot == outputSlot
+        })
     }
 
     func removeConnection(_ id: String) {
@@ -757,6 +969,7 @@ final class NodeEditorViewModel {
                         outputSlot: 0,
                         inputSlot: 0
                     )
+                    advanceOutputWindowIfApplicable(fromNodeId: targetId, toNodeId: newId, outputSlot: 0)
                     refresh()
                 } else if let cableId = targetCableId,
                           let conn = connections.first(where: { $0.id == cableId }) {
@@ -805,6 +1018,12 @@ final class NodeEditorViewModel {
             outputSlot: 0,
             inputSlot: origInputSlot
         )
+
+        // Splicing puts `newId` immediately downstream of `startId`. If the
+        // upstream node had a preview window, advance it onto the new shader.
+        // (The window on `endId`, if any, stays put — `newId` is upstream of
+        // it, not downstream.)
+        advanceOutputWindowIfApplicable(fromNodeId: startId, toNodeId: newId, outputSlot: origOutputSlot)
 
         refresh()
     }
@@ -976,6 +1195,8 @@ final class NodeEditorViewModel {
         selectedNodeIds.removeAll()
         inspectorParameters = []
         refresh()
+        needsInitialZoomToFit = true
+        RecentWorkspacesService.shared.record(url: url)
     }
 
     func saveWorkspace() {
@@ -989,46 +1210,20 @@ final class NodeEditorViewModel {
         engine.saveWorkspaceToPath(path: url.path, name: name)
         currentWorkspacePath = url.path
         currentWorkspaceName = name
+        RecentWorkspacesService.shared.record(url: url)
     }
 
     // MARK: - Screenshot
 
+    /// Capture from the action-bar button. Targets selected node, else the
+    /// deepest terminal shader, else the most recent source. First press
+    /// prompts for a folder; subsequent presses save silently.
     func captureScreenshot() {
-        // Find the best node to screenshot: selected node, or last shader, or last source
         let targetId: String? = selectedNodeId
             ?? nodes.last(where: { !$0.isSource })?.id
             ?? nodes.last?.id
-
-        guard let id = targetId,
-              let cgImage = TextureProvider.shared.snapshot(for: id) else {
-            return
-        }
-
-        let panel = NSSavePanel()
-        let timestamp = ISO8601DateFormatter().string(from: Date())
-            .replacingOccurrences(of: ":", with: "-")
-        panel.nameFieldStringValue = "nottawa_\(timestamp).jpg"
-        panel.allowedContentTypes = [.jpeg, .png]
-
-        guard panel.runModal() == .OK, let url = panel.url else { return }
-
-        let nsImage = NSImage(cgImage: cgImage, size: NSSize(width: cgImage.width, height: cgImage.height))
-        guard let tiffData = nsImage.tiffRepresentation,
-              let bitmap = NSBitmapImageRep(data: tiffData) else { return }
-
-        let isJPEG = url.pathExtension.lowercased() == "jpg" || url.pathExtension.lowercased() == "jpeg"
-        let fileType: NSBitmapImageRep.FileType = isJPEG ? .jpeg : .png
-        let properties: [NSBitmapImageRep.PropertyKey: Any] = isJPEG ? [.compressionFactor: 0.9] : [:]
-
-        guard let data = bitmap.representation(using: fileType, properties: properties) else { return }
-
-        do {
-            try data.write(to: url)
-            // Open containing folder in Finder
-            NSWorkspace.shared.selectFile(url.path, inFileViewerRootedAtPath: "")
-        } catch {
-            print("Screenshot save failed: \(error)")
-        }
+        guard let id = targetId else { return }
+        ScreenshotService.shared.capture(connectableId: id, mode: .quickSave)
     }
 
     // MARK: - Library
@@ -1219,6 +1414,9 @@ final class NodeEditorViewModel {
     }
 
     /// Load a welcome template strand for live preview, clearing the graph first.
+    /// Also applies the strand's authored resolution (if persisted) so previews
+    /// match what the author intended. Surfaces a one-time toast per session
+    /// when the resolution changes, so the user understands what happened.
     func loadWelcomeStrand(id: String) {
         // Stop sharing old textures
         for node in nodes {
@@ -1227,6 +1425,19 @@ final class NodeEditorViewModel {
         sharingTextureIds.removeAll()
         TextureProvider.shared.invalidateAll()
         welcomePreviewOutputId = nil
+
+        // Apply authored resolution BEFORE loading the strand so FBOs allocate
+        // at the right size. Skip if the strand predates 2.0 (no resolution field).
+        if let authored = engine.authoredResolution(forStrandId: id) {
+            let current = engine.resolutionSettingIndex
+            if authored != current {
+                engine.setResolution(settingIndex: authored)
+                if !welcomeResolutionToastShown {
+                    welcomeResolutionToastShown = true
+                    showToast("Switched to \(Self.resolutionLabel(for: authored)) — change in Settings if needed.")
+                }
+            }
+        }
 
         engine.clearGraph()
         let newIds = engine.loadStrand(id: id)
@@ -1249,16 +1460,11 @@ final class NodeEditorViewModel {
         }
     }
 
-    /// Resume the workspace that was loaded before the welcome screen appeared.
+    /// Resume whatever was auto-loaded at app startup. The engine reads the
+    /// default config in EngineLoop.setup() before any UI appears, so the
+    /// graph is already restored by the time the welcome screen shows.
+    /// Resume just needs to get out of the way.
     func resumePreviousWorkspace() {
-        for node in nodes {
-            engine.stopTextureSharing(connectableId: node.id)
-        }
-        sharingTextureIds.removeAll()
-        TextureProvider.shared.invalidateAll()
-        engine.clearGraph()
-        engine.loadDefaultConfig()
-        refresh()
         showWelcomeScreen = false
     }
 
@@ -1480,4 +1686,11 @@ final class NodeEditorViewModel {
         nodeDownloadPollTimer = nil
         stopStageRefreshTimer()
     }
+}
+
+/// Identifies the shader currently being edited by the ShaderCodeEditor
+/// sheet. Identifiable so SwiftUI's sheet(item:) can pick the right context.
+struct ShaderCodeEditorTarget: Identifiable, Equatable {
+    let id: String   // shader connectable id
+    let name: String // user-facing label (e.g. "Triple")
 }

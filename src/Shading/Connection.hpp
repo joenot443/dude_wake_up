@@ -19,6 +19,7 @@
 #include "VideoSourceSettings.hpp"
 #include "ShaderType.hpp"
 #include "UUID.hpp"
+#include "LifecycleCounter.hpp"
 
 using json = nlohmann::json;
 
@@ -117,17 +118,26 @@ public:
              InputSlot inputSlot)
   : start(start), end(end), type(type), id(UUID::generateUUID()), inputSlot(inputSlot), outputSlot(outputSlot)
   {}
-  
+
   json serialize();
+
+  LIFECYCLE_TRACK("Connection");
 };
 
 class Connectable : public std::enable_shared_from_this<Connectable>
 {
 public:
   virtual ~Connectable() = default;
-  
+
   std::map<InputSlot, std::shared_ptr<Connection>> inputs;
   std::map<OutputSlot, std::vector<std::shared_ptr<Connection>>> outputs; // Changed to vector
+
+  // Monotonic counter incremented after every successful render into this
+  // connectable's FBO (see VideoSource::saveFrame and Shader::traverseFrame).
+  // Used by IOSurfaceTextureManager to skip the blit when the source FBO
+  // hasn't changed since the last blit. Single-thread (engine thread) so a
+  // plain uint64_t is fine.
+  uint64_t renderTick = 0;
   
   // Either a Shader::shaderId or a VideoSource::id
   virtual std::string connId() = 0;

@@ -9,6 +9,7 @@
 #include "NodeLayoutView.hpp"
 #include "CommonViews.hpp"
 #include "LayoutStateService.hpp"
+#include "IOSurfaceTextureManager.hpp"
 
 void WebcamSource::setup() {
   grabberReady = false;
@@ -52,11 +53,36 @@ void WebcamSource::saveFrame() {
   }
   grabber.update();
   if (!grabber.isFrameNew()) return;
-  
-  fbo->begin();
+
+  int w = LayoutStateService::getService()->resolution.x;
+  int h = LayoutStateService::getService()->resolution.y;
+
+  // Capture into rawFbo (the pre-transform feed). Lazy-allocate / resize.
+  if (!rawFbo) rawFbo = std::make_shared<ofFbo>();
+  if (!rawFbo->isAllocated() ||
+      (int)rawFbo->getWidth() != w || (int)rawFbo->getHeight() != h) {
+    rawFbo->allocate(w, h, GL_RGBA);
+  }
+
+  rawFbo->begin();
   ofClear(0, 0, 0, 255);
-  grabber.draw(0, 0, LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
-  fbo->end();
+  grabber.draw(0, 0, w, h);
+  rawFbo->end();
+
+  // Expose the raw feed for the SwiftUI Crop pad if it's subscribed.
+  {
+    std::string rawId = "sourceRaw:" + id;
+    auto* iom = IOSurfaceTextureManager::getInstance();
+    if (iom && iom->isSharing(rawId)) {
+      iom->blitExternalFrame(rawId, rawFbo->getId(),
+                              rawFbo->getWidth(), rawFbo->getHeight());
+    }
+  }
+
+  // Apply the two-pass crop + place pipeline. The helper exposes its own
+  // intermediate cropped FBO under "transformCrop:<id>".
+  auto tex = rawFbo->getTexture();
+  settings->transform.apply(tex, fbo);
 }
 
 void WebcamSource::load(json j) {

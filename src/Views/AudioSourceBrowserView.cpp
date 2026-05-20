@@ -414,7 +414,9 @@ void AudioSourceBrowserView::drawSelectedAudioSource() {
 
           if (waveformCopy.size() >= 256) {
             float scale = source->audioAnalysis.frequencyScale->value;
-            float release = source->audioAnalysis.frequencyRelease->value;
+            // Use the per-frame factor (already derived from the half-life and
+            // dt in analyzeFrame) — frequencyRelease itself is now seconds.
+            float release = source->audioAnalysis.currentReleaseFactor;
 
             // Apply exponential smoothing manually for visualization (using release value)
             static std::vector<float> visualSmooth(256, 0.0f);

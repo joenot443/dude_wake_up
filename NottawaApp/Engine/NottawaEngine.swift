@@ -400,6 +400,52 @@ final class NottawaEngine {
         return result
     }
 
+    // MARK: - Live GLSL editing
+
+    /// Result of an attempted shader source override. `ok` is false when the
+    /// vertex or fragment failed to compile, or the program failed to link.
+    /// In that case, the previously-valid program keeps rendering.
+    struct ShaderCompileResult {
+        let ok: Bool
+        let errorLog: String?
+        let errorLine: Int
+    }
+
+    /// Current fragment source for a shader: the user's session override if
+    /// active, otherwise the on-disk .frag contents. nil if the shader isn't
+    /// found or the file can't be read.
+    func shaderFragmentSource(shaderId: String) -> String? {
+        guard let cStr = ntw_get_shader_fragment_source(shaderId) else { return nil }
+        let result = String(cString: cStr)
+        ntw_free_string(cStr)
+        return result
+    }
+
+    /// Apply a new fragment source. Blocks until the engine thread has
+    /// compiled + linked. On failure the previous program stays live.
+    func setShaderFragmentSource(shaderId: String, source: String) -> ShaderCompileResult {
+        let cResult = ntw_set_shader_fragment_source(shaderId, source)
+        var log: String?
+        if let logPtr = cResult.errorLog {
+            log = String(cString: logPtr)
+        }
+        let swiftResult = ShaderCompileResult(
+            ok: cResult.ok != 0,
+            errorLog: log,
+            errorLine: Int(cResult.errorLine)
+        )
+        ntw_free_shader_compile_result(cResult)
+        return swiftResult
+    }
+
+    func revertShaderSource(shaderId: String) {
+        ntw_revert_shader_source(shaderId)
+    }
+
+    func shaderHasSessionOverride(shaderId: String) -> Bool {
+        ntw_shader_has_session_override(shaderId)
+    }
+
     var isAudioActive: Bool {
         ntw_is_audio_active()
     }
@@ -655,10 +701,15 @@ final class NottawaEngine {
     }
 
     func destroyPreview(id: String) {
+        // Drop the cached MTLTexture/IOSurface wrapper before tearing down the
+        // C++ side. Otherwise TextureProvider holds the IOSurfaceRef forever
+        // and the preview's GPU memory never releases (~8 MB per stale entry).
+        TextureProvider.shared.invalidate(connectableId: id)
         ntw_destroy_preview(id)
     }
 
     func destroyAllPreviews() {
+        TextureProvider.shared.invalidateAll()
         ntw_destroy_all_previews()
     }
 
@@ -782,10 +833,6 @@ final class NottawaEngine {
     func toggleFileAudioPause() { ntw_toggle_file_audio_pause() }
     func setFileAudioPosition(_ position: Float) { ntw_set_file_audio_position(position) }
 
-    // MARK: - Screenshot
-
-    func captureScreenshot() { ntw_capture_screenshot() }
-
     // MARK: - Config
 
     func saveDefaultConfig() { ntw_save_default_config() }
@@ -827,12 +874,31 @@ final class NottawaEngine {
         Int(ntw_get_resolution_setting_index())
     }
 
+    /// Resolution setting index a strand was authored at, or nil if the
+    /// strand predates 2.0 (no `resolution` field in its JSON).
+    func authoredResolution(forStrandId strandId: String) -> Int? {
+        let result = strandId.withCString { ntw_strand_authored_resolution($0) }
+        return result >= 0 ? Int(result) : nil
+    }
+
     func setCustomResolution(width: Float, height: Float) {
         ntw_set_custom_resolution(width, height)
     }
 
     var resolutionWidth: Float { ntw_get_resolution_width() }
     var resolutionHeight: Float { ntw_get_resolution_height() }
+
+    // MARK: - MIDI Smoothing
+
+    var midiSmoothingEnabled: Bool {
+        get { ntw_get_midi_smoothing_enabled() }
+        set { ntw_set_midi_smoothing_enabled(newValue) }
+    }
+
+    var midiSmoothingDurationMs: Float {
+        get { ntw_get_midi_smoothing_duration_ms() }
+        set { ntw_set_midi_smoothing_duration_ms(newValue) }
+    }
 
     // MARK: - Callbacks
 
@@ -928,7 +994,10 @@ final class NottawaEngine {
             position: s.position,
             duration: s.duration,
             isMuted: s.mute != 0,
-            isPlaying: s.playing != 0
+            isPlaying: s.playing != 0,
+            cacheAvailable: s.cacheAvailable != 0,
+            useCachedMode: s.useCachedMode != 0,
+            cachedFrameCount: Int(s.cachedFrameCount)
         )
     }
 
@@ -950,6 +1019,10 @@ final class NottawaEngine {
 
     func setFileSourcePlaying(sourceId: String, playing: Bool) {
         ntw_set_file_source_playing(sourceId, playing ? 1 : 0)
+    }
+
+    func setFileSourceUseCachedMode(sourceId: String, enabled: Bool) {
+        ntw_set_file_source_use_cached_mode(sourceId, enabled ? 1 : 0)
     }
 
     // MARK: - Text Source State

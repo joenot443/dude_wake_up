@@ -33,13 +33,23 @@ struct ParameterInspectorView: View {
             if isMultiSelect {
                 multiSelectionHeader
             } else if let node = selectedNode {
-                singleSelectionHeader(node: node)
+                singleSelectionTitleBar(node: node)
             }
 
             // Parameters list (single selection only)
             if !isMultiSelect {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 0) {
+                        if let node = selectedNode {
+                            singleSelectionScrollableContent(node: node)
+                        }
+
+                        VStack(alignment: .leading, spacing: 8) {
+                        // Edit shader code (shader nodes + shader-source generators).
+                        if let node = selectedNode, node.hasEditableShader {
+                            editShaderCodeButton(node: node)
+                        }
+
                         // Clear Feedback Buffer button (Feedback shader only)
                         if let node = selectedNode, isFeedbackShader(node) {
                             Button {
@@ -66,6 +76,53 @@ struct ParameterInspectorView: View {
                             .tint(theme.colors.accent)
                         }
 
+                        // Crop / Place pads — for any node that carries the
+                        // SourceTransform pipeline (TransformShader,
+                        // WebcamSource, etc.).
+                        if let node = selectedNode,
+                           nodeHasTransformPipeline,
+                           let minX = viewModel.inspectorParameters.first(where: { $0.name == "Min X" }),
+                           let maxX = viewModel.inspectorParameters.first(where: { $0.name == "Max X" }),
+                           let minY = viewModel.inspectorParameters.first(where: { $0.name == "Min Y" }),
+                           let maxY = viewModel.inspectorParameters.first(where: { $0.name == "Max Y" }) {
+                            // Resolve the input frame for the Crop pad
+                            // backdrop. Shaders read it from their upstream
+                            // connection; sources expose their own pre-
+                            // transform feed under "sourceRaw:<id>".
+                            let inputId: String? = node.isSource
+                                ? "sourceRaw:\(node.id)"
+                                : viewModel.connections
+                                    .first(where: { $0.endNodeId == node.id && $0.inputSlot == 0 })?
+                                    .startNodeId
+                            TransformCropPadView(
+                                nodeId: node.id,
+                                inputConnectableId: inputId,
+                                minXParam: minX,
+                                maxXParam: maxX,
+                                minYParam: minY,
+                                maxYParam: maxY
+                            )
+
+                            // Place pad — only in Standard mode. Auto-fit
+                            // modes (Fill / Fit / Fill+Aspect) compute
+                            // placement from aspect ratios, so manual
+                            // controls would be inert.
+                            if let mode = viewModel.inspectorParameters.first(where: { $0.name == "Mode" }),
+                               mode.intValue == 0,
+                               let xParam = viewModel.inspectorParameters.first(where: { $0.name == "X" }),
+                               let yParam = viewModel.inspectorParameters.first(where: { $0.name == "Y" }),
+                               let scaleParam = viewModel.inspectorParameters.first(where: { $0.name == "Scale" }) {
+                                TransformPlacePadView(
+                                    nodeId: node.id,
+                                    translateXParam: xParam,
+                                    translateYParam: yParam,
+                                    scaleParam: scaleParam,
+                                    cropWidthFrac: max(0, maxX.value - minX.value),
+                                    cropHeightFrac: max(0, maxY.value - minY.value)
+                                )
+                            }
+                        }
+
                         ForEach(viewModel.inspectorParameters.filter { param in
                             guard param.parameterType != .hidden else { return false }
                             // Shader-controlled runtime hide (e.g. Blend hides unconnected input strengths).
@@ -74,6 +131,38 @@ struct ParameterInspectorView: View {
                             // so hide the duplicate X/Y params (and their pad) from the list.
                             if viewModel.textSourceState != nil,
                                isPositionXParam(param) || isPositionYParam(param) {
+                                return false
+                            }
+                            // FeedbackAuxStrandView replaces the `Allow Auxillary`
+                            // checkbox for shaders that surface an aux pin.
+                            // Spelled with the C++ side's typo (FeedbackShader.hpp:100).
+                            if let node = selectedNode,
+                               node.supportsAuxOutput,
+                               param.name == "Allow Auxillary" {
+                                return false
+                            }
+                            // VideoSourceSettings params (width/height/start/end)
+                            // are internal plumbing — never useful to expose.
+                            if ["width", "height", "start", "end"].contains(param.name) {
+                                return false
+                            }
+                            // Icon sources expose their picker via
+                            // IconSourceControlsView — hide the underlying
+                            // icon/texture parameters from the list.
+                            if viewModel.iconSourceState != nil,
+                               ["icon", "texture", "Enable Texture"].contains(param.name) {
+                                return false
+                            }
+                            // Transform crop params are driven by the Crop pad.
+                            if nodeHasTransformPipeline,
+                               Self.transformCropParamNames.contains(param.name) {
+                                return false
+                            }
+                            // Transform place / scale / center params are
+                            // driven by TransformPlacePadView (Standard mode)
+                            // or are inert (auto-fit modes).
+                            if nodeHasTransformPipeline,
+                               Self.transformPlaceParamNames.contains(param.name) {
                                 return false
                             }
                             return !isPositionYParam(param)
@@ -89,12 +178,19 @@ struct ParameterInspectorView: View {
                             }
                         }
 
+                        // Auxiliary Strand section — for FeedbackShader and the
+                        // mask-maker shaders that surface an aux output pin.
+                        if let node = selectedNode, node.supportsAuxOutput {
+                            FeedbackAuxStrandView(parentNodeId: node.id)
+                        }
+
                         // Optional Shaders section
                         if let node = selectedNode {
                             OptionalShadersSection(nodeId: node.id)
                         }
+                        }
+                        .padding(16)
                     }
-                    .padding(16)
                 }
             }
         }
@@ -112,17 +208,28 @@ struct ParameterInspectorView: View {
     // MARK: - Position Pad Detection
 
     private func isPositionXParam(_ param: ParameterInfo) -> Bool {
-        (param.name == "X Position" || param.name == "X") && param.minValue >= 0 && param.maxValue <= 1.0
+        if param.name == "Orb X" { return true }
+        return (param.name == "X Position" || param.name == "X") && param.minValue >= 0 && param.maxValue <= 1.0
     }
 
     private func isPositionYParam(_ param: ParameterInfo) -> Bool {
-        (param.name == "Y Position" || param.name == "Y") && param.minValue >= 0 && param.maxValue <= 1.0
+        if param.name == "Orb Y" { return true }
+        return (param.name == "Y Position" || param.name == "Y") && param.minValue >= 0 && param.maxValue <= 1.0
     }
 
     private func matchingYParam(for xParam: ParameterInfo) -> ParameterInfo? {
-        let yName = xParam.name == "X" ? "Y" : "Y Position"
+        let yName: String
+        let requireUnitRange: Bool
+        switch xParam.name {
+        case "X": yName = "Y"; requireUnitRange = true
+        case "X Position": yName = "Y Position"; requireUnitRange = true
+        case "Orb X": yName = "Orb Y"; requireUnitRange = false
+        default: return nil
+        }
         return viewModel.inspectorParameters.first {
-            $0.name == yName && $0.parameterType != .hidden && $0.minValue >= 0 && $0.maxValue <= 1.0
+            guard $0.name == yName && $0.parameterType != .hidden else { return false }
+            if requireUnitRange { return $0.minValue >= 0 && $0.maxValue <= 1.0 }
+            return true
         }
     }
 
@@ -142,10 +249,72 @@ struct ParameterInspectorView: View {
         return false
     }
 
+    /// Opens the live GLSL editor for the given shader. A small "modified"
+    /// pill renders alongside the button when the shader currently has a
+    /// session override active.
+    @ViewBuilder
+    private func editShaderCodeButton(node: NodeModel) -> some View {
+        let hasOverride = NottawaEngine.shared.shaderHasSessionOverride(shaderId: node.id)
+        HStack(spacing: 6) {
+            Button {
+                viewModel.shaderCodeEditorTarget = ShaderCodeEditorTarget(
+                    id: node.id, name: node.name
+                )
+            } label: {
+                Label("Edit Shader Code…", systemImage: "chevron.left.forwardslash.chevron.right")
+                    .font(.caption)
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+            .tint(theme.colors.accent)
+            .help("Edit this shader's fragment GLSL for the current session")
+
+            if hasOverride {
+                Text("MOD")
+                    .font(.caption2.weight(.bold).monospaced())
+                    .foregroundStyle(theme.colors.warning)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 2)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 3)
+                            .stroke(theme.colors.warning, lineWidth: 1)
+                    )
+                    .help("This shader has a session-only edit. Open the editor to revert.")
+            }
+        }
+    }
+
+    private static let transformCropParamNames: Set<String> = [
+        "Min X", "Max X", "Min Y", "Max Y"
+    ]
+
+    /// Translate / center params are driven by TransformPlacePadView in
+    /// Standard mode (and are no-ops in auto-fit modes) — always hide them.
+    /// `Scale` is intentionally not in this list: it applies in *every* mode
+    /// (as a uniform multiplier in auto-fit modes), and the param-list
+    /// slider serves as the only way to edit it when the Place pad is
+    /// hidden. In Standard mode the slider mirrors the pad's corner drag.
+    private static let transformPlaceParamNames: Set<String> = [
+        "X", "Y", "Center", "Scale From Center"
+    ]
+
+    /// True iff the currently selected node carries the SourceTransform
+    /// pipeline — i.e. has all of Min X / Max X / Min Y / Max Y / X / Y /
+    /// Scale / Mode. Used to drive the dedicated Crop / Place pads and to
+    /// suppress the underlying parameter sliders that the pads replace.
+    /// Works for any node (TransformShader, WebcamSource, future sources).
+    private var nodeHasTransformPipeline: Bool {
+        let required: Set<String> = [
+            "Min X", "Max X", "Min Y", "Max Y", "X", "Y", "Scale", "Mode"
+        ]
+        let present = Set(viewModel.inspectorParameters.map(\.name))
+        return required.isSubset(of: present)
+    }
+
     // MARK: - Single Selection Header
 
     @ViewBuilder
-    private func singleSelectionHeader(node: NodeModel) -> some View {
+    private func singleSelectionTitleBar(node: NodeModel) -> some View {
         HStack {
             Circle()
                 .fill(theme.colors.accent)
@@ -174,7 +343,10 @@ struct ParameterInspectorView: View {
         .padding(.vertical, 12)
 
         theme.colors.border.frame(height: 1)
+    }
 
+    @ViewBuilder
+    private func singleSelectionScrollableContent(node: NodeModel) -> some View {
         // Live preview of node output
         TextureDisplayView(connectableId: node.id)
             .aspectRatio(16.0 / 9.0, contentMode: .fit)
@@ -203,10 +375,13 @@ struct ParameterInspectorView: View {
             theme.colors.border.frame(height: 1)
         }
 
-        // Position pad for shaders with X/Y parameters (e.g. Feedback)
+        // Position pad for shaders with X/Y parameters (e.g. Feedback).
+        // Skip when the node uses the SourceTransform pipeline — that has
+        // its own Place pad covering X/Y/Scale.
         if let xParam = viewModel.inspectorParameters.first(where: { $0.name == "X" }),
            let yParam = viewModel.inspectorParameters.first(where: { $0.name == "Y" }),
-           viewModel.textSourceState == nil {
+           viewModel.textSourceState == nil,
+           !nodeHasTransformPipeline {
             ParameterPositionPadView(
                 xParam: xParam,
                 yParam: yParam,
@@ -323,16 +498,40 @@ struct OptionalShadersSection: View {
     @State private var optionalShaders: [NottawaEngine.OptionalShaderInfo] = []
     @State private var expandedIndex: Int?
 
+    private var anyEnabled: Bool {
+        optionalShaders.contains(where: { $0.enabled })
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             if !optionalShaders.isEmpty {
                 theme.colors.border.frame(height: 1)
                     .padding(.vertical, 8)
 
-                Text("Optional Effects")
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(theme.colors.textSecondary)
+                HStack(spacing: 6) {
+                    Text("Optional Effects")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(theme.colors.textSecondary)
+                    Spacer()
+                    if anyEnabled {
+                        Button {
+                            for shader in optionalShaders where shader.enabled {
+                                NottawaEngine.shared.toggleOptionalShader(
+                                    connectableId: nodeId, index: shader.index
+                                )
+                            }
+                            refreshOptionalShaders()
+                            expandedIndex = nil
+                        } label: {
+                            Image(systemName: "arrow.counterclockwise")
+                                .font(.caption2)
+                                .foregroundStyle(theme.colors.textTertiary)
+                        }
+                        .buttonStyle(.plainHitArea)
+                        .help("Disable all optional effects")
+                    }
+                }
 
                 ForEach(optionalShaders, id: \.index) { shader in
                     VStack(alignment: .leading, spacing: 4) {
@@ -424,19 +623,10 @@ struct ParameterPositionPadView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Text("Position")
-                    .font(.caption)
-                    .foregroundStyle(theme.colors.textSecondary)
-                Spacer()
-                Text(String(format: "%.2f, %.2f",
-                            Self.fromNormalized(padX, min: xParam.minValue, max: xParam.maxValue),
-                            Self.fromNormalized(padY, min: yParam.minValue, max: yParam.maxValue)))
-                    .font(.caption)
-                    .foregroundStyle(theme.colors.textTertiary)
-                    .monospacedDigit()
-            }
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Position")
+                .font(.caption)
+                .foregroundStyle(theme.colors.textSecondary)
 
             PositionPadView(x: $padX, y: $padY, connectableId: connectableId)
                 .onChange(of: padX) { _, newValue in
@@ -445,6 +635,17 @@ struct ParameterPositionPadView: View {
                 .onChange(of: padY) { _, newValue in
                     engine.setParameterValue(paramId: yParam.id, value: Self.fromNormalized(1.0 - newValue, min: yParam.minValue, max: yParam.maxValue))
                 }
+
+            PositionAxisReactivityRow(
+                label: "X",
+                value: Self.fromNormalized(padX, min: xParam.minValue, max: xParam.maxValue),
+                param: xParam
+            )
+            PositionAxisReactivityRow(
+                label: "Y",
+                value: Self.fromNormalized(padY, min: yParam.minValue, max: yParam.maxValue),
+                param: yParam
+            )
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
@@ -481,6 +682,119 @@ struct OptionalShaderParametersView: View {
     }
 }
 
+// MARK: - Position Axis Reactivity Row
+
+/// Per-axis readout + reactivity buttons (oscillator / audio driver / MIDI)
+/// for the 2D position pads. Mirrors ParameterControlView's button row +
+/// expandable panel pattern so the X and Y bindings of a position pad can
+/// be modulated the same way any other parameter can be.
+private struct PositionAxisReactivityRow: View {
+    @Environment(NodeEditorViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var theme
+
+    let label: String
+    let value: Float
+    let param: ParameterInfo
+
+    @State private var showOscillator = false
+    @State private var showAudioDriver: Bool
+    @State private var showMidi: Bool
+    @State private var oscEnabled: Bool
+    @State private var driverActive: Bool
+    @State private var midiActive: Bool
+
+    init(label: String, value: Float, param: ParameterInfo) {
+        self.label = label
+        self.value = value
+        self.param = param
+        self._oscEnabled = State(initialValue: param.oscillatorEnabled)
+        self._driverActive = State(initialValue: param.hasDriver)
+        self._midiActive = State(initialValue: param.hasMidiBinding)
+        // Start the audio / MIDI panels open if the param is already
+        // bound — otherwise the toggle button looks broken (panel was
+        // already forced visible by `|| midiActive`, so clicking did
+        // nothing visible).
+        self._showAudioDriver = State(initialValue: param.hasDriver)
+        self._showMidi = State(initialValue: param.hasMidiBinding)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 6) {
+                Text("\(label): \(String(format: "%.2f", value))")
+                    .font(.caption2)
+                    .foregroundStyle(theme.colors.textTertiary)
+                    .monospacedDigit()
+                Spacer()
+                if param.hasOscillator {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            showOscillator.toggle()
+                            if showOscillator {
+                                showAudioDriver = false
+                                showMidi = false
+                                if !oscEnabled {
+                                    oscEnabled = true
+                                    NottawaEngine.shared.setOscillatorEnabled(paramId: param.id, enabled: true)
+                                }
+                            }
+                        }
+                    } label: {
+                        Image(systemName: oscEnabled ? "waveform.circle.fill" : "waveform.circle")
+                            .font(.caption2)
+                            .foregroundStyle(oscEnabled ? theme.colors.accent : theme.colors.textSecondary)
+                    }
+                    .buttonStyle(.plainHitArea)
+                    .accessibilityIdentifier("osc-toggle-\(param.id)")
+                }
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showAudioDriver.toggle()
+                        if showAudioDriver { showOscillator = false; showMidi = false }
+                    }
+                } label: {
+                    Image(systemName: driverActive ? "music.note.list" : "music.note")
+                        .font(.caption2)
+                        .foregroundStyle(driverActive ? theme.colors.warning : theme.colors.textSecondary)
+                }
+                .buttonStyle(.plainHitArea)
+                .accessibilityIdentifier("driver-toggle-\(param.id)")
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showMidi.toggle()
+                        if showMidi { showOscillator = false; showAudioDriver = false }
+                    }
+                } label: {
+                    Image(systemName: midiActive ? "pianokeys.inverse" : "pianokeys")
+                        .font(.caption2)
+                        .foregroundStyle(midiActive ? .purple : theme.colors.textSecondary)
+                }
+                .buttonStyle(.plainHitArea)
+                .accessibilityIdentifier("midi-toggle-\(param.id)")
+            }
+
+            if showOscillator && param.hasOscillator {
+                OscillatorControlsView(param: param, enabled: $oscEnabled)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+            if showAudioDriver {
+                AudioDriverControlsView(param: param)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+            if showMidi {
+                MidiControlsView(param: param)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .parameterRefresh)) { _ in
+            guard let fresh = viewModel.inspectorParameters.first(where: { $0.id == param.id }) else { return }
+            if fresh.oscillatorEnabled != oscEnabled { oscEnabled = fresh.oscillatorEnabled }
+            if fresh.hasDriver != driverActive { driverActive = fresh.hasDriver }
+            if fresh.hasMidiBinding != midiActive { midiActive = fresh.hasMidiBinding }
+        }
+    }
+}
+
 // MARK: - Position Pad Control
 
 /// Wraps PositionPadView for use with ParameterInfo X/Y pairs in the inspector.
@@ -501,17 +815,37 @@ private struct PositionPadControl: View {
         self._yValue = State(initialValue: yParam.value)
     }
 
+    private func normalize(_ value: Float, _ param: ParameterInfo) -> Float {
+        let range = param.maxValue - param.minValue
+        guard range > 0 else { return 0 }
+        return (value - param.minValue) / range
+    }
+
+    private func denormalize(_ normalized: Float, _ param: ParameterInfo) -> Float {
+        return param.minValue + normalized * (param.maxValue - param.minValue)
+    }
+
+    /// Orb-style params (Electric Eels) feed straight into screen-space GLSL
+    /// math, so the pad's Cartesian flip would reverse them. Skip the flip
+    /// for those — drag up = orbY decreases = orb appears at top.
+    private var invertY: Bool {
+        yParam.name != "Orb Y"
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 6) {
             Text("Position")
                 .font(.caption)
                 .foregroundStyle(theme.colors.textSecondary)
 
             PositionPadView(
-                x: $xValue,
+                x: Binding(
+                    get: { normalize(xValue, xParam) },
+                    set: { xValue = denormalize($0, xParam) }
+                ),
                 y: Binding(
-                    get: { 1.0 - yValue },
-                    set: { yValue = 1.0 - $0 }
+                    get: { invertY ? 1.0 - normalize(yValue, yParam) : normalize(yValue, yParam) },
+                    set: { yValue = denormalize(invertY ? 1.0 - $0 : $0, yParam) }
                 ),
                 connectableId: connectableId
             )
@@ -522,20 +856,8 @@ private struct PositionPadControl: View {
                     NottawaEngine.shared.setParameterValue(paramId: yParam.id, value: newValue)
                 }
 
-            HStack {
-                Text("X: \(String(format: "%.2f", xValue))")
-                    .font(.caption2)
-                    .foregroundStyle(theme.colors.textTertiary)
-                    .monospacedDigit()
-                Spacer()
-                Text("Y: \(String(format: "%.2f", yValue))")
-                    .font(.caption2)
-                    .foregroundStyle(theme.colors.textTertiary)
-                    .monospacedDigit()
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .parameterRefresh)) { _ in
-            // Sync from engine (oscillator/driver may be changing values)
+            PositionAxisReactivityRow(label: "X", value: xValue, param: xParam)
+            PositionAxisReactivityRow(label: "Y", value: yValue, param: yParam)
         }
     }
 }

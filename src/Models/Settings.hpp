@@ -18,6 +18,7 @@
 #include "ParameterService.hpp"
 #include "json.hpp"
 #include "UUID.hpp"
+#include "LifecycleCounter.hpp"
 #include <string>
 
 using json = nlohmann::json;
@@ -34,8 +35,14 @@ public:
   std::shared_ptr<Parameter> audioReactiveParameter;
   
   Settings() : name("None"), settingsId(UUID::generateUUID()) {};
-  
+
   Settings(std::string name) : name(name), audioReactiveParameter(nullptr), settingsId(UUID::generateUUID()) {};
+
+  // Settings is held via shared_ptr<ShaderSettings> / shared_ptr<Settings>
+  // upstream. Without a virtual destructor, deleting through the base pointer
+  // skips derived destructors entirely — derived oscillator/parameter members
+  // never destruct, leaving the underlying objects alive forever.
+  virtual ~Settings() = default;
   
   bool hasAudioReactiveParameter() {
     return audioReactiveParameter != nullptr;
@@ -158,6 +165,8 @@ public:
 //      }
 //    }
   }
+
+  LIFECYCLE_TRACK("Settings");
 };
 
 #endif /* Settings_hpp */

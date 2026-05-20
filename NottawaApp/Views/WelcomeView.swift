@@ -2,8 +2,8 @@
 //  WelcomeView.swift
 //  NottawaApp
 //
-//  Welcome screen shown on launch with a live strand preview header,
-//  action buttons, and two-column strand browsers (Templates + Recent).
+//  Welcome screen shown on launch with a header, action buttons, and
+//  two-column strand browsers (Templates + Recent).
 //
 
 import SwiftUI
@@ -12,7 +12,10 @@ struct WelcomeView: View {
     @Environment(NodeEditorViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var theme
 
-    @State private var currentWelcomeIndex: Int = 0
+    @State private var titleOpacity: Double = 0
+    @State private var titleOffset: CGFloat = 8
+    @State private var subtitleOpacity: Double = 0
+    @State private var subtitleOffset: CGFloat = 6
 
     var body: some View {
         ZStack {
@@ -28,19 +31,28 @@ struct WelcomeView: View {
                 let panelWidth = geo.size.width * 0.60
                 let panelHeight = geo.size.height * 0.80
 
-                VStack(spacing: 0) {
-                    // MARK: - Live Strand Preview Header
-                    livePreviewHeader(width: panelWidth)
+                ZStack(alignment: .bottomTrailing) {
+                    VStack(spacing: 0) {
+                        welcomeHeader(width: panelWidth)
 
-                    Spacer().frame(height: 16)
+                        actionButtons()
 
-                    // MARK: - Action Buttons
-                    actionButtons()
+                        Spacer().frame(height: 24)
 
-                    Spacer().frame(height: 16)
+                        strandBrowsers()
+                            .frame(maxHeight: .infinity)
+                    }
 
-                    // MARK: - Two-Column Browsers
-                    strandBrowsers(height: panelHeight * 0.45)
+                    DSToggle(
+                        isOn: Bindable(viewModel).welcomeScreenEnabled,
+                        label: "Always show at launch",
+                        style: .checkbox,
+                        size: .sm
+                    )
+                    .foregroundStyle(theme.colors.textTertiary)
+                    .opacity(0.6)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 14)
                 }
                 .frame(width: panelWidth, height: panelHeight)
                 .background(theme.colors.backgroundSecondary)
@@ -52,164 +64,100 @@ struct WelcomeView: View {
         .onAppear {
             viewModel.fetchTemplateStrands()
             viewModel.fetchStrands()
-            // Load the first template strand for live preview
-            loadCurrentWelcomeStrand()
         }
         .onExitCommand {
             viewModel.dismissWelcomeScreen()
         }
     }
 
-    // MARK: - Live Preview Header
+    // MARK: - Welcome Header
 
     @ViewBuilder
-    private func livePreviewHeader(width: CGFloat) -> some View {
-        let aspectRatio = viewModel.welcomePreviewAspectRatio
-        let headerHeight = width / aspectRatio
+    private func welcomeHeader(width: CGFloat) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Welcome to Nottawa.")
+                .font(.system(size: 38, weight: .semibold, design: .serif))
+                .foregroundStyle(theme.colors.textPrimary)
+                .opacity(titleOpacity)
+                .offset(y: titleOffset)
 
-        ZStack(alignment: .bottom) {
-            // Black background behind the live texture
-            Color.black
-                .frame(width: width, height: headerHeight)
-
-            // Live texture from the engine
-            if let outputId = viewModel.welcomePreviewOutputId {
-                TextureDisplayView(connectableId: outputId)
-                    .aspectRatio(aspectRatio, contentMode: .fit)
-                    .frame(width: width, height: headerHeight)
-                    .clipped()
-            }
-
-            // Strand name overlay at top-left
-            if !viewModel.templateStrandsList.isEmpty {
-                VStack {
-                    HStack {
-                        Text(currentStrandName)
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 5)
-                            .background(.black.opacity(0.5), in: Capsule())
-                        Spacer()
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.top, 10)
-                    Spacer()
-                }
-            }
-
-            // Bottom overlay bar
-            HStack {
-                // Always show at launch toggle
-                DSToggle(isOn: Bindable(viewModel).welcomeScreenEnabled, label: "Always show at launch", style: .checkbox, size: .sm)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(
-                        Capsule().fill(Color.black.opacity(0.5))
-                    )
-
-                Spacer()
-
-                // Navigation arrows
-                if viewModel.templateStrandsList.count > 1 {
-                    HStack(spacing: 4) {
-                        Button {
-                            navigateStrand(delta: -1)
-                        } label: {
-                            Image(systemName: "chevron.left")
-                                .font(.caption.weight(.bold))
-                                .foregroundStyle(.white)
-                                .frame(width: 28, height: 28)
-                                .background(.white.opacity(0.2), in: Circle())
-                        }
-                        .buttonStyle(.plainHitArea)
-
-                        Text("\(currentWelcomeIndex + 1)/\(viewModel.templateStrandsList.count)")
-                            .font(.caption2.weight(.medium).monospacedDigit())
-                            .foregroundStyle(.white.opacity(0.8))
-
-                        Button {
-                            navigateStrand(delta: 1)
-                        } label: {
-                            Image(systemName: "chevron.right")
-                                .font(.caption.weight(.bold))
-                                .foregroundStyle(.white)
-                                .frame(width: 28, height: 28)
-                                .background(.white.opacity(0.2), in: Circle())
-                        }
-                        .buttonStyle(.plainHitArea)
-                    }
-                }
-
-                Spacer()
-
-                // Use this strand button
-                Button("Use this") {
-                    viewModel.dismissWelcomeScreen()
-                }
-                .buttonStyle(.plainHitArea)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-                .background(theme.colors.accent)
-                .foregroundStyle(theme.colors.textOnAccent)
-                .clipShape(Capsule())
-                .controlSize(.small)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-            }
-            .padding(.horizontal, 10)
-            .padding(.bottom, 10)
+            Text("Make something cool.")
+                .font(.system(size: 17, weight: .regular, design: .serif))
+                .italic()
+                .foregroundStyle(theme.colors.textSecondary)
+                .opacity(subtitleOpacity)
+                .offset(y: subtitleOffset)
         }
-        .clipShape(
-            UnevenRoundedRectangle(topLeadingRadius: 12, topTrailingRadius: 12)
-        )
+        .padding(.horizontal, 28)
+        .padding(.vertical, 32)
+        .frame(width: width, alignment: .leading)
+        .frame(minHeight: 160, alignment: .leading)
+        .onAppear(perform: startIntroAnimation)
+    }
+
+    // MARK: - Intro Animation
+
+    private func startIntroAnimation() {
+        // Reset (in case view re-appears, e.g. via menu).
+        titleOpacity = 0
+        titleOffset = 8
+        subtitleOpacity = 0
+        subtitleOffset = 6
+
+        withAnimation(.easeOut(duration: 0.55)) {
+            titleOpacity = 1
+            titleOffset = 0
+        }
+        withAnimation(.easeOut(duration: 0.55).delay(0.2)) {
+            subtitleOpacity = 1
+            subtitleOffset = 0
+        }
     }
 
     // MARK: - Action Buttons
 
     @ViewBuilder
     private func actionButtons() -> some View {
-        HStack(spacing: 24) {
-            Button {
-                viewModel.resumePreviousWorkspace()
-            } label: {
-                Text("Resume Workspace")
-                    .frame(width: 160, height: 36)
-            }
-            .buttonStyle(.plainHitArea)
-            .background(theme.colors.surface)
-            .foregroundStyle(theme.colors.textPrimary)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+        // Primary = "what does the user most likely want to do right now?"
+        // If the engine has restored a graph from the last session, Resume.
+        // Otherwise (truly fresh / first launch), New.
+        let hasResumableSession = !viewModel.nodes.isEmpty
 
-            Button {
-                viewModel.newWorkspace()
-                viewModel.dismissWelcomeScreen()
-            } label: {
-                Text("New Workspace")
-                    .frame(width: 160, height: 36)
-            }
-            .buttonStyle(.plainHitArea)
-            .background(theme.colors.surface)
-            .foregroundStyle(theme.colors.textPrimary)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+        return HStack(spacing: 14) {
+            WelcomeActionCard(
+                icon: "arrow.uturn.backward",
+                title: "Resume",
+                subtitle: "Continue where you left off",
+                isPrimary: hasResumableSession,
+                isEnabled: hasResumableSession,
+                action: { viewModel.resumePreviousWorkspace() }
+            )
 
-            Button {
-                openWorkspacePanel()
-            } label: {
-                Text("Open Workspace")
-                    .frame(width: 160, height: 36)
-            }
-            .buttonStyle(.plainHitArea)
-            .background(theme.colors.surface)
-            .foregroundStyle(theme.colors.textPrimary)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            WelcomeActionCard(
+                icon: "plus.square.dashed",
+                title: "New Workspace",
+                subtitle: "Start with a blank canvas",
+                isPrimary: !hasResumableSession,
+                action: {
+                    viewModel.newWorkspace()
+                    viewModel.dismissWelcomeScreen()
+                }
+            )
+
+            WelcomeActionCard(
+                icon: "folder",
+                title: "Open Workspace",
+                subtitle: "Pick a saved file",
+                action: openWorkspacePanel
+            )
         }
+        .padding(.horizontal, 28)
     }
 
     // MARK: - Strand Browsers
 
     @ViewBuilder
-    private func strandBrowsers(height: CGFloat) -> some View {
+    private func strandBrowsers() -> some View {
         HStack(alignment: .top, spacing: 16) {
             // Templates column
             VStack(alignment: .leading, spacing: 8) {
@@ -233,8 +181,7 @@ struct WelcomeView: View {
                     .padding(.horizontal, 8)
                 }
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: height)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             theme.colors.border.frame(width: 1)
 
@@ -269,37 +216,13 @@ struct WelcomeView: View {
                     .frame(maxHeight: .infinity)
                 }
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: height)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .padding(.horizontal, 16)
         .padding(.bottom, 16)
     }
 
     // MARK: - Helpers
-
-    private var currentStrandName: String {
-        guard !viewModel.templateStrandsList.isEmpty,
-              currentWelcomeIndex < viewModel.templateStrandsList.count else {
-            return ""
-        }
-        return viewModel.templateStrandsList[currentWelcomeIndex].name
-    }
-
-    private func loadCurrentWelcomeStrand() {
-        guard !viewModel.templateStrandsList.isEmpty else { return }
-        let index = currentWelcomeIndex.clamped(to: 0..<viewModel.templateStrandsList.count)
-        currentWelcomeIndex = index
-        let strand = viewModel.templateStrandsList[index]
-        viewModel.loadWelcomeStrand(id: strand.id)
-    }
-
-    private func navigateStrand(delta: Int) {
-        guard !viewModel.templateStrandsList.isEmpty else { return }
-        let count = viewModel.templateStrandsList.count
-        currentWelcomeIndex = (currentWelcomeIndex + delta + count) % count
-        loadCurrentWelcomeStrand()
-    }
 
     private func openWorkspacePanel() {
         let panel = NSOpenPanel()
@@ -314,8 +237,70 @@ struct WelcomeView: View {
     }
 }
 
-private extension Int {
-    func clamped(to range: Range<Int>) -> Int {
-        Swift.max(range.lowerBound, Swift.min(self, range.upperBound - 1))
+// MARK: - Welcome Action Card
+
+private struct WelcomeActionCard: View {
+    let icon: String
+    let title: String
+    let subtitle: String
+    var isPrimary: Bool = false
+    var isEnabled: Bool = true
+    let action: () -> Void
+
+    @Environment(ThemeManager.self) private var theme
+    @State private var hovering = false
+
+    var body: some View {
+        Button(action: action) {
+            HStack(alignment: .center, spacing: 14) {
+                Image(systemName: icon)
+                    .font(.system(size: 20, weight: .regular))
+                    .foregroundStyle(iconColor)
+                    .frame(width: 28, height: 28)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(theme.colors.textPrimary)
+                    Text(subtitle)
+                        .font(.system(size: 11, weight: .regular))
+                        .foregroundStyle(theme.colors.textTertiary)
+                        .lineLimit(1)
+                }
+
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(backgroundFill)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(borderColor, lineWidth: isPrimary ? 1 : 0.5)
+            )
+            .scaleEffect(hovering && isEnabled ? 1.015 : 1.0)
+            .animation(.easeOut(duration: 0.12), value: hovering)
+        }
+        .buttonStyle(.plain)
+        .disabled(!isEnabled)
+        .opacity(isEnabled ? 1.0 : 0.45)
+        .onHover { hovering = $0 }
+    }
+
+    private var iconColor: Color {
+        isPrimary ? theme.colors.accent : theme.colors.textSecondary
+    }
+
+    private var backgroundFill: Color {
+        if !isEnabled { return theme.colors.surface }
+        if hovering { return theme.colors.surfaceHover }
+        return theme.colors.surface
+    }
+
+    private var borderColor: Color {
+        isPrimary ? theme.colors.accent.opacity(0.5) : theme.colors.borderSubtle
     }
 }

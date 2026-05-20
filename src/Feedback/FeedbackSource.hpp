@@ -12,6 +12,7 @@
 #include "VideoSourceSettings.hpp"
 #include "Connection.hpp"
 #include "Console.hpp"
+#include "LifecycleCounter.hpp"
 
 const int FrameBufferCount=30;
 
@@ -116,11 +117,13 @@ struct FeedbackSource {
     canvas->end();
     
     startIndex++;
-    
+
     if (startIndex == FrameBufferCount) {
       startIndex = 0;
     }
   }
+
+  LIFECYCLE_TRACK("FeedbackSource");
 };
 
 #endif /* FeedbackSource_h */

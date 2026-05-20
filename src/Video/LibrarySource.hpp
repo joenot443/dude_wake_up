@@ -39,6 +39,7 @@ public:
   void drawPreviewSized(ImVec2 size) override;
   
   void runSetupOnMainThread(ofEventArgs & args);
+  LIFECYCLE_TRACK("LibrarySource");
 };
 
 

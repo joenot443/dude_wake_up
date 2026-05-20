@@ -52,12 +52,22 @@ public:
   std::shared_ptr<Oscillator> oscillatorForParameter(std::shared_ptr<Parameter> param);
   void tickOscillators();
 
+  // Sets enabled state on an oscillator and keeps the hot list in sync.
+  // All callers that toggle Oscillator::enabled MUST go through this helper.
+  void setEnabled(std::shared_ptr<Oscillator> osc, bool enabled);
+
   void clear();
-  
+
   json config() override;
   void loadConfig(json j) override;
 
   void removeOscillatorsFor(std::vector<std::shared_ptr<Parameter>> parameters);
+
+private:
+  // Hot list of currently-enabled oscillators. tickOscillators iterates only
+  // this — avoids walking the full oscillators map every frame.
+  std::vector<std::shared_ptr<Oscillator>> enabledOscillators_;
+  void rebuildEnabledCache();
 };
 
 #endif /* OscillationService_hpp */

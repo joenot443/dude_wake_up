@@ -18,13 +18,40 @@
 void OscillationService::addOscillator(std::shared_ptr<Oscillator> obj) {
   oscillators[obj->value->paramId] = obj;
   loadOscillatorSettings(obj);
+  // Saved-config path: Settings::load sets enabled->boolValue=true before
+  // registerParameters() runs addOscillator. Mirror that into the hot list
+  // so tickOscillators sees the loaded-enabled oscillators.
+  if (obj->enabled && obj->enabled->boolValue) {
+    auto it = std::find(enabledOscillators_.begin(), enabledOscillators_.end(), obj);
+    if (it == enabledOscillators_.end()) {
+      enabledOscillators_.push_back(obj);
+    }
+  }
 }
 
 void OscillationService::tickOscillators() {
+  for (auto & osc : enabledOscillators_) {
+    osc->tick();
+  }
+}
+
+void OscillationService::setEnabled(std::shared_ptr<Oscillator> osc, bool enabled) {
+  if (osc == nullptr) return;
+  osc->enabled->boolValue = enabled;
+  auto it = std::find(enabledOscillators_.begin(), enabledOscillators_.end(), osc);
+  bool inCache = it != enabledOscillators_.end();
+  if (enabled && !inCache) {
+    enabledOscillators_.push_back(osc);
+  } else if (!enabled && inCache) {
+    enabledOscillators_.erase(it);
+  }
+}
+
+void OscillationService::rebuildEnabledCache() {
+  enabledOscillators_.clear();
   for (auto & [key, osc] : oscillators) {
-    if (osc == nullptr) continue;
-    if (osc->enabled->boolValue) {
-      osc->tick();
+    if (osc != nullptr && osc->enabled->boolValue) {
+      enabledOscillators_.push_back(osc);
     }
   }
 }
@@ -53,7 +80,7 @@ void OscillationService::selectOscillator(std::shared_ptr<Oscillator> osc, std::
   selectedOscillator = osc;
   loadOscillatorSettings(osc);
   ParameterService::getService()->selectedParameter = param;
-  osc->enabled->boolValue = true;
+  setEnabled(osc, true);
   ConfigService::getService()->saveDefaultConfigFile();
 }
 
@@ -62,6 +89,7 @@ void OscillationService::clear() {
     osc.second->enabled->boolValue = false;
   }
   oscillators.clear();
+  enabledOscillators_.clear();
   selectedOscillator = nullptr;
 }
 
@@ -117,7 +145,7 @@ void OscillationService::loadConfig(json data) {
             wOsc->maxOutput->value = shift + halfRange;
           }
 
-          osc->enabled->boolValue = true;
+          setEnabled(osc, true);
         }
       } else {
         log("Couldn't find %s", paramId.c_str());
@@ -130,7 +158,7 @@ void OscillationService::removeOscillatorsFor(std::vector<std::shared_ptr<Parame
   for (const auto& param : parameters) {
     auto it = oscillators.find(param->paramId);
     if (it != oscillators.end()) {
-      it->second->enabled->boolValue = false; // Disable the oscillator
+      setEnabled(it->second, false); // Disable + remove from hot list
       oscillators.erase(it); // Remove the oscillator from the map
     }
   }

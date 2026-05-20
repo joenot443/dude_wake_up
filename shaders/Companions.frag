@@ -5,7 +5,6 @@ uniform vec2 dimensions;
 uniform float time;
 uniform vec2 position;
 
-uniform float flowSpeed;
 uniform float zoom;
 uniform int   octaves;
 uniform float lacunarity;
@@ -13,6 +12,12 @@ uniform float gain;
 uniform float focusPull;
 uniform float brightness;
 uniform float hueShift;
+
+uniform float domainWarp;
+uniform float perspective;
+uniform vec4  glowColor;
+uniform float saturation;
+uniform float vignette;
 
 in vec2 coord;
 out vec4 outputColor;
@@ -59,7 +64,7 @@ float fbm3d(vec3 p) {
     vec3 shift = vec3(focus - focus2);  //play with this
     shift.z += .03*tf;
 
-    float angle = pi/4.; //+ .001*focus;
+    float angle = pi/4.;
     float cc=cos(angle), ss=sin(angle);
     mat3 rot = mat3( cc,  0., ss,
                       0., 1., 0.,
@@ -113,13 +118,13 @@ void main(  )
 
     uv *= coord_scale;
 
-    vec3 rd = normalize( vec3(uv, -1.4) );
+    vec3 rd = normalize( vec3(uv, -perspective) );
     vec3 ro = vec3(0.);
 
     float delta = pi/100.;
     mat3 rot = rxz(-mm.x*delta) * ryz(-mm.y*delta);
 
-    ro -= rot[2] * time * flowSpeed / 5.;
+    ro -= rot[2] * time / 5.;
 
     vec3 p = ro + rot*rd;
 
@@ -127,7 +132,7 @@ void main(  )
     float ttt = 1.55;
 
     //distance to torus
-    float td = torus( p - ro , vec2( 4.*cos(time*flowSpeed/2.)*cos(ttt*5.),8.*sin(ttt*5.)) );
+    float td = torus( p - ro , vec2( 4.*cos(time/2.)*cos(ttt*5.),8.*sin(ttt*5.)) );
 
 
     mm *= coord_scale;
@@ -147,7 +152,7 @@ void main(  )
     q.y = fbm3d(p.yzx);
     q.z = fbm3d(p.zxy);
 
-    float f = fbm3d(p + q);
+    float f = fbm3d(p + q * domainWarp);
 
     vec3 cc = q;
     cc *= 35. * f * brightness;
@@ -156,12 +161,23 @@ void main(  )
     cc.r += 2.*focus*focusPull; cc.g += 2.*focus*focusPull; cc.b += 8.*focus2*focusPull; cc.r -= 4.*focus2*focusPull;
     cc /= 10.;
     cc /= (1.+.006*tf);
-    cc += .001*tf*vec3(.5,.2,1.);
+    cc += .001*tf*glowColor.rgb*glowColor.a;
 
     cc = 1. - exp(-cc*cc);
     //cc = pow(cc, vec3(3.));
 
     cc = rotateHue(cc, hueShift);
+
+    // Saturation around per-pixel luma (post-hue so the rotation isn't
+    // pre-flattened).
+    float luma = dot(cc, vec3(0.299, 0.587, 0.114));
+    cc = mix(vec3(luma), cc, saturation);
+
+    // Vignette: darken corners based on normalized screen distance from
+    // center. Independent of the focus-driven brightening above.
+    vec2 vCentered = (coord / dimensions.xy) * 2.0 - 1.0;
+    float vd = length(vCentered);
+    cc *= 1.0 - smoothstep(0.4, 1.2, vd) * vignette;
 
     outputColor = vec4(cc,1.0);
 

@@ -16,7 +16,8 @@ void FeedbackSourceService::setup()
   std::shared_ptr<FeedbackSource> source = std::make_shared<FeedbackSource>(UUID::generateUUID(), std::make_shared<VideoSourceSettings>(UUID::generateUUID(), 0));
   registerFeedbackSource(source);
   defaultFeedbackSource = source;
-  defaultFeedbackSource->setup();
+  // Frame buffer is allocated lazily on the first pushFrame() that has a
+  // consumer. The default source typically has none → ~240 MB saved at 1080p.
 }
 
 void FeedbackSourceService::registerFeedbackSource(std::shared_ptr<FeedbackSource> feedbackSource)
@@ -88,7 +89,16 @@ void FeedbackSourceService::removeFeedbackSource(std::string id)
 
 void FeedbackSourceService::removeConsumerForShader(std::string shaderId)
 {
-  consumerMap.erase(shaderId);
+  // Look up the source before erasing so we can release its frame buffer if
+  // this was the last consumer. Keeping the 30-FBO ring around for an
+  // unconsumed FeedbackSource is ~240 MB at 1080p.
+  auto it = consumerMap.find(shaderId);
+  if (it == consumerMap.end()) return;
+  auto source = it->second;
+  consumerMap.erase(it);
+  if (source && !isSourceBeingConsumed(source->id)) {
+    source->teardown();
+  }
 }
 
 std::vector<std::shared_ptr<FeedbackSource>> FeedbackSourceService::feedbackSources()

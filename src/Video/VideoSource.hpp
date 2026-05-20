@@ -15,6 +15,8 @@
 #include "VideoSourceSettings.hpp"
 #include "json.hpp"
 #include "Connection.hpp"
+#include "subscription.hpp"
+#include "LifecycleCounter.hpp"
 #include <stdio.h>
 
 using json = nlohmann::json;
@@ -117,6 +119,14 @@ public:
   };
 
   OptionalShadersHelper optionalShadersHelper;
+
+  // Subscription to LayoutStateService resolution updates. Held here so it
+  // is severed automatically when the source is destroyed, and explicitly
+  // reset on remove so that orphaned sources stop having setup() called on
+  // them (which, for FileSource, rebuilt the entire frame cache).
+  observable::unique_subscription resolutionUpdateSubscription;
+
+  LIFECYCLE_TRACK("VideoSource");
 };
 
 #endif /* VideoSourceSource_hpp */

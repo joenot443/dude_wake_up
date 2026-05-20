@@ -23,6 +23,7 @@
 #include "BookmarkService.hpp"
 #include "LayoutStateService.hpp"
 #include "FileSource.hpp"
+#include "ShaderSource.hpp"
 #include "Strings.hpp"
 #include <cstdlib>
 
@@ -140,10 +141,14 @@ void VideoSourceService::updateVideoSources()
   {
     // If inactive, don't save the next frame
     if (!x.second->active) continue;
-    
+
     x.second->saveFrame();
     x.second->applyOptionalShaders();
     x.second->saveFeedbackFrame();
+
+    // Mark this frame as freshly written. IOSurfaceTextureManager skips
+    // its blit when this hasn't advanced since the last blit.
+    ++x.second->renderTick;
   }
 }
 
@@ -168,11 +173,13 @@ void VideoSourceService::addVideoSource(std::shared_ptr<VideoSource> videoSource
   }
   videoSource->setup();
   videoSource->generateOptionalShaders();
-  // Subscribe the Shader's setup() to resolution updates
-  LayoutStateService::getService()->subscribeToResolutionUpdates([videoSource]() {
-    videoSource->setup();
-  });
-  
+  // Subscribe the Source's setup() to resolution updates. Token stored on
+  // the source so it can be unsubscribed in removeVideoSource.
+  std::weak_ptr<VideoSource> weakSrc = videoSource;
+  videoSource->resolutionUpdateSubscription =
+    LayoutStateService::getService()->subscribeToResolutionUpdates([weakSrc]() {
+      if (auto s = weakSrc.lock()) s->setup();
+    });
 }
 
 // Remove a video source from the map
@@ -181,11 +188,38 @@ void VideoSourceService::removeVideoSource(std::string id)
   if (videoSourceMap.find(id) != videoSourceMap.end())
   {
     auto source = videoSourceMap[id];
+    // Unsubscribe from resolution updates BEFORE teardown so a stray
+    // notification can't re-run setup() on a source mid-teardown.
+    source->resolutionUpdateSubscription = observable::unique_subscription{};
     source->teardown();
     OscillationService::getService()->removeOscillatorsFor(source->settings->parameters);
+    ParameterService::getService()->unregisterParameters(source->settings->parameters);
+
+    // Walk every optional shader created via the VideoSource's helper as
+    // well as any shader nested inside a ShaderSource. Each shader has its
+    // own settings + parameters that were registered at construction time
+    // and would otherwise leak into the global parameterMap forever.
+    std::function<void(std::shared_ptr<Shader>)> cleanShader =
+      [&cleanShader](std::shared_ptr<Shader> s) {
+        if (!s || !s->settings) return;
+        OscillationService::getService()->removeOscillatorsFor(s->settings->parameters);
+        ParameterService::getService()->unregisterParameters(s->settings->parameters);
+        for (auto& opt : s->optionalShaders) cleanShader(opt);
+      };
+    for (auto& opt : source->optionalShadersHelper.optionalShaders) cleanShader(opt);
+    if (auto shaderSrc = std::dynamic_pointer_cast<ShaderSource>(source)) {
+      cleanShader(shaderSrc->shader);
+    }
     FeedbackSourceService::getService()->removeFeedbackSource(id);
+    // Drop the back-ref so the FeedbackSource shell can actually die once the
+    // service map entry is gone. Without this, undo-held VideoSources keep
+    // the FeedbackSource alive forever (and any pending frame-buffer state
+    // along with it).
+    source->feedbackDestination = nullptr;
     ShaderChainerService::getService()->removeConnectable(source);
     videoSourceMap.erase(id);
+    log("removeVideoSource(%s): source.use_count=%ld (anything > 1 is held by undo or copies)",
+        id.c_str(), source.use_count());
   }
   
   ConfigService::getService()->saveDefaultConfigFile();
@@ -460,9 +494,8 @@ std::shared_ptr<VideoSource> VideoSourceService::makeImageVideoSource(std::strin
 std::shared_ptr<VideoSource> VideoSourceService::makeTextVideoSource(std::string name, ImVec2 origin, std::string id, json j)
 {
   auto displayText = std::make_shared<DisplayText>();
-  auto textSource = TextSource(id, name, displayText);
-  textSource.load(j);
-  std::shared_ptr<VideoSource> videoSource = std::make_shared<TextSource>(textSource);
+  auto videoSource = std::make_shared<TextSource>(id, name, displayText);
+  videoSource->load(j);
   videoSource->origin = origin;
   return videoSource;
 }
@@ -471,9 +504,8 @@ std::shared_ptr<VideoSource> VideoSourceService::makeTextVideoSource(std::string
 std::shared_ptr<VideoSource> VideoSourceService::makeTypewriterTextVideoSource(std::string name, ImVec2 origin, std::string id, json j)
 {
   auto displayText = std::make_shared<DisplayText>();
-  auto typewriterSource = TypewriterTextSource(id, name, displayText);
-  typewriterSource.load(j);
-  std::shared_ptr<VideoSource> videoSource = std::make_shared<TypewriterTextSource>(typewriterSource);
+  auto videoSource = std::make_shared<TypewriterTextSource>(id, name, displayText);
+  videoSource->load(j);
   videoSource->origin = origin;
   return videoSource;
 }
@@ -482,9 +514,8 @@ std::shared_ptr<VideoSource> VideoSourceService::makeTypewriterTextVideoSource(s
 std::shared_ptr<VideoSource> VideoSourceService::makeScrollingTextVideoSource(std::string name, ImVec2 origin, std::string id, json j)
 {
   auto displayText = std::make_shared<DisplayText>();
-  auto scrollingSource = ScrollingTextSource(id, name, displayText);
-  scrollingSource.load(j);
-  std::shared_ptr<VideoSource> videoSource = std::make_shared<ScrollingTextSource>(scrollingSource);
+  auto videoSource = std::make_shared<ScrollingTextSource>(id, name, displayText);
+  videoSource->load(j);
   videoSource->origin = origin;
   return videoSource;
 }

@@ -25,7 +25,7 @@ final class WorkspaceUITests: XCTestCase {
         // Re-attach via bundle identifier — this can pick up the SwiftUI
         // accessibility tree that the path-based connection may miss when
         // GLFW creates its own window context.
-        app = XCUIApplication(bundleIdentifier: "com.joecrozier.nottawaapp")
+        app = XCUIApplication(bundleIdentifier: "com.joecrozier.nottawa")
         app.activate()
         sleep(3)
     }
@@ -386,6 +386,101 @@ final class WorkspaceUITests: XCTestCase {
         // Name should now appear
         XCTAssertTrue(workspaceNameLabel.waitForExistence(timeout: 5),
                       "Workspace name should appear after Save As")
+    }
+
+    // MARK: - Tests: File-on-Disk
+
+    /// Read the current workspace path from the toolbar's accessibility value.
+    private func currentWorkspacePathFromUI() -> String? {
+        let label = workspaceNameLabel
+        guard label.waitForExistence(timeout: 5) else { return nil }
+        guard let path = label.value as? String, !path.isEmpty else { return nil }
+        return path
+    }
+
+    /// Save As must actually write a non-empty JSON file at the chosen path.
+    func testSaveAsWritesFileToDisk() throws {
+        XCTAssertTrue(waitForAppReady())
+
+        XCTAssertTrue(addShader(name: "Blur"))
+        pressSaveAs()
+        XCTAssertTrue(acceptSavePanel(), "Save panel should accept")
+
+        guard let path = currentWorkspacePathFromUI() else {
+            return XCTFail("Workspace path should be exposed after Save As")
+        }
+
+        XCTAssertTrue(FileManager.default.fileExists(atPath: path),
+                      "Workspace file should exist on disk at \(path)")
+
+        let data = try Data(contentsOf: URL(fileURLWithPath: path))
+        XCTAssertGreaterThan(data.count, 100, "Workspace file should have non-trivial content")
+
+        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        XCTAssertNotNil(json?["shaders"], "Workspace JSON should contain a 'shaders' key")
+    }
+
+    /// Regression test for the saveConfigFile early-return bug: after a Save As,
+    /// pressing Cmd+S with no graph changes since the last save must STILL
+    /// re-write the file. Before the fix, `saveConfigFile()` short-circuited
+    /// on `lastConfig == config` and the disk mtime never updated.
+    ///
+    /// The test runner is sandboxed and can't delete files outside its
+    /// container, so we observe mtime instead of deleting+recreating.
+    func testCmdSWritesFileEvenWhenConfigUnchangedSinceLastSave() throws {
+        XCTAssertTrue(waitForAppReady())
+
+        XCTAssertTrue(addShader(name: "Blur"))
+        pressSaveAs()
+        XCTAssertTrue(acceptSavePanel())
+
+        guard let path = currentWorkspacePathFromUI() else {
+            return XCTFail("Workspace path should be exposed after Save As")
+        }
+        XCTAssertTrue(FileManager.default.fileExists(atPath: path))
+
+        let mtimeBefore = try FileManager.default.attributesOfItem(atPath: path)[.modificationDate] as? Date
+        XCTAssertNotNil(mtimeBefore)
+
+        // Sleep long enough that any new write will produce a strictly later
+        // mtime (HFS+/APFS mtime resolution is 1ns on APFS but be safe with 2s).
+        // The graph is intentionally unchanged here — that's the point of the
+        // regression: `lastConfig == currentConfig()` so the old code skipped
+        // the write entirely.
+        sleep(2)
+        pressSave()
+        sleep(3)
+
+        let mtimeAfter = try FileManager.default.attributesOfItem(atPath: path)[.modificationDate] as? Date
+        XCTAssertNotNil(mtimeAfter)
+        XCTAssertGreaterThan(mtimeAfter!, mtimeBefore!,
+                             "Cmd+S must re-write the workspace file even when the graph hasn't changed since the last save (mtime should advance)")
+    }
+
+    /// Saving after modifying the graph should produce a strictly larger file
+    /// (more shaders = more JSON). Verifies the on-disk content actually
+    /// reflects the new state, not a cached blob.
+    func testSaveUpdatesFileContentAfterGraphChange() throws {
+        XCTAssertTrue(waitForAppReady())
+
+        XCTAssertTrue(addShader(name: "Blur"))
+        pressSaveAs()
+        XCTAssertTrue(acceptSavePanel())
+
+        guard let path = currentWorkspacePathFromUI() else {
+            return XCTFail("Workspace path should be exposed after Save As")
+        }
+        let sizeBefore = (try FileManager.default.attributesOfItem(atPath: path)[.size] as? Int) ?? 0
+        XCTAssertGreaterThan(sizeBefore, 0)
+
+        XCTAssertTrue(addShader(name: "Blur"))
+        sleep(1)
+        pressSave()
+        sleep(3)
+
+        let sizeAfter = (try FileManager.default.attributesOfItem(atPath: path)[.size] as? Int) ?? 0
+        XCTAssertGreaterThan(sizeAfter, sizeBefore,
+                             "File should grow on disk after adding a node (\(sizeBefore) → \(sizeAfter))")
     }
 
     func testWorkspaceNameClearedByNew() throws {

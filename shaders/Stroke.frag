@@ -44,19 +44,24 @@ void main() {
   }
   centerColor /= totalWeight;
 
-  // Check if any text exists in the surrounding area with distance weighting
+  // Check if any text exists within `radius` pixels by sampling concentric
+  // circles from near the center out to `radius`. The outer-edge falloff via
+  // smoothstep gives antialiased stroke boundaries.
   float strokeAlpha = 0.0;
-  float innerRadius = max(0.0, radius - 1.0);
-  float outerRadius = radius + 1.0;
+  const int RADIAL_STEPS = 8;
+  float effRadius = max(0.001, radius);
+  // Feather can't exceed the radius itself, otherwise smoothstep degenerates.
+  float feather = min(1.0, effRadius);
+  float fadeStart = effRadius - feather;
 
-  for (float i = 0.0; i < TAU; i += TAU / steps) {
-    // Sample at multiple distances for smoother falloff
-    for (float r = innerRadius; r <= outerRadius; r += 0.5) {
+  for (int s = 1; s <= RADIAL_STEPS; s++) {
+    float r = (float(s) / float(RADIAL_STEPS)) * effRadius;
+    // distWeight is 1.0 well inside the stroke and falls off at the outer edge
+    // for antialiasing.
+    float distWeight = 1.0 - smoothstep(fadeStart, effRadius, r);
+    for (float i = 0.0; i < TAU; i += TAU / steps) {
       vec2 offset = vec2(sin(i), cos(i)) * aspect * r;
       vec4 col = texture(tex, uv + offset);
-
-      // Distance-based weight for smoother stroke edges
-      float distWeight = 1.0 - smoothstep(innerRadius, outerRadius, r);
       strokeAlpha = max(strokeAlpha, col.a * distWeight);
     }
   }

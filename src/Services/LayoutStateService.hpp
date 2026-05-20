@@ -13,6 +13,8 @@
 #include "ConfigService.hpp"
 #include "ConfigurableService.hpp"
 #include "imgui.h"
+#include "observable.hpp"
+#include "subscription.hpp"
 
 static const std::string PortraitJsonKey = "portrait";
 static const std::string ShowAudioSettingsJsonKey = "showAudioSettings";
@@ -107,7 +109,10 @@ public:
   
   void togglePortraitSetting();
   
-  void subscribeToResolutionUpdates(std::function<void()> callback);
+  // Returns a unique_subscription — store it on the subscriber and let it
+  // destruct when the subscriber goes away (or reset it explicitly to
+  // unsubscribe early). Discarding the return value leaks the subscription.
+  observable::unique_subscription subscribeToResolutionUpdates(std::function<void()> callback);
   
   bool actionBarExpanded = true;
   
