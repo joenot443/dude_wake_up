@@ -308,7 +308,14 @@ std::shared_ptr<VideoSource> VideoSourceService::makeWebcamVideoSource(std::stri
   std::shared_ptr<WebcamSource> videoSource = std::make_shared<WebcamSource>(id, name);
   videoSource->origin = origin;
   videoSource->settings->deviceId->intValue = deviceId;
-  
+
+  // Restore saved settings (crop/place transform, device, etc.) when
+  // hydrating from config/strand JSON. load() self-guards on non-objects,
+  // and runs after deviceId so the saved device wins over the default 0.
+  if (j.is_object()) {
+    videoSource->load(j);
+  }
+
   return videoSource;
 }
 
@@ -374,12 +381,15 @@ std::shared_ptr<VideoSource> VideoSourceService::makeFileVideoSource(std::string
   // Trim the extension from the name
   std::string nameWithoutExtension = name.substr(0, name.find_last_of('.'));
   videoSource = std::make_shared<FileSource>(id, nameWithoutExtension, path);
+  // Restore saved settings (crop/place transform, volume, mute, ranges) when
+  // hydrating from config/strand JSON. load() self-guards on non-objects.
+  if (j.is_object()) videoSource->load(j);
   videoSource->origin = origin;
-  
+
   // Release CF objects
   CFRelease(fileURL);
   CFRelease(bookmarkData);
-  
+
   return videoSource;
 }
 
@@ -395,6 +405,7 @@ std::shared_ptr<VideoSource> VideoSourceService::makePlaylistVideoSource(std::st
 std::shared_ptr<VideoSource> VideoSourceService::makeIconVideoSource(std::string name, ImVec2 origin, std::string id, json j)
 {
   std::shared_ptr<VideoSource> videoSource = std::make_shared<IconSource>(id, "Icon");
+  if (j.is_object()) videoSource->load(j);
   videoSource->origin = origin;
   return videoSource;
 }
@@ -480,13 +491,13 @@ std::shared_ptr<VideoSource> VideoSourceService::makeImageVideoSource(std::strin
   
   // At this point, we have successfully resolved the bookmark and accessed the resource
   videoSource = std::make_shared<ImageSource>(id, name, path);
-  videoSource->load(j);
+  if (j.is_object()) videoSource->load(j);
   videoSource->origin = origin;
-  
+
   // Release CF objects
   CFRelease(fileURL);
   CFRelease(bookmarkData);
-  
+
   return videoSource;
 }
 
@@ -524,6 +535,7 @@ std::shared_ptr<VideoSource> VideoSourceService::makeScrollingTextVideoSource(st
 std::shared_ptr<VideoSource> VideoSourceService::makeLibraryVideoSource(std::shared_ptr<LibraryFile> libraryFile, ImVec2 origin, std::string id, json j)
 {
   std::shared_ptr<VideoSource> videoSource = std::make_shared<LibrarySource>(id, libraryFile);
+  if (j.is_object()) videoSource->load(j);
   videoSource->origin = origin;
   return videoSource;
 }
