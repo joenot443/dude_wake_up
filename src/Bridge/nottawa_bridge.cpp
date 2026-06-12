@@ -2325,8 +2325,99 @@ static std::shared_ptr<ofFbo> getMostRecentVideoSourceFrame() {
   return nullptr;
 }
 
+// ---------------------------------------------------------------------------
+// Fake preview audio
+//
+// Audio-reactive shaders read AudioSourceService::selectedAudioSource->
+// audioAnalysis directly, so when no real audio is playing their previews sit
+// dead-still. While previews are on screen and no real source is active, we
+// drive the analysis with a synthetic "musical" signal for the duration of the
+// preview render pass, then restore the original values. The main shader chain
+// renders earlier in EngineLoop::tick() (before ntw_tick_previews), so it never
+// sees the fake values; and we only inject when the source is inactive, so we
+// never race the audio thread (which writes the analysis only while active).
+// ---------------------------------------------------------------------------
+
+static bool previewFakeAudioEnabled = true;
+
+namespace {
+  inline float pvClamp01(float v) { return v < 0.0f ? 0.0f : (v > 1.0f ? 1.0f : v); }
+
+  // Snapshot of the analysis fields we overwrite, so they can be restored.
+  struct PreviewAudioBackup {
+    float rms = 0, lows = 0, mids = 0, highs = 0, beatPulse = 0;
+    std::array<float, AudioAnalysis::kSpectrumSize> renderSpectrum{};
+    std::array<float, AudioAnalysis::kSpectrumSize> renderMelSpectrum{};
+    std::array<float, AudioAnalysis::kSpectrumSize> renderWaveform{};
+    std::vector<float> smoothSpectrum, smoothMelSpectrum, smoothWaveform;
+  };
+
+  // Fill the analysis with a believable beat-driven spectrum at time `t`.
+  void generatePreviewAudio(AudioAnalysis& a, float t) {
+    // ~120 BPM — two beats per second — with a sharp kick envelope.
+    const float beatPhase = std::fmod(t * 2.0f, 1.0f);
+    const float beat  = std::exp(-beatPhase * 6.0f);
+    const float lows  = 0.20f + 0.75f * beat;
+    const float mids  = 0.25f + 0.25f * (0.5f + 0.5f * std::sin(t * 3.1f)) + 0.15f * beat;
+    const float highs = 0.20f + 0.18f * (0.5f + 0.5f * std::sin(t * 7.3f + 1.0f))
+                              + 0.20f * (0.5f + 0.5f * std::sin(t * 13.0f));
+    const float rms   = 0.20f + 0.55f * (0.45f * beat + 0.30f * mids + 0.25f * lows);
+
+    if (a.lows)      a.lows->value      = pvClamp01(lows);
+    if (a.mids)      a.mids->value      = pvClamp01(mids);
+    if (a.highs)     a.highs->value     = pvClamp01(highs);
+    if (a.rms)       a.rms->value       = pvClamp01(rms);
+    if (a.beatPulse) a.beatPulse->value = pvClamp01(beat);
+
+    const size_t N = AudioAnalysis::kSpectrumSize;
+    a.smoothSpectrum.resize(N);
+    a.smoothMelSpectrum.resize(N);
+    a.smoothWaveform.resize(N);
+    for (size_t i = 0; i < N; ++i) {
+      const float f       = (N > 1) ? (float)i / (float)(N - 1) : 0.0f; // 0..1 across bins
+      const float rolloff = std::pow(1.0f - f, 1.6f);                   // bass-heavy shape
+      const float wobble  = 0.5f + 0.5f * std::sin(t * (2.0f + f * 9.0f) + f * 22.0f);
+      const float band    = (f < 0.12f) ? lows : (f < 0.5f ? mids : highs);
+      const float mag     = pvClamp01(rolloff * (0.35f + 0.65f * wobble) * (0.45f + 0.85f * band));
+      a.renderSpectrum[i]    = mag;
+      a.renderMelSpectrum[i] = mag;
+      a.smoothSpectrum[i]    = mag;
+      a.smoothMelSpectrum[i] = mag;
+      // Waveform is a time-domain signal in [-1, 1].
+      const float sample = std::sin(t * 6.2831853f * 2.0f + f * 6.2831853f * 3.0f)
+                           * (0.25f + 0.75f * rms);
+      a.renderWaveform[i] = sample;
+      a.smoothWaveform[i] = sample;
+    }
+  }
+}
+
 void ntw_tick_previews(void) {
   if (previewInstances.empty()) return;
+
+  // Inject synthetic audio for this preview pass (restored before we return).
+  std::shared_ptr<AudioSource> previewAudioSrc;
+  PreviewAudioBackup audioBackup;
+  bool fakeAudioInjected = false;
+  if (previewFakeAudioEnabled) {
+    previewAudioSrc = AudioSourceService::getService()->selectedAudioSource;
+    if (previewAudioSrc && !previewAudioSrc->active) {
+      AudioAnalysis& a = previewAudioSrc->audioAnalysis;
+      audioBackup.rms       = a.rms ? a.rms->value : 0.0f;
+      audioBackup.lows      = a.lows ? a.lows->value : 0.0f;
+      audioBackup.mids      = a.mids ? a.mids->value : 0.0f;
+      audioBackup.highs     = a.highs ? a.highs->value : 0.0f;
+      audioBackup.beatPulse = a.beatPulse ? a.beatPulse->value : 0.0f;
+      audioBackup.renderSpectrum    = a.renderSpectrum;
+      audioBackup.renderMelSpectrum = a.renderMelSpectrum;
+      audioBackup.renderWaveform    = a.renderWaveform;
+      audioBackup.smoothSpectrum    = a.smoothSpectrum;
+      audioBackup.smoothMelSpectrum = a.smoothMelSpectrum;
+      audioBackup.smoothWaveform    = a.smoothWaveform;
+      generatePreviewAudio(a, ofGetElapsedTimef());
+      fakeAudioInjected = true;
+    }
+  }
 
   auto* mgr = IOSurfaceTextureManager::getInstance();
 
@@ -2427,6 +2518,22 @@ void ntw_tick_previews(void) {
       mgr->blitExternalFrame(pid, resultFrame->getId(),
                              resultFrame->getWidth(), resultFrame->getHeight());
     }
+  }
+
+  // Restore the real analysis so nothing outside the preview pass sees the fake audio.
+  if (fakeAudioInjected && previewAudioSrc) {
+    AudioAnalysis& a = previewAudioSrc->audioAnalysis;
+    if (a.rms)       a.rms->value       = audioBackup.rms;
+    if (a.lows)      a.lows->value      = audioBackup.lows;
+    if (a.mids)      a.mids->value      = audioBackup.mids;
+    if (a.highs)     a.highs->value     = audioBackup.highs;
+    if (a.beatPulse) a.beatPulse->value = audioBackup.beatPulse;
+    a.renderSpectrum    = audioBackup.renderSpectrum;
+    a.renderMelSpectrum = audioBackup.renderMelSpectrum;
+    a.renderWaveform    = audioBackup.renderWaveform;
+    a.smoothSpectrum    = std::move(audioBackup.smoothSpectrum);
+    a.smoothMelSpectrum = std::move(audioBackup.smoothMelSpectrum);
+    a.smoothWaveform    = std::move(audioBackup.smoothWaveform);
   }
 
   glFlush();
