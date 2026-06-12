@@ -50,7 +50,7 @@ struct AudioAuroraSettings: public ShaderSettings {
   thicknessOscillator(std::make_shared<WaveformOscillator>(thickness)),
   colorShift(std::make_shared<Parameter>("Color Shift", 0.0, 0.0, 1.0)),
   colorShiftOscillator(std::make_shared<WaveformOscillator>(colorShift)),
-  audioSensitivity(std::make_shared<Parameter>("Audio Sensitivity", 2.0, 0.1, 5.0)),
+  audioSensitivity(std::make_shared<Parameter>("Audio Sensitivity", 3.0, 0.1, 8.0)),
   audioSensitivityOscillator(std::make_shared<WaveformOscillator>(audioSensitivity)),
   brightness(std::make_shared<Parameter>("Brightness", 1.5, 0.1, 3.0)),
   brightnessOscillator(std::make_shared<WaveformOscillator>(brightness)),

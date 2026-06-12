@@ -92,7 +92,12 @@ void main() {
             // Silent fallback: gentle pulsing
             amp = 0.2 + 0.15 * sin(t * 0.4 + float(i) * 1.3);
         } else {
-            amp = getBandAmplitude(i, rc) * audioSensitivity;
+            // Perceptual curve: the raw magnitude spectrum is tiny except at high
+            // volume, so a linear mapping leaves the aurora faint. Raising it to a
+            // fractional power lifts quiet/moderate signals toward visibility while
+            // still letting loud peaks reach the top of the range.
+            float band = getBandAmplitude(i, rc);
+            amp = pow(band, 0.45) * audioSensitivity;
         }
         totalAmp += amp;
 
@@ -129,8 +134,11 @@ void main() {
         color += ribbonColor;
     }
 
-    // Scale by total energy so silence = dark
-    float energyScale = clamp(totalAmp * 2.0 / float(rc), 0.0, 1.0);
+    // Scale by total energy so silence = dark. sqrt() ramps the scale up quickly
+    // from low energy so the aurora reaches full strength well before peak loudness,
+    // instead of staying dim until the signal is very loud (which made the overall
+    // response roughly quadratic).
+    float energyScale = sqrt(clamp(totalAmp * 2.0 / float(rc), 0.0, 1.0));
     color *= energyScale;
 
     // Subtle vertical shimmer (like real aurora)
