@@ -12,6 +12,7 @@ struct ParameterControlView: View {
 
     @Environment(NodeEditorViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var theme
+    @Environment(HelpGuideViewModel.self) private var helpGuide
 
     @State private var sliderValue: Float
     @State private var intValue: Int
@@ -68,6 +69,7 @@ struct ParameterControlView: View {
             selectableContainer {
                 contentStack
             }
+            .background(blendModeAnchorReporter)
             .onChange(of: oscEnabled) { _, newValue in
                 isExternallyDriven = newValue || driverActive
             }
@@ -115,6 +117,21 @@ struct ParameterControlView: View {
                 if fresh.boolValue != boolValue {
                     boolValue = fresh.boolValue
                 }
+            }
+        }
+    }
+
+    /// During inspector-attached help steps, report this row's global frame when
+    /// it's the control the current step targets, so the help overlay can point
+    /// its arrow directly at it.
+    @ViewBuilder
+    private var blendModeAnchorReporter: some View {
+        if param.name == helpGuide.inspectorTargetParamName {
+            GeometryReader { proxy in
+                Color.clear.preference(
+                    key: InspectorTargetFrameKey.self,
+                    value: proxy.frame(in: .global)
+                )
             }
         }
     }

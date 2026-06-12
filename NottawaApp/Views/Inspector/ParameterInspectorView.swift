@@ -197,6 +197,9 @@ struct ParameterInspectorView: View {
         .frame(width: viewModel.inspectorWidth)
         .background(theme.colors.backgroundSecondary)
         .accessibilityIdentifier("parameter-inspector")
+        .onPreferenceChange(InspectorTargetFrameKey.self) { frame in
+            helpGuide.inspectorTargetFrame = frame
+        }
         .onAppear {
             startRefreshTimer()
         }
@@ -446,7 +449,7 @@ struct ParameterInspectorView: View {
     }
 
     @State private var initialBlendMode: Int?
-    @State private var initialAlpha: Float?
+    @State private var initialMainStrength: Float?
 
     private func startRefreshTimer() {
         refreshTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
@@ -464,8 +467,8 @@ struct ParameterInspectorView: View {
         if initialBlendMode == nil, let mode = params.first(where: { $0.name.lowercased().contains("mode") }) {
             initialBlendMode = mode.intValue
         }
-        if initialAlpha == nil, let alpha = params.first(where: { $0.name.lowercased().contains("alpha") }) {
-            initialAlpha = alpha.value
+        if initialMainStrength == nil, let strength = params.first(where: { $0.name == "Main Input Strength" }) {
+            initialMainStrength = strength.value
         }
 
         // Detect blend mode changed from initial
@@ -475,10 +478,10 @@ struct ParameterInspectorView: View {
             helpGuide.notifyBlendModeEdited()
         }
 
-        // Detect alpha changed from initial
-        if let initial = initialAlpha,
-           let alpha = params.first(where: { $0.name.lowercased().contains("alpha") }),
-           abs(alpha.value - initial) > 0.01 {
+        // Detect the Main Input Strength slider changed from initial
+        if let initial = initialMainStrength,
+           let strength = params.first(where: { $0.name == "Main Input Strength" }),
+           abs(strength.value - initial) > 0.01 {
             helpGuide.notifyAlphaEdited()
         }
     }

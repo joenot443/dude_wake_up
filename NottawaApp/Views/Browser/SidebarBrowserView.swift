@@ -182,13 +182,13 @@ struct SidebarBrowserView: View {
         VStack(spacing: 0) {
             // Icon tab bar
             HStack(spacing: 0) {
-                SidebarTabButton(icon: "sparkles", label: "Effects",
-                                 isActive: viewModel.sidebarActiveTab == .shaders) {
-                    viewModel.sidebarActiveTab = .shaders
-                }
                 SidebarTabButton(icon: "video", label: "Sources",
                                  isActive: viewModel.sidebarActiveTab == .sources) {
                     viewModel.sidebarActiveTab = .sources
+                }
+                SidebarTabButton(icon: "sparkles", label: "Effects",
+                                 isActive: viewModel.sidebarActiveTab == .shaders) {
+                    viewModel.sidebarActiveTab = .shaders
                 }
                 SidebarTabButton(icon: "waveform.path", label: "Osc",
                                  isActive: viewModel.sidebarActiveTab == .oscillators) {

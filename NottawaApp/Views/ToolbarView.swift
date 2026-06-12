@@ -49,7 +49,7 @@ struct ToolbarView: View {
 
             // Audio panel toggle
             Button {
-                viewModel.showAudioPanel.toggle()
+                viewModel.toggleAudioPanel()
             } label: {
                 Image(systemName: "waveform")
             }

@@ -47,8 +47,8 @@ enum HelpStrings {
     static let clickBlendInstruction = "Click inside the Blend node or its preview to open its Settings pane."
 
     static let changeParametersTitle = "Blend Settings"
-    static let blendModeInstruction = "First, select a different Blend Mode to change how the images blend."
-    static let alphaModeInstruction = "Now, use the slider for the Alpha parameter to change the opacity of the blend."
+    static let blendModeInstruction = "First, select a different Mode to change how the images blend."
+    static let alphaModeInstruction = "Now, use the Main Input Strength slider to change the opacity of the blend."
     static let otherNodesInstruction = "You can click on other nodes to change their settings, too."
 
     static let deleteBlend = "Now let's delete this Blend node.\n\nSince we've already got it selected, just press the Delete key on your keyboard to remove it."

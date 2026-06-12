@@ -14,6 +14,10 @@ struct HelpOverlayView: View {
     @Environment(HelpGuideViewModel.self) private var helpGuide
     @Environment(ThemeManager.self) private var theme
 
+    // Measured size of the inspector-pointing help card, so it can be centred on
+    // the target control while staying pinned to the inspector's leading edge.
+    @State private var targetCardSize: CGSize = .zero
+
     var body: some View {
         GeometryReader { geo in
             let step = helpGuide.currentStep
@@ -47,14 +51,14 @@ struct HelpOverlayView: View {
 
                 // MARK: - Inspector-pointing steps
                 case .editBlendMode:
-                    inspectorPointingCard(
+                    inspectorTargetPointingCard(
                         in: geo,
                         title: HelpStrings.changeParametersTitle,
                         bodyText: HelpStrings.blendModeInstruction
                     )
 
                 case .editAlpha:
-                    inspectorPointingCard(
+                    inspectorTargetPointingCard(
                         in: geo,
                         title: HelpStrings.changeParametersTitle,
                         bodyText: HelpStrings.alphaModeInstruction + "\n\n" + HelpStrings.otherNodesInstruction
@@ -104,13 +108,39 @@ struct HelpOverlayView: View {
         .position(x: 200, y: geo.size.height / 2)
     }
 
-    /// Card pointing at the inspector panel (right side)
-    private func inspectorPointingCard(in geo: GeometryProxy, title: String, bodyText: String) -> some View {
-        HStack(spacing: 8) {
+    /// Card whose arrow points directly at the inspector control the current
+    /// step targets (the Mode selector, the Main Input Strength slider, …). The
+    /// control's global frame is captured by the inspector
+    /// (`HelpGuideViewModel.inspectorTargetFrame`); here we convert it into the
+    /// overlay's local space and vertically centre the card+arrow on it, while
+    /// keeping the card pinned just left of the inspector panel. Falls back to a
+    /// third of the way down until the frame is measured.
+    private func inspectorTargetPointingCard(in geo: GeometryProxy, title: String, bodyText: String) -> some View {
+        let overlayGlobal = geo.frame(in: .global)
+        let target = helpGuide.inspectorTargetFrame
+
+        let rawY = target == .zero
+            ? geo.size.height / 3
+            : target.midY - overlayGlobal.minY
+
+        let halfH = targetCardSize.height / 2
+        let y = min(max(rawY, halfH + 8), geo.size.height - halfH - 8)
+        // Pin the card's trailing edge ~8pt from the inspector's left edge.
+        let x = targetCardSize == .zero
+            ? geo.size.width - 8
+            : geo.size.width - targetCardSize.width / 2 - 8
+
+        return HStack(spacing: 8) {
             HelpStepCardView(title: title, bodyText: bodyText)
             HelpArrowView(direction: .right)
         }
-        .position(x: geo.size.width - 250, y: geo.size.height / 3)
+        .background(
+            GeometryReader { proxy in
+                Color.clear.preference(key: HelpCardSizeKey.self, value: proxy.size)
+            }
+        )
+        .onPreferenceChange(HelpCardSizeKey.self) { targetCardSize = $0 }
+        .position(x: x, y: y)
     }
 
     /// Action buttons tour card
@@ -128,6 +158,7 @@ struct HelpOverlayView: View {
             DSButton("Okay!", variant: .primary, size: .sm) {
                 helpGuide.hasSeenActionButtons = true
             }
+            .frame(maxWidth: .infinity, alignment: .center)
             .padding(.top, 4)
         }
         .padding(16)
@@ -141,7 +172,11 @@ struct HelpOverlayView: View {
                 .strokeBorder(theme.colors.accent.opacity(0.3), lineWidth: 1)
         )
         .shadow(color: .black.opacity(0.3), radius: 12, y: 4)
-        .position(x: geo.size.width / 2, y: geo.size.height / 2)
+        // Pin just above the action bar, which lives in the canvas's
+        // bottom-trailing corner with a 16pt inset and stands ~40pt tall.
+        .padding(.trailing, 16)
+        .padding(.bottom, 64)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
     }
 
     /// Share help card
@@ -198,5 +233,27 @@ struct HelpOverlayView: View {
                 .foregroundStyle(theme.colors.textSecondary)
             DSText(text, style: .caption, color: theme.colors.textSecondary)
         }
+    }
+}
+
+// MARK: - Preference Keys
+
+/// Carries the global-coordinate frame of the current step's target inspector
+/// control up to the help overlay. Only non-empty frames win the reduce so a
+/// stray default doesn't clobber a real measurement.
+struct InspectorTargetFrameKey: PreferenceKey {
+    static var defaultValue: CGRect = .zero
+    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
+        let next = nextValue()
+        if next != .zero { value = next }
+    }
+}
+
+/// Measured size of a help card, used to position it precisely.
+struct HelpCardSizeKey: PreferenceKey {
+    static var defaultValue: CGSize = .zero
+    static func reduce(value: inout CGSize, nextValue: () -> CGSize) {
+        let next = nextValue()
+        if next != .zero { value = next }
     }
 }

@@ -66,7 +66,7 @@ final class NodeEditorViewModel {
 
     // MARK: - Sidebar State
     var showSidebar = true
-    var sidebarActiveTab: SidebarTab = .shaders
+    var sidebarActiveTab: SidebarTab = .sources
     var sidebarWidth: CGFloat = 240
     var inspectorWidth: CGFloat = 350
 
@@ -168,6 +168,17 @@ final class NodeEditorViewModel {
     var isAudioActive = false
     var audioPanelHeight: CGFloat = 250
 
+    /// Toggle the audio panel's visibility. Opening the panel kicks off audio
+    /// analysis if it isn't already running, so the panel shows live data
+    /// immediately instead of an inert UI the user has to separately start.
+    func toggleAudioPanel() {
+        showAudioPanel.toggle()
+        if showAudioPanel && !engine.isAudioActive {
+            engine.toggleAudioSource()
+            isAudioActive = engine.isAudioActive
+        }
+    }
+
     // MARK: - Inspector
     var inspectorParameters: [ParameterInfo] = []
     var fileSourceState: FileSourceState?
@@ -239,6 +250,16 @@ final class NodeEditorViewModel {
             self.welcomeScreenEnabled = true
         }
         self.showWelcomeScreen = self.welcomeScreenEnabled
+
+        // Auto-start the guided help tutorial on first launch only. Gate on a
+        // one-time flag so it never re-enables itself on later launches, and skip
+        // it if the user has already completed the tutorial.
+        if UserDefaults.standard.object(forKey: "nottawa_help_autostarted") == nil {
+            UserDefaults.standard.set(true, forKey: "nottawa_help_autostarted")
+            if !UserDefaults.standard.bool(forKey: "nottawa_help_completed") {
+                self.helpEnabled = true
+            }
+        }
     }
 
     // MARK: - Initialization
