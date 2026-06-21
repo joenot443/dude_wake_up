@@ -69,6 +69,8 @@ void CommonViews::HSpacing(int n)
 bool CommonViews::ShaderParameter(std::shared_ptr<Parameter> param,
                                   std::shared_ptr<Oscillator> osc)
 {
+  // Global oscillation switch off: hide the oscillate button entirely.
+  if (!LayoutStateService::getService()->oscillationEnabled) osc = nullptr;
   ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.);
   H3Title(param->name, false);
   ImGui::SameLine();
@@ -384,6 +386,8 @@ void CommonViews::IntShaderStageParameter(std::shared_ptr<Parameter> param) {
 
 
 void CommonViews::ShaderStageParameter(std::shared_ptr<Parameter> param, std::shared_ptr<Oscillator> osc) {
+  // Global oscillation switch off: hide the oscillator readout and button.
+  if (!LayoutStateService::getService()->oscillationEnabled) osc = nullptr;
   ImGui::Columns(2, formatString("%s_param_columns", param->paramId.c_str()).c_str(), ImGuiOldColumnFlags_NoResize | ImGuiOldColumnFlags_NoBorder);
   ImGui::SetColumnWidth(0, 65);
   ImGui::SetColumnWidth(1, 135);

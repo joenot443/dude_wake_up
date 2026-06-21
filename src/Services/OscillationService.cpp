@@ -8,6 +8,7 @@
 #include "OscillationService.hpp"
 #include "WaveformOscillator.hpp"
 #include "ConfigService.hpp"
+#include "LayoutStateService.hpp"
 #include "ParameterService.hpp"
 #include "Console.hpp"
 #include "Strings.hpp"
@@ -30,6 +31,10 @@ void OscillationService::addOscillator(std::shared_ptr<Oscillator> obj) {
 }
 
 void OscillationService::tickOscillators() {
+  // Global master switch: when oscillation is disabled app-wide, freeze all
+  // parameters by skipping every oscillator tick.
+  if (!LayoutStateService::getService()->oscillationEnabled) return;
+
   for (auto & osc : enabledOscillators_) {
     osc->tick();
   }

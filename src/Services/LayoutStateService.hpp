@@ -22,6 +22,7 @@ static const std::string OutputWindowUpdatesAutomaticallyJsonKey = "OutputWindow
 static const std::string LibraryPathJsonKey = "libraryPath";
 static const std::string ColorHistoryJsonKey = "colorHistory";
 static const std::string MidiEnabledJsonKey = "midiEnabled";
+static const std::string OscillationEnabledJsonKey = "oscillationEnabled";
 static const std::string StageModeEnabled = "stageModeEnabled";
 static const std::string ResolutionJsonKey = "resolution";
 static const std::string ShaderInfoEnabledJsonKey = "shaderInfoEnabled";
@@ -43,7 +44,11 @@ public:
   bool showAudioSettings = false;
   
   bool midiEnabled = false;
-  
+
+  // Global master switch for parameter oscillation. When false, no oscillators
+  // tick (values freeze) and the per-parameter oscillate buttons are hidden.
+  bool oscillationEnabled = true;
+
   bool stageModeEnabled = false;
   
   

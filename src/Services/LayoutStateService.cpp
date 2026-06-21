@@ -20,6 +20,7 @@ json LayoutStateService::config() {
   j[LibraryPathJsonKey] = libraryPath;
   j[ColorHistoryJsonKey] = colorHistory;
   j[MidiEnabledJsonKey] = midiEnabled;
+  j[OscillationEnabledJsonKey] = oscillationEnabled;
   j[StageModeEnabled] = stageModeEnabled;
   j[PortraitJsonKey] = portrait;
   j[AllParametersInStageMode] = allParametersInStageModeEnabled;
@@ -40,6 +41,10 @@ void LayoutStateService::loadConfig(json j) {
   }
   libraryPath = j[LibraryPathJsonKey];
   midiEnabled = j[MidiEnabledJsonKey];
+  // Back-compat: key absent in configs saved before the global toggle existed.
+  if (!j[OscillationEnabledJsonKey].is_null()) {
+    oscillationEnabled = j[OscillationEnabledJsonKey];
+  }
 //  stageModeEnabled = j[StageModeEnabled];
   portrait = j[PortraitJsonKey];
   outputWindowUpdatesAutomatically = j[OutputWindowUpdatesAutomaticallyJsonKey];

@@ -446,7 +446,13 @@ void MainStageView::drawMenu()
       {
         LayoutStateService::getService()->midiEnabled = midiEnabled;
       }
-      
+
+      bool oscillationEnabled = LayoutStateService::getService()->oscillationEnabled;
+      if (ImGui::MenuItem("Enable Oscillation", nullptr, &oscillationEnabled))
+      {
+        LayoutStateService::getService()->oscillationEnabled = oscillationEnabled;
+      }
+
       bool flowEnabled = LayoutStateService::getService()->flowEnabled;
       if (ImGui::MenuItem("Animate Connection Flow", nullptr, &flowEnabled))
       {
