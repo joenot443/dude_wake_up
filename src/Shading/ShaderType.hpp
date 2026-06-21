@@ -187,6 +187,10 @@ enum ShaderType {
   ShaderTypeSolarWave,
   ShaderTypeLighten,
   ShaderTypeDarken,
+  ShaderTypeIridescent,
+  ShaderTypeDiscoSun,
+  ShaderTypeMarbleCaves,
+  ShaderTypeSilk,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -330,6 +334,14 @@ static std::vector<ShaderType> AllShaderTypes() {
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) { // ShaderNames
+    case ShaderTypeSilk:
+      return "Silk";
+    case ShaderTypeMarbleCaves:
+      return "MarbleCaves";
+    case ShaderTypeDiscoSun:
+      return "DiscoSun";
+    case ShaderTypeIridescent:
+      return "Iridescent";
     case ShaderTypeDarken:
       return "Darken";
     case ShaderTypeLighten:

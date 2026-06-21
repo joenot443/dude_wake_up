@@ -8,6 +8,10 @@
 #include "ShaderChainerService.hpp"
 #include "Models/Strand.hpp"
 #include "AsciiShader.hpp"
+#include "SilkShader.hpp"
+#include "MarbleCavesShader.hpp"
+#include "DiscoSunShader.hpp"
+#include "IridescentShader.hpp"
 #include "DarkenShader.hpp"
 #include "LightenShader.hpp"
 #include "SolarWaveShader.hpp"
@@ -1088,6 +1092,30 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeSilk: {
+      auto settings = new SilkSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<SilkShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeMarbleCaves: {
+      auto settings = new MarbleCavesSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<MarbleCavesShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeDiscoSun: {
+      auto settings = new DiscoSunSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<DiscoSunShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeIridescent: {
+      auto settings = new IridescentSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<IridescentShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeDarken: {
       auto settings = new DarkenSettings(shaderId, shaderJson);
       auto shader = std::make_shared<DarkenShader>(settings);

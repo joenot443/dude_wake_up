@@ -4,6 +4,10 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "SilkShader.hpp"
+#include "MarbleCavesShader.hpp"
+#include "DiscoSunShader.hpp"
+#include "IridescentShader.hpp"
 #include "AuroraShader.hpp"
 #include "CyberWarehouseShader.hpp"
 #include "AudioGraphShader.hpp"
@@ -196,6 +200,10 @@ enum ShaderSourceType {
   ShaderSource_CyberWarehouse, //source enum,
   ShaderSource_AudioAurora, //source enum,
   ShaderSource_AudioPulseGrid, //source enum,
+  ShaderSource_Iridescent, //source enum,
+  ShaderSource_DiscoSun, //source enum,
+  ShaderSource_MarbleCaves, //source enum,
+  ShaderSource_Silk, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -286,11 +294,23 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_CyberWarehouse, // Available
   ShaderSource_AudioAurora, // Available
   ShaderSource_AudioPulseGrid, // Available
+  ShaderSource_Iridescent, // Available
+  ShaderSource_DiscoSun, // Available
+  ShaderSource_MarbleCaves, // Available
+  ShaderSource_Silk, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
       // shaderTypeForShaderSourceType
+  case ShaderSource_Silk: //type enum
+    return ShaderTypeSilk;
+  case ShaderSource_MarbleCaves: //type enum
+    return ShaderTypeMarbleCaves;
+  case ShaderSource_DiscoSun: //type enum
+    return ShaderTypeDiscoSun;
+  case ShaderSource_Iridescent: //type enum
+    return ShaderTypeIridescent;
   case ShaderSource_CyberWarehouse: //type enum
     return ShaderTypeCyberWarehouse;
   case ShaderSource_Aurora: //type enum
@@ -615,6 +635,14 @@ static ShaderSourceType shaderSourceTypeForShaderType(ShaderType type) {
       return ShaderSource_audioMountains;
     case ShaderTypeGalaxy:
       return ShaderSource_galaxy;
+    case ShaderTypeIridescent:
+      return ShaderSource_Iridescent;
+    case ShaderTypeDiscoSun:
+      return ShaderSource_DiscoSun;
+    case ShaderTypeMarbleCaves:
+      return ShaderSource_MarbleCaves;
+    case ShaderTypeSilk:
+      return ShaderSource_Silk;
     default:
       return ShaderSource_empty; // Default case
   }
@@ -670,6 +698,7 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     case ShaderSource_Companions:
     case ShaderSource_Flaming:
     case ShaderSource_Glassy:
+    case ShaderSource_MarbleCaves:
       return "Scenic";
       
       // Textured
@@ -721,6 +750,9 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     case ShaderSource_Accretion:
     case ShaderSource_Synthfly:
     case ShaderSource_Synthwave:
+    case ShaderSource_Iridescent:
+    case ShaderSource_DiscoSun:
+    case ShaderSource_Silk:
       return "Psychedelic";
     default:
       return "Unknown";
@@ -748,6 +780,30 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_Silk: { // Settings
+      auto settings = new SilkSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<SilkShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_MarbleCaves: { // Settings
+      auto settings = new MarbleCavesSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<MarbleCavesShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_DiscoSun: { // Settings
+      auto settings = new DiscoSunSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<DiscoSunShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Iridescent: { // Settings
+      auto settings = new IridescentSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<IridescentShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_CyberWarehouse: { // Settings
       auto settings = new CyberWarehouseSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<CyberWarehouseShader>(settings);
