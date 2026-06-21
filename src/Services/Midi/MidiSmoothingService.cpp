@@ -8,6 +8,9 @@
 #include "ofUtils.h"
 
 namespace {
+// Global upper bound on MIDI smoothing duration (4 seconds).
+constexpr float kMaxDurationMs = 4000.0f;
+
 inline float easeOutCubic(float t) {
   if (t <= 0.0f) return 0.0f;
   if (t >= 1.0f) return 1.0f;
@@ -29,6 +32,7 @@ void MidiSmoothingService::setEnabled(bool e) {
 
 void MidiSmoothingService::setDurationMs(float ms) {
   if (ms < 0.0f) ms = 0.0f;
+  if (ms > kMaxDurationMs) ms = kMaxDurationMs;
   durationMs = ms;
 }
 
@@ -108,5 +112,6 @@ void MidiSmoothingService::loadConfig(json j) {
   if (j.contains("durationMs") && j["durationMs"].is_number()) {
     durationMs = j["durationMs"].get<float>();
     if (durationMs < 0.0f) durationMs = 0.0f;
+    if (durationMs > kMaxDurationMs) durationMs = kMaxDurationMs;
   }
 }

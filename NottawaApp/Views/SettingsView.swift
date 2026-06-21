@@ -112,12 +112,14 @@ struct SettingsView: View {
 
                 HStack {
                     Text("Duration")
-                    Slider(value: $midiSmoothingDurationMs, in: 0...500)
+                    Slider(value: $midiSmoothingDurationMs, in: 0...4000)
                         .disabled(!midiSmoothingEnabled)
                         .onChange(of: midiSmoothingDurationMs) { _, newValue in
                             NottawaEngine.shared.midiSmoothingDurationMs = Float(newValue)
                         }
-                    Text(String(format: "%.0f ms", midiSmoothingDurationMs))
+                    Text(midiSmoothingDurationMs >= 1000
+                         ? String(format: "%.2f s", midiSmoothingDurationMs / 1000)
+                         : String(format: "%.0f ms", midiSmoothingDurationMs))
                         .font(.caption)
                         .monospacedDigit()
                         .foregroundStyle(.secondary)
