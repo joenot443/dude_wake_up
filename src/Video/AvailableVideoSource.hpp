@@ -25,7 +25,7 @@ public:
   std::string category = "";
   VideoSourceType type;
   std::shared_ptr<ofTexture> preview;
-  bool hasPreview;
+  bool hasPreview = false;
 };
 
 class AvailableVideoSourceWebcam : public AvailableVideoSource
@@ -78,6 +78,9 @@ public:
   ShaderSourceType shaderType;
 
 private:
+  // Number of times we've tried to build this preview. Used to bound retries
+  // when a render comes back blank (e.g. a texture/GL resource wasn't ready).
+  int previewAttempts = 0;
 };
 
 class AvailableVideoSourceLibrary : public AvailableVideoSource
