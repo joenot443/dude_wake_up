@@ -4,6 +4,8 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "MarbleFlowShader.hpp"
+#include "GemfieldShader.hpp"
 #include "SilkShader.hpp"
 #include "MarbleCavesShader.hpp"
 #include "DiscoSunShader.hpp"
@@ -204,6 +206,8 @@ enum ShaderSourceType {
   ShaderSource_DiscoSun, //source enum,
   ShaderSource_MarbleCaves, //source enum,
   ShaderSource_Silk, //source enum,
+  ShaderSource_Gemfield, //source enum,
+  ShaderSource_MarbleFlow, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -298,11 +302,17 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_DiscoSun, // Available
   ShaderSource_MarbleCaves, // Available
   ShaderSource_Silk, // Available
+  ShaderSource_Gemfield, // Available
+  ShaderSource_MarbleFlow, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
       // shaderTypeForShaderSourceType
+  case ShaderSource_MarbleFlow: //type enum
+    return ShaderTypeMarbleFlow;
+  case ShaderSource_Gemfield: //type enum
+    return ShaderTypeGemfield;
   case ShaderSource_Silk: //type enum
     return ShaderTypeSilk;
   case ShaderSource_MarbleCaves: //type enum
@@ -643,6 +653,10 @@ static ShaderSourceType shaderSourceTypeForShaderType(ShaderType type) {
       return ShaderSource_MarbleCaves;
     case ShaderTypeSilk:
       return ShaderSource_Silk;
+    case ShaderTypeGemfield:
+      return ShaderSource_Gemfield;
+    case ShaderTypeMarbleFlow:
+      return ShaderSource_MarbleFlow;
     default:
       return ShaderSource_empty; // Default case
   }
@@ -753,6 +767,8 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     case ShaderSource_Iridescent:
     case ShaderSource_DiscoSun:
     case ShaderSource_Silk:
+    case ShaderSource_Gemfield:
+    case ShaderSource_MarbleFlow:
       return "Psychedelic";
     default:
       return "Unknown";
@@ -780,6 +796,18 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_MarbleFlow: { // Settings
+      auto settings = new MarbleFlowSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<MarbleFlowShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Gemfield: { // Settings
+      auto settings = new GemfieldSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<GemfieldShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_Silk: { // Settings
       auto settings = new SilkSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<SilkShader>(settings);

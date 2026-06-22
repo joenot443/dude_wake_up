@@ -8,6 +8,8 @@
 #include "ShaderChainerService.hpp"
 #include "Models/Strand.hpp"
 #include "AsciiShader.hpp"
+#include "MarbleFlowShader.hpp"
+#include "GemfieldShader.hpp"
 #include "SilkShader.hpp"
 #include "MarbleCavesShader.hpp"
 #include "DiscoSunShader.hpp"
@@ -1092,6 +1094,18 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeMarbleFlow: {
+      auto settings = new MarbleFlowSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<MarbleFlowShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeGemfield: {
+      auto settings = new GemfieldSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<GemfieldShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeSilk: {
       auto settings = new SilkSettings(shaderId, shaderJson);
       auto shader = std::make_shared<SilkShader>(settings);
