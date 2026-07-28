@@ -8,6 +8,8 @@
 #include "ShaderChainerService.hpp"
 #include "Models/Strand.hpp"
 #include "AsciiShader.hpp"
+#include "RisoColumnsShader.hpp"
+#include "FerroShader.hpp"
 #include "MarbleFlowShader.hpp"
 #include "GemfieldShader.hpp"
 #include "SilkShader.hpp"
@@ -142,6 +144,8 @@
 #include "DancingSquaresShader.hpp"
 #include "LumaMaskMakerShader.hpp"
 #include "MaskShader.hpp"
+#include "MatchBlendShader.hpp"
+#include "MaskEngineShader.hpp"
 #include "CrosshatchShader.hpp"
 #include "HalfToneShader.hpp"
 #include "AudioBumperShader.hpp"
@@ -1094,6 +1098,18 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeRisoColumns: {
+      auto settings = new RisoColumnsSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<RisoColumnsShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeFerro: {
+      auto settings = new FerroSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<FerroShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeMarbleFlow: {
       auto settings = new MarbleFlowSettings(shaderId, shaderJson);
       auto shader = std::make_shared<MarbleFlowShader>(settings);
@@ -1913,6 +1929,20 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
     {
       auto settings = new MaskSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<MaskShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeMatchBlend:
+    {
+      auto settings = new MatchBlendSettings(shaderId, shaderJson, shaderTypeName(shaderType));
+      auto shader = std::make_shared<MatchBlendShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeMaskEngine:
+    {
+      auto settings = new MaskEngineSettings(shaderId, shaderJson, shaderTypeName(shaderType));
+      auto shader = std::make_shared<MaskEngineShader>(settings);
       shader->setup();
       return shader;
     }

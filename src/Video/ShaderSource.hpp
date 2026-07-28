@@ -4,6 +4,8 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "RisoColumnsShader.hpp"
+#include "FerroShader.hpp"
 #include "MarbleFlowShader.hpp"
 #include "GemfieldShader.hpp"
 #include "SilkShader.hpp"
@@ -208,6 +210,8 @@ enum ShaderSourceType {
   ShaderSource_Silk, //source enum,
   ShaderSource_Gemfield, //source enum,
   ShaderSource_MarbleFlow, //source enum,
+  ShaderSource_Ferro, //source enum,
+  ShaderSource_RisoColumns, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -304,11 +308,17 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_Silk, // Available
   ShaderSource_Gemfield, // Available
   ShaderSource_MarbleFlow, // Available
+  ShaderSource_Ferro, // Available
+  ShaderSource_RisoColumns, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
       // shaderTypeForShaderSourceType
+  case ShaderSource_RisoColumns: //type enum
+    return ShaderTypeRisoColumns;
+  case ShaderSource_Ferro: //type enum
+    return ShaderTypeFerro;
   case ShaderSource_MarbleFlow: //type enum
     return ShaderTypeMarbleFlow;
   case ShaderSource_Gemfield: //type enum
@@ -657,6 +667,10 @@ static ShaderSourceType shaderSourceTypeForShaderType(ShaderType type) {
       return ShaderSource_Gemfield;
     case ShaderTypeMarbleFlow:
       return ShaderSource_MarbleFlow;
+    case ShaderTypeFerro:
+      return ShaderSource_Ferro;
+    case ShaderTypeRisoColumns:
+      return ShaderSource_RisoColumns;
     default:
       return ShaderSource_empty; // Default case
   }
@@ -769,6 +783,8 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     case ShaderSource_Silk:
     case ShaderSource_Gemfield:
     case ShaderSource_MarbleFlow:
+    case ShaderSource_Ferro:
+    case ShaderSource_RisoColumns:
       return "Psychedelic";
     default:
       return "Unknown";
@@ -796,6 +812,18 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_RisoColumns: { // Settings
+      auto settings = new RisoColumnsSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<RisoColumnsShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Ferro: { // Settings
+      auto settings = new FerroSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<FerroShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_MarbleFlow: { // Settings
       auto settings = new MarbleFlowSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<MarbleFlowShader>(settings);

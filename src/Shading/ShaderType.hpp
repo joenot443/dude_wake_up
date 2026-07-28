@@ -193,6 +193,10 @@ enum ShaderType {
   ShaderTypeSilk,
   ShaderTypeGemfield,
   ShaderTypeMarbleFlow,
+  ShaderTypeFerro,
+  ShaderTypeMatchBlend,
+  ShaderTypeMaskEngine,
+  ShaderTypeRisoColumns,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -229,7 +233,9 @@ static const ShaderType AvailableMaskShaderTypes[] = {
   ShaderTypeMask,
   ShaderTypeTextureMask,
   ShaderTypeLumaMaskMaker,
-  ShaderTypeColorKeyMaskMaker
+  ShaderTypeColorKeyMaskMaker,
+  ShaderTypeMatchBlend,
+  ShaderTypeMaskEngine
 };
 
 static const ShaderType AvailableGlitchShaderTypes[] = {
@@ -336,6 +342,10 @@ static std::vector<ShaderType> AllShaderTypes() {
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) { // ShaderNames
+    case ShaderTypeRisoColumns:
+      return "RisoColumns";
+    case ShaderTypeFerro:
+      return "Ferro";
     case ShaderTypeMarbleFlow:
       return "MarbleFlow";
     case ShaderTypeGemfield:
@@ -604,6 +614,10 @@ static std::string shaderTypeName(ShaderType type) {
       return "Luma Mask";
     case ShaderTypeMask:
       return "Masker";
+    case ShaderTypeMatchBlend:
+      return "Match Blend";
+    case ShaderTypeMaskEngine:
+      return "Mask";
     case ShaderTypeCrosshatch:
       return "Crosshatch";
     case ShaderTypeHalfTone:

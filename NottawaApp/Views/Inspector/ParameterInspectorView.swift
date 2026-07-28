@@ -242,6 +242,12 @@ struct ParameterInspectorView: View {
         return raw == 80
     }
 
+    private var isSelectedNodeMaskEngine: Bool {
+        guard let node = selectedNode,
+              case .shader(let raw) = node.nodeType else { return false }
+        return raw == 182 // ShaderTypeMaskEngine
+    }
+
     private func isFeedbackShader(_ node: NodeModel) -> Bool {
         if case .shader(let raw) = node.nodeType { return raw == 7 }
         return false
@@ -359,6 +365,17 @@ struct ParameterInspectorView: View {
             .padding(.vertical, 8)
 
         theme.colors.border.frame(height: 1)
+
+        // Mask shader: preset pane (Luma / Color Key / Match Blend) drives the
+        // Source Mode; mode-specific params are shown/hidden via hiddenFromNode.
+        if isSelectedNodeMaskEngine,
+           let sourceMode = viewModel.inspectorParameters.first(where: { $0.name == "Source Mode" }) {
+            MaskEnginePresetPaneView(
+                sourceModeParam: sourceMode,
+                outputModeParam: viewModel.inspectorParameters.first(where: { $0.name == "Output Mode" })
+            )
+            theme.colors.border.frame(height: 1)
+        }
 
         // Text source controls (text field, font size)
         if let textState = viewModel.textSourceState {
@@ -489,6 +506,52 @@ struct ParameterInspectorView: View {
     private func stopRefreshTimer() {
         refreshTimer?.invalidate()
         refreshTimer = nil
+    }
+}
+
+// MARK: - Mask Engine Preset Pane
+
+/// Three-card preset selector for the unified Mask shader. Sets the Source
+/// Mode (and a sensible default Output Mode) via the bridge; the C++ shader's
+/// `hiddenFromNode` flags then reveal the params relevant to the chosen mode.
+private struct MaskEnginePresetPaneView: View {
+    @Environment(ThemeManager.self) private var theme
+    @Environment(NodeEditorViewModel.self) private var viewModel
+
+    let sourceModeParam: ParameterInfo
+    let outputModeParam: ParameterInfo?
+
+    private let presets = ["Luma", "Color Key", "Match Blend"]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Preset")
+                .font(.caption)
+                .foregroundStyle(theme.colors.textSecondary)
+            HStack(spacing: 6) {
+                ForEach(Array(presets.enumerated()), id: \.offset) { idx, label in
+                    DSButton(
+                        label,
+                        variant: sourceModeParam.intValue == idx ? .primary : .secondary,
+                        size: .sm,
+                        fullWidth: true
+                    ) {
+                        applyPreset(idx)
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+    }
+
+    private func applyPreset(_ idx: Int) {
+        NottawaEngine.shared.setParameterInt(paramId: sourceModeParam.id, value: idx)
+        // Default output: Blend (1) for Match Blend, Mask (0) otherwise.
+        if let outputModeParam {
+            NottawaEngine.shared.setParameterInt(paramId: outputModeParam.id, value: idx == 2 ? 1 : 0)
+        }
+        viewModel.refreshInspector()
     }
 }
 
