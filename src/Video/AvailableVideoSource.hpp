@@ -78,9 +78,6 @@ public:
   ShaderSourceType shaderType;
 
 private:
-  // Number of times we've tried to build this preview. Used to bound retries
-  // when a render comes back blank (e.g. a texture/GL resource wasn't ready).
-  int previewAttempts = 0;
 };
 
 class AvailableVideoSourceLibrary : public AvailableVideoSource

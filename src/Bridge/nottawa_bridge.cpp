@@ -2200,6 +2200,7 @@ struct PreviewInstance {
   std::shared_ptr<Shader> shader;           // The effect shader (null for source previews)
   std::shared_ptr<VideoSource> source;      // The source (shared plasma or standalone)
   bool isSourceOnly = false;                // True if this is a source-only preview
+  int loadRetries = 0;                      // Reload attempts after a transient compile failure
 };
 
 static std::unordered_map<std::string, PreviewInstance> previewInstances;
@@ -2464,8 +2465,21 @@ void ntw_tick_previews(void) {
       auto& canvas = shaderSrc->canvas;
       if (!fbo || !fbo->isAllocated() || !canvas || !canvas->isAllocated()) continue;
 
-      // Verify GL shader program is still valid and textures have valid IDs
-      if (!shaderSrc->shader->shader.isLoaded()) continue;
+      // The macOS GL driver intermittently fails a shader compile/link
+      // ("Compiled shader was corrupt") under the load of the browser's
+      // preview preload storm — the shader source is valid, the link just
+      // failed transiently. Retry the load from this (clean) tick context; it
+      // succeeds within a few frames, before the snapshot is captured. Bounded
+      // so a genuinely-broken shader doesn't reload forever.
+      if (!shaderSrc->shader->shader.isLoaded()) {
+        if (inst.loadRetries < 60) {
+          inst.loadRetries++;
+          // Reload only the GL program (not setup(), which can reallocate the
+          // source's FBOs back to full resolution).
+          shaderSrc->shader->shader.load("shaders/" + shaderSrc->shader->fileName());
+        }
+        if (!shaderSrc->shader->shader.isLoaded()) continue;
+      }
       if (fbo->getTexture().getTextureData().textureID == 0) continue;
       if (canvas->getTexture().getTextureData().textureID == 0) continue;
 
@@ -2482,6 +2496,12 @@ void ntw_tick_previews(void) {
 
       resultFrame = fbo;
     } else if (inst.shader) {
+      // Same transient-compile recovery as the source branch above.
+      if (!inst.shader->shader.isLoaded() && inst.loadRetries < 60) {
+        inst.loadRetries++;
+        inst.shader->shader.load("shaders/" + inst.shader->fileName());
+      }
+
       auto lastFrame = inst.shader->lastFrame;
       bool canRender = effectInputFrame && effectInputFrame->isAllocated()
                        && lastFrame && lastFrame->isAllocated()

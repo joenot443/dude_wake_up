@@ -9,9 +9,7 @@
 #include "ofAVFoundationPlayer.h"
 #include "AvailableVideoSource.hpp"
 #include "ShaderChainerService.hpp"
-#include "TimeService.hpp"
 #include "UUID.hpp"
-#include <algorithm>
 #include <stdio.h>
 
 AvailableVideoSource::AvailableVideoSource(std::string sourceName,
@@ -22,71 +20,16 @@ AvailableVideoSource::AvailableVideoSource(std::string sourceName,
   preview = std::make_shared<ofTexture>();
 }
 
-// Returns true if the FBO is essentially black/empty. Sampled sparsely so it's
-// cheap to call at preview-generation time.
-static bool previewLooksBlank(const std::shared_ptr<ofFbo> &fbo) {
-  if (fbo == nullptr || !fbo->isAllocated()) return true;
-  ofPixels pixels;
-  fbo->readToPixels(pixels);
-  if (!pixels.isAllocated()) return true;
-  size_t numPixels = static_cast<size_t>(pixels.getWidth()) * pixels.getHeight();
-  int ch = pixels.getNumChannels();
-  if (numPixels == 0 || ch < 3) return true;
-  const unsigned char *d = pixels.getData();
-  size_t step = std::max<size_t>(1, numPixels / 2000); // sample ~2000 pixels
-  for (size_t p = 0; p < numPixels; p += step) {
-    const unsigned char *px = d + p * ch;
-    if (px[0] > 10 || px[1] > 10 || px[2] > 10) return false;
-  }
-  return true;
-}
-
 void AvailableVideoSourceShader::generatePreview()  {
-  previewAttempts++;
-
-  // Maximum number of (lazy) retries before we give up and cache whatever we
-  // get — keeps a genuinely-dark source from re-rendering every browser frame.
-  static const int kMaxPreviewAttempts = 8;
-
   std::shared_ptr<ofFbo> fbo = std::make_shared<ofFbo>();
   std::shared_ptr<ofFbo> blankFbo = std::make_shared<ofFbo>();
   fbo->allocate(426, 240, GL_RGBA);
   blankFbo->allocate(426, 240, GL_RGBA);
 
-  // Clear both FBOs so a source that samples its input doesn't read garbage.
-  blankFbo->begin();
-  ofClear(0, 0, 0, 255);
-  blankFbo->end();
-  fbo->begin();
-  ofClear(0, 0, 0, 255);
-  fbo->end();
-
   auto shader = ShaderChainerService::getService()->shaderForType(
       shaderTypeForShaderSourceType(shaderType), UUID::generateUUID(), 0);
   shader->setup();
-
-  // Render at a fixed, representative time rather than the live value (which is
-  // ~0 when previews are first built at startup), and step a few warm-up frames
-  // so time-animated and phase-accumulating sources show a developed image.
-  // The global time is restored immediately afterward; this runs synchronously.
-  auto timeService = TimeService::getService();
-  float savedTime = timeService->timeParam->value;
-  const float previewBaseTime = 12.0f;
-  const int warmupFrames = 4;
-  for (int i = 0; i < warmupFrames; i++) {
-    timeService->timeParam->value = previewBaseTime + i * (1.0f / 60.0f);
-    shader->shade(blankFbo, fbo);
-  }
-  timeService->timeParam->value = savedTime;
-
-  // If the render is still blank (e.g. a texture or GL resource wasn't ready),
-  // don't cache it — leave hasPreview false so the browser retries on a later
-  // frame once things have warmed up. Bounded by kMaxPreviewAttempts.
-  if (previewLooksBlank(fbo) && previewAttempts < kMaxPreviewAttempts) {
-    hasPreview = false;
-    return;
-  }
-
+  shader->shade(blankFbo, fbo);
   fbo->begin();
   ofSetColor(0, 0, 0, 128);
   ofDrawRectangle(0, 0, 426, 240);
