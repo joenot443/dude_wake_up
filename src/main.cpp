@@ -44,8 +44,15 @@ using json = nlohmann::json;
 // so they can be shared between dude_wake_up and NottawaApp targets.
 
 void setupDirectories() {
+#if defined(TARGET_WIN32)
+  // Windows: data ships as bin/data next to the executable. Build step
+  // (packaging/windows/build_release.ps1 + vcxproj post-build) robocopies
+  // it there. Empty string leaves OF's default "bin/data" resolution.
+  ofSetDataPathRoot("data/");
+#else
   ofSetDataPathRoot("../Resources/data/");
-  
+#endif
+
   auto appSupportPath = ConfigService::appSupportFilePath();
   auto libraryPath = appSupportPath + "/nottawa";
   auto sentryPath = libraryPath + "/sentry";

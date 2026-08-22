@@ -1,3 +1,7 @@
+// Windows portability: entire body gated. Project excludes this file from Windows
+// builds; this gate is belt-and-braces so an accidental compile fails cleanly.
+#ifdef __APPLE__
+
 #include "AVFRecorderWrapper.hpp"
 #include "AVFRecorder.h"
 #include "ofLog.h"
@@ -463,3 +467,5 @@ float AVFRecorderWrapper::getElapsedTime() const {
   auto elapsedMicros = std::chrono::duration_cast<std::chrono::microseconds>(now - recordingStartTime).count();
   return static_cast<float>(elapsedMicros) / 1000000.0f;
 }
+
+#endif // __APPLE__

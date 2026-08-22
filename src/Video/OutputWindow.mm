@@ -1,3 +1,7 @@
+// Windows portability: entire body gated. Project excludes this file from Windows
+// builds; this gate is belt-and-braces so an accidental compile fails cleanly.
+#ifdef __APPLE__
+
 //
 //  OutputWindow.cpp
 //  dude_wake_up
@@ -223,3 +227,5 @@ void OutputWindow::keyPressed(int key) {
     drawFPS = true;
   }
 }
+
+#endif // __APPLE__

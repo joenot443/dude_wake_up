@@ -1,3 +1,7 @@
+// Windows portability: entire body gated. Project excludes this file from Windows
+// builds; this gate is belt-and-braces so an accidental compile fails cleanly.
+#ifdef __APPLE__
+
 //
 //  SystemAudioSource.mm
 //  dude_wake_up
@@ -410,3 +414,5 @@ void SystemAudioSource::load(json j) {
         targetPID = j["targetPID"];
     }
 }
+
+#endif // __APPLE__
