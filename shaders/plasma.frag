@@ -1,7 +1,7 @@
 #version 150
 
 // Input uniforms
-uniform sampler2DRect tex;
+uniform sampler2D tex;
 uniform float time;
 uniform float speed;
 uniform float color;

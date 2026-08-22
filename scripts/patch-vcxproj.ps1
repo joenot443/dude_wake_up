@@ -197,6 +197,32 @@ function Ensure-DefinesAndFlags {
         }
         # Leave empty by default; only set if you confirm OF ships plain `main`.
         if (-not $ep.InnerText) { $ep.InnerText = 'mainCRTStartup' }
+
+        # Manifest > AdditionalManifestFiles — DPI awareness, longPathAware,
+        # UTF-8 code page, supportedOS. See app.manifest at repo root.
+        $mf = $idg.SelectSingleNode('m:Manifest', $ns)
+        if (-not $mf) {
+            $mf = $xml.CreateElement('Manifest', $ns.LookupNamespace('m'))
+            [void]$idg.AppendChild($mf)
+        }
+        $mfa = $mf.SelectSingleNode('m:AdditionalManifestFiles', $ns)
+        if (-not $mfa) {
+            $mfa = $xml.CreateElement('AdditionalManifestFiles', $ns.LookupNamespace('m'))
+            [void]$mf.AppendChild($mfa)
+        }
+        $manifestPath = '$(SolutionDir)..\..\..\app.manifest'
+        $existingMf = $mfa.InnerText
+        if ($existingMf -notlike "*$manifestPath*") {
+            if ($existingMf -and $existingMf -notmatch ';\s*$') { $existingMf += ';' }
+            $mfa.InnerText = $existingMf + $manifestPath
+        }
+        # Ensure we don't emit an auto-generated manifest that would conflict.
+        $gm = $mf.SelectSingleNode('m:GenerateManifest', $ns)
+        if (-not $gm) {
+            $gm = $xml.CreateElement('GenerateManifest', $ns.LookupNamespace('m'))
+            [void]$mf.AppendChild($gm)
+        }
+        $gm.InnerText = 'true'
     }
 }
 

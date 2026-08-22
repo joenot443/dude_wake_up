@@ -1,6 +1,6 @@
 #version 150
 
-uniform sampler2DRect tex;
+uniform sampler2D tex;
 uniform vec2 coord;
 out vec4 outputColor;
 

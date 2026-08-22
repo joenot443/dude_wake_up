@@ -84,14 +84,26 @@ silently dropped. All logging goes through `ofLog*` which writes to
 ## DPI awareness and long paths
 
 **Manifest, not runtime API.** Per-monitor V2 DPI awareness is declared
-in `app.manifest` at the repo root (Phase 2, M2.3). Declaring it via
+in `app.manifest` at the repo root. Declaring it via
 `SetProcessDpiAwarenessContext` at runtime is too late — top-level HWND
-creation before the call happens at the wrong DPI.
+creation before the call happens at the wrong DPI. Manifest also
+declares `PerMonitor` V1 as fallback for pre-1703 systems.
 
-**Long path awareness.** Same manifest, `<ws2:longPathAware>true</ws2:longPathAware>`.
+**Long path awareness.** Same manifest, `<longPathAware>true</longPathAware>`.
 Users still need `HKLM\SYSTEM\CurrentControlSet\Control\FileSystem\LongPathsEnabled`
-set (Win 10 1607+); the installer should nudge them or the installer's
-default install location should stay short.
+set (Win 10 1607+); the installer defaults to a short path under
+`%LOCALAPPDATA%\Programs\Nottawa` to sidestep the requirement.
+
+**Active code page = UTF-8.** Manifest also sets `<activeCodePage>UTF-8`
+(Win 10 1903+). Makes any A-suffix Win32 call that leaks through — plus
+`_mkdir`, `fopen`, etc. — treat their input as UTF-8 bytes. Older
+Windows silently ignores the setting; the `Utf8Path.hpp` helpers cover
+that gap by always going through the W-suffix APIs anyway.
+
+**Manifest gets wired in via `scripts/patch-vcxproj.ps1`** into
+`<Manifest><AdditionalManifestFiles>...\app.manifest</AdditionalManifestFiles></Manifest>`
+on every ItemDefinitionGroup. Do NOT `#include` the manifest via
+`.vcxproj`'s `<ClInclude>` — that's for headers.
 
 ## sRGB and framebuffer color space
 

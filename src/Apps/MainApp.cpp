@@ -33,6 +33,31 @@
 #include "../Services/SparkleUpdater.h"
 #include "URLSchemeHandler.h"
 
+static void logGLEnvironmentOnce() {
+  static bool logged = false;
+  if (logged) return;
+  logged = true;
+
+  const char* vendor   = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+  const char* renderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+  const char* version  = reinterpret_cast<const char*>(glGetString(GL_VERSION));
+  const char* glsl     = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
+  ofLogNotice("GL") << "vendor="   << (vendor   ? vendor   : "(null)");
+  ofLogNotice("GL") << "renderer=" << (renderer ? renderer : "(null)");
+  ofLogNotice("GL") << "version="  << (version  ? version  : "(null)");
+  ofLogNotice("GL") << "glsl="     << (glsl     ? glsl     : "(null)");
+
+  GLint format = 0, type = 0;
+  glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &format);
+  glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &type);
+  ofLogNotice("GL") << "impl_color_read_format=0x" << std::hex << format
+                    << " type=0x" << type << std::dec;
+
+  GLboolean srgb = GL_FALSE;
+  glGetBooleanv(GL_FRAMEBUFFER_SRGB, &srgb);
+  ofLogNotice("GL") << "framebuffer_srgb=" << (srgb ? "ENABLED" : "disabled");
+}
+
 void MainApp::setup()
 {
   glEnable(GL_DEPTH_TEST);
@@ -41,6 +66,7 @@ void MainApp::setup()
   ofDisableArbTex();
   ofEnableAlphaBlending();
   ofDisableDepthTest();
+  logGLEnvironmentOnce();
   ModulationService::getService();
   AudioSourceService::getService();
   TextureService::getService();

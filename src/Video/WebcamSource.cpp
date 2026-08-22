@@ -15,13 +15,43 @@ void WebcamSource::setup() {
   grabber.close();
   grabber.setDeviceID(settings->deviceId->intValue);
   grabber.setDesiredFrameRate(30);
-  grabber.setPixelFormat(OF_PIXELS_RGBA);
-  if (!grabber.setup(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y)) {
+
+  const int rx = LayoutStateService::getService()->resolution.x;
+  const int ry = LayoutStateService::getService()->resolution.y;
+
+  // Pixel-format negotiation. Different backends expose different formats:
+  //   - macOS AVFoundation: usually delivers RGBA cleanly
+  //   - Windows Media Foundation / DirectShow: RGB is far more likely to
+  //     succeed; RGBA often requires a shim conversion that some backends
+  //     silently skip, leaving the texture uninitialized
+  // Try RGB first, then RGBA. Deliberately do NOT fall through to
+  // OF_PIXELS_NATIVE — NATIVE hands us MJPEG/YUY2 raw bytes that
+  // ofVideoGrabber can't upload as a GL_RGB texture, producing garbage.
+  static const ofPixelFormat kFormats[] = { OF_PIXELS_RGB, OF_PIXELS_RGBA };
+  const char* kFormatNames[] = { "RGB", "RGBA" };
+
+  for (size_t i = 0; i < sizeof(kFormats)/sizeof(kFormats[0]); ++i) {
+    grabber.setPixelFormat(kFormats[i]);
+    if (grabber.setup(rx, ry)) {
+      ofLogNotice("WebcamSource") << "device " << settings->deviceId->intValue
+        << " negotiated " << kFormatNames[i] << " @ " << rx << "x" << ry;
+      grabberReady = true;
+      break;
+    }
+    ofLogWarning("WebcamSource") << "device " << settings->deviceId->intValue
+      << " rejected " << kFormatNames[i] << ", trying next";
+    grabber.close();
+  }
+
+  if (!grabberReady) {
+    ofLogError("WebcamSource") << "device " << settings->deviceId->intValue
+      << " accepted neither RGB nor RGBA @ " << rx << "x" << ry
+      << " — leaving source inactive";
     return;
   }
-  grabberReady = true;
-  fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
-  optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
+
+  fbo->allocate(rx, ry);
+  optionalFbo->allocate(rx, ry);
   maskShader.load("shaders/ColorKeyMaskMaker");
 
   // Collect the device names

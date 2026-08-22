@@ -35,6 +35,11 @@
 #include "IconService.hpp"
 #include "URLSchemeHandler.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#include "Utf8Path.hpp"
+#endif
+
 
 const static ofVec2f windowSize = ofVec2f(2400, 1600);
 
@@ -87,17 +92,53 @@ void setupDirectories() {
   }
 }
 
+// Try to create the OF window at the given GL version. Returns a shared_ptr
+// (empty on failure). ofCreateWindow can succeed with a partially usable
+// window on some drivers, so we probe glfwGetCurrentContext() after.
+static std::shared_ptr<ofAppBaseWindow> tryCreateWindow(int major, int minor) {
+  ofGLFWWindowSettings settings;
+  settings.setGLVersion(major, minor);
+  settings.setSize(1440, 900);
+  auto window = ofCreateWindow(settings);
+  if (!window) return nullptr;
+
+  auto* glfwWindow = dynamic_cast<ofAppGLFWWindow*>(window.get());
+  if (!glfwWindow || !glfwWindow->getGLFWWindow()) {
+    ofLogError("main") << "GL " << major << "." << minor
+                      << " context creation failed (no GLFW window)";
+    return nullptr;
+  }
+  ofLogNotice("main") << "GL " << major << "." << minor << " context created";
+  return window;
+}
+
 int main( ){
   setupDirectories();
   auto homeDir = ofFilePath::getUserHomeDir();
   auto libraryPath = ofFilePath::join(homeDir, "/nottawa");
   auto sentryPath = ofFilePath::join(homeDir, "/nottawa/sentry");
-  
-  ofGLFWWindowSettings settings;
-  settings.setGLVersion(3, 2);
-  settings.setSize(1440, 900);
-  auto window = ofCreateWindow(settings);
-  // Maximize the window to fill the screen
+
+  // Windows GPUs range from modern discrete cards down to Sandy/Ivy Bridge
+  // iGPUs. Ask for 3.2 first (parity with macOS Core Profile), then step
+  // down. If nothing works, tell the user the machine is unsupported
+  // rather than crashing on a null context.
+  std::shared_ptr<ofAppBaseWindow> window = tryCreateWindow(3, 2);
+  if (!window) window = tryCreateWindow(3, 1);
+  if (!window) window = tryCreateWindow(3, 0);
+  if (!window) {
+#ifdef _WIN32
+    const wchar_t* msg =
+      L"Nottawa requires OpenGL 3.0 or newer.\n\n"
+      L"Your GPU driver reports a lower version — this often means "
+      L"Microsoft's software renderer is being used instead of your real GPU.\n\n"
+      L"Install the latest vendor driver from Intel, NVIDIA, or AMD, then try again.";
+    MessageBoxW(nullptr, msg, L"Nottawa — unsupported GPU", MB_OK | MB_ICONERROR);
+#else
+    ofLogFatalError("main") << "Could not create any GL 3.x context. Aborting.";
+#endif
+    return 1;
+  }
+
   auto glfwWindow = dynamic_cast<ofAppGLFWWindow*>(window.get())->getGLFWWindow();
   glfwMaximizeWindow(glfwWindow);
   auto app = shared_ptr<MainApp>(new MainApp(window));
