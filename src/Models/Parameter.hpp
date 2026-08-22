@@ -62,6 +62,8 @@ struct Parameter : public std::enable_shared_from_this<Parameter>
   // Color value contained by Parameter
   std::shared_ptr<std::array<float, 4>> color = std::make_shared<std::array<float, 4>>(std::array<float, 4>({0.0f, 0.0f, 0.0f, 1.0f}));
 
+  // WINDOWS PORTABILITY: `min` and `max` collide with <Windows.h> macros
+  // unless NOMINMAX is defined project-wide. See src/Util/PortabilityCheck.hpp.
   float min = 0.0;
   float max = 1.0;
   

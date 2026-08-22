@@ -12,9 +12,11 @@
 #include "Connection.hpp"
 #include "ofMain.h"
 
+#ifdef __APPLE__
 #include <OpenGL/CGLCurrent.h>
 #include <OpenGL/CGLIOSurface.h>
 #include <CoreFoundation/CoreFoundation.h>
+#endif
 
 IOSurfaceTextureManager* IOSurfaceTextureManager::instance = nullptr;
 

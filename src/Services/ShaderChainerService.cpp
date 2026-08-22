@@ -7,7 +7,7 @@
 
 #include "ShaderChainerService.hpp"
 #include "Models/Strand.hpp"
-#include "AsciiShader.hpp"
+#include "ASCIIShader.hpp"
 #include "AuroraShader.hpp"
 #include "NeonShader.hpp"
 #include "ScrapbookShader.hpp"
@@ -119,7 +119,7 @@
 #include "StaticFrameShader.hpp"
 #include "SlidingFrameShader.hpp"
 #include "SolidColorShader.hpp"
-#include "16BitShader.hpp"
+#include "16bitShader.hpp"
 #include "HilbertShader.hpp"
 #include "WarpShader.hpp"
 #include "FrequencyVisualizerShader.hpp"

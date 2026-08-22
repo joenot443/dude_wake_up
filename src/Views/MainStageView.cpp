@@ -7,7 +7,9 @@
 
 //#include <sentry.h>
 #include "MainStageView.hpp"
+#ifdef __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
+#endif
 #include "ShaderInfoView.hpp"
 #include "ActionService.hpp"
 #include "CommonStrings.hpp"

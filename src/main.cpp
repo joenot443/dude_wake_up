@@ -2,7 +2,9 @@
 #define IMGUI_DEFINE_MATH_OPERATORS 1
 
 #include <errno.h>
+#ifdef __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
+#endif
 
 #include "imgui.h"
 #include "imgui_internal.h"

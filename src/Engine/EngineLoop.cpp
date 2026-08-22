@@ -26,7 +26,9 @@
 #include "Strings.hpp"
 #include "ofMain.h"
 #include "GLFW/glfw3.h"
+#ifdef __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
+#endif
 #include <sys/stat.h>
 
 // Hidden GLFW window for OpenGL context (NottawaApp only).

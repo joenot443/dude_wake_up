@@ -15,7 +15,13 @@
 #include <mutex>
 #include <functional>
 #include <memory>
+#ifdef __APPLE__
 #include <IOSurface/IOSurface.h>
+#else
+// Portable placeholder so the class declaration compiles on non-Apple platforms.
+// The Windows implementation (Phase 2: DXGI shared handles) will wrap this.
+typedef void* IOSurfaceRef;
+#endif
 
 struct SharedTexture {
   IOSurfaceRef surface = nullptr;

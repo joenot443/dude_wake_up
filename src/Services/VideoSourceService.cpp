@@ -5,8 +5,10 @@
 //  Created by Joe Crozier on 11/3/22.
 //
 
+#ifdef __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
 #include <Security/SecItem.h>
+#endif
 #include "VideoSourceService.hpp"
 #include "UUID.hpp"
 #include "NodeLayoutView.hpp"

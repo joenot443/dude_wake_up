@@ -36,6 +36,8 @@ struct WaveformOscillator: public Oscillator {
 
   void tick() override;
 
+  // WINDOWS PORTABILITY: `min` and `max` collide with <Windows.h> macros
+  // unless NOMINMAX is defined project-wide. See src/Util/PortabilityCheck.hpp.
   float max();
   float min();
 

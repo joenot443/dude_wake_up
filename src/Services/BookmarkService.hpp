@@ -9,7 +9,14 @@
 #define BookmarkService_hpp
 
 #include <stdio.h>
+#ifdef __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
+#else
+// Portable placeholder. BookmarkService is macOS sandbox-specific and will be
+// removed on Windows in Phase 5; this typedef exists only so the class
+// declaration compiles cleanly under the day-5 stub.
+typedef const void* CFDataRef;
+#endif
 
 #include "ofMain.h"
 

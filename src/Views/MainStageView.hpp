@@ -8,7 +8,9 @@
 #ifndef MainStageView_hpp
 #define MainStageView_hpp
 
+#ifdef __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
+#endif
 #include "AudioSourceBrowserView.hpp"
 #include <ableton/Link.hpp>
 #include "NodeLayoutView.hpp"
