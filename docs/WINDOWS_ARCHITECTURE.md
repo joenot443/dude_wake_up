@@ -135,6 +135,61 @@ TBD — Phase 5. Requires:
 - Named-pipe forwarding for single-instance warm-launch (avoid spawning a
   second `nottawa.exe`; forward URL to the running instance)
 
+## Audio thread and recordingCallback
+
+**`AudioSource::audioIn()` is called on the audio capture thread.** Which
+thread that is depends on the source:
+- `MicrophoneAudioSource` — OF's RtAudio backend worker (WASAPI callback
+  on Windows)
+- `FileAudioSource` — OF's audio output callback (also RtAudio worker)
+- `SystemAudioSource` — our own thread in `SystemAudioSource_win.cpp`
+  (WASAPI loopback), MTA-initialized via `ComApartmentMTA`
+
+**`AudioSource::setRecordingCallback`** takes the caller's `std::function`
+under `recordingMutex`, then `audioIn()` invokes it on the audio thread.
+`recordingMutex` is held ONLY across the copy of the callback pointer and
+its invocation — no downstream work runs under it. This keeps the mutex
+window microseconds long, which matters because the audio thread is
+running at MMCSS "Pro Audio" priority and can't tolerate long stalls.
+
+**Global lock ordering:** the recorder path (Phase 4 `LibavRecorder`)
+must **NEVER acquire `recordingMutex`.** The audio thread already holds
+it when it calls into the recorder; the recorder holds its own
+`writeMutex` internally. If the recorder ever needs to reach back into
+the AudioSource to query state, it must do so via a lock-free accessor
+(atomic loads, thread-local caches) — not by acquiring `recordingMutex`.
+Violating this order can deadlock (audio thread holds `recordingMutex`
+waiting for `writeMutex`; recording UI thread holds `writeMutex` waiting
+for `recordingMutex`).
+
+**Silence gate does NOT gate the callback.** `AudioSource::audioIn`
+runs the recording callback BEFORE the amplitude-based silence check,
+so recordings include silent passages verbatim rather than skipping to
+the next non-silent chunk. If we ever change that, update the recorder
+too — its wall-clock PTS assumes samples arrive contiguously.
+
+## Audio file I/O with Unicode paths
+
+`ofxAudioFile` fans out to four decoders — dr_wav, dr_mp3, dr_flac,
+stb_vorbis — and all four in the vendored copy under `lib/` open files
+with `char*` paths and CRT `fopen`. Only dr_wav has `_w` (wide-char)
+variants; the other three do not.
+
+**Policy: rely on the manifest's `activeCodePage=UTF-8`** (Win 10 1903+).
+With it, MSVC's `fopen("日本語.mp3", "rb")` calls `GetACP()`, gets
+65001, and correctly transcodes UTF-8 bytes to UTF-16 for the actual
+`CreateFileW` under the hood. Our Inno Setup `MinVersion=10.0.19041`
+(Win 10 2004) already gates us above 1903 → this works.
+
+**Fallback if a future user reports Unicode paths failing:** upgrade
+dr_mp3 / dr_flac to a recent upstream (both added `_init_file_w` after
+we vendored) and patch `ofxAudioFile.cpp` to prefer the `_w` variants
+on Windows. stb_vorbis has no wide-char API — for that one, load into
+memory via `_wfopen_s` + fread + `stb_vorbis_decode_memory`.
+
+Do NOT go down that path pre-emptively — the manifest route works and
+touches zero vendored library code.
+
 ## What we deliberately do NOT do on Windows
 
 - **Sandbox / bookmark persistence.** `BookmarkService` is a permanent
