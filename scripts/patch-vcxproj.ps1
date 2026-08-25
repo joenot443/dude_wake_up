@@ -72,6 +72,13 @@ if (Test-Path $LibRoot) {
     $IncludeDirs += Get-ChildItem -Path $LibRoot -Directory |
         ForEach-Object { $_.FullName }
 }
+# ffmpeg headers are staged by fetch_ffmpeg_lgpl.ps1 into libs\ffmpeg\include.
+$FfmpegInc = Join-Path $RepoRoot 'libs\ffmpeg\include'
+if (Test-Path $FfmpegInc) { $IncludeDirs += $FfmpegInc }
+
+# ffmpeg linker settings — libs staged into libs\ffmpeg\lib\.
+$FfmpegLibDir = Join-Path $RepoRoot 'libs\ffmpeg\lib'
+$FfmpegLibs   = @('avformat.lib','avcodec.lib','avutil.lib','swscale.lib','swresample.lib')
 # Normalize to project-relative $(ProjectDir)-anchored paths for portability.
 $ProjectDir = Split-Path -Parent $Project
 $IncludeDirs = $IncludeDirs | ForEach-Object {
@@ -97,6 +104,8 @@ $ExcludeMasks = @(
 $RequiredCompileItems = @(
     'src\Audio\SystemAudioSource_win.cpp',
     'src\Video\Recording\AVFRecorderWrapper_win.cpp',
+    'src\Video\Recording\LibavRecorder.cpp',
+    'src\Video\Recording\LibavRecorder.hpp',
     'src\Engine\IOSurfaceTextureManager_win.cpp',
     'src\Services\SparkleUpdater_win.cpp',
     'src\Services\URLSchemeHandler_win.cpp',
@@ -104,7 +113,9 @@ $RequiredCompileItems = @(
     'src\Video\OutputWindow_win.cpp',
     'src\Util\PortabilityCheck.cpp',
     'src\Util\Utf8Path.cpp',
-    'src\Util\ComApartment.hpp'
+    'src\Util\ComApartment.hpp',
+    'src\Audio\AudioRawSink.cpp',
+    'src\Audio\AudioRawSink.hpp'
 )
 
 # --- Load XML -----------------------------------------------------------
@@ -181,6 +192,31 @@ function Ensure-DefinesAndFlags {
             $link = $xml.CreateElement('Link', $ns.LookupNamespace('m'))
             [void]$idg.AppendChild($link)
         }
+
+        # ffmpeg link inputs: AdditionalLibraryDirectories + AdditionalDependencies.
+        # Idempotent — merges into whatever projectGenerator produced.
+        $ald = $link.SelectSingleNode('m:AdditionalLibraryDirectories', $ns)
+        if (-not $ald) {
+            $ald = $xml.CreateElement('AdditionalLibraryDirectories', $ns.LookupNamespace('m'))
+            [void]$link.AppendChild($ald)
+        }
+        $existingLibDirs = if ($ald.InnerText) { $ald.InnerText.Split(';') | Where-Object { $_ -ne '' } } else { @() }
+        if ($existingLibDirs -notcontains $FfmpegLibDir) { $existingLibDirs += $FfmpegLibDir }
+        if ($existingLibDirs -notcontains '%(AdditionalLibraryDirectories)') { $existingLibDirs += '%(AdditionalLibraryDirectories)' }
+        $ald.InnerText = ($existingLibDirs -join ';')
+
+        $adp = $link.SelectSingleNode('m:AdditionalDependencies', $ns)
+        if (-not $adp) {
+            $adp = $xml.CreateElement('AdditionalDependencies', $ns.LookupNamespace('m'))
+            [void]$link.AppendChild($adp)
+        }
+        $existingDeps = if ($adp.InnerText) { $adp.InnerText.Split(';') | Where-Object { $_ -ne '' } } else { @() }
+        foreach ($lib in $FfmpegLibs) {
+            if ($existingDeps -notcontains $lib) { $existingDeps += $lib }
+        }
+        if ($existingDeps -notcontains '%(AdditionalDependencies)') { $existingDeps += '%(AdditionalDependencies)' }
+        $adp.InnerText = ($existingDeps -join ';')
+
         $ss = $link.SelectSingleNode('m:SubSystem', $ns)
         if (-not $ss) {
             $ss = $xml.CreateElement('SubSystem', $ns.LookupNamespace('m'))

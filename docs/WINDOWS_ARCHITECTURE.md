@@ -116,9 +116,75 @@ Decision must precede Phase 6 golden-image baselines.
 ffmpeg (would GPL-taint ffmpeg's own components that were LGPL upstream —
 and more importantly, obligate GPL source availability for the whole
 distribution). Fetch script (`scripts/fetch_ffmpeg_lgpl.ps1`) pins to a
-known LGPL BtbN / Gyan build with SHA256 verification. Runtime belt-and-
-braces: on first use, query `avformat_configuration()` and refuse to
-initialize if the string contains `--enable-gpl` (Phase 4).
+known LGPL BtbN build with SHA256 verification. Runtime belt-and-braces:
+`LibavRecorder::verifyLgplOnce_` queries `avutil_configuration()` on
+first setup and refuses to initialize if the string contains
+`--enable-gpl`. See `src/Video/Recording/LibavRecorder.cpp`.
+
+**Version pin.** BtbN dated releases embed the git hash in every asset
+name, so the URL changes daily; only the `latest` rolling tag has
+stable-named assets. Fetch script defaults to
+`ffmpeg-n8.1-latest-win64-lgpl-shared-8.1.zip` from the `latest` tag
+(shipping the current 8.1 release-branch build, currently 8.1.2). The
+port plan originally called for 7.1.x; 8.1 carries the same modern APIs
+we target (`AVChannelLayout`, `swr_alloc_set_opts2`, per-frame
+`ch_layout`) so no code changes needed. The SHA pin — not the tag — is
+what proves reproducibility.
+
+## Recorder (LibavRecorder)
+
+**Public surface stays `AVFRecorderWrapper`.** Windows re-uses
+`recorderInstance` as a `LibavRecorder*`. macOS still delegates to the
+Objective-C `AVFRecorder` class. Callers (OutputWindow, ShareStrandView)
+never see libav headers.
+
+**Thread model.**
+- `setup` / `setupAudio` / `start` / `stop`: caller thread (main).
+- `addFrame`: caller thread (main draw loop).
+- `addAudioSamples`: audio thread (WASAPI / RtAudio callback).
+
+**Concurrency.** `writeMutex_` serializes every `av_interleaved_write_frame`
+call (per libav muxer thread-safety contract — the muxer is not
+reentrant). `audioMutex_` guards `audioTail_` + `swrCtx_` so audio
+callbacks can't race a finalize-time tail flush. Video-encoder state
+(`videoCodecCtx_`, `swsCtx_`, `videoFrame_`) is main-thread-only and
+needs no additional lock. Audio-encoder state (`audioCodecCtx_`,
+`audioFrame_`) is audio-thread-only aside from the finalize flush,
+which happens under `audioMutex_` when the audio thread has already
+drained.
+
+**Video PTS: wall-clock derived.** `steady_clock::now() - startTime_`
+rescaled into the video stream's `time_base`. NOT a frame counter — a
+shader-load hitch in the main draw loop would otherwise cause the
+counter clock to drift behind real time, and audio would appear to
+lead video in the final mux.
+
+**Audio PTS: sample-count derived.** Cumulative encoded output samples,
+starting from zero at `start()`. Deterministic and drift-free as long
+as the source keeps producing at the declared sample rate. If WASAPI
+drops buffers, audio track will be shorter than video track — an
+acceptable failure mode (VLC plays through gaps).
+
+**Single-fire completion.** `completed_` atomic `exchange(true)` gates
+the finalize path. `stop()`, duration-limit expiry inside `addFrame()`,
+and the destructor all funnel through `finalizeIfLive_` — only the
+first caller runs the moov trailer + fires `onRecordingComplete`.
+
+**Fragmented mp4.** `movflags=frag_keyframe+empty_moov+default_base_moof`
+so files stay playable after abnormal exit (crash, kill, power loss).
+Every keyframe seals a fragment; player picks up wherever the last
+complete fragment lands.
+
+**Encoder ladder.** `h264_nvenc → h264_qsv → h264_amf → libopenh264`.
+First one that `avcodec_open2` accepts wins. Logs which encoder
+opened on `setup()` success. libopenh264 is the portable LGPL software
+fallback — no hardware acceleration but always works.
+
+**Unicode output paths.** Same policy as `ofxAudioFile` (see below):
+we rely on the manifest's `activeCodePage=UTF-8` for libavformat's
+file protocol to transcode our UTF-8 `std::string` correctly into
+`CreateFileW`. No custom AVIOContext needed under our
+`MinVersion=10.0.19041` gate.
 
 ## Update mechanism
 

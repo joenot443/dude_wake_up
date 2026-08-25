@@ -15,7 +15,15 @@ avutil_configuration() and refuses to initialize if '--enable-gpl' is
 present. This script is the build-time guard.
 
 .PARAMETER Version
-BtbN release tag to fetch. Default: latest known-good LGPL pin.
+BtbN release tag to fetch. Default: 'latest' (rolling — the only tag with
+stable-named assets; dated autobuild-* tags include the git hash in the
+filename, so the URL changes daily and can't be pinned by name).
+
+.PARAMETER Archive
+Asset filename inside the release. Default: the n8.1 release-branch build,
+which is the current LTS-ish stable branch. Alternatives at the 'latest'
+tag: ffmpeg-master-latest-win64-lgpl-shared.zip (bleeding-edge master) or
+ffmpeg-n9.0-latest-win64-lgpl-shared-9.0.zip (newest release branch).
 
 .PARAMETER RepoRoot
 Repo root. Defaults to two levels up from this script.
@@ -28,6 +36,11 @@ If empty, first-run mode: script downloads, prints SHA256, exits. Rerun
 after pasting the printed hash into $DefaultSha256 below (or via -PinHash).
 If non-empty, script fails hard when the archive's hash differs.
 
+Because the 'latest' tag's assets are rebuilt with every patch backport,
+the SHA changes on every BtbN CI run. You bump the pin deliberately when
+you take an upstream fix; between bumps, the pin is what proves the DLLs
+you're about to link against are bit-exact what you approved.
+
 .EXAMPLE
 pwsh scripts\fetch_ffmpeg_lgpl.ps1                 # First-run: prints SHA256
 pwsh scripts\fetch_ffmpeg_lgpl.ps1 -PinHash <hash> # Verified fetch + stage
@@ -35,7 +48,8 @@ pwsh scripts\fetch_ffmpeg_lgpl.ps1 -PinHash <hash> # Verified fetch + stage
 
 [CmdletBinding()]
 param(
-    [string]$Version = 'autobuild-2024-12-05-14-06',
+    [string]$Version = 'latest',
+    [string]$Archive = 'ffmpeg-n8.1-latest-win64-lgpl-shared-8.1.zip',
     [string]$RepoRoot,
     [switch]$Force,
     [string]$PinHash
@@ -47,8 +61,10 @@ $ErrorActionPreference = 'Stop'
 
 # BtbN's ffmpeg-windows-build-helpers releases. LGPL variant only.
 # https://github.com/BtbN/FFmpeg-Builds/releases
-# LGPL builds are named e.g. ffmpeg-master-latest-win64-lgpl-shared.zip.
-$Archive   = "ffmpeg-master-latest-win64-lgpl-shared.zip"
+#
+# Only the 'latest' rolling tag has stable-named assets. Dated releases
+# (autobuild-YYYY-MM-DD-HH-MM) embed the git hash in each filename so the
+# URL changes daily. Reproducibility comes from $DefaultSha256, not the tag.
 $DownloadUrl = "https://github.com/BtbN/FFmpeg-Builds/releases/download/$Version/$Archive"
 
 # Paste the SHA256 the first-run mode prints into this constant to make
