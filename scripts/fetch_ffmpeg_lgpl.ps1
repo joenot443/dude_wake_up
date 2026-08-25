@@ -70,7 +70,11 @@ $DownloadUrl = "https://github.com/BtbN/FFmpeg-Builds/releases/download/$Version
 # Paste the SHA256 the first-run mode prints into this constant to make
 # subsequent runs verify. Leaving it empty means every run is unverified;
 # CI should treat empty pin as a build failure.
-$DefaultSha256 = ''  # <-- PIN AFTER FIRST FETCH
+#
+# Pinned 2026-08-25 by joe.crozier — from `ffmpeg-n8.1-latest-win64-lgpl-
+# shared-8.1.zip` on BtbN's rolling 'latest' tag. Bump deliberately when
+# taking a security fix or feature — every bump is a supply-chain review.
+$DefaultSha256 = '6579c91e81e9091098f52653f94cd5168193632729e441fa5effcfad4bca1c9d'
 
 # DLLs we ship. Must match the runtime `dumpbin /dependents nottawa.exe`.
 $RequiredDlls = @(
