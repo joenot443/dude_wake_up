@@ -1,7 +1,7 @@
 #ifndef AbletonLinkManager_hpp
 #define AbletonLinkManager_hpp
 
-#include "Link.hpp" // Assuming Link.hpp is the correct header for ableton::Link
+#include <ableton/Link.hpp>
 #include <stdio.h>
 
 class AbletonLinkManager {

@@ -7,6 +7,7 @@
 #if defined(_WIN32) && !defined(TARGET_OSX)
 
 #include "ofLog.h"
+#include "ofGraphicsConstants.h"   // OF_IMAGE_COLOR_ALPHA
 #include <algorithm>
 #include <cstring>
 

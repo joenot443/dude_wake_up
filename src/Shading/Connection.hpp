@@ -115,7 +115,7 @@ public:
              ConnectionType type,
              OutputSlot outputSlot,
              InputSlot inputSlot)
-  : start(start), end(end), type(type), id(UUID::generateUUID()), inputSlot(inputSlot), outputSlot(outputSlot)
+  : start(start), end(end), type(type), id(NottawaUUID::generateUUID()), inputSlot(inputSlot), outputSlot(outputSlot)
   {}
   
   json serialize();

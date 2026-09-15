@@ -15,6 +15,7 @@
 #include "EngineLoop.hpp"
 #endif
 #include "httplib.h"
+#include "HttplibSslStub.hpp"   // stubs SSLClient when built without OpenSSL
 #include "json.hpp"
 #include <memory>
 //#include <sentry.h>

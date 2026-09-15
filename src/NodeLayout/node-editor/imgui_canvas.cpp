@@ -144,7 +144,16 @@ bool ImGuiEx::Canvas::Begin(ImGuiID id, const ImVec2& size)
   ImGui::SetCursorScreenPos(ImVec2(0.0f, 0.0f));
   
   m_InBeginEnd = true;
-  
+
+  // ImGui 1.90 removed ImGuiContextHookType_BeginWindow / _EndWindow hook
+  // types (only NewFrame/EndFrame/Render/Shutdown remain). imgui_canvas
+  // used these to transform popup positions and preserve cursor state
+  // around nested BeginWindow/EndWindow calls inside the canvas. Without
+  // them, popup positions inside the node canvas may be off by the
+  // canvas transform, and cursor state may leak between windows.
+  // TODO: migrate to internal ImGui window callbacks or upgrade
+  // imgui_node_editor to a version that no longer needs these hooks.
+#if 0
   auto beginWindowHook = ImGuiContextHook{};
   beginWindowHook.UserData = this;
   beginWindowHook.Type = ImGuiContextHookType_BeginWindow;
@@ -194,7 +203,8 @@ bool ImGuiEx::Canvas::Begin(ImGuiID id, const ImVec2& size)
   };
   
   m_endWindowHook = ImGui::AddContextHook( ImGui::GetCurrentContext(), &endWindowHook );
-  
+#endif // Begin/EndWindow hook types removed in ImGui 1.90
+
   return true;
 }
 
@@ -231,9 +241,11 @@ void ImGuiEx::Canvas::End()
 
   m_InBeginEnd = false;
 
+#if 0 // hooks disabled — see AddContextHook block above
   ImGui::RemoveContextHook( ImGui::GetCurrentContext(), m_beginWindowHook );
   ImGui::RemoveContextHook( ImGui::GetCurrentContext(), m_endWindowHook );
-	
+#endif
+
 }
 
 void ImGuiEx::Canvas::SetView(const ImVec2& origin, float scale)

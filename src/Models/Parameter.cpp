@@ -24,7 +24,7 @@ boolValue(false),
 driver(NULL),
 shift(NULL),
 scale(NULL) {
-  paramId = UUID::generateParamId(name);
+  paramId = NottawaUUID::generateParamId(name);
 };
 
 
@@ -40,7 +40,7 @@ boolValue(value > 0.0001),
 driver(NULL),
 shift(NULL),
 scale(NULL) {
-  paramId = UUID::generateParamId(name);
+  paramId = NottawaUUID::generateParamId(name);
 };
 
 Parameter::Parameter(std::string name,
@@ -59,7 +59,7 @@ intValue(static_cast<int>(value)),
 driver(NULL),
 shift(NULL),
 scale(NULL) {
-  paramId = UUID::generateParamId(name);
+  paramId = NottawaUUID::generateParamId(name);
   intValue = static_cast<int>(value);
   boolValue = static_cast<bool>(value);
 };

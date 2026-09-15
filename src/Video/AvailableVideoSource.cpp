@@ -16,7 +16,7 @@ AvailableVideoSource::AvailableVideoSource(std::string sourceName,
                                            std::string category,
                                            VideoSourceType type)
     : sourceName(sourceName), type(type), category(category),
-      availableVideoSourceId(UUID::generateUUID()) {
+      availableVideoSourceId(NottawaUUID::generateUUID()) {
   preview = std::make_shared<ofTexture>();
 }
 
@@ -27,7 +27,7 @@ void AvailableVideoSourceShader::generatePreview()  {
   blankFbo->allocate(426, 240, GL_RGBA);
 
   auto shader = ShaderChainerService::getService()->shaderForType(
-      shaderTypeForShaderSourceType(shaderType), UUID::generateUUID(), 0);
+      shaderTypeForShaderSourceType(shaderType), NottawaUUID::generateUUID(), 0);
   shader->setup();
   shader->shade(blankFbo, fbo);
   fbo->begin();

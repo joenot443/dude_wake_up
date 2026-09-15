@@ -33,9 +33,9 @@ public:
   // Audio
   std::shared_ptr<Parameter> audioReactiveParameter;
   
-  Settings() : name("None"), settingsId(UUID::generateUUID()) {};
+  Settings() : name("None"), settingsId(NottawaUUID::generateUUID()) {};
   
-  Settings(std::string name) : name(name), audioReactiveParameter(nullptr), settingsId(UUID::generateUUID()) {};
+  Settings(std::string name) : name(name), audioReactiveParameter(nullptr), settingsId(NottawaUUID::generateUUID()) {};
   
   bool hasAudioReactiveParameter() {
     return audioReactiveParameter != nullptr;

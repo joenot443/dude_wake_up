@@ -219,7 +219,7 @@ static ImVec2 getScaledContentRegionAvail() {
 
 static ImVec2 scaleVector(ImVec2 vec) {
   int scale = dynamic_cast<ofAppGLFWWindow*>(ofGetWindowPtr())->getPixelScreenCoordScale();
-  return scale * vec;
+  return vec * static_cast<float>(scale);
 }
 
 static float scaleFloat(float f) {

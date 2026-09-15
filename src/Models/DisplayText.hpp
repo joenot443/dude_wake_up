@@ -43,7 +43,7 @@ public:
   std::shared_ptr<Parameter> fontSelector;
   
   DisplayText() : font(Font("", "")),
-  id(UUID::generateUUID()),
+  id(NottawaUUID::generateUUID()),
   xPosition(std::make_shared<Parameter>("X", 0.1, 0.0, 1.0)),
   yPosition(std::make_shared<Parameter>("Y", 0.4, 0.0, 1.0)),
   strokeWeight(std::make_shared<Parameter>("Stroke Weight", 5.0, 0.0, 20.0)),

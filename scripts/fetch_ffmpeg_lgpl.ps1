@@ -111,7 +111,11 @@ if (-not $RepoRoot) {
 if (-not $PinHash) { $PinHash = $DefaultSha256 }
 
 $CacheDir  = Join-Path $RepoRoot '.cache\ffmpeg'
-$StageDir  = Join-Path $RepoRoot 'apps\myApps\Nottawa\bin'
+# DLLs must sit next to the built exe. MSBuild's OutDir for our .vcxproj is
+# `bin\` relative to the solution, and $(SolutionDir) == repo root through
+# the OF junction (<OF>\apps\myApps\Nottawa → repo). So bin\ at repo root
+# is where the runtime DLLs need to live.
+$StageDir  = Join-Path $RepoRoot 'bin'
 $LibsDir   = Join-Path $RepoRoot 'libs\ffmpeg'
 New-Item -ItemType Directory -Path $CacheDir  -Force | Out-Null
 New-Item -ItemType Directory -Path $LibsDir   -Force | Out-Null

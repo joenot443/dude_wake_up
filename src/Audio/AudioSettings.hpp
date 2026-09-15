@@ -157,7 +157,7 @@ struct AudioAnalysis {
   AudioAnalysisParameter midsAnalysisParam;
   AudioAnalysisParameter lowsAnalysisParam;
   
-  u_int64_t bpmStartTime;
+  uint64_t bpmStartTime;
   uint32_t beatCount = 0;
   bool beatCounted = false;
   float lastBpmPct = 0.0f;
@@ -388,7 +388,7 @@ struct AudioAnalysis {
     auto currentTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
 
     // New start time = current time - (phase * beat duration)
-    bpmStartTime = currentTimeMs - static_cast<u_int64_t>(currentPct * newBeatDuration * 1000);
+    bpmStartTime = currentTimeMs - static_cast<uint64_t>(currentPct * newBeatDuration * 1000);
   }
 
   std::vector<float> splitAndAverage(const std::vector<float>& frequencies, int count) {

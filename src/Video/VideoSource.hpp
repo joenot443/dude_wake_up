@@ -51,7 +51,7 @@ public:
   ImVec2 origin;
   
   // Dummy Source
-  VideoSource() : id(UUID::generateUUID()), sourceName(UUID::generateUUID()), settings(std::make_shared<VideoSourceSettings>(id, 0)), origin(ImVec2(0.,0.)) {};
+  VideoSource() : id(NottawaUUID::generateUUID()), sourceName(NottawaUUID::generateUUID()), settings(std::make_shared<VideoSourceSettings>(id, 0)), origin(ImVec2(0.,0.)) {};
 
   VideoSource(std::string id, std::string name, VideoSourceType type)
       : id(id), fbo(std::make_shared<ofFbo>()), optionalFbo(std::make_shared<ofFbo>()), sourceName(name), type(type), settings(std::make_shared<VideoSourceSettings>(id, 0)), origin(ImVec2(0.,0.)) {};

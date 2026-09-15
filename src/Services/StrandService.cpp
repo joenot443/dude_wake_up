@@ -104,7 +104,7 @@ std::string StrandService::savePreview(std::string name, std::shared_ptr<Connect
   tex.readToPixels(pixels);
   std::filesystem::path fileName = strandPreviewPath(name);
   ofSaveImage(pixels, fileName);
-  return fileName;
+  return fileName.string();
 }
 
 std::string StrandService::strandPreviewPath(std::string name) {
@@ -231,7 +231,7 @@ void StrandService::populateMapFromFolder(std::map<std::string, std::shared_ptr<
       imagePath = "";
     }
     
-    auto strand = std::make_shared<AvailableStrand>(removeFileExtension(file.getFileName()), file.getAbsolutePath(), imagePath, UUID::generateUUID());
+    auto strand = std::make_shared<AvailableStrand>(removeFileExtension(file.getFileName()), file.getAbsolutePath(), imagePath, NottawaUUID::generateUUID());
     if (strandNames.count(strand->name) != 0) {
       log("Adding Strand %s which already exists", strand->name.c_str());
       continue;

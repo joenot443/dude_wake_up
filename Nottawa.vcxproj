@@ -1,0 +1,947 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|ARM64">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|ARM64EC">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM64EC</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64EC">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64EC</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Condition="'$(Platform)'=='x64' or '$(Platform)'=='ARM64'">
+    <LatestTargetPlatformVersion>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))</LatestTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(WindowsTargetPlatformVersion)' == ''">$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
+    <TargetPlatformVersion>$(WindowsTargetPlatformVersion)</TargetPlatformVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'=='ARM64EC'">
+    <LatestTargetPlatformVersion>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '11.0'))</LatestTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(WindowsTargetPlatformVersion)' == ''">$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
+    <TargetPlatformVersion>$(WindowsTargetPlatformVersion)</TargetPlatformVersion>
+  </PropertyGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7FD42DF7-442E-479A-BA76-D0022F99702A}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Nottawa</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64' or '$(Configuration)|$(Platform)'=='Debug|ARM64' or '$(Configuration)|$(Platform)'=='Debug|ARM64EC'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64' or '$(Configuration)|$(Platform)'=='Release|ARM64' or '$(Configuration)|$(Platform)'=='Release|ARM64EC'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64' or '$(Configuration)|$(Platform)'=='Release|ARM64' or '$(Configuration)|$(Platform)'=='Release|ARM64EC'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\libs\openFrameworksCompiled\project\vs\openFrameworksRelease.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64' or '$(Configuration)|$(Platform)'=='Debug|ARM64' or '$(Configuration)|$(Platform)'=='Debug|ARM64EC'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\libs\openFrameworksCompiled\project\vs\openFrameworksDebug.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64' or '$(Configuration)|$(Platform)'=='Debug|ARM64' or '$(Configuration)|$(Platform)'=='Debug|ARM64EC'">
+    <OutDir>bin\</OutDir>
+    <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_debug</TargetName>
+    <LinkIncremental>true</LinkIncremental>
+    <GenerateManifest>true</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64' or '$(Configuration)|$(Platform)'=='Release|ARM64' or '$(Configuration)|$(Platform)'=='Release|ARM64EC'">
+    <OutDir>bin\</OutDir>
+    <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64' or '$(Configuration)|$(Platform)'=='Debug|ARM64' or '$(Configuration)|$(Platform)'=='Debug|ARM64EC'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;__WINDOWS_WASAPI__;__WINDOWS_MM__;TARGET_WIN32;GLM_FORCE_CTOR_INIT;GLM_ENABLE_EXPERIMENTAL;OF_NO_FMOD=1;USE_KISS_FFT;ofxAddons_ENABLE_IMGUI;JSON_DIAGNOSTICS=1;IMGUI_DEFINE_MATH_OPERATORS=1;LINK_PLATFORM_WINDOWS=1;ASIO_STANDALONE=1</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\..\..\Users\Joe\dev\dude_wake_up\src;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Apps;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Bridge;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Engine;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Feedback;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Network;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\node-editor;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation\implot;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Midi;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\detail;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\expressions;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\Recording;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\BTrack;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\implot;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\kiss_fft130;..\..\..\..\..\Users\Joe\dev\dude_wake_up\libs\ffmpeg\include;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ableton\include;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ableton\modules\asio-standalone\asio\include;..\..\..\addons\ofxImGui\src;..\..\..\addons\ofxImGui\libs\imgui\src;..\..\..\addons\ofxMidi\src;..\..\..\addons\ofxMidi\libs\rtmidi</AdditionalIncludeDirectories>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ObjectFileName>$(IntDir)\Build\%(RelativeDir)\$(Configuration)\</ObjectFileName>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <PostBuildEvent>
+      <Command>if not exist "$(OutDir)data" mkdir "$(OutDir)data"
+robocopy "$(SolutionDir)data" "$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+if %ERRORLEVEL% GEQ 8 exit /b 1
+exit /b 0</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalLibraryDirectories>C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)app.manifest</AdditionalManifestFiles>
+      <GenerateManifest>true</GenerateManifest>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <AdditionalDependencies>%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+    <ClCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;__WINDOWS_WASAPI__;__WINDOWS_MM__;TARGET_WIN32;GLM_FORCE_CTOR_INIT;GLM_ENABLE_EXPERIMENTAL;OF_NO_FMOD=1;USE_KISS_FFT;ofxAddons_ENABLE_IMGUI;JSON_DIAGNOSTICS=1;IMGUI_DEFINE_MATH_OPERATORS=1;LINK_PLATFORM_WINDOWS=1;ASIO_STANDALONE=1</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\..\..\Users\Joe\dev\dude_wake_up\src;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Apps;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Bridge;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Engine;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Feedback;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Network;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\node-editor;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation\implot;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Midi;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\detail;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\expressions;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\Recording;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\BTrack;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\implot;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\kiss_fft130;..\..\..\..\..\Users\Joe\dev\dude_wake_up\libs\ffmpeg\include;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ableton\include;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ableton\modules\asio-standalone\asio\include;..\..\..\addons\ofxImGui\src;..\..\..\addons\ofxImGui\libs\imgui\src;..\..\..\addons\ofxMidi\src;..\..\..\addons\ofxMidi\libs\rtmidi</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)app.manifest</AdditionalManifestFiles>
+      <GenerateManifest>true</GenerateManifest>
+    </Manifest>
+    <PostBuildEvent>
+      <Command>if not exist "$(OutDir)data" mkdir "$(OutDir)data"
+robocopy "$(SolutionDir)data" "$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+if %ERRORLEVEL% GEQ 8 exit /b 1
+exit /b 0</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <AdditionalDependencies>%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+    <ClCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;__WINDOWS_WASAPI__;__WINDOWS_MM__;TARGET_WIN32;GLM_FORCE_CTOR_INIT;GLM_ENABLE_EXPERIMENTAL;OF_NO_FMOD=1;USE_KISS_FFT;ofxAddons_ENABLE_IMGUI;JSON_DIAGNOSTICS=1;IMGUI_DEFINE_MATH_OPERATORS=1;LINK_PLATFORM_WINDOWS=1;ASIO_STANDALONE=1</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\..\..\Users\Joe\dev\dude_wake_up\src;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Apps;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Bridge;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Engine;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Feedback;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Network;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\node-editor;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation\implot;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Midi;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\detail;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\expressions;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\Recording;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\BTrack;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\implot;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\kiss_fft130;..\..\..\..\..\Users\Joe\dev\dude_wake_up\libs\ffmpeg\include;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ableton\include;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ableton\modules\asio-standalone\asio\include;..\..\..\addons\ofxImGui\src;..\..\..\addons\ofxImGui\libs\imgui\src;..\..\..\addons\ofxMidi\src;..\..\..\addons\ofxMidi\libs\rtmidi</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)app.manifest</AdditionalManifestFiles>
+      <GenerateManifest>true</GenerateManifest>
+    </Manifest>
+    <PostBuildEvent>
+      <Command>if not exist "$(OutDir)data" mkdir "$(OutDir)data"
+robocopy "$(SolutionDir)data" "$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+if %ERRORLEVEL% GEQ 8 exit /b 1
+exit /b 0</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64EC'">
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <AdditionalDependencies>%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+    <ClCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;__WINDOWS_WASAPI__;__WINDOWS_MM__;TARGET_WIN32;GLM_FORCE_CTOR_INIT;GLM_ENABLE_EXPERIMENTAL;OF_NO_FMOD=1;USE_KISS_FFT;ofxAddons_ENABLE_IMGUI;JSON_DIAGNOSTICS=1;IMGUI_DEFINE_MATH_OPERATORS=1;LINK_PLATFORM_WINDOWS=1;ASIO_STANDALONE=1</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\..\..\Users\Joe\dev\dude_wake_up\src;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Apps;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Bridge;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Engine;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Feedback;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Network;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\node-editor;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation\implot;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Midi;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\detail;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\expressions;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\Recording;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\BTrack;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\implot;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\kiss_fft130;..\..\..\..\..\Users\Joe\dev\dude_wake_up\libs\ffmpeg\include;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ableton\include;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ableton\modules\asio-standalone\asio\include;..\..\..\addons\ofxImGui\src;..\..\..\addons\ofxImGui\libs\imgui\src;..\..\..\addons\ofxMidi\src;..\..\..\addons\ofxMidi\libs\rtmidi</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)app.manifest</AdditionalManifestFiles>
+      <GenerateManifest>true</GenerateManifest>
+    </Manifest>
+    <PostBuildEvent>
+      <Command>if not exist "$(OutDir)data" mkdir "$(OutDir)data"
+robocopy "$(SolutionDir)data" "$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+if %ERRORLEVEL% GEQ 8 exit /b 1
+exit /b 0</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64' or '$(Configuration)|$(Platform)'=='Release|ARM64' or '$(Configuration)|$(Platform)'=='Release|ARM64EC'">
+    <ClCompile>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;__WINDOWS_WASAPI__;__WINDOWS_MM__;TARGET_WIN32;GLM_FORCE_CTOR_INIT;GLM_ENABLE_EXPERIMENTAL;OF_NO_FMOD=1;USE_KISS_FFT;ofxAddons_ENABLE_IMGUI;JSON_DIAGNOSTICS=1;IMGUI_DEFINE_MATH_OPERATORS=1;LINK_PLATFORM_WINDOWS=1;ASIO_STANDALONE=1</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\..\..\Users\Joe\dev\dude_wake_up\src;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Apps;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Bridge;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Engine;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Feedback;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Network;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\node-editor;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation\implot;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Midi;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\detail;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\expressions;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\Recording;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\BTrack;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\implot;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\kiss_fft130;..\..\..\..\..\Users\Joe\dev\dude_wake_up\libs\ffmpeg\include;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ableton\include;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ableton\modules\asio-standalone\asio\include;..\..\..\addons\ofxImGui\src;..\..\..\addons\ofxImGui\libs\imgui\src;..\..\..\addons\ofxMidi\src;..\..\..\addons\ofxMidi\libs\rtmidi</AdditionalIncludeDirectories>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <ObjectFileName>$(IntDir)\Build\%(RelativeDir)\$(Configuration)\</ObjectFileName>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <PostBuildEvent>
+      <Command>if not exist "$(OutDir)data" mkdir "$(OutDir)data"
+robocopy "$(SolutionDir)data" "$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+if %ERRORLEVEL% GEQ 8 exit /b 1
+exit /b 0</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalLibraryDirectories>C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)app.manifest</AdditionalManifestFiles>
+      <GenerateManifest>true</GenerateManifest>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Link>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <AdditionalDependencies>%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+    <ClCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;__WINDOWS_WASAPI__;__WINDOWS_MM__;TARGET_WIN32;GLM_FORCE_CTOR_INIT;GLM_ENABLE_EXPERIMENTAL;OF_NO_FMOD=1;USE_KISS_FFT;ofxAddons_ENABLE_IMGUI;JSON_DIAGNOSTICS=1;IMGUI_DEFINE_MATH_OPERATORS=1;LINK_PLATFORM_WINDOWS=1;ASIO_STANDALONE=1</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\..\..\Users\Joe\dev\dude_wake_up\src;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Apps;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Bridge;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Engine;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Feedback;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Network;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\node-editor;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation\implot;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Midi;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\detail;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\expressions;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\Recording;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\BTrack;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\implot;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\kiss_fft130;..\..\..\..\..\Users\Joe\dev\dude_wake_up\libs\ffmpeg\include;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ableton\include;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ableton\modules\asio-standalone\asio\include;..\..\..\addons\ofxImGui\src;..\..\..\addons\ofxImGui\libs\imgui\src;..\..\..\addons\ofxMidi\src;..\..\..\addons\ofxMidi\libs\rtmidi</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)app.manifest</AdditionalManifestFiles>
+      <GenerateManifest>true</GenerateManifest>
+    </Manifest>
+    <PostBuildEvent>
+      <Command>if not exist "$(OutDir)data" mkdir "$(OutDir)data"
+robocopy "$(SolutionDir)data" "$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+if %ERRORLEVEL% GEQ 8 exit /b 1
+exit /b 0</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <Link>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <AdditionalDependencies>%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+    <ClCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;__WINDOWS_WASAPI__;__WINDOWS_MM__;TARGET_WIN32;GLM_FORCE_CTOR_INIT;GLM_ENABLE_EXPERIMENTAL;OF_NO_FMOD=1;USE_KISS_FFT;ofxAddons_ENABLE_IMGUI;JSON_DIAGNOSTICS=1;IMGUI_DEFINE_MATH_OPERATORS=1;LINK_PLATFORM_WINDOWS=1;ASIO_STANDALONE=1</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\..\..\Users\Joe\dev\dude_wake_up\src;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Apps;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Bridge;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Engine;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Feedback;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Network;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\node-editor;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation\implot;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Midi;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\detail;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\expressions;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\Recording;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\BTrack;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\implot;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\kiss_fft130;..\..\..\..\..\Users\Joe\dev\dude_wake_up\libs\ffmpeg\include;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ableton\include;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ableton\modules\asio-standalone\asio\include;..\..\..\addons\ofxImGui\src;..\..\..\addons\ofxImGui\libs\imgui\src;..\..\..\addons\ofxMidi\src;..\..\..\addons\ofxMidi\libs\rtmidi</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)app.manifest</AdditionalManifestFiles>
+      <GenerateManifest>true</GenerateManifest>
+    </Manifest>
+    <PostBuildEvent>
+      <Command>if not exist "$(OutDir)data" mkdir "$(OutDir)data"
+robocopy "$(SolutionDir)data" "$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+if %ERRORLEVEL% GEQ 8 exit /b 1
+exit /b 0</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64EC'">
+    <Link>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <AdditionalDependencies>%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+    <ClCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;__WINDOWS_WASAPI__;__WINDOWS_MM__;TARGET_WIN32;GLM_FORCE_CTOR_INIT;GLM_ENABLE_EXPERIMENTAL;OF_NO_FMOD=1;USE_KISS_FFT;ofxAddons_ENABLE_IMGUI;JSON_DIAGNOSTICS=1;IMGUI_DEFINE_MATH_OPERATORS=1;LINK_PLATFORM_WINDOWS=1;ASIO_STANDALONE=1</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\..\..\Users\Joe\dev\dude_wake_up\src;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Apps;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Bridge;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Engine;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Feedback;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Network;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\node-editor;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation\implot;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Midi;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\detail;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\expressions;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\Recording;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\BTrack;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\implot;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\kiss_fft130;..\..\..\..\..\Users\Joe\dev\dude_wake_up\libs\ffmpeg\include;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ableton\include;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ableton\modules\asio-standalone\asio\include;..\..\..\addons\ofxImGui\src;..\..\..\addons\ofxImGui\libs\imgui\src;..\..\..\addons\ofxMidi\src;..\..\..\addons\ofxMidi\libs\rtmidi</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)app.manifest</AdditionalManifestFiles>
+      <GenerateManifest>true</GenerateManifest>
+    </Manifest>
+    <PostBuildEvent>
+      <Command>if not exist "$(OutDir)data" mkdir "$(OutDir)data"
+robocopy "$(SolutionDir)data" "$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+if %ERRORLEVEL% GEQ 8 exit /b 1
+exit /b 0</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Platform)'=='x64'">
+    <PostBuildEvent>
+      <Command>if not exist "$(OutDir)data" mkdir "$(OutDir)data"
+robocopy "$(SolutionDir)data" "$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+if %ERRORLEVEL% GEQ 8 exit /b 1
+exit /b 0</Command>
+    </PostBuildEvent>
+    <ClCompile>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdc17</LanguageStandard_C>
+      <BuildStlModules Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</BuildStlModules>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Release|x64'">OldStyle</DebugInformationFormat>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;__WINDOWS_WASAPI__;__WINDOWS_MM__;TARGET_WIN32;GLM_FORCE_CTOR_INIT;GLM_ENABLE_EXPERIMENTAL;OF_NO_FMOD=1;USE_KISS_FFT;ofxAddons_ENABLE_IMGUI;JSON_DIAGNOSTICS=1;IMGUI_DEFINE_MATH_OPERATORS=1;LINK_PLATFORM_WINDOWS=1;ASIO_STANDALONE=1</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\..\..\Users\Joe\dev\dude_wake_up\src;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Apps;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Bridge;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Engine;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Feedback;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Network;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\node-editor;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation\implot;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Midi;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\detail;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\expressions;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\Recording;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\BTrack;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\implot;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\kiss_fft130;..\..\..\..\..\Users\Joe\dev\dude_wake_up\libs\ffmpeg\include;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ableton\include;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ableton\modules\asio-standalone\asio\include;..\..\..\addons\ofxImGui\src;..\..\..\addons\ofxImGui\libs\imgui\src;..\..\..\addons\ofxMidi\src;..\..\..\addons\ofxMidi\libs\rtmidi</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <ClCompile>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdc17</LanguageStandard_C>
+      <BuildStlModules Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</BuildStlModules>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">OldStyle</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)app.manifest</AdditionalManifestFiles>
+      <GenerateManifest>true</GenerateManifest>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Platform)'=='ARM64'">
+    <PostBuildEvent>
+      <Command>if not exist "$(OutDir)data" mkdir "$(OutDir)data"
+robocopy "$(SolutionDir)data" "$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+if %ERRORLEVEL% GEQ 8 exit /b 1
+exit /b 0</Command>
+    </PostBuildEvent>
+    <ClCompile>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">stdc17</LanguageStandard_C>
+      <BuildStlModules Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">true</BuildStlModules>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">OldStyle</DebugInformationFormat>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;__WINDOWS_WASAPI__;__WINDOWS_MM__;TARGET_WIN32;GLM_FORCE_CTOR_INIT;GLM_ENABLE_EXPERIMENTAL;OF_NO_FMOD=1;USE_KISS_FFT;ofxAddons_ENABLE_IMGUI;JSON_DIAGNOSTICS=1;IMGUI_DEFINE_MATH_OPERATORS=1;LINK_PLATFORM_WINDOWS=1;ASIO_STANDALONE=1</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\..\..\Users\Joe\dev\dude_wake_up\src;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Apps;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Bridge;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Engine;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Feedback;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Network;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\node-editor;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation\implot;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Midi;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\detail;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\expressions;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\Recording;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\BTrack;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\implot;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\kiss_fft130;..\..\..\..\..\Users\Joe\dev\dude_wake_up\libs\ffmpeg\include;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ableton\include;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ableton\modules\asio-standalone\asio\include;..\..\..\addons\ofxImGui\src;..\..\..\addons\ofxImGui\libs\imgui\src;..\..\..\addons\ofxMidi\src;..\..\..\addons\ofxMidi\libs\rtmidi</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <ClCompile>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">stdc17</LanguageStandard_C>
+      <BuildStlModules Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">true</BuildStlModules>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">OldStyle</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)app.manifest</AdditionalManifestFiles>
+      <GenerateManifest>true</GenerateManifest>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Platform)'=='ARM64EC'">
+    <PostBuildEvent>
+      <Command>if not exist "$(OutDir)data" mkdir "$(OutDir)data"
+robocopy "$(SolutionDir)data" "$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+if %ERRORLEVEL% GEQ 8 exit /b 1
+exit /b 0</Command>
+    </PostBuildEvent>
+    <ClCompile>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64EC'">stdc17</LanguageStandard_C>
+      <BuildStlModules Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64EC'">true</BuildStlModules>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64EC'">OldStyle</DebugInformationFormat>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;__WINDOWS_WASAPI__;__WINDOWS_MM__;TARGET_WIN32;GLM_FORCE_CTOR_INIT;GLM_ENABLE_EXPERIMENTAL;OF_NO_FMOD=1;USE_KISS_FFT;ofxAddons_ENABLE_IMGUI;JSON_DIAGNOSTICS=1;IMGUI_DEFINE_MATH_OPERATORS=1;LINK_PLATFORM_WINDOWS=1;ASIO_STANDALONE=1</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\..\..\Users\Joe\dev\dude_wake_up\src;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Apps;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Bridge;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Engine;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Feedback;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Network;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\node-editor;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation\implot;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Midi;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\detail;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\expressions;..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\Recording;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\BTrack;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\implot;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\kiss_fft130;..\..\..\..\..\Users\Joe\dev\dude_wake_up\libs\ffmpeg\include;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ableton\include;..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ableton\modules\asio-standalone\asio\include;..\..\..\addons\ofxImGui\src;..\..\..\addons\ofxImGui\libs\imgui\src;..\..\..\addons\ofxMidi\src;..\..\..\addons\ofxMidi\libs\rtmidi</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <ClCompile>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Release|ARM64EC'">stdc17</LanguageStandard_C>
+      <BuildStlModules Condition="'$(Configuration)|$(Platform)'=='Release|ARM64EC'">true</BuildStlModules>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Release|ARM64EC'">OldStyle</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)C:\Users\Joe\dev\dude_wake_up\libs\ffmpeg\lib%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)avformat.libavcodec.libavutil.libswscale.libswresample.libwinmm.libole32.libuuid.libavrt.libpropsys.libshlwapi.lib%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)app.manifest</AdditionalManifestFiles>
+      <GenerateManifest>true</GenerateManifest>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(OF_ROOT)\libs\openFrameworksCompiled\project\vs\openframeworksLib.vcxproj">
+      <Project>{5837595d-aca9-485c-8e76-729040ce4b0b}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="icon.rc">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64' or '$(Configuration)|$(Platform)'=='Debug|ARM64' or '$(Configuration)|$(Platform)'=='Debug|ARM64EC'">/D_DEBUG %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(OF_ROOT)\libs\openFrameworksCompiled\project\vs</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="icon.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
+  <ItemGroup Label="NottawaAuto">
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Apps\MainApp.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Apps\MainApp.h" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Apps\ofApp.h" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\AccelerateFFT.h" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\BTrack.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\BTrack.h" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\BTrackOnsetDetectionFunction.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\BTrackOnsetDetectionFunction.h" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\CircularBuffer.h" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\common.h" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\CoreFrequencyDomainFeatures.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\CoreFrequencyDomainFeatures.h" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\CoreTimeDomainFeatures.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\CoreTimeDomainFeatures.h" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\fastest_coeffs.h" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\Gist.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\Gist.h" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\high_qual_coeffs.h" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\kiss_fft.c" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\kiss_fft.h" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\MFCC.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\MFCC.h" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\mid_qual_coeffs.h" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\OnsetDetectionFunction.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\OnsetDetectionFunction.h" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\samplerate.c" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\samplerate.h" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\src_linear.c" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\src_sinc.c" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\src_zoh.c" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\WindowFunctions.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\WindowFunctions.h" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\Yin.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\Yin.h" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\gist\_kiss_fft_guts.h" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\AudioRawSink.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\AudioRawSink.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\AudioSettings.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\AudioSource.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\AudioSource.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\AudioTrack.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\BTrackDetector.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\BTrackDetector.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\dr_flac.h" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\dr_mp3.h" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\dr_wav.h" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\FileAudioSource.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\FileAudioSource.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\MicrophoneAudioSource.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\MicrophoneAudioSource.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\ofxAudioFile.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\ofxAudioFile.h" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\stb_vorbis.h" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\SystemAudioSource.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Audio\SystemAudioSource_win.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Engine\EngineConfig.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Engine\IOSurfaceTextureManager_win.cpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Engine\ServiceStatics.cpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Feedback\FeedbackSource.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Feedback\FeedbackSource.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Feedback\FeedbackSourceService.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Feedback\FeedbackSourceService.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models\AvailableShaderConfig.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models\AvailableStrand.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models\Connection.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models\Credit.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models\DisplayText.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models\FavoriteParameter.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models\FavoriteParameter.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models\Font.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models\Icon.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models\Icon.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models\Image.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models\MarkdownItem.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models\Parameter.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models\Parameter.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models\Settings.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models\Strand.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models\Texture.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models\TileItem.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Models\Workspace.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Network\Backblaze.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Network\LibraryFile.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Network\LibraryFile.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Network\LibraryService.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Network\LibraryService_win.cpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\node-editor\crude_json.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\node-editor\crude_json.h" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\node-editor\imgui_bezier_math.h" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\node-editor\imgui_canvas.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\node-editor\imgui_canvas.h" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\node-editor\imgui_extra_math.h" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\node-editor\imgui_node_editor.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\node-editor\imgui_node_editor.h" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\node-editor\imgui_node_editor_api.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\node-editor\imgui_node_editor_internal.h" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\NodeLayoutView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\NodeLayoutView.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\NodeLayout\NodeTypes.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation\Oscillator.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation\PulseOscillator.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation\PulseOscillator.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation\Pulser.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation\Pulser.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation\ValueOscillator.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation\ValueOscillator.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation\WaveformOscillator.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Oscillation\WaveformOscillator.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands\AddFileVideoSourceCommand.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands\AddIconVideoSourceCommand.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands\AddImageVideoSourceCommand.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands\AddLibraryVideoSourceCommand.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands\AddPlaylistVideoSourceCommand.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands\AddScrollingTextVideoSourceCommand.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands\AddShaderCommand.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands\AddShaderVideoSourceCommand.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands\AddTextVideoSourceCommand.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands\AddTypewriterTextVideoSourceCommand.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands\AddWebcamVideoSourceCommand.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands\ClearGraphCommand.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands\Command.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands\CopyCommand.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands\MakeConnectionCommand.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands\PasteCommand.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands\RemoveConnectionCommand.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands\RemoveShaderCommand.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Commands\RemoveVideoSourceCommand.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Midi\MidiPairing.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Midi\MidiPairing.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Midi\MidiService.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Midi\MidiService.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\ActionService.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\ActionService.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\AudioSourceService.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\AudioSourceService.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\BookmarkService.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\BookmarkService_win.cpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\ConfigService.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\ConfigService.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\ConfigurableService.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\FontService.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\FontService.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\IconService.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\IconService.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\Image.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\ImageService.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\ImageService.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\LayoutStateService.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\LayoutStateService.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\MarkdownService.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\MarkdownService.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\ModulationService.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\ModulationService.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\OscillationService.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\OscillationService.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\ParameterService.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\ParameterService.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\ShaderChainerService.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\ShaderChainerService.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\SparkleUpdater.h" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\SparkleUpdater_win.cpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\StrandService.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\StrandService.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\TextureService.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\TextureService.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\TimeService.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\TimeService.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\URLSchemeHandler.h" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\URLSchemeHandler_win.cpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\VideoSourceService.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Services\VideoSourceService.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\16bitShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\AccretionShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\AerogelShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\ASCIIShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\AudioBallShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\AudioBlocksShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\AudioBumperShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\AudioCymaticsShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\AudioGlowBarsShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\AudioGraphShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\AudioMountainsShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\AudioOscillatorShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\AudioWaveformShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\AuroraShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\AutotangentShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\BackgroundShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\BlendShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\BlurShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\BounceShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\BreatheShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\BubblesShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\CannyShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\ChromeGrillShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\CircleBlurShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\CircleMixShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\CirclePathShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\CloudShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\CloudyShapesShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\CloudyTunnelShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\ColoredDropsShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\ColorKeyMaskMakerShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\ColorPassShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\ColorStepperShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\ColorSwapShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\ColorWheelShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\ComicbookShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\CompanionsShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\Connection.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\CoreShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\CosmosShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\CrosshatchShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\CrystalKaleidoscopeShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\CubifyShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\CurlySquaresShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\DancingSquaresShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\DiffractorShader.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\DiffusionShader.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\DiffusionShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\DirtyPlasmaShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\DiscoAudioShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\DiscoShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\DitherShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\DoubleBlurShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\ElectricEelsShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\EmptyShader.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\FeedbackShader.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\FeedbackShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\FibersShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\FirefliesShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\FishEyeShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\FlamingShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\FlickerAudioShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\FloatingSparksShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\FlockingShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\FractalAudioShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\FractalShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\FrequencyVisualizerShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\FujiShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\FullHouseShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\GalaxyShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\GameboyShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\GlassyShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\GlitchAudioShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\GlitchDigitalShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\GlitchRGBShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\GlitchShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\GlowBeatShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\GodRayShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\GridRunShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\GyroidsShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\HalfToneShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\HeptagonsShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\HilbertShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\HSBShader.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\ImageTexture.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\ImageTexture.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\IsoFractShader.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\IsoFractShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\KaleidoscopeShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\LavaShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\LimboShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\LiquidShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\LumaMaskMakerShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\MaskShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\MelterShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\MirrorShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\MistShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\MixShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\MotionBlurTextureShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\MountainsShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\MultiMixShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\NeonShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\OctagramsShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\OctahedronShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\OldTVShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\OneBitDitherShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\OnOffShader.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\OptionalShadersHelper.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\OptionalShadersHelper.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\OutlineShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\OverlayShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\PaintShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\PerplexionShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\PieSplitShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\PixelAudioPartyShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\PixelPlayShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\PixelShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\PlasmaShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\PlasmaTwoShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\PlasmorShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\PsycurvesShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\RainbowRotatorShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\ReflectorShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\RetroPCShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\RGBShiftShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\RingsShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\RotateShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\RubiksShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\RuttEtraShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\ScrapbookShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\ScratchyShader.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\Shader.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\Shader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\ShaderSettings.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\ShaderType.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\SimpleBarsShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\SimpleShapeShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\SliderShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\SlidingFrameShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\SmokeRingShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\SnowfallShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\SobelShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\SolidColorShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\SpaceRingsShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\SpectrumClashShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\SpiralShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\SpiralWhirlpoolShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\StageShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\StaticFrameShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\StellarShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\StrangeScreenShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\StrawberryWineShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\SwirlingSoulShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\SwirlShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\SwitcherShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\SynthflyShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\SynthwaveShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\TextureMaskShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\TileShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\TissueShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\TransformShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\TriangleMapShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\TripleShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\TwistedCubesShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\TwistedTripShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\UnknownPleasuresShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\VertexShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\VHSShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\WarpShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\WarpspeedShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\WavyShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\WebShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\WelcomeRingsShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\WindowsShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Shading\WobbleShader.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\detail\collection.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\detail\compiler_config.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\detail\type_traits.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\expressions\expression.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\expressions\filters.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\expressions\math.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\expressions\operators.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\expressions\tree.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\expressions\utility.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\observable.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\observe.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\subject.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\subscription.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\observable\value.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\AbletonLinkManager.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\AbletonLinkManager.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\Colors.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\ComApartment.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\CommonStrings.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\CommonStrings.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\ConfigServiceHelper.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\ConfigServiceHelper.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\Console.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\dear_widgets.h" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\dear_widgets.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\File.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\Fonts.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\httplib.h" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\HttplibSslStub.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\imgui_markdown.h" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\json.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\JSONSerializable.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\Math.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\MSABPMTapper.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\MSABPMTapper.h" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\MSATimer.h" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\PortabilityCheck.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\PortabilityCheck.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\RollingMean.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\Strings.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\Strings.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\Utf8Path.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\Utf8Path.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\UUID.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\Vectors.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Util\Video.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\Recording\AVFRecorderWrapper.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\Recording\AVFRecorderWrapper_win.cpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\Recording\LibavRecorder.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\Recording\LibavRecorder.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\AvailableVideoSource.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\AvailableVideoSource.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\FileSource.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\FileSource.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\IconSource.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\IconSource.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\ImageSource.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\ImageSource.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\LibrarySource.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\LibrarySource.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\MultiSource.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\MultiSource.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\OutputWindow.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\OutputWindow_win.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\PlaylistSettings.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\PlaylistSource.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\PlaylistSource.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\ScrollingTextSource.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\ScrollingTextSource.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\ShaderSource.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\ShaderSource.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\TextSource.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\TextSource.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\TypewriterTextSource.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\TypewriterTextSource.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\VideoSource.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\VideoSource.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\VideoSourceSettings.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\WebcamSource.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Video\WebcamSource.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\AbstractTileBrowserView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\AudioSourceBrowserView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\AudioSourceBrowserView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\AvailableShader.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\AvailableShader.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\BarPlotView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\BarPlotView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\CommonViews.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\CommonViews.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\CreditView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\CreditView.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\FeedbackView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\FileBrowserView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\FileBrowserView.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\FramePreview.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\ImGuiExtensions.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\ImGuiExtensions.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\ListBrowserView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\ListBrowserView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\MainStageView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\MainStageView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\MarkdownView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\MarkdownView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\NodeShaderBrowserView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\NodeShaderBrowserView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\NodeVideoSourceBrowserView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\NodeVideoSourceBrowserView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\OscillatorPanelView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\OscillatorPanelView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\OscillatorView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\OscillatorView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\PagedTileBrowserView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\PagedTileBrowserView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\ParameterTileBrowserView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\ParameterTileBrowserView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\ShaderBrowserView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\ShaderBrowserView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\ShaderConfigSelectionView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\ShaderConfigSelectionView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\ShaderInfoView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\ShaderInfoView.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\ShareStrandView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\StageModeView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\StageModeView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\StageParameterView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\StageParameterView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\StrandBrowserView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\StrandBrowserView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\StrandBrowserWindow.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\StrandBrowserWindow.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\StrandTileView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\StrandTileView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\TextEditorView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\TextEditorView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\TileBrowserView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\TileBrowserView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\TimePanelView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\TimePanelView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\UploadChainerView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\UploadChainerView.h" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\VideoSourceBrowserView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\VideoSourceBrowserView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\WelcomeScreenView.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\Views\WelcomeScreenView.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\HelpService.cpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\HelpService.hpp" />
+    <ClInclude Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\macro_scope.hpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\src\main.cpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\imgui_stdlib.cpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\ofxFastFboReader.cpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\implot\implot.cpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\implot\implot_items.cpp" />
+    <ClCompile Include="..\..\..\..\..\Users\Joe\dev\dude_wake_up\lib\kiss_fft130\kiss_fft.c" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\BaseEngine.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\DefaultTheme.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\EngineGLFW.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\EngineOpenFrameworks.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\Gui.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\GuiEventHelper.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\ImHelpers.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\ofxImGuiLoggerChannel.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\libs\imgui\src\imgui.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\libs\imgui\src\imgui_draw.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\libs\imgui\src\imgui_widgets.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\libs\imgui\src\imgui_tables.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxMidi\src\ofxBaseMidi.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxMidi\src\ofxMidi.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxMidi\src\ofxMidiClock.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxMidi\src\ofxMidiIn.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxMidi\src\ofxMidiMessage.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxMidi\src\ofxMidiOut.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxMidi\src\ofxMidiTimecode.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxMidi\src\desktop\ofxRtMidiIn.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxMidi\src\desktop\ofxRtMidiOut.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxMidi\libs\rtmidi\RtMidi.cpp" />
+  </ItemGroup>
+</Project>

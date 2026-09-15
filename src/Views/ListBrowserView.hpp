@@ -22,7 +22,7 @@ public:
   std::string id;
 
   ListBrowserView(std::vector<std::shared_ptr<TileItem>> tileItems) : tileItems(tileItems),
-  id(UUID::generateUUID())
+  id(NottawaUUID::generateUUID())
   {};
 };
 

@@ -20,7 +20,7 @@
 #include "ofRectangle.h"
 
 TextEditorView::TextEditorView(std::shared_ptr<DisplayText> displayText)
-: displayText(displayText), id(UUID::generateUUID()) {
+: displayText(displayText), id(NottawaUUID::generateUUID()) {
   font.load(displayText->font.path, displayText->fontSize);
   previewStrokeShader.load("shaders/Stroke");
 }
@@ -107,12 +107,13 @@ void TextEditorView::renderPreview(std::shared_ptr<ofFbo> targetFbo, const Font&
   if (!targetFbo || !targetFbo->isAllocated() || !previewTempFbo || !previewTempFbo->isAllocated()) return;
 
   int previewFontSize = std::max(1, PreviewHeight / 5);
-  if (!previewFont.isLoaded() || previewFont.settings.fontName != fontToPreview.name || previewFont.getSize() != previewFontSize) {
+  if (!previewFont.isLoaded() || previewFontName != fontToPreview.name || previewFont.getSize() != previewFontSize) {
       previewFont.load(fontToPreview.path, previewFontSize);
       if (!previewFont.isLoaded()) {
           ofLogError("TextEditorView") << "Failed to load preview font: " << fontToPreview.path;
           return;
       }
+      previewFontName = fontToPreview.name;
   }
 
   targetFbo->begin();

@@ -152,47 +152,51 @@ void MainApp::exitStream(ofEventArgs &args) {}
 
 void MainApp::dragEvent(ofDragInfo dragInfo)
 {
-  
-  if (ofFile(dragInfo.files[0]).isDirectory()) {
-    BookmarkService::getService()->saveBookmarkForDirectory(dragInfo.files[0]);
-    BookmarkService::getService()->beginAccessingBookmark(dragInfo.files[0]);
-    mainStageView->loadDirectory(dragInfo.files[0]);
+  // OF 0.12 returns std::filesystem::path from dragInfo.files; MSVC (unlike
+  // Apple libc++) refuses the implicit conversion to std::string. Materialize
+  // once at the top so the rest of the function keeps its old shape.
+  const std::string dropped = dragInfo.files[0].string();
+
+  if (ofFile(dropped).isDirectory()) {
+    BookmarkService::getService()->saveBookmarkForDirectory(dropped);
+    BookmarkService::getService()->beginAccessingBookmark(dropped);
+    mainStageView->loadDirectory(dropped);
     return;
   }
-  
+
   // Check if the file is a JSON file
-  if (ofIsStringInString(dragInfo.files[0], ".json"))
+  if (ofIsStringInString(dropped, ".json"))
   {
-    ConfigService::getService()->loadStrandFile(dragInfo.files[0]);
+    ConfigService::getService()->loadStrandFile(dropped);
     return;
   }
-  
+
   // Check if the file is a video file
-  if (ofIsStringInString(dragInfo.files[0], ".mp4") ||
-      ofIsStringInString(dragInfo.files[0], ".mov") ||
-      ofIsStringInString(dragInfo.files[0], ".avi") ||
-      ofIsStringInString(dragInfo.files[0], ".mkv") ||
-      ofIsStringInString(dragInfo.files[0], ".flv") ||
-      ofIsStringInString(dragInfo.files[0], ".wmv"))
+  if (ofIsStringInString(dropped, ".mp4") ||
+      ofIsStringInString(dropped, ".mov") ||
+      ofIsStringInString(dropped, ".avi") ||
+      ofIsStringInString(dropped, ".mkv") ||
+      ofIsStringInString(dropped, ".flv") ||
+      ofIsStringInString(dropped, ".wmv"))
   {
     // Create a new VideoSource for the file
-    auto fileName = ofFilePath::getFileName(dragInfo.files[0]);
-    
-    auto videoSource = ActionService::getService()->addFileVideoSource(fileName, dragInfo.files[0]);
+    auto fileName = ofFilePath::getFileName(dropped);
+
+    auto videoSource = ActionService::getService()->addFileVideoSource(fileName, dropped);
     NodeLayoutView::getInstance()->fileDropInProgress = true;
     NodeLayoutView::getInstance()->handleDroppedSource(videoSource);
     return;
   }
-  
+
   // Check if the file is a video file
-  if (ofIsStringInString(dragInfo.files[0], ".png") ||
-      ofIsStringInString(dragInfo.files[0], ".jpg") ||
-      ofIsStringInString(dragInfo.files[0], ".jpeg") ||
-      ofIsStringInString(dragInfo.files[0], ".gif"))
+  if (ofIsStringInString(dropped, ".png") ||
+      ofIsStringInString(dropped, ".jpg") ||
+      ofIsStringInString(dropped, ".jpeg") ||
+      ofIsStringInString(dropped, ".gif"))
   {
     // Create a new VideoSource for the file
-    auto fileName = ofFilePath::getFileName(dragInfo.files[0]);
-    auto videoSource = ActionService::getService()->addImageVideoSource(fileName, dragInfo.files[0]);
+    auto fileName = ofFilePath::getFileName(dropped);
+    auto videoSource = ActionService::getService()->addImageVideoSource(fileName, dropped);
     NodeLayoutView::getInstance()->handleDroppedSource(videoSource);
   }
 }

@@ -378,7 +378,7 @@ void ShaderChainerService::deselectConnectable()
 
 std::shared_ptr<Shader> ShaderChainerService::makeShader(ShaderType type)
 {
-  auto shader = shaderForType(type, UUID::generateUUID(), 0);
+  auto shader = shaderForType(type, NottawaUUID::generateUUID(), 0);
   addShader(shader);
   return shader;
 }
@@ -630,7 +630,7 @@ void ShaderChainerService::addShader(std::shared_ptr<Shader> shader)
     return;
   }
   
-  std::shared_ptr<FeedbackSource> feedbackSource = std::make_shared<FeedbackSource>(shader->shaderId, std::make_shared<VideoSourceSettings>(UUID::generateUUID(), 0));
+  std::shared_ptr<FeedbackSource> feedbackSource = std::make_shared<FeedbackSource>(shader->shaderId, std::make_shared<VideoSourceSettings>(NottawaUUID::generateUUID(), 0));
   
   FeedbackSourceService::getService()->registerFeedbackSource(feedbackSource);
   shader->feedbackDestination = feedbackSource;
@@ -2121,14 +2121,14 @@ void ShaderChainerService::randomStrand(const std::vector<std::shared_ptr<Availa
   auto source1 = VideoSourceService::getService()->makeShaderVideoSource(
     sources[sourceIndex1]->shaderType,
     ImVec2(origin.x, origin.y),
-    UUID::generateUUID(),
+    NottawaUUID::generateUUID(),
     0
   );
   
   auto source2 = VideoSourceService::getService()->makeShaderVideoSource(
     sources[sourceIndex2]->shaderType,
     ImVec2(origin.x, origin.y + 1200),
-    UUID::generateUUID(),
+    NottawaUUID::generateUUID(),
     0
   );
 

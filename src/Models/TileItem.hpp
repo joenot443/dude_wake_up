@@ -32,7 +32,7 @@ public:
 
   TileItem(std::string name, ImTextureID textureID, int index,
            std::function<void(std::string)> dragCallback, std::string category = "", TileType tileType = TileType_Shader, ShaderType type = ShaderTypeNone)
-  : name(name), textureID(textureID), index(index), shaderType(type), category(category), tileType(tileType), id(UUID::generateUUID()),
+  : name(name), textureID(textureID), index(index), shaderType(type), category(category), tileType(tileType), id(NottawaUUID::generateUUID()),
         dragCallback(dragCallback) {};
 };
 

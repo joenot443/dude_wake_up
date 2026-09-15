@@ -48,7 +48,9 @@ $RequiredDefines = @(
     'NOMINMAX',
     'WIN32_LEAN_AND_MEAN',
     '_USE_MATH_DEFINES',
+    '_CRT_SECURE_NO_WARNINGS',
     '__WINDOWS_WASAPI__',
+    '__WINDOWS_MM__',              # rtmidi WinMM backend
     'TARGET_WIN32',
     'GLM_FORCE_CTOR_INIT',
     'GLM_ENABLE_EXPERIMENTAL',
@@ -56,8 +58,77 @@ $RequiredDefines = @(
     'USE_KISS_FFT',
     'ofxAddons_ENABLE_IMGUI',
     'JSON_DIAGNOSTICS=1',
-    'IMGUI_DEFINE_MATH_OPERATORS=1'
+    'IMGUI_DEFINE_MATH_OPERATORS=1',
+    'LINK_PLATFORM_WINDOWS=1',     # selects platform header in ableton/Link.hpp
+    'ASIO_STANDALONE=1'            # asio without Boost, header-only mode
 )
+
+# Individual source files under src/, lib/, and the addons that must be excluded
+# from the Windows build even though they'd otherwise be enumerated. Paths are
+# repo-relative, backslash-separated.
+$ExcludeFiles = @(
+    'src\Audio\gist\AccelerateFFT.cpp',
+    'src\Audio\SystemAudioSource_mac.mm',
+    'src\Video\Recording\AVFRecorder.h',
+    'src\Video\Recording\AVFRecorder.m',
+    'src\Video\Recording\AVFRecorderWrapper.mm',
+    'src\Video\OutputWindow.mm',
+    'src\Services\SparkleUpdater.mm',
+    'src\Services\URLSchemeHandler.mm',
+    # macOS-only Engine files. EngineLoop pulls in CoreFoundation bundle
+    # helpers + nottawa_bridge; IOSurfaceTextureManager wraps CVPixelBuffers.
+    # Both have _win.cpp stubs (or aren't needed at all on Windows).
+    'src\Engine\EngineLoop.cpp',
+    'src\Engine\EngineLoop.hpp',
+    'src\Engine\IOSurfaceTextureManager.cpp',
+    'src\Engine\IOSurfaceTextureManager.hpp',
+    # LibraryService needs OpenSSL for HTTPS — until Phase 5+ Windows uses
+    # the no-op stub in LibraryService_win.cpp.
+    'src\Network\LibraryService.cpp',
+    # BookmarkService's mac impl uses CoreFoundation extensively — the
+    # header-side typedef fallback covers callers, but the .cpp itself
+    # needs to be replaced by BookmarkService_win.cpp on Windows.
+    'src\Services\BookmarkService.cpp',
+    # dear_widgets uses ImGui internals removed in 1.86+. Nottawa never
+    # references its ImWidgets:: symbols, so drop both copies (this is
+    # the src/Util/ shadow; the lib/ one was already skipped).
+    'src\Util\dear_widgets.cpp'
+)
+
+# Directory prefixes to skip entirely (recursive). Anything under these
+# roots is never added to the project.
+$ExcludeDirs = @(
+    'src\Bridge',
+    'src\Engine\NottawaApp',
+    'lib\gist',                    # duplicate of src\Audio\gist — the src\ one is the live copy
+    'lib\BTrack\modules-and-plug-ins',
+    'lib\BTrack\libs',             # kiss_fft here is a duplicate of lib\kiss_fft130
+    'lib\Sparkle.framework',
+    'lib\Syphon',
+    'lib\ofxSyphon',
+    'lib\ofxVideoRecorder',
+    'lib\ableton',
+    'lib\gist\libs',
+    # implot is vendored in TWO places (lib/implot AND src/Oscillation/implot);
+    # exclude the src/ copy so we don't get duplicate symbols at link.
+    'src\Oscillation\implot'
+)
+
+# Explicit list of source files under lib/ that we DO want to compile.
+# Everything else in lib/ is either duplicate, macOS-only, or not needed.
+$LibSourceFiles = @(
+    # dear_widgets.cpp uses ImGui internals removed in 1.86+ (FocusableItem*)
+    # — the library is unreferenced by any Nottawa TU, so drop it.
+    # 'lib\dear_widgets.cpp',
+    'lib\imgui_stdlib.cpp',
+    'lib\ofxFastFboReader.cpp',
+    'lib\implot\implot.cpp',
+    'lib\implot\implot_items.cpp',
+    'lib\kiss_fft130\kiss_fft.c'
+)
+
+# Ableton Link and other vendored native SDKs may not be present — this is
+# a best-effort enumeration.
 
 # All src/** directories (recursive) and select lib/** dirs get include paths.
 $SrcRoot = Join-Path $RepoRoot 'src'
@@ -69,25 +140,60 @@ if (Test-Path $SrcRoot) {
     $IncludeDirs = @($SrcRoot) + $IncludeDirs
 }
 if (Test-Path $LibRoot) {
+    # lib/ itself hosts loose headers like ofxFastFboReader.h / json.hpp /
+    # dr_wav.h — add the root, then walk its immediate subdirectories.
+    $IncludeDirs += $LibRoot
     $IncludeDirs += Get-ChildItem -Path $LibRoot -Directory |
+        Where-Object {
+            $rel = 'lib\' + $_.Name
+            $skip = $false
+            foreach ($ex in $ExcludeDirs) { if ($rel -eq $ex -or $rel -like "$ex*") { $skip = $true; break } }
+            -not $skip
+        } |
         ForEach-Object { $_.FullName }
 }
 # ffmpeg headers are staged by fetch_ffmpeg_lgpl.ps1 into libs\ffmpeg\include.
 $FfmpegInc = Join-Path $RepoRoot 'libs\ffmpeg\include'
 if (Test-Path $FfmpegInc) { $IncludeDirs += $FfmpegInc }
 
+# Ableton Link SDK (header-only) + its asio dependency (also header-only).
+# Cloned into lib\ableton by a one-time git submodule fetch.
+$AbletonInc = Join-Path $RepoRoot 'lib\ableton\include'
+$AsioInc    = Join-Path $RepoRoot 'lib\ableton\modules\asio-standalone\asio\include'
+if (Test-Path $AbletonInc) { $IncludeDirs += $AbletonInc }
+if (Test-Path $AsioInc)    { $IncludeDirs += $AsioInc }
+
 # ffmpeg linker settings — libs staged into libs\ffmpeg\lib\.
 $FfmpegLibDir = Join-Path $RepoRoot 'libs\ffmpeg\lib'
 $FfmpegLibs   = @('avformat.lib','avcodec.lib','avutil.lib','swscale.lib','swresample.lib')
+
+# Extra Windows system libs Nottawa needs beyond what OF's props sheet provides.
+# winmm.lib      — rtmidi (via ofxMidi) uses the WinMM MIDI API
+# ole32.lib      — WASAPI COM (SystemAudioSource_win)
+# uuid.lib       — CLSIDs / IIDs used by WASAPI init
+# avrt.lib       — MMCSS ("Pro Audio" thread priority)
+# propsys.lib    — property-store access on WASAPI endpoints
+# shlwapi.lib    — path helpers used by our Utf8Path shim's fallback path
+$ExtraSystemLibs = @('winmm.lib','ole32.lib','uuid.lib','avrt.lib','propsys.lib','shlwapi.lib')
 # Normalize to project-relative $(ProjectDir)-anchored paths for portability.
 $ProjectDir = Split-Path -Parent $Project
-$IncludeDirs = $IncludeDirs | ForEach-Object {
+$IncludeDirs = @($IncludeDirs | ForEach-Object {
     # Fall back to absolute path if Resolve-Path -Relative isn't supported
     Push-Location $ProjectDir
     try { (Resolve-Path -LiteralPath $_ -Relative -ErrorAction Stop) }
     catch { $_ }
     finally { Pop-Location }
-}
+})
+
+# Addon include dirs are already project-relative (..\..\..\addons\...) —
+# append AFTER the resolve pipeline so they keep their exact form.
+# NOTE: $AddonIncludeDirs is declared below; assign here from the same literal.
+$IncludeDirs += @(
+    '..\..\..\addons\ofxImGui\src',
+    '..\..\..\addons\ofxImGui\libs\imgui\src',
+    '..\..\..\addons\ofxMidi\src',
+    '..\..\..\addons\ofxMidi\libs\rtmidi'
+)
 
 # ObjC++ files that must NOT compile on Windows even though projectGenerator
 # may enumerate them. Belt-and-braces beyond the __APPLE__ gate.
@@ -99,23 +205,47 @@ $ExcludeMasks = @(
     'src\Engine\*.mm'
 )
 
-# Windows _win.cpp stubs that must be in the project even if projectGenerator
-# skips them (some versions filter by filename pattern).
-$RequiredCompileItems = @(
-    'src\Audio\SystemAudioSource_win.cpp',
-    'src\Video\Recording\AVFRecorderWrapper_win.cpp',
-    'src\Video\Recording\LibavRecorder.cpp',
-    'src\Video\Recording\LibavRecorder.hpp',
-    'src\Engine\IOSurfaceTextureManager_win.cpp',
-    'src\Services\SparkleUpdater_win.cpp',
-    'src\Services\URLSchemeHandler_win.cpp',
-    'src\Services\BookmarkService_win.cpp',
-    'src\Video\OutputWindow_win.cpp',
-    'src\Util\PortabilityCheck.cpp',
-    'src\Util\Utf8Path.cpp',
-    'src\Util\ComApartment.hpp',
-    'src\Audio\AudioRawSink.cpp',
-    'src\Audio\AudioRawSink.hpp'
+# Superseded by Ensure-SourceItems — that function enumerates src\**, lib\
+# selectively, and the addons, so no static list is needed here.
+$RequiredCompileItems = @()
+
+# Addons rooted at ..\..\..\addons\ (relative from apps\myApps\Nottawa\).
+# Include-search paths for these come from AdditionalIncludeDirectories below.
+$AddonSourcePaths = @(
+    # ofxImGui — skip EngineOpenGLES / EngineVk (not our targets)
+    'addons\ofxImGui\src\BaseEngine.cpp',
+    'addons\ofxImGui\src\DefaultTheme.cpp',
+    'addons\ofxImGui\src\EngineGLFW.cpp',
+    'addons\ofxImGui\src\EngineOpenFrameworks.cpp',
+    'addons\ofxImGui\src\Gui.cpp',
+    'addons\ofxImGui\src\GuiEventHelper.cpp',
+    'addons\ofxImGui\src\ImHelpers.cpp',
+    'addons\ofxImGui\src\ofxImGuiLoggerChannel.cpp',
+    # ofxImGui vendored ImGui core — skip imgui_demo.cpp
+    'addons\ofxImGui\libs\imgui\src\imgui.cpp',
+    'addons\ofxImGui\libs\imgui\src\imgui_draw.cpp',
+    'addons\ofxImGui\libs\imgui\src\imgui_widgets.cpp',
+    'addons\ofxImGui\libs\imgui\src\imgui_tables.cpp',
+    # ofxMidi — desktop backend + rtmidi
+    'addons\ofxMidi\src\ofxBaseMidi.cpp',
+    'addons\ofxMidi\src\ofxMidi.cpp',
+    'addons\ofxMidi\src\ofxMidiClock.cpp',
+    'addons\ofxMidi\src\ofxMidiIn.cpp',
+    'addons\ofxMidi\src\ofxMidiMessage.cpp',
+    'addons\ofxMidi\src\ofxMidiOut.cpp',
+    'addons\ofxMidi\src\ofxMidiTimecode.cpp',
+    'addons\ofxMidi\src\desktop\ofxRtMidiIn.cpp',
+    'addons\ofxMidi\src\desktop\ofxRtMidiOut.cpp',
+    'addons\ofxMidi\libs\rtmidi\RtMidi.cpp'
+)
+
+# Addon include directories for AdditionalIncludeDirectories. Relative from
+# the vcxproj at apps\myApps\Nottawa\ — so ..\..\..\addons\...
+$AddonIncludeDirs = @(
+    '..\..\..\addons\ofxImGui\src',
+    '..\..\..\addons\ofxImGui\libs\imgui\src',
+    '..\..\..\addons\ofxMidi\src',
+    '..\..\..\addons\ofxMidi\libs\rtmidi'
 )
 
 # --- Load XML -----------------------------------------------------------
@@ -139,7 +269,7 @@ function Ensure-DefinesAndFlags {
         # PreprocessorDefinitions
         $pp = $cl.SelectSingleNode('m:PreprocessorDefinitions', $ns)
         $existing = if ($pp) { $pp.InnerText } else { '%(PreprocessorDefinitions)' }
-        $existingList = $existing.Split(';') | Where-Object { $_ -ne '' }
+        $existingList = @($existing.Split(';') | Where-Object { $_ -ne '' })
         $merged = $existingList
         foreach ($d in $defines) {
             if ($merged -notcontains $d) { $merged += $d }
@@ -156,7 +286,7 @@ function Ensure-DefinesAndFlags {
         # AdditionalIncludeDirectories
         $inc = $cl.SelectSingleNode('m:AdditionalIncludeDirectories', $ns)
         $existingInc = if ($inc) { $inc.InnerText } else { '%(AdditionalIncludeDirectories)' }
-        $existingIncList = $existingInc.Split(';') | Where-Object { $_ -ne '' }
+        $existingIncList = @($existingInc.Split(';') | Where-Object { $_ -ne '' })
         $mergedInc = $existingIncList
         foreach ($d in $includeDirs) {
             if ($mergedInc -notcontains $d) { $mergedInc += $d }
@@ -200,7 +330,7 @@ function Ensure-DefinesAndFlags {
             $ald = $xml.CreateElement('AdditionalLibraryDirectories', $ns.LookupNamespace('m'))
             [void]$link.AppendChild($ald)
         }
-        $existingLibDirs = if ($ald.InnerText) { $ald.InnerText.Split(';') | Where-Object { $_ -ne '' } } else { @() }
+        $existingLibDirs = if ($ald.InnerText) { @($ald.InnerText.Split(';') | Where-Object { $_ -ne '' }) } else { @() }
         if ($existingLibDirs -notcontains $FfmpegLibDir) { $existingLibDirs += $FfmpegLibDir }
         if ($existingLibDirs -notcontains '%(AdditionalLibraryDirectories)') { $existingLibDirs += '%(AdditionalLibraryDirectories)' }
         $ald.InnerText = ($existingLibDirs -join ';')
@@ -210,8 +340,11 @@ function Ensure-DefinesAndFlags {
             $adp = $xml.CreateElement('AdditionalDependencies', $ns.LookupNamespace('m'))
             [void]$link.AppendChild($adp)
         }
-        $existingDeps = if ($adp.InnerText) { $adp.InnerText.Split(';') | Where-Object { $_ -ne '' } } else { @() }
+        $existingDeps = if ($adp.InnerText) { @($adp.InnerText.Split(';') | Where-Object { $_ -ne '' }) } else { @() }
         foreach ($lib in $FfmpegLibs) {
+            if ($existingDeps -notcontains $lib) { $existingDeps += $lib }
+        }
+        foreach ($lib in $ExtraSystemLibs) {
             if ($existingDeps -notcontains $lib) { $existingDeps += $lib }
         }
         if ($existingDeps -notcontains '%(AdditionalDependencies)') { $existingDeps += '%(AdditionalDependencies)' }
@@ -246,7 +379,9 @@ function Ensure-DefinesAndFlags {
             $mfa = $xml.CreateElement('AdditionalManifestFiles', $ns.LookupNamespace('m'))
             [void]$mf.AppendChild($mfa)
         }
-        $manifestPath = '$(SolutionDir)..\..\..\app.manifest'
+        # Repo root == $(SolutionDir) because we work via a junction:
+        # <OF>\apps\myApps\Nottawa is a directory junction to the repo root.
+        $manifestPath = '$(SolutionDir)app.manifest'
         $existingMf = $mfa.InnerText
         if ($existingMf -notlike "*$manifestPath*") {
             if ($existingMf -and $existingMf -notmatch ';\s*$') { $existingMf += ';' }
@@ -289,21 +424,18 @@ function Ensure-ExcludeFromBuild {
 function Ensure-CompileItems {
     param($xml, $ns, $items)
 
-    # Grab or create an ItemGroup for our added items so we can find them
-    # on re-runs by Label.
+    # Legacy path — kept for the (now-empty) $RequiredCompileItems list. New
+    # source enumeration lives in Ensure-SourceItems below.
+    if (-not $items -or $items.Count -eq 0) { return }
     $group = $xml.SelectSingleNode("//m:ItemGroup[@Label='NottawaWinStubs']", $ns)
     if (-not $group) {
         $group = $xml.CreateElement('ItemGroup', $ns.LookupNamespace('m'))
         $group.SetAttribute('Label', 'NottawaWinStubs')
         [void]$xml.DocumentElement.AppendChild($group)
     }
-
     foreach ($p in $items) {
-        # Skip if any ClCompile / ClInclude already lists this file.
         $existing = $xml.SelectNodes("//m:ClCompile[@Include=`"$p`"] | //m:ClInclude[@Include=`"$p`"]", $ns)
         if ($existing.Count -gt 0) { continue }
-
-        # .hpp go in ClInclude, .cpp in ClCompile.
         $tag = if ($p -like '*.hpp' -or $p -like '*.h') { 'ClInclude' } else { 'ClCompile' }
         $node = $xml.CreateElement($tag, $ns.LookupNamespace('m'))
         $node.SetAttribute('Include', $p)
@@ -311,14 +443,134 @@ function Ensure-CompileItems {
     }
 }
 
+function Should-ExcludeFile {
+    param([string]$RelPath, [string[]]$ExcludeDirs, [string[]]$ExcludeFiles)
+    foreach ($d in $ExcludeDirs) {
+        if ($RelPath -like "$d\*" -or $RelPath -eq $d) { return $true }
+    }
+    foreach ($f in $ExcludeFiles) {
+        if ($RelPath -eq $f) { return $true }
+    }
+    # Global .mm / .m exclusions — Windows never compiles Objective-C.
+    if ($RelPath -like '*.mm' -or $RelPath -like '*.m') { return $true }
+    return $false
+}
+
+function Ensure-SourceItems {
+    param(
+        $xml, $ns, $repoRoot, $projectDir,
+        [string[]]$ExcludeDirs, [string[]]$ExcludeFiles,
+        [string[]]$LibSourceFiles, [string[]]$AddonSourcePaths
+    )
+
+    # Fresh authoritative source ItemGroup — drop stale entries from prior
+    # runs so removed files don't linger as unresolvable references.
+    $existing = $xml.SelectSingleNode("//m:ItemGroup[@Label='NottawaAuto']", $ns)
+    if ($existing) { [void]$existing.ParentNode.RemoveChild($existing) }
+
+    # Also purge template stubs — emptyExample.vcxproj ships with
+    # <ClCompile Include="src\main.cpp"/> and <ClCompile Include="src\ofApp.cpp"/>
+    # etc., which either duplicate our enumerated items or reference files
+    # that don't exist in Nottawa. Our enumeration is authoritative.
+    $staleGroups = @()
+    $stubs = $xml.SelectNodes('//m:ItemGroup/m:ClCompile | //m:ItemGroup/m:ClInclude', $ns)
+    foreach ($node in $stubs) {
+        $parent = $node.ParentNode
+        [void]$parent.RemoveChild($node)
+        if ($parent.ChildNodes.Count -eq 0 -and $staleGroups -notcontains $parent) {
+            $staleGroups += $parent
+        }
+    }
+    foreach ($g in $staleGroups) {
+        [void]$g.ParentNode.RemoveChild($g)
+    }
+
+    $srcGroup = $xml.CreateElement('ItemGroup', $ns.LookupNamespace('m'))
+    $srcGroup.SetAttribute('Label', 'NottawaAuto')
+    [void]$xml.DocumentElement.AppendChild($srcGroup)
+
+    $projectDirFull = (Resolve-Path $projectDir).Path.TrimEnd('\')
+
+    function Add-Item($include, $tag) {
+        $node = $xml.CreateElement($tag, $ns.LookupNamespace('m'))
+        $node.SetAttribute('Include', $include)
+        [void]$srcGroup.AppendChild($node)
+    }
+
+    function ToProjectRelative($absPath, $projectDirFull) {
+        # If projectDir is inside the repo (real path), file-relative works.
+        # Otherwise (junction case: projectDir is <OF>/apps/myApps/Nottawa,
+        # repo is C:\Users\Joe\dev\dude_wake_up), use the junction-relative
+        # form so the vcxproj remains portable.
+        Push-Location $projectDirFull
+        try {
+            $rel = (Resolve-Path -LiteralPath $absPath -Relative -ErrorAction Stop)
+            if ($rel.StartsWith('.\')) { $rel = $rel.Substring(2) }
+            return $rel
+        } catch {
+            return $absPath
+        } finally {
+            Pop-Location
+        }
+    }
+
+    $counts = @{ cpp = 0; c = 0; h = 0 }
+
+    # 1. src\**\*.{cpp,c,h,hpp} with our exclusion policy.
+    $srcRoot = Join-Path $repoRoot 'src'
+    if (Test-Path $srcRoot) {
+        Get-ChildItem -Path $srcRoot -Recurse -File -Include '*.cpp','*.c','*.h','*.hpp' -ErrorAction SilentlyContinue |
+        ForEach-Object {
+            $rel = ($_.FullName.Substring($repoRoot.Length + 1)) -replace '/', '\'
+            if (Should-ExcludeFile -RelPath $rel -ExcludeDirs $ExcludeDirs -ExcludeFiles $ExcludeFiles) { return }
+            $rel2 = ToProjectRelative $_.FullName $projectDirFull
+            $ext  = $_.Extension.ToLower()
+            switch ($ext) {
+                '.cpp' { Add-Item $rel2 'ClCompile'; $counts.cpp++ }
+                '.c'   { Add-Item $rel2 'ClCompile'; $counts.c++ }
+                '.h'   { Add-Item $rel2 'ClInclude'; $counts.h++ }
+                '.hpp' { Add-Item $rel2 'ClInclude'; $counts.h++ }
+            }
+        }
+    }
+
+    # 2. Explicit list of lib\ source files.
+    foreach ($rel in $LibSourceFiles) {
+        $abs = Join-Path $repoRoot $rel
+        if (-not (Test-Path $abs)) {
+            Write-Warning "Missing lib source: $rel"; continue
+        }
+        $rel2 = ToProjectRelative $abs $projectDirFull
+        Add-Item $rel2 'ClCompile'
+        if ($rel -like '*.c') { $counts.c++ } else { $counts.cpp++ }
+    }
+
+    # 3. Addon source files. These live in <OF>/addons/... which is
+    #    accessible from $projectDirFull via ..\..\..\ .
+    foreach ($rel in $AddonSourcePaths) {
+        # $rel like 'addons\ofxImGui\src\Gui.cpp'; resolves under the OF
+        # junction container: <projectDir>\..\..\..\<rel>
+        $abs = Resolve-Path -LiteralPath (Join-Path $projectDirFull "..\..\..\$rel") -ErrorAction SilentlyContinue
+        if (-not $abs) {
+            Write-Warning "Addon source not present: $rel"; continue
+        }
+        $rel2 = ToProjectRelative $abs.Path $projectDirFull
+        Add-Item $rel2 'ClCompile'
+        $counts.cpp++
+    }
+
+    Write-Host ("  enumerated: cpp={0}  c={1}  headers={2}" -f $counts.cpp, $counts.c, $counts.h) -ForegroundColor DarkGray
+}
+
 function Ensure-DataRobocopy {
     param($xml, $ns, $repoRoot)
 
     # Post-build event: robocopy repo data/ to $(OutDir)data\.
     # Robocopy exit codes 0-7 are success; wrap so MSBuild doesn't treat 1 as failure.
+    # $(SolutionDir) == repo root (see manifest note above).
     $cmd = @"
 if not exist "`$(OutDir)data" mkdir "`$(OutDir)data"
-robocopy "`$(SolutionDir)..\..\..\data" "`$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+robocopy "`$(SolutionDir)data" "`$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
 if %ERRORLEVEL% GEQ 8 exit /b 1
 exit /b 0
 "@
@@ -345,6 +597,9 @@ exit /b 0
 Ensure-DefinesAndFlags -xml $xml -ns $ns -defines $RequiredDefines -includeDirs $IncludeDirs
 Ensure-ExcludeFromBuild -xml $xml -ns $ns -masks $ExcludeMasks
 Ensure-CompileItems -xml $xml -ns $ns -items $RequiredCompileItems
+Ensure-SourceItems -xml $xml -ns $ns -repoRoot $RepoRoot -projectDir $ProjectDir `
+  -ExcludeDirs $ExcludeDirs -ExcludeFiles $ExcludeFiles `
+  -LibSourceFiles $LibSourceFiles -AddonSourcePaths $AddonSourcePaths
 Ensure-DataRobocopy -xml $xml -ns $ns -repoRoot $RepoRoot
 
 # Preserve encoding and formatting on save

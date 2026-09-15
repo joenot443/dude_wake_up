@@ -6,7 +6,7 @@
 //
 
 #include "Console.hpp"
-#import "ofMain.h"
+#include "ofMain.h"
 #include "FontService.hpp"
 #include "ConfigService.hpp"
 #include "Fonts.hpp"
