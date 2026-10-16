@@ -18,6 +18,7 @@
 #include "FlockingShader.hpp"
 #include "AudioCymaticsShader.hpp"
 #include "AudioAuroraShader.hpp"
+#include "AudioSilkShader.hpp"
 #include "AudioPulseGridShader.hpp"
 #include "AudioOscillatorShader.hpp"
 #include "LavaShader.hpp"
@@ -212,6 +213,7 @@ enum ShaderSourceType {
   ShaderSource_MarbleFlow, //source enum,
   ShaderSource_Ferro, //source enum,
   ShaderSource_RisoColumns, //source enum,
+  ShaderSource_AudioSilk, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -310,6 +312,7 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_MarbleFlow, // Available
   ShaderSource_Ferro, // Available
   ShaderSource_RisoColumns, // Available
+  ShaderSource_AudioSilk, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
@@ -339,6 +342,8 @@ static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
     return ShaderTypeAudioPulseGrid;
   case ShaderSource_AudioAurora: //type enum
     return ShaderTypeAudioAurora;
+  case ShaderSource_AudioSilk: //type enum
+    return ShaderTypeAudioSilk;
   case ShaderSource_AudioCymatics: //type enum
     return ShaderTypeAudioCymatics;
   case ShaderSource_Flocking: //type enum
@@ -523,6 +528,8 @@ static ShaderSourceType shaderSourceTypeForShaderType(ShaderType type) {
       return ShaderSource_AudioCymatics;
     case ShaderTypeAudioAurora:
       return ShaderSource_AudioAurora;
+    case ShaderTypeAudioSilk:
+      return ShaderSource_AudioSilk;
     case ShaderTypeAudioPulseGrid:
       return ShaderSource_AudioPulseGrid;
     case ShaderTypeSpiral:
@@ -695,6 +702,7 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     case ShaderSource_AudioCymatics:
     case ShaderSource_AudioAurora:
     case ShaderSource_AudioPulseGrid:
+    case ShaderSource_AudioSilk:
       return "Audio Reactive";
       
       // Particles
@@ -905,6 +913,12 @@ public:
     case ShaderSource_AudioPulseGrid: { // Settings
       auto settings = new AudioPulseGridSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<AudioPulseGridShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_AudioSilk: { // Settings
+      auto settings = new AudioSilkSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<AudioSilkShader>(settings);
       shader->setup();
       return;
     }

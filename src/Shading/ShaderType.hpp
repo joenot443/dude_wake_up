@@ -197,6 +197,7 @@ enum ShaderType {
   ShaderTypeMatchBlend,
   ShaderTypeMaskEngine,
   ShaderTypeRisoColumns,
+  ShaderTypeAudioSilk,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -372,6 +373,8 @@ static std::string shaderTypeName(ShaderType type) {
       return "Audio Pulse Grid";
     case ShaderTypeAudioAurora:
       return "Audio Aurora";
+    case ShaderTypeAudioSilk:
+      return "Audio Silk";
     case ShaderTypeAudioCymatics:
       return "Audio Cymatics";
     case ShaderTypeFlocking:
@@ -753,6 +756,7 @@ static bool shaderTypeIsAudioReactive(ShaderType type) {
     case ShaderTypeAudioCymatics:
     case ShaderTypeAudioAurora:
     case ShaderTypeAudioPulseGrid:
+    case ShaderTypeAudioSilk:
       return true;
     default:
       return false;

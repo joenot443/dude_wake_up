@@ -26,6 +26,7 @@
 #include "FlockingShader.hpp"
 #include "AudioCymaticsShader.hpp"
 #include "AudioAuroraShader.hpp"
+#include "AudioSilkShader.hpp"
 #include "AudioPulseGridShader.hpp"
 #include "RuttEtraShader.hpp"
 #include "WindowsShader.hpp"
@@ -1098,6 +1099,12 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeAudioSilk: {
+      auto settings = new AudioSilkSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AudioSilkShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeRisoColumns: {
       auto settings = new RisoColumnsSettings(shaderId, shaderJson);
       auto shader = std::make_shared<RisoColumnsShader>(settings);
