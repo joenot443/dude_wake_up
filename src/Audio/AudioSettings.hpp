@@ -142,6 +142,12 @@ struct AudioAnalysis {
   std::array<float, kSpectrumSize> renderSpectrum = {};
   std::array<float, kSpectrumSize> renderMelSpectrum = {};
   std::array<float, kSpectrumSize> renderWaveform = {};
+  // Latest raw (unsmoothed, bipolar) waveform chunk, for shaders that need the true signal shape.
+  std::array<float, kSpectrumSize> renderRawWaveform = {};
+  // Rolling history of the last 4 raw chunks (oldest -> newest, contiguous), for CPU-side
+  // analysis such as pitch tracking or scope-style triggering.
+  static constexpr size_t kRawHistorySize = kSpectrumSize * 4;
+  std::array<float, kRawHistorySize> renderRawHistory = {};
 
   // Smoothing buffers for different modes
   std::deque<std::vector<float>> spectrumHistory;

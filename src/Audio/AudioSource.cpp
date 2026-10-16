@@ -90,6 +90,13 @@ void AudioSource::processFrame(const std::vector<float>& frame) {
       size_t idx = i * 2;
       float avg = (chunk[idx] + chunk[idx + 1]) * 0.5f;
       audioAnalysis.waveform.push_back(avg);
+      audioAnalysis.renderRawWaveform[i] = avg;
+    }
+    {
+      auto &h = audioAnalysis.renderRawHistory;
+      const size_t n = AudioAnalysis::kSpectrumSize;
+      std::move(h.begin() + n, h.end(), h.begin());
+      std::copy_n(audioAnalysis.renderRawWaveform.begin(), n, h.end() - n);
     }
 
     // Run beat detection only in Auto mode. BTrack expects one call per 512-sample hop.

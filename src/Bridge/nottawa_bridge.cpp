@@ -2350,6 +2350,8 @@ namespace {
     std::array<float, AudioAnalysis::kSpectrumSize> renderSpectrum{};
     std::array<float, AudioAnalysis::kSpectrumSize> renderMelSpectrum{};
     std::array<float, AudioAnalysis::kSpectrumSize> renderWaveform{};
+    std::array<float, AudioAnalysis::kSpectrumSize> renderRawWaveform{};
+    std::array<float, AudioAnalysis::kRawHistorySize> renderRawHistory{};
     std::vector<float> smoothSpectrum, smoothMelSpectrum, smoothWaveform;
   };
 
@@ -2388,8 +2390,12 @@ namespace {
       const float sample = std::sin(t * 6.2831853f * 2.0f + f * 6.2831853f * 3.0f)
                            * (0.25f + 0.75f * rms);
       a.renderWaveform[i] = sample;
+      a.renderRawWaveform[i] = sample;
       a.smoothWaveform[i] = sample;
     }
+    // The fake waveform has whole cycles per window, so tiling it gives a seamless history.
+    for (size_t i = 0; i < AudioAnalysis::kRawHistorySize; ++i)
+      a.renderRawHistory[i] = a.renderRawWaveform[i % N];
   }
 }
 
@@ -2412,6 +2418,8 @@ void ntw_tick_previews(void) {
       audioBackup.renderSpectrum    = a.renderSpectrum;
       audioBackup.renderMelSpectrum = a.renderMelSpectrum;
       audioBackup.renderWaveform    = a.renderWaveform;
+      audioBackup.renderRawWaveform = a.renderRawWaveform;
+      audioBackup.renderRawHistory  = a.renderRawHistory;
       audioBackup.smoothSpectrum    = a.smoothSpectrum;
       audioBackup.smoothMelSpectrum = a.smoothMelSpectrum;
       audioBackup.smoothWaveform    = a.smoothWaveform;
@@ -2551,6 +2559,8 @@ void ntw_tick_previews(void) {
     a.renderSpectrum    = audioBackup.renderSpectrum;
     a.renderMelSpectrum = audioBackup.renderMelSpectrum;
     a.renderWaveform    = audioBackup.renderWaveform;
+    a.renderRawWaveform = audioBackup.renderRawWaveform;
+    a.renderRawHistory  = audioBackup.renderRawHistory;
     a.smoothSpectrum    = std::move(audioBackup.smoothSpectrum);
     a.smoothMelSpectrum = std::move(audioBackup.smoothMelSpectrum);
     a.smoothWaveform    = std::move(audioBackup.smoothWaveform);
