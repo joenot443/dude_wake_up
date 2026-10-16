@@ -19,6 +19,11 @@
 #include "AudioCymaticsShader.hpp"
 #include "AudioAuroraShader.hpp"
 #include "AudioSilkShader.hpp"
+#include "AudioPrismShader.hpp"
+#include "AudioSuminagashiShader.hpp"
+#include "AudioPhasePortraitShader.hpp"
+#include "AudioRainShader.hpp"
+#include "AudioPendulumShader.hpp"
 #include "AudioPulseGridShader.hpp"
 #include "AudioOscillatorShader.hpp"
 #include "LavaShader.hpp"
@@ -214,6 +219,11 @@ enum ShaderSourceType {
   ShaderSource_Ferro, //source enum,
   ShaderSource_RisoColumns, //source enum,
   ShaderSource_AudioSilk, //source enum,
+  ShaderSource_AudioPrism, //source enum,
+  ShaderSource_AudioSuminagashi, //source enum,
+  ShaderSource_AudioPhasePortrait, //source enum,
+  ShaderSource_AudioRain, //source enum,
+  ShaderSource_AudioPendulum, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -313,6 +323,11 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_Ferro, // Available
   ShaderSource_RisoColumns, // Available
   ShaderSource_AudioSilk, // Available
+  ShaderSource_AudioPrism, // Available
+  ShaderSource_AudioSuminagashi, // Available
+  ShaderSource_AudioPhasePortrait, // Available
+  ShaderSource_AudioRain, // Available
+  ShaderSource_AudioPendulum, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
@@ -344,6 +359,16 @@ static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
     return ShaderTypeAudioAurora;
   case ShaderSource_AudioSilk: //type enum
     return ShaderTypeAudioSilk;
+  case ShaderSource_AudioPrism: //type enum
+    return ShaderTypeAudioPrism;
+  case ShaderSource_AudioSuminagashi: //type enum
+    return ShaderTypeAudioSuminagashi;
+  case ShaderSource_AudioPhasePortrait: //type enum
+    return ShaderTypeAudioPhasePortrait;
+  case ShaderSource_AudioRain: //type enum
+    return ShaderTypeAudioRain;
+  case ShaderSource_AudioPendulum: //type enum
+    return ShaderTypeAudioPendulum;
   case ShaderSource_AudioCymatics: //type enum
     return ShaderTypeAudioCymatics;
   case ShaderSource_Flocking: //type enum
@@ -530,6 +555,16 @@ static ShaderSourceType shaderSourceTypeForShaderType(ShaderType type) {
       return ShaderSource_AudioAurora;
     case ShaderTypeAudioSilk:
       return ShaderSource_AudioSilk;
+    case ShaderTypeAudioPrism:
+      return ShaderSource_AudioPrism;
+    case ShaderTypeAudioSuminagashi:
+      return ShaderSource_AudioSuminagashi;
+    case ShaderTypeAudioPhasePortrait:
+      return ShaderSource_AudioPhasePortrait;
+    case ShaderTypeAudioRain:
+      return ShaderSource_AudioRain;
+    case ShaderTypeAudioPendulum:
+      return ShaderSource_AudioPendulum;
     case ShaderTypeAudioPulseGrid:
       return ShaderSource_AudioPulseGrid;
     case ShaderTypeSpiral:
@@ -703,6 +738,11 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     case ShaderSource_AudioAurora:
     case ShaderSource_AudioPulseGrid:
     case ShaderSource_AudioSilk:
+    case ShaderSource_AudioPrism:
+    case ShaderSource_AudioSuminagashi:
+    case ShaderSource_AudioPhasePortrait:
+    case ShaderSource_AudioRain:
+    case ShaderSource_AudioPendulum:
       return "Audio Reactive";
       
       // Particles
@@ -913,6 +953,36 @@ public:
     case ShaderSource_AudioPulseGrid: { // Settings
       auto settings = new AudioPulseGridSettings(UUID::generateUUID(), 0);
       shader = std::make_shared<AudioPulseGridShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_AudioPendulum: { // Settings
+      auto settings = new AudioPendulumSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<AudioPendulumShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_AudioRain: { // Settings
+      auto settings = new AudioRainSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<AudioRainShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_AudioPhasePortrait: { // Settings
+      auto settings = new AudioPhasePortraitSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<AudioPhasePortraitShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_AudioSuminagashi: { // Settings
+      auto settings = new AudioSuminagashiSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<AudioSuminagashiShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_AudioPrism: { // Settings
+      auto settings = new AudioPrismSettings(UUID::generateUUID(), 0);
+      shader = std::make_shared<AudioPrismShader>(settings);
       shader->setup();
       return;
     }

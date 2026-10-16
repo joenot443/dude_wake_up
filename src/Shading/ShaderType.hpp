@@ -198,6 +198,11 @@ enum ShaderType {
   ShaderTypeMaskEngine,
   ShaderTypeRisoColumns,
   ShaderTypeAudioSilk,
+  ShaderTypeAudioPrism,
+  ShaderTypeAudioSuminagashi,
+  ShaderTypeAudioPhasePortrait,
+  ShaderTypeAudioRain,
+  ShaderTypeAudioPendulum,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -375,6 +380,16 @@ static std::string shaderTypeName(ShaderType type) {
       return "Audio Aurora";
     case ShaderTypeAudioSilk:
       return "Audio Silk";
+    case ShaderTypeAudioPrism:
+      return "Audio Prism";
+    case ShaderTypeAudioSuminagashi:
+      return "Audio Suminagashi";
+    case ShaderTypeAudioPhasePortrait:
+      return "Audio Phase Portrait";
+    case ShaderTypeAudioRain:
+      return "Audio Rain";
+    case ShaderTypeAudioPendulum:
+      return "Audio Pendulum";
     case ShaderTypeAudioCymatics:
       return "Audio Cymatics";
     case ShaderTypeFlocking:
@@ -757,6 +772,11 @@ static bool shaderTypeIsAudioReactive(ShaderType type) {
     case ShaderTypeAudioAurora:
     case ShaderTypeAudioPulseGrid:
     case ShaderTypeAudioSilk:
+    case ShaderTypeAudioPrism:
+    case ShaderTypeAudioSuminagashi:
+    case ShaderTypeAudioPhasePortrait:
+    case ShaderTypeAudioRain:
+    case ShaderTypeAudioPendulum:
       return true;
     default:
       return false;

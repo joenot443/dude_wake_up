@@ -27,6 +27,11 @@
 #include "AudioCymaticsShader.hpp"
 #include "AudioAuroraShader.hpp"
 #include "AudioSilkShader.hpp"
+#include "AudioPrismShader.hpp"
+#include "AudioSuminagashiShader.hpp"
+#include "AudioPhasePortraitShader.hpp"
+#include "AudioRainShader.hpp"
+#include "AudioPendulumShader.hpp"
 #include "AudioPulseGridShader.hpp"
 #include "RuttEtraShader.hpp"
 #include "WindowsShader.hpp"
@@ -1099,6 +1104,36 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeAudioPendulum: {
+      auto settings = new AudioPendulumSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AudioPendulumShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeAudioRain: {
+      auto settings = new AudioRainSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AudioRainShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeAudioPhasePortrait: {
+      auto settings = new AudioPhasePortraitSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AudioPhasePortraitShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeAudioSuminagashi: {
+      auto settings = new AudioSuminagashiSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AudioSuminagashiShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeAudioPrism: {
+      auto settings = new AudioPrismSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AudioPrismShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeAudioSilk: {
       auto settings = new AudioSilkSettings(shaderId, shaderJson);
       auto shader = std::make_shared<AudioSilkShader>(settings);
