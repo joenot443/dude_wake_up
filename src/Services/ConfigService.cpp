@@ -25,6 +25,9 @@
 #include "VideoSourceService.hpp"
 #include "json.hpp"
 #include "ofMain.h"
+#include <algorithm>
+#include <cstdlib>
+#include <filesystem>
 #include <fstream>
 #include <ostream>
 
@@ -77,13 +80,20 @@ std::string ConfigService::relativeFilePathWithinNottawaFolder(std::string fileP
 
 std::string ConfigService::appSupportFilePath() {
 #if defined(_WIN32)
-  // Windows has no sandbox container; use the user home dir directly.
-  // nottawaFolderFilePath() appends "/nottawa", so this gives us
-  // %USERPROFILE% and the final path is %USERPROFILE%\nottawa\.
-  std::string appSupportPath = ofFilePath::getUserHomeDir();
-  if (!ofDirectory::doesDirectoryExist(appSupportPath + "/nottawa", false)) {
-    ofDirectory::createDirectory(appSupportPath + "/nottawa", false, true);
+  // %LOCALAPPDATA%\Nottawa (local, not roaming: the library holds videos).
+  // NOTTAWA_APPDATA overrides it so scripted test runs get a throwaway
+  // session instead of autosaving into the user's.
+  std::string appSupportPath;
+  if (const char* overridePath = std::getenv("NOTTAWA_APPDATA")) {
+    appSupportPath = overridePath;
+  } else if (const char* localAppData = std::getenv("LOCALAPPDATA")) {
+    appSupportPath = std::string(localAppData) + "/Nottawa";
+  } else {
+    appSupportPath = ofFilePath::getUserHomeDir() + "/AppData/Local/Nottawa";
   }
+  std::replace(appSupportPath.begin(), appSupportPath.end(), '\\', '/');
+  std::error_code ec;
+  std::filesystem::create_directories(std::filesystem::u8path(appSupportPath + "/nottawa"), ec);
   return appSupportPath;
 #else
   // Both the legacy ImGui app and the SwiftUI rebuild ship under bundle ID
