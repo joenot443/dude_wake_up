@@ -7,15 +7,25 @@
 #include <QString>
 #include <QStringList>
 #include <QVector>
+#include <atomic>
 
 class FrameExchange;
 
+// One entry of the engine's catalog. Shader sources and effects carry their
+// shader type; inputs (text, icon, image, webcam) carry a VideoSourceType.
 struct CatalogItem {
     QString name;
     QString category;
     int     typeRaw  = 0;
     bool    isSource = false;
+    bool    isInput  = false;
+    bool    favorite = false;
+
+    // Drag payload, also used as a stable key: "shader:N", "source:N", "input:N".
+    QString payload() const;
 };
+
+namespace VideoSourceKind { enum { Webcam = 0, Image = 2, Icon = 3, Text = 5 }; }
 
 struct GraphNode {
     QString id;
@@ -75,6 +85,8 @@ public:
 
     QVector<CatalogItem> effects() const;
     QVector<CatalogItem> sources() const;
+    QVector<CatalogItem> inputs() const;
+    void toggleFavorite(const CatalogItem& item);
     QVector<GraphNode>   nodes() const;
     QVector<GraphEdge>   edges() const;
     // Deepest node with no outgoing connection, preferring shaders — the same
@@ -83,6 +95,8 @@ public:
 
     QString addEffect(int typeRaw, const QString& connectFromId);
     QString addSource(int typeRaw);
+    // Adds a text, icon, image or webcam source; images need `path`.
+    QString addInput(int videoSourceType, const QString& path = {});
     QString connectNodes(const QString& startId, const QString& endId, int outputSlot, int inputSlot);
     void    removeConnection(const QString& connectionId);
     void    removeNode(const QString& connectableId);
@@ -114,6 +128,15 @@ public:
     void    toggleAudio();
     bool    isAudioActive() const;
 
+    // Browser previews: small standalone instances of a catalog type,
+    // shared like nodes. These block until the engine thread runs them
+    // (create compiles a shader), so they're safe and meant to be called
+    // from a worker thread.
+    static QString createPreview(int typeRaw, bool isSource);
+    static void    destroyPreview(const QString& previewId);
+    // Effect previews process this source's output (or any active one).
+    void setPreferredPreviewSource(const QString& sourceId);
+
     // Texture sharing is reference counted per node: several views (stage,
     // node previews) may show the same node.
     void retainFrames(const QString& connectableId);
@@ -126,6 +149,6 @@ signals:
 
 private:
     EngineBridge() = default;
-    bool running_ = false;
+    std::atomic<bool> running_{false};  // read by preview worker threads
     QHash<QString, int> shareCounts_;
 };

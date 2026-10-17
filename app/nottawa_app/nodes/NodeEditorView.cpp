@@ -13,6 +13,7 @@
 #include <QMouseEvent>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
+#include <QFileDialog>
 #include <QOpenGLWidget>
 #include <QScreen>
 #include <QScrollBar>
@@ -596,14 +597,35 @@ QString NodeEditorView::addFromCatalog(int typeRaw, bool isSource, const QString
     QPointF pos;
     if (scenePos) pos = *scenePos;
     else if (anchor) pos = anchor->pos() + QPointF(kChainStep, 0);
-    else if (const NodeItem* last = nodes_.value(lastAddedId_)) pos = last->pos() + QPointF(0, kStackStep);
-    else pos = mapToScene(viewport()->rect().center());
-    engine->setNodePosition(id, pos);
+    else pos = nextFreePosition();
+    placeNew(id, pos);
+    return id;
+}
+
+QString NodeEditorView::addInput(int type, const QPointF* scenePos) {
+    QString path;
+    if (type == VideoSourceKind::Image) {
+        path = QFileDialog::getOpenFileName(this, "Choose an image file", {},
+                                            "Images (*.png *.jpg *.jpeg *.gif *.bmp *.tif *.tiff *.webp)");
+        if (path.isEmpty()) return {};
+    }
+    const QString id = EngineBridge::instance()->addInput(type, path);
+    if (id.isEmpty()) return id;
+    placeNew(id, scenePos ? *scenePos : nextFreePosition());
+    return id;
+}
+
+QPointF NodeEditorView::nextFreePosition() const {
+    if (const NodeItem* last = nodes_.value(lastAddedId_)) return last->pos() + QPointF(0, kStackStep);
+    return mapToScene(viewport()->rect().center());
+}
+
+void NodeEditorView::placeNew(const QString& id, QPointF pos) {
+    EngineBridge::instance()->setNodePosition(id, pos);
     lastAddedId_ = id;
     syncFromEngine();
     selectNode(id);
     emit nodeSelected(id);
-    return id;
 }
 
 // ------------------------------------------------------------ drag & drop
@@ -620,11 +642,17 @@ void NodeEditorView::dropEvent(QDropEvent* e) {
     const QString payload = QString::fromUtf8(e->mimeData()->data(kCatalogMime));
     const int colon = payload.indexOf(':');
     if (colon < 0) return;
-    const bool isSource = payload.left(colon) == QLatin1String("source");
+    const QStringView kind = QStringView(payload).left(colon);
+    const bool isSource = kind == u"source";
     const int type = payload.mid(colon + 1).toInt();
     const QPoint viewPos = e->position().toPoint();
     const QPointF scenePos = mapToScene(viewPos);
     e->acceptProposedAction();
+    if (kind == u"input") {
+        // Return to the event loop first: the image file dialog is modal.
+        QTimer::singleShot(0, this, [this, type, scenePos] { addInput(type, &scenePos); });
+        return;
+    }
 
     auto* engine = EngineBridge::instance();
     if (!isSource) {

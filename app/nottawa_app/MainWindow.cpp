@@ -71,8 +71,11 @@ MainWindow::MainWindow(const QString& dataPath) : dataPath_(dataPath) {
         selectedId_ = id;
         EngineBridge::instance()->selectNode(id);
         QString name;
-        for (const auto& n : EngineBridge::instance()->nodes()) if (n.id == id) name = n.name;
+        bool isSource = false;
+        for (const auto& n : EngineBridge::instance()->nodes())
+            if (n.id == id) { name = n.name; isSource = !n.isShader; }
         inspector_->setNode(id, name);
+        browser_->setSelectedNode(id, isSource);
     });
 
     // After the event loop starts, so the window is up while services load.
@@ -84,8 +87,9 @@ MainWindow::MainWindow(const QString& dataPath) : dataPath_(dataPath) {
 }
 
 MainWindow::~MainWindow() {
-    // The views release their shared textures when destroyed; do that while
-    // the engine is still running.
+    // The views release their shared textures (and the browser its
+    // previews) when destroyed; do that while the engine is still running.
+    browser_->shutdown();
     delete centre_;
     EngineBridge::instance()->stop();
 }
@@ -172,7 +176,10 @@ void MainWindow::buildDocks() {
         addDockWidget(area, dock);
         return dock;
     };
-    addDock("LIBRARY",   browser_,   Qt::LeftDockWidgetArea)->setMinimumWidth(240);
+    // The browser's tab bar stands in for a dock title, as on macOS.
+    QDockWidget* browserDock = addDock("LIBRARY", browser_, Qt::LeftDockWidgetArea);
+    browserDock->setTitleBarWidget(new QWidget(browserDock));
+    browserDock->setMinimumWidth(240);
     addDock("INSPECTOR", inspector_, Qt::RightDockWidgetArea)->setMinimumWidth(320);
     addDock("LOG",       logPanel_,  Qt::BottomDockWidgetArea)->setMinimumHeight(90);
 }
@@ -193,7 +200,7 @@ void MainWindow::startEngine() {
     }
     const auto sources = engine->sources();
     const auto effects = engine->effects();
-    browser_->populate(sources, effects);
+    browser_->reload();
     const QSize res = engine->resolution();
     log(QString("[engine] running at %1x%2 — %3 sources, %4 effects available")
         .arg(res.width()).arg(res.height()).arg(sources.size()).arg(effects.size()));
@@ -214,7 +221,7 @@ void MainWindow::runScriptedAdds() {
             for (const auto& list : {engine->sources(), engine->effects()}) {
                 for (const auto& item : list) {
                     if (item.name.compare(name, Qt::CaseInsensitive) != 0) continue;
-                    addFromLibrary(item.typeRaw, item.isSource);
+                    addFromLibrary(item);
                     log("[script] added " + item.name);
                     return;
                 }
@@ -224,12 +231,15 @@ void MainWindow::runScriptedAdds() {
     }
 }
 
-void MainWindow::addFromLibrary(int typeRaw, bool isSource) {
+void MainWindow::addFromLibrary(const CatalogItem& item) {
     if (!EngineBridge::instance()->isRunning()) return;
     // Effects chain after the selected node, else after the output.
     const QString after = selectedId_.isEmpty() ? EngineBridge::instance()->outputNodeId() : selectedId_;
-    if (editor_->addFromCatalog(typeRaw, isSource, after).isEmpty()) log("[graph] ERROR could not add node");
-    else welcome_->hide();
+    const QString id = item.isInput ? editor_->addInput(item.typeRaw)
+                                    : editor_->addFromCatalog(item.typeRaw, item.isSource, after);
+    // An image input that was cancelled in its file dialog isn't an error.
+    if (!id.isEmpty()) welcome_->hide();
+    else if (!(item.isInput && item.typeRaw == VideoSourceKind::Image)) log("[graph] ERROR could not add node");
 }
 
 void MainWindow::refreshGraph() {

@@ -2,6 +2,7 @@
 
 #include "nottawa_bridge.h"
 
+#include <QFileInfo>
 #include <QHash>
 #include <QSet>
 #include <cstdlib>
@@ -23,6 +24,10 @@ void onGraphChanged() {
 const char* const kEffectCategories[] = {"Basic", "Mix", "Transform", "Filter", "Mask", "Glitch"};
 
 } // anon
+
+QString CatalogItem::payload() const {
+    return QString("%1:%2").arg(isInput ? "input" : isSource ? "source" : "shader").arg(typeRaw);
+}
 
 EngineBridge* EngineBridge::instance() {
     static EngineBridge bridge;
@@ -58,7 +63,8 @@ QVector<CatalogItem> EngineBridge::effects() const {
         int n = 0;
         NTWAvailableShaderInfo* arr = ntw_get_available_shaders(c, &n);
         for (int i = 0; i < n; ++i)
-            out.push_back({str(arr[i].name), kEffectCategories[c - 1], arr[i].shaderTypeRaw, false});
+            out.push_back({str(arr[i].name), kEffectCategories[c - 1], arr[i].shaderTypeRaw, false, false,
+                           arr[i].isFavorited != 0});
         ntw_free_available_shader_info_array(arr, n);
     }
     return out;
@@ -69,9 +75,56 @@ QVector<CatalogItem> EngineBridge::sources() const {
     int n = 0;
     NTWAvailableShaderInfo* arr = ntw_get_available_shader_sources(&n);
     for (int i = 0; i < n; ++i)
-        out.push_back({str(arr[i].name), str(arr[i].category), arr[i].shaderTypeRaw, true});
+        out.push_back({str(arr[i].name), str(arr[i].category), arr[i].shaderTypeRaw, true, false,
+                       arr[i].isFavorited != 0});
     ntw_free_available_shader_info_array(arr, n);
     return out;
+}
+
+QVector<CatalogItem> EngineBridge::inputs() const {
+    QVector<CatalogItem> out;
+    int n = 0;
+    NTWAvailableNonShaderSourceInfo* arr = ntw_get_available_non_shader_sources(&n);
+    for (int i = 0; i < n; ++i)
+        out.push_back({str(arr[i].name), "Input", arr[i].sourceType, true, true, arr[i].isFavorited != 0});
+    ntw_free_available_non_shader_source_info_array(arr, n);
+    return out;
+}
+
+void EngineBridge::toggleFavorite(const CatalogItem& item) {
+    // Inputs share the source favourites, offset by 1000 (as on macOS).
+    if (item.isInput) ntw_toggle_favorite_source_type(1000 + item.typeRaw);
+    else if (item.isSource) ntw_toggle_favorite_source_type(item.typeRaw);
+    else ntw_toggle_favorite_shader_type(item.typeRaw);
+}
+
+QString EngineBridge::addInput(int type, const QString& path) {
+    switch (type) {
+    case VideoSourceKind::Text:   return takeString(ntw_add_text_video_source("Text"));
+    case VideoSourceKind::Icon:   return takeString(ntw_add_icon_video_source("Icon"));
+    case VideoSourceKind::Webcam: return takeString(ntw_add_webcam_video_source("Webcam", 0));
+    case VideoSourceKind::Image: {
+        if (path.isEmpty()) return {};
+        const QByteArray name = QFileInfo(path).fileName().toUtf8();
+        return takeString(ntw_add_image_video_source(name.constData(), path.toUtf8().constData()));
+    }
+    }
+    return {};
+}
+
+// Bridge calls made while the engine is stopped run GL code on the calling
+// thread, which has no context — so these do nothing then.
+QString EngineBridge::createPreview(int typeRaw, bool isSource) {
+    if (!instance()->isRunning()) return {};
+    return takeString(ntw_create_preview(typeRaw, isSource));
+}
+
+void EngineBridge::destroyPreview(const QString& id) {
+    if (instance()->isRunning()) ntw_destroy_preview(id.toUtf8().constData());
+}
+
+void EngineBridge::setPreferredPreviewSource(const QString& id) {
+    ntw_set_preferred_preview_source(id.isEmpty() ? nullptr : id.toUtf8().constData());
 }
 
 QVector<GraphNode> EngineBridge::nodes() const {

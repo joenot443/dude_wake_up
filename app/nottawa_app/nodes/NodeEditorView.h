@@ -45,6 +45,8 @@ public:
     // Adds a library entry the way the macOS editor does: at `scenePos` if
     // given, else connected after `connectFrom` (300 to its right), else
     // below the last added node, else at the view centre.
+    // Adds a text, icon, image (asks for the file) or webcam source.
+    QString addInput(int videoSourceType, const QPointF* scenePos = nullptr);
     QString addFromCatalog(int typeRaw, bool isSource, const QString& connectFrom = {},
                            const QPointF* scenePos = nullptr);
 
@@ -85,6 +87,9 @@ private:
     void fillCatalogMenu(QMenu* menu, bool sources, const std::function<void(int)>& pick);
     void swapNode(const QString& id, bool isSource, int typeRaw);
     void cycleSelection(bool backwards);
+    QPointF nextFreePosition() const;
+    // Positions a just-added node, selects it and syncs.
+    void placeNew(const QString& id, QPointF pos);
 
     QHash<QString, NodeItem*> nodes_;
     QHash<QString, EdgeItem*> edges_;

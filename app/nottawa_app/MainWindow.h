@@ -1,4 +1,6 @@
 #pragma once
+
+#include "EngineBridge.h"
 #include <QMainWindow>
 #include <QString>
 #include <QtGlobal>
@@ -42,7 +44,7 @@ private:
     void startEngine();
     void setStageMode(bool on);
     void updateStageSource();
-    void addFromLibrary(int typeRaw, bool isSource);
+    void addFromLibrary(const CatalogItem& item);
     void runScriptedAdds();
     void log(const QString& line);
 

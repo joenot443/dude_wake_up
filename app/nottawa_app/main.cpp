@@ -4,6 +4,7 @@
 #include <QApplication>
 #include <QDir>
 #include <QFileInfo>
+#include <QSettings>
 #include <QSurfaceFormat>
 
 namespace {
@@ -20,6 +21,14 @@ QString findDataDir() {
         if (!dir.cdUp()) break;
     }
     return {};
+}
+
+// Per-user app data, matching the engine's ConfigService: NOTTAWA_APPDATA
+// when set (test runs), else %LOCALAPPDATA%/Nottawa.
+QString appDataDir() {
+    const QString override = qEnvironmentVariable("NOTTAWA_APPDATA");
+    if (!override.isEmpty()) return override;
+    return QDir(qEnvironmentVariable("LOCALAPPDATA")).absoluteFilePath("Nottawa");
 }
 } // anon
 
@@ -41,6 +50,10 @@ int main(int argc, char** argv) {
     QApplication app(argc, argv);
     app.setApplicationName("Nottawa");
     app.setOrganizationName("Nottawa");
+    // UI settings live in an INI file beside the engine's config (not the
+    // registry), so a throwaway NOTTAWA_APPDATA isolates them too.
+    QSettings::setDefaultFormat(QSettings::IniFormat);
+    QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, appDataDir());
     Theme::apply(app);
 
     MainWindow w(findDataDir());

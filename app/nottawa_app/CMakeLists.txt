@@ -37,6 +37,9 @@ qt_add_executable(nottawa_app WIN32
     StageWidget.h            StageWidget.cpp
     FramePresenter.h         FramePresenter.cpp
     PreviewWindow.h          PreviewWindow.cpp
+    Icons.h                  Icons.cpp
+    panels/PreviewPool.h     panels/PreviewPool.cpp
+    panels/TileGridView.h    panels/TileGridView.cpp
     nodes/NodeEditorView.h   nodes/NodeEditorView.cpp
     nodes/NodeItems.h        nodes/NodeItems.cpp
     Theme.h                  Theme.cpp
