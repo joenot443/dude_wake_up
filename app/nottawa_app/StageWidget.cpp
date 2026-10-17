@@ -5,9 +5,9 @@
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 #include <QScreen>
-#include <QtGui/qopenglcontext_platform.h>
 
-StageWidget::StageWidget(QWidget* parent) : QOpenGLWidget(parent) {
+StageWidget::StageWidget(QWidget* parent, FramePresenter::Reader reader)
+    : QOpenGLWidget(parent), reader_(reader) {
     setUpdateBehavior(QOpenGLWidget::NoPartialUpdate);
     setMinimumSize(320, 180);
     repaintTimer_.setTimerType(Qt::PreciseTimer);
@@ -34,10 +34,7 @@ void StageWidget::setSourceNode(const QString& connectableId) {
 }
 
 void StageWidget::initializeGL() {
-    if (auto* wgl = context()->nativeInterface<QNativeInterface::QWGLContext>())
-        nativeContext_ = wgl->nativeContext();
     presenter_.initialize();
-    emit glReady();
 }
 
 void StageWidget::paintGL() {
@@ -46,6 +43,6 @@ void StageWidget::paintGL() {
     gl->glClear(GL_COLOR_BUFFER_BIT);
     if (nodeId_.isEmpty()) return;
     bool isNew = false;
-    presenter_.draw(EngineBridge::instance()->frames(nodeId_), FramePresenter::Stage, 1.0f, &isNew);
+    presenter_.draw(EngineBridge::instance()->frames(nodeId_), reader_, 1.0f, 0.0f, &isNew);
     if (isNew) framesShown_.fetch_add(1);
 }

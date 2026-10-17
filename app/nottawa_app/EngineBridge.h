@@ -84,6 +84,9 @@ public:
     void    selectNode(const QString& connectableId);
     void    setNodeActive(const QString& connectableId, bool active);
     QString blendBetween(const QString& id1, const QString& id2);
+    // Swaps a node for another catalog type, keeping its connections.
+    // Returns the replacement's id.
+    QString replaceNode(const QString& connectableId, int typeRaw, bool isSource);
     void    copyNodes(const QStringList& ids);
     QStringList pasteNodes();
     void    undo();

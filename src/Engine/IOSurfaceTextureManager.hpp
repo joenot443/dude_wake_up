@@ -38,8 +38,8 @@ struct SharedTexture {
   uint64_t lastBlittedTick = UINT64_MAX;
 #ifndef __APPLE__
   std::shared_ptr<FrameExchange> exchange;  // `surface` points at this
-  unsigned int slotTextures[4] = {};  // FrameExchange::kSlots
-  unsigned int slotFbos[4] = {};
+  unsigned int slotTextures[5] = {};  // FrameExchange::kSlots
+  unsigned int slotFbos[5] = {};
 #endif
 };
 

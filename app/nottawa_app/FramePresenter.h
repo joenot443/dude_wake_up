@@ -10,16 +10,18 @@ class FrameExchange;
 // initialize() with that context current.
 class FramePresenter : protected QOpenGLFunctions_3_3_Core {
 public:
-    enum Reader { Stage = 0, NodeEditor = 1 };
+    enum Reader { Stage = 0, NodeEditor = 1, Preview = 2 };
 
     void initialize();
     void destroy();
     bool isInitialized() const { return program_ != 0; }
 
     // Returns false if the exchange has no frame yet. `newFrame` is set when
-    // the frame wasn't shown by this reader before. `opacity` scales alpha
-    // (blending is enabled only when it is below 1).
-    bool draw(FrameExchange* exchange, Reader reader, float opacity = 1.0f, bool* newFrame = nullptr);
+    // the frame wasn't shown by this reader before. `opacity` scales alpha.
+    // A non-zero `cornerRadiusPx` rounds the corners of the current viewport
+    // (antialiased); blending is enabled whenever either applies.
+    bool draw(FrameExchange* exchange, Reader reader, float opacity = 1.0f,
+              float cornerRadiusPx = 0.0f, bool* newFrame = nullptr);
 
 private:
     uint32_t program_ = 0;
@@ -27,4 +29,6 @@ private:
     uint32_t vbo_     = 0;
     int      locTex_     = -1;
     int      locOpacity_ = -1;
+    int      locRect_    = -1;
+    int      locRadius_  = -1;
 };

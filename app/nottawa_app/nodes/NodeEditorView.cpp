@@ -2,6 +2,7 @@
 
 #include "EngineBridge.h"
 #include "NodeItems.h"
+#include "PreviewWindow.h"
 
 #include <QApplication>
 #include <QGraphicsLineItem>
@@ -17,6 +18,7 @@
 #include <QScrollBar>
 #include <QSet>
 #include <QWheelEvent>
+#include <algorithm>
 #include <cmath>
 
 namespace {
@@ -59,6 +61,7 @@ NodeEditorView::NodeEditorView(QWidget* parent) : QGraphicsView(parent) {
 }
 
 NodeEditorView::~NodeEditorView() {
+    for (const auto& w : std::as_const(previews_)) if (w) delete w.data();
     for (const QString& id : nodes_.keys()) EngineBridge::instance()->releaseFrames(id);
     if (auto* gl = qobject_cast<QOpenGLWidget*>(viewport())) {
         gl->makeCurrent();
@@ -112,9 +115,15 @@ void NodeEditorView::syncFromEngine() {
     }
     for (auto it = nodes_.begin(); it != nodes_.end();) {
         if (liveNodes.contains(it.key())) { ++it; continue; }
+        if (PreviewWindow* w = previews_.take(it.key())) w->close();
         engine->releaseFrames(it.key());
         delete it.value();
         it = nodes_.erase(it);
+    }
+    for (auto it = previews_.begin(); it != previews_.end();) {
+        if (!it.value()) { it = previews_.erase(it); continue; }
+        if (NodeItem* n = nodes_.value(it.key())) it.value()->setNodeName(n->name());
+        ++it;
     }
 
     QSet<QString> liveEdges;
@@ -186,7 +195,7 @@ QStringList NodeEditorView::selectedNodeIds() const {
 
 // ---------------------------------------------------------------- previews
 
-void NodeEditorView::drawNodePreview(QPainter* p, const NodeItem* node, const QRectF& bodyLocal, float opacity) {
+void NodeEditorView::drawNodePreview(QPainter* p, const NodeItem* node, const QRectF& bodyLocal, qreal cornerRadius, float opacity) {
     FrameExchange* ex = EngineBridge::instance()->frames(node->id());
     if (!ex) return;
     const QRectF vr = node->deviceTransform(viewportTransform()).mapRect(bodyLocal);
@@ -208,7 +217,8 @@ void NodeEditorView::drawNodePreview(QPainter* p, const NodeItem* node, const QR
     GLint saved[4];
     gl->glGetIntegerv(GL_VIEWPORT, saved);
     gl->glViewport(left, fbHeight - bottom, right - left, bottom - top);
-    presenter_.draw(ex, FramePresenter::NodeEditor, opacity);
+    const qreal radiusPx = cornerRadius * node->deviceTransform(viewportTransform()).m11() * dpr;
+    presenter_.draw(ex, FramePresenter::NodeEditor, opacity, float(radiusPx));
     gl->glViewport(saved[0], saved[1], saved[2], saved[3]);
     p->endNativePainting();
 }
@@ -407,6 +417,10 @@ void NodeEditorView::keyPressEvent(QKeyEvent* e) {
     }
     if (ctrl && e->key() == Qt::Key_Z) { (e->modifiers() & Qt::ShiftModifier) ? engine->redo() : engine->undo(); return; }
     if (ctrl && e->key() == Qt::Key_Y) { engine->redo(); return; }
+    if (ctrl && (e->key() == Qt::Key_Tab || e->key() == Qt::Key_Backtab)) {
+        cycleSelection(e->key() == Qt::Key_Backtab || (e->modifiers() & Qt::ShiftModifier));
+        return;
+    }
     QGraphicsView::keyPressEvent(e);
 }
 
@@ -442,8 +456,13 @@ void NodeEditorView::showContextMenu(const QPoint& viewPos) {
     } else if (NodeItem* node = nodeAt(viewPos)) {
         if (!node->isSelected()) { scene()->clearSelection(); node->setSelected(true); }
         const QString id = node->id();
+        const bool isSource = !node->isShader();
         menu.addAction(node->isActive() ? "Pause" : "Resume", this, [engine, id, node] { engine->setNodeActive(id, !node->isActive()); });
         menu.addAction(QString("Delete %1").arg(node->name()), this, [engine, id] { engine->removeNode(id); });
+        fillCatalogMenu(menu.addMenu(isSource ? "Swap Source" : "Swap Effect"), isSource,
+                        [this, id, isSource](int type) { swapNode(id, isSource, type); });
+        menu.addAction("Open Preview Window", this, [this, id] { openPreview(id); });
+        menu.addSeparator();
         QList<EdgeItem*> nodeEdges;
         for (EdgeItem* edge : std::as_const(edges_))
             if (edge->from()->parentItem() == node || edge->to()->parentItem() == node) nodeEdges << edge;
@@ -474,21 +493,84 @@ void NodeEditorView::showContextMenu(const QPoint& viewPos) {
             });
         }
     } else {
-        QMenu* effects = menu.addMenu("Add Effect");
-        QHash<QString, QMenu*> categories;
-        for (const CatalogItem& item : engine->effects()) {
-            QMenu*& sub = categories[item.category];
-            if (!sub) sub = effects->addMenu(item.category);
-            const int type = item.typeRaw;
-            sub->addAction(item.name, this, [this, type, scenePos] { addFromCatalog(type, false, {}, &scenePos); });
-        }
-        QMenu* sources = menu.addMenu("Add Source");
-        for (const CatalogItem& item : engine->sources()) {
-            const int type = item.typeRaw;
-            sources->addAction(item.name, this, [this, type, scenePos] { addFromCatalog(type, true, {}, &scenePos); });
-        }
+        fillCatalogMenu(menu.addMenu("Add Effect"), false,
+                        [this, scenePos](int type) { addFromCatalog(type, false, {}, &scenePos); });
+        fillCatalogMenu(menu.addMenu("Add Source"), true,
+                        [this, scenePos](int type) { addFromCatalog(type, true, {}, &scenePos); });
     }
     if (!menu.isEmpty()) menu.exec(mapToGlobal(viewPos));
+}
+
+void NodeEditorView::fillCatalogMenu(QMenu* menu, bool sources, const std::function<void(int)>& pick) {
+    auto* engine = EngineBridge::instance();
+    QHash<QString, QMenu*> categories;
+    for (const CatalogItem& item : sources ? engine->sources() : engine->effects()) {
+        QMenu* target = menu;
+        if (!sources) {
+            QMenu*& sub = categories[item.category];
+            if (!sub) sub = menu->addMenu(item.category);
+            target = sub;
+        }
+        const int type = item.typeRaw;
+        target->addAction(item.name, this, [pick, type] { pick(type); });
+    }
+}
+
+// --------------------------------------------------------- node operations
+
+void NodeEditorView::nodeButtonClicked(NodeItem* node, int button, QPoint screenPos) {
+    auto* engine = EngineBridge::instance();
+    const QString id = node->id();
+    switch (button) {
+    case NodeItem::ToggleActive:
+        engine->setNodeActive(id, !node->isActive());
+        break;
+    case NodeItem::Swap: {
+        const bool isSource = !node->isShader();
+        QMenu menu(this);
+        fillCatalogMenu(&menu, isSource, [this, id, isSource](int type) { swapNode(id, isSource, type); });
+        menu.exec(screenPos);
+        break;
+    }
+    case NodeItem::Delete:
+        engine->removeNode(id);
+        break;
+    }
+}
+
+void NodeEditorView::swapNode(const QString& id, bool isSource, int typeRaw) {
+    const QString newId = EngineBridge::instance()->replaceNode(id, typeRaw, isSource);
+    if (newId.isEmpty()) return;
+    syncFromEngine();
+    selectNode(newId);
+    emit nodeSelected(newId);
+}
+
+void NodeEditorView::openPreview(const QString& id) {
+    NodeItem* node = nodes_.value(id);
+    if (!node) return;
+    QPointer<PreviewWindow>& window = previews_[id];
+    if (!window) window = new PreviewWindow(id, node->name(), this->window());
+    window->show();
+    window->raise();
+    window->activateWindow();
+}
+
+void NodeEditorView::cycleSelection(bool backwards) {
+    if (nodes_.isEmpty()) return;
+    QList<NodeItem*> order = nodes_.values();
+    std::sort(order.begin(), order.end(), [](const NodeItem* a, const NodeItem* b) {
+        return a->y() != b->y() ? a->y() < b->y() : a->x() < b->x();
+    });
+    const QStringList selected = selectedNodeIds();
+    int index = -1;
+    if (!selected.isEmpty())
+        for (int i = 0; i < order.size(); ++i) if (order[i]->id() == selected.first()) index = i;
+    const int n = int(order.size());
+    const int next = index < 0 ? (backwards ? n - 1 : 0) : (index + (backwards ? n - 1 : 1)) % n;
+    selectNode(order[next]->id());
+    emit nodeSelected(order[next]->id());
+    ensureVisible(order[next], 40, 40);
 }
 
 // ------------------------------------------------------------- adding nodes

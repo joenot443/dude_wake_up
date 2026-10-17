@@ -17,8 +17,20 @@ constexpr const char* kFrag = R"(
 in vec2 vUV;
 uniform sampler2D uTex;
 uniform float uOpacity;
+uniform vec4  uRect;    // viewport x, y, w, h in framebuffer pixels
+uniform float uRadius;  // corner radius in pixels; 0 = square
 out vec4 outColor;
-void main() { outColor = vec4(texture(uTex, vUV).rgb, uOpacity); }
+void main() {
+    float coverage = 1.0;
+    if (uRadius > 0.0) {
+        vec2 half_ = uRect.zw * 0.5;
+        vec2 p = gl_FragCoord.xy - uRect.xy - half_;
+        vec2 q = abs(p) - (half_ - vec2(uRadius));
+        float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - uRadius;
+        coverage = clamp(0.5 - d, 0.0, 1.0);
+    }
+    outColor = vec4(texture(uTex, vUV).rgb, uOpacity * coverage);
+}
 )";
 } // anon
 
@@ -45,6 +57,8 @@ void FramePresenter::initialize() {
     glDeleteShader(fs);
     locTex_ = glGetUniformLocation(program_, "uTex");
     locOpacity_ = glGetUniformLocation(program_, "uOpacity");
+    locRect_ = glGetUniformLocation(program_, "uRect");
+    locRadius_ = glGetUniformLocation(program_, "uRadius");
 
     const float verts[] = {
         -1.f,-1.f, 0.f,0.f,
@@ -72,7 +86,7 @@ void FramePresenter::destroy() {
     program_ = vao_ = vbo_ = 0;
 }
 
-bool FramePresenter::draw(FrameExchange* ex, Reader reader, float opacity, bool* newFrame) {
+bool FramePresenter::draw(FrameExchange* ex, Reader reader, float opacity, float cornerRadiusPx, bool* newFrame) {
     if (newFrame) *newFrame = false;
     if (!ex || !program_) return false;
 
@@ -83,16 +97,22 @@ bool FramePresenter::draw(FrameExchange* ex, Reader reader, float opacity, bool*
     if (isNew && writeFence) glWaitSync(static_cast<GLsync>(writeFence), 0, GL_TIMEOUT_IGNORED);
     if (newFrame) *newFrame = isNew;
 
-    const bool blend = opacity < 1.0f;
+    const bool blend = opacity < 1.0f || cornerRadiusPx > 0.0f;
+    GLint vp[4];
+    glGetIntegerv(GL_VIEWPORT, vp);
     if (blend) {
         glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        // Leave destination alpha alone: the widget's framebuffer is
+        // composited, so lowering its alpha would let the backdrop through.
+        glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ONE);
     }
     glUseProgram(program_);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, ex->texture(slot));
     glUniform1i(locTex_, 0);
     glUniform1f(locOpacity_, opacity);
+    glUniform4f(locRect_, float(vp[0]), float(vp[1]), float(vp[2]), float(vp[3]));
+    glUniform1f(locRadius_, cornerRadiusPx);
     glBindVertexArray(vao_);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);

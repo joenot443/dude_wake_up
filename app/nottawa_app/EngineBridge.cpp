@@ -163,6 +163,12 @@ QString EngineBridge::blendBetween(const QString& id1, const QString& id2) {
     return takeString(ntw_create_blend_between(id1.toUtf8().constData(), id2.toUtf8().constData()));
 }
 
+QString EngineBridge::replaceNode(const QString& id, int typeRaw, bool isSource) {
+    const QByteArray utf8 = id.toUtf8();
+    return takeString(isSource ? ntw_replace_video_source(utf8.constData(), typeRaw)
+                               : ntw_replace_shader(utf8.constData(), typeRaw));
+}
+
 void EngineBridge::copyNodes(const QStringList& ids) {
     QVector<QByteArray> utf8;
     QVector<const char*> ptrs;

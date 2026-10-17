@@ -35,6 +35,9 @@ private:
 class NodeItem : public QGraphicsObject {
     Q_OBJECT
 public:
+    // Buttons shown in the title bar while the node is selected.
+    enum Button { NoButton, ToggleActive, Swap, Delete };
+
     NodeItem(NodeEditorView* view, const QString& id);
 
     void setInfo(const QString& name, bool isShader, bool active, int inputCount, bool hasAux);
@@ -56,9 +59,16 @@ public:
 
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
+    void mousePressEvent(QGraphicsSceneMouseEvent* e) override;
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* e) override;
+    void hoverMoveEvent(QGraphicsSceneHoverEvent* e) override;
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent* e) override;
 
 private:
     void rebuildPorts(int inputCount, bool hasAux);
+    QRectF buttonRect(Button b) const;
+    Button buttonAt(QPointF pos) const;
+    void paintButton(QPainter* p, Button b) const;
 
     NodeEditorView*    view_;
     QString            id_;
@@ -68,6 +78,7 @@ private:
     bool               needsInput_ = false;
     int                inputCount_ = -1;
     bool               hasAux_    = false;
+    Button             hovered_   = NoButton;
     QVector<PortItem*> ports_;
 };
 

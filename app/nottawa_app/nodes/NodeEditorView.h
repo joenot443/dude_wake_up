@@ -4,10 +4,14 @@
 
 #include <QGraphicsView>
 #include <QHash>
+#include <QPointer>
+#include <functional>
 #include <QTimer>
 
 class EdgeItem;
 class NodeItem;
+class PreviewWindow;
+class QMenu;
 class PortItem;
 class QGraphicsLineItem;
 class QGraphicsPathItem;
@@ -20,8 +24,9 @@ class QGraphicsPathItem;
 // Mouse: left-drag moves nodes / marquee-selects (Ctrl adds), drag between
 // ports connects (output onto output blends), Alt-drag on empty canvas cuts
 // cables, right-drag pans, right-click opens a context menu, wheel zooms.
-// Keys: Delete/Backspace, Space (toggle active), Ctrl+A/C/V, Ctrl+Z,
-// Ctrl+Shift+Z / Ctrl+Y.
+// Double-click opens a preview window. Keys: Delete/Backspace, Space
+// (toggle active), Ctrl+A/C/V, Ctrl+Z, Ctrl+Shift+Z / Ctrl+Y, Ctrl+Tab /
+// Ctrl+Shift+Tab (cycle selection).
 class NodeEditorView : public QGraphicsView {
     Q_OBJECT
 public:
@@ -42,9 +47,13 @@ public:
     QString addFromCatalog(int typeRaw, bool isSource, const QString& connectFrom = {},
                            const QPointF* scenePos = nullptr);
 
+    // Opens (or raises) a separate window showing the node's output.
+    void openPreview(const QString& id);
+
     // Called by NodeItem.
-    void drawNodePreview(QPainter* p, const NodeItem* node, const QRectF& bodyLocal, float opacity);
+    void drawNodePreview(QPainter* p, const NodeItem* node, const QRectF& bodyLocal, qreal cornerRadius, float opacity);
     void nodeGeometryChanged(NodeItem* node);
+    void nodeButtonClicked(NodeItem* node, int button, QPoint screenPos);
 
 signals:
     void nodeSelected(const QString& id);
@@ -71,9 +80,14 @@ private:
     void commitMovedNodes();
     void finishPortDrag(const QPoint& viewPos);
     void finishCut();
+    // Adds catalog entries of one kind to `menu`, grouped like the library.
+    void fillCatalogMenu(QMenu* menu, bool sources, const std::function<void(int)>& pick);
+    void swapNode(const QString& id, bool isSource, int typeRaw);
+    void cycleSelection(bool backwards);
 
     QHash<QString, NodeItem*> nodes_;
     QHash<QString, EdgeItem*> edges_;
+    QHash<QString, QPointer<PreviewWindow>> previews_;
     QString lastAddedId_;
 
     FramePresenter presenter_;

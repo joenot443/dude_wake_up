@@ -3,6 +3,8 @@
 #include "EngineBridge.h"
 #include "NodeEditorView.h"
 
+#include <QGraphicsSceneHoverEvent>
+#include <QGraphicsSceneMouseEvent>
 #include <QLinearGradient>
 #include <QPainter>
 #include <QPainterPathStroker>
@@ -14,7 +16,6 @@ const QColor kWarning(0xe6, 0xa2, 0x3f);
 const QColor kSourceDot(0x3c, 0xc8, 0x7a);
 const QColor kInactiveDot(0x6b, 0x6e, 0x7c);
 const QColor kBody(0x1a, 0x1c, 0x25);
-const QColor kCanvas(0x13, 0x14, 0x19);
 constexpr qreal kRadius     = 14.0;
 constexpr qreal kTitleH     = 30.0;
 constexpr qreal kPortDot    = 3.0;   // radius of the 6 px dot
@@ -66,6 +67,7 @@ void PortItem::paint(QPainter* p, const QStyleOptionGraphicsItem*, QWidget*) {
 
 NodeItem::NodeItem(NodeEditorView* view, const QString& id) : view_(view), id_(id) {
     setFlags(ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges);
+    setAcceptHoverEvents(true);
     setZValue(1);
 }
 
@@ -116,13 +118,7 @@ void NodeItem::paint(QPainter* p, const QStyleOptionGraphicsItem*, QWidget*) {
     rounded.addRoundedRect(b, kRadius, kRadius);
 
     p->fillPath(rounded, kBody);
-    view_->drawNodePreview(p, this, b, active_ ? 1.0f : 0.4f);
-
-    // The preview is drawn as a plain rectangle; mask its corners back to
-    // the canvas colour so the node reads as rounded.
-    QPainterPath corners;
-    corners.addRect(b.adjusted(-1, -1, 1, 1));
-    p->fillPath(corners.subtracted(rounded), kCanvas);
+    view_->drawNodePreview(p, this, b, kRadius, active_ ? 1.0f : 0.4f);
 
     if (needsInput_) {
         p->setPen(QColor(0xd8, 0xd9, 0xdf, 200));
@@ -147,9 +143,12 @@ void NodeItem::paint(QPainter* p, const QStyleOptionGraphicsItem*, QWidget*) {
     p->drawEllipse(QPointF(bar.left() + 14, bar.center().y() + 2), 3, 3);
     p->setPen(Qt::white);
     QFont f = p->font(); f.setPointSizeF(9); f.setBold(true); p->setFont(f);
-    const QRectF textRect(bar.left() + 24, bar.top() + 4, bar.width() - 36, bar.height() - 4);
+    const qreal textRight = isSelected() ? buttonRect(ToggleActive).left() - 6 : bar.right() - 12;
+    const QRectF textRect(bar.left() + 24, bar.top() + 4, textRight - bar.left() - 24, bar.height() - 4);
     p->drawText(textRect, Qt::AlignVCenter | Qt::AlignLeft,
                 p->fontMetrics().elidedText(name_, Qt::ElideRight, int(textRect.width())));
+    if (isSelected())
+        for (Button b : {ToggleActive, Swap, Delete}) paintButton(p, b);
 
     p->setBrush(Qt::NoBrush);
     if (isSelected()) {
@@ -166,6 +165,80 @@ QVariant NodeItem::itemChange(GraphicsItemChange change, const QVariant& value) 
     if (change == ItemPositionHasChanged) view_->nodeGeometryChanged(this);
     if (change == ItemSelectedHasChanged) update();
     return QGraphicsObject::itemChange(change, value);
+}
+
+QRectF NodeItem::buttonRect(Button b) const {
+    constexpr qreal size = 20, gap = 4;
+    const QRectF bar(body().left(), body().bottom() - kTitleH, kWidth, kTitleH);
+    const int fromRight = b == Delete ? 0 : b == Swap ? 1 : 2;
+    const qreal right = bar.right() - 8 - fromRight * (size + gap);
+    return QRectF(right - size, bar.center().y() + 2 - size / 2, size, size);
+}
+
+NodeItem::Button NodeItem::buttonAt(QPointF pos) const {
+    if (!isSelected()) return NoButton;
+    for (Button b : {ToggleActive, Swap, Delete})
+        if (buttonRect(b).contains(pos)) return b;
+    return NoButton;
+}
+
+void NodeItem::paintButton(QPainter* p, Button b) const {
+    const QRectF r = buttonRect(b);
+    const QColor fg = b == Delete ? QColor(0xe6, 0x5a, 0x5a) : QColor(0xd8, 0xd9, 0xdf);
+    p->setPen(Qt::NoPen);
+    p->setBrush(hovered_ == b ? QColor(255, 255, 255, 40) : QColor(255, 255, 255, 18));
+    p->drawRoundedRect(r, 5, 5);
+    const QPointF c = r.center();
+    p->setPen(QPen(fg, 1.6, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    p->setBrush(Qt::NoBrush);
+    switch (b) {
+    case ToggleActive:
+        if (active_) {  // pause
+            p->drawLine(c + QPointF(-2.5, -4.5), c + QPointF(-2.5, 4.5));
+            p->drawLine(c + QPointF(2.5, -4.5), c + QPointF(2.5, 4.5));
+        } else {        // play
+            p->setBrush(fg);
+            p->drawPolygon(QPolygonF({c + QPointF(-3, -5), c + QPointF(5, 0), c + QPointF(-3, 5)}));
+        }
+        break;
+    case Swap:
+        p->drawLine(c + QPointF(-5, -2.5), c + QPointF(5, -2.5));
+        p->drawLine(c + QPointF(2.5, -5), c + QPointF(5, -2.5));
+        p->drawLine(c + QPointF(5, 2.5), c + QPointF(-5, 2.5));
+        p->drawLine(c + QPointF(-2.5, 5), c + QPointF(-5, 2.5));
+        break;
+    case Delete:
+        p->drawLine(c + QPointF(-5, -3.5), c + QPointF(5, -3.5));
+        p->drawLine(c + QPointF(-1.5, -5.5), c + QPointF(1.5, -5.5));
+        p->drawRect(QRectF(c + QPointF(-3.5, -3.5), c + QPointF(3.5, 5.5)));
+        break;
+    case NoButton:
+        break;
+    }
+}
+
+void NodeItem::mousePressEvent(QGraphicsSceneMouseEvent* e) {
+    if (e->button() == Qt::LeftButton) {
+        if (const Button b = buttonAt(e->pos()); b != NoButton) {
+            e->accept();
+            view_->nodeButtonClicked(this, b, e->screenPos());
+            return;
+        }
+    }
+    QGraphicsObject::mousePressEvent(e);
+}
+
+void NodeItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* e) {
+    if (e->button() == Qt::LeftButton && buttonAt(e->pos()) == NoButton) view_->openPreview(id_);
+}
+
+void NodeItem::hoverMoveEvent(QGraphicsSceneHoverEvent* e) {
+    const Button b = buttonAt(e->pos());
+    if (b != hovered_) { hovered_ = b; update(); }
+}
+
+void NodeItem::hoverLeaveEvent(QGraphicsSceneHoverEvent*) {
+    if (hovered_ != NoButton) { hovered_ = NoButton; update(); }
 }
 
 // ---------------------------------------------------------------- EdgeItem

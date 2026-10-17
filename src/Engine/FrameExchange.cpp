@@ -1,5 +1,9 @@
 #include "FrameExchange.h"
 
+FrameExchange::FrameExchange() {
+    for (int& s : showing_) s = -1;
+}
+
 void FrameExchange::setTextures(const uint32_t (&ids)[kSlots]) {
     std::lock_guard<std::mutex> lk(m_);
     for (int i = 0; i < kSlots; ++i) tex_[i] = ids[i];
