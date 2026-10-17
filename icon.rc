@@ -1,0 +1,4 @@
+// Empty resource file — Nottawa doesn't ship a Windows .ico yet.
+// The OF template vcxproj references icon.rc, so we provide a stub.
+// TODO: convert the macOS .icns to a Windows .ico and add proper
+//       1 ICON "icon.ico" entry for Phase 7 packaging.

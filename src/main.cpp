@@ -112,8 +112,37 @@ static std::shared_ptr<ofAppBaseWindow> tryCreateWindow(int major, int minor) {
   return window;
 }
 
+#ifdef _WIN32
+// Debug-only: write every ofLog message to a file next to the exe so a
+// crash before any UI appears still leaves a trail.
+static void installFileLogger_() {
+  static class FileLogger : public ofBaseLoggerChannel {
+  public:
+    FileLogger() {
+      f_ = std::fopen("nottawa-boot.log", "wb");
+      if (f_) { std::fputs("--- boot ---\n", f_); std::fflush(f_); }
+    }
+    void log(ofLogLevel level, const std::string& module, const std::string& message) override {
+      if (!f_) return;
+      std::fprintf(f_, "[%d] %s: %s\n", (int)level, module.c_str(), message.c_str());
+      std::fflush(f_);
+    }
+    FILE* f_ = nullptr;
+  } logger;
+  ofSetLoggerChannel(std::shared_ptr<ofBaseLoggerChannel>(&logger, [](ofBaseLoggerChannel*){}));
+}
+#endif
+
 int main( ){
+#ifdef _WIN32
+  installFileLogger_();
+  ofSetLogLevel(OF_LOG_VERBOSE);
+  ofLogNotice("main") << "entry — pre-setupDirectories";
+#endif
   setupDirectories();
+#ifdef _WIN32
+  ofLogNotice("main") << "post-setupDirectories";
+#endif
   auto homeDir = ofFilePath::getUserHomeDir();
   auto libraryPath = ofFilePath::join(homeDir, "/nottawa");
   auto sentryPath = ofFilePath::join(homeDir, "/nottawa/sentry");
@@ -122,6 +151,9 @@ int main( ){
   // iGPUs. Ask for 3.2 first (parity with macOS Core Profile), then step
   // down. If nothing works, tell the user the machine is unsupported
   // rather than crashing on a null context.
+#ifdef _WIN32
+  ofLogNotice("main") << "about to tryCreateWindow(3,2)";
+#endif
   std::shared_ptr<ofAppBaseWindow> window = tryCreateWindow(3, 2);
   if (!window) window = tryCreateWindow(3, 1);
   if (!window) window = tryCreateWindow(3, 0);
@@ -140,8 +172,22 @@ int main( ){
   }
 
   auto glfwWindow = dynamic_cast<ofAppGLFWWindow*>(window.get())->getGLFWWindow();
+#ifdef _WIN32
+  // Daandelange's ofxImGui EngineGLFW replaces OF's event listeners; the
+  // window stays hidden+0x0 until explicitly shown and sized. Set a usable
+  // size, position centered-ish, then show + maximize.
+  glfwSetWindowSize(glfwWindow, 1440, 900);
+  glfwSetWindowPos(glfwWindow, 100, 100);
+  glfwShowWindow(glfwWindow);
+#endif
   glfwMaximizeWindow(glfwWindow);
+#ifdef _WIN32
+  ofLogNotice("main") << "about to construct MainApp";
+#endif
   auto app = shared_ptr<MainApp>(new MainApp(window));
+#ifdef _WIN32
+  ofLogNotice("main") << "MainApp constructed; calling ofRunApp";
+#endif
   ofSetFrameRate(60);
   ofEnableAntiAliasing();
   ofEnableSmoothing();

@@ -16,7 +16,7 @@ void StrandTileView::draw(std::shared_ptr<AvailableStrand> strand) {
   ImVec2 size = ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y);
   ImGui::BeginChild(strand->id.c_str(), size, ImGuiChildFlags_None, ImGuiWindowFlags_NoScrollbar);
   ImVec2 origin = ImGui::GetCursorPos();
-  ImGui::SetItemAllowOverlap();
+  ImGui::SetNextItemAllowOverlap();
   if (ImGui::Button(idString(strand->id).c_str(), size)) {
     NodeLayoutView::getInstance()->clear();
     ConfigService::getService()->loadStrandFile(strand->path);

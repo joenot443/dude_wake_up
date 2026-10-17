@@ -139,7 +139,7 @@ void MainStageView::draw()
   // Sources
   ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
   ImGui::PushStyleColor(ImGuiCol_ChildBg, Colors::TabSelected.Value);
-  ImGui::BeginChild("##sourceBrowser", sourceBrowserSize, ImGuiChildFlags_Border, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+  ImGui::BeginChild("##sourceBrowser", sourceBrowserSize, ImGuiChildFlags_Borders, ImGuiChildFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
   ImGui::PopStyleColor();
   drawVideoSourceBrowser();
   ImGui::EndChild();
@@ -147,7 +147,7 @@ void MainStageView::draw()
 
   ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
   ImGui::PushStyleColor(ImGuiCol_ChildBg, Colors::TabSelected.Value);
-  ImGui::BeginChild("##shaderBrowser", shaderBrowserSize, ImGuiChildFlags_Border, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+  ImGui::BeginChild("##shaderBrowser", shaderBrowserSize, ImGuiChildFlags_Borders, ImGuiChildFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
   ImGui::PopStyleColor();
   drawShaderBrowser();
   ImGui::EndChild();
@@ -158,7 +158,7 @@ void MainStageView::draw()
 
   ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
   ImGui::PushStyleColor(ImGuiCol_ChildBg, Colors::TabSelected.Value);
-  if (ImGui::BeginChild("##libraryOscillatorBrowser", utilityBrowserSize, ImGuiChildFlags_Border, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
+  if (ImGui::BeginChild("##libraryOscillatorBrowser", utilityBrowserSize, ImGuiChildFlags_Borders, ImGuiChildFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
   ImGui::PopStyleColor();
 
     // Draw collapse button before the tab bar
@@ -250,7 +250,7 @@ void MainStageView::draw()
     auto shaderInfoPaneSize = ImVec2(browserSize.x ,(ImGui::GetWindowContentRegionMax().y - MenuBarHeight));
     
     ImGui::NextColumn();
-    ImGui::BeginChild("##shaderInfo", shaderInfoPaneSize, false, ImGuiWindowFlags_AlwaysUseWindowPadding);
+    ImGui::BeginChild("##shaderInfo", shaderInfoPaneSize, false, ImGuiChildFlags_AlwaysUseWindowPadding);
     ShaderInfoView::draw();
     ImGui::EndChild();
   }

@@ -389,7 +389,7 @@ void HelpService::drawActionButtons() {
 
 void HelpService::drawStageModeHelp() {
   ImVec2 helpSize = ImVec2(ImGui::GetContentRegionAvail().x / 2.0 + 10.0, ImGui::GetContentRegionAvail().y);
-  ImGui::BeginChild("stage_mode_help", helpSize, true, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar);
+  ImGui::BeginChild("stage_mode_help", helpSize, true, ImGuiChildFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar);
   CommonViews::H2Title(StringManager::get("stage_mode_title"));
   CommonViews::xsSpacing();
   CommonViews::H3Title(StringManager::get("stage_mode_subtitle"));
@@ -401,7 +401,7 @@ void HelpService::drawStageModeHelp() {
 void HelpService::drawShareStrandHelp() {
   ImVec2 helpSize = ImVec2(400.0, 280.0);
   ImGui::SetCursorPos(ImVec2(ImGui::GetWindowWidth() / 2.0 - helpSize.x / 2.0, ImGui::GetWindowHeight() / 2.0 - helpSize.y / 2.0));
-  ImGui::BeginChild("share_strand_help", helpSize, true, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar);
+  ImGui::BeginChild("share_strand_help", helpSize, true, ImGuiChildFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar);
 
   CommonViews::H2Title(StringManager::get("share_strand_title"));
   CommonViews::xsSpacing();
@@ -460,7 +460,7 @@ void HelpService::drawStageModeActionButtonsHelp() {
   ImVec2 helpSize = ImVec2(ImGui::GetContentRegionAvail().x / 2.0, ImGui::GetContentRegionAvail().y / 2.0);
   CommonViews::lSpacing();
   ImGui::SetCursorPosX(ImGui::GetContentRegionAvail().x / 2.0);
-  ImGui::BeginChild("stage_mode_actions", helpSize, true, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar);
+  ImGui::BeginChild("stage_mode_actions", helpSize, true, ImGuiChildFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar);
   
   CommonViews::LargeIconButton(ICON_MD_HUB, "nodeModeExample");
   ImGui::SameLine();

@@ -123,8 +123,9 @@ $LibSourceFiles = @(
     'lib\imgui_stdlib.cpp',
     'lib\ofxFastFboReader.cpp',
     'lib\implot\implot.cpp',
-    'lib\implot\implot_items.cpp',
-    'lib\kiss_fft130\kiss_fft.c'
+    'lib\implot\implot_items.cpp'
+    # kiss_fft.c has a copy in src\Audio\gist\ which the src recursion
+    # picks up — compiling both would collide at obj-file level.
 )
 
 # Ableton Link and other vendored native SDKs may not be present — this is
@@ -190,7 +191,12 @@ $IncludeDirs = @($IncludeDirs | ForEach-Object {
 # NOTE: $AddonIncludeDirs is declared below; assign here from the same literal.
 $IncludeDirs += @(
     '..\..\..\addons\ofxImGui\src',
+    # ofxImGui's engines include "backends/imgui_impl_glfw.h" with the
+    # `backends/` prefix, so we add the `libs/imgui/` parent too (not just
+    # the `backends/` dir).
+    '..\..\..\addons\ofxImGui\libs\imgui',
     '..\..\..\addons\ofxImGui\libs\imgui\src',
+    '..\..\..\addons\ofxImGui\libs\imgui\backends',
     '..\..\..\addons\ofxMidi\src',
     '..\..\..\addons\ofxMidi\libs\rtmidi'
 )
@@ -226,6 +232,14 @@ $AddonSourcePaths = @(
     'addons\ofxImGui\libs\imgui\src\imgui_draw.cpp',
     'addons\ofxImGui\libs\imgui\src\imgui_widgets.cpp',
     'addons\ofxImGui\libs\imgui\src\imgui_tables.cpp',
+    # imgui_demo.cpp provides ShowDemoWindow which MainStageView references.
+    'addons\ofxImGui\libs\imgui\src\imgui_demo.cpp',
+    'addons\ofxImGui\libs\imgui\backends\imgui_impl_opengl3.cpp',
+    # OpenGL2 backend — ofxImGui engines use both GL2 and GL3 impls.
+    'addons\ofxImGui\libs\imgui\backends\imgui_impl_opengl2.cpp',
+    'addons\ofxImGui\libs\imgui\backends\imgui_impl_glfw.cpp',
+    # ScopedContext static — needed by EngineGLFW + imgui_impl_glfw.
+    'addons\ofxImGui\libs\imgui\backends\imgui_impl_glfw_context_support.cpp',
     # ofxMidi — desktop backend + rtmidi
     'addons\ofxMidi\src\ofxBaseMidi.cpp',
     'addons\ofxMidi\src\ofxMidi.cpp',
@@ -269,7 +283,7 @@ function Ensure-DefinesAndFlags {
         # PreprocessorDefinitions
         $pp = $cl.SelectSingleNode('m:PreprocessorDefinitions', $ns)
         $existing = if ($pp) { $pp.InnerText } else { '%(PreprocessorDefinitions)' }
-        $existingList = @($existing.Split(';') | Where-Object { $_ -ne '' })
+        [string[]]$existingList = $existing.Split(';') | Where-Object { $_ -ne '' }
         $merged = $existingList
         foreach ($d in $defines) {
             if ($merged -notcontains $d) { $merged += $d }
@@ -286,7 +300,7 @@ function Ensure-DefinesAndFlags {
         # AdditionalIncludeDirectories
         $inc = $cl.SelectSingleNode('m:AdditionalIncludeDirectories', $ns)
         $existingInc = if ($inc) { $inc.InnerText } else { '%(AdditionalIncludeDirectories)' }
-        $existingIncList = @($existingInc.Split(';') | Where-Object { $_ -ne '' })
+        [string[]]$existingIncList = $existingInc.Split(';') | Where-Object { $_ -ne '' }
         $mergedInc = $existingIncList
         foreach ($d in $includeDirs) {
             if ($mergedInc -notcontains $d) { $mergedInc += $d }
@@ -299,6 +313,19 @@ function Ensure-DefinesAndFlags {
             [void]$cl.AppendChild($inc)
         }
         $inc.InnerText = ($mergedInc -join ';')
+
+        # Flat ObjectFileName — avoids 128k linker RSP line overflow when
+        # source files have deep junction-relative paths. The template
+        # default uses %(RelativeDir), which for src/ files via our OF
+        # junction expands to "..\..\..\..\..\Users\...", producing obj
+        # paths ~200 chars each * 150 files = linker /MANIFEST line too
+        # long (LNK1170). Flat means each obj goes to $(IntDir)<name>.obj.
+        $ofn = $cl.SelectSingleNode('m:ObjectFileName', $ns)
+        if (-not $ofn) {
+            $ofn = $xml.CreateElement('ObjectFileName', $ns.LookupNamespace('m'))
+            [void]$cl.AppendChild($ofn)
+        }
+        $ofn.InnerText = '$(IntDir)%(Filename).obj'
 
         # LanguageStandard = /std:c++17
         $ls = $cl.SelectSingleNode('m:LanguageStandard', $ns)
@@ -330,7 +357,11 @@ function Ensure-DefinesAndFlags {
             $ald = $xml.CreateElement('AdditionalLibraryDirectories', $ns.LookupNamespace('m'))
             [void]$link.AppendChild($ald)
         }
-        $existingLibDirs = if ($ald.InnerText) { @($ald.InnerText.Split(';') | Where-Object { $_ -ne '' }) } else { @() }
+        # IMPORTANT: PowerShell's `if` expression unwraps single-element
+        # arrays to scalars on assignment, even when the if-block uses
+        # @(...). Use [string[]] cast to force array type — otherwise
+        # `+= "x"` on a scalar does string-concatenation (LNK1170 bait).
+        [string[]]$existingLibDirs = if ($ald.InnerText) { $ald.InnerText.Split(';') | Where-Object { $_ -ne '' } } else { @() }
         if ($existingLibDirs -notcontains $FfmpegLibDir) { $existingLibDirs += $FfmpegLibDir }
         if ($existingLibDirs -notcontains '%(AdditionalLibraryDirectories)') { $existingLibDirs += '%(AdditionalLibraryDirectories)' }
         $ald.InnerText = ($existingLibDirs -join ';')
@@ -340,7 +371,7 @@ function Ensure-DefinesAndFlags {
             $adp = $xml.CreateElement('AdditionalDependencies', $ns.LookupNamespace('m'))
             [void]$link.AppendChild($adp)
         }
-        $existingDeps = if ($adp.InnerText) { @($adp.InnerText.Split(';') | Where-Object { $_ -ne '' }) } else { @() }
+        [string[]]$existingDeps = if ($adp.InnerText) { $adp.InnerText.Split(';') | Where-Object { $_ -ne '' } } else { @() }
         foreach ($lib in $FfmpegLibs) {
             if ($existingDeps -notcontains $lib) { $existingDeps += $lib }
         }
@@ -567,11 +598,17 @@ function Ensure-DataRobocopy {
 
     # Post-build event: robocopy repo data/ to $(OutDir)data\.
     # Robocopy exit codes 0-7 are success; wrap so MSBuild doesn't treat 1 as failure.
-    # $(SolutionDir) == repo root (see manifest note above).
+    # $(SolutionDir) == repo root (see manifest note above). Nottawa keeps
+    # its data/ dir INSIDE bin/ already (bin/data/), so this is a no-op in
+    # the normal case — the if-exist guard avoids robocopy erroring 16
+    # ("source not found") when the top-level data/ doesn't exist, which
+    # is what Nottawa's layout has today.
     $cmd = @"
-if not exist "`$(OutDir)data" mkdir "`$(OutDir)data"
-robocopy "`$(SolutionDir)data" "`$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
-if %ERRORLEVEL% GEQ 8 exit /b 1
+if exist "`$(SolutionDir)data" (
+    if not exist "`$(OutDir)data" mkdir "`$(OutDir)data"
+    robocopy "`$(SolutionDir)data" "`$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+    if %ERRORLEVEL% GEQ 8 exit /b 1
+)
 exit /b 0
 "@
 
