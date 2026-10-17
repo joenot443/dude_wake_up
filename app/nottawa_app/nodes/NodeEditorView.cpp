@@ -1,0 +1,566 @@
+#include "NodeEditorView.h"
+
+#include "EngineBridge.h"
+#include "NodeItems.h"
+
+#include <QApplication>
+#include <QGraphicsLineItem>
+#include <QGraphicsScene>
+#include <QKeyEvent>
+#include <QMenu>
+#include <QMimeData>
+#include <QMouseEvent>
+#include <QOpenGLContext>
+#include <QOpenGLFunctions>
+#include <QOpenGLWidget>
+#include <QScreen>
+#include <QScrollBar>
+#include <QSet>
+#include <QWheelEvent>
+#include <cmath>
+
+namespace {
+constexpr qreal kMinZoom   = 0.2;
+constexpr qreal kMaxZoom   = 3.0;
+constexpr qreal kGrid      = 40.0;
+constexpr qreal kSnap      = 30.0;   // screen px
+constexpr int   kClickSlop = 4;      // screen px
+constexpr qreal kChainStep = 300.0;
+constexpr qreal kStackStep = 228.0;
+} // anon
+
+NodeEditorView::NodeEditorView(QWidget* parent) : QGraphicsView(parent) {
+    // Live previews are drawn with GL straight into the viewport, which
+    // shares textures with the engine through Qt's global share context.
+    setViewport(new QOpenGLWidget);
+    auto* scene = new QGraphicsScene(this);
+    scene->setSceneRect(-50000, -50000, 100000, 100000);
+    setScene(scene);
+    setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+    setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    setDragMode(QGraphicsView::RubberBandDrag);
+    setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setFocusPolicy(Qt::StrongFocus);
+    setAcceptDrops(true);
+    centerOn(0, 0);
+
+    connect(scene, &QGraphicsScene::selectionChanged, this, [this] {
+        if (syncing_) return;
+        const QStringList ids = selectedNodeIds();
+        emit nodeSelected(ids.isEmpty() ? QString() : ids.first());
+    });
+
+    repaintTimer_.setTimerType(Qt::PreciseTimer);
+    connect(&repaintTimer_, &QTimer::timeout, this, [this] { if (isVisible()) viewport()->update(); });
+    const qreal hz = screen() ? screen()->refreshRate() : 60.0;
+    repaintTimer_.start(qMax(1, int(1000.0 / (hz > 0 ? hz : 60.0))));
+}
+
+NodeEditorView::~NodeEditorView() {
+    for (const QString& id : nodes_.keys()) EngineBridge::instance()->releaseFrames(id);
+    if (auto* gl = qobject_cast<QOpenGLWidget*>(viewport())) {
+        gl->makeCurrent();
+        presenter_.destroy();
+        gl->doneCurrent();
+    }
+}
+
+// ------------------------------------------------------------------ sync
+
+void NodeEditorView::syncFromEngine() {
+    auto* engine = EngineBridge::instance();
+    if (!engine->isRunning()) return;
+    syncing_ = true;
+
+    const auto graphNodes = engine->nodes();
+    const auto graphEdges = engine->edges();
+
+    QSet<QString> connectedInputs;  // "<nodeId>/<slot>"
+    QSet<QString> connectedOutputs;
+    for (const GraphEdge& e : graphEdges) {
+        connectedInputs.insert(e.endId + '/' + QString::number(e.inputSlot));
+        connectedOutputs.insert(e.startId + '/' + QString::number(e.outputSlot));
+    }
+
+    QSet<QString> liveNodes;
+    for (const GraphNode& n : graphNodes) {
+        liveNodes.insert(n.id);
+        NodeItem* item = nodes_.value(n.id);
+        if (!item) {
+            item = new NodeItem(this, n.id);
+            scene()->addItem(item);
+            nodes_.insert(n.id, item);
+            item->setPos(n.position);
+            engine->retainFrames(n.id);
+        } else if (!item->isSelected() || QApplication::mouseButtons() == Qt::NoButton) {
+            // Don't fight an in-progress drag; otherwise follow the engine
+            // (undo, paste and blend creation move nodes).
+            if (item->pos() != n.position) item->setPos(n.position);
+        }
+        item->setInfo(n.name, n.isShader, n.active, n.inputCount, n.hasAuxOutput);
+        bool anyInput = false;
+        for (PortItem* port : item->ports()) {
+            const QString key = n.id + '/' + QString::number(port->slot());
+            const bool on = port->kind() == PortItem::Input ? connectedInputs.contains(key)
+                                                            : connectedOutputs.contains(key);
+            port->setConnected(on);
+            if (port->kind() == PortItem::Input) anyInput |= on;
+        }
+        item->setNeedsInput(n.isShader && n.inputCount > 0 && !anyInput);
+    }
+    for (auto it = nodes_.begin(); it != nodes_.end();) {
+        if (liveNodes.contains(it.key())) { ++it; continue; }
+        engine->releaseFrames(it.key());
+        delete it.value();
+        it = nodes_.erase(it);
+    }
+
+    QSet<QString> liveEdges;
+    for (const GraphEdge& e : graphEdges) {
+        NodeItem* from = nodes_.value(e.startId);
+        NodeItem* to   = nodes_.value(e.endId);
+        PortItem* out = from ? from->port(PortItem::Output, e.outputSlot) : nullptr;
+        PortItem* in  = to ? to->port(PortItem::Input, e.inputSlot) : nullptr;
+        if (!out || !in) continue;
+        liveEdges.insert(e.id);
+        EdgeItem* edge = edges_.value(e.id);
+        if (!edge) {
+            edge = new EdgeItem(e.id, e.outputSlot == kAuxOutputSlot);
+            scene()->addItem(edge);
+            edges_.insert(e.id, edge);
+        }
+        edge->setEnds(out, in);
+    }
+    for (auto it = edges_.begin(); it != edges_.end();) {
+        if (liveEdges.contains(it.key())) { ++it; continue; }
+        delete it.value();
+        it = edges_.erase(it);
+    }
+    syncing_ = false;
+
+    if (!fitted_ && !nodes_.isEmpty()) {
+        fitted_ = true;
+        zoomToFit();
+    }
+}
+
+void NodeEditorView::nodeGeometryChanged(NodeItem* node) {
+    for (EdgeItem* edge : std::as_const(edges_)) {
+        if ((edge->from() && edge->from()->parentItem() == node) ||
+            (edge->to() && edge->to()->parentItem() == node))
+            edge->updatePath();
+    }
+}
+
+void NodeEditorView::zoomToFit() {
+    if (nodes_.isEmpty()) return;
+    QRectF bounds;
+    for (NodeItem* n : std::as_const(nodes_)) bounds |= n->sceneBoundingRect();
+    bounds.adjust(-60, -60, 60, 60);
+    const qreal scaleX = viewport()->width() / bounds.width();
+    const qreal scaleY = viewport()->height() / bounds.height();
+    const qreal s = qBound(kMinZoom, qMin(scaleX, scaleY), 1.5);
+    setTransform(QTransform::fromScale(s, s));
+    centerOn(bounds.center());
+}
+
+// --------------------------------------------------------------- selection
+
+void NodeEditorView::selectNode(const QString& id) {
+    NodeItem* item = nodes_.value(id);
+    if (!item || (item->isSelected() && selectedNodeIds().size() == 1)) return;
+    syncing_ = true;
+    scene()->clearSelection();
+    item->setSelected(true);
+    syncing_ = false;
+}
+
+QStringList NodeEditorView::selectedNodeIds() const {
+    QStringList ids;
+    for (QGraphicsItem* item : scene()->selectedItems())
+        if (auto* node = dynamic_cast<NodeItem*>(item)) ids << node->id();
+    return ids;
+}
+
+// ---------------------------------------------------------------- previews
+
+void NodeEditorView::drawNodePreview(QPainter* p, const NodeItem* node, const QRectF& bodyLocal, float opacity) {
+    FrameExchange* ex = EngineBridge::instance()->frames(node->id());
+    if (!ex) return;
+    const QRect vp = mapFromScene(node->mapToScene(bodyLocal)).boundingRect();
+    if (!vp.intersects(viewport()->rect())) return;
+
+    p->beginNativePainting();
+    QOpenGLFunctions* gl = QOpenGLContext::currentContext()->functions();
+    if (!presenter_.isInitialized()) presenter_.initialize();
+    const qreal dpr = viewport()->devicePixelRatioF();
+    const int fbHeight = int(viewport()->height() * dpr);
+    GLint saved[4];
+    gl->glGetIntegerv(GL_VIEWPORT, saved);
+    gl->glViewport(int(vp.x() * dpr), fbHeight - int((vp.y() + vp.height()) * dpr),
+                   int(vp.width() * dpr), int(vp.height() * dpr));
+    presenter_.draw(ex, FramePresenter::NodeEditor, opacity);
+    gl->glViewport(saved[0], saved[1], saved[2], saved[3]);
+    p->endNativePainting();
+}
+
+// ------------------------------------------------------------- hit testing
+
+PortItem* NodeEditorView::dragFrom() const {
+    const NodeItem* node = dragNodeId_.isEmpty() ? nullptr : nodes_.value(dragNodeId_);
+    return node ? node->port(PortItem::Kind(dragKind_), dragSlot_) : nullptr;
+}
+
+NodeItem* NodeEditorView::nodeAt(const QPoint& viewPos) const {
+    for (QGraphicsItem* item : items(viewPos)) {
+        if (auto* node = dynamic_cast<NodeItem*>(item)) return node;
+        if (auto* port = dynamic_cast<PortItem*>(item)) return static_cast<NodeItem*>(port->parentItem());
+    }
+    return nullptr;
+}
+
+EdgeItem* NodeEditorView::edgeAt(const QPoint& viewPos) const {
+    for (QGraphicsItem* item : items(viewPos))
+        if (auto* edge = dynamic_cast<EdgeItem*>(item)) return edge;
+    return nullptr;
+}
+
+bool NodeEditorView::isValidTarget(const PortItem* from, const PortItem* to) const {
+    if (!from || !to || from->nodeId() == to->nodeId()) return false;
+    if (from->kind() != to->kind()) return true;
+    // Output onto output creates a Blend between the two nodes.
+    return from->kind() == PortItem::Output && from->slot() == 0 && to->slot() == 0;
+}
+
+PortItem* NodeEditorView::portNear(QPointF scenePos, const PortItem* from) const {
+    const qreal radius = kSnap / transform().m11();
+    PortItem* best = nullptr;
+    qreal bestDist = radius;
+    for (NodeItem* node : std::as_const(nodes_)) {
+        for (PortItem* port : node->ports()) {
+            if (from && !isValidTarget(from, port)) continue;
+            const qreal d = QLineF(port->anchor(), scenePos).length();
+            if (d < bestDist) { bestDist = d; best = port; }
+        }
+    }
+    return best;
+}
+
+void NodeEditorView::setDragHighlights(const PortItem* from, const PortItem* snapped) {
+    for (NodeItem* node : std::as_const(nodes_))
+        for (PortItem* port : node->ports())
+            port->setDragState(!from ? 0 : port == snapped ? 2 : isValidTarget(from, port) ? 1 : 0);
+    for (EdgeItem* edge : std::as_const(edges_)) edge->setDimmed(from != nullptr);
+}
+
+// ------------------------------------------------------------------- mouse
+
+void NodeEditorView::wheelEvent(QWheelEvent* e) {
+    const qreal current = transform().m11();
+    const qreal target = qBound(kMinZoom, current * std::pow(1.0015, e->angleDelta().y()), kMaxZoom);
+    scale(target / current, target / current);
+}
+
+void NodeEditorView::mousePressEvent(QMouseEvent* e) {
+    if (e->button() == Qt::RightButton) {
+        panning_ = true;
+        rightMoved_ = false;
+        rightPress_ = panLast_ = e->pos();
+        return;
+    }
+    if (e->button() == Qt::LeftButton) {
+        leftPress_ = e->pos();
+        const QPointF scenePos = mapToScene(e->pos());
+        if (PortItem* port = portNear(scenePos, nullptr)) {
+            dragNodeId_ = port->nodeId();
+            dragKind_ = port->kind();
+            dragSlot_ = port->slot();
+            dragEdge_ = new QGraphicsPathItem;
+            dragEdge_->setPen(QPen(QColor(0x3f, 0x87, 0xe6), 2.5, Qt::DashLine));
+            dragEdge_->setZValue(3);
+            scene()->addItem(dragEdge_);
+            setDragHighlights(port, nullptr);
+            return;
+        }
+        if ((e->modifiers() & Qt::AltModifier) && !nodeAt(e->pos())) {
+            cutLine_ = scene()->addLine(QLineF(scenePos, scenePos), QPen(QColor(0xe6, 0x5a, 0x5a), 2, Qt::DashLine));
+            cutLine_->setZValue(3);
+            return;
+        }
+        leftOnNode_ = nodeAt(e->pos()) != nullptr;
+        if (!leftOnNode_ && !edgeAt(e->pos()) && !(e->modifiers() & Qt::ControlModifier))
+            EngineBridge::instance()->selectNode({});
+    }
+    QGraphicsView::mousePressEvent(e);
+}
+
+void NodeEditorView::mouseMoveEvent(QMouseEvent* e) {
+    if (panning_) {
+        const QPoint d = e->pos() - panLast_;
+        panLast_ = e->pos();
+        if ((e->pos() - rightPress_).manhattanLength() > kClickSlop) rightMoved_ = true;
+        horizontalScrollBar()->setValue(horizontalScrollBar()->value() - d.x());
+        verticalScrollBar()->setValue(verticalScrollBar()->value() - d.y());
+        return;
+    }
+    if (dragEdge_) {
+        PortItem* from = dragFrom();
+        if (!from) return;
+        const QPointF scenePos = mapToScene(e->pos());
+        PortItem* snapped = portNear(scenePos, from);
+        setDragHighlights(from, snapped);
+        const QPointF end = snapped ? snapped->anchor() : scenePos;
+        dragEdge_->setPath(from->kind() == PortItem::Output ? EdgeItem::curve(from->anchor(), end)
+                                                            : EdgeItem::curve(end, from->anchor()));
+        return;
+    }
+    if (cutLine_) {
+        cutLine_->setLine(QLineF(cutLine_->line().p1(), mapToScene(e->pos())));
+        return;
+    }
+    QGraphicsView::mouseMoveEvent(e);
+}
+
+void NodeEditorView::mouseReleaseEvent(QMouseEvent* e) {
+    if (panning_ && e->button() == Qt::RightButton) {
+        panning_ = false;
+        if (!rightMoved_) showContextMenu(e->pos());
+        return;
+    }
+    if (dragEdge_) { finishPortDrag(e->pos()); return; }
+    if (cutLine_)  { finishCut(); return; }
+    QGraphicsView::mouseReleaseEvent(e);
+    if (e->button() == Qt::LeftButton && leftOnNode_ && (e->pos() - leftPress_).manhattanLength() > kClickSlop)
+        commitMovedNodes();
+    leftOnNode_ = false;
+}
+
+void NodeEditorView::finishPortDrag(const QPoint& viewPos) {
+    delete dragEdge_;
+    dragEdge_ = nullptr;
+    PortItem* from = dragFrom();
+    dragNodeId_.clear();
+    PortItem* to = from ? portNear(mapToScene(viewPos), from) : nullptr;
+    setDragHighlights(nullptr, nullptr);
+    if (!from || !to) return;
+    auto* engine = EngineBridge::instance();
+    if (from->kind() == PortItem::Output && to->kind() == PortItem::Output) {
+        const QString blendId = engine->blendBetween(from->nodeId(), to->nodeId());
+        const NodeItem* a = nodes_.value(from->nodeId());
+        const NodeItem* b = nodes_.value(to->nodeId());
+        if (!blendId.isEmpty() && a && b)
+            engine->setNodePosition(blendId, QPointF(qMax(a->x(), b->x()) + kChainStep, (a->y() + b->y()) / 2));
+        return;
+    }
+    const PortItem* out = from->kind() == PortItem::Output ? from : to;
+    const PortItem* in  = from->kind() == PortItem::Input ? from : to;
+    engine->connectNodes(out->nodeId(), in->nodeId(), out->slot(), in->slot());
+}
+
+void NodeEditorView::finishCut() {
+    QPainterPath cut(cutLine_->line().p1());
+    cut.lineTo(cutLine_->line().p2());
+    delete cutLine_;
+    cutLine_ = nullptr;
+    QStringList hit;
+    for (EdgeItem* edge : std::as_const(edges_))
+        if (edge->path().intersects(cut)) hit << edge->id();
+    for (const QString& id : hit) EngineBridge::instance()->removeConnection(id);
+}
+
+void NodeEditorView::commitMovedNodes() {
+    for (QGraphicsItem* item : scene()->selectedItems())
+        if (auto* node = dynamic_cast<NodeItem*>(item))
+            EngineBridge::instance()->setNodePosition(node->id(), node->pos());
+}
+
+// -------------------------------------------------------------------- keys
+
+void NodeEditorView::keyPressEvent(QKeyEvent* e) {
+    auto* engine = EngineBridge::instance();
+    const bool ctrl = e->modifiers() & Qt::ControlModifier;
+    if (e->key() == Qt::Key_Delete || e->key() == Qt::Key_Backspace) { deleteSelection(); return; }
+    if (e->key() == Qt::Key_Space) {
+        for (const QString& id : selectedNodeIds()) engine->setNodeActive(id, !nodes_.value(id)->isActive());
+        return;
+    }
+    if (ctrl && e->key() == Qt::Key_A) {
+        for (NodeItem* n : std::as_const(nodes_)) n->setSelected(true);
+        return;
+    }
+    if (ctrl && e->key() == Qt::Key_C) { engine->copyNodes(selectedNodeIds()); return; }
+    if (ctrl && e->key() == Qt::Key_V) {
+        const QStringList pasted = engine->pasteNodes();
+        syncFromEngine();
+        scene()->clearSelection();
+        for (const QString& id : pasted) if (NodeItem* n = nodes_.value(id)) n->setSelected(true);
+        return;
+    }
+    if (ctrl && e->key() == Qt::Key_Z) { (e->modifiers() & Qt::ShiftModifier) ? engine->redo() : engine->undo(); return; }
+    if (ctrl && e->key() == Qt::Key_Y) { engine->redo(); return; }
+    QGraphicsView::keyPressEvent(e);
+}
+
+void NodeEditorView::deleteSelection() {
+    auto* engine = EngineBridge::instance();
+    QStringList edgeIds;
+    for (QGraphicsItem* item : scene()->selectedItems())
+        if (auto* edge = dynamic_cast<EdgeItem*>(item)) edgeIds << edge->id();
+    if (!edgeIds.isEmpty()) {
+        for (const QString& id : edgeIds) engine->removeConnection(id);
+        return;
+    }
+    for (const QString& id : selectedNodeIds()) engine->removeNode(id);
+}
+
+// ----------------------------------------------------------- context menu
+
+void NodeEditorView::showContextMenu(const QPoint& viewPos) {
+    auto* engine = EngineBridge::instance();
+    QMenu menu(this);
+    const QPointF scenePos = mapToScene(viewPos);
+
+    if (PortItem* port = portNear(scenePos, nullptr)) {
+        for (EdgeItem* edge : std::as_const(edges_)) {
+            const bool mine = port->kind() == PortItem::Output ? edge->from() == port : edge->to() == port;
+            if (!mine) continue;
+            const PortItem* other = port->kind() == PortItem::Output ? edge->to() : edge->from();
+            const QString name = static_cast<NodeItem*>(other->parentItem())->name();
+            const QString id = edge->id();
+            menu.addAction(QString("Break Connection %1 %2").arg(port->kind() == PortItem::Output ? "→" : "←", name),
+                           this, [engine, id] { engine->removeConnection(id); });
+        }
+    } else if (NodeItem* node = nodeAt(viewPos)) {
+        if (!node->isSelected()) { scene()->clearSelection(); node->setSelected(true); }
+        const QString id = node->id();
+        menu.addAction(node->isActive() ? "Pause" : "Resume", this, [engine, id, node] { engine->setNodeActive(id, !node->isActive()); });
+        menu.addAction(QString("Delete %1").arg(node->name()), this, [engine, id] { engine->removeNode(id); });
+        QList<EdgeItem*> nodeEdges;
+        for (EdgeItem* edge : std::as_const(edges_))
+            if (edge->from()->parentItem() == node || edge->to()->parentItem() == node) nodeEdges << edge;
+        if (!nodeEdges.isEmpty()) {
+            QMenu* breakMenu = menu.addMenu("Break Connections");
+            for (EdgeItem* edge : nodeEdges) {
+                const bool outgoing = edge->from()->parentItem() == node;
+                const PortItem* other = outgoing ? edge->to() : edge->from();
+                const QString edgeId = edge->id();
+                breakMenu->addAction(QString("%1 %2").arg(outgoing ? "→" : "←", static_cast<NodeItem*>(other->parentItem())->name()),
+                                     this, [engine, edgeId] { engine->removeConnection(edgeId); });
+            }
+            if (nodeEdges.size() > 1) {
+                QStringList ids;
+                for (EdgeItem* edge : nodeEdges) ids << edge->id();
+                breakMenu->addSeparator();
+                breakMenu->addAction("Break All", this, [engine, ids] { for (const QString& i : ids) engine->removeConnection(i); });
+            }
+        }
+        const QStringList selected = selectedNodeIds();
+        if (selected.size() == 2) {
+            menu.addAction("Blend Selected", this, [this, engine, selected] {
+                const QString blendId = engine->blendBetween(selected[0], selected[1]);
+                const NodeItem* a = nodes_.value(selected[0]);
+                const NodeItem* b = nodes_.value(selected[1]);
+                if (!blendId.isEmpty() && a && b)
+                    engine->setNodePosition(blendId, QPointF(qMax(a->x(), b->x()) + kChainStep, (a->y() + b->y()) / 2));
+            });
+        }
+    } else {
+        QMenu* effects = menu.addMenu("Add Effect");
+        QHash<QString, QMenu*> categories;
+        for (const CatalogItem& item : engine->effects()) {
+            QMenu*& sub = categories[item.category];
+            if (!sub) sub = effects->addMenu(item.category);
+            const int type = item.typeRaw;
+            sub->addAction(item.name, this, [this, type, scenePos] { addFromCatalog(type, false, {}, &scenePos); });
+        }
+        QMenu* sources = menu.addMenu("Add Source");
+        for (const CatalogItem& item : engine->sources()) {
+            const int type = item.typeRaw;
+            sources->addAction(item.name, this, [this, type, scenePos] { addFromCatalog(type, true, {}, &scenePos); });
+        }
+    }
+    if (!menu.isEmpty()) menu.exec(mapToGlobal(viewPos));
+}
+
+// ------------------------------------------------------------- adding nodes
+
+QString NodeEditorView::addFromCatalog(int typeRaw, bool isSource, const QString& connectFrom, const QPointF* scenePos) {
+    auto* engine = EngineBridge::instance();
+    const NodeItem* anchor = connectFrom.isEmpty() || isSource ? nullptr : nodes_.value(connectFrom);
+    const QString id = isSource ? engine->addSource(typeRaw)
+                                : engine->addEffect(typeRaw, anchor ? connectFrom : QString());
+    if (id.isEmpty()) return id;
+    QPointF pos;
+    if (scenePos) pos = *scenePos;
+    else if (anchor) pos = anchor->pos() + QPointF(kChainStep, 0);
+    else if (const NodeItem* last = nodes_.value(lastAddedId_)) pos = last->pos() + QPointF(0, kStackStep);
+    else pos = mapToScene(viewport()->rect().center());
+    engine->setNodePosition(id, pos);
+    lastAddedId_ = id;
+    syncFromEngine();
+    selectNode(id);
+    emit nodeSelected(id);
+    return id;
+}
+
+// ------------------------------------------------------------ drag & drop
+
+void NodeEditorView::dragEnterEvent(QDragEnterEvent* e) {
+    if (e->mimeData()->hasFormat(kCatalogMime)) e->acceptProposedAction();
+}
+
+void NodeEditorView::dragMoveEvent(QDragMoveEvent* e) {
+    if (e->mimeData()->hasFormat(kCatalogMime)) e->acceptProposedAction();
+}
+
+void NodeEditorView::dropEvent(QDropEvent* e) {
+    const QString payload = QString::fromUtf8(e->mimeData()->data(kCatalogMime));
+    const int colon = payload.indexOf(':');
+    if (colon < 0) return;
+    const bool isSource = payload.left(colon) == QLatin1String("source");
+    const int type = payload.mid(colon + 1).toInt();
+    const QPoint viewPos = e->position().toPoint();
+    const QPointF scenePos = mapToScene(viewPos);
+    e->acceptProposedAction();
+
+    auto* engine = EngineBridge::instance();
+    if (!isSource) {
+        if (NodeItem* node = nodeAt(viewPos)) {
+            addFromCatalog(type, false, node->id());
+            return;
+        }
+        if (EdgeItem* edge = edgeAt(viewPos)) {
+            // Insert into the cable, keeping its original slots.
+            const QString startId = edge->from()->nodeId(), endId = edge->to()->nodeId();
+            const int outSlot = edge->from()->slot(), inSlot = edge->to()->slot();
+            engine->removeConnection(edge->id());
+            const QString id = addFromCatalog(type, false, {}, &scenePos);
+            if (!id.isEmpty()) {
+                engine->connectNodes(startId, id, outSlot, 0);
+                engine->connectNodes(id, endId, 0, inSlot);
+            }
+            return;
+        }
+    }
+    addFromCatalog(type, isSource, {}, &scenePos);
+}
+
+// -------------------------------------------------------------- background
+
+void NodeEditorView::drawBackground(QPainter* p, const QRectF& rect) {
+    p->fillRect(rect, QColor(0x13, 0x14, 0x19));
+    const qreal scale = transform().m11();
+    if (kGrid * scale <= 4.0) return;
+    QPen dot(QColor(0x2a, 0x2c, 0x38), 3.0, Qt::SolidLine, Qt::RoundCap);
+    dot.setCosmetic(true);
+    p->setPen(dot);
+    QVector<QPointF> points;
+    const qreal left = std::floor(rect.left() / kGrid) * kGrid;
+    const qreal top  = std::floor(rect.top() / kGrid) * kGrid;
+    for (qreal x = left; x < rect.right(); x += kGrid)
+        for (qreal y = top; y < rect.bottom(); y += kGrid)
+            points.append(QPointF(x, y));
+    p->drawPoints(points.constData(), int(points.size()));
+}

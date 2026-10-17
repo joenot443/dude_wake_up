@@ -1,6 +1,9 @@
 #include "BrowserPanel.h"
 
+#include "nodes/NodeEditorView.h"
+
 #include <QLineEdit>
+#include <QMimeData>
 #include <functional>
 #include <QMap>
 #include <QTreeWidget>
@@ -10,6 +13,22 @@
 namespace {
 constexpr int kTypeRole   = Qt::UserRole;
 constexpr int kSourceRole = Qt::UserRole + 1;
+
+// Catalog entries can be dragged onto the node canvas.
+class CatalogTree : public QTreeWidget {
+protected:
+    QStringList mimeTypes() const override { return {NodeEditorView::kCatalogMime}; }
+    QMimeData* mimeData(const QList<QTreeWidgetItem*>& items) const override {
+        if (items.isEmpty() || !items.first()->data(0, kTypeRole).isValid()) return nullptr;
+        const QTreeWidgetItem* item = items.first();
+        const QString payload = QString("%1:%2")
+            .arg(item->data(0, kSourceRole).toBool() ? "source" : "shader")
+            .arg(item->data(0, kTypeRole).toInt());
+        auto* data = new QMimeData;
+        data->setData(NodeEditorView::kCatalogMime, payload.toUtf8());
+        return data;
+    }
+};
 
 QTreeWidgetItem* addHeader(QTreeWidget* tree, QTreeWidgetItem* parent, const QString& name) {
     auto* item = parent ? new QTreeWidgetItem(parent, QStringList{name})
@@ -39,8 +58,10 @@ BrowserPanel::BrowserPanel(QWidget* parent) : QWidget(parent) {
     layout->addWidget(search_);
     connect(search_, &QLineEdit::textChanged, this, &BrowserPanel::onFilterChanged);
 
-    tree_ = new QTreeWidget;
+    tree_ = new CatalogTree;
     tree_->setHeaderHidden(true);
+    tree_->setDragEnabled(true);
+    tree_->setDragDropMode(QAbstractItemView::DragOnly);
     tree_->setAlternatingRowColors(true);
     layout->addWidget(tree_, 1);
     // itemClicked for mouse, itemActivated for keyboard Enter.

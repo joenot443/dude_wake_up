@@ -1,6 +1,8 @@
 #pragma once
 
+#include <QHash>
 #include <QObject>
+#include <QPointF>
 #include <QSize>
 #include <QString>
 #include <QStringList>
@@ -18,12 +20,24 @@ struct CatalogItem {
 struct GraphNode {
     QString id;
     QString name;
-    bool    isShader = false;
+    bool    isShader   = false;
+    int     typeRaw    = 0;
+    int     inputCount = 0;
+    QPointF position;
+    bool    active = true;
+    bool    hasAuxOutput = false;
 };
 
+// Shaders with an auxiliary output expose it on this output slot.
+constexpr int kAuxOutputSlot = 10;
+
 struct GraphEdge {
+    QString id;
     QString startId;
     QString endId;
+    int     connectionType = 0;  // 0 = shader start, 1 = source start
+    int     outputSlot = 0;
+    int     inputSlot  = 0;
 };
 
 struct ParamInfo {
@@ -63,6 +77,17 @@ public:
 
     QString addEffect(int typeRaw, const QString& connectFromId);
     QString addSource(int typeRaw);
+    QString connectNodes(const QString& startId, const QString& endId, int outputSlot, int inputSlot);
+    void    removeConnection(const QString& connectionId);
+    void    removeNode(const QString& connectableId);
+    void    setNodePosition(const QString& connectableId, QPointF pos);
+    void    selectNode(const QString& connectableId);
+    void    setNodeActive(const QString& connectableId, bool active);
+    QString blendBetween(const QString& id1, const QString& id2);
+    void    copyNodes(const QStringList& ids);
+    QStringList pasteNodes();
+    void    undo();
+    void    redo();
     void    clearGraph();
     bool    loadWorkspace(const QString& path);
     void    saveWorkspace(const QString& path, const QString& name);
@@ -73,8 +98,10 @@ public:
     void setParameter(const QString& paramId, bool value);
     void setParameter(const QString& paramId, const QString& value);
 
-    void startSharing(const QString& connectableId);
-    void stopSharing(const QString& connectableId);
+    // Texture sharing is reference counted per node: several views (stage,
+    // node previews) may show the same node.
+    void retainFrames(const QString& connectableId);
+    void releaseFrames(const QString& connectableId);
     // Null until the engine has produced the first shared frame.
     FrameExchange* frames(const QString& connectableId) const;
 
@@ -84,4 +111,5 @@ signals:
 private:
     EngineBridge() = default;
     bool running_ = false;
+    QHash<QString, int> shareCounts_;
 };

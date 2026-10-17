@@ -78,10 +78,19 @@ QVector<GraphNode> EngineBridge::nodes() const {
     QVector<GraphNode> out;
     int n = 0;
     NTWConnectableInfo* shaders = ntw_get_all_shaders(&n);
-    for (int i = 0; i < n; ++i) out.push_back({str(shaders[i].id), str(shaders[i].name), true});
+    for (int i = 0; i < n; ++i) {
+        const auto& s = shaders[i];
+        const QByteArray id(s.id);
+        out.push_back({str(s.id), str(s.name), true, s.shaderTypeRaw, s.inputCount, QPointF(s.posX, s.posY),
+                       ntw_get_connectable_active(id.constData()), ntw_supports_aux_output(id.constData())});
+    }
     ntw_free_connectable_info_array(shaders, n);
     NTWVideoSourceInfo* srcs = ntw_get_all_video_sources(&n);
-    for (int i = 0; i < n; ++i) out.push_back({str(srcs[i].id), str(srcs[i].name), false});
+    for (int i = 0; i < n; ++i) {
+        const auto& s = srcs[i];
+        out.push_back({str(s.id), str(s.name), false, s.sourceType, s.inputCount, QPointF(s.posX, s.posY),
+                       ntw_get_connectable_active(s.id), false});
+    }
     ntw_free_video_source_info_array(srcs, n);
     return out;
 }
@@ -90,7 +99,10 @@ QVector<GraphEdge> EngineBridge::edges() const {
     QVector<GraphEdge> out;
     int n = 0;
     NTWConnectionInfo* arr = ntw_get_all_connections(&n);
-    for (int i = 0; i < n; ++i) out.push_back({str(arr[i].startId), str(arr[i].endId)});
+    for (int i = 0; i < n; ++i) {
+        const auto& c = arr[i];
+        out.push_back({str(c.id), str(c.startId), str(c.endId), c.connectionType, c.outputSlot, c.inputSlot});
+    }
     ntw_free_connection_info_array(arr, n);
     return out;
 }
@@ -117,14 +129,59 @@ QString EngineBridge::outputNodeId() const {
 
 QString EngineBridge::addEffect(int typeRaw, const QString& connectFromId) {
     const QString id = takeString(ntw_add_shader(typeRaw));
-    if (id.isEmpty() || connectFromId.isEmpty()) return id;
-    bool fromShader = false;
-    for (const auto& n : nodes()) if (n.id == connectFromId) { fromShader = n.isShader; break; }
-    // connectionType follows the start node: 0 = shader, 1 = source.
-    takeString(ntw_make_connection(connectFromId.toUtf8().constData(), id.toUtf8().constData(),
-                                   fromShader ? 0 : 1, 0, 0));
+    if (!id.isEmpty() && !connectFromId.isEmpty()) connectNodes(connectFromId, id, 0, 0);
     return id;
 }
+
+QString EngineBridge::connectNodes(const QString& startId, const QString& endId, int outputSlot, int inputSlot) {
+    bool fromShader = false;
+    for (const auto& n : nodes()) if (n.id == startId) { fromShader = n.isShader; break; }
+    // Aux output (slot 10) only produces frames once the shader's
+    // "Allow Auxillary" parameter is on, as NodeEditorViewModel does.
+    if (outputSlot == kAuxOutputSlot) {
+        for (const ParamInfo& p : parameters(startId))
+            if (p.name == QLatin1String("Allow Auxillary")) setParameter(p.id, true);
+    }
+    // connectionType follows the start node: 0 = shader, 1 = source.
+    return takeString(ntw_make_connection(startId.toUtf8().constData(), endId.toUtf8().constData(),
+                                          fromShader ? 0 : 1, outputSlot, inputSlot));
+}
+
+void EngineBridge::removeConnection(const QString& id) { ntw_remove_connection(id.toUtf8().constData()); }
+void EngineBridge::removeNode(const QString& id)       { ntw_remove_connectable(id.toUtf8().constData()); }
+void EngineBridge::selectNode(const QString& id) {
+    if (id.isEmpty()) ntw_deselect_connectable(); else ntw_select_connectable(id.toUtf8().constData());
+}
+void EngineBridge::setNodePosition(const QString& id, QPointF pos) {
+    ntw_set_connectable_position(id.toUtf8().constData(), float(pos.x()), float(pos.y()));
+}
+void EngineBridge::setNodeActive(const QString& id, bool active) {
+    ntw_set_connectable_active(id.toUtf8().constData(), active);
+}
+
+QString EngineBridge::blendBetween(const QString& id1, const QString& id2) {
+    return takeString(ntw_create_blend_between(id1.toUtf8().constData(), id2.toUtf8().constData()));
+}
+
+void EngineBridge::copyNodes(const QStringList& ids) {
+    QVector<QByteArray> utf8;
+    QVector<const char*> ptrs;
+    for (const QString& id : ids) utf8.push_back(id.toUtf8());
+    for (const QByteArray& b : utf8) ptrs.push_back(b.constData());
+    ntw_copy_connectables(ptrs.data(), int(ptrs.size()));
+}
+
+QStringList EngineBridge::pasteNodes() {
+    int n = 0;
+    char** arr = ntw_paste_connectables(&n);
+    QStringList out;
+    for (int i = 0; i < n; ++i) out << str(arr[i]);
+    if (arr) ntw_free_string_array(arr, n);
+    return out;
+}
+
+void EngineBridge::undo() { ntw_undo(); }
+void EngineBridge::redo() { ntw_redo(); }
 
 QString EngineBridge::addSource(int typeRaw) { return takeString(ntw_add_shader_video_source(typeRaw)); }
 void EngineBridge::clearGraph() { ntw_clear_graph(); }
@@ -162,8 +219,17 @@ void EngineBridge::setParameter(const QString& id, int v)            { ntw_set_p
 void EngineBridge::setParameter(const QString& id, bool v)           { ntw_set_parameter_bool(id.toUtf8().constData(), v); }
 void EngineBridge::setParameter(const QString& id, const QString& v) { ntw_set_parameter_string(id.toUtf8().constData(), v.toUtf8().constData()); }
 
-void EngineBridge::startSharing(const QString& id) { ntw_start_texture_sharing(id.toUtf8().constData()); }
-void EngineBridge::stopSharing(const QString& id)  { ntw_stop_texture_sharing(id.toUtf8().constData()); }
+void EngineBridge::retainFrames(const QString& id) {
+    if (shareCounts_[id]++ == 0) ntw_start_texture_sharing(id.toUtf8().constData());
+}
+
+void EngineBridge::releaseFrames(const QString& id) {
+    auto it = shareCounts_.find(id);
+    if (it == shareCounts_.end()) return;
+    if (--it.value() > 0) return;
+    shareCounts_.erase(it);
+    if (running_) ntw_stop_texture_sharing(id.toUtf8().constData());
+}
 
 FrameExchange* EngineBridge::frames(const QString& id) const {
     return static_cast<FrameExchange*>(ntw_get_connectable_texture(id.toUtf8().constData()));

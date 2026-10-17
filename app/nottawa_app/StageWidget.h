@@ -1,15 +1,15 @@
 #pragma once
 
-#include <QOpenGLFunctions_3_3_Core>
+#include "FramePresenter.h"
+
 #include <QOpenGLWidget>
 #include <QString>
 #include <QTimer>
 #include <atomic>
-#include <cstdint>
 
-// Shows the output of one engine node. Frames arrive through the engine's
-// FrameExchange for that node; the widget repaints at the display's refresh rate.
-class StageWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core {
+// Shows the output of one engine node, repainting at the display's refresh
+// rate (the app runs with swap interval 0; see main.cpp).
+class StageWidget : public QOpenGLWidget {
     Q_OBJECT
 public:
     explicit StageWidget(QWidget* parent = nullptr);
@@ -29,16 +29,12 @@ signals:
 
 protected:
     void initializeGL() override;
-    void resizeGL(int w, int h) override;
     void paintGL() override;
 
 private:
-    QTimer   repaintTimer_;
-    QString  nodeId_;
-    void*    nativeContext_ = nullptr;
-    uint32_t program_ = 0;
-    uint32_t vao_     = 0;
-    uint32_t vbo_     = 0;
-    int      locTex_  = -1;
+    QTimer         repaintTimer_;
+    FramePresenter presenter_;
+    QString        nodeId_;
+    void*          nativeContext_ = nullptr;
     std::atomic<quint64> framesShown_{0};
 };

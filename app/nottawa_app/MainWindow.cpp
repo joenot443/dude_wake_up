@@ -2,11 +2,13 @@
 
 #include "EngineBridge.h"
 #include "StageWidget.h"
+#include "nodes/NodeEditorView.h"
 #include "panels/BrowserPanel.h"
 #include "panels/InspectorPanel.h"
 #include "panels/LogPanel.h"
 #include "panels/WelcomeOverlay.h"
 
+#include <QAction>
 #include <QComboBox>
 #include <QDateTime>
 #include <QDockWidget>
@@ -15,17 +17,18 @@
 #include <QFileInfo>
 #include <QKeySequence>
 #include <QLabel>
-#include <QListWidget>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QOpenGLContext>
 #include <QResizeEvent>
 #include <QSignalBlocker>
+#include <QStackedWidget>
 #include <QStatusBar>
 #include <QTimer>
 #include <QToolBar>
+#include <QtGui/qopenglcontext_platform.h>
 
 namespace {
-constexpr int kNodeIdRole = Qt::UserRole;
 const QString kAutoStage = QStringLiteral("Output (auto)");
 }
 
@@ -42,10 +45,15 @@ MainWindow::MainWindow(const QString& dataPath) : dataPath_(dataPath) {
         }
     }
 
-    stage_ = new StageWidget(this);
-    setCentralWidget(stage_);
-    welcome_ = new WelcomeOverlay(stage_);
-    welcome_->setGeometry(stage_->rect());
+    centre_ = new QStackedWidget(this);
+    editor_ = new NodeEditorView(centre_);
+    stage_  = new StageWidget(centre_);
+    centre_->addWidget(editor_);
+    centre_->addWidget(stage_);
+    setCentralWidget(centre_);
+
+    welcome_ = new WelcomeOverlay(centre_);
+    welcome_->setGeometry(centre_->rect());
     connect(welcome_, &WelcomeOverlay::newStrandRequested,  this, [this] { welcome_->hide(); });
     connect(welcome_, &WelcomeOverlay::openStrandRequested, this, &MainWindow::onOpen);
 
@@ -58,9 +66,16 @@ MainWindow::MainWindow(const QString& dataPath) : dataPath_(dataPath) {
     statusBar()->addPermanentWidget(statsLabel_);
 
     connect(EngineBridge::instance(), &EngineBridge::graphChanged, this, &MainWindow::refreshGraph);
-    // The engine needs the stage's GL context to share textures with; it
-    // exists once initializeGL has run.
-    connect(stage_, &StageWidget::glReady, this, &MainWindow::startEngine, Qt::QueuedConnection);
+    connect(editor_, &NodeEditorView::nodeSelected, this, [this](const QString& id) {
+        selectedId_ = id;
+        EngineBridge::instance()->selectNode(id);
+        QString name;
+        for (const auto& n : EngineBridge::instance()->nodes()) if (n.id == id) name = n.name;
+        inspector_->setNode(id, name);
+    });
+
+    // After the event loop starts, so the window is up while services load.
+    QTimer::singleShot(0, this, &MainWindow::startEngine);
 
     statsTimer_ = new QTimer(this);
     connect(statsTimer_, &QTimer::timeout, this, &MainWindow::sampleStats);
@@ -68,6 +83,9 @@ MainWindow::MainWindow(const QString& dataPath) : dataPath_(dataPath) {
 }
 
 MainWindow::~MainWindow() {
+    // The views release their shared textures when destroyed; do that while
+    // the engine is still running.
+    delete centre_;
     EngineBridge::instance()->stop();
 }
 
@@ -81,16 +99,22 @@ void MainWindow::log(const QString& line) {
 
 void MainWindow::resizeEvent(QResizeEvent* e) {
     QMainWindow::resizeEvent(e);
-    welcome_->setGeometry(stage_->rect());
+    welcome_->setGeometry(centre_->rect());
 }
 
 void MainWindow::buildMenusAndToolbar() {
+    auto* engine = EngineBridge::instance();
     auto* file = menuBar()->addMenu("&File");
-    file->addAction("&New",        this, &MainWindow::onNew,  QKeySequence::New);
-    file->addAction("&Open…",      this, &MainWindow::onOpen, QKeySequence::Open);
-    file->addAction("&Save As…",   this, &MainWindow::onSave, QKeySequence::Save);
+    file->addAction("&New",      this, &MainWindow::onNew,  QKeySequence::New);
+    file->addAction("&Open…",    this, &MainWindow::onOpen, QKeySequence::Open);
+    file->addAction("&Save As…", this, &MainWindow::onSave, QKeySequence::Save);
     file->addSeparator();
     file->addAction("E&xit", this, &QWidget::close, QKeySequence::Quit);
+
+    auto* view = menuBar()->addMenu("&View");
+    stageAction_ = view->addAction("&Stage Mode", QKeySequence("Ctrl+Return"), this, [this](bool on) { setStageMode(on); });
+    stageAction_->setCheckable(true);
+    view->addAction("Zoom to &Fit", QKeySequence("Ctrl+0"), editor_, &NodeEditorView::zoomToFit);
 
     auto* help = menuBar()->addMenu("&Help");
     help->addAction("&About Nottawa", this, [this] {
@@ -103,24 +127,23 @@ void MainWindow::buildMenusAndToolbar() {
     tb->addAction("Open", this, &MainWindow::onOpen);
     tb->addAction("Save", this, &MainWindow::onSave);
     tb->addSeparator();
-    tb->addWidget(new QLabel("  Stage: "));
+    tb->addAction("Undo", this, [engine] { engine->undo(); });
+    tb->addAction("Redo", this, [engine] { engine->redo(); });
+    tb->addAction("Fit",  editor_, &NodeEditorView::zoomToFit);
+    tb->addSeparator();
+    tb->addAction(stageAction_);
     stagePick_ = new QComboBox;
-    stagePick_->setMinimumWidth(220);
+    stagePick_->setMinimumWidth(200);
     stagePick_->addItem(kAutoStage);
-    connect(stagePick_, &QComboBox::currentIndexChanged, this, &MainWindow::refreshGraph);
+    connect(stagePick_, &QComboBox::currentIndexChanged, this, &MainWindow::updateStageSource);
     tb->addWidget(stagePick_);
 }
 
 void MainWindow::buildDocks() {
     browser_   = new BrowserPanel(this);
-    graph_     = new QListWidget(this);
     inspector_ = new InspectorPanel(this);
     logPanel_  = new LogPanel(this);
-
     connect(browser_, &BrowserPanel::itemPicked, this, &MainWindow::addFromLibrary);
-    connect(graph_, &QListWidget::currentItemChanged, this, [this](QListWidgetItem* item) {
-        if (item) selectNode(item->data(kNodeIdRole).toString());
-    });
 
     auto addDock = [this](const QString& title, QWidget* w, Qt::DockWidgetArea area) {
         auto* dock = new QDockWidget(title, this);
@@ -130,17 +153,21 @@ void MainWindow::buildDocks() {
         return dock;
     };
     addDock("LIBRARY",   browser_,   Qt::LeftDockWidgetArea)->setMinimumWidth(240);
-    addDock("GRAPH",     graph_,     Qt::LeftDockWidgetArea);
     addDock("INSPECTOR", inspector_, Qt::RightDockWidgetArea)->setMinimumWidth(320);
-    addDock("LOG",       logPanel_,  Qt::BottomDockWidgetArea)->setMinimumHeight(120);
+    addDock("LOG",       logPanel_,  Qt::BottomDockWidgetArea)->setMinimumHeight(90);
 }
 
 void MainWindow::startEngine() {
     auto* engine = EngineBridge::instance();
     if (engine->isRunning()) return;
-    if (!stage_->nativeContext()) { log("[engine] ERROR stage GL context unavailable"); return; }
+    // Every Qt GL context shares with the global share context
+    // (AA_ShareOpenGLContexts), so joining it shares engine textures with
+    // the canvas and the stage alike.
+    QOpenGLContext* shared = QOpenGLContext::globalShareContext();
+    auto* wgl = shared ? shared->nativeInterface<QNativeInterface::QWGLContext>() : nullptr;
+    if (!wgl) { log("[engine] ERROR no shared GL context"); return; }
     log("[engine] starting, data path " + dataPath_);
-    if (!engine->start(stage_->nativeContext(), dataPath_)) {
+    if (!engine->start(wgl->nativeContext(), dataPath_)) {
         log("[engine] ERROR engine failed to initialise");
         return;
     }
@@ -151,15 +178,21 @@ void MainWindow::startEngine() {
     log(QString("[engine] running at %1x%2 — %3 sources, %4 effects available")
         .arg(res.width()).arg(res.height()).arg(sources.size()).arg(effects.size()));
     refreshGraph();
+    editor_->setFocus();
+    runScriptedAdds();
+}
 
-    // NOTTAWA_ADD="Plasma Two;Kaleidoscope" adds catalog entries by name, one
-    // per second, as library clicks would — for scripted test runs.
+// NOTTAWA_ADD="Plasma Two;Kaleidoscope" adds catalog entries by name, one per
+// second, as library clicks would (effects chain after the previous node) —
+// for scripted runs.
+void MainWindow::runScriptedAdds() {
+    auto* engine = EngineBridge::instance();
     const QStringList names = qEnvironmentVariable("NOTTAWA_ADD").split(';', Qt::SkipEmptyParts);
     for (int i = 0; i < names.size(); ++i) {
         const QString name = names[i].trimmed();
-        QTimer::singleShot(1000 * (i + 1), this, [this, name, sources, effects] {
-            for (const auto* list : {&sources, &effects}) {
-                for (const auto& item : *list) {
+        QTimer::singleShot(1000 * (i + 1), this, [this, engine, name] {
+            for (const auto& list : {engine->sources(), engine->effects()}) {
+                for (const auto& item : list) {
                     if (item.name.compare(name, Qt::CaseInsensitive) != 0) continue;
                     addFromLibrary(item.typeRaw, item.isSource);
                     log("[script] added " + item.name);
@@ -172,31 +205,27 @@ void MainWindow::startEngine() {
 }
 
 void MainWindow::addFromLibrary(int typeRaw, bool isSource) {
-    auto* engine = EngineBridge::instance();
-    if (!engine->isRunning()) return;
-    const QString id = isSource ? engine->addSource(typeRaw) : engine->addEffect(typeRaw, engine->outputNodeId());
-    if (id.isEmpty()) { log("[graph] ERROR could not add node"); return; }
-    welcome_->hide();
-    selectedId_ = id;
+    if (!EngineBridge::instance()->isRunning()) return;
+    // Effects chain after the selected node, else after the output.
+    const QString after = selectedId_.isEmpty() ? EngineBridge::instance()->outputNodeId() : selectedId_;
+    if (editor_->addFromCatalog(typeRaw, isSource, after).isEmpty()) log("[graph] ERROR could not add node");
+    else welcome_->hide();
 }
 
 void MainWindow::refreshGraph() {
     auto* engine = EngineBridge::instance();
     if (!engine->isRunning()) return;
-    const auto nodes = engine->nodes();
-    const QString outputId = engine->outputNodeId();
+    editor_->syncFromEngine();
 
-    {
-        const QSignalBlocker blockGraph(graph_);
-        graph_->clear();
-        for (const auto& n : nodes) {
-            auto* item = new QListWidgetItem(QString("%1  %2").arg(n.isShader ? "◆" : "●", n.name), graph_);
-            item->setData(kNodeIdRole, n.id);
-            if (n.id == outputId) { QFont f = item->font(); f.setBold(true); item->setFont(f); }
-        }
+    const auto nodes = engine->nodes();
+    const int edgeCount = int(engine->edges().size());
+    if (nodes.size() != lastNodeCount_ || edgeCount != lastEdgeCount_) {
+        lastNodeCount_ = int(nodes.size());
+        lastEdgeCount_ = edgeCount;
+        log(QString("[graph] %1 nodes, %2 connections").arg(lastNodeCount_).arg(lastEdgeCount_));
     }
     {
-        const QSignalBlocker blockPick(stagePick_);
+        const QSignalBlocker block(stagePick_);
         const QString picked = stagePick_->currentData().toString();
         stagePick_->clear();
         stagePick_->addItem(kAutoStage);
@@ -204,27 +233,28 @@ void MainWindow::refreshGraph() {
         const int idx = picked.isEmpty() ? 0 : stagePick_->findData(picked);
         stagePick_->setCurrentIndex(idx < 0 ? 0 : idx);
     }
-    const QString pinned = stagePick_->currentData().toString();
-    stage_->setSourceNode(pinned.isEmpty() ? outputId : pinned);
-
+    updateStageSource();
     if (!nodes.isEmpty()) welcome_->hide();
 
     bool selectedExists = false;
     for (const auto& n : nodes) selectedExists |= (n.id == selectedId_);
-    selectNode(selectedExists ? selectedId_ : outputId);
+    if (!selectedExists && !selectedId_.isEmpty()) {
+        selectedId_.clear();
+        inspector_->setNode({}, {});
+    }
 }
 
-void MainWindow::selectNode(const QString& id) {
-    selectedId_ = id;
-    QString name;
-    for (int i = 0; i < graph_->count(); ++i) {
-        QListWidgetItem* item = graph_->item(i);
-        if (item->data(kNodeIdRole).toString() != id) continue;
-        const QSignalBlocker block(graph_);
-        graph_->setCurrentItem(item);
-        name = item->text().mid(3);
-    }
-    if (id != inspector_->node()) inspector_->setNode(id, name);
+void MainWindow::setStageMode(bool on) {
+    centre_->setCurrentWidget(on ? static_cast<QWidget*>(stage_) : editor_);
+    if (!on) editor_->setFocus();
+    updateStageSource();
+}
+
+// The stage only holds a shared texture while it is shown.
+void MainWindow::updateStageSource() {
+    const bool shown = centre_->currentWidget() == stage_;
+    const QString pinned = stagePick_->currentData().toString();
+    stage_->setSourceNode(!shown ? QString() : pinned.isEmpty() ? EngineBridge::instance()->outputNodeId() : pinned);
 }
 
 void MainWindow::onNew() {
@@ -241,6 +271,7 @@ void MainWindow::onOpen() {
     if (EngineBridge::instance()->loadWorkspace(path)) {
         strandLabel_->setText(QFileInfo(path).fileName());
         log("[file] opened " + path);
+        editor_->zoomToFit();
     } else {
         log("[file] ERROR could not open " + path);
     }
@@ -258,8 +289,8 @@ void MainWindow::sampleStats() {
     const quint64 shown = stage_->framesShown();
     const quint64 perSec = shown - lastShown_;
     lastShown_ = shown;
-    const QString line = QString("engine %1 fps · stage %2 frames/s")
-        .arg(EngineBridge::instance()->fps(), 0, 'f', 1).arg(perSec);
+    QString line = QString("engine %1 fps").arg(EngineBridge::instance()->fps(), 0, 'f', 1);
+    if (centre_->currentWidget() == stage_) line += QString(" · stage %1 frames/s").arg(perSec);
     statsLabel_->setText(line);
     if (logFile_) {
         logFile_->write((QDateTime::currentDateTime().toString("HH:mm:ss.zzz ") + "[stats] " + line + '\n').toUtf8());
