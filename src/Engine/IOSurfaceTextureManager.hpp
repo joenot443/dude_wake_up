@@ -15,12 +15,14 @@
 #include <mutex>
 #include <functional>
 #include <memory>
+#include <vector>
 #ifdef __APPLE__
 #include <IOSurface/IOSurface.h>
 #else
-// Portable placeholder so the class declaration compiles on non-Apple platforms.
-// The Windows implementation (Phase 2: DXGI shared handles) will wrap this.
+// Windows: the "surface" handed to the UI is a FrameExchange* (a fenced
+// triple buffer of GL textures in the UI's share group).
 typedef void* IOSurfaceRef;
+class FrameExchange;
 #endif
 
 struct SharedTexture {
@@ -34,6 +36,11 @@ struct SharedTexture {
   // source FBO hasn't been written since the previous blit. UINT64_MAX
   // until the first successful blit, so the initial frame always blits.
   uint64_t lastBlittedTick = UINT64_MAX;
+#ifndef __APPLE__
+  std::shared_ptr<FrameExchange> exchange;  // `surface` points at this
+  unsigned int slotTextures[3] = {};
+  unsigned int slotFbos[3] = {};
+#endif
 };
 
 class IOSurfaceTextureManager {
@@ -85,6 +92,14 @@ private:
   std::unordered_map<std::string, SharedTexture> tracked;
   std::mutex mutex;
   ConnectableLookup secondaryLookup;
+#ifndef __APPLE__
+  // stopSharing may run off the GL thread, so GL cleanup is deferred to the
+  // next blitTrackedTextures(). Exchanges outlive their entries because the
+  // UI may still hold the pointer.
+  void publish(SharedTexture& tex, unsigned int srcFboId, int srcW, int srcH);
+  std::vector<SharedTexture> pendingCleanup;
+  std::vector<std::shared_ptr<FrameExchange>> retiredExchanges;
+#endif
 
   static IOSurfaceTextureManager* instance;
 };

@@ -1,43 +1,192 @@
-// IOSurfaceTextureManager_win.cpp
-// Non-macOS placeholder. Real DXGI-shared-handle implementation lands in
-// Phase 2 (see WINDOWS_PORT_PLAN.md). Exists so the empty-shell Windows
-// build links; texture sharing is a no-op until Phase 2.
+// Windows implementation of IOSurfaceTextureManager. Instead of an IOSurface,
+// each shared connectable gets a FrameExchange: three GL textures in the share
+// group joined to the host UI (EngineLoop::setShareContext), handed over with
+// fences. getIOSurface() returns the FrameExchange*.
 
 #ifndef TARGET_OSX
 
 #include "IOSurfaceTextureManager.hpp"
-#include "ofLog.h"
-
-namespace {
-  void warnOnce(const char* method) {
-    static bool warned = false;
-    if (!warned) {
-      ofLogWarning("IOSurfaceTextureManager_win") << "stub: " << method
-        << " — DXGI shared-handle implementation deferred to Phase 2";
-      warned = true;
-    }
-  }
-}
+#include "FrameExchange.h"
+#include "ShaderChainerService.hpp"
+#include "VideoSourceService.hpp"
+#include "Connection.hpp"
+#include "ofMain.h"
 
 IOSurfaceTextureManager* IOSurfaceTextureManager::instance = nullptr;
-
-IOSurfaceTextureManager::~IOSurfaceTextureManager() {}
 
 IOSurfaceTextureManager* IOSurfaceTextureManager::getInstance() {
   if (!instance) instance = new IOSurfaceTextureManager();
   return instance;
 }
 
-void IOSurfaceTextureManager::startSharing(const std::string& /*id*/)                             { warnOnce("startSharing"); }
-void IOSurfaceTextureManager::stopSharing(const std::string& /*id*/)                              { /* silent no-op */ }
-void IOSurfaceTextureManager::blitTrackedTextures()                                                { /* silent no-op — called per-frame; don't spam */ }
-void IOSurfaceTextureManager::blitExternalFrame(const std::string&, unsigned int, int, int)       { /* silent no-op — called per-frame */ }
+// Process-lifetime singleton; GL objects die with the context.
+IOSurfaceTextureManager::~IOSurfaceTextureManager() {}
 
-IOSurfaceRef IOSurfaceTextureManager::getIOSurface(const std::string& /*id*/) { return nullptr; }
-int          IOSurfaceTextureManager::getWidth   (const std::string& /*id*/) { return 0; }
-int          IOSurfaceTextureManager::getHeight  (const std::string& /*id*/) { return 0; }
-bool         IOSurfaceTextureManager::isSharing  (const std::string& /*id*/) { return false; }
+void IOSurfaceTextureManager::startSharing(const std::string& connectableId) {
+  std::lock_guard<std::mutex> lock(mutex);
+  if (tracked.count(connectableId)) return;
+  SharedTexture tex;
+  tex.exchange = std::make_shared<FrameExchange>();
+  tex.surface = tex.exchange.get();
+  tracked[connectableId] = std::move(tex);
+}
 
-void IOSurfaceTextureManager::setSecondaryLookup(ConnectableLookup lookup) { secondaryLookup = std::move(lookup); }
+void IOSurfaceTextureManager::stopSharing(const std::string& connectableId) {
+  std::lock_guard<std::mutex> lock(mutex);
+  auto it = tracked.find(connectableId);
+  if (it == tracked.end()) return;
+  retiredExchanges.push_back(it->second.exchange);
+  pendingCleanup.push_back(std::move(it->second));
+  tracked.erase(it);
+}
+
+IOSurfaceRef IOSurfaceTextureManager::getIOSurface(const std::string& connectableId) {
+  std::lock_guard<std::mutex> lock(mutex);
+  auto it = tracked.find(connectableId);
+  if (it == tracked.end() || it->second.needsSetup) return nullptr;
+  return it->second.surface;
+}
+
+int IOSurfaceTextureManager::getWidth(const std::string& connectableId) {
+  std::lock_guard<std::mutex> lock(mutex);
+  auto it = tracked.find(connectableId);
+  return it == tracked.end() ? 0 : it->second.width;
+}
+
+int IOSurfaceTextureManager::getHeight(const std::string& connectableId) {
+  std::lock_guard<std::mutex> lock(mutex);
+  auto it = tracked.find(connectableId);
+  return it == tracked.end() ? 0 : it->second.height;
+}
+
+bool IOSurfaceTextureManager::isSharing(const std::string& connectableId) {
+  std::lock_guard<std::mutex> lock(mutex);
+  return tracked.count(connectableId) > 0;
+}
+
+void IOSurfaceTextureManager::setSecondaryLookup(ConnectableLookup lookup) {
+  secondaryLookup = std::move(lookup);
+}
+
+// Defined in nottawa_bridge.cpp.
+extern std::shared_ptr<Connectable> ntw_find_preview_connectable(const std::string& id);
+
+static std::shared_ptr<Connectable> findConnectableForBlit(const std::string& id) {
+  // Synthetic ids ("transformCrop:<shaderId>") are fed via blitExternalFrame.
+  if (id.find(':') != std::string::npos) return nullptr;
+  if (auto preview = ntw_find_preview_connectable(id)) return preview;
+  if (auto source = VideoSourceService::getService()->videoSourceForId(id))
+    return std::dynamic_pointer_cast<Connectable>(source);
+  if (auto shader = ShaderChainerService::getService()->shaderForId(id))
+    return std::dynamic_pointer_cast<Connectable>(shader);
+  return nullptr;
+}
+
+void IOSurfaceTextureManager::publish(SharedTexture& tex, unsigned int srcFboId, int srcW, int srcH) {
+  void* readFence = nullptr;
+  const int slot = tex.exchange->acquireWriteSlot(&readFence);
+  if (readFence) {
+    glWaitSync(static_cast<GLsync>(readFence), 0, GL_TIMEOUT_IGNORED);
+    glDeleteSync(static_cast<GLsync>(readFence));
+  }
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFboId);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, tex.slotFbos[slot]);
+  glBlitFramebuffer(0, 0, srcW, srcH, 0, 0, tex.width, tex.height,
+                    GL_COLOR_BUFFER_BIT, GL_NEAREST);
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+  GLsync writeFence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+  if (void* stale = tex.exchange->publish(slot, writeFence))
+    glDeleteSync(static_cast<GLsync>(stale));
+}
+
+void IOSurfaceTextureManager::blitTrackedTextures() {
+  std::lock_guard<std::mutex> lock(mutex);
+  for (auto& tex : pendingCleanup) cleanupSharedTexture(tex);
+  pendingCleanup.clear();
+  if (tracked.empty()) return;
+
+  for (auto& [id, tex] : tracked) {
+    auto connectable = findConnectableForBlit(id);
+    if (!connectable) continue;
+    auto fbo = connectable->frame();
+    if (!fbo) continue;
+    const int srcW = fbo->getWidth();
+    const int srcH = fbo->getHeight();
+    if (srcW <= 0 || srcH <= 0) continue;
+
+    bool reallocated = false;
+    if (tex.needsSetup || tex.width != srcW || tex.height != srcH) {
+      cleanupSharedTexture(tex);
+      setupSharedTexture(tex, srcW, srcH);
+      if (tex.needsSetup) continue;
+      reallocated = true;
+    }
+    if (!reallocated && tex.lastBlittedTick == connectable->renderTick) continue;
+
+    publish(tex, fbo->getId(), srcW, srcH);
+    tex.lastBlittedTick = connectable->renderTick;
+  }
+  // Make the fences visible to the UI's context.
+  glFlush();
+}
+
+void IOSurfaceTextureManager::blitExternalFrame(const std::string& id, unsigned int srcFboId,
+                                                int srcW, int srcH) {
+  std::lock_guard<std::mutex> lock(mutex);
+  auto it = tracked.find(id);
+  if (it == tracked.end() || srcW <= 0 || srcH <= 0) return;
+  auto& tex = it->second;
+  if (tex.needsSetup || tex.width != srcW || tex.height != srcH) {
+    cleanupSharedTexture(tex);
+    setupSharedTexture(tex, srcW, srcH);
+    if (tex.needsSetup) return;
+  }
+  publish(tex, srcFboId, srcW, srcH);
+  glFlush();
+}
+
+void IOSurfaceTextureManager::setupSharedTexture(SharedTexture& tex, int width, int height) {
+  glGenTextures(3, tex.slotTextures);
+  glGenFramebuffers(3, tex.slotFbos);
+  bool ok = true;
+  for (int i = 0; i < 3; ++i) {
+    glBindTexture(GL_TEXTURE_2D, tex.slotTextures[i]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindFramebuffer(GL_FRAMEBUFFER, tex.slotFbos[i]);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex.slotTextures[i], 0);
+    ok = ok && glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+    glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+  }
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  if (!ok) {
+    ofLogError("IOSurfaceTextureManager") << "shared texture FBO incomplete (" << width << "x" << height << ")";
+    cleanupSharedTexture(tex);
+    return;
+  }
+  const uint32_t ids[3] = {tex.slotTextures[0], tex.slotTextures[1], tex.slotTextures[2]};
+  tex.exchange->setTextures(ids);
+  tex.width = width;
+  tex.height = height;
+  tex.needsSetup = false;
+}
+
+void IOSurfaceTextureManager::cleanupSharedTexture(SharedTexture& tex) {
+  if (tex.exchange)
+    for (void* fence : tex.exchange->takeAllFences()) glDeleteSync(static_cast<GLsync>(fence));
+  if (tex.slotFbos[0]) glDeleteFramebuffers(3, tex.slotFbos);
+  if (tex.slotTextures[0]) glDeleteTextures(3, tex.slotTextures);
+  for (int i = 0; i < 3; ++i) tex.slotFbos[i] = tex.slotTextures[i] = 0;
+  tex.width = tex.height = 0;
+  tex.needsSetup = true;
+  tex.lastBlittedTick = UINT64_MAX;
+}
 
 #endif // !TARGET_OSX

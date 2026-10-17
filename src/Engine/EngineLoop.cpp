@@ -30,6 +30,13 @@
 #ifdef __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
 #endif
+#ifdef _WIN32
+#include <windows.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#define GLFW_EXPOSE_NATIVE_WGL
+#include "GLFW/glfw3native.h"
+#include <filesystem>
+#endif
 #include <sys/stat.h>
 #include <chrono>
 #include <cstdlib>
@@ -47,7 +54,20 @@ EngineLoop* EngineLoop::getInstance() {
   return instance;
 }
 
+static std::string dataPathOverride;
+static void* hostShareContext = nullptr;
+
+void EngineLoop::setDataPath(const std::string& path) { dataPathOverride = path; }
+void EngineLoop::setShareContext(void* nativeContext) { hostShareContext = nativeContext; }
+
 static void setupDataPath() {
+  if (!dataPathOverride.empty()) {
+    std::string path = dataPathOverride;
+    if (path.back() != '/' && path.back() != '\\') path += '/';
+    ofSetDataPathRoot(path);
+    return;
+  }
+#ifdef __APPLE__
   // Set OF data path from bundle Resources/data/ directory.
   CFBundleRef mainBundle = CFBundleGetMainBundle();
   if (mainBundle) {
@@ -61,13 +81,17 @@ static void setupDataPath() {
       CFRelease(resourcesURL);
     }
   }
+#endif
 }
 
 /// Create a directory if it doesn't exist using POSIX stat/mkdir.
 /// OF's ofDirectory::createDirectory fails silently on paths with spaces
 /// (e.g. "Application Support"), so we use POSIX directly for NottawaApp.
 static void ensureDirectory(const std::string& path) {
-#ifdef NOTTAWA_ENGINE_ONLY
+#if defined(_WIN32)
+  std::error_code ec;
+  std::filesystem::create_directories(std::filesystem::u8path(path), ec);
+#elif defined(NOTTAWA_ENGINE_ONLY)
   struct stat st;
   if (stat(path.c_str(), &st) != 0) {
     mkdir(path.c_str(), 0755);
@@ -103,6 +127,54 @@ static void setupDirectories() {
 
 static std::shared_ptr<ofAppBaseWindow> ofWindow = nullptr;
 
+#ifdef _WIN32
+// Lets a raw GLFWwindow be passed as ofGLFWWindowSettings::shareContextWith,
+// which OF only reads through getWindowContext().
+class BareShareHandle : public ofAppBaseWindow {
+public:
+  explicit BareShareHandle(GLFWwindow* w) : raw(w) {}
+  void* getWindowContext() override { return raw; }
+  void setup(const ofWindowSettings&) override {}
+  void update() override {}
+  void draw() override {}
+  ofCoreEvents& events() override { return coreEvents; }
+  std::shared_ptr<ofBaseRenderer>& renderer() override { return noRenderer; }
+private:
+  GLFWwindow* raw;
+  ofCoreEvents coreEvents;
+  std::shared_ptr<ofBaseRenderer> noRenderer;
+};
+
+static GLFWwindow* shareRoot = nullptr;
+static std::shared_ptr<BareShareHandle> shareRootHandle;
+
+// Joins the host UI's GL context (an HGLRC) to the engine's share group so
+// textures the engine renders are directly usable by the UI. wglShareLists
+// refuses contexts that already contain objects, and OF populates its
+// context during ofCreateWindow, so: create an empty GLFW context, share it
+// with the host while both are empty, then create OF's window sharing with
+// that root.
+static bool createShareRoot() {
+  if (!glfwInit()) return false;
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+  glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+  shareRoot = glfwCreateWindow(16, 16, "nottawa-share-root", nullptr, nullptr);
+  glfwDefaultWindowHints();
+  if (!shareRoot) return false;
+  if (!wglShareLists(static_cast<HGLRC>(hostShareContext), glfwGetWGLContext(shareRoot))) {
+    ofLogError("EngineLoop") << "wglShareLists failed: " << GetLastError();
+    glfwDestroyWindow(shareRoot);
+    shareRoot = nullptr;
+    return false;
+  }
+  shareRootHandle = std::make_shared<BareShareHandle>(shareRoot);
+  return true;
+}
+#endif
+
 static bool setupOpenGLContext() {
   // Create a hidden OF window for full GL initialization.
   // OF needs its own window creation path to set up the programmable
@@ -110,6 +182,13 @@ static bool setupOpenGLContext() {
   ofGLFWWindowSettings settings;
   settings.setGLVersion(3, 2);
   settings.setSize(64, 64);
+#ifdef _WIN32
+  settings.visible = false;
+  if (hostShareContext) {
+    if (!createShareRoot()) return false;
+    settings.shareContextWith = shareRootHandle;
+  }
+#endif
 
   ofWindow = ofCreateWindow(settings);
   if (!ofWindow) {

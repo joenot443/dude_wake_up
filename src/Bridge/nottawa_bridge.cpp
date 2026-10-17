@@ -50,6 +50,11 @@
 #include <thread>
 #include <atomic>
 #include <future>
+#ifdef _WIN32
+#include <windows.h>
+#include <timeapi.h>
+#pragma comment(lib, "winmm.lib")
+#endif
 #include <tuple>
 #include <type_traits>
 
@@ -69,6 +74,12 @@ static void notifyGraphChanged() {
 }
 
 static void engineThreadFunc() {
+#ifdef _WIN32
+  // sleep_for below rounds up to the 15.6 ms system timer tick unless the
+  // process asks for 1 ms resolution, which capped the engine near 40 fps.
+  timeBeginPeriod(1);
+  SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
+#endif
   try {
     engineThreadId = std::this_thread::get_id();
     EngineLoop::getInstance()->makeContextCurrent();
@@ -96,6 +107,9 @@ static void engineThreadFunc() {
   // Signal that the engine thread is no longer running so
   // runOnEngineThread() falls through instead of deadlocking.
   engineRunning.store(false);
+#ifdef _WIN32
+  timeEndPeriod(1);
+#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -281,6 +295,14 @@ static void ntwTerminateHandler() {
     fprintf(stderr, "\n*** NTW TERMINATE: no active exception (direct std::terminate call)\n");
   }
   abort();
+}
+
+void ntw_set_data_path(const char* absPath) {
+  EngineLoop::getInstance()->setDataPath(absPath ? absPath : "");
+}
+
+void ntw_set_share_context(void* nativeContext) {
+  EngineLoop::getInstance()->setShareContext(nativeContext);
 }
 
 bool ntw_engine_init(void) {
@@ -667,7 +689,13 @@ void ntw_remove_connection(const char* connectionId) {
 // ---------------------------------------------------------------------------
 
 #include "LifecycleCounter.hpp"
+#ifdef __APPLE__
 #include <mach/mach.h>
+#elif defined(_WIN32)
+#include <windows.h>
+#include <psapi.h>
+#pragma comment(lib, "psapi.lib")
+#endif
 
 char* ntw_dump_object_counts(void) {
   std::string s = ::lifecycle::Registry::instance().dumpJson();
@@ -686,12 +714,20 @@ void ntw_reset_object_counts(void) {
 // Note: returns a JSON string the caller must free.
 // Returns resident set size in MB.
 static double processRssMB() {
+#ifdef __APPLE__
   task_basic_info_data_t info;
   mach_msg_type_number_t count = TASK_BASIC_INFO_COUNT;
   if (task_info(mach_task_self(), TASK_BASIC_INFO, (task_info_t)&info, &count) != KERN_SUCCESS) {
     return -1.0;
   }
   return info.resident_size / 1048576.0;
+#elif defined(_WIN32)
+  PROCESS_MEMORY_COUNTERS pmc;
+  if (!GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) return -1.0;
+  return pmc.WorkingSetSize / 1048576.0;
+#else
+  return -1.0;
+#endif
 }
 
 char* ntw_run_leak_test(int cycles) {
@@ -3360,6 +3396,7 @@ int ntw_is_source_type_favorited(int sourceType) {
 // MARK: - Strand Sharing & Community
 // ---------------------------------------------------------------------------
 
+#ifdef CPPHTTPLIB_OPENSSL_SUPPORT
 void ntw_share_strand(const char* nodeId, const char* title, const char* description,
                       const char* author, const void* previewPngData, int previewLen,
                       NTWShareStrandCallback callback) {
@@ -3491,19 +3528,6 @@ void ntw_fetch_community_feed(int page, int limit, const char* voterId, NTWFeedC
   }).detach();
 }
 
-void ntw_free_shared_strand_info_array(NTWSharedStrandInfo* array, int count) {
-  if (!array) return;
-  for (int i = 0; i < count; i++) {
-    free((void*)array[i].slug);
-    free((void*)array[i].title);
-    free((void*)array[i].description);
-    free((void*)array[i].previewUrl);
-    free((void*)array[i].author);
-    free((void*)array[i].createdAt);
-    free((void*)array[i].userVote);
-  }
-  free(array);
-}
 
 void ntw_vote_strand(const char* slug, const char* voterId, const char* vote, NTWVoteCallback callback) {
   if (!slug || !voterId || !vote || !callback) return;
@@ -3582,6 +3606,38 @@ void ntw_fetch_shared_strand(const char* slug, NTWFetchStrandCallback callback) 
       callback(false, strdup_safe(err));
     }
   }).detach();
+}
+#else
+// HTTPS needs CPPHTTPLIB_OPENSSL_SUPPORT, which the Windows build doesn't
+// enable yet (see LibraryService_win.cpp). Report the feature as unavailable.
+static const char* kNoHttps = "Community features are not available in this build";
+void ntw_share_strand(const char*, const char*, const char*, const char*, const void*, int,
+                      NTWShareStrandCallback callback) {
+  if (callback) callback(false, kNoHttps);
+}
+void ntw_fetch_community_feed(int, int, const char*, NTWFeedCallback callback) {
+  if (callback) callback(false, nullptr, 0, 0);
+}
+void ntw_vote_strand(const char*, const char*, const char*, NTWVoteCallback callback) {
+  if (callback) callback(false, 0, 0, 0, nullptr);
+}
+void ntw_fetch_shared_strand(const char*, NTWFetchStrandCallback callback) {
+  if (callback) callback(false, strdup_safe(kNoHttps));
+}
+#endif
+
+void ntw_free_shared_strand_info_array(NTWSharedStrandInfo* array, int count) {
+  if (!array) return;
+  for (int i = 0; i < count; i++) {
+    free((void*)array[i].slug);
+    free((void*)array[i].title);
+    free((void*)array[i].description);
+    free((void*)array[i].previewUrl);
+    free((void*)array[i].author);
+    free((void*)array[i].createdAt);
+    free((void*)array[i].userVote);
+  }
+  free(array);
 }
 
 char** ntw_load_strand_from_json(const char* jsonStr, int* outCount) {

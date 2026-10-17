@@ -53,6 +53,9 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(NottawaEngineLib)'=='true'" Label="NottawaEngineLibConfig">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64' or '$(Configuration)|$(Platform)'=='Release|ARM64' or '$(Configuration)|$(Platform)'=='Release|ARM64EC'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -74,6 +77,12 @@
     <OutDir>bin\</OutDir>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(NottawaEngineLib)'=='true'" Label="NottawaEngineLibPaths">
+    <TargetName>NottawaEngine</TargetName>
+    <OutDir>obj\engine\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>obj\engine\$(Platform)\$(Configuration)\int\</IntDir>
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64' or '$(Configuration)|$(Platform)'=='Debug|ARM64' or '$(Configuration)|$(Platform)'=='Debug|ARM64EC'">
     <ClCompile>
@@ -435,6 +444,11 @@ exit /b 0</Command>
       <GenerateManifest>true</GenerateManifest>
     </Manifest>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(NottawaEngineLib)'=='true'" Label="NottawaEngineLibDefines">
+    <ClCompile>
+      <PreprocessorDefinitions>NOTTAWA_ENGINE_ONLY=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ProjectReference Include="$(OF_ROOT)\libs\openFrameworksCompiled\project\vs\openframeworksLib.vcxproj">
       <Project>{5837595d-aca9-485c-8e76-729040ce4b0b}</Project>
@@ -453,7 +467,7 @@ exit /b 0</Command>
     </VisualStudio>
   </ProjectExtensions>
   <ItemGroup Label="NottawaAuto">
-    <ClCompile Include="src\Apps\MainApp.cpp" />
+    <ClCompile Include="src\Apps\MainApp.cpp" Condition="'$(NottawaEngineLib)'!='true'" />
     <ClInclude Include="src\Apps\MainApp.h" />
     <ClInclude Include="src\Apps\ofApp.h" />
     <ClInclude Include="src\Audio\gist\AccelerateFFT.h" />
@@ -508,7 +522,14 @@ exit /b 0</Command>
     <ClInclude Include="src\Audio\stb_vorbis.h" />
     <ClInclude Include="src\Audio\SystemAudioSource.hpp" />
     <ClCompile Include="src\Audio\SystemAudioSource_win.cpp" />
+    <ClCompile Include="src\Bridge\nottawa_bridge.cpp" />
+    <ClInclude Include="src\Bridge\nottawa_bridge.h" />
     <ClInclude Include="src\Engine\EngineConfig.hpp" />
+    <ClCompile Include="src\Engine\EngineLoop.cpp" />
+    <ClInclude Include="src\Engine\EngineLoop.hpp" />
+    <ClCompile Include="src\Engine\FrameExchange.cpp" />
+    <ClInclude Include="src\Engine\FrameExchange.h" />
+    <ClInclude Include="src\Engine\IOSurfaceTextureManager.hpp" />
     <ClCompile Include="src\Engine\IOSurfaceTextureManager_win.cpp" />
     <ClCompile Include="src\Engine\ServiceStatics.cpp" />
     <ClCompile Include="src\Feedback\FeedbackSource.cpp" />
@@ -977,7 +998,7 @@ exit /b 0</Command>
     <ClCompile Include="src\HelpService.cpp" />
     <ClInclude Include="src\HelpService.hpp" />
     <ClInclude Include="src\macro_scope.hpp" />
-    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\main.cpp" Condition="'$(NottawaEngineLib)'!='true'" />
     <ClCompile Include="lib\imgui_stdlib.cpp" />
     <ClCompile Include="lib\ofxFastFboReader.cpp" />
     <ClCompile Include="lib\implot\implot.cpp" />
