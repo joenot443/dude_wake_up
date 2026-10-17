@@ -2,6 +2,7 @@
 // <GL/gl.h> (via Qt or windows.h), because OF pulls in <GL/glew.h>
 // which refuses to compile if gl.h was seen first.
 #include "ofMain.h"
+#include "ofAppGLFWWindow.h"
 #include "ofGLProgrammableRenderer.h"
 #include "ofFbo.h"
 #include "ofShader.h"
@@ -26,17 +27,44 @@
 
 namespace of_impl {
 
-// Engine state. A.2.a keeps this bag of raw-GL handles; A.2.b will add
-// ofFbo + ofShader + ofGLProgrammableRenderer alongside, once OF is
-// properly initialized via ofCreateWindow.
+// A tiny shim letting us pass a RAW GLFWwindow* into OF's
+// `shareContextWith` setting. OF reads it via
+// `getWindowContext()` and uses it as the `share` parameter when it
+// internally calls glfwCreateWindow. The other virtuals are stubs
+// — OF never invokes them on a share-only handle.
+class BareShareHandle : public ofAppBaseWindow {
+public:
+    explicit BareShareHandle(GLFWwindow* w) : raw_(w) {}
+    void* getWindowContext() override { return raw_; }
+
+    // Pure-virtual stubs. OF only reads getWindowContext() from the
+    // share-handle; these never run.
+    void  setup(const ofWindowSettings&) override {}
+    void  update() override {}
+    void  draw() override {}
+    ofCoreEvents& events() override { return events_; }
+    std::shared_ptr<ofBaseRenderer>& renderer() override { return renderer_; }
+private:
+    GLFWwindow*                      raw_;
+    ofCoreEvents                     events_;
+    std::shared_ptr<ofBaseRenderer>  renderer_;
+};
+
+// Engine state. The pivotal order is:
+//   1) create bareGLFW (empty)
+//   2) wglShareLists(qtHglrc, bareGLFW) — WGL rule says both must be
+//      empty at share time, and they are
+//   3) ofCreateWindow with shareContextWith = bareShim(bareGLFW) —
+//      OF's new window B shares with bareGLFW, so Qt sees everything OF
+//      creates in B via the bareGLFW bridge.
 struct State {
-    GLuint rawFbo  = 0;
-    GLuint rawTex  = 0;
-    GLuint rawProg = 0;
-    GLuint rawVao  = 0;
-    GLuint rawVbo  = 0;
-    GLint  locTime = -1;
-    GLint  locRes  = -1;
+    GLFWwindow* bareGLFW   = nullptr;      // the empty share-root
+    std::shared_ptr<BareShareHandle> shim;
+    std::shared_ptr<ofAppBaseWindow> ofWindow;
+
+    ofFbo    fbo;
+    ofShader shader;
+    ofMesh   quad;
 
     static constexpr int W = 1920;
     static constexpr int H = 1080;
@@ -83,6 +111,10 @@ OFStageEngine::~OFStageEngine() {
 void OFStageEngine::requestStop() { stop_.store(true); }
 
 bool OFStageEngine::initGLFWContext() {
+    // Step 1 — create a BARE GLFW context, no objects in it yet.
+    // This is the share-root that both Qt and OF will link against.
+    of_ = std::make_unique<of_impl::State>();
+
     if (!glfwInit()) {
         emit engineError("glfwInit failed");
         return false;
@@ -92,14 +124,17 @@ bool OFStageEngine::initGLFWContext() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-    window_ = glfwCreateWindow(64, 64, "nottawa-engine", nullptr, nullptr);
-    if (!window_) {
-        emit engineError("glfwCreateWindow failed");
+    of_->bareGLFW = glfwCreateWindow(16, 16, "nottawa-share-root",
+                                     nullptr, nullptr);
+    if (!of_->bareGLFW) {
+        emit engineError("bare glfwCreateWindow failed");
         return false;
     }
-    glfwMakeContextCurrent(window_);
+    // Make current so wglGetCurrentContext inside shareWithQt resolves
+    // to our HGLRC via glfwGetWGLContext(bareGLFW).
+    glfwMakeContextCurrent(of_->bareGLFW);
+    window_ = of_->bareGLFW;
     return true;
 }
 
@@ -122,115 +157,98 @@ bool OFStageEngine::shareWithQt() {
 }
 
 bool OFStageEngine::initOF() {
-    // Phase A.2.a — prove the GLFW↔Qt context-sharing plumbing works
-    // end-to-end with RAW GL (via GLEW, which OF brings in). Full OF
-    // init (ofCreateWindow + ofFbo/ofShader) requires the ofRunApp
-    // path and lands in A.2.b. OF is linked and headers are reachable
-    // from this translation unit — the lib build is validated.
-    of_ = std::make_unique<of_impl::State>();
+    // Step 3 — hand OF a shareContextWith pointing at the bare GLFW
+    // window we just linked to Qt. OF's new window B shares with it,
+    // so B's objects (including ofFbo textures) are visible to Qt.
+    of_->shim = std::make_shared<of_impl::BareShareHandle>(of_->bareGLFW);
 
-    GLenum err = glewInit();
-    if (err != GLEW_OK) {
-        emit engineError(QString("glewInit failed: %1")
-                         .arg(reinterpret_cast<const char*>(glewGetErrorString(err))));
+    ofGLFWWindowSettings settings;
+    settings.setGLVersion(3, 3);
+    settings.setSize(64, 64);
+    settings.visible         = false;
+    settings.decorated       = false;
+    settings.resizable       = false;
+    settings.shareContextWith = of_->shim;
+
+    of_->ofWindow = ofCreateWindow(settings);
+    if (!of_->ofWindow) {
+        emit engineError("ofCreateWindow failed");
+        return false;
+    }
+    auto* glfwWin = dynamic_cast<ofAppGLFWWindow*>(of_->ofWindow.get());
+    if (glfwWin && glfwWin->getGLFWWindow()) {
+        glfwHideWindow(glfwWin->getGLFWWindow());
+        glfwSetWindowRefreshCallback(glfwWin->getGLFWWindow(), nullptr);
+    }
+
+    ofDisableArbTex();  // Force GL_TEXTURE_2D — matches Nottawa's main app.
+
+    ofFboSettings fboSettings;
+    fboSettings.width          = of_impl::State::W;
+    fboSettings.height         = of_impl::State::H;
+    fboSettings.internalformat = GL_RGBA8;
+    fboSettings.textureTarget  = GL_TEXTURE_2D;
+    fboSettings.useDepth       = false;
+    fboSettings.useStencil     = false;
+    of_->fbo.allocate(fboSettings);
+    if (!of_->fbo.isAllocated()) {
+        emit engineError("ofFbo::allocate failed");
         return false;
     }
 
-    // Raw-GL FBO + color texture — the color texture IS what Qt reads.
-    glGenTextures(1, &of_->rawTex);
-    glBindTexture(GL_TEXTURE_2D, of_->rawTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, of_impl::State::W, of_impl::State::H, 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    glGenFramebuffers(1, &of_->rawFbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, of_->rawFbo);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                           GL_TEXTURE_2D, of_->rawTex, 0);
-    GLenum st = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (st != GL_FRAMEBUFFER_COMPLETE) {
-        emit engineError(QString("FBO incomplete: 0x%1").arg(st, 0, 16));
+    // Compile the plasma through ofShader. OF handles glCreate/Attach/Link.
+    of_->shader.setupShaderFromSource(GL_VERTEX_SHADER,   kVertSrc);
+    of_->shader.setupShaderFromSource(GL_FRAGMENT_SHADER, kFragSrc);
+    of_->shader.bindAttribute(0, "position");
+    if (!of_->shader.linkProgram()) {
+        emit engineError("ofShader::linkProgram failed");
         return false;
     }
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    // Shader program.
-    auto compile = [](GLenum type, const char* src)->GLuint {
-        GLuint s = glCreateShader(type);
-        glShaderSource(s, 1, &src, nullptr);
-        glCompileShader(s);
-        return s;
-    };
-    GLuint vs = compile(GL_VERTEX_SHADER,   kVertSrc);
-    GLuint fs = compile(GL_FRAGMENT_SHADER, kFragSrc);
-    of_->rawProg = glCreateProgram();
-    glAttachShader(of_->rawProg, vs);
-    glAttachShader(of_->rawProg, fs);
-    glBindAttribLocation(of_->rawProg, 0, "position");
-    glLinkProgram(of_->rawProg);
-    GLint ok = 0;
-    glGetProgramiv(of_->rawProg, GL_LINK_STATUS, &ok);
-    if (!ok) {
-        char log[1024]{};
-        glGetProgramInfoLog(of_->rawProg, sizeof(log), nullptr, log);
-        emit engineError(QString("link failed: %1").arg(log));
-        return false;
-    }
-    glDeleteShader(vs); glDeleteShader(fs);
-    of_->locTime = glGetUniformLocation(of_->rawProg, "uTime");
-    of_->locRes  = glGetUniformLocation(of_->rawProg, "uRes");
+    // Fullscreen quad as an ofMesh — OF's draw() handles VAO/VBO.
+    of_->quad.setMode(OF_PRIMITIVE_TRIANGLE_STRIP);
+    of_->quad.addVertex(glm::vec3(-1,-1, 0));
+    of_->quad.addVertex(glm::vec3( 1,-1, 0));
+    of_->quad.addVertex(glm::vec3(-1, 1, 0));
+    of_->quad.addVertex(glm::vec3( 1, 1, 0));
 
-    // Fullscreen-quad geometry.
-    const float verts[] = { -1.f,-1.f, 1.f,-1.f, -1.f,1.f, 1.f,1.f };
-    glGenVertexArrays(1, &of_->rawVao);
-    glGenBuffers(1, &of_->rawVbo);
-    glBindVertexArray(of_->rawVao);
-    glBindBuffer(GL_ARRAY_BUFFER, of_->rawVbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float), nullptr);
-    glBindVertexArray(0);
-
-    emit engineInfo(QString("raw-GL ready — renderer=%1 fbo=%2x%3 texId=%4 — OF lib linked (ofFbo wiring: A.2.b)")
+    emit engineInfo(QString("OF ready — renderer=%1 ofFbo=%2x%3 texId=%4 (ofFbo + ofShader active)")
                     .arg(reinterpret_cast<const char*>(glGetString(GL_RENDERER)))
                     .arg(of_impl::State::W)
                     .arg(of_impl::State::H)
-                    .arg(of_->rawTex));
+                    .arg(of_->fbo.getTexture().getTextureData().textureID));
     return true;
 }
 
 void OFStageEngine::renderFrame(float t) {
     frameCount_.fetch_add(1);
-    glBindFramebuffer(GL_FRAMEBUFFER, of_->rawFbo);
+    of_->fbo.begin();
     glViewport(0, 0, of_impl::State::W, of_impl::State::H);
-    glUseProgram(of_->rawProg);
-    glUniform1f(of_->locTime, t);
-    glUniform2f(of_->locRes, (float)of_impl::State::W, (float)of_impl::State::H);
-    glBindVertexArray(of_->rawVao);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glBindVertexArray(0);
+    of_->shader.begin();
+    of_->shader.setUniform1f("uTime", t);
+    of_->shader.setUniform2f("uRes",
+                             static_cast<float>(of_impl::State::W),
+                             static_cast<float>(of_impl::State::H));
+    of_->quad.draw();
+    of_->shader.end();
+    of_->fbo.end();
     glFlush();
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    widget_->setEngineTexture(of_->rawTex);
+    widget_->setEngineTexture(of_->fbo.getTexture().getTextureData().textureID);
 }
 
 void OFStageEngine::teardown() {
     if (of_) {
-        if (of_->rawVbo)  glDeleteBuffers(1, &of_->rawVbo);
-        if (of_->rawVao)  glDeleteVertexArrays(1, &of_->rawVao);
-        if (of_->rawProg) glDeleteProgram(of_->rawProg);
-        if (of_->rawFbo)  glDeleteFramebuffers(1, &of_->rawFbo);
-        if (of_->rawTex)  glDeleteTextures(1, &of_->rawTex);
+        of_->shader.unload();
+        of_->fbo.clear();
+        of_->quad.clear();
+        of_->ofWindow.reset();   // destroys OF's GLFW window B
+        if (of_->bareGLFW) {
+            glfwDestroyWindow(of_->bareGLFW);
+            of_->bareGLFW = nullptr;
+        }
         of_.reset();
     }
-    if (window_) {
-        glfwDestroyWindow(window_);
-        window_ = nullptr;
-    }
+    window_ = nullptr;
     glfwTerminate();
 }
 
