@@ -257,6 +257,10 @@ void OFStageEngine::requestShader(const QString& name) {
     pendingShaderIsSet_  = true;
 }
 
+void OFStageEngine::setBrightness(double value) {
+    brightness_.store(value);
+}
+
 void OFStageEngine::renderFrame(float t) {
     frameCount_.fetch_add(1);
 
@@ -293,7 +297,7 @@ void OFStageEngine::renderFrame(float t) {
     of_->shader.setUniform2f("dimensions",
                              static_cast<float>(of_impl::State::W),
                              static_cast<float>(of_impl::State::H));
-    of_->shader.setUniform1f("brightness", 400.0f);
+    of_->shader.setUniform1f("brightness", static_cast<float>(brightness_.load()));
     of_->shader.setUniformTexture("tex", of_->inputTex, 0);
     // Mimic Nottawa's shade() pattern — use ofTexture::draw to produce
     // a fullscreen textured quad through the active shader.

@@ -135,6 +135,11 @@ void MainWindow::buildDocks() {
         logPanel_->append("[browser] pick: " + name);
         if (engine_)       engine_->requestShader(name);
         if (shaderPicker_) shaderPicker_->setCurrentText(name);
+        if (inspector_)    inspector_->setCurrentShader(name);
+        if (welcome_ && !welcomeDismissed_) {
+            welcomeDismissed_ = true;
+            welcome_->hide();
+        }
     });
 
     browserDock_ = new QDockWidget("LIBRARY", this);
@@ -197,6 +202,16 @@ void MainWindow::startEngineOnGlReady() {
         if (shaderPicker_) {
             connect(shaderPicker_, &QComboBox::currentTextChanged, engine_,
                     &OFStageEngine::requestShader, Qt::QueuedConnection);
+            connect(shaderPicker_, &QComboBox::currentTextChanged, this,
+                    [this](const QString& n) {
+                        if (inspector_) inspector_->setCurrentShader(n);
+                    });
+        }
+        // Inspector brightness slider → engine (uniform `brightness`).
+        if (inspector_) {
+            connect(inspector_, &InspectorPanel::brightnessChanged, engine_,
+                    &OFStageEngine::setBrightness, Qt::QueuedConnection);
+            inspector_->setCurrentShader("Accretion");
         }
         engine_->start();
         logPanel_->append("[engine] OF stage engine thread started");

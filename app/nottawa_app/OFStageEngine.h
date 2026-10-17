@@ -53,6 +53,10 @@ public slots:
     // top of the next renderFrame().
     void requestShader(const QString& name);
 
+    // Live brightness uniform. Many Nottawa shaders take a
+    // `uniform float brightness`; those that don't just ignore it.
+    void setBrightness(double value);
+
 signals:
     // Emitted once with the OF/GLFW version string so the UI can show
     // "OpenFrameworks 0.12.1 loaded" in the log on startup. Confirms
@@ -83,6 +87,7 @@ private:
     std::atomic<uint64_t> frameCount_{0};
     std::atomic<double>   emaFps_{0.0};
     std::atomic<double>   p99FrameMs_{0.0};
+    std::atomic<double>   brightness_{400.0};  // matches Nottawa default
 
     // Pending shader name — set by the UI via requestShader(), read
     // (and cleared) on the engine thread at the top of the next frame.
