@@ -9,7 +9,9 @@
 
 #include "BookmarkService.hpp"
 
-BookmarkService* BookmarkService::service = nullptr;
+// `BookmarkService::service` is now defined in src/Engine/ServiceStatics.cpp
+// (upstream moved all singleton statics into one TU to deduplicate link).
+// If you re-add it here you'll get LNK4006 + /FORCE and a possibly-broken exe.
 
 void                          BookmarkService::saveBookmarkForPath(std::string)         {}
 bool                          BookmarkService::hasBookmarkForPath (std::string)         { return false; }

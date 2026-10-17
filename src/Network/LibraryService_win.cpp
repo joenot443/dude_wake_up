@@ -17,7 +17,9 @@
 #include "LibraryService.hpp"
 #include "ofLog.h"
 
-LibraryService* LibraryService::service = nullptr;
+// `LibraryService::service` is now defined in src/Engine/ServiceStatics.cpp
+// (upstream moved all singleton statics into one TU to deduplicate link).
+// If you re-add it here you'll get LNK4006 + /FORCE and a possibly-broken exe.
 
 namespace {
 void warnOnce(const char* method) {
