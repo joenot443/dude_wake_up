@@ -152,21 +152,22 @@ void MainWindow::startEngine() {
         .arg(res.width()).arg(res.height()).arg(sources.size()).arg(effects.size()));
     refreshGraph();
 
-    // NOTTAWA_ADD="Plasma Two;Kaleidoscope" adds catalog entries by name, in
-    // order, exactly as library clicks would — for scripted test runs.
-    for (const QString& name : qEnvironmentVariable("NOTTAWA_ADD").split(';', Qt::SkipEmptyParts)) {
-        bool found = false;
-        for (const auto* list : {&sources, &effects}) {
-            for (const auto& item : *list) {
-                if (item.name.compare(name.trimmed(), Qt::CaseInsensitive) != 0) continue;
-                addFromLibrary(item.typeRaw, item.isSource);
-                log("[script] added " + item.name);
-                found = true;
-                break;
+    // NOTTAWA_ADD="Plasma Two;Kaleidoscope" adds catalog entries by name, one
+    // per second, as library clicks would — for scripted test runs.
+    const QStringList names = qEnvironmentVariable("NOTTAWA_ADD").split(';', Qt::SkipEmptyParts);
+    for (int i = 0; i < names.size(); ++i) {
+        const QString name = names[i].trimmed();
+        QTimer::singleShot(1000 * (i + 1), this, [this, name, sources, effects] {
+            for (const auto* list : {&sources, &effects}) {
+                for (const auto& item : *list) {
+                    if (item.name.compare(name, Qt::CaseInsensitive) != 0) continue;
+                    addFromLibrary(item.typeRaw, item.isSource);
+                    log("[script] added " + item.name);
+                    return;
+                }
             }
-            if (found) break;
-        }
-        if (!found) log("[script] ERROR no catalog entry named " + name);
+            log("[script] ERROR no catalog entry named " + name);
+        });
     }
 }
 
