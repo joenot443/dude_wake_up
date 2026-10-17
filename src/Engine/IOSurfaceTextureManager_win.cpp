@@ -83,12 +83,15 @@ static std::shared_ptr<Connectable> findConnectableForBlit(const std::string& id
 }
 
 void IOSurfaceTextureManager::publish(SharedTexture& tex, unsigned int srcFboId, int srcW, int srcH) {
-  void* readFence = nullptr;
-  const int slot = tex.exchange->acquireWriteSlot(&readFence);
-  if (readFence) {
-    glWaitSync(static_cast<GLsync>(readFence), 0, GL_TIMEOUT_IGNORED);
-    glDeleteSync(static_cast<GLsync>(readFence));
+  std::vector<void*> readFences;
+  void* oldWriteFence = nullptr;
+  const int slot = tex.exchange->acquireWriteSlot(readFences, &oldWriteFence);
+  if (slot < 0) return;
+  for (void* fence : readFences) {
+    glWaitSync(static_cast<GLsync>(fence), 0, GL_TIMEOUT_IGNORED);
+    glDeleteSync(static_cast<GLsync>(fence));
   }
+  if (oldWriteFence) glDeleteSync(static_cast<GLsync>(oldWriteFence));
   glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFboId);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, tex.slotFbos[slot]);
   glBlitFramebuffer(0, 0, srcW, srcH, 0, 0, tex.width, tex.height,
@@ -96,9 +99,7 @@ void IOSurfaceTextureManager::publish(SharedTexture& tex, unsigned int srcFboId,
   glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-  GLsync writeFence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-  if (void* stale = tex.exchange->publish(slot, writeFence))
-    glDeleteSync(static_cast<GLsync>(stale));
+  tex.exchange->publish(slot, glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0));
 }
 
 void IOSurfaceTextureManager::blitTrackedTextures() {
@@ -147,11 +148,15 @@ void IOSurfaceTextureManager::blitExternalFrame(const std::string& id, unsigned 
   glFlush();
 }
 
+static_assert(sizeof(SharedTexture::slotTextures) / sizeof(unsigned int) == FrameExchange::kSlots,
+              "SharedTexture slot arrays must match FrameExchange::kSlots");
+constexpr int kSlots = FrameExchange::kSlots;
+
 void IOSurfaceTextureManager::setupSharedTexture(SharedTexture& tex, int width, int height) {
-  glGenTextures(3, tex.slotTextures);
-  glGenFramebuffers(3, tex.slotFbos);
+  glGenTextures(kSlots, tex.slotTextures);
+  glGenFramebuffers(kSlots, tex.slotFbos);
   bool ok = true;
-  for (int i = 0; i < 3; ++i) {
+  for (int i = 0; i < kSlots; ++i) {
     glBindTexture(GL_TEXTURE_2D, tex.slotTextures[i]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -171,7 +176,8 @@ void IOSurfaceTextureManager::setupSharedTexture(SharedTexture& tex, int width, 
     cleanupSharedTexture(tex);
     return;
   }
-  const uint32_t ids[3] = {tex.slotTextures[0], tex.slotTextures[1], tex.slotTextures[2]};
+  uint32_t ids[kSlots];
+  for (int i = 0; i < kSlots; ++i) ids[i] = tex.slotTextures[i];
   tex.exchange->setTextures(ids);
   tex.width = width;
   tex.height = height;
@@ -181,9 +187,9 @@ void IOSurfaceTextureManager::setupSharedTexture(SharedTexture& tex, int width, 
 void IOSurfaceTextureManager::cleanupSharedTexture(SharedTexture& tex) {
   if (tex.exchange)
     for (void* fence : tex.exchange->takeAllFences()) glDeleteSync(static_cast<GLsync>(fence));
-  if (tex.slotFbos[0]) glDeleteFramebuffers(3, tex.slotFbos);
-  if (tex.slotTextures[0]) glDeleteTextures(3, tex.slotTextures);
-  for (int i = 0; i < 3; ++i) tex.slotFbos[i] = tex.slotTextures[i] = 0;
+  if (tex.slotFbos[0]) glDeleteFramebuffers(kSlots, tex.slotFbos);
+  if (tex.slotTextures[0]) glDeleteTextures(kSlots, tex.slotTextures);
+  for (int i = 0; i < kSlots; ++i) tex.slotFbos[i] = tex.slotTextures[i] = 0;
   tex.width = tex.height = 0;
   tex.needsSetup = true;
   tex.lastBlittedTick = UINT64_MAX;

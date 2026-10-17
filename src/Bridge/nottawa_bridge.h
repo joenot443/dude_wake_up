@@ -1001,8 +1001,8 @@ void ntw_stop_texture_sharing(const char* connectableId);
 // Get the shared surface for a connectable's output texture. Returns NULL if
 // not sharing or not yet set up; the caller does not own the result.
 //   macOS:   IOSurfaceRef (do not CFRelease).
-//   Windows: FrameExchange* (src/Engine/FrameExchange.h) — a fenced triple
-//            buffer of GL textures in the share group set up by
+//   Windows: FrameExchange* (src/Engine/FrameExchange.h) — a fenced ring
+//            of GL textures in the share group set up by
 //            ntw_set_share_context. Stays valid until engine shutdown, but
 //            stops receiving frames after ntw_stop_texture_sharing.
 void* ntw_get_connectable_texture(const char* connectableId);

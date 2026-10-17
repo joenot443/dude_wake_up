@@ -34,8 +34,8 @@ not valid:
 - Every run ended with a force-kill, so shutdown was never tested.
 
 `engine-fbo/` is kept as the record of the context-sharing experiment and
-still has these flaws. The production path fixes them with a fenced triple
-buffer (`src/Engine/FrameExchange`), now used by the Windows
+still has these flaws. The production path fixes them with a fenced ring of
+textures (`src/Engine/FrameExchange`), now used by the Windows
 `IOSurfaceTextureManager` to hand engine output to the Qt app.
 
 ## Measured results (2026-10-17)

@@ -20,7 +20,7 @@
 #include <IOSurface/IOSurface.h>
 #else
 // Windows: the "surface" handed to the UI is a FrameExchange* (a fenced
-// triple buffer of GL textures in the UI's share group).
+// ring of GL textures in the UI's share group, readable by several views).
 typedef void* IOSurfaceRef;
 class FrameExchange;
 #endif
@@ -38,8 +38,8 @@ struct SharedTexture {
   uint64_t lastBlittedTick = UINT64_MAX;
 #ifndef __APPLE__
   std::shared_ptr<FrameExchange> exchange;  // `surface` points at this
-  unsigned int slotTextures[3] = {};
-  unsigned int slotFbos[3] = {};
+  unsigned int slotTextures[4] = {};  // FrameExchange::kSlots
+  unsigned int slotFbos[4] = {};
 #endif
 };
 
