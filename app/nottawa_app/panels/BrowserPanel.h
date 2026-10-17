@@ -1,20 +1,21 @@
 #pragma once
+#include "EngineBridge.h"
 #include <QWidget>
-#include <QString>
+
+class QLineEdit;
 class QTreeWidget;
 class QTreeWidgetItem;
-class QLineEdit;
 
-// Left sidebar: Nottawa shaders under EFFECTS; clicking emits shaderPicked.
+// Left sidebar: the engine's source and effect catalog. Clicking an entry
+// emits itemPicked with the engine type to add.
 class BrowserPanel : public QWidget {
     Q_OBJECT
 public:
     explicit BrowserPanel(QWidget* parent = nullptr);
-    void populate(const QStringList& shaderNames);
-    void setCurrentShader(const QString& name);
+    void populate(const QVector<CatalogItem>& sources, const QVector<CatalogItem>& effects);
 
 signals:
-    void shaderPicked(const QString& name);
+    void itemPicked(int typeRaw, bool isSource);
 
 private slots:
     void onItemActivated(QTreeWidgetItem* item, int column);

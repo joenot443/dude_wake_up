@@ -1,60 +1,60 @@
 #pragma once
 #include <QMainWindow>
+#include <QString>
 #include <QtGlobal>
 
 class QComboBox;
-class QDockWidget;
 class QFile;
 class QLabel;
+class QListWidget;
 class QTimer;
 class BrowserPanel;
 class InspectorPanel;
 class LogPanel;
-class OFStageEngine;
 class StageWidget;
 class WelcomeOverlay;
 
-// Qt counterpart of NottawaApp's MainEditorView: toolbar, LIBRARY dock
-// (left), INSPECTOR dock (right), LOG dock (bottom), stage in the centre.
+// Qt counterpart of NottawaApp's MainEditorView, driving the engine through
+// EngineBridge. Toolbar; LIBRARY and GRAPH docks (left); INSPECTOR (right);
+// LOG (bottom); stage in the centre showing the graph's output node.
 // NOTTAWA_LOG=<path> mirrors the log plus a stats line per second to a file.
 class MainWindow : public QMainWindow {
     Q_OBJECT
 public:
-    MainWindow();
+    explicit MainWindow(const QString& dataPath);
     ~MainWindow() override;
 
 protected:
     void resizeEvent(QResizeEvent* e) override;
 
 private slots:
-    void onNewStrand();
-    void onOpenStrand();
-    void onSaveStrand();
-    void onToggleStageFullscreen();
-    void sampleEngineStats();
+    void onNew();
+    void onOpen();
+    void onSave();
+    void refreshGraph();
+    void sampleStats();
 
 private:
-    void buildMenus();
-    void buildToolbar();
+    void buildMenusAndToolbar();
     void buildDocks();
-    void buildStatusBar();
-    void startEngineOnGlReady();
-    void selectShader(const QString& name);
-    void dismissWelcome();
+    void startEngine();
+    void addFromLibrary(int typeRaw, bool isSource);
+    void selectNode(const QString& id);
     void log(const QString& line);
 
-    StageWidget*    stage_        = nullptr;
-    WelcomeOverlay* welcome_      = nullptr;
-    OFStageEngine*  engine_       = nullptr;
+    QString         dataPath_;
+    StageWidget*    stage_     = nullptr;
+    WelcomeOverlay* welcome_   = nullptr;
+    BrowserPanel*   browser_   = nullptr;
+    QListWidget*    graph_     = nullptr;
+    InspectorPanel* inspector_ = nullptr;
+    LogPanel*       logPanel_  = nullptr;
+    QComboBox*      stagePick_ = nullptr;
 
-    BrowserPanel*   browser_      = nullptr;
-    InspectorPanel* inspector_    = nullptr;
-    LogPanel*       logPanel_     = nullptr;
-    QComboBox*      shaderPicker_ = nullptr;
-
-    QLabel*         fpsLabel_     = nullptr;
-    QLabel*         strandLabel_  = nullptr;
-    QTimer*         statsTimer_   = nullptr;
-    QFile*          logFile_      = nullptr;
-    quint64         lastShown_    = 0;
+    QLabel*         statsLabel_  = nullptr;
+    QLabel*         strandLabel_ = nullptr;
+    QTimer*         statsTimer_  = nullptr;
+    QFile*          logFile_     = nullptr;
+    quint64         lastShown_   = 0;
+    QString         selectedId_;
 };

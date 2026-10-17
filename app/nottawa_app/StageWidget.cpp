@@ -1,6 +1,12 @@
 #include "StageWidget.h"
 
+#include "EngineBridge.h"
+#include "FrameExchange.h"
+
 #include <QDebug>
+#include <QOpenGLContext>
+#include <QScreen>
+#include <QtGui/qopenglcontext_platform.h>
 
 namespace {
 constexpr const char* kVert = R"(
@@ -34,19 +40,36 @@ uint32_t compile(QOpenGLFunctions_3_3_Core* gl, uint32_t type, const char* src) 
 StageWidget::StageWidget(QWidget* parent) : QOpenGLWidget(parent) {
     setUpdateBehavior(QOpenGLWidget::NoPartialUpdate);
     setMinimumSize(640, 360);
+    // Swap interval is 0 (see main.cpp), so pace repaints here.
+    repaintTimer_.setTimerType(Qt::PreciseTimer);
+    connect(&repaintTimer_, &QTimer::timeout, this, [this] { update(); });
+    const qreal hz = screen() ? screen()->refreshRate() : 60.0;
+    // Round the interval down so no engine frame is skipped.
+    repaintTimer_.start(qMax(1, int(1000.0 / (hz > 0 ? hz : 60.0))));
 }
 
 StageWidget::~StageWidget() {
     makeCurrent();
-    for (void* f : exchange_.takeAllFences()) glDeleteSync(static_cast<GLsync>(f));
     if (program_) glDeleteProgram(program_);
     if (vbo_)     glDeleteBuffers(1, &vbo_);
     if (vao_)     glDeleteVertexArrays(1, &vao_);
     doneCurrent();
 }
 
+void StageWidget::setSourceNode(const QString& connectableId) {
+    if (connectableId == nodeId_) return;
+    auto* engine = EngineBridge::instance();
+    if (!nodeId_.isEmpty()) engine->stopSharing(nodeId_);
+    nodeId_ = connectableId;
+    if (!nodeId_.isEmpty()) engine->startSharing(nodeId_);
+    update();
+}
+
 void StageWidget::initializeGL() {
     initializeOpenGLFunctions();
+    if (auto* wgl = context()->nativeInterface<QNativeInterface::QWGLContext>())
+        nativeContext_ = wgl->nativeContext();
+
     const uint32_t vs = compile(this, GL_VERTEX_SHADER, kVert);
     const uint32_t fs = compile(this, GL_FRAGMENT_SHADER, kFrag);
     program_ = glCreateProgram();
@@ -79,19 +102,15 @@ void StageWidget::initializeGL() {
 
 void StageWidget::resizeGL(int w, int h) { glViewport(0, 0, w, h); }
 
-void StageWidget::notifyFrameReady() {
-    if (!updatePending_.exchange(true))
-        QMetaObject::invokeMethod(this, [this]{ update(); }, Qt::QueuedConnection);
-}
-
 void StageWidget::paintGL() {
-    updatePending_.store(false);
-
     glClearColor(0.055f, 0.059f, 0.075f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    FrameExchange* ex = nodeId_.isEmpty() ? nullptr : EngineBridge::instance()->frames(nodeId_);
+    if (!ex) return;
+
     void* writeFence = nullptr;
-    const int slot = exchange_.acquireReadSlot(&writeFence);
+    const int slot = ex->acquireReadSlot(&writeFence);
     if (slot < 0) return;
     if (writeFence) {
         glWaitSync(static_cast<GLsync>(writeFence), 0, GL_TIMEOUT_IGNORED);
@@ -101,7 +120,7 @@ void StageWidget::paintGL() {
 
     glUseProgram(program_);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, exchange_.texture(slot));
+    glBindTexture(GL_TEXTURE_2D, ex->texture(slot));
     glUniform1i(locTex_, 0);
     glBindVertexArray(vao_);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -109,6 +128,5 @@ void StageWidget::paintGL() {
 
     GLsync readFence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     glFlush();
-    if (void* old = exchange_.releaseReadSlot(slot, readFence))
-        glDeleteSync(static_cast<GLsync>(old));
+    if (void* old = ex->releaseReadSlot(slot, readFence)) glDeleteSync(static_cast<GLsync>(old));
 }

@@ -1,26 +1,25 @@
 #pragma once
+#include <QString>
 #include <QWidget>
-class QVBoxLayout;
-class QLabel;
-class QSlider;
-class QDoubleSpinBox;
 
-// InspectorPanel — right sidebar. A.2.f shows a hardcoded brightness
-// slider that drives every shader's `brightness` uniform (safe no-op
-// if the shader doesn't declare one). A.3 switches to introspection:
-// scan the active shader's uniforms, build a control per uniform.
+class QLabel;
+class QVBoxLayout;
+
+// Right sidebar: editable parameters of one engine node, built from
+// ntw_get_parameters. Standard, int (incl. option lists), bool and text
+// parameters get controls; colour editing is not yet supported.
 class InspectorPanel : public QWidget {
     Q_OBJECT
 public:
     explicit InspectorPanel(QWidget* parent = nullptr);
-    void setCurrentShader(const QString& name);
-
-signals:
-    void brightnessChanged(double value);
+    void setNode(const QString& connectableId, const QString& name);
+    QString node() const { return nodeId_; }
 
 private:
-    QVBoxLayout*    layout_      = nullptr;
-    QLabel*         shaderLabel_ = nullptr;
-    QSlider*        slider_      = nullptr;
-    QDoubleSpinBox* spin_        = nullptr;
+    void rebuild();
+
+    QString      nodeId_;
+    QLabel*      title_  = nullptr;
+    QWidget*     form_   = nullptr;
+    QVBoxLayout* layout_ = nullptr;
 };

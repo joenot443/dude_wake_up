@@ -34,11 +34,15 @@ not valid:
 - Every run ended with a force-kill, so shutdown was never tested.
 
 `engine-fbo/` is kept as the record of the context-sharing experiment and
-still has these flaws. The production path in `app/nottawa_app/` fixes them:
-a fenced triple buffer (`FrameExchange`), deadline-based 60 Hz pacing with
-1 ms timer resolution, and `GL_TIME_ELAPSED` GPU timing.
+still has these flaws. The production path fixes them with a fenced triple
+buffer (`src/Engine/FrameExchange`), now used by the Windows
+`IOSurfaceTextureManager` to hand engine output to the Qt app.
 
-## Measured results (`app/nottawa_app`, 2026-10-17)
+## Measured results (2026-10-17)
+
+Measured with the stand-in renderer that `app/nottawa_app` used before it
+moved to the real engine via `nottawa_bridge.h`; it rendered single Nottawa
+shaders through the same context sharing and handoff.
 
 RTX 3070 (driver 581.57), Qt 6.8.0, MSVC 2022, 1920×1080, engine thread at
 highest priority, 5-minute soak of `FractalAudio`, the heaviest shader in

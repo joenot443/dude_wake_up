@@ -13,36 +13,59 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
 find_package(Qt6 6.8 REQUIRED COMPONENTS Widgets OpenGL OpenGLWidgets)
 find_package(OF REQUIRED)
 
+get_filename_component(NOTTAWA_REPO "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)
+
+# The engine is Nottawa.vcxproj built with /p:NottawaEngineLib=true (see
+# scripts/patch-vcxproj.ps1). It must be built through the OF apps/myApps
+# junction so the project's ..\..\..\addons paths resolve.
+set(NOTTAWA_ENGINE_VCXPROJ "${OF_ROOT}/apps/myApps/Nottawa/Nottawa.vcxproj"
+    CACHE FILEPATH "Nottawa.vcxproj opened through the OF apps/myApps junction")
+set(NOTTAWA_ENGINE_LIB "${NOTTAWA_REPO}/obj/engine/x64/$<CONFIG>/NottawaEngine.lib")
+add_custom_target(nottawa_engine
+    COMMAND "${CMAKE_VS_MSBUILD_COMMAND}" "${NOTTAWA_ENGINE_VCXPROJ}"
+            /p:NottawaEngineLib=true /p:Configuration=$<CONFIG> /p:Platform=x64
+            /m /nologo /v:minimal
+    COMMENT "Building NottawaEngine.lib"
+    VERBATIM)
+
 qt_standard_project_setup()
 
 qt_add_executable(nottawa_app WIN32
     main.cpp
     MainWindow.h             MainWindow.cpp
+    EngineBridge.h           EngineBridge.cpp
     StageWidget.h            StageWidget.cpp
-    FrameExchange.h          FrameExchange.cpp
-    OFStageEngine.h          OFStageEngine.cpp
     Theme.h                  Theme.cpp
     panels/BrowserPanel.h    panels/BrowserPanel.cpp
     panels/InspectorPanel.h  panels/InspectorPanel.cpp
     panels/LogPanel.h        panels/LogPanel.cpp
     panels/WelcomeOverlay.h  panels/WelcomeOverlay.cpp
 )
-target_include_directories(nottawa_app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+add_dependencies(nottawa_app nottawa_engine)
+target_include_directories(nottawa_app PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${NOTTAWA_REPO}/src/Bridge
+    ${NOTTAWA_REPO}/src/Engine)
+target_link_directories(nottawa_app PRIVATE ${NOTTAWA_REPO}/libs/ffmpeg/lib)
+# Same link inputs as Nottawa.exe (Nottawa.vcxproj AdditionalDependencies).
 target_link_libraries(nottawa_app PRIVATE
     Qt6::Widgets Qt6::OpenGL Qt6::OpenGLWidgets
+    ${NOTTAWA_ENGINE_LIB}
     OF::OF
-    opengl32 winmm)
+    avformat avcodec avutil swscale swresample
+    winmm ole32 uuid avrt propsys shlwapi opengl32)
+# The engine objects are compiled with /GL.
+target_link_options(nottawa_app PRIVATE /LTCG)
 
 # OF's VS release libs use the dynamic CRT.
 set_property(TARGET nottawa_app PROPERTY
     MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
-if(WIN32)
-    get_target_property(_qmake Qt6::qmake IMPORTED_LOCATION)
-    get_filename_component(_qt_bin "${_qmake}" DIRECTORY)
-    add_custom_command(TARGET nottawa_app POST_BUILD
-        COMMAND "${_qt_bin}/windeployqt.exe"
-                --no-translations --no-system-d3d-compiler --no-opengl-sw
-                "$<TARGET_FILE:nottawa_app>"
-        COMMENT "windeployqt")
-endif()
+get_target_property(_qmake Qt6::qmake IMPORTED_LOCATION)
+get_filename_component(_qt_bin "${_qmake}" DIRECTORY)
+file(GLOB _ffmpeg_dlls "${NOTTAWA_REPO}/bin/av*.dll" "${NOTTAWA_REPO}/bin/sw*.dll")
+add_custom_command(TARGET nottawa_app POST_BUILD
+    COMMAND "${_qt_bin}/windeployqt.exe" --no-translations --no-system-d3d-compiler --no-opengl-sw
+            "$<TARGET_FILE:nottawa_app>"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${_ffmpeg_dlls} "$<TARGET_FILE_DIR:nottawa_app>"
+    COMMENT "Deploying Qt and ffmpeg DLLs")
