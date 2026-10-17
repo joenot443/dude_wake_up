@@ -2,12 +2,18 @@
 
 #include <QThread>
 #include <QObject>
+#include <QString>
 #include <atomic>
 #include <cstdint>
 
 class StageWidget;
 struct GLFWwindow;
 namespace of_impl { struct State; }
+
+// Set once at startup — directory holding Nottawa .vert/.frag files.
+// Simple module-level setter so main.cpp can resolve it from the exe
+// path without the engine class growing a construction parameter.
+void setNottawaShadersDir(const QString& absPath);
 
 // OFStageEngine — Phase A.2 engine thread. The dual-context pattern
 // from the spike + OpenFrameworks on top:

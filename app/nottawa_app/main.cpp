@@ -7,9 +7,13 @@
 // services).
 
 #include "MainWindow.h"
+#include "OFStageEngine.h"
 #include "Theme.h"
 
 #include <QApplication>
+#include <QCoreApplication>
+#include <QDir>
+#include <QFileInfo>
 #include <QSurfaceFormat>
 
 int main(int argc, char** argv) {
@@ -29,6 +33,21 @@ int main(int argc, char** argv) {
     app.setApplicationName("Nottawa");
     app.setOrganizationName("Nottawa");
     Theme::apply(app);
+
+    // Locate the repo's shaders/ directory relative to the exe.
+    // Dev tree: exe at app/build/nottawa_app/Release/nottawa_app.exe,
+    // shaders at <repo>/shaders. Walk up to find it. A.3 switches to
+    // ConfigService-driven paths; for now, probe.
+    {
+        QDir probe(QCoreApplication::applicationDirPath());
+        for (int i = 0; i < 6 && probe.cdUp(); ++i) {
+            QDir shaders(probe.absoluteFilePath("shaders"));
+            if (shaders.exists() && QFileInfo(shaders.absoluteFilePath("Accretion.frag")).exists()) {
+                setNottawaShadersDir(shaders.absolutePath());
+                break;
+            }
+        }
+    }
 
     MainWindow w;
     w.show();

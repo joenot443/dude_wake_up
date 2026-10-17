@@ -62,9 +62,10 @@ struct State {
     std::shared_ptr<BareShareHandle> shim;
     std::shared_ptr<ofAppBaseWindow> ofWindow;
 
-    ofFbo    fbo;
-    ofShader shader;
-    ofMesh   quad;
+    ofFbo      fbo;
+    ofShader   shader;
+    ofMesh     quad;
+    ofTexture  inputTex;   // 1x1 white dummy for the shader's `tex` uniform
 
     static constexpr int W = 1920;
     static constexpr int H = 1080;
@@ -74,31 +75,18 @@ struct State {
 
 namespace {
 
-// Minimal plasma shader expressed through OF's shader API. Lets us
-// prove ofShader works end-to-end under Qt.
-constexpr const char* kVertSrc = R"(
-#version 330 core
-in vec2 position;
-void main() { gl_Position = vec4(position, 0.0, 1.0); }
-)";
+// A.2.c — load an actual Nottawa shader from the repo's shaders/
+// directory via ofShader. Confirms Nottawa's shader content runs
+// through our OF+Qt pipeline unchanged.
+constexpr const char* kShaderName = "Accretion";
 
-constexpr const char* kFragSrc = R"(
-#version 330 core
-uniform float uTime;
-uniform vec2  uRes;
-out vec4 fragColor;
-void main() {
-    vec2 uv = gl_FragCoord.xy / uRes;
-    // Different color pattern than nottawa_shell's plasma so we can
-    // visually tell them apart.
-    float r = 0.5 + 0.5 * sin(uTime         + uv.x * 6.0);
-    float g = 0.5 + 0.5 * sin(uTime * 0.7   + uv.y * 6.0);
-    float b = 0.5 + 0.5 * sin(uTime * 1.3   + (uv.x + uv.y) * 4.0);
-    fragColor = vec4(r, g, b, 1.0);
-}
-)";
+// Repo-root shaders dir, discovered relative to the exe. Set by main()
+// before engine starts.
+QString& shadersDir() { static QString s; return s; }
 
 } // anon
+
+void setNottawaShadersDir(const QString& absPath) { shadersDir() = absPath; }
 
 OFStageEngine::OFStageEngine(StageWidget* widget, void* qtHglrc)
   : widget_(widget), qtHglrc_(qtHglrc) {}
@@ -196,40 +184,80 @@ bool OFStageEngine::initOF() {
         return false;
     }
 
-    // Compile the plasma through ofShader. OF handles glCreate/Attach/Link.
-    of_->shader.setupShaderFromSource(GL_VERTEX_SHADER,   kVertSrc);
-    of_->shader.setupShaderFromSource(GL_FRAGMENT_SHADER, kFragSrc);
-    of_->shader.bindAttribute(0, "position");
+    // Load the real Nottawa shader from shaders/<name>.vert + .frag.
+    // Can't use ofShader::load() because OF prepends the data path; we
+    // use the project's shader dir directly via ofBufferFromFile +
+    // setupShaderFromSource.
+    const QString vertPath = shadersDir() + "/" + kShaderName + ".vert";
+    const QString fragPath = shadersDir() + "/" + kShaderName + ".frag";
+
+    ofBuffer vertBuf = ofBufferFromFile(vertPath.toStdString(), false);
+    ofBuffer fragBuf = ofBufferFromFile(fragPath.toStdString(), false);
+    if (vertBuf.size() == 0 || fragBuf.size() == 0) {
+        emit engineError(QString("shader files missing: %1 / %2").arg(vertPath, fragPath));
+        return false;
+    }
+
+    if (!of_->shader.setupShaderFromSource(GL_VERTEX_SHADER,   vertBuf.getText())) {
+        emit engineError(QString("vert compile failed: %1").arg(vertPath));
+        return false;
+    }
+    if (!of_->shader.setupShaderFromSource(GL_FRAGMENT_SHADER, fragBuf.getText())) {
+        emit engineError(QString("frag compile failed: %1").arg(fragPath));
+        return false;
+    }
+    of_->shader.bindDefaults();   // Binds `position`+`texcoord` so ofMesh.draw() routes correctly.
     if (!of_->shader.linkProgram()) {
         emit engineError("ofShader::linkProgram failed");
         return false;
     }
 
-    // Fullscreen quad as an ofMesh — OF's draw() handles VAO/VBO.
-    of_->quad.setMode(OF_PRIMITIVE_TRIANGLE_STRIP);
-    of_->quad.addVertex(glm::vec3(-1,-1, 0));
-    of_->quad.addVertex(glm::vec3( 1,-1, 0));
-    of_->quad.addVertex(glm::vec3(-1, 1, 0));
-    of_->quad.addVertex(glm::vec3( 1, 1, 0));
+    // 1x1 white dummy input texture — Accretion samples it but its
+    // output doesn't depend on content. A.2.d will wire a real source.
+    unsigned char whitePx[4] = {255, 255, 255, 255};
+    of_->inputTex.allocate(1, 1, GL_RGBA);
+    of_->inputTex.loadData(whitePx, 1, 1, GL_RGBA);
 
-    emit engineInfo(QString("OF ready — renderer=%1 ofFbo=%2x%3 texId=%4 (ofFbo + ofShader active)")
+    // Fullscreen quad in CLIP SPACE (-1..1). With Accretion.vert's
+    // `gl_Position = modelViewProjectionMatrix * position`, if MVP is
+    // identity (what you get when calling mesh.draw() with no renderer-
+    // managed matrices), clip-space in == clip-space out → fullscreen.
+    // Nottawa's engine normally pushes an ortho projection matching
+    // the FBO, but that lives in services we haven't bootstrapped yet;
+    // clip-space is the right fit for A.2.c.
+    of_->quad.setMode(OF_PRIMITIVE_TRIANGLE_STRIP);
+    of_->quad.addVertex(glm::vec3(-1,-1, 0)); of_->quad.addTexCoord(glm::vec2(0, 0));
+    of_->quad.addVertex(glm::vec3( 1,-1, 0)); of_->quad.addTexCoord(glm::vec2(1, 0));
+    of_->quad.addVertex(glm::vec3(-1, 1, 0)); of_->quad.addTexCoord(glm::vec2(0, 1));
+    of_->quad.addVertex(glm::vec3( 1, 1, 0)); of_->quad.addTexCoord(glm::vec2(1, 1));
+
+    emit engineInfo(QString("OF ready — renderer=%1 ofFbo=%2x%3 texId=%4 shader=%5 (real Nottawa shader)")
                     .arg(reinterpret_cast<const char*>(glGetString(GL_RENDERER)))
                     .arg(of_impl::State::W)
                     .arg(of_impl::State::H)
-                    .arg(of_->fbo.getTexture().getTextureData().textureID));
+                    .arg(of_->fbo.getTexture().getTextureData().textureID)
+                    .arg(kShaderName));
     return true;
 }
 
 void OFStageEngine::renderFrame(float t) {
     frameCount_.fetch_add(1);
+    // Default OF_FBOMODE_PERSPECTIVE|MATRIXFLIP: OF pushes an ortho
+    // projection matching the FBO size, so ofTexture::draw(0, 0, W, H)
+    // becomes a fullscreen quad with correct MVP for Nottawa's
+    // vertex shader (`gl_Position = modelViewProjectionMatrix * position`).
     of_->fbo.begin();
-    glViewport(0, 0, of_impl::State::W, of_impl::State::H);
+    ofClear(0, 0, 0, 255);
     of_->shader.begin();
-    of_->shader.setUniform1f("uTime", t);
-    of_->shader.setUniform2f("uRes",
+    of_->shader.setUniform1f("time",       t);
+    of_->shader.setUniform2f("dimensions",
                              static_cast<float>(of_impl::State::W),
                              static_cast<float>(of_impl::State::H));
-    of_->quad.draw();
+    of_->shader.setUniform1f("brightness", 400.0f);   // matches Nottawa's AccretionSettings default
+    of_->shader.setUniformTexture("tex", of_->inputTex, 0);
+    // Mimic Nottawa's shade() pattern — use ofTexture::draw to produce
+    // a fullscreen textured quad through the active shader.
+    of_->inputTex.draw(0, 0, of_impl::State::W, of_impl::State::H);
     of_->shader.end();
     of_->fbo.end();
     glFlush();
