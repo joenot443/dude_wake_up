@@ -62,3 +62,4 @@ Temporary Items
 # Qt spike build artifacts
 spike/qt-of/build/
 aqtinstall.log
+app/build/
