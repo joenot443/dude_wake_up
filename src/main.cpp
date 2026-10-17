@@ -113,9 +113,13 @@ static std::shared_ptr<ofAppBaseWindow> tryCreateWindow(int major, int minor) {
 }
 
 #ifdef _WIN32
-// Debug-only: write every ofLog message to a file next to the exe so a
-// crash before any UI appears still leaves a trail.
+// Dev-only: mirror ofLog output to a file next to the exe. Nottawa.exe
+// uses SubSystem=Windows so stdout/stderr go nowhere by default; without
+// this a boot crash leaves no trail. Opt in via NOTTAWA_BOOT_LOG=1 at
+// launch — defaults to off so release users don't get a mystery log.
 static void installFileLogger_() {
+  const char* envVal = std::getenv("NOTTAWA_BOOT_LOG");
+  if (!envVal || envVal[0] != '1') return;
   static class FileLogger : public ofBaseLoggerChannel {
   public:
     FileLogger() {
@@ -136,13 +140,8 @@ static void installFileLogger_() {
 int main( ){
 #ifdef _WIN32
   installFileLogger_();
-  ofSetLogLevel(OF_LOG_VERBOSE);
-  ofLogNotice("main") << "entry — pre-setupDirectories";
 #endif
   setupDirectories();
-#ifdef _WIN32
-  ofLogNotice("main") << "post-setupDirectories";
-#endif
   auto homeDir = ofFilePath::getUserHomeDir();
   auto libraryPath = ofFilePath::join(homeDir, "/nottawa");
   auto sentryPath = ofFilePath::join(homeDir, "/nottawa/sentry");
@@ -151,9 +150,6 @@ int main( ){
   // iGPUs. Ask for 3.2 first (parity with macOS Core Profile), then step
   // down. If nothing works, tell the user the machine is unsupported
   // rather than crashing on a null context.
-#ifdef _WIN32
-  ofLogNotice("main") << "about to tryCreateWindow(3,2)";
-#endif
   std::shared_ptr<ofAppBaseWindow> window = tryCreateWindow(3, 2);
   if (!window) window = tryCreateWindow(3, 1);
   if (!window) window = tryCreateWindow(3, 0);
@@ -181,13 +177,7 @@ int main( ){
   glfwShowWindow(glfwWindow);
 #endif
   glfwMaximizeWindow(glfwWindow);
-#ifdef _WIN32
-  ofLogNotice("main") << "about to construct MainApp";
-#endif
   auto app = shared_ptr<MainApp>(new MainApp(window));
-#ifdef _WIN32
-  ofLogNotice("main") << "MainApp constructed; calling ofRunApp";
-#endif
   ofSetFrameRate(60);
   ofEnableAntiAliasing();
   ofEnableSmoothing();

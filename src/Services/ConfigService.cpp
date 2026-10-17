@@ -74,7 +74,16 @@ std::string ConfigService::relativeFilePathWithinNottawaFolder(std::string fileP
 }
 
 std::string ConfigService::appSupportFilePath() {
-#ifdef NOTTAWA_ENGINE_ONLY
+#if defined(_WIN32)
+  // Windows has no sandbox container; use the user home dir directly.
+  // nottawaFolderFilePath() appends "/nottawa", so this gives us
+  // %USERPROFILE% and the final path is %USERPROFILE%\nottawa\.
+  std::string appSupportPath = ofFilePath::getUserHomeDir();
+  if (!ofDirectory::doesDirectoryExist(appSupportPath + "/nottawa", false)) {
+    ofDirectory::createDirectory(appSupportPath + "/nottawa", false, true);
+  }
+  return appSupportPath;
+#elif defined(NOTTAWA_ENGINE_ONLY)
   // NottawaApp is sandboxed with bundle ID com.joecrozier.nottawaapp.
   // Use its own sandbox container (same pattern as the main app).
   std::string appSupportPath = ofFilePath::getUserHomeDir() + "/Library/Containers/com.joecrozier.nottawaapp/Data";
