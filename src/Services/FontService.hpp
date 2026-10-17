@@ -46,7 +46,7 @@ public:
   // Fonts
   FontSet retinaFonts;
   FontSet standardFonts;
-  FontSet *current;
+  FontSet *current = nullptr;
   
   ImVec2 paddingH1 = ImVec2(0, 30);
   ImVec2 paddingH2 = ImVec2(0, 8);

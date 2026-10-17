@@ -73,8 +73,15 @@ void MainApp::setup()
   BookmarkService::getService();
   StrandService::getService();
   LayoutStateService::getService();
+#ifdef _WIN32
+  // Daandelange's ofxImGui default autoDraw=true isn't painting on Windows
+  // (listener on window->events().draw at OF_EVENT_ORDER_AFTER_APP doesn't
+  // fire for us). Switch to manual draw mode: gui.end() closes the frame,
+  // we explicitly call gui.draw() after to render.
+  gui.setup(nullptr, false);
+#else
   gui.setup();
-  ImGui::CreateContext();
+#endif
   ImPlot::CreateContext();
   setupStyle(); // Apply the style
   FontService::getService()->setup();
@@ -125,6 +132,10 @@ void MainApp::draw()
   gui.begin();
   drawMainStage();
   gui.end();
+#ifdef _WIN32
+  // Manual draw since Windows build opts out of autoDraw in setup().
+  gui.draw();
+#endif
 }
 
 void MainApp::drawMainStage()
@@ -141,9 +152,15 @@ void MainApp::drawMainStage()
   
   CommonViews::PushRedesignStyle();
   ImGui::Begin("Main Stage", NULL, windowFlags);
-  ImGui::PushFont(FontService::getService()->current->p);
+  // Guard against FontService::current being null or its `p` not yet
+  // loaded (happens briefly during first draw on Windows). Fall back to
+  // the current ImGui default font — the UI will look wrong until the
+  // real font arrives but it won't crash.
+  auto* fs = FontService::getService();
+  ImFont* font = (fs && fs->current) ? fs->current->p : nullptr;
+  if (font) ImGui::PushFont(font);
   mainStageView->draw();
-  ImGui::PopFont();
+  if (font) ImGui::PopFont();
   ImGui::End();
   CommonViews::PopRedesignStyle();
 }
