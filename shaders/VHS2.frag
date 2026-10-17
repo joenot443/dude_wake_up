@@ -8,6 +8,7 @@ uniform float blurIntensity;
 uniform float jitterIntensity;
 uniform float jitterFrequency;
 uniform float kernelBias;
+uniform float amount;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -36,7 +37,13 @@ float noise(in vec2 st, float seed) {
 void main() {
   vec2 resolution = dimensions.xy;
   vec2 uv = coord / resolution;
-  
+
+  // Original (pre-jitter, pre-blur) input — used at the end to mix the
+  // clean pass-through against the processed convolution result via
+  // `amount`. Without this, `blurIntensity = 0` collapses the kernel sum
+  // to full black.
+  vec3 originalColor = texture(tex, uv).rgb;
+
   // Define horizontal blur kernel weights
   float kernel[12];
   kernel[0] = -4.0 / 9.0;
@@ -67,6 +74,6 @@ void main() {
     vec2 offset = vec2(float(i), 0);
     convolvedColor += texture(tex, uv + (offset + vec2(hsync, 0.0)) / resolution).rgb * kernel[i + 6] * blurIntensity;
   }
-  
-  outputColor = vec4(convolvedColor, 1.0);
+
+  outputColor = vec4(mix(originalColor, convolvedColor, amount), 1.0);
 }

@@ -42,7 +42,7 @@ struct AudioGlowBarsSettings: public ShaderSettings {
   bloomSize(std::make_shared<Parameter>("Bloom Size", 12.0, 1.0, 30.0)),
   bloomSizeOscillator(std::make_shared<WaveformOscillator>(bloomSize)),
   backgroundColor(std::make_shared<Parameter>("Background Color", ParameterType_Color)),
-  boost(std::make_shared<Parameter>("Boost", 3.0, 1.0, 10.0)),
+  boost(std::make_shared<Parameter>("Boost", 1.0, 1.0, 10.0)),
   boostOscillator(std::make_shared<WaveformOscillator>(boost)),
   ShaderSettings(shaderId, j, "AudioGlowBars") {
     parameters = { barHeight, bloomIntensity, bloomSize, backgroundColor, boost };
@@ -69,7 +69,10 @@ struct AudioGlowBarsShader: Shader {
     shader.begin();
 
     if (source != nullptr)
-      shader.setUniform1fv("audio", source->audioAnalysis.renderSpectrum.data(), 256);
+      // Mel spectrum is per-frame normalized + smoothed via Release, so it
+      // shows visible decay. The raw magnitude spectrum is too noisy/sustained
+      // for the release envelope to be perceptible.
+      shader.setUniform1fv("audio", source->audioAnalysis.renderMelSpectrum.data(), 256);
 
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("barHeight", settings->barHeight->value);

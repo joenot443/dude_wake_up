@@ -12,6 +12,7 @@
 #include "OscillationService.hpp"
 #include "AudioSourceService.hpp"
 #include "MidiService.hpp"
+#include "MidiSmoothingService.hpp"
 #include "ConfigService.hpp"
 #include "ImageService.hpp"
 #include "FeedbackSourceService.hpp"
@@ -39,6 +40,7 @@ IconService *IconService::service = 0;
 ModulationService *ModulationService::service = 0;
 OscillationService *OscillationService::service = 0;
 MidiService *MidiService::service = 0;
+MidiSmoothingService *MidiSmoothingService::service = 0;
 ParameterService *ParameterService::service = 0;
 ConfigService *ConfigService::service = 0;
 FeedbackSourceService *FeedbackSourceService::service = 0;

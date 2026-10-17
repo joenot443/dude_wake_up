@@ -5,24 +5,26 @@ uniform vec2 dimensions;
 uniform float time;
 uniform float specularPower;
 uniform float reflectivity;
+uniform float shapeSize;
+uniform float distortion;
+uniform float repetitionScale;
+uniform float shapeBlend;
 in vec2 coord;
 out vec4 outputColor;
 
 // Mirror-like "Happy Accident" Shader (CC0)
 // A shiny reflective variation of a raymarched fractal accident
-// ATTRIBUTION: Shader techniques inspired by (alphabetical):
-//   @byt3_m3chanic
-//   @FabriceNeyrat2
-//   @iq
-//   @shane
-//   @XorDev
-//   + many more
 
 float map(vec3 p) {
-    // Domain repetition
+    // Domain repetition with configurable scale
+    p *= repetitionScale;
     p = abs(fract(p) - 0.5);
     // Cylinder + planes SDF
-    return abs(min(length(p.xy) - 0.175, min(p.x, p.y) + 1e-3)) + 1e-3;
+    float cylPlanes = abs(min(length(p.xy) - shapeSize, min(p.x, p.y) + 1e-3)) + 1e-3;
+    // Sphere SDF
+    float sphere = abs(length(p.xyz) - shapeSize) + 1e-3;
+    // Blend between shapes
+    return mix(cylPlanes, sphere, shapeBlend);
 }
 
 vec3 estimateNormal(vec3 p) {
@@ -50,8 +52,8 @@ void main() {
 
         vec4 q = p;
 
-        // Apply "bugged" rotation matrices for glitchy fractal distortion
-        p.xy *= mat2(cos(2.0 + q.z + vec4(0,11,33,0)));
+        // Configurable distortion rotation matrices
+        p.xy *= mat2(cos(distortion + q.z + vec4(0,11,33,0)));
         p.xy *= mat2(cos(q + vec4(0,11,33,0)));
 
         // Distance estimation
@@ -64,13 +66,13 @@ void main() {
         vec3 n = estimateNormal(pos);
         vec3 reflectDir = reflect(viewDir, n);
 
-        // Fake environment reflection (sky blue + fade to white)
+        // Fake environment reflection
         vec3 envColor = mix(vec3(0.8, 0.4, 0.8), vec3(1.0), 0.5 + 0.5 * reflectDir.y);
 
         // Specular highlight
         float spec = pow(max(dot(reflectDir, lightDir), 0.0), specularPower);
 
-        // Funky palette color using original method
+        // Funky palette color
         vec4 baseColor = (1.0 + sin(0.5 * q.z + length(p.xyz - q.xyz) + vec4(0,4,3,6)))
                        / (0.5 + 2.0 * dot(q.xy, q.xy));
 

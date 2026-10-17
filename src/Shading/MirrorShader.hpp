@@ -71,31 +71,37 @@ public:
   ShaderType type() override { return ShaderTypeMirror; }
   
   void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas) override {
+    int mode = settings->mirrorTypeSelection->intParamValue();
+    // Hide the offset parameter for any axis the current mode doesn't affect.
+    // Locked (0): xOffset drives both, yOffset unused. X Only (2): hide yOffset. Y Only (3): hide xOffset.
+    settings->xOffset->hiddenFromNode = (mode == 3);
+    settings->yOffset->hiddenFromNode = (mode == 0 || mode == 2);
+
     canvas->begin();
     shader.begin();
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
-    
+
     // X/Y Locked
-    if (settings->mirrorTypeSelection->intParamValue() == 0) {
+    if (mode == 0) {
       shader.setUniform1i("mirrorXEnabled", 1);
       shader.setUniform1i("mirrorYEnabled", 1);
       shader.setUniform2f("offset", settings->xOffset->value,
                           settings->xOffset->value);
       // X/Y Separate
-    } else if (settings->mirrorTypeSelection->intParamValue() == 1) {
+    } else if (mode == 1) {
       shader.setUniform1i("mirrorXEnabled", 1);
       shader.setUniform1i("mirrorYEnabled", 1);
       shader.setUniform2f("offset", settings->xOffset->value,
                           settings->yOffset->value);
       // X Only
-    } else if (settings->mirrorTypeSelection->intParamValue() == 2) {
+    } else if (mode == 2) {
       shader.setUniform1i("mirrorXEnabled", 1);
       shader.setUniform1i("mirrorYEnabled", 0);
       shader.setUniform2f("offset", settings->xOffset->value,
                           0.);
       // Y Only
-    } else if (settings->mirrorTypeSelection->intParamValue() == 3) {
+    } else if (mode == 3) {
       shader.setUniform1i("mirrorYEnabled", 1);
       shader.setUniform1i("mirrorXEnabled", 0);
       shader.setUniform2f("offset", 0.,

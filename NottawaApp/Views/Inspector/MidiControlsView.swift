@@ -86,6 +86,26 @@ struct MidiControlsView: View {
         .background(Color.purple.opacity(0.06))
         .clipShape(RoundedRectangle(cornerRadius: 6))
         .accessibilityIdentifier("midi-controls-\(param.id)")
+        .onAppear {
+            // Pressing the MIDI button on a parameter expands this panel —
+            // we kick off learning immediately so the user doesn't have to
+            // click a second "Learn" button. Skip if the param already has
+            // a binding (we'd rather show the current binding than clobber
+            // it) or if learning is already in flight for this param.
+            guard !hasMidi, !isLearning else { return }
+            NottawaEngine.shared.beginMidiLearning(paramId: param.id)
+            isLearning = true
+        }
+        .onDisappear {
+            // Closing the MIDI panel (toggling the button off, switching to
+            // a different reactivity tab, etc.) cancels any in-progress
+            // learn so the engine doesn't sit "listening" with no UI
+            // surface for the user to see it.
+            if isLearning {
+                NottawaEngine.shared.stopMidiLearning()
+                isLearning = false
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: .parameterRefresh)) { _ in
             guard let fresh = viewModel.inspectorParameters.first(where: { $0.id == param.id }) else { return }
             if fresh.hasMidiBinding != hasMidi { hasMidi = fresh.hasMidiBinding }

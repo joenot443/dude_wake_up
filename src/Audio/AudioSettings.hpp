@@ -142,6 +142,12 @@ struct AudioAnalysis {
   std::array<float, kSpectrumSize> renderSpectrum = {};
   std::array<float, kSpectrumSize> renderMelSpectrum = {};
   std::array<float, kSpectrumSize> renderWaveform = {};
+  // Latest raw (unsmoothed, bipolar) waveform chunk, for shaders that need the true signal shape.
+  std::array<float, kSpectrumSize> renderRawWaveform = {};
+  // Rolling history of the last 4 raw chunks (oldest -> newest, contiguous), for CPU-side
+  // analysis such as pitch tracking or scope-style triggering.
+  static constexpr size_t kRawHistorySize = kSpectrumSize * 4;
+  std::array<float, kRawHistorySize> renderRawHistory = {};
 
   // Smoothing buffers for different modes
   std::deque<std::vector<float>> spectrumHistory;
@@ -151,6 +157,13 @@ struct AudioAnalysis {
   std::vector<float> peakMelSpectrum;
   std::vector<float> peakWaveform;
   int movingAverageWindowSize = 3;
+
+  // Frame-rate-independent release. `frequencyRelease` is now a half-life in
+  // seconds; `currentReleaseFactor` is the per-frame multiplier derived from
+  // it each tick via dt. All smoothing modes consume the factor, not the
+  // half-life directly.
+  std::chrono::steady_clock::time_point lastAnalyzeTime = std::chrono::steady_clock::now();
+  float currentReleaseFactor = 1.0f;
 
   AudioAnalysisParameter rmsAnalysisParam;  
   AudioAnalysisParameter highsAnalysisParam;
@@ -193,7 +206,7 @@ struct AudioAnalysis {
         bpmModeParam(std::make_shared<Parameter>("", static_cast<float>(BpmMode_Auto), 0.0, 2.0)),
         bpmLocked(std::make_shared<Parameter>("BPM Locked", 0.0, ParameterType_Bool)),
         bpmNudge(std::make_shared<Parameter>("BPM Nudge", 0.0, -1.0, 1.0)),
-        frequencyRelease(std::make_shared<Parameter>("Release", 0.7, 0.01, 1.0)),
+        frequencyRelease(std::make_shared<Parameter>("Release", 0.25, 0.0, 2.0)),
         frequencyScale(std::make_shared<Parameter>("Scale", 1.0, 0.01, 2.0)),
         loudnessScale(std::make_shared<Parameter>("Loudness Scale", 1.0, 0.1, 5.0)),
         rmsOscillator(std::make_shared<ValueOscillator>(rms)),
@@ -223,7 +236,7 @@ struct AudioAnalysis {
     switch (smoothingMode) {
       case SmoothingMode_Exponential:
         // Existing exponential smoothing
-        result = Vectors::release(input, previous, frequencyRelease->value);
+        result = Vectors::release(input, previous, currentReleaseFactor);
         break;
 
       case SmoothingMode_MovingAverage: {
@@ -248,13 +261,11 @@ struct AudioAnalysis {
           }
         }
 
-        // Apply release decay: exponential blend toward current value
-        // rel=0 → instant (no hold), rel=1 → infinite hold
-        float rel = frequencyRelease->value;
-        for (size_t i = 0; i < result.size() && i < previous.size(); i++) {
-          // Exponential smoothing: blend previous toward current
-          result[i] = result[i] * (1.0f - rel) + previous[i] * rel;
-        }
+        // Use the moving average as the envelope's input, then apply the same
+        // peak-and-release behavior as Exponential mode: instant rise on peaks,
+        // multiply-by-release decay otherwise. Keeps "Release" semantics
+        // consistent across all three modes (higher = slower decay).
+        result = Vectors::release(result, previous, currentReleaseFactor);
         break;
       }
 
@@ -276,7 +287,7 @@ struct AudioAnalysis {
             peak[i] = input[i];
           } else {
             // Decay peak
-            peak[i] *= frequencyRelease->value;
+            peak[i] *= currentReleaseFactor;
           }
           result[i] = peak[i];
         }
@@ -288,9 +299,24 @@ struct AudioAnalysis {
   }
 
   void analyzeFrame(Gist<float> *gist) {
+    // Convert the half-life parameter into a per-frame multiplier using the
+    // actual time since the last call. half=0 → instant decay, larger → slower.
+    auto now = std::chrono::steady_clock::now();
+    float dt = std::chrono::duration<float>(now - lastAnalyzeTime).count();
+    lastAnalyzeTime = now;
+    float halfLife = frequencyRelease->value;
+    currentReleaseFactor = (halfLife > 0.0f) ? std::pow(0.5f, dt / halfLife) : 0.0f;
+
     magnitudeSpectrum = gist->getMagnitudeSpectrum();
-    melFrequencySpectrum =
-        Vectors::normalize(Vectors::sqrt(gist->getMelFrequencySpectrum()));
+    // Drop mel bins 0 and 1: bin 0 starts at 0 Hz (DC + sub-bass rumble) and
+    // bin 1 sits in the bass region. Both reliably win Vectors::normalize's
+    // per-frame max, pinning the lows bucket near 1.0 every frame.
+    const auto& rawMel = gist->getMelFrequencySpectrum();
+    std::vector<float> trimmedMel;
+    if (rawMel.size() > 2) {
+      trimmedMel.assign(rawMel.begin() + 2, rawMel.end());
+    }
+    melFrequencySpectrum = Vectors::normalize(Vectors::sqrt(trimmedMel));
 
     smoothSpectrum = applySmoothing(magnitudeSpectrum, smoothSpectrum, spectrumHistory, peakSpectrum);
     smoothSpectrum = Vectors::scalarMultiply(smoothSpectrum, frequencyScale->value);

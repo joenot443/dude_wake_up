@@ -7,6 +7,7 @@ uniform float chromaEmphasis;
 uniform float noiseIntensity;
 uniform float noiseFrequency;
 uniform float crossColorIntensity;
+uniform float amount;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -71,7 +72,12 @@ void main() {
   float red = luminance + 1.403 * chromaRed;
   float green = luminance - 0.344 * chromaBlue - 0.714 * chromaRed;
   float blue = luminance + 1.773 * chromaBlue;
-  
-  outputColor = vec4(red, green, blue, 1.0);
+
+  vec3 processedColor = vec3(red, green, blue);
+
+  // `amount` blends from the clean original (0) through to the fully
+  // processed VHS pass (1). Keeps each per-effect slider linear inside
+  // the processing path while giving the user one master fader.
+  outputColor = vec4(mix(originalColor, processedColor, amount), 1.0);
 }
 

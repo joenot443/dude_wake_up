@@ -7,7 +7,7 @@
 #include "ShaderChainerService.hpp"
 
 void OptionalShadersHelper::generateOptionalShaders() {
-  std::vector<ShaderType> optionalShaderTypes = {ShaderTypeHSB, ShaderTypeTransform, ShaderTypeRotate, ShaderTypeDoubleBlur, ShaderTypeMirror, ShaderTypeColorKeyMaskMaker, ShaderTypeLumaMaskMaker};
+  std::vector<ShaderType> optionalShaderTypes = {ShaderTypeHSB, ShaderTypeTransform, ShaderTypeRotate, ShaderTypeDoubleBlur, ShaderTypeMirror, ShaderTypeColorKeyMaskMaker, ShaderTypeLumaMaskMaker, ShaderTypeLighten, ShaderTypeDarken};
   for (ShaderType type : optionalShaderTypes) {
     std::shared_ptr<Shader> newShader = ShaderChainerService::getService()->shaderForType(type, NottawaUUID::generateUUID(), 0);
     newShader->isOptional = true;

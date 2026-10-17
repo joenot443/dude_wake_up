@@ -12,6 +12,8 @@
 #include "EmptyShader.hpp"
 #include "GlitchShader.hpp"
 #include "HSBShader.hpp"
+#include "MidiService.hpp"
+#include "MidiSmoothingService.hpp"
 #include "MirrorShader.hpp"
 #include "OscillationService.hpp"
 #include "BookmarkService.hpp"
@@ -83,18 +85,17 @@ std::string ConfigService::appSupportFilePath() {
     ofDirectory::createDirectory(appSupportPath + "/nottawa", false, true);
   }
   return appSupportPath;
-#elif defined(NOTTAWA_ENGINE_ONLY)
-  // NottawaApp is sandboxed with bundle ID com.joecrozier.nottawaapp.
-  // Use its own sandbox container (same pattern as the main app).
-  std::string appSupportPath = ofFilePath::getUserHomeDir() + "/Library/Containers/com.joecrozier.nottawaapp/Data";
 #else
+  // Both the legacy ImGui app and the SwiftUI rebuild ship under bundle ID
+  // com.joecrozier.nottawa as of v2.0, so they share the same sandbox container.
   std::string appSupportPath = ofFilePath::getUserHomeDir() + "/Library/Containers/com.joecrozier.nottawa/Data";
+#ifndef NOTTAWA_ENGINE_ONLY
   if (!ofDirectory::doesDirectoryExist(appSupportPath, false)) {
     ofDirectory::createDirectory(appSupportPath, false, true);
   }
 #endif
-
   return appSupportPath;
+#endif
 }
 
 std::string ConfigService::templatesFolderFilePath()
@@ -211,6 +212,9 @@ void ConfigService::saveStrandFile(Strand strand, std::string path, std::string 
   container[ConfigTypeKey] = ConfigTypeStrand;
   container[ParametersJsonKey] = ParameterService::getService()->config();
   container[PreviewPathJsonKey] = previewPath;
+  // Resolution setting index (0=240p, 1=360p, 2=480p, 3=720p, 4=1080p, 5=1440p, 6=4K).
+  // Consumed by NottawaApp's welcome screen to load templates at their authored res.
+  container[ResolutionJsonKey] = LayoutStateService::getService()->resolutionSetting;
   
   if (fileStream.is_open())
   {
@@ -363,6 +367,7 @@ json ConfigService::currentConfig()
 {
   json config;
   config[MidiJsonKey] = MidiService::getService()->config();
+  config[MidiSmoothingJsonKey] = MidiSmoothingService::getService()->config();
   config[OscJsonKey] = OscillationService::getService()->config();
   config[ShadersJsonKey] = ShaderChainerService::getService()->config();
   config[LayoutJsonKey] = LayoutStateService::getService()->config();
@@ -383,8 +388,6 @@ void ConfigService::saveConfigFile(std::string path)
   if (isLoading) return;
 
   json config = currentConfig();
-
-  if (lastConfig == config) return;
 
   std::ofstream fileStream;
   fileStream.open(path.c_str(), std::ios::trunc);
@@ -638,7 +641,18 @@ void ConfigService::loadConfigFile(std::string path)
       std::cerr << "Error loading MIDI config: " << e.what() << std::endl;
     }
   }
-  
+
+  // Load MIDI Smoothing Config
+  if (data.contains(MidiSmoothingJsonKey) && data[MidiSmoothingJsonKey].is_object())
+  {
+    try {
+      MidiSmoothingService::getService()->loadConfig(data[MidiSmoothingJsonKey]);
+    } catch (const json::exception& e) {
+      std::cerr << "Error loading MIDI Smoothing config: " << e.what() << std::endl;
+    }
+  }
+
+
   // Load Video Source Service Config
   if (data[SourcesJsonKey].is_object())
   {

@@ -6,6 +6,7 @@
 //
 
 #include "MidiService.hpp"
+#include "MidiSmoothingService.hpp"
 #include "ParameterService.hpp"
 #include "ConfigService.hpp"
 #include "json.hpp"
@@ -162,7 +163,12 @@ void MidiService::driveParameter(std::string paramId, ofxMidiMessage &msg) {
       break;
   }
   
-  param->driveValue(normalizedValue);
+  auto smoother = MidiSmoothingService::getService();
+  if (smoother->isEnabled() && smoother->getDurationMs() > 0.0f) {
+    smoother->setTarget(param, normalizedValue);
+  } else {
+    param->driveValue(normalizedValue);
+  }
 }
 
 std::string MidiService::descriptorFrom(ofxMidiMessage &msg) {
@@ -230,6 +236,7 @@ void MidiService::removePairing(std::shared_ptr<Parameter> param) {
   log("Removing %s for %d", param->name.c_str(), descriptor.c_str());
   descriptorToPairing.erase(descriptor);
   parameterIdToPairing.erase(param->paramId);
+  MidiSmoothingService::getService()->clearForParam(param->paramId);
 }
 
 bool MidiService::hasPairingForDescriptor(std::string descriptor) {

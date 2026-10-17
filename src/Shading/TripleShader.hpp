@@ -36,20 +36,22 @@ struct TripleSettings : public ShaderSettings
   
   std::shared_ptr<Parameter> blendMode;
 
-  TripleSettings(std::string shaderId, json j, std::string name) : scale(std::make_shared<Parameter>("scale", 1.0, 0.0, 5.0)),
-                                                 scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
-                                                 xShift(std::make_shared<Parameter>("xShift", 0.4, -2.0, 2.0)),
-                                                 xShiftOscillator(std::make_shared<WaveformOscillator>(xShift)),
-                                                 yShift(std::make_shared<Parameter>("yShift", 0.0, -2.0, 2.0)),
-                                                 yShiftOscillator(std::make_shared<WaveformOscillator>(yShift)),
-                                                 drawOriginal(std::make_shared<Parameter>("drawOriginal", 0.0, ParameterType_Bool)),
-                                                 drawLeft(std::make_shared<Parameter>("drawLeft", 1.0, ParameterType_Bool)),
-                                                 drawRight(std::make_shared<Parameter>("drawRight", 1.0, ParameterType_Bool)),
-                                                 drawCenter(std::make_shared<Parameter>("drawCenter", ParameterType_Bool)),
-  blendMode(std::make_shared<Parameter>("Blend Mode", 1.0, 0.0, 13.0)),                                                 ShaderSettings(shaderId, j, name)
+  TripleSettings(std::string shaderId, json j, std::string name) :
+    scale(std::make_shared<Parameter>("Scale", 1.0, 0.0, 5.0)),
+    scaleOscillator(std::make_shared<WaveformOscillator>(scale)),
+    xShift(std::make_shared<Parameter>("X Shift", 0.4, -2.0, 2.0)),
+    xShiftOscillator(std::make_shared<WaveformOscillator>(xShift)),
+    yShift(std::make_shared<Parameter>("Y Shift", 0.0, -2.0, 2.0)),
+    yShiftOscillator(std::make_shared<WaveformOscillator>(yShift)),
+    drawOriginal(std::make_shared<Parameter>("Show Original", 0.0, ParameterType_Bool)),
+    drawLeft(std::make_shared<Parameter>("Show Left", 1.0, ParameterType_Bool)),
+    drawRight(std::make_shared<Parameter>("Show Right", 1.0, ParameterType_Bool)),
+    drawCenter(std::make_shared<Parameter>("Show Center", 0.0, ParameterType_Bool)),
+    blendMode(std::make_shared<Parameter>("Blend Mode", 1.0, 0.0, 13.0)),
+    ShaderSettings(shaderId, j, name)
   {
-    parameters = {scale, xShift, yShift, drawOriginal, drawLeft, drawRight, drawCenter, blendMode };
-    oscillators = {scaleOscillator, xShiftOscillator, yShiftOscillator};
+    parameters = { scale, xShift, yShift, drawOriginal, drawLeft, drawRight, drawCenter, blendMode };
+    oscillators = { scaleOscillator, xShiftOscillator, yShiftOscillator };
     load(j);
     registerParameters();
   };
@@ -70,7 +72,7 @@ struct TripleShader : Shader
     canvas->begin();
     shader.begin();
     // Clear the frame
-    ofClear(0, 0, 0, 255);
+     ofClear(0, 0, 0, 255);
     ofClear(0, 0, 0, 0);
     shader.setUniformTexture("tex", frame->getTexture(), 4);
     shader.setUniform1f("scale", settings->scale->value);

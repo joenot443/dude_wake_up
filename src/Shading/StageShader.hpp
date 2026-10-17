@@ -74,9 +74,11 @@ struct StageShader: Shader {
         ofPushMatrix();
         ofPushStyle();
 
-        // Calculate position in canvas space
+        // Calculate position in canvas space. positionY uses Cartesian
+        // convention (1 = top) to match the inspector's 2D position pad,
+        // so flip it for screen-space ofTranslate (0 = top).
         float x = settings->positionX->value * canvas->getWidth();
-        float y = settings->positionY->value * canvas->getHeight();
+        float y = (1.0f - settings->positionY->value) * canvas->getHeight();
 
         // Get foreground dimensions
         float fgWidth = foregroundFrame->getWidth() * settings->scale->value;

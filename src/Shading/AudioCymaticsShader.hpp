@@ -44,7 +44,7 @@ struct AudioCymaticsSettings: public ShaderSettings {
 
   AudioCymaticsSettings(std::string shaderId, json j) :
   modeCount(std::make_shared<Parameter>("Mode Count", 6.0, 2.0, 12.0, ParameterType_Int)),
-  sharpness(std::make_shared<Parameter>("Sharpness", 15.0, 1.0, 50.0)),
+  sharpness(std::make_shared<Parameter>("Sharpness", 3.0, 0.5, 15.0)),
   sharpnessOscillator(std::make_shared<WaveformOscillator>(sharpness)),
   scale(std::make_shared<Parameter>("Scale", 2.0, 0.5, 4.0)),
   scaleOscillator(std::make_shared<WaveformOscillator>(scale)),

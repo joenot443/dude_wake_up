@@ -38,6 +38,9 @@ xcuserdata/
 # Binary releases
 *.dmg
 
+# Release build output (archives, exported .app/.pkg, staging, logs)
+dist/
+
 # Thumbnails
 ._*
 

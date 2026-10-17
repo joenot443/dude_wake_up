@@ -34,6 +34,11 @@ final class HelpGuideViewModel {
     var hasSeenActionButtons = false
     var hasSeenShareHelp = false
 
+    /// Global-coordinate frame of the inspector control the current step points
+    /// at (the Mode selector, the Main Input Strength slider, …), captured so the
+    /// help arrow can point directly at it. `.zero` until measured.
+    var inspectorTargetFrame: CGRect = .zero
+
     // Persisted completion
     var completed: Bool {
         didSet {
@@ -104,6 +109,17 @@ final class HelpGuideViewModel {
         return vm.helpEnabled && !completed
     }
 
+    /// The exact inspector parameter name the current step's arrow should point
+    /// at, or nil if the step isn't inspector-attached. Must match the C++
+    /// parameter display names in BlendShader.hpp.
+    var inspectorTargetParamName: String? {
+        switch currentStep {
+        case .editBlendMode: return "Mode"
+        case .editAlpha: return "Main Input Strength"
+        default: return nil
+        }
+    }
+
     /// The sidebar tab the help guide requires for the current step, or nil if no preference.
     var requiredSidebarTab: NodeEditorViewModel.SidebarTab? {
         guard isActive else { return nil }
@@ -172,14 +188,25 @@ final class HelpGuideViewModel {
         return false
     }
 
-    /// First non-blend node (for blend-via-outputs tooltip).
-    private func firstUnconnectedNodeId(_ vm: NodeEditorViewModel) -> String? {
-        vm.nodes.first(where: { !isBlendNode($0) })?.id
+    /// Non-blend nodes whose outputs are still free (not already feeding another
+    /// node). These are the meaningful blend candidates — e.g. the effect we just
+    /// linked and the newly added second source — not the upstream source that is
+    /// already connected into the effect.
+    private func terminalOutputNodeIds(_ vm: NodeEditorViewModel) -> [String] {
+        let connectedOutputs = Set(vm.connections.map { $0.startNodeId })
+        return vm.nodes
+            .filter { !isBlendNode($0) && !connectedOutputs.contains($0.id) }
+            .map { $0.id }
     }
 
-    /// Second non-blend node (for blend-via-outputs tooltip).
+    /// First free-output node (for blend-via-outputs "drag from here" tooltip).
+    private func firstUnconnectedNodeId(_ vm: NodeEditorViewModel) -> String? {
+        terminalOutputNodeIds(vm).first
+    }
+
+    /// Second free-output node (for blend-via-outputs "drop here" tooltip).
     private func secondUnconnectedNodeId(_ vm: NodeEditorViewModel) -> String? {
-        let nonBlend = vm.nodes.filter { !isBlendNode($0) }
-        return nonBlend.count >= 2 ? nonBlend[1].id : nil
+        let ids = terminalOutputNodeIds(vm)
+        return ids.count >= 2 ? ids[1] : nil
     }
 }

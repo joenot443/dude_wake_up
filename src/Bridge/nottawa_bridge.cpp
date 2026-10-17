@@ -20,6 +20,7 @@
 #include "VideoSourceService.hpp"
 #include "ShaderSource.hpp"
 #include "BlendShader.hpp"
+#include "BounceShader.hpp"
 #include "FeedbackShader.hpp"
 #include "OscillationService.hpp"
 #include "WaveformOscillator.hpp"
@@ -27,6 +28,7 @@
 #include "StrandService.hpp"
 #include "Workspace.hpp"
 #include "MidiService.hpp"
+#include "MidiSmoothingService.hpp"
 
 #include <filesystem>
 #include "LibraryService.hpp"
@@ -48,6 +50,7 @@
 #include <thread>
 #include <atomic>
 #include <future>
+#include <tuple>
 #include <type_traits>
 
 // ---------------------------------------------------------------------------
@@ -165,6 +168,7 @@ void ntw_free_parameter_info(NTWParameterInfo* info) {
   if (!info) return;
   free((void*)info->id);
   free((void*)info->name);
+  if (info->stringValue) free((void*)info->stringValue);
   if (info->driverName) free((void*)info->driverName);
   if (info->midiDescriptor) free((void*)info->midiDescriptor);
   if (info->options) {
@@ -377,15 +381,91 @@ char* ntw_replace_shader(const char* shaderId, int newShaderTypeRaw) {
   return result;
 }
 
+// Resolves a connectable ID to the editable Shader. Covers both:
+//   • Effect shaders registered in ShaderChainerService (most cases).
+//   • Source-shaders — VideoSources of type VideoSource_shader (Plasma,
+//     Galaxy, etc.). Their inner Shader instance lives on ShaderSource
+//     and is fully compatible with the Shader override API.
+static std::shared_ptr<Shader> findEditableShader(const std::string& id) {
+  if (auto s = ShaderChainerService::getService()->shaderForId(id)) return s;
+  auto src = VideoSourceService::getService()->videoSourceForId(id);
+  if (!src || src->type != VideoSource_shader) return nullptr;
+  auto shaderSrc = std::dynamic_pointer_cast<ShaderSource>(src);
+  if (!shaderSrc) return nullptr;
+  return shaderSrc->shader;
+}
+
 char* ntw_get_shader_file_path(const char* shaderId) {
   if (!shaderId) return nullptr;
   std::string sid(shaderId);
 
-  auto shader = ShaderChainerService::getService()->shaderForId(sid);
+  auto shader = findEditableShader(sid);
   if (!shader) return nullptr;
 
   std::string path = ofToDataPath("shaders/" + shader->fileName() + ".frag");
   return strdup_safe(path);
+}
+
+// ---------------------------------------------------------------------------
+// MARK: - Live GLSL Editing
+// ---------------------------------------------------------------------------
+
+void ntw_free_shader_compile_result(NTWShaderCompileResult result) {
+  if (result.errorLog) free(result.errorLog);
+}
+
+char* ntw_get_shader_fragment_source(const char* shaderId) {
+  if (!shaderId) return nullptr;
+  std::string sid(shaderId);
+  // Read-only: a file read + a string copy. No engine-thread dispatch.
+  auto shader = findEditableShader(sid);
+  if (!shader) return nullptr;
+  std::string src = shader->currentFragmentSource();
+  if (src.empty()) return nullptr;
+  return strdup_safe(src);
+}
+
+NTWShaderCompileResult ntw_set_shader_fragment_source(const char* shaderId, const char* source) {
+  NTWShaderCompileResult result = {0, nullptr, 0};
+  if (!shaderId || !source) return result;
+  std::string sid(shaderId), src(source);
+
+  // GL compile + program link MUST happen on the engine thread that owns
+  // the GL context. The whole compile + atomic swap is done inside one
+  // lambda so shade() can never observe a partial state.
+  auto compiled = runOnEngineThread([sid, src]() -> std::tuple<bool, std::string, int> {
+    auto shader = findEditableShader(sid);
+    if (!shader) return {false, std::string("Shader not found"), 0};
+    bool ok = shader->applyFragmentSourceOverride(src);
+    return {ok, shader->lastCompileError, shader->lastCompileErrorLine};
+  });
+
+  result.ok = std::get<0>(compiled) ? 1 : 0;
+  const std::string& log = std::get<1>(compiled);
+  result.errorLine = std::get<2>(compiled);
+  if (!result.ok && !log.empty()) {
+    result.errorLog = strdup_safe(log);
+  }
+  return result;
+}
+
+void ntw_revert_shader_source(const char* shaderId) {
+  if (!shaderId) return;
+  std::string sid(shaderId);
+  runOnEngineThread([sid]() {
+    auto shader = findEditableShader(sid);
+    if (!shader) return;
+    shader->revertFragmentSource();
+  });
+}
+
+bool ntw_shader_has_session_override(const char* shaderId) {
+  if (!shaderId) return false;
+  std::string sid(shaderId);
+  // Read-only — just checking a bool on the shader instance.
+  auto shader = findEditableShader(sid);
+  if (!shader) return false;
+  return shader->hasSessionOverride();
 }
 
 bool ntw_is_audio_active(void) {
@@ -580,6 +660,114 @@ void ntw_remove_connection(const char* connectionId) {
     }
   });
   notifyGraphChanged();
+}
+
+// ---------------------------------------------------------------------------
+// MARK: - Leak Hunting
+// ---------------------------------------------------------------------------
+
+#include "LifecycleCounter.hpp"
+#include <mach/mach.h>
+
+char* ntw_dump_object_counts(void) {
+  std::string s = ::lifecycle::Registry::instance().dumpJson();
+  return strdup_safe(s);
+}
+
+void ntw_reset_object_counts(void) {
+  ::lifecycle::Registry::instance().resetCounters();
+}
+
+// Run a self-contained add+remove leak test. Adds a Plasma video source and
+// an HSB shader, connects them, ticks the engine a few frames, then removes
+// both. Repeats `cycles` times. Logs lifecycle deltas after each cycle so
+// they can be grepped from stdout.
+//
+// Note: returns a JSON string the caller must free.
+// Returns resident set size in MB.
+static double processRssMB() {
+  task_basic_info_data_t info;
+  mach_msg_type_number_t count = TASK_BASIC_INFO_COUNT;
+  if (task_info(mach_task_self(), TASK_BASIC_INFO, (task_info_t)&info, &count) != KERN_SUCCESS) {
+    return -1.0;
+  }
+  return info.resident_size / 1048576.0;
+}
+
+char* ntw_run_leak_test(int cycles) {
+  // Snapshot baseline before doing anything.
+  std::string baseline = ::lifecycle::Registry::instance().dumpJson();
+  double baselineRss = processRssMB();
+  log("LEAK_TEST_BASELINE: rss=%.1f MB %s", baselineRss, baseline.c_str());
+
+  for (int i = 0; i < cycles; ++i) {
+    // Each cycle is a self-contained add+remove. We dispatch all the work
+    // through the engine thread (synchronously) to mirror real user actions.
+
+    char* sourceIdC = ntw_add_shader_video_source(/* Plasma */ 12);
+    if (!sourceIdC) {
+      log("LEAK_TEST: failed to add source on cycle %d", i);
+      break;
+    }
+    std::string sourceId(sourceIdC);
+    free(sourceIdC);
+
+    char* shaderIdC = ntw_add_shader(/* HSB */ 1);
+    if (!shaderIdC) {
+      log("LEAK_TEST: failed to add shader on cycle %d", i);
+      ntw_remove_video_source(sourceId.c_str());
+      break;
+    }
+    std::string shaderId(shaderIdC);
+    free(shaderIdC);
+
+    // Connect source -> shader (main slot).
+    char* connIdC = ntw_make_connection(sourceId.c_str(), shaderId.c_str(),
+                                        /* Source-to-shader */ 1, 0, 0);
+    std::string connId = connIdC ? connIdC : "";
+    if (connIdC) free(connIdC);
+
+    // Let the engine run a few ticks so the source/shader settle.
+    // Sleep on the calling thread; engine thread is independent.
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    // Remove both — removing connectables also breaks the connection.
+    ntw_remove_video_source(sourceId.c_str());
+    ntw_remove_shader(shaderId.c_str());
+
+    // Give removal a moment to flush.
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+    // Log the live-count snapshot + memory delta.
+    std::string flat = ::lifecycle::Registry::instance().dumpFlat(false);
+    double rss = processRssMB();
+    log("LEAK_TEST_CYCLE %d: rss=%.1f MB (Δ%.1f) %s",
+        i + 1, rss, rss - baselineRss, flat.c_str());
+  }
+
+  std::string preClear = ::lifecycle::Registry::instance().dumpJson();
+  double preClearRss = processRssMB();
+  log("LEAK_TEST_FINAL_BEFORE_UNDO_CLEAR: rss=%.1f MB (Δ%.1f) %s",
+      preClearRss, preClearRss - baselineRss, preClear.c_str());
+
+  // Clear undo + redo stacks. If the leaks were "just" the undo holding refs
+  // for redo support, counters should drop back to baseline after this.
+  // Anything still elevated is a real leak.
+  runOnEngineThread([]() {
+    ActionService::getService()->clear();
+  });
+
+  // Give shared_ptrs that just dropped a chance to actually destruct.
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+  std::string finalDump = ::lifecycle::Registry::instance().dumpJson();
+  double finalRss = processRssMB();
+  log("LEAK_TEST_FINAL_AFTER_UNDO_CLEAR: rss=%.1f MB (Δ%.1f) %s",
+      finalRss, finalRss - baselineRss, finalDump.c_str());
+  log("LEAK_TEST_MAPS: oscillators=%zu parameterMap=%zu",
+      OscillationService::getService()->oscillators.size(),
+      ParameterService::getService()->parameterMap.size());
+  return strdup_safe(finalDump);
 }
 
 // ---------------------------------------------------------------------------
@@ -890,10 +1078,12 @@ NTWParameterInfo* ntw_get_parameters(const char* connectableId, int* outCount) {
     result[i].intValue = p->intValue;
     result[i].boolValue = p->boolValue ? 1 : 0;
     result[i].isFavorited = p->favorited ? 1 : 0;
+    result[i].stringValue = p->stringValue.empty() ? nullptr : strdup_safe(p->stringValue);
     result[i].colorR = p->color->at(0);
     result[i].colorG = p->color->at(1);
     result[i].colorB = p->color->at(2);
     result[i].colorA = p->color->at(3);
+    result[i].hiddenFromNode = p->hiddenFromNode ? 1 : 0;
     populateOscillatorDriverFields(result[i], p);
 
     // Populate options (e.g. font names for font selector)
@@ -936,6 +1126,12 @@ void ntw_set_parameter_bool(const char* paramId, bool value) {
   if (!paramId) return;
   auto param = ParameterService::getService()->parameterForId(std::string(paramId));
   if (param) param->setBoolValue(value);
+}
+
+void ntw_set_parameter_string(const char* paramId, const char* value) {
+  if (!paramId || !value) return;
+  auto param = ParameterService::getService()->parameterForId(std::string(paramId));
+  if (param) param->stringValue = std::string(value);
 }
 
 void ntw_set_parameter_color(const char* paramId,
@@ -1017,6 +1213,19 @@ void ntw_clear_feedback_buffer(const char* shaderId) {
   });
 }
 
+void ntw_reset_bounce_position(const char* shaderId) {
+  if (!shaderId) return;
+  std::string sid(shaderId);
+  runOnEngineThread([sid]() {
+    auto shader = ShaderChainerService::getService()->shaderForId(sid);
+    if (!shader) return;
+    auto* bounce = dynamic_cast<BounceShader*>(shader.get());
+    if (bounce) {
+      bounce->resetPosition();
+    }
+  });
+}
+
 // ---------------------------------------------------------------------------
 // MARK: - Oscillator Control
 // ---------------------------------------------------------------------------
@@ -1028,7 +1237,9 @@ void ntw_set_oscillator_enabled(const char* paramId, bool enabled) {
     auto param = ParameterService::getService()->parameterForId(sid);
     if (!param) return;
     auto osc = OscillationService::getService()->oscillatorForParameter(param);
-    if (osc && osc->enabled) osc->enabled->setBoolValue(enabled);
+    // setEnabled keeps the enabledOscillators_ hot-list in sync;
+    // setting boolValue directly leaves tick() blind to the change.
+    if (osc) OscillationService::getService()->setEnabled(osc, enabled);
   });
 }
 
@@ -1267,6 +1478,14 @@ int ntw_get_shader_bypassed(const char* shaderId) {
   return shader ? (shader->bypassed ? 1 : 0) : 0;
 }
 
+void ntw_set_clear_on_disconnect(int enabled) {
+  ShaderChainerService::getService()->clearOnDisconnect = (enabled != 0);
+}
+
+int ntw_get_clear_on_disconnect(void) {
+  return ShaderChainerService::getService()->clearOnDisconnect ? 1 : 0;
+}
+
 int ntw_get_shader_depth(const char* shaderId) {
   if (!shaderId) return 0;
   std::string sid(shaderId);
@@ -1292,6 +1511,12 @@ void ntw_remove_connectable(const char* connectableId) {
   if (!connectableId) return;
   std::string sid(connectableId);
   runOnEngineThread([sid]() {
+    // Drop the IOSurface tracking — Swift may not have called
+    // ntw_stop_texture_sharing yet (e.g. when the node disappears and the
+    // ViewModel hasn't run its cleanup). Without this, every removed
+    // connectable leaks an IOSurface (~8 MB at 1080p RGBA).
+    IOSurfaceTextureManager::getInstance()->stopSharing(sid);
+
     // Try video source first (avoids spurious log from shaderForId).
     auto source = VideoSourceService::getService()->videoSourceForId(sid);
     if (source) {
@@ -1733,11 +1958,18 @@ bool ntw_load_workspace(const char* path) {
       data.erase("workspace");
     }
 
-    // Write sanitized JSON to a temp file and load it.
-    std::string tmpPath = spath + ".ntw_tmp";
+    // Write sanitized JSON to a temp file and load it. Must use the sandbox's
+    // own writable tmp dir — NSOpenPanel grants read access to the picked file
+    // but not write access to its parent directory, so a sibling temp file
+    // fails in the sandbox. $TMPDIR resolves to the per-container tmp dir.
+    const char* tmpDir = std::getenv("TMPDIR");
+    std::string tmpBase = tmpDir ? tmpDir : "/tmp";
+    if (!tmpBase.empty() && tmpBase.back() != '/') tmpBase += '/';
+    std::string tmpPath = tmpBase + "ntw_load_" +
+      std::to_string((unsigned long long)ofGetElapsedTimeMillis()) + ".json";
     std::ofstream tmpOut(tmpPath);
     if (!tmpOut.is_open()) {
-      ofLogError("Bridge") << "ntw_load_workspace: failed to write temp file";
+      ofLogError("Bridge") << "ntw_load_workspace: failed to write temp file at " << tmpPath;
       return false;
     }
     tmpOut << data.dump();
@@ -1825,6 +2057,30 @@ float ntw_get_resolution_width(void) {
 
 float ntw_get_resolution_height(void) {
   return LayoutStateService::getService()->resolution.y;
+}
+
+// ---------------------------------------------------------------------------
+// MARK: - MIDI Smoothing
+// ---------------------------------------------------------------------------
+
+bool ntw_get_midi_smoothing_enabled(void) {
+  return MidiSmoothingService::getService()->isEnabled();
+}
+
+void ntw_set_midi_smoothing_enabled(bool enabled) {
+  runOnEngineThread([enabled]() {
+    MidiSmoothingService::getService()->setEnabled(enabled);
+  });
+}
+
+float ntw_get_midi_smoothing_duration_ms(void) {
+  return MidiSmoothingService::getService()->getDurationMs();
+}
+
+void ntw_set_midi_smoothing_duration_ms(float ms) {
+  runOnEngineThread([ms]() {
+    MidiSmoothingService::getService()->setDurationMs(ms);
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -1921,11 +2177,15 @@ void ntw_register_graph_changed_callback(NTWGraphChangedCallback callback) {
 }
 
 void ntw_register_resolution_changed_callback(NTWResolutionChangedCallback callback) {
+  static observable::unique_subscription bridgeResolutionSubscription;
   resolutionChangedCallback = callback;
+  // Reset first so re-registering replaces (rather than stacking) the subscription.
+  bridgeResolutionSubscription = observable::unique_subscription{};
   if (callback) {
-    LayoutStateService::getService()->subscribeToResolutionUpdates([callback]() {
-      callback();
-    });
+    bridgeResolutionSubscription =
+      LayoutStateService::getService()->subscribeToResolutionUpdates([callback]() {
+        callback();
+      });
   }
 }
 
@@ -1940,6 +2200,7 @@ struct PreviewInstance {
   std::shared_ptr<Shader> shader;           // The effect shader (null for source previews)
   std::shared_ptr<VideoSource> source;      // The source (shared plasma or standalone)
   bool isSourceOnly = false;                // True if this is a source-only preview
+  int loadRetries = 0;                      // Reload attempts after a transient compile failure
 };
 
 static std::unordered_map<std::string, PreviewInstance> previewInstances;
@@ -1960,6 +2221,13 @@ std::shared_ptr<Connectable> ntw_find_preview_connectable(const std::string& id)
   return nullptr;
 }
 
+// Preview tile resolution. Tiles are 16:9 thumbnails — full resolution is wasteful
+// (1080p RGBA = ~8 MB per FBO, and ShaderSource/Shader allocate 3-5 FBOs each, so
+// ~24-40 MB per preview × 155 shader types ≈ 4 GB). 320×180 keeps each preview at
+// ~230 KB per FBO, ~1 MB total per preview.
+static constexpr int kPreviewWidth = 320;
+static constexpr int kPreviewHeight = 180;
+
 char* ntw_create_preview(int shaderTypeRaw, bool isSource) {
   return runOnEngineThread([shaderTypeRaw, isSource]() -> char* {
     std::string pid = "preview_" + std::to_string(++previewCounter);
@@ -1970,6 +2238,11 @@ char* ntw_create_preview(int shaderTypeRaw, bool isSource) {
       auto type = static_cast<ShaderSourceType>(shaderTypeRaw);
       auto src = std::make_shared<ShaderSource>(pid, type);
       src->setup();
+      // Reallocate to preview size. ofFbo::allocate calls clear() first, so the
+      // full-resolution FBOs that setup() allocated are released here.
+      if (src->fbo) src->fbo->allocate(kPreviewWidth, kPreviewHeight, GL_RGBA);
+      if (src->optionalFbo) src->optionalFbo->allocate(kPreviewWidth, kPreviewHeight, GL_RGBA);
+      if (src->canvas) src->canvas->allocate(kPreviewWidth, kPreviewHeight, GL_RGBA);
       inst.source = std::dynamic_pointer_cast<VideoSource>(src);
       inst.isSourceOnly = true;
 
@@ -1982,6 +2255,9 @@ char* ntw_create_preview(int shaderTypeRaw, bool isSource) {
       if (!shader) return nullptr;
       shader->setup();
       shader->allocateFrames();
+      // Reallocate to preview size (see comment above).
+      if (shader->lastFrame) shader->lastFrame->allocate(kPreviewWidth, kPreviewHeight, GL_RGBA);
+      if (shader->optionalFrame) shader->optionalFrame->allocate(kPreviewWidth, kPreviewHeight, GL_RGBA);
 
       inst.shader = shader;
 
@@ -2050,8 +2326,107 @@ static std::shared_ptr<ofFbo> getMostRecentVideoSourceFrame() {
   return nullptr;
 }
 
+// ---------------------------------------------------------------------------
+// Fake preview audio
+//
+// Audio-reactive shaders read AudioSourceService::selectedAudioSource->
+// audioAnalysis directly, so when no real audio is playing their previews sit
+// dead-still. While previews are on screen and no real source is active, we
+// drive the analysis with a synthetic "musical" signal for the duration of the
+// preview render pass, then restore the original values. The main shader chain
+// renders earlier in EngineLoop::tick() (before ntw_tick_previews), so it never
+// sees the fake values; and we only inject when the source is inactive, so we
+// never race the audio thread (which writes the analysis only while active).
+// ---------------------------------------------------------------------------
+
+static bool previewFakeAudioEnabled = true;
+
+namespace {
+  inline float pvClamp01(float v) { return v < 0.0f ? 0.0f : (v > 1.0f ? 1.0f : v); }
+
+  // Snapshot of the analysis fields we overwrite, so they can be restored.
+  struct PreviewAudioBackup {
+    float rms = 0, lows = 0, mids = 0, highs = 0, beatPulse = 0;
+    std::array<float, AudioAnalysis::kSpectrumSize> renderSpectrum{};
+    std::array<float, AudioAnalysis::kSpectrumSize> renderMelSpectrum{};
+    std::array<float, AudioAnalysis::kSpectrumSize> renderWaveform{};
+    std::array<float, AudioAnalysis::kSpectrumSize> renderRawWaveform{};
+    std::array<float, AudioAnalysis::kRawHistorySize> renderRawHistory{};
+    std::vector<float> smoothSpectrum, smoothMelSpectrum, smoothWaveform;
+  };
+
+  // Fill the analysis with a believable beat-driven spectrum at time `t`.
+  void generatePreviewAudio(AudioAnalysis& a, float t) {
+    // ~120 BPM — two beats per second — with a sharp kick envelope.
+    const float beatPhase = std::fmod(t * 2.0f, 1.0f);
+    const float beat  = std::exp(-beatPhase * 6.0f);
+    const float lows  = 0.20f + 0.75f * beat;
+    const float mids  = 0.25f + 0.25f * (0.5f + 0.5f * std::sin(t * 3.1f)) + 0.15f * beat;
+    const float highs = 0.20f + 0.18f * (0.5f + 0.5f * std::sin(t * 7.3f + 1.0f))
+                              + 0.20f * (0.5f + 0.5f * std::sin(t * 13.0f));
+    const float rms   = 0.20f + 0.55f * (0.45f * beat + 0.30f * mids + 0.25f * lows);
+
+    if (a.lows)      a.lows->value      = pvClamp01(lows);
+    if (a.mids)      a.mids->value      = pvClamp01(mids);
+    if (a.highs)     a.highs->value     = pvClamp01(highs);
+    if (a.rms)       a.rms->value       = pvClamp01(rms);
+    if (a.beatPulse) a.beatPulse->value = pvClamp01(beat);
+
+    const size_t N = AudioAnalysis::kSpectrumSize;
+    a.smoothSpectrum.resize(N);
+    a.smoothMelSpectrum.resize(N);
+    a.smoothWaveform.resize(N);
+    for (size_t i = 0; i < N; ++i) {
+      const float f       = (N > 1) ? (float)i / (float)(N - 1) : 0.0f; // 0..1 across bins
+      const float rolloff = std::pow(1.0f - f, 1.6f);                   // bass-heavy shape
+      const float wobble  = 0.5f + 0.5f * std::sin(t * (2.0f + f * 9.0f) + f * 22.0f);
+      const float band    = (f < 0.12f) ? lows : (f < 0.5f ? mids : highs);
+      const float mag     = pvClamp01(rolloff * (0.35f + 0.65f * wobble) * (0.45f + 0.85f * band));
+      a.renderSpectrum[i]    = mag;
+      a.renderMelSpectrum[i] = mag;
+      a.smoothSpectrum[i]    = mag;
+      a.smoothMelSpectrum[i] = mag;
+      // Waveform is a time-domain signal in [-1, 1].
+      const float sample = std::sin(t * 6.2831853f * 2.0f + f * 6.2831853f * 3.0f)
+                           * (0.25f + 0.75f * rms);
+      a.renderWaveform[i] = sample;
+      a.renderRawWaveform[i] = sample;
+      a.smoothWaveform[i] = sample;
+    }
+    // The fake waveform has whole cycles per window, so tiling it gives a seamless history.
+    for (size_t i = 0; i < AudioAnalysis::kRawHistorySize; ++i)
+      a.renderRawHistory[i] = a.renderRawWaveform[i % N];
+  }
+}
+
 void ntw_tick_previews(void) {
   if (previewInstances.empty()) return;
+
+  // Inject synthetic audio for this preview pass (restored before we return).
+  std::shared_ptr<AudioSource> previewAudioSrc;
+  PreviewAudioBackup audioBackup;
+  bool fakeAudioInjected = false;
+  if (previewFakeAudioEnabled) {
+    previewAudioSrc = AudioSourceService::getService()->selectedAudioSource;
+    if (previewAudioSrc && !previewAudioSrc->active) {
+      AudioAnalysis& a = previewAudioSrc->audioAnalysis;
+      audioBackup.rms       = a.rms ? a.rms->value : 0.0f;
+      audioBackup.lows      = a.lows ? a.lows->value : 0.0f;
+      audioBackup.mids      = a.mids ? a.mids->value : 0.0f;
+      audioBackup.highs     = a.highs ? a.highs->value : 0.0f;
+      audioBackup.beatPulse = a.beatPulse ? a.beatPulse->value : 0.0f;
+      audioBackup.renderSpectrum    = a.renderSpectrum;
+      audioBackup.renderMelSpectrum = a.renderMelSpectrum;
+      audioBackup.renderWaveform    = a.renderWaveform;
+      audioBackup.renderRawWaveform = a.renderRawWaveform;
+      audioBackup.renderRawHistory  = a.renderRawHistory;
+      audioBackup.smoothSpectrum    = a.smoothSpectrum;
+      audioBackup.smoothMelSpectrum = a.smoothMelSpectrum;
+      audioBackup.smoothWaveform    = a.smoothWaveform;
+      generatePreviewAudio(a, ofGetElapsedTimef());
+      fakeAudioInjected = true;
+    }
+  }
 
   auto* mgr = IOSurfaceTextureManager::getInstance();
 
@@ -2059,14 +2434,12 @@ void ntw_tick_previews(void) {
   // falling back to the shared plasma source if no sources exist on canvas.
   std::shared_ptr<ofFbo> effectInputFrame = getMostRecentVideoSourceFrame();
   if (!effectInputFrame) {
-    // No video sources on canvas — fall back to plasma
     if (!sharedPlasmaSource) {
       auto plasma = std::make_shared<ShaderSource>("preview_plasma_shared", ShaderSource_plasma);
       plasma->setup();
       sharedPlasmaSource = std::dynamic_pointer_cast<VideoSource>(plasma);
     }
     if (sharedPlasmaSource) {
-      // Render plasma directly, bypassing saveFrame()'s resolution check.
       auto plasmaSrc = std::dynamic_pointer_cast<ShaderSource>(sharedPlasmaSource);
       if (plasmaSrc && plasmaSrc->shader && plasmaSrc->fbo && plasmaSrc->fbo->isAllocated()
           && plasmaSrc->canvas && plasmaSrc->canvas->isAllocated()
@@ -2100,8 +2473,21 @@ void ntw_tick_previews(void) {
       auto& canvas = shaderSrc->canvas;
       if (!fbo || !fbo->isAllocated() || !canvas || !canvas->isAllocated()) continue;
 
-      // Verify GL shader program is still valid and textures have valid IDs
-      if (!shaderSrc->shader->shader.isLoaded()) continue;
+      // The macOS GL driver intermittently fails a shader compile/link
+      // ("Compiled shader was corrupt") under the load of the browser's
+      // preview preload storm — the shader source is valid, the link just
+      // failed transiently. Retry the load from this (clean) tick context; it
+      // succeeds within a few frames, before the snapshot is captured. Bounded
+      // so a genuinely-broken shader doesn't reload forever.
+      if (!shaderSrc->shader->shader.isLoaded()) {
+        if (inst.loadRetries < 60) {
+          inst.loadRetries++;
+          // Reload only the GL program (not setup(), which can reallocate the
+          // source's FBOs back to full resolution).
+          shaderSrc->shader->shader.load("shaders/" + shaderSrc->shader->fileName());
+        }
+        if (!shaderSrc->shader->shader.isLoaded()) continue;
+      }
       if (fbo->getTexture().getTextureData().textureID == 0) continue;
       if (canvas->getTexture().getTextureData().textureID == 0) continue;
 
@@ -2118,6 +2504,12 @@ void ntw_tick_previews(void) {
 
       resultFrame = fbo;
     } else if (inst.shader) {
+      // Same transient-compile recovery as the source branch above.
+      if (!inst.shader->shader.isLoaded() && inst.loadRetries < 60) {
+        inst.loadRetries++;
+        inst.shader->shader.load("shaders/" + inst.shader->fileName());
+      }
+
       auto lastFrame = inst.shader->lastFrame;
       bool canRender = effectInputFrame && effectInputFrame->isAllocated()
                        && lastFrame && lastFrame->isAllocated()
@@ -2125,9 +2517,12 @@ void ntw_tick_previews(void) {
                        && lastFrame->getTexture().getTextureData().textureID;
 
       if (canRender) {
-        inst.shader->clearLastFrame();
-        // Re-clear to opaque black so unwritten pixels don't show
-        // the macOS debug-pink from the transparent clear.
+        // Ensure lastFrame matches input dimensions so the effect fills the preview
+        int inputW = effectInputFrame->getWidth();
+        int inputH = effectInputFrame->getHeight();
+        if (lastFrame->getWidth() != inputW || lastFrame->getHeight() != inputH) {
+          lastFrame->allocate(inputW, inputH, GL_RGBA);
+        }
         lastFrame->begin();
         ofClear(0, 0, 0, 255);
         lastFrame->end();
@@ -2136,11 +2531,11 @@ void ntw_tick_previews(void) {
         if (!resultFrame || !resultFrame->isAllocated()) resultFrame = nullptr;
       }
 
-      // If shader couldn't render, clear its frame to black
+      // If shader couldn't render, clear its frame to neutral gray
       if (!resultFrame && lastFrame && lastFrame->isAllocated()
           && lastFrame->getTexture().getTextureData().textureID) {
         lastFrame->begin();
-        ofClear(0, 0, 0, 255);
+        ofClear(38, 38, 38, 255);
         lastFrame->end();
         resultFrame = lastFrame;
       }
@@ -2151,6 +2546,24 @@ void ntw_tick_previews(void) {
       mgr->blitExternalFrame(pid, resultFrame->getId(),
                              resultFrame->getWidth(), resultFrame->getHeight());
     }
+  }
+
+  // Restore the real analysis so nothing outside the preview pass sees the fake audio.
+  if (fakeAudioInjected && previewAudioSrc) {
+    AudioAnalysis& a = previewAudioSrc->audioAnalysis;
+    if (a.rms)       a.rms->value       = audioBackup.rms;
+    if (a.lows)      a.lows->value      = audioBackup.lows;
+    if (a.mids)      a.mids->value      = audioBackup.mids;
+    if (a.highs)     a.highs->value     = audioBackup.highs;
+    if (a.beatPulse) a.beatPulse->value = audioBackup.beatPulse;
+    a.renderSpectrum    = audioBackup.renderSpectrum;
+    a.renderMelSpectrum = audioBackup.renderMelSpectrum;
+    a.renderWaveform    = audioBackup.renderWaveform;
+    a.renderRawWaveform = audioBackup.renderRawWaveform;
+    a.renderRawHistory  = audioBackup.renderRawHistory;
+    a.smoothSpectrum    = std::move(audioBackup.smoothSpectrum);
+    a.smoothMelSpectrum = std::move(audioBackup.smoothMelSpectrum);
+    a.smoothWaveform    = std::move(audioBackup.smoothWaveform);
   }
 
   glFlush();
@@ -2218,6 +2631,28 @@ void ntw_free_available_strand_info_array(NTWAvailableStrandInfo* array, int cou
     free((void*)array[i].imagePath);
   }
   free(array);
+}
+
+int ntw_strand_authored_resolution(const char* strandId) {
+  if (!strandId) return -1;
+  std::string sid(strandId);
+  // No engine-thread dispatch — just a file read. StrandService's map
+  // is built once at setup and only mutated on the engine thread when
+  // strands are added/removed, but availableStrandForId is read-only.
+  auto strand = StrandService::getService()->availableStrandForId(sid);
+  if (!strand) return -1;
+  std::fstream f(strand->path, std::ios::in);
+  if (!f.is_open()) return -1;
+  try {
+    nlohmann::json data;
+    f >> data;
+    if (data.contains(ResolutionJsonKey) && data[ResolutionJsonKey].is_number_integer()) {
+      return data[ResolutionJsonKey].get<int>();
+    }
+  } catch (...) {
+    // fall through
+  }
+  return -1;
 }
 
 char** ntw_load_strand(const char* strandId, int* outCount) {
@@ -2430,10 +2865,12 @@ NTWParameterInfo* ntw_get_optional_shader_parameters(const char* connectableId, 
     result[i].intValue = p->intValue;
     result[i].boolValue = p->boolValue ? 1 : 0;
     result[i].isFavorited = p->favorited ? 1 : 0;
+    result[i].stringValue = p->stringValue.empty() ? nullptr : strdup_safe(p->stringValue);
     result[i].colorR = p->color->at(0);
     result[i].colorG = p->color->at(1);
     result[i].colorB = p->color->at(2);
     result[i].colorA = p->color->at(3);
+    result[i].hiddenFromNode = p->hiddenFromNode ? 1 : 0;
     populateOscillatorDriverFields(result[i], p);
   }
 
@@ -2593,6 +3030,9 @@ NTWFileSourceState ntw_get_file_source_state(const char* sourceId) {
   result.duration = fileSrc->player.getDuration();
   result.mute = (fileSrc->mute && fileSrc->mute->boolValue) ? 1 : 0;
   result.playing = fileSrc->playing ? 1 : 0;
+  result.cacheAvailable = !fileSrc->cachedFrames.empty() ? 1 : 0;
+  result.useCachedMode = fileSrc->useCachedMode ? 1 : 0;
+  result.cachedFrameCount = static_cast<int>(fileSrc->cachedFrames.size());
 
   return result;
 }
@@ -2658,6 +3098,16 @@ void ntw_set_file_source_playing(const char* sourceId, int playing) {
       fileSrc->player.play();
     }
   });
+}
+
+void ntw_set_file_source_use_cached_mode(const char* sourceId, int enabled) {
+  if (!sourceId) return;
+  std::string sid(sourceId);
+  auto src = VideoSourceService::getService()->videoSourceForId(sid);
+  if (!src) return;
+  auto* fileSrc = dynamic_cast<FileSource*>(src.get());
+  if (!fileSrc) return;
+  fileSrc->useCachedMode = (enabled != 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -3222,6 +3672,70 @@ void ntw_register_midi_learned_callback(NTWMidiLearnedCallback callback) {
       midiLearnedCallback(paramId.c_str(), descriptor.c_str());
     }
   };
+}
+
+// ---------------------------------------------------------------------------
+// MARK: - MIDI Device & Assignment Queries
+// ---------------------------------------------------------------------------
+
+NTWMidiInputInfo* ntw_get_midi_inputs(int* outCount) {
+  if (outCount) *outCount = 0;
+  return runOnEngineThread([outCount]() -> NTWMidiInputInfo* {
+    auto& inputs = MidiService::getService()->getInputs();
+    int count = static_cast<int>(inputs.size());
+    if (outCount) *outCount = count;
+    if (count == 0) return nullptr;
+
+    auto* result = static_cast<NTWMidiInputInfo*>(calloc(count, sizeof(NTWMidiInputInfo)));
+    for (int i = 0; i < count; i++) {
+      result[i].name = strdup_safe(inputs[i]->getName());
+      result[i].port = inputs[i]->getPort();
+      result[i].isOpen = inputs[i]->isOpen() ? 1 : 0;
+    }
+    return result;
+  });
+}
+
+void ntw_free_midi_input_info_array(NTWMidiInputInfo* array, int count) {
+  if (!array) return;
+  for (int i = 0; i < count; i++) {
+    free((void*)array[i].name);
+  }
+  free(array);
+}
+
+NTWMidiAssignmentInfo* ntw_get_midi_assignments(int* outCount) {
+  if (outCount) *outCount = 0;
+  return runOnEngineThread([outCount]() -> NTWMidiAssignmentInfo* {
+    auto& pairings = MidiService::getService()->getPairings();
+    int count = static_cast<int>(pairings.size());
+    if (outCount) *outCount = count;
+    if (count == 0) return nullptr;
+
+    auto* result = static_cast<NTWMidiAssignmentInfo*>(calloc(count, sizeof(NTWMidiAssignmentInfo)));
+    int i = 0;
+    for (auto& [paramId, pairing] : pairings) {
+      result[i].paramId = strdup_safe(pairing.paramId);
+      result[i].midiDescriptor = strdup_safe(pairing.descriptor);
+
+      auto param = ParameterService::getService()->parameterForId(pairing.paramId);
+      result[i].paramName = strdup_safe(param ? param->name : "Unknown");
+      result[i].ownerName = strdup_safe(param ? param->ownerName : "Unknown");
+      i++;
+    }
+    return result;
+  });
+}
+
+void ntw_free_midi_assignment_info_array(NTWMidiAssignmentInfo* array, int count) {
+  if (!array) return;
+  for (int i = 0; i < count; i++) {
+    free((void*)array[i].paramId);
+    free((void*)array[i].paramName);
+    free((void*)array[i].ownerName);
+    free((void*)array[i].midiDescriptor);
+  }
+  free(array);
 }
 
 // ---------------------------------------------------------------------------

@@ -180,6 +180,29 @@ enum ShaderType {
   ShaderTypeAudioCymatics,
   ShaderTypeAurora,
   ShaderTypeCrystalKaleidoscope,
+  ShaderTypeCyberWarehouse,
+  ShaderTypeAudioAurora,
+  ShaderTypeAudioPulseGrid,
+  ShaderTypeChromaCompass,
+  ShaderTypeSolarWave,
+  ShaderTypeLighten,
+  ShaderTypeDarken,
+  ShaderTypeIridescent,
+  ShaderTypeDiscoSun,
+  ShaderTypeMarbleCaves,
+  ShaderTypeSilk,
+  ShaderTypeGemfield,
+  ShaderTypeMarbleFlow,
+  ShaderTypeFerro,
+  ShaderTypeMatchBlend,
+  ShaderTypeMaskEngine,
+  ShaderTypeRisoColumns,
+  ShaderTypeAudioSilk,
+  ShaderTypeAudioPrism,
+  ShaderTypeAudioSuminagashi,
+  ShaderTypeAudioPhasePortrait,
+  ShaderTypeAudioRain,
+  ShaderTypeAudioPendulum,
 };
 
 static const ShaderType AvailableBasicShaderTypes[] = {
@@ -216,7 +239,9 @@ static const ShaderType AvailableMaskShaderTypes[] = {
   ShaderTypeMask,
   ShaderTypeTextureMask,
   ShaderTypeLumaMaskMaker,
-  ShaderTypeColorKeyMaskMaker
+  ShaderTypeColorKeyMaskMaker,
+  ShaderTypeMatchBlend,
+  ShaderTypeMaskEngine
 };
 
 static const ShaderType AvailableGlitchShaderTypes[] = {
@@ -242,6 +267,7 @@ static const ShaderType AvailableTransformShaderTypes[] = {
   ShaderTypeTile,
   ShaderTypeKaleidoscope,
   ShaderTypeCrystalKaleidoscope,
+  ShaderTypeCyberWarehouse,
   ShaderTypeSlider, // Generated
   ShaderTypeLiquid,
   ShaderTypeSwirl,
@@ -272,6 +298,8 @@ static const ShaderType AvailableFilterShaderTypes[] = {
   ShaderTypeOneBitDither,
   ShaderTypeRuttEtra,
   ShaderTypeNeon,
+  ShaderTypeChromaCompass,
+  ShaderTypeSolarWave,
 };
 
 static const ShaderType ExcludedRandomShaderTypes[] = {
@@ -320,8 +348,48 @@ static std::vector<ShaderType> AllShaderTypes() {
 
 static std::string shaderTypeName(ShaderType type) {
   switch (type) { // ShaderNames
+    case ShaderTypeRisoColumns:
+      return "RisoColumns";
+    case ShaderTypeFerro:
+      return "Ferro";
+    case ShaderTypeMarbleFlow:
+      return "MarbleFlow";
+    case ShaderTypeGemfield:
+      return "Gemfield";
+    case ShaderTypeSilk:
+      return "Silk";
+    case ShaderTypeMarbleCaves:
+      return "MarbleCaves";
+    case ShaderTypeDiscoSun:
+      return "DiscoSun";
+    case ShaderTypeIridescent:
+      return "Iridescent";
+    case ShaderTypeDarken:
+      return "Darken";
+    case ShaderTypeLighten:
+      return "Lighten";
+    case ShaderTypeSolarWave:
+      return "Solar Wave";
+    case ShaderTypeChromaCompass:
+      return "Chroma Compass";
     case ShaderTypeAurora:
       return "Aurora";
+    case ShaderTypeAudioPulseGrid:
+      return "Audio Pulse Grid";
+    case ShaderTypeAudioAurora:
+      return "Audio Aurora";
+    case ShaderTypeAudioSilk:
+      return "Audio Silk";
+    case ShaderTypeAudioPrism:
+      return "Audio Prism";
+    case ShaderTypeAudioSuminagashi:
+      return "Audio Suminagashi";
+    case ShaderTypeAudioPhasePortrait:
+      return "Audio Phase Portrait";
+    case ShaderTypeAudioRain:
+      return "Audio Rain";
+    case ShaderTypeAudioPendulum:
+      return "Audio Pendulum";
     case ShaderTypeAudioCymatics:
       return "Audio Cymatics";
     case ShaderTypeFlocking:
@@ -564,6 +632,10 @@ static std::string shaderTypeName(ShaderType type) {
       return "Luma Mask";
     case ShaderTypeMask:
       return "Masker";
+    case ShaderTypeMatchBlend:
+      return "Match Blend";
+    case ShaderTypeMaskEngine:
+      return "Mask";
     case ShaderTypeCrosshatch:
       return "Crosshatch";
     case ShaderTypeHalfTone:
@@ -632,6 +704,8 @@ static std::string shaderTypeName(ShaderType type) {
       return "Kaleidoscope";
     case ShaderTypeCrystalKaleidoscope:
       return "Crystal Kaleidoscope";
+    case ShaderTypeCyberWarehouse:
+      return "Cyber Warehouse";
     case ShaderTypeTile:
       return "Tile";
     case ShaderTypeMix:
@@ -695,6 +769,14 @@ static bool shaderTypeIsAudioReactive(ShaderType type) {
     case ShaderTypeSynthwave:
     case ShaderTypeGlowBeat:
     case ShaderTypeAudioCymatics:
+    case ShaderTypeAudioAurora:
+    case ShaderTypeAudioPulseGrid:
+    case ShaderTypeAudioSilk:
+    case ShaderTypeAudioPrism:
+    case ShaderTypeAudioSuminagashi:
+    case ShaderTypeAudioPhasePortrait:
+    case ShaderTypeAudioRain:
+    case ShaderTypeAudioPendulum:
       return true;
     default:
       return false;

@@ -25,7 +25,7 @@ public:
   std::string category = "";
   VideoSourceType type;
   std::shared_ptr<ofTexture> preview;
-  bool hasPreview;
+  bool hasPreview = false;
 };
 
 class AvailableVideoSourceWebcam : public AvailableVideoSource

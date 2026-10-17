@@ -209,6 +209,7 @@ json TextSource::serialize() {
   j["edgeSoftness"] = displayText->edgeSoftness->value;
   j["textSmoothing"] = displayText->textSmoothing->value;
   j["cropToText"] = displayText->cropToText->boolValue;
+  j["displayTextSettings"] = displayText->serialize();
   auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);
   if (node != nullptr) {
     j["x"] = node->position.x;
@@ -268,6 +269,9 @@ void TextSource::load(json j) {
   }
   if (j.contains("cropToText")) {
     displayText->cropToText->setBoolValue(j["cropToText"]);
+  }
+  if (j.contains("displayTextSettings")) {
+    displayText->load(j["displayTextSettings"]);
   }
   if (j.contains("x")) {
     auto node = NodeLayoutView::getInstance()->nodeForShaderSourceId(id);

@@ -38,6 +38,10 @@ struct OscillatorsSidebarView: View {
             Text("No active Oscillators")
                 .font(.caption)
                 .foregroundStyle(theme.colors.textTertiary)
+            Text("Enable an oscillator on any parameter\nto see it here")
+                .font(.caption2)
+                .foregroundStyle(theme.colors.textTertiary.opacity(0.6))
+                .multilineTextAlignment(.center)
             Spacer()
         }
         .frame(maxWidth: .infinity)
@@ -47,11 +51,12 @@ struct OscillatorsSidebarView: View {
 
     private var oscillatorList: some View {
         ScrollView {
-            LazyVStack(spacing: 10) {
+            VStack(spacing: 10) {
                 ForEach(oscillators) { osc in
                     OscillatorRowView(oscillator: osc) {
                         viewModel.selectNode(osc.connectableId)
                     }
+                    .id(osc.id)
                 }
             }
             .padding(8)
@@ -89,20 +94,33 @@ private struct OscillatorRowView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 8) {
             // Header
             Button(action: onTapHeader) {
-                HStack {
-                    Text("\(oscillator.paramName)")
+                HStack(spacing: 6) {
+                    // Accent pip
+                    Circle()
+                        .fill(enabled ? theme.colors.accent : theme.colors.textTertiary)
+                        .frame(width: 6, height: 6)
+
+                    Text(oscillator.paramName)
                         .font(.caption)
                         .fontWeight(.semibold)
-                    Text("—")
-                        .font(.caption)
-                        .foregroundStyle(theme.colors.textSecondary)
+                        .foregroundStyle(theme.colors.textPrimary)
+
+                    Text("on")
+                        .font(.caption2)
+                        .foregroundStyle(theme.colors.textTertiary)
+
                     Text(oscillator.ownerName)
                         .font(.caption)
                         .foregroundStyle(theme.colors.textSecondary)
+
                     Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 8, weight: .semibold))
+                        .foregroundStyle(theme.colors.textTertiary)
                 }
                 .contentShape(Rectangle())
             }
@@ -145,7 +163,7 @@ private struct OscillatorRowView: View {
 
             if enabled {
                 // Frequency
-                DSSlider(value: $frequency, range: 0...4, label: "Frequency", showValue: true)
+                DSSlider(value: $frequency, range: 0...12, label: "Frequency", showValue: true)
                     .onChange(of: frequency) { _, newValue in
                         NottawaEngine.shared.setOscillatorFrequency(
                             paramId: oscillator.paramId, frequency: newValue)
@@ -167,9 +185,15 @@ private struct OscillatorRowView: View {
             }
         }
         .font(.caption)
-        .padding(8)
-        .background(theme.colors.surface)
-        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .padding(10)
+        .background(
+            RoundedRectangle(cornerRadius: theme.radii.lg)
+                .fill(theme.colors.surface)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: theme.radii.lg)
+                .strokeBorder(enabled ? theme.colors.accent.opacity(0.3) : theme.colors.borderSubtle, lineWidth: 1)
+        )
         .onChange(of: oscillator.enabled) { _, v in enabled = v }
         .onChange(of: oscillator.frequency) { _, v in frequency = v }
         .onChange(of: oscillator.minOutput) { _, v in minOutput = v }

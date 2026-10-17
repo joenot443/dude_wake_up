@@ -6,6 +6,7 @@
 //
 
 #include <stdio.h>
+#include <regex>
 #include "Shader.hpp"
 #include "NodeLayoutView.hpp"
 #include "Colors.hpp"
@@ -67,6 +68,9 @@ void Shader::traverseFrame(std::shared_ptr<ofFbo> frame, int depth)
   {
     feedbackDestination->pushFrame(lastFrame);
   }
+
+  // Mark the FBO as freshly written so IOSurfaceTextureManager knows to blit.
+  ++renderTick;
 }
 
 void Shader::clearLastFrame() {
@@ -76,6 +80,7 @@ void Shader::clearLastFrame() {
   ofClear(0,0,0, 255);
   ofClear(0,0,0, 0);
   lastFrame->end();
+  ++renderTick;
 }
 
 std::shared_ptr<VideoSourceSettings> Shader::sourceSettings() {
@@ -140,15 +145,25 @@ json Shader::serialize()
 };
 
 void Shader::activateParameters() {
+  auto* paramService = ParameterService::getService();
   for (std::shared_ptr<Parameter> param : settings->parameters) {
-    param->active = true;
+    paramService->markActive(param);
   }
 }
 
 void Shader::allocateFrames() {
   lastFrame->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y, GL_RGBA);
-  
+
   optionalFrame->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y, GL_RGBA);
+}
+
+void Shader::releaseFrames() {
+  if (lastFrame) lastFrame->clear();
+  if (optionalFrame) optionalFrame->clear();
+  // Optional children each have their own lastFrame/optionalFrame.
+  for (auto& opt : optionalShaders) {
+    if (opt) opt->releaseFrames();
+  }
 }
 
 void Shader::enableAudioAutoReactivity(std::shared_ptr<Parameter> audioParam) {
@@ -194,6 +209,147 @@ void Shader::checkForFileChanges() {
     shader.load("shaders/" + shaderName);
     log("Reloaded Shader for - " + shaderName);
   }
+}
+
+// ---------------------------------------------------------------------------
+// MARK: - Live GLSL editing
+// ---------------------------------------------------------------------------
+
+namespace {
+
+// Standard Nottawa vertex passthrough. Matches the .vert files shipped
+// alongside every fragment shader. Used as a fallback when a .vert file
+// is missing on disk (a few shaders ship frag-only).
+constexpr const char* kDefaultPassthroughVert = R"GLSL(#version 150
+
+uniform mat4 modelViewProjectionMatrix;
+
+in vec4 position;
+in vec2 texcoord;
+
+out vec2 coord;
+
+void main()
+{
+  coord = vec2(texcoord.x, texcoord.y);
+  gl_Position = modelViewProjectionMatrix * position;
+}
+)GLSL";
+
+// RAII guard that swaps in a buffering log channel for the duration of a
+// scoped block, then restores whatever channel was active before. Used to
+// capture ofShader compile / link errors (which arrive via ofLogError,
+// since ofShader exposes no info-log return).
+//
+// Note: ofLog's channel is process-global, so any unrelated log call on the
+// engine thread during the guarded window will also be captured. Keep the
+// window as tight as possible — wrap only the compile + link calls.
+class ScopedShaderLogCapture {
+public:
+  ScopedShaderLogCapture() {
+    saved_ = ofGetLoggerChannel();
+    buffer_ = std::make_shared<BufferingChannel>();
+    ofSetLoggerChannel(buffer_);
+  }
+  ~ScopedShaderLogCapture() {
+    ofSetLoggerChannel(saved_);
+  }
+  ScopedShaderLogCapture(const ScopedShaderLogCapture&) = delete;
+  ScopedShaderLogCapture& operator=(const ScopedShaderLogCapture&) = delete;
+
+  std::string text() const { return buffer_->text; }
+
+private:
+  class BufferingChannel : public ofBaseLoggerChannel {
+  public:
+    std::string text;
+    // Only the std::string overload is virtual on the base; the variadic
+    // template forms route through it via ofVAArgsToString.
+    void log(ofLogLevel /*level*/, const std::string& module, const std::string& message) override {
+      // Anything from ofShader (or its prefix variants) is interesting.
+      if (module.find("ofShader") != std::string::npos) {
+        text += message;
+        if (!text.empty() && text.back() != '\n') text += '\n';
+      }
+    }
+  };
+
+  std::shared_ptr<ofBaseLoggerChannel> saved_;
+  std::shared_ptr<BufferingChannel> buffer_;
+};
+
+// Extract the first GLSL error line number from a compiler log. GLSL drivers
+// produce messages like "0:42(7): error:" (Intel) or "ERROR: 0:42:" (NVIDIA);
+// the second number is the source line. Returns 0 if no line found.
+int parseFirstErrorLine(const std::string& log) {
+  static const std::regex re(R"((?:0:|ERROR:\s*\d+:)\s*(\d+))");
+  std::smatch match;
+  if (std::regex_search(log, match, re) && match.size() >= 2) {
+    try { return std::stoi(match[1].str()); } catch (...) {}
+  }
+  return 0;
+}
+
+// Read a file's full contents into a string. Returns empty on miss.
+std::string readShaderFile(const std::string& path) {
+  ofFile f(path);
+  if (!f.exists()) return {};
+  return ofBufferFromFile(path).getText();
+}
+
+} // namespace
+
+std::string Shader::currentFragmentSource() {
+  if (hasSessionOverride()) return editedFragmentSource;
+  return readShaderFile("shaders/" + fileName() + ".frag");
+}
+
+bool Shader::applyFragmentSourceOverride(const std::string& source) {
+  lastCompileError.clear();
+  lastCompileErrorLine = 0;
+
+  // Resolve the vertex source: prefer the shader's own .vert if present,
+  // otherwise fall back to the standard passthrough.
+  std::string vertSource = readShaderFile("shaders/" + fileName() + ".vert");
+  if (vertSource.empty()) vertSource = kDefaultPassthroughVert;
+
+  // Stage a fresh ofShader. If anything fails, we throw it away without
+  // touching the live `shader` member — the previously-valid program keeps
+  // rendering.
+  ofShader staged;
+  bool ok = true;
+  std::string log;
+  {
+    ScopedShaderLogCapture capture;
+    ok = staged.setupShaderFromSource(GL_VERTEX_SHADER, vertSource);
+    if (ok) ok = staged.setupShaderFromSource(GL_FRAGMENT_SHADER, source);
+    if (ok) {
+      staged.bindDefaults();
+      ok = staged.linkProgram();
+    }
+    log = capture.text();
+  }
+
+  if (!ok) {
+    lastCompileError = log.empty() ? "Shader compile failed (no detail)." : log;
+    lastCompileErrorLine = parseFirstErrorLine(log);
+    return false;
+  }
+
+  // Atomic-from-the-engine-thread-POV swap. shade() can't run concurrently
+  // because this method only runs inside runOnEngineThread, and the engine
+  // thread is serialized.
+  shader = std::move(staged);
+  editedFragmentSource = source;
+  return true;
+}
+
+void Shader::revertFragmentSource() {
+  editedFragmentSource.clear();
+  lastCompileError.clear();
+  lastCompileErrorLine = 0;
+  shader.unload();
+  shader.load("shaders/" + fileName());
 }
 
 void Shader::drawOptionalSettings() {
@@ -270,7 +426,7 @@ void Shader::generateOptionalShaders() {
   if (isOptional) return;
   if (!optionalShaders.empty()) return;
   
-  std::vector<ShaderType> optionalShaderTypes = {ShaderTypeHSB, ShaderTypeBackground, ShaderTypeTransform, ShaderTypeRotate, ShaderTypeDoubleBlur, ShaderTypeMirror, ShaderTypeColorKeyMaskMaker, ShaderTypeLumaMaskMaker};
+  std::vector<ShaderType> optionalShaderTypes = {ShaderTypeHSB, ShaderTypeBackground, ShaderTypeTransform, ShaderTypeRotate, ShaderTypeDoubleBlur, ShaderTypeMirror, ShaderTypeColorKeyMaskMaker, ShaderTypeLumaMaskMaker, ShaderTypeLighten, ShaderTypeDarken};
   
   for (ShaderType type : optionalShaderTypes) {
     std::shared_ptr<Shader> newShader = ShaderChainerService::getService()->shaderForType(type, NottawaUUID::generateUUID(), 0);

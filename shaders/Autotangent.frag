@@ -6,6 +6,7 @@ uniform float time;
 uniform float brightness;
 uniform float speed;
 uniform vec3 color;
+uniform float amount;
 in vec2 coord;
 out vec4 outputColor;
 
@@ -32,6 +33,6 @@ void main()
   col = temp.rgb * brightness
   + vec3(tan((temp.rgb * vec3(3.0, 5.0, 50.0)
               + (t / 135.0) * 100.0) * 3.1415)) * color;
-  
-  outputColor = vec4(col, 1.0);
+
+  outputColor = vec4(mix(temp.rgb, col, amount), 1.0);
 }

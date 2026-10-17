@@ -5,6 +5,8 @@ in vec2 coord;
 uniform float scale;
 uniform float sides;
 uniform float rotation;
+uniform float autorotate;
+uniform float time;
 uniform float shift;
 uniform vec2 dimensions;
 out vec4 outputColor;
@@ -24,7 +26,6 @@ vec2 reflectLine(vec2 p, vec2 n) {
 void main()
 {
   vec2 uv = (coord - 0.5) * scale;
-  uv = rotate2d(uv, rotation);
   uv += shift;
 
   // Build the fundamental triangle based on the "sides" parameter.
@@ -97,6 +98,9 @@ void main()
     uv.x / triBase,
     uv.y / (triBase * sin(alpha))
   );
+  // Rotate the content within the kaleidoscope
+  float totalRotation = rotation + mod(time * autorotate, PI * 2.0);
+  texUV = rotate2d(texUV - 0.5, totalRotation) + 0.5;
   texUV = clamp(texUV, 0.0, 1.0);
 
   outputColor = texture(tex, texUV);

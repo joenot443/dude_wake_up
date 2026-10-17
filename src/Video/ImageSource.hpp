@@ -45,6 +45,7 @@ public:
   std::shared_ptr<Parameter> center;
   std::shared_ptr<Parameter> verticalFlip;
   std::shared_ptr<Parameter> horizontalFlip;
+  LIFECYCLE_TRACK("ImageSource");
 };
 
 #endif /* ImageSource_hpp */

@@ -85,8 +85,17 @@ struct ConnectionCablesView: View {
                         let opacity: Double = isDragging && !isRelevant ? 0.3 : 0.8
                         let glowOpacity: Double = isDragging && !isRelevant ? 0.05 : 0.12
 
-                        context.stroke(path, with: .color(accentColor.opacity(glowOpacity)), lineWidth: 8)
-                        context.stroke(path, with: .color(accentColor.opacity(opacity)), lineWidth: 2.5)
+                        // Aux connections (slot 10) stroke dashed in warning
+                        // color so users can tell aux flow apart from main flow.
+                        if connection.outputSlot == 10 {
+                            context.stroke(path, with: .color(warningColor.opacity(glowOpacity)), lineWidth: 8)
+                            context.stroke(path,
+                                           with: .color(warningColor.opacity(opacity)),
+                                           style: StrokeStyle(lineWidth: 2.5, lineCap: .round, dash: [6, 4]))
+                        } else {
+                            context.stroke(path, with: .color(accentColor.opacity(glowOpacity)), lineWidth: 8)
+                            context.stroke(path, with: .color(accentColor.opacity(opacity)), lineWidth: 2.5)
+                        }
                     }
                 }
 

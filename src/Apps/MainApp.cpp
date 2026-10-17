@@ -30,7 +30,6 @@
 #include "ofxImGui.h"
 #include "Strings.hpp"
 #include <stdio.h>
-#include "../Services/SparkleUpdater.h"
 #include "URLSchemeHandler.h"
 
 static void logGLEnvironmentOnce() {
@@ -98,11 +97,6 @@ void MainApp::setup()
   affirmScale();
   MidiService::getService();
   StringManager::loadStrings();
-
-  // Initialize Sparkle auto-updater
-  #ifdef TARGET_OSX
-  SparkleUpdaterService::getInstance().initialize();
-  #endif
 
   // Process any pending URL that launched the app
   #ifdef TARGET_OSX

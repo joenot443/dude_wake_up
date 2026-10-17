@@ -27,13 +27,12 @@ struct PixelPlaySettings: public ShaderSettings {
   PixelPlaySettings(std::string shaderId, json j) :
   displaceFactor(std::make_shared<Parameter>("Displace Factor", 0.5, 0.0, 1.0)),
   displaceFactorOscillator(std::make_shared<WaveformOscillator>(displaceFactor)),
-  amount(std::make_shared<Parameter>("Amount", 0.5, 0.0, 1.0)),
+  amount(std::make_shared<Parameter>("Amount", 1.0, 0.0, 1.0)),
   amountOscillator(std::make_shared<WaveformOscillator>(amount)),
   ShaderSettings(shaderId, j, "PixelPlay") {
-    parameters = { displaceFactor };
-    oscillators = { displaceFactorOscillator };
+    parameters = { amount, displaceFactor };
+    oscillators = { amountOscillator, displaceFactorOscillator };
     load(j);
-    audioReactiveParameter = amount;
     registerParameters();
   };
 };
@@ -72,10 +71,8 @@ struct PixelPlayShader: Shader {
   }
 
   void drawSettings() override {
-    
-
-    CommonViews::ShaderParameter(settings->displaceFactor, settings->displaceFactorOscillator);
     CommonViews::ShaderParameter(settings->amount, settings->amountOscillator);
+    CommonViews::ShaderParameter(settings->displaceFactor, settings->displaceFactorOscillator);
   }
 };
 

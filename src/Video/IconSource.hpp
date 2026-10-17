@@ -57,6 +57,7 @@ public:
 
 private:
   std::string path;
+  LIFECYCLE_TRACK("IconSource");
 };
 
 #endif /* IconSource_hpp */

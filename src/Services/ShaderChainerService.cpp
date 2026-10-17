@@ -7,12 +7,34 @@
 
 #include "ShaderChainerService.hpp"
 #include "Models/Strand.hpp"
+// NB: ASCIIShader is uppercase on disk — some filesystems (ext4, NTFS
+// resolved case-sensitively from Linux) reject the lowercase form.
 #include "ASCIIShader.hpp"
+#include "RisoColumnsShader.hpp"
+#include "FerroShader.hpp"
+#include "MarbleFlowShader.hpp"
+#include "GemfieldShader.hpp"
+#include "SilkShader.hpp"
+#include "MarbleCavesShader.hpp"
+#include "DiscoSunShader.hpp"
+#include "IridescentShader.hpp"
+#include "DarkenShader.hpp"
+#include "LightenShader.hpp"
+#include "SolarWaveShader.hpp"
+#include "ChromaCompassShader.hpp"
 #include "AuroraShader.hpp"
 #include "NeonShader.hpp"
 #include "ScrapbookShader.hpp"
 #include "FlockingShader.hpp"
 #include "AudioCymaticsShader.hpp"
+#include "AudioAuroraShader.hpp"
+#include "AudioSilkShader.hpp"
+#include "AudioPrismShader.hpp"
+#include "AudioSuminagashiShader.hpp"
+#include "AudioPhasePortraitShader.hpp"
+#include "AudioRainShader.hpp"
+#include "AudioPendulumShader.hpp"
+#include "AudioPulseGridShader.hpp"
 #include "RuttEtraShader.hpp"
 #include "WindowsShader.hpp"
 #include "CircleBlurShader.hpp"
@@ -130,6 +152,8 @@
 #include "DancingSquaresShader.hpp"
 #include "LumaMaskMakerShader.hpp"
 #include "MaskShader.hpp"
+#include "MatchBlendShader.hpp"
+#include "MaskEngineShader.hpp"
 #include "CrosshatchShader.hpp"
 #include "HalfToneShader.hpp"
 #include "AudioBumperShader.hpp"
@@ -151,6 +175,7 @@
 #include "HSBShader.hpp"
 #include "KaleidoscopeShader.hpp"
 #include "CrystalKaleidoscopeShader.hpp"
+#include "CyberWarehouseShader.hpp"
 #include "LiquidShader.hpp"
 #include "MelterShader.hpp"
 #include "MirrorShader.hpp"
@@ -639,11 +664,16 @@ void ShaderChainerService::addShader(std::shared_ptr<Shader> shader)
   shader->settings->selectorParam->setValue(shader->type());
   shadersMap[shader->shaderId] = shader;
   
-  // Subscribe the Shader's setup() to resolution updates
-  LayoutStateService::getService()->subscribeToResolutionUpdates([shader]() {
-    shader->allocateFrames();
-    shader->setup();
-  });
+  // Subscribe the Shader's setup() to resolution updates. Token stored on
+  // the shader so removeShader can unsubscribe explicitly.
+  std::weak_ptr<Shader> weakShader = shader;
+  shader->resolutionUpdateSubscription =
+    LayoutStateService::getService()->subscribeToResolutionUpdates([weakShader]() {
+      if (auto s = weakShader.lock()) {
+        s->allocateFrames();
+        s->setup();
+      }
+    });
   
   ConfigService::getService()->saveDefaultConfigFile();
 }
@@ -656,7 +686,21 @@ void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader, bool fro
         shader->shaderId.c_str());
     return;
   }
-  
+
+  // Unsubscribe from resolution updates so a stale shader (held alive by
+  // an undo command, etc.) can't have setup()/allocateFrames() re-run on it.
+  shader->resolutionUpdateSubscription = observable::unique_subscription{};
+
+  // Eagerly release the shader's GL FBOs (and any optional children). The
+  // shader shared_ptr typically lives on in the undo stack; without this,
+  // each removed shader pins ~32 MB per FBO × 2 FBOs × ~21 optional children
+  // for the lifetime of the undo entry.
+  shader->releaseFrames();
+
+  // Drop any consumer registration. FeedbackShader::populateSource calls
+  // setConsumer(shaderId, ...); without this, consumerMap pins the source
+  // forever and beingConsumed() stays true → frame buffer never tears down.
+  FeedbackSourceService::getService()->removeConsumerForShader(shader->shaderId);
 
   if (shader->feedbackDestination)
   {
@@ -674,8 +718,17 @@ void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader, bool fro
   }
   // --- END FIX ---
   
-  // Remove associated oscillators
-  OscillationService::getService()->removeOscillatorsFor(shader->settings->parameters);
+  // Remove associated oscillators + drop parameters from the parameter map.
+  // Without unregisterParameters() the map (and its hot lists) grow forever.
+  // Recurse into optional shader children — each has its own settings.
+  std::function<void(std::shared_ptr<Shader>)> cleanShader =
+    [&cleanShader](std::shared_ptr<Shader> s) {
+      if (!s || !s->settings) return;
+      OscillationService::getService()->removeOscillatorsFor(s->settings->parameters);
+      ParameterService::getService()->unregisterParameters(s->settings->parameters);
+      for (auto& opt : s->optionalShaders) cleanShader(opt);
+    };
+  cleanShader(shader);
   
   // Remove all connections associated with this shader
   // This internally calls breakConnectionForConnectionId, which removes
@@ -889,12 +942,9 @@ void ShaderChainerService::copyConnections(std::shared_ptr<Connectable> source, 
 
 std::shared_ptr<Shader> ShaderChainerService::shaderForId(std::string id)
 {
-  if (shadersMap.count(id) == 0)
-  {
-    log("Tried to get Shader %s, but it doesn't exist", id.c_str());
-    return nullptr;
-  }
-  return shadersMap[id];
+  auto it = shadersMap.find(id);
+  if (it == shadersMap.end()) return nullptr;
+  return it->second;
 }
 
 Strand ShaderChainerService::strandForConnectable(std::shared_ptr<Connectable> connectable) {
@@ -982,9 +1032,24 @@ void ShaderChainerService::breakConnectionForConnectionId(std::string connection
     connectionMap.erase(it);
     return;
   }
+  auto endConnectable = connection->end;
+  InputSlot disconnectedSlot = connection->inputSlot;
   connection->start->removeConnection(connection);
   connection->end->removeConnection(connection);
   connectionMap.erase(it);
+
+  // If a Main input was just removed and the global "Clear on Disconnect"
+  // view setting is enabled, zero the end shader's output frame so stale
+  // pixels don't linger after disconnection.
+  if (clearOnDisconnect && endConnectable && disconnectedSlot == InputSlotMain &&
+      endConnectable->connectableType() == ConnectableTypeShader) {
+    auto shader = std::dynamic_pointer_cast<Shader>(endConnectable);
+    if (shader && !shader->hasInputAtSlot(InputSlotMain) &&
+        shader->lastFrame && shader->lastFrame->isAllocated()) {
+      shader->clearLastFrame();
+    }
+  }
+
   ConfigService::getService()->saveDefaultConfigFile();
 }
 
@@ -1041,9 +1106,129 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
   switch (shaderType)
   {
     // hygenSwitch
+    case ShaderTypeAudioPendulum: {
+      auto settings = new AudioPendulumSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AudioPendulumShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeAudioRain: {
+      auto settings = new AudioRainSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AudioRainShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeAudioPhasePortrait: {
+      auto settings = new AudioPhasePortraitSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AudioPhasePortraitShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeAudioSuminagashi: {
+      auto settings = new AudioSuminagashiSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AudioSuminagashiShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeAudioPrism: {
+      auto settings = new AudioPrismSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AudioPrismShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeAudioSilk: {
+      auto settings = new AudioSilkSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AudioSilkShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeRisoColumns: {
+      auto settings = new RisoColumnsSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<RisoColumnsShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeFerro: {
+      auto settings = new FerroSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<FerroShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeMarbleFlow: {
+      auto settings = new MarbleFlowSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<MarbleFlowShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeGemfield: {
+      auto settings = new GemfieldSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<GemfieldShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeSilk: {
+      auto settings = new SilkSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<SilkShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeMarbleCaves: {
+      auto settings = new MarbleCavesSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<MarbleCavesShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeDiscoSun: {
+      auto settings = new DiscoSunSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<DiscoSunShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeIridescent: {
+      auto settings = new IridescentSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<IridescentShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeDarken: {
+      auto settings = new DarkenSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<DarkenShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeLighten: {
+      auto settings = new LightenSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<LightenShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeSolarWave: {
+      auto settings = new SolarWaveSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<SolarWaveShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeChromaCompass: {
+      auto settings = new ChromaCompassSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<ChromaCompassShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeAurora: {
       auto settings = new AuroraSettings(shaderId, shaderJson);
       auto shader = std::make_shared<AuroraShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeAudioPulseGrid: {
+      auto settings = new AudioPulseGridSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AudioPulseGridShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeAudioAurora: {
+      auto settings = new AudioAuroraSettings(shaderId, shaderJson);
+      auto shader = std::make_shared<AudioAuroraShader>(settings);
       shader->setup();
       return shader;
     }
@@ -1791,6 +1976,20 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
       shader->setup();
       return shader;
     }
+    case ShaderTypeMatchBlend:
+    {
+      auto settings = new MatchBlendSettings(shaderId, shaderJson, shaderTypeName(shaderType));
+      auto shader = std::make_shared<MatchBlendShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeMaskEngine:
+    {
+      auto settings = new MaskEngineSettings(shaderId, shaderJson, shaderTypeName(shaderType));
+      auto shader = std::make_shared<MaskEngineShader>(settings);
+      shader->setup();
+      return shader;
+    }
     case ShaderTypeCrosshatch:
     {
       auto settings = new CrosshatchSettings(shaderId, shaderJson, shaderTypeName(shaderType));
@@ -2021,6 +2220,13 @@ ShaderChainerService::shaderForType(ShaderType shaderType, std::string shaderId,
     {
       auto settings = new CrystalKaleidoscopeSettings(shaderId, shaderJson, shaderTypeName(shaderType));
       auto shader = std::make_shared<CrystalKaleidoscopeShader>(settings);
+      shader->setup();
+      return shader;
+    }
+    case ShaderTypeCyberWarehouse:
+    {
+      auto settings = new CyberWarehouseSettings(shaderId, shaderJson, shaderTypeName(shaderType));
+      auto shader = std::make_shared<CyberWarehouseShader>(settings);
       shader->setup();
       return shader;
     }

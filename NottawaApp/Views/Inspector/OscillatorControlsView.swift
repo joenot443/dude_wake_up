@@ -28,7 +28,7 @@ struct OscillatorControlsView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 8) {
             // Waveform visualization
             WaveformPreviewView(
                 waveShape: waveShape,
@@ -66,7 +66,7 @@ struct OscillatorControlsView: View {
 
             if enabled {
                 // Frequency
-                DSSlider(value: $frequency, range: 0...4, label: "Frequency", showValue: true)
+                DSSlider(value: $frequency, range: 0...12, label: "Frequency", showValue: true)
                     .accessibilityIdentifier("osc-frequency-\(param.id)")
                     .onChange(of: frequency) { _, newValue in
                         NottawaEngine.shared.setOscillatorFrequency(paramId: param.id, frequency: newValue)
@@ -86,9 +86,15 @@ struct OscillatorControlsView: View {
             }
         }
         .font(.caption)
-        .padding(8)
-        .background(theme.colors.surface)
-        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .padding(10)
+        .background(
+            RoundedRectangle(cornerRadius: theme.radii.lg)
+                .fill(theme.colors.surface)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: theme.radii.lg)
+                .strokeBorder(enabled ? theme.colors.accent.opacity(0.3) : theme.colors.borderSubtle, lineWidth: 1)
+        )
         .accessibilityIdentifier("osc-controls-\(param.id)")
         .onChange(of: param.oscillatorFrequency) { _, newValue in
             frequency = newValue

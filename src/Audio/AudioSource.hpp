@@ -50,6 +50,13 @@ public:
   void setRecordingCallback(AudioRecordingCallback callback);
   void clearRecordingCallback();
 
+  // Ring-style accumulator so gist always sees exactly 512-sample frames,
+  // regardless of how many mono samples the audio callback happens to deliver.
+  // Without this, sources whose callback delivers fewer than 512 frames per
+  // tick (common with file/sample-track playback when device and file sample
+  // rates differ) starve the FFT and leave the spectrum half-populated.
+  std::vector<float> gistAccumulator;
+
   virtual ~AudioSource() = default;
   
   virtual json serialize() { return json(); }

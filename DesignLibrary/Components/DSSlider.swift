@@ -11,6 +11,8 @@ struct DSSlider: View {
     let formatString: String
 
     @State private var isDragging = false
+    @State private var isEditingValue = false
+    @State private var editText = ""
 
     init(
         value: Binding<Float>,
@@ -45,9 +47,7 @@ struct DSSlider: View {
                     }
                     Spacer()
                     if showValue {
-                        Text(String(format: formatString, value))
-                            .font(.system(size: theme.typography.captionSize, weight: .medium, design: .monospaced))
-                            .foregroundStyle(theme.colors.textTertiary)
+                        editableValueLabel
                     }
                 }
             }
@@ -103,5 +103,58 @@ struct DSSlider: View {
             }
             .frame(height: theme.sizing.sliderThumbSize)
         }
+    }
+
+    // MARK: - Editable Value Label
+
+    @ViewBuilder
+    private var editableValueLabel: some View {
+        if isEditingValue {
+            TextField("", text: $editText)
+                .font(.system(size: theme.typography.captionSize, weight: .medium, design: .monospaced))
+                .foregroundStyle(theme.colors.textPrimary)
+                .multilineTextAlignment(.trailing)
+                .frame(width: 54)
+                .textFieldStyle(.plain)
+                .padding(.horizontal, 4)
+                .padding(.vertical, 2)
+                .background(
+                    RoundedRectangle(cornerRadius: theme.radii.sm)
+                        .fill(theme.colors.backgroundTertiary)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: theme.radii.sm)
+                        .strokeBorder(theme.colors.accent.opacity(0.5), lineWidth: 1)
+                )
+                .onSubmit {
+                    commitEdit()
+                }
+                .onExitCommand {
+                    isEditingValue = false
+                }
+                .task {
+                    // Small delay so the field is in the view hierarchy before focusing
+                    try? await Task.sleep(for: .milliseconds(50))
+                }
+        } else {
+            Text(String(format: formatString, value))
+                .font(.system(size: theme.typography.captionSize, weight: .medium, design: .monospaced))
+                .foregroundStyle(theme.colors.textTertiary)
+                .padding(.horizontal, 4)
+                .padding(.vertical, 2)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    editText = String(format: formatString, value)
+                    isEditingValue = true
+                }
+        }
+    }
+
+    private func commitEdit() {
+        if let parsed = Float(editText) {
+            let clamped = min(max(parsed, range.lowerBound), range.upperBound)
+            value = clamped
+        }
+        isEditingValue = false
     }
 }

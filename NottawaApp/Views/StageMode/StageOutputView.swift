@@ -192,6 +192,7 @@ struct StageOutputView: View {
                     lineWidth: isSoloed ? 2 : 1
                 )
         )
+        .overlay(ScreenshotFlashOverlay().clipShape(RoundedRectangle(cornerRadius: 6)))
         .shadow(color: isSoloed ? theme.colors.warning.opacity(0.3) : .clear, radius: 8)
     }
 

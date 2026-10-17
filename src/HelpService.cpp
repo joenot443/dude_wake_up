@@ -87,8 +87,8 @@ bool HelpService::editedAlphaParameter() {
     if (shader->type() == ShaderTypeBlend) {
       std::shared_ptr<BlendShader> blendShader = std::dynamic_pointer_cast<BlendShader>(shader);
       
-      // Check if Alpha have been changed
-      hasEditedAlpha = abs(blendShader->settings->alpha->value - blendShader->settings->alpha->defaultValue) > 0.01;
+      // Check if any input strength has been changed
+      hasEditedAlpha = abs(blendShader->settings->inputStrength[0]->value - blendShader->settings->inputStrength[0]->defaultValue) > 0.01;
       return hasEditedAlpha;
     }
   }

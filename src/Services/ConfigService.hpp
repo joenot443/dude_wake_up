@@ -24,6 +24,7 @@ using json = nlohmann::json;
 static const std::string ConfigFolderName = "shader_configs";
 
 static const std::string MidiJsonKey = "midi";
+static const std::string MidiSmoothingJsonKey = "midiSmoothing";
 static const std::string OscJsonKey = "osc";
 static const std::string SourcesJsonKey = "sources";
 static const std::string ShadersJsonKey = "shaders";

@@ -4,10 +4,27 @@
 #define ShaderSource_hpp
 
 #include "AudioBumperShader.hpp"
+#include "RisoColumnsShader.hpp"
+#include "FerroShader.hpp"
+#include "MarbleFlowShader.hpp"
+#include "GemfieldShader.hpp"
+#include "SilkShader.hpp"
+#include "MarbleCavesShader.hpp"
+#include "DiscoSunShader.hpp"
+#include "IridescentShader.hpp"
 #include "AuroraShader.hpp"
+#include "CyberWarehouseShader.hpp"
 #include "AudioGraphShader.hpp"
 #include "FlockingShader.hpp"
 #include "AudioCymaticsShader.hpp"
+#include "AudioAuroraShader.hpp"
+#include "AudioSilkShader.hpp"
+#include "AudioPrismShader.hpp"
+#include "AudioSuminagashiShader.hpp"
+#include "AudioPhasePortraitShader.hpp"
+#include "AudioRainShader.hpp"
+#include "AudioPendulumShader.hpp"
+#include "AudioPulseGridShader.hpp"
 #include "AudioOscillatorShader.hpp"
 #include "LavaShader.hpp"
 #include "AudioGlowBarsShader.hpp"
@@ -190,6 +207,23 @@ enum ShaderSourceType {
   ShaderSource_Flocking, //source enum,
   ShaderSource_AudioCymatics, //source enum,
   ShaderSource_Aurora, //source enum,
+  ShaderSource_CyberWarehouse, //source enum,
+  ShaderSource_AudioAurora, //source enum,
+  ShaderSource_AudioPulseGrid, //source enum,
+  ShaderSource_Iridescent, //source enum,
+  ShaderSource_DiscoSun, //source enum,
+  ShaderSource_MarbleCaves, //source enum,
+  ShaderSource_Silk, //source enum,
+  ShaderSource_Gemfield, //source enum,
+  ShaderSource_MarbleFlow, //source enum,
+  ShaderSource_Ferro, //source enum,
+  ShaderSource_RisoColumns, //source enum,
+  ShaderSource_AudioSilk, //source enum,
+  ShaderSource_AudioPrism, //source enum,
+  ShaderSource_AudioSuminagashi, //source enum,
+  ShaderSource_AudioPhasePortrait, //source enum,
+  ShaderSource_AudioRain, //source enum,
+  ShaderSource_AudioPendulum, //source enum,
 }; // End ShaderSourceType
 
 static const ShaderSourceType AvailableShaderSourceTypes[] = {
@@ -277,13 +311,64 @@ static const ShaderSourceType AvailableShaderSourceTypes[] = {
   ShaderSource_Flocking, // Available
   ShaderSource_AudioCymatics, // Available
   ShaderSource_Aurora, // Available
+  ShaderSource_CyberWarehouse, // Available
+  ShaderSource_AudioAurora, // Available
+  ShaderSource_AudioPulseGrid, // Available
+  ShaderSource_Iridescent, // Available
+  ShaderSource_DiscoSun, // Available
+  ShaderSource_MarbleCaves, // Available
+  ShaderSource_Silk, // Available
+  ShaderSource_Gemfield, // Available
+  ShaderSource_MarbleFlow, // Available
+  ShaderSource_Ferro, // Available
+  ShaderSource_RisoColumns, // Available
+  ShaderSource_AudioSilk, // Available
+  ShaderSource_AudioPrism, // Available
+  ShaderSource_AudioSuminagashi, // Available
+  ShaderSource_AudioPhasePortrait, // Available
+  ShaderSource_AudioRain, // Available
+  ShaderSource_AudioPendulum, // Available
 }; // End AvailableShaderSourceTypes
 
 static ShaderType shaderTypeForShaderSourceType(ShaderSourceType type) {
   switch (type) {
       // shaderTypeForShaderSourceType
+  case ShaderSource_RisoColumns: //type enum
+    return ShaderTypeRisoColumns;
+  case ShaderSource_Ferro: //type enum
+    return ShaderTypeFerro;
+  case ShaderSource_MarbleFlow: //type enum
+    return ShaderTypeMarbleFlow;
+  case ShaderSource_Gemfield: //type enum
+    return ShaderTypeGemfield;
+  case ShaderSource_Silk: //type enum
+    return ShaderTypeSilk;
+  case ShaderSource_MarbleCaves: //type enum
+    return ShaderTypeMarbleCaves;
+  case ShaderSource_DiscoSun: //type enum
+    return ShaderTypeDiscoSun;
+  case ShaderSource_Iridescent: //type enum
+    return ShaderTypeIridescent;
+  case ShaderSource_CyberWarehouse: //type enum
+    return ShaderTypeCyberWarehouse;
   case ShaderSource_Aurora: //type enum
     return ShaderTypeAurora;
+  case ShaderSource_AudioPulseGrid: //type enum
+    return ShaderTypeAudioPulseGrid;
+  case ShaderSource_AudioAurora: //type enum
+    return ShaderTypeAudioAurora;
+  case ShaderSource_AudioSilk: //type enum
+    return ShaderTypeAudioSilk;
+  case ShaderSource_AudioPrism: //type enum
+    return ShaderTypeAudioPrism;
+  case ShaderSource_AudioSuminagashi: //type enum
+    return ShaderTypeAudioSuminagashi;
+  case ShaderSource_AudioPhasePortrait: //type enum
+    return ShaderTypeAudioPhasePortrait;
+  case ShaderSource_AudioRain: //type enum
+    return ShaderTypeAudioRain;
+  case ShaderSource_AudioPendulum: //type enum
+    return ShaderTypeAudioPendulum;
   case ShaderSource_AudioCymatics: //type enum
     return ShaderTypeAudioCymatics;
   case ShaderSource_Flocking: //type enum
@@ -466,6 +551,22 @@ static ShaderSourceType shaderSourceTypeForShaderType(ShaderType type) {
       return ShaderSource_Flocking;
     case ShaderTypeAudioCymatics:
       return ShaderSource_AudioCymatics;
+    case ShaderTypeAudioAurora:
+      return ShaderSource_AudioAurora;
+    case ShaderTypeAudioSilk:
+      return ShaderSource_AudioSilk;
+    case ShaderTypeAudioPrism:
+      return ShaderSource_AudioPrism;
+    case ShaderTypeAudioSuminagashi:
+      return ShaderSource_AudioSuminagashi;
+    case ShaderTypeAudioPhasePortrait:
+      return ShaderSource_AudioPhasePortrait;
+    case ShaderTypeAudioRain:
+      return ShaderSource_AudioRain;
+    case ShaderTypeAudioPendulum:
+      return ShaderSource_AudioPendulum;
+    case ShaderTypeAudioPulseGrid:
+      return ShaderSource_AudioPulseGrid;
     case ShaderTypeSpiral:
       return ShaderSource_Spiral;
     case ShaderTypeSimpleBars:
@@ -596,6 +697,22 @@ static ShaderSourceType shaderSourceTypeForShaderType(ShaderType type) {
       return ShaderSource_audioMountains;
     case ShaderTypeGalaxy:
       return ShaderSource_galaxy;
+    case ShaderTypeIridescent:
+      return ShaderSource_Iridescent;
+    case ShaderTypeDiscoSun:
+      return ShaderSource_DiscoSun;
+    case ShaderTypeMarbleCaves:
+      return ShaderSource_MarbleCaves;
+    case ShaderTypeSilk:
+      return ShaderSource_Silk;
+    case ShaderTypeGemfield:
+      return ShaderSource_Gemfield;
+    case ShaderTypeMarbleFlow:
+      return ShaderSource_MarbleFlow;
+    case ShaderTypeFerro:
+      return ShaderSource_Ferro;
+    case ShaderTypeRisoColumns:
+      return ShaderSource_RisoColumns;
     default:
       return ShaderSource_empty; // Default case
   }
@@ -618,6 +735,14 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     case ShaderSource_AudioGraph:
     case ShaderSource_AudioOscillator:
     case ShaderSource_AudioCymatics:
+    case ShaderSource_AudioAurora:
+    case ShaderSource_AudioPulseGrid:
+    case ShaderSource_AudioSilk:
+    case ShaderSource_AudioPrism:
+    case ShaderSource_AudioSuminagashi:
+    case ShaderSource_AudioPhasePortrait:
+    case ShaderSource_AudioRain:
+    case ShaderSource_AudioPendulum:
       return "Audio Reactive";
       
       // Particles
@@ -649,6 +774,7 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     case ShaderSource_Companions:
     case ShaderSource_Flaming:
     case ShaderSource_Glassy:
+    case ShaderSource_MarbleCaves:
       return "Scenic";
       
       // Textured
@@ -700,6 +826,13 @@ static std::string shaderSourceTypeCategory(ShaderSourceType nameType) {
     case ShaderSource_Accretion:
     case ShaderSource_Synthfly:
     case ShaderSource_Synthwave:
+    case ShaderSource_Iridescent:
+    case ShaderSource_DiscoSun:
+    case ShaderSource_Silk:
+    case ShaderSource_Gemfield:
+    case ShaderSource_MarbleFlow:
+    case ShaderSource_Ferro:
+    case ShaderSource_RisoColumns:
       return "Psychedelic";
     default:
       return "Unknown";
@@ -727,6 +860,60 @@ public:
   void addShader(ShaderSourceType addType) {
     switch (addType) {
     // Shader Settings
+    case ShaderSource_RisoColumns: { // Settings
+      auto settings = new RisoColumnsSettings(NottawaUUID::generateUUID(), 0);
+      shader = std::make_shared<RisoColumnsShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Ferro: { // Settings
+      auto settings = new FerroSettings(NottawaUUID::generateUUID(), 0);
+      shader = std::make_shared<FerroShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_MarbleFlow: { // Settings
+      auto settings = new MarbleFlowSettings(NottawaUUID::generateUUID(), 0);
+      shader = std::make_shared<MarbleFlowShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Gemfield: { // Settings
+      auto settings = new GemfieldSettings(NottawaUUID::generateUUID(), 0);
+      shader = std::make_shared<GemfieldShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Silk: { // Settings
+      auto settings = new SilkSettings(NottawaUUID::generateUUID(), 0);
+      shader = std::make_shared<SilkShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_MarbleCaves: { // Settings
+      auto settings = new MarbleCavesSettings(NottawaUUID::generateUUID(), 0);
+      shader = std::make_shared<MarbleCavesShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_DiscoSun: { // Settings
+      auto settings = new DiscoSunSettings(NottawaUUID::generateUUID(), 0);
+      shader = std::make_shared<DiscoSunShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_Iridescent: { // Settings
+      auto settings = new IridescentSettings(NottawaUUID::generateUUID(), 0);
+      shader = std::make_shared<IridescentShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_CyberWarehouse: { // Settings
+      auto settings = new CyberWarehouseSettings(NottawaUUID::generateUUID(), 0);
+      shader = std::make_shared<CyberWarehouseShader>(settings);
+      shader->setup();
+      return;
+    }
     case ShaderSource_Aurora: { // Settings
       auto settings = new AuroraSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<AuroraShader>(settings);
@@ -760,6 +947,54 @@ public:
     case ShaderSource_AudioGlowBars: { // Settings
       auto settings = new AudioGlowBarsSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<AudioGlowBarsShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_AudioPulseGrid: { // Settings
+      auto settings = new AudioPulseGridSettings(NottawaUUID::generateUUID(), 0);
+      shader = std::make_shared<AudioPulseGridShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_AudioPendulum: { // Settings
+      auto settings = new AudioPendulumSettings(NottawaUUID::generateUUID(), 0);
+      shader = std::make_shared<AudioPendulumShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_AudioRain: { // Settings
+      auto settings = new AudioRainSettings(NottawaUUID::generateUUID(), 0);
+      shader = std::make_shared<AudioRainShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_AudioPhasePortrait: { // Settings
+      auto settings = new AudioPhasePortraitSettings(NottawaUUID::generateUUID(), 0);
+      shader = std::make_shared<AudioPhasePortraitShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_AudioSuminagashi: { // Settings
+      auto settings = new AudioSuminagashiSettings(NottawaUUID::generateUUID(), 0);
+      shader = std::make_shared<AudioSuminagashiShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_AudioPrism: { // Settings
+      auto settings = new AudioPrismSettings(NottawaUUID::generateUUID(), 0);
+      shader = std::make_shared<AudioPrismShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_AudioSilk: { // Settings
+      auto settings = new AudioSilkSettings(NottawaUUID::generateUUID(), 0);
+      shader = std::make_shared<AudioSilkShader>(settings);
+      shader->setup();
+      return;
+    }
+    case ShaderSource_AudioAurora: { // Settings
+      auto settings = new AudioAuroraSettings(NottawaUUID::generateUUID(), 0);
+      shader = std::make_shared<AudioAuroraShader>(settings);
       shader->setup();
       return;
     }
@@ -1242,7 +1477,17 @@ public:
   }
   
   void setup() override;
-  
+
+  void teardown() override {
+    // Release the three full-resolution FBOs (~24 MB at 1080p RGBA) plus
+    // the inner shader's lastFrame/optionalFrame and any optional children.
+    // Without this every removed ShaderSource pins ~50 MB on the undo stack.
+    if (fbo) fbo->clear();
+    if (optionalFbo) optionalFbo->clear();
+    if (canvas) canvas->clear();
+    if (shader) shader->releaseFrames();
+  }
+
   void saveFrame() override {
     // If our width or height has changed, setup again
     if (fbo->getWidth() != LayoutStateService::getService()->resolution.x ||
@@ -1281,8 +1526,9 @@ public:
   }
   
   void draw();
-  
+
   json serialize() override;
+  LIFECYCLE_TRACK("ShaderSource");
 };
 
 #endif /* ShaderSource_hpp */

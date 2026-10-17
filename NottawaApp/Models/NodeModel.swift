@@ -36,6 +36,19 @@ struct NodeModel: Identifiable, Hashable {
         return false
     }
 
+    /// A "shader source" is a VideoSource of type VideoSource_shader — a
+    /// procedural shader generator (Plasma, Galaxy, Aurora, etc.) wrapped
+    /// as a source. It has an editable inner Shader just like effect nodes.
+    /// Raw value 4 matches `VideoSource_shader` in src/Video/VideoSource.hpp.
+    var isShaderSource: Bool {
+        if case .source(let raw) = nodeType { return raw == 4 }
+        return false
+    }
+
+    /// True if this node carries an editable Shader instance — either a
+    /// chained effect or a shader-source generator.
+    var hasEditableShader: Bool { isShader || isShaderSource }
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
@@ -51,6 +64,19 @@ struct NodeModel: Identifiable, Hashable {
         && lhs.downloadPaused == rhs.downloadPaused
     }
 
+    /// Shader types whose auxiliary output is part of their semantics
+    /// (mirrors `Shader::allowAuxOutputSlot()` in src/Shading/Shader.cpp).
+    /// FeedbackShader overrides that on the C++ side to gate on the
+    /// `Allow Auxillary` parameter, but the runtime feedback path itself only
+    /// checks for an aux connection — so for the SwiftUI UX we surface the
+    /// aux pin unconditionally for these types.
+    static func shaderTypeSupportsAuxOutput(_ raw: Int) -> Bool {
+        // 7  = ShaderTypeFeedback
+        // 41 = ShaderTypeLumaMaskMaker
+        // 45 = ShaderTypeColorKeyMaskMaker
+        return raw == 7 || raw == 41 || raw == 45
+    }
+
     // Factory from ConnectableInfo (shader)
     static func from(_ info: ConnectableInfo) -> NodeModel {
         let isShader = info.connectableType != .source
@@ -63,7 +89,7 @@ struct NodeModel: Identifiable, Hashable {
             inputCount: info.inputCount,
             position: CGPoint(x: CGFloat(info.posX), y: CGFloat(info.posY)),
             isActive: true,
-            supportsAuxOutput: isShader ? NottawaEngine.shared.supportsAuxOutput(shaderId: info.id) : false,
+            supportsAuxOutput: isShader ? NodeModel.shaderTypeSupportsAuxOutput(info.shaderTypeRaw) : false,
             isAudioReactive: NottawaEngine.shared.isAudioReactive(connectableId: info.id)
         )
     }

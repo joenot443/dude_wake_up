@@ -58,6 +58,12 @@ std::shared_ptr<Texture> TextureService::defaultTexture()
 
 std::shared_ptr<Texture> TextureService::textureWithName(std::string name)
 {
+  // Lazily load textures on first lookup. TextureService::setup() is never
+  // called explicitly, and in the engine-only (NottawaApp) build nothing
+  // populates textures otherwise — so a shader like DirtyPlasma that resolves
+  // "Granite" in its setup() would get nullptr and render black.
+  if (!populated) populateTextures();
+
   for (auto texture : textures)
   {
     if (texture->name == name)

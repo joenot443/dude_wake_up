@@ -95,6 +95,12 @@ void IOSurfaceTextureManager::setSecondaryLookup(ConnectableLookup lookup) {
 extern std::shared_ptr<Connectable> ntw_find_preview_connectable(const std::string& id);
 
 static std::shared_ptr<Connectable> findConnectableForBlit(const std::string& id) {
+  // Synthetic ids (e.g. "transformCrop:<shaderId>") are owned by their
+  // producing shader and blitted via blitExternalFrame — they aren't
+  // connectables in any service, so short-circuit before shaderForId logs
+  // a spurious "shader doesn't exist" warning every frame.
+  if (id.find(':') != std::string::npos) return nullptr;
+
   // Check preview instances first (avoids noisy error logs from shaderForId)
   auto preview = ntw_find_preview_connectable(id);
   if (preview) return preview;
@@ -126,13 +132,22 @@ void IOSurfaceTextureManager::blitTrackedTextures() {
     if (srcW <= 0 || srcH <= 0) continue;
 
     // Set up or resize if needed
+    bool didReallocate = false;
     if (tex.needsSetup || tex.width != srcW || tex.height != srcH) {
       cleanupSharedTexture(tex);
       setupSharedTexture(tex, srcW, srcH);
       if (!tex.surface) continue;
+      didReallocate = true;
     }
 
-    // Blit from source FBO to IOSurface FBO
+    // Skip blit if the source FBO hasn't been written since our last blit.
+    // (Always blit immediately after a (re)allocation so the IOSurface has
+    // valid contents on first read.)
+    if (!didReallocate && tex.lastBlittedTick == connectable->renderTick) {
+      continue;
+    }
+
+      // Blit from source FBO to IOSurface FBO
     GLuint srcFboId = fbo->getId();
     glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFboId);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, tex.glFbo);
@@ -143,6 +158,7 @@ void IOSurfaceTextureManager::blitTrackedTextures() {
     );
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    tex.lastBlittedTick = connectable->renderTick;
   }
 
   // Flush to ensure IOSurface contents are visible to Metal
@@ -261,6 +277,12 @@ void IOSurfaceTextureManager::setupSharedTexture(SharedTexture& tex, int width, 
     tex.surface = nullptr;
     return;
   }
+
+  // Clear the IOSurface FBO to black so it doesn't show uninitialized pink
+  glBindFramebuffer(GL_FRAMEBUFFER, tex.glFbo);
+  glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   tex.width = width;
   tex.height = height;

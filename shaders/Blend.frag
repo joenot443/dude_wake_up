@@ -3,11 +3,7 @@
 uniform sampler2D tex;
 uniform sampler2D tex2;
 uniform int mode;
-uniform int blendWithEmpty;
-uniform int flip;
-uniform float alpha;
-uniform float amount;
-uniform int alphaSwap;
+uniform float strength;
 
 in vec2 coord;
 out vec4 outputColor;
@@ -16,7 +12,7 @@ out vec4 outputColor;
 vec4 blend(vec4 a, vec4 b, int mode) {
   vec4 result;
   if (mode == 0) { // Mix
-    result = mix(a, b, amount);
+    result = mix(a, b, strength);
   } else if (mode == 1) { // Multiply
     result = a * b;
   } else if (mode == 2) { // Screen
@@ -53,7 +49,7 @@ vec4 blend(vec4 a, vec4 b, int mode) {
 void main() {
   vec4 tex_color = texture(tex, coord);
   vec4 tex2_color = texture(tex2, coord);
-  
+
   // If either texture is fully transparent, return the other
   if (tex_color.a < 0.1) {
     outputColor = tex2_color;
@@ -63,17 +59,20 @@ void main() {
     outputColor = tex_color;
     return;
   }
-  // If our alpha is low, just return our tex1
-  if (alpha < 0.03) {
+  // If strength is zero, just return input A
+  if (strength < 0.01) {
     outputColor = tex_color;
     return;
   }
-  
+
   vec4 result = blend(tex_color, tex2_color, mode);
-  // Mix
+
+  // Mix mode already incorporates strength in the blend function
   if (mode == 0) {
     outputColor = result;
     return;
   }
-	outputColor = alphaSwap == 1 ? mix(result, tex_color, alpha) : mix(tex_color, result, alpha);
+
+  // For all other modes, strength controls how much of the blend result shows
+  outputColor = mix(tex_color, result, strength);
 }

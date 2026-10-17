@@ -28,9 +28,10 @@ typedef struct {
   float value;
   float minValue;
   float maxValue;
-  int parameterType;       // 0=Standard, 1=Int, 2=Bool, 3=Color, 4=Hidden
+  int parameterType;       // 0=Standard, 1=Int, 2=Bool, 3=Color, 4=Hidden, 5=Text
   int intValue;
   int boolValue;
+  const char* stringValue; // Owned by caller - must free. NULL if empty
   int isFavorited;
   float colorR, colorG, colorB, colorA;
 
@@ -55,6 +56,9 @@ typedef struct {
   // Options (for int params with named choices, e.g. font selector)
   const char** options;        // Array of option strings (NULL if none) - caller must free each + array
   int optionCount;             // 0 if no options
+
+  // Runtime-hidden by the shader (e.g. Blend hides unconnected input strengths)
+  int hiddenFromNode;
 } NTWParameterInfo;
 
 typedef struct {
@@ -193,6 +197,46 @@ char* ntw_replace_shader(const char* shaderId, int newShaderTypeRaw);
 // Returns the path (caller must free), or NULL if not found.
 char* ntw_get_shader_file_path(const char* shaderId);
 
+// ---------------------------------------------------------------------------
+// MARK: - Live GLSL Editing
+//
+// Lets the SwiftUI inspector pull the current fragment-shader source for a
+// node, push edits back to the engine for live recompile, and revert to the
+// on-disk version. Overrides are per-instance and session-only — nothing is
+// persisted.
+// ---------------------------------------------------------------------------
+
+// Result of an attempted shader source override.
+//   ok: true if vertex + fragment compiled and the program linked.
+//   errorLog: combined compiler/linker log (caller frees). NULL if ok or
+//             nothing was captured.
+//   errorLine: first GLSL source line referenced by the log, or 0.
+typedef struct NTWShaderCompileResult {
+  int ok;
+  char* errorLog;
+  int errorLine;
+} NTWShaderCompileResult;
+
+void ntw_free_shader_compile_result(NTWShaderCompileResult result);
+
+// Returns the fragment source the editor should display: the session
+// override if one is active, otherwise the on-disk .frag contents. NULL
+// if the shader doesn't exist or the file can't be read. Caller frees.
+char* ntw_get_shader_fragment_source(const char* shaderId);
+
+// Stage-then-swap a new fragment source. On failure the previously-valid
+// program keeps rendering and errorLog/errorLine in the result are
+// populated. Runs on the engine thread.
+NTWShaderCompileResult ntw_set_shader_fragment_source(const char* shaderId, const char* source);
+
+// Drop the session override and re-load the shader from disk. Runs on the
+// engine thread.
+void ntw_revert_shader_source(const char* shaderId);
+
+// True iff the shader currently has a session override active. Used by the
+// inspector to show the "modified" pill and enable the Revert button.
+bool ntw_shader_has_session_override(const char* shaderId);
+
 // Check if a shader supports auxiliary output.
 bool ntw_supports_aux_output(const char* shaderId);
 bool ntw_is_audio_reactive(const char* connectableId);
@@ -232,6 +276,22 @@ char* ntw_make_connection(const char* startId,
 
 // Remove a connection by its ID.
 void ntw_remove_connection(const char* connectionId);
+
+// ---------------------------------------------------------------------------
+// MARK: - Leak Hunting (LifecycleCounter)
+// ---------------------------------------------------------------------------
+
+// Dump live + cumulative ctor/dtor counts for tracked classes as a JSON
+// string. Caller must free with ntw_free_string.
+char* ntw_dump_object_counts(void);
+
+// Reset all lifecycle counters to zero (establishes a baseline).
+void ntw_reset_object_counts(void);
+
+// Run an automated leak test: for `cycles` iterations, add a Plasma source
+// and an HSB shader, connect them, then remove both. Logs counts each cycle.
+// Returns a JSON summary string (caller must free).
+char* ntw_run_leak_test(int cycles);
 
 // ---------------------------------------------------------------------------
 // MARK: - Undo / Redo / Copy / Paste
@@ -295,12 +355,14 @@ NTWParameterInfo* ntw_get_parameters(const char* connectableId, int* outCount);
 void ntw_set_parameter_value(const char* paramId, float value);
 void ntw_set_parameter_int(const char* paramId, int value);
 void ntw_set_parameter_bool(const char* paramId, bool value);
+void ntw_set_parameter_string(const char* paramId, const char* value);
 void ntw_set_parameter_color(const char* paramId,
                              float r, float g, float b, float a);
 void ntw_toggle_parameter_favorite(const char* paramId);
 void ntw_reset_parameter(const char* paramId);
 void ntw_reset_all_parameters(const char* connectableId);
 void ntw_clear_feedback_buffer(const char* shaderId);
+void ntw_reset_bounce_position(const char* shaderId);
 
 // ---------------------------------------------------------------------------
 // MARK: - Oscillator Control
@@ -351,6 +413,12 @@ bool ntw_get_connectable_active(const char* connectableId);
 // Set/get whether a shader is bypassed (passes input through without processing).
 void ntw_set_shader_bypassed(const char* shaderId, int bypassed);
 int ntw_get_shader_bypassed(const char* shaderId);
+
+// Global view setting: when enabled, breaking a shader's main input
+// connection clears its output frame to black instead of leaving the
+// last-rendered pixels onscreen. Default: enabled.
+void ntw_set_clear_on_disconnect(int enabled);
+int ntw_get_clear_on_disconnect(void);
 
 // Get the depth of a shader in its chain (0 = directly connected to source).
 int ntw_get_shader_depth(const char* shaderId);
@@ -515,6 +583,17 @@ float ntw_get_resolution_width(void);
 float ntw_get_resolution_height(void);
 
 // ---------------------------------------------------------------------------
+// MARK: - MIDI Smoothing
+// ---------------------------------------------------------------------------
+
+// Eases MIDI-driven parameter changes over a configurable duration to soften
+// 7-bit CC stepping. Disabled by default.
+bool  ntw_get_midi_smoothing_enabled(void);
+void  ntw_set_midi_smoothing_enabled(bool enabled);
+float ntw_get_midi_smoothing_duration_ms(void);
+void  ntw_set_midi_smoothing_duration_ms(float ms);
+
+// ---------------------------------------------------------------------------
 // MARK: - Preview Manager (for browser live previews)
 // ---------------------------------------------------------------------------
 
@@ -564,6 +643,12 @@ void ntw_free_available_strand_info_array(NTWAvailableStrandInfo* array, int cou
 // Load a strand file into the graph. Returns new node IDs.
 // Caller owns the returned array and must free with ntw_free_string_array().
 char** ntw_load_strand(const char* strandId, int* outCount);
+
+// Read the resolution setting index a strand was authored at (0-6, see
+// LayoutStateService for the index→pixels mapping). Returns -1 if the
+// strand has no resolution field (pre-2.0 strand) or if the file can't
+// be read. Pure file read, no engine-thread dispatch.
+int ntw_strand_authored_resolution(const char* strandId);
 
 // Get all available template strands. Caller owns the returned array.
 NTWAvailableStrandInfo* ntw_get_available_template_strands(int* outCount);
@@ -713,13 +798,16 @@ NTWLibrarySourceState ntw_get_library_source_state(const char* sourceId);
 // ---------------------------------------------------------------------------
 
 typedef struct {
-    float volume;       // 0.0–1.0
-    float speed;        // 0.0–2.0
-    float position;     // 0.0–1.0 (playback position)
-    float duration;     // total duration in seconds
-    int mute;           // 1 if muted
-    int playing;        // 1 if playing
-    int isFileSource;   // 1 if this connectable is a FileSource (or subclass)
+    float volume;        // 0.0–1.0
+    float speed;         // 0.0–2.0
+    float position;      // 0.0–1.0 (playback position)
+    float duration;      // total duration in seconds
+    int mute;            // 1 if muted
+    int playing;         // 1 if playing
+    int isFileSource;    // 1 if this connectable is a FileSource (or subclass)
+    int cacheAvailable;  // 1 if a frame cache was successfully built at load time
+    int useCachedMode;   // 1 if the cached path is currently in use (when available)
+    int cachedFrameCount;// number of frames in the cache (0 if none)
 } NTWFileSourceState;
 
 NTWFileSourceState ntw_get_file_source_state(const char* sourceId);
@@ -728,6 +816,7 @@ void ntw_set_file_source_speed(const char* sourceId, float speed);
 void ntw_set_file_source_position(const char* sourceId, float position);
 void ntw_set_file_source_mute(const char* sourceId, int mute);
 void ntw_set_file_source_playing(const char* sourceId, int playing);
+void ntw_set_file_source_use_cached_mode(const char* sourceId, int enabled);
 
 // ---------------------------------------------------------------------------
 // MARK: - Text Source State
@@ -868,6 +957,26 @@ void ntw_remove_midi_binding(const char* paramId);
 // Callback fired when a MIDI binding is learned.
 typedef void (*NTWMidiLearnedCallback)(const char* paramId, const char* descriptor);
 void ntw_register_midi_learned_callback(NTWMidiLearnedCallback callback);
+
+// MIDI device and assignment queries
+typedef struct {
+    const char* name;    // Owned by caller - must free
+    int port;
+    int isOpen;
+} NTWMidiInputInfo;
+
+typedef struct {
+    const char* paramId;        // Owned by caller - must free
+    const char* paramName;      // Owned by caller - must free
+    const char* ownerName;      // Owned by caller - must free
+    const char* midiDescriptor; // Owned by caller - must free
+} NTWMidiAssignmentInfo;
+
+NTWMidiInputInfo* ntw_get_midi_inputs(int* outCount);
+void ntw_free_midi_input_info_array(NTWMidiInputInfo* array, int count);
+
+NTWMidiAssignmentInfo* ntw_get_midi_assignments(int* outCount);
+void ntw_free_midi_assignment_info_array(NTWMidiAssignmentInfo* array, int count);
 
 // ---------------------------------------------------------------------------
 // MARK: - Texture Sharing (IOSurface)

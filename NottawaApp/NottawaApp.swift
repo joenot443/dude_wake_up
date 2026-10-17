@@ -13,8 +13,11 @@ struct NottawaApp: App {
     @State private var viewModel = NodeEditorViewModel()
     @State private var themeManager = ThemeManager()
     @State private var helpGuide = HelpGuideViewModel()
+    @State private var recents = RecentWorkspacesService.shared
     @State private var engineStatus: EngineStatus = .idle
     @State private var stretchPreviewWindows = false
+    @AppStorage("showNodeHints") private var showNodeHints: Bool = true
+    @AppStorage("clearOnDisconnect") private var clearOnDisconnect: Bool = true
 
     var body: some Scene {
         Window("Nottawa", id: "main") {
@@ -27,6 +30,15 @@ struct NottawaApp: App {
                             .environment(themeManager)
                             .environment(helpGuide)
                             .navigationTitle(viewModel.currentWorkspaceName ?? "Nottawa")
+                            .background(WindowAccessor { window in
+                                // Allow native fullscreen so the explicit
+                                // Toggle Full Screen command can transition
+                                // the window. Disable state restoration so
+                                // macOS doesn't auto-reopen the window in
+                                // fullscreen on subsequent launches.
+                                window.collectionBehavior.insert(.fullScreenPrimary)
+                                window.isRestorable = false
+                            })
                             .overlay {
                                 if viewModel.showWelcomeScreen {
                                     WelcomeView()
@@ -103,6 +115,24 @@ struct NottawaApp: App {
                     }
                 }
                 .keyboardShortcut("o", modifiers: .command)
+
+                Menu("Open Recent") {
+                    if recents.workspaces.isEmpty {
+                        Button("No Recent Workspaces") {}
+                            .disabled(true)
+                    } else {
+                        ForEach(recents.workspaces) { entry in
+                            Button(entry.name) {
+                                openRecent(entry)
+                            }
+                            .disabled(!FileManager.default.fileExists(atPath: entry.path))
+                        }
+                        Divider()
+                        Button("Clear Menu") {
+                            recents.clear()
+                        }
+                    }
+                }
             }
 
             CommandGroup(after: .newItem) {
@@ -124,9 +154,21 @@ struct NottawaApp: App {
             }
 
             CommandGroup(after: .toolbar) {
+                Button("Toggle Full Screen") {
+                    NSApp.keyWindow?.toggleFullScreen(nil)
+                }
+                .keyboardShortcut("f", modifiers: [.control, .command])
+
+                Divider()
+
                 Toggle("Stretch Preview Windows", isOn: $stretchPreviewWindows)
                     .onChange(of: stretchPreviewWindows) { _, newValue in
                         PreviewWindowManager.shared.setStretchToFill(newValue)
+                    }
+                Toggle("Show Node Hints", isOn: $showNodeHints)
+                Toggle("Clear on Disconnect", isOn: $clearOnDisconnect)
+                    .onChange(of: clearOnDisconnect) { _, newValue in
+                        NottawaEngine.shared.setClearOnDisconnect(newValue)
                     }
             }
 
@@ -142,6 +184,31 @@ struct NottawaApp: App {
                 }
                 .keyboardShortcut("z", modifiers: [.command, .shift])
                 .disabled(!viewModel.canRedo)
+            }
+
+            CommandGroup(replacing: .help) {
+                Button("Nottawa Tutorial") {
+                    helpGuide.reset()
+                    viewModel.helpEnabled = true
+                }
+
+                Button("Show Welcome Screen") {
+                    viewModel.showWelcomeScreen = true
+                }
+
+                Divider()
+
+                Button("Visit nottawa.app") {
+                    if let url = URL(string: "https://nottawa.app") {
+                        NSWorkspace.shared.open(url)
+                    }
+                }
+
+                Button("Send Feedback...") {
+                    if let url = URL(string: "mailto:joe@nottawa.app?subject=Nottawa%20Feedback") {
+                        NSWorkspace.shared.open(url)
+                    }
+                }
             }
 
         }
@@ -170,6 +237,7 @@ struct NottawaApp: App {
 
         if success {
             engine.start()
+            engine.setClearOnDisconnect(clearOnDisconnect)
             engineStatus = .ready
             viewModel.setup()
             helpGuide.viewModel = viewModel
@@ -190,6 +258,21 @@ struct NottawaApp: App {
         } else {
             engineStatus = .error("Failed to initialize engine")
         }
+    }
+
+    private func openRecent(_ entry: RecentWorkspace) {
+        guard let url = recents.resolve(entry) else {
+            recents.remove(id: entry.id)
+            return
+        }
+        let didStart = url.startAccessingSecurityScopedResource()
+        defer { if didStart { url.stopAccessingSecurityScopedResource() } }
+
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            recents.remove(id: entry.id)
+            return
+        }
+        viewModel.openWorkspace(url: url)
     }
 
     private func presentSavePanel() {
@@ -238,6 +321,33 @@ struct ColorSchemeObserver<Content: View>: View {
                 themeManager.colorScheme = newScheme
             }
     }
+}
+
+// MARK: - Window Accessor
+
+/// Bridges a SwiftUI view to its hosting NSWindow so callers can configure
+/// AppKit-level properties (collection behavior, title bar, etc.) that
+/// SwiftUI's `Window` scene doesn't expose directly.
+struct WindowAccessor: NSViewRepresentable {
+    let configure: (NSWindow) -> Void
+
+    final class HostView: NSView {
+        var onWindow: ((NSWindow) -> Void)?
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            if let window = window {
+                onWindow?(window)
+            }
+        }
+    }
+
+    func makeNSView(context: Context) -> HostView {
+        let view = HostView()
+        view.onWindow = configure
+        return view
+    }
+
+    func updateNSView(_ nsView: HostView, context: Context) {}
 }
 
 // MARK: - Engine Status

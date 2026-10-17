@@ -48,6 +48,12 @@ struct BounceShader: Shader {
     // Initialize velocity with a static speed in the down-right direction
     velocity = glm::vec2(1, 1); // You can adjust the values for different speeds/directions
   };
+
+  void resetPosition() {
+    position = glm::vec2(0, 0);
+    velocity = glm::vec2(1, 1);
+    changedVelocity = false;
+  }
   
   void setup() override {
     // Setup your shader as needed

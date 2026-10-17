@@ -28,16 +28,30 @@ struct RetroPCSettings: public ShaderSettings {
   std::shared_ptr<Parameter> ditherAmount;
   std::shared_ptr<WaveformOscillator> ditherAmountOscillator;
 
+  std::shared_ptr<Parameter> palette;
+
+  std::shared_ptr<Parameter> hueShift;
+  std::shared_ptr<WaveformOscillator> hueShiftOscillator;
+
+  std::shared_ptr<Parameter> saturation;
+  std::shared_ptr<WaveformOscillator> saturationOscillator;
+
   RetroPCSettings(std::string shaderId, json j) :
-  gamma(std::make_shared<Parameter>("gamma", 1.0, 0.1, 3.0)),
+  gamma(std::make_shared<Parameter>("Gamma", 1.0, 0.1, 3.0)),
   gammaOscillator(std::make_shared<WaveformOscillator>(gamma)),
-  pixelSize(std::make_shared<Parameter>("pixelSize", 4.0, 1.0, 16.0)),
+  pixelSize(std::make_shared<Parameter>("Pixel Size", 4.0, 1.0, 16.0)),
   pixelSizeOscillator(std::make_shared<WaveformOscillator>(pixelSize)),
-  ditherAmount(std::make_shared<Parameter>("ditherAmount", 1.0, 0.0, 1.0)),
+  ditherAmount(std::make_shared<Parameter>("Dither Amount", 1.0, 0.0, 1.0)),
   ditherAmountOscillator(std::make_shared<WaveformOscillator>(ditherAmount)),
+  palette(std::make_shared<Parameter>("Palette", 0, 0, 7, ParameterType_Int)),
+  hueShift(std::make_shared<Parameter>("Hue Shift", 0.0, -1.0, 1.0)),
+  hueShiftOscillator(std::make_shared<WaveformOscillator>(hueShift)),
+  saturation(std::make_shared<Parameter>("Saturation", 1.0, 0.0, 2.0)),
+  saturationOscillator(std::make_shared<WaveformOscillator>(saturation)),
   ShaderSettings(shaderId, j, "RetroPC") {
-    parameters = { gamma, pixelSize, ditherAmount };
-    oscillators = { gammaOscillator, pixelSizeOscillator, ditherAmountOscillator };
+    palette->options = {"ZX Spectrum", "CGA 0 (Cyan/Magenta)", "CGA 1 (Green/Red)", "Game Boy", "Commodore 64", "Mono Green", "Mono Amber", "Mono White"};
+    parameters = { gamma, pixelSize, ditherAmount, palette, hueShift, saturation };
+    oscillators = { gammaOscillator, pixelSizeOscillator, ditherAmountOscillator, hueShiftOscillator, saturationOscillator };
     load(j);
     registerParameters();
   };
@@ -58,6 +72,9 @@ struct RetroPCShader: Shader {
     shader.setUniform1f("gamma", settings->gamma->value);
     shader.setUniform1f("pixelSize", settings->pixelSize->value);
     shader.setUniform1f("ditherAmount", settings->ditherAmount->value);
+    shader.setUniform1i("palette", settings->palette->intValue);
+    shader.setUniform1f("hueShift", settings->hueShift->value);
+    shader.setUniform1f("saturation", settings->saturation->value);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
     frame->draw(0, 0);
@@ -80,9 +97,12 @@ struct RetroPCShader: Shader {
   void drawSettings() override {
     CommonViews::H3Title("RetroPC");
 
+    CommonViews::ShaderOption(settings->palette, settings->palette->options);
     CommonViews::ShaderParameter(settings->gamma, settings->gammaOscillator);
     CommonViews::ShaderParameter(settings->pixelSize, settings->pixelSizeOscillator);
     CommonViews::ShaderParameter(settings->ditherAmount, settings->ditherAmountOscillator);
+    CommonViews::ShaderParameter(settings->hueShift, settings->hueShiftOscillator);
+    CommonViews::ShaderParameter(settings->saturation, settings->saturationOscillator);
   }
 };
 

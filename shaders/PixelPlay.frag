@@ -82,5 +82,5 @@ void main() {
   
   vec4 datamosh = texture(tex, datamoshUV);
   vec4 newColor = vec4(datamosh.rgb + colorVariation(datamosh.rg, time), 1.0);
-  outputColor = mix(newColor, texture(tex, uv), amount);
+  outputColor = mix(texture(tex, uv), newColor, amount);
 }

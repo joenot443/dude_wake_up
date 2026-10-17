@@ -12,6 +12,7 @@
 #include "Oscillator.hpp"
 #include "OscillationService.hpp"
 #include "ofMain.h"
+#include "LifecycleCounter.hpp"
 
 enum WaveShape {
   Sine,
@@ -65,6 +66,8 @@ struct WaveformOscillator: public Oscillator {
   OscillatorType type() override {
     return OscillatorType_waveform;
   }
+
+  LIFECYCLE_TRACK("WaveformOscillator");
 };
 
 #endif /* WaveformOscillator_hpp */

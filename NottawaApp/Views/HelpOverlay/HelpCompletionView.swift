@@ -25,22 +25,10 @@ struct HelpCompletionView: View {
             }
             .padding(.bottom, 20)
 
-            // Sign-off with photo
-            HStack(spacing: 12) {
-                Image("JoePhoto")
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 44, height: 44)
-                    .clipShape(Circle())
-                    .overlay(
-                        Circle()
-                            .strokeBorder(theme.colors.accent.opacity(0.4), lineWidth: 1.5)
-                    )
-
-                DSText(HelpStrings.completionDescription4, style: .h3)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.bottom, 20)
+            // Sign-off
+            DSText(HelpStrings.completionDescription4, style: .h3)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.bottom, 20)
 
             // Divider
             Rectangle()

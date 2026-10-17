@@ -27,7 +27,6 @@ struct CoreSettings: public ShaderSettings {
 
   // Count
   std::shared_ptr<Parameter> count;
-  std::shared_ptr<WaveformOscillator> countOscillator;
 
   // Color Offsets
   std::shared_ptr<Parameter> colorOffsetR;
@@ -51,8 +50,7 @@ struct CoreSettings: public ShaderSettings {
   shapeDistanceOscillator(std::make_shared<WaveformOscillator>(shapeDistance)),
   speed(std::make_shared<Parameter>("Speed", 0.5, 0.0, 1.0)),
   speedOscillator(std::make_shared<WaveformOscillator>(speed)),
-  count(std::make_shared<Parameter>("Count", 20.0, 1.0, 50.0)),
-  countOscillator(std::make_shared<WaveformOscillator>(count)),
+  count(std::make_shared<Parameter>("Count", 20.0, 1.0, 50.0, ParameterType_Int)),
   colorOffsetR(std::make_shared<Parameter>("Color Offset R", 0.0, -5.0, 5.0)),
   colorOffsetROscillator(std::make_shared<WaveformOscillator>(colorOffsetR)),
   colorOffsetG(std::make_shared<Parameter>("Color Offset G", 1.0, -5.0, 5.0)),
@@ -61,11 +59,11 @@ struct CoreSettings: public ShaderSettings {
   colorOffsetBOscillator(std::make_shared<WaveformOscillator>(colorOffsetB)),
   rate(std::make_shared<Parameter>("Rate", 2.0, 0.0, 10.0)),
   rateOscillator(std::make_shared<WaveformOscillator>(rate)),
-  rotationOffset(std::make_shared<Parameter>("Rotation Offset", 0.1, 0.0, 1.0)),
+  rotationOffset(std::make_shared<Parameter>("Rotation Offset", 0.001, 0.0, 0.05)),
   rotationOffsetOscillator(std::make_shared<WaveformOscillator>(rotationOffset)),
   ShaderSettings(shaderId, j, "Core") {
-    parameters = { shapeDistance, speed, count, colorOffsetR, colorOffsetG, colorOffsetB, rate, rotationOffset };
-    oscillators = { shapeDistanceOscillator, speedOscillator, countOscillator, colorOffsetROscillator, colorOffsetGOscillator, colorOffsetBOscillator, rateOscillator, rotationOffsetOscillator };
+    parameters = { rotationOffset, shapeDistance, speed, count, colorOffsetR, colorOffsetG, colorOffsetB, rate };
+    oscillators = { shapeDistanceOscillator, speedOscillator, colorOffsetROscillator, colorOffsetGOscillator, colorOffsetBOscillator, rateOscillator, rotationOffsetOscillator };
     load(j);
     registerParameters();
   };
@@ -91,7 +89,7 @@ struct CoreShader: Shader {
     shader.setUniform1f("speed", settings->speed->value);
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
-    shader.setUniform1f("u_count", settings->count->value);
+    shader.setUniform1i("u_count", (int)settings->count->value);
     shader.setUniform1f("u_colorOffsetR", settings->colorOffsetR->value);
     shader.setUniform1f("u_colorOffsetG", settings->colorOffsetG->value);
     shader.setUniform1f("u_colorOffsetB", settings->colorOffsetB->value);
@@ -119,7 +117,7 @@ struct CoreShader: Shader {
 
     CommonViews::ShaderParameter(settings->shapeDistance, settings->shapeDistanceOscillator);
     CommonViews::ShaderParameter(settings->speed, settings->speedOscillator);
-    CommonViews::ShaderParameter(settings->count, settings->countOscillator);
+    CommonViews::ShaderIntParameter(settings->count);
     CommonViews::ShaderParameter(settings->colorOffsetR, settings->colorOffsetROscillator);
     CommonViews::ShaderParameter(settings->colorOffsetG, settings->colorOffsetGOscillator);
     CommonViews::ShaderParameter(settings->colorOffsetB, settings->colorOffsetBOscillator);

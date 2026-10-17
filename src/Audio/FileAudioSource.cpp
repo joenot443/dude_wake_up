@@ -50,12 +50,13 @@ void FileAudioSource::loadFile(std::shared_ptr<AudioTrack> audioTrack) {
 
 void FileAudioSource::disable() {
   active = false;
-  
+
   soundStream.stop();
   soundStream.close();
-  
+
   currentSample = 0;
   isPaused = false;
+  gistAccumulator.clear();
 }
 
 void FileAudioSource::pausePlayback() {

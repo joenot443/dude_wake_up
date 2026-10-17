@@ -30,8 +30,15 @@ out vec4 outputColor;
 #define SINGLE_COLOR vec3(1.0, 1.0, 1.0)  // White for single color mode
 
 // SCALING CONFIGURATION
-#define USE_LOGARITHMIC_SCALE 1  // 1 = logarithmic, 0 = linear
-#define LOG_SCALE_FACTOR 0.5     // Higher = more emphasis on low frequencies
+// Mel scale is already perceptually log-Hz, so distribute bars linearly across
+// the mel bins.
+#define USE_LOGARITHMIC_SCALE 0
+
+// We're now reading the mel spectrum, which has 11 useful bins (0..10) after
+// the engine drops the bottom two (DC + sub-bass). Bars sample across that
+// range with linear interpolation between bins.
+#define BIN_MIN 0.0
+#define BIN_MAX 10.0
 
 // Center line settings
 #define CENTER_LINE_THICKNESS 0.006  // Thickness of center line
@@ -48,26 +55,26 @@ out vec4 outputColor;
 #define COLOR_MID vec3(1.0, 1.0, 0.2)    // Yellow for mid frequencies  
 #define COLOR_HIGH vec3(0.2, 0.4, 1.0)   // Blue for high frequencies
 
-// Convert bar index to frequency sampling position
-float getFrequencySamplePosition(int barIndex) {
-    float t = float(barIndex) / float(NUM_BARS - 1); // 0.0 to 1.0
-    
-    if (USE_LOGARITHMIC_SCALE == 1) {
-        // Logarithmic scaling - exponential curve
-        float logValue = pow(t, LOG_SCALE_FACTOR);
-        return logValue;
-    } else {
-        // Linear scaling - direct mapping
-        return t;
-    }
-}
-
-// Get audio frequency for a specific bar
+// Get audio frequency for a specific bar.
+// Bars are distributed exponentially from BIN_MIN to BIN_MAX so each octave
+// of musical content gets roughly the same number of bars.
 float getFrequency(int barIndex) {
-    float samplePos = getFrequencySamplePosition(barIndex);
-    samplePos = clamp(samplePos, 0.0, 1.0);
-    int index = clamp(int(samplePos * 223.0) + 32, 32, 255);
-    return clamp(audio[index] * boost, 0.0, 1.0);
+    float t = float(barIndex) / float(NUM_BARS - 1); // 0.0 to 1.0
+    float bin;
+    if (USE_LOGARITHMIC_SCALE == 1) {
+        // Pow curve is undefined at bin=0, so guard against it.
+        float lo = max(BIN_MIN, 0.0001);
+        bin = lo * pow(BIN_MAX / lo, t);
+    } else {
+        bin = mix(BIN_MIN, BIN_MAX, t);
+    }
+    // Linear interpolation between adjacent mel bins so 48 bars render
+    // smoothly across an 11-bin source.
+    int idxLo = clamp(int(floor(bin)), 0, 255);
+    int idxHi = clamp(idxLo + 1, 0, 255);
+    float frac = bin - float(idxLo);
+    float v = mix(audio[idxLo], audio[idxHi], frac);
+    return clamp(v * boost, 0.0, 1.0);
 }
 
 // HSV to RGB conversion for rainbow colors

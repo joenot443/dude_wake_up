@@ -23,6 +23,7 @@ private:
   
   void scanFolder();
   void loadSelectedVideo();
+  LIFECYCLE_TRACK("PlaylistSource");
 };
 
 #endif /* PlaylistSource_hpp */

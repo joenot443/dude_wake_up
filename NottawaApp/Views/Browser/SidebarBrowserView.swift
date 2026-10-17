@@ -182,13 +182,13 @@ struct SidebarBrowserView: View {
         VStack(spacing: 0) {
             // Icon tab bar
             HStack(spacing: 0) {
-                SidebarTabButton(icon: "sparkles", label: "Effects",
-                                 isActive: viewModel.sidebarActiveTab == .shaders) {
-                    viewModel.sidebarActiveTab = .shaders
-                }
                 SidebarTabButton(icon: "video", label: "Sources",
                                  isActive: viewModel.sidebarActiveTab == .sources) {
                     viewModel.sidebarActiveTab = .sources
+                }
+                SidebarTabButton(icon: "sparkles", label: "Effects",
+                                 isActive: viewModel.sidebarActiveTab == .shaders) {
+                    viewModel.sidebarActiveTab = .shaders
                 }
                 SidebarTabButton(icon: "waveform.path", label: "Osc",
                                  isActive: viewModel.sidebarActiveTab == .oscillators) {
@@ -573,7 +573,7 @@ struct SidebarTileView: View {
             ZStack(alignment: .topTrailing) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 6)
-                        .fill(isSource ? Color.blue.opacity(0.15) : Color.purple.opacity(0.15))
+                        .fill(theme.colors.backgroundTertiary)
                         .aspectRatio(16.0 / 9.0, contentMode: .fit)
 
                     if livePreview, let pid = previewId {
@@ -589,7 +589,7 @@ struct SidebarTileView: View {
                     } else {
                         Image(systemName: isSource ? "video.fill" : "sparkles")
                             .font(.caption)
-                            .foregroundStyle(isSource ? .blue : .purple)
+                            .foregroundStyle(theme.colors.textTertiary)
                     }
                 }
 

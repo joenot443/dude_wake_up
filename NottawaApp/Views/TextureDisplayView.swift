@@ -32,6 +32,7 @@ struct TextureDisplayView: NSViewRepresentable {
         mtkView.isPaused = false
         mtkView.enableSetNeedsDisplay = false
         mtkView.preferredFramesPerSecond = 60
+        mtkView.clearColor = MTLClearColor(red: 0.15, green: 0.15, blue: 0.15, alpha: 1)
         mtkView.layer?.isOpaque = false
         return mtkView
     }
@@ -116,22 +117,24 @@ struct TextureDisplayView: NSViewRepresentable {
         func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}
 
         func draw(in view: MTKView) {
-            guard let pipelineState,
-                  let vertexBuffer,
-                  let texture = TextureProvider.shared.texture(for: connectableId),
-                  let drawable = view.currentDrawable,
+            guard let drawable = view.currentDrawable,
                   let passDescriptor = view.currentRenderPassDescriptor else { return }
 
-            passDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 1)
+            passDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0.15, green: 0.15, blue: 0.15, alpha: 1)
             passDescriptor.colorAttachments[0].loadAction = .clear
 
             guard let commandBuffer = commandQueue.makeCommandBuffer(),
                   let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor) else { return }
 
-            encoder.setRenderPipelineState(pipelineState)
-            encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
-            encoder.setFragmentTexture(texture, index: 0)
-            encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 6)
+            if let pipelineState,
+               let vertexBuffer,
+               let texture = TextureProvider.shared.texture(for: connectableId) {
+                encoder.setRenderPipelineState(pipelineState)
+                encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
+                encoder.setFragmentTexture(texture, index: 0)
+                encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 6)
+            }
+
             encoder.endEncoding()
 
             commandBuffer.present(drawable)

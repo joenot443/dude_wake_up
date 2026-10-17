@@ -36,7 +36,7 @@ struct DiscoAudioSettings: public ShaderSettings {
 
 
   DiscoAudioSettings(std::string shaderId, json j) :
-  audioDisplacementScale(std::make_shared<Parameter>("Audio Scale", 1.0, 0.0, 5.0)),
+  audioDisplacementScale(std::make_shared<Parameter>("Audio Scale", 4.0, 0.0, 20.0)),
   audioDisplacementScaleOscillator(std::make_shared<WaveformOscillator>(audioDisplacementScale)),
   patternComplexityParam(std::make_shared<Parameter>("Complexity", 4.0, 1.0, 10.0, ParameterType_Int)),
   patternComplexityOscillator(std::make_shared<WaveformOscillator>(patternComplexityParam)),
@@ -77,7 +77,7 @@ struct DiscoAudioShader: Shader {
     shader.setUniformTexture("tex", frame->getTexture(), 4); 
     shader.setUniform1f("time", TimeService::getService()->timeParam->value);
     shader.setUniform2f("dimensions", frame->getWidth(), frame->getHeight());
-    shader.setUniform1f("audioDisplacementScale", settings->audioDisplacementScale->value);
+    shader.setUniform1f("audioDisplacementScale", settings->audioDisplacementScale->value * 4.0f);
     shader.setUniform1i("patternComplexity", settings->patternComplexityParam->intValue);
     
     // Pass new color uniforms

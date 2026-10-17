@@ -20,6 +20,7 @@
 #include "ofxImGui.h"
 #include "Connection.hpp"
 #include "Colors.hpp"
+#include "LifecycleCounter.hpp"
 #include <stdio.h>
 
 using json = nlohmann::json;
@@ -77,6 +78,43 @@ public:
   virtual void setup(){};
   virtual void shade(std::shared_ptr<ofFbo> frame, std::shared_ptr<ofFbo> canvas){};
   virtual void clear(){};
+
+  // ---------------------------------------------------------------------
+  // Session-only GLSL editing.
+  //
+  // When the user edits a shader's fragment source from the inspector,
+  // we keep the edited string here and recompile in-place. Empty means
+  // "no override; load straight from the disk .frag file as usual".
+  //
+  // Reverting just clears the override and re-loads from disk.
+  // Nothing is persisted across sessions.
+  // ---------------------------------------------------------------------
+  std::string editedFragmentSource;
+
+  // Populated by applyFragmentSourceOverride() when a compile or link
+  // fails. The previously-valid program keeps running; the UI surfaces
+  // these for the user.
+  std::string lastCompileError;
+  int lastCompileErrorLine = 0;
+
+  bool hasSessionOverride() const { return !editedFragmentSource.empty(); }
+
+  // Returns the source the user should see in the editor: their override
+  // if one is active, otherwise the contents of shaders/<fileName>.frag
+  // read from disk.
+  std::string currentFragmentSource();
+
+  // Stage-then-swap recompile. Builds a fresh ofShader from the given
+  // fragment source (plus the disk vertex shader), and only replaces
+  // `this->shader` if vertex + fragment compile AND the program links.
+  // Returns true on success. On failure, lastCompileError /
+  // lastCompileErrorLine are populated and the existing shader keeps
+  // rendering. MUST run on the engine thread (owns the GL context).
+  bool applyFragmentSourceOverride(const std::string& source);
+
+  // Drop the session override and re-load from disk. MUST run on the
+  // engine thread.
+  void revertFragmentSource();
   
   // Feedback
   // The Feedback OUTPUT pin for shading feedback frames before injection
@@ -88,7 +126,13 @@ public:
   std::shared_ptr<FeedbackSource> feedbackDestination;
   
   void allocateFrames();
-  
+
+  // Release the GL resources held by this shader's FBOs and any optional
+  // children. The shader object itself stays alive (the undo stack typically
+  // holds it), but ~32 MB of full-resolution FBOs per shader + recursively
+  // ~16 MB per optional child are released eagerly.
+  void releaseFrames();
+
   virtual std::string name() { return shaderTypeName(type()); };
   virtual bool enabled() { return true; };
   virtual bool hasFrameBuffer() { return false; };
@@ -165,6 +209,14 @@ public:
 
   void setAudioUniform(std::vector<float> *audio);
   void setAudioUniform(const float *data, size_t count);
+
+  // Subscription to LayoutStateService resolution updates. Stored here so
+  // ShaderChainerService::removeShader can sever it explicitly — otherwise
+  // a removed shader's setup()/allocateFrames() would still run on every
+  // resolution change for as long as anything (e.g. undo) holds the shared_ptr.
+  observable::unique_subscription resolutionUpdateSubscription;
+
+  LIFECYCLE_TRACK("Shader");
 };
 
 #endif

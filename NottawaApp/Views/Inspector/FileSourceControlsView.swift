@@ -87,6 +87,30 @@ struct FileSourceControlsView: View {
                     range: 0...2
                 )
             }
+
+            // Cache mode toggle (A/B compare cached vs streaming decode)
+            HStack(spacing: 8) {
+                Toggle(isOn: Binding(
+                    get: { state.useCachedMode && state.cacheAvailable },
+                    set: { engine.setFileSourceUseCachedMode(sourceId: sourceId, enabled: $0) }
+                )) {
+                    Text("Use frame cache")
+                        .font(.caption)
+                        .foregroundStyle(theme.colors.textSecondary)
+                }
+                .toggleStyle(.switch)
+                .controlSize(.mini)
+                .disabled(!state.cacheAvailable)
+
+                Spacer()
+
+                Text(state.cacheAvailable
+                     ? "\(state.cachedFrameCount) frames cached"
+                     : "no cache")
+                    .font(.caption2)
+                    .foregroundStyle(theme.colors.textSecondary)
+                    .monospacedDigit()
+            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 8)

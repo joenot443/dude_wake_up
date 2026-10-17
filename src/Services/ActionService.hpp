@@ -19,6 +19,7 @@
 #include "Commands/RemoveVideoSourceCommand.hpp"
 #include "../Shading/ShaderType.hpp"
 #include "Connection.hpp"
+#include <deque>
 
 class ActionService {
 public:
@@ -80,11 +81,13 @@ private:
   // Private constructor to prevent instantiation
   ActionService() = default;
   
-  // Stack to keep track of executed commands for undo
-  std::stack<std::shared_ptr<Command>> undoStack;
-  
-  // Stack to keep track of undone commands for redo
-  std::stack<std::shared_ptr<Command>> redoStack;
+  // Use deque so we can stack-push/pop on the back AND drop the oldest
+  // entry from the front when we exceed kMaxStackSize. Each command pins
+  // its target shader/source/connection (and recursively their
+  // settings/parameters/oscillators), so an unbounded stack is a slow leak.
+  static constexpr size_t kMaxStackSize = 10;
+  std::deque<std::shared_ptr<Command>> undoStack;
+  std::deque<std::shared_ptr<Command>> redoStack;
   
   // Static instance of the service
   static ActionService* service;

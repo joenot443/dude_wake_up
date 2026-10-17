@@ -69,6 +69,8 @@ void CommonViews::HSpacing(int n)
 bool CommonViews::ShaderParameter(std::shared_ptr<Parameter> param,
                                   std::shared_ptr<Oscillator> osc)
 {
+  // Global oscillation switch off: hide the oscillate button entirely.
+  if (!LayoutStateService::getService()->oscillationEnabled) osc = nullptr;
   ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.);
   H3Title(param->name, false);
   ImGui::SameLine();
@@ -185,7 +187,7 @@ void CommonViews::AudioParameterSelector(std::shared_ptr<Parameter> param, ImVec
   {
     if (TitledButton(param, param->driver->name.c_str(), size))
     {
-      param->driver = NULL;
+      param->removeDriver();
     }
     ImGui::SliderFloat(formatString("Shift##%s", param->paramId.c_str()).c_str(), &param->shift->value, param->shift->min, param->shift->max, "%.3f", ImGuiSliderFlags_Logarithmic);
     ImGui::SliderFloat(formatString("Scale##%s", param->paramId.c_str()).c_str(), &param->scale->value, param->scale->min, param->scale->max, "%.3f", ImGuiSliderFlags_Logarithmic);
@@ -384,6 +386,8 @@ void CommonViews::IntShaderStageParameter(std::shared_ptr<Parameter> param) {
 
 
 void CommonViews::ShaderStageParameter(std::shared_ptr<Parameter> param, std::shared_ptr<Oscillator> osc) {
+  // Global oscillation switch off: hide the oscillator readout and button.
+  if (!LayoutStateService::getService()->oscillationEnabled) osc = nullptr;
   ImGui::Columns(2, formatString("%s_param_columns", param->paramId.c_str()).c_str(), ImGuiOldColumnFlags_NoResize | ImGuiOldColumnFlags_NoBorder);
   ImGui::SetColumnWidth(0, 65);
   ImGui::SetColumnWidth(1, 135);
@@ -956,7 +960,7 @@ void CommonViews::OscillateButton(std::string id, std::shared_ptr<Oscillator> o,
       ImGui::OpenPopup(p->oscPopupId().c_str());
     }
     
-    o->enabled->boolValue = !o->enabled->boolValue;
+    OscillationService::getService()->setEnabled(o, !o->enabled->boolValue);
     OscillationService::getService()->selectOscillator(o, p);
     LayoutStateService::getService()->utilityPanelTab = 1;
   }

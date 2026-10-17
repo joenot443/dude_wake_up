@@ -20,7 +20,8 @@ struct ChannelStripView: View {
     }
 
     private var displayedParams: [ParameterInfo] {
-        viewModel.stageShowAllParams ? strip.allParams : strip.favoriteParams
+        let base = viewModel.stageShowAllParams ? strip.allParams : strip.favoriteParams
+        return base.filter { !$0.hiddenFromNode }
     }
 
     var body: some View {

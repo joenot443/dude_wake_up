@@ -73,10 +73,64 @@ void ParameterService::registerParameter(std::shared_ptr<Parameter> parameter) {
   }
 }
 
+void ParameterService::unregisterParameters(const std::vector<std::shared_ptr<Parameter>>& parameters) {
+  for (auto const& p : parameters) {
+    if (p == nullptr) continue;
+    parameterMap.erase(p->paramId);
+  }
+  // Also drop them from the hot lists. Use erase-remove to walk once.
+  drivenParameters.erase(
+    std::remove_if(drivenParameters.begin(), drivenParameters.end(),
+      [&](const std::shared_ptr<Parameter>& p) {
+        for (auto const& q : parameters) if (p == q) return true;
+        return false;
+      }),
+    drivenParameters.end());
+  recentlyActiveParameters.erase(
+    std::remove_if(recentlyActiveParameters.begin(), recentlyActiveParameters.end(),
+      [&](const std::shared_ptr<Parameter>& p) {
+        for (auto const& q : parameters) if (p == q) return true;
+        return false;
+      }),
+    recentlyActiveParameters.end());
+}
+
 void ParameterService::tickParameters() {
-  for (auto const &[key, shared_val] : parameterMap) {
-    shared_val->active = false;
-    shared_val->tick();
+  // Reset active flag on params that were marked active last frame.
+  // Shaders re-mark via markActive() during traverseFrame.
+  for (auto const &p : recentlyActiveParameters) {
+    p->active = false;
+  }
+  recentlyActiveParameters.clear();
+
+  // Apply driver values. Most params have no driver — those don't tick.
+  for (auto const &p : drivenParameters) {
+    p->tick();
+  }
+}
+
+void ParameterService::trackDriver(std::shared_ptr<Parameter> parameter) {
+  if (parameter == nullptr) return;
+  auto it = std::find(drivenParameters.begin(), drivenParameters.end(), parameter);
+  if (it == drivenParameters.end()) {
+    drivenParameters.push_back(parameter);
+  }
+}
+
+void ParameterService::untrackDriver(std::shared_ptr<Parameter> parameter) {
+  if (parameter == nullptr) return;
+  auto it = std::find(drivenParameters.begin(), drivenParameters.end(), parameter);
+  if (it != drivenParameters.end()) {
+    drivenParameters.erase(it);
+  }
+}
+
+void ParameterService::markActive(std::shared_ptr<Parameter> parameter) {
+  if (parameter == nullptr) return;
+  // active doubles as a dedup flag — if it's already true it's in the vector.
+  if (!parameter->active) {
+    parameter->active = true;
+    recentlyActiveParameters.push_back(parameter);
   }
 }
 

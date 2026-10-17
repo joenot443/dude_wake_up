@@ -136,7 +136,7 @@ NEW_ITEM="
         sparkle:edSignature=\"$SIGNATURE\"
         length=\"$DMG_SIZE\"
         type=\"application/octet-stream\" />
-      <sparkle:minimumSystemVersion>10.13</sparkle:minimumSystemVersion>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
     </item>"
 
 # Insert after "<!-- Latest version first -->"
@@ -166,6 +166,7 @@ eleventyExcludeFromCollections: true
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="robots" content="noindex">
     <title>Nottawa ${VERSION} Release Notes</title>
     <style>
         body { font-family: -apple-system, sans-serif; line-height: 1.6; color: #e0e0e0; background: #1a1a1a; max-width: 600px; margin: 0 auto; padding: 20px; }

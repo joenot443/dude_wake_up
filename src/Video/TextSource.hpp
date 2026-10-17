@@ -42,6 +42,7 @@ protected:
   float xPos = 0.0;
   float yPos = 0.0;
   float lastSampleCount = 8.0;
+  LIFECYCLE_TRACK("TextSource");
 };
 
 #endif /* TextSource_hpp */

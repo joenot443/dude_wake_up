@@ -30,6 +30,10 @@ struct SharedTexture {
   int width = 0;
   int height = 0;
   bool needsSetup = true;  // Defers GL resource creation to engine thread
+  // Last-blitted source renderTick. blitTrackedTextures skips when the
+  // source FBO hasn't been written since the previous blit. UINT64_MAX
+  // until the first successful blit, so the initial frame always blits.
+  uint64_t lastBlittedTick = UINT64_MAX;
 };
 
 class IOSurfaceTextureManager {
