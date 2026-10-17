@@ -52,13 +52,13 @@ public:
   std::string shaderId;
   
   // Whether this Shader is an optional phase in another Shader
-  bool isOptional;
+  bool isOptional = false;
   
   // If this Shader is optional, whether it is presently enabled
-  bool optionallyEnabled;
+  bool optionallyEnabled = false;
 
   // Whether this Shader is "dry" i.e. not rendering new frames but still allowing traversal
-  bool isDry;
+  bool isDry = false;
 
   std::shared_ptr<ofFbo> lastFrame;
   
