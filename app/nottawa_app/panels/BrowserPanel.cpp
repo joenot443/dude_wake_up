@@ -1,18 +1,18 @@
 #include "BrowserPanel.h"
+#include <QDir>
+#include <QFileInfo>
 #include <QLineEdit>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 #include <QVBoxLayout>
 
 namespace {
-void addCategory(QTreeWidget* tree, const QString& name,
-                 const QStringList& children) {
+QTreeWidgetItem* addCategory(QTreeWidget* tree, const QString& name) {
     auto* top = new QTreeWidgetItem(tree, QStringList{name});
     QFont f = top->font(0); f.setBold(true); top->setFont(0, f);
-    for (const auto& c : children) {
-        new QTreeWidgetItem(top, QStringList{c});
-    }
+    top->setFlags(Qt::ItemIsEnabled);   // non-selectable header
     top->setExpanded(true);
+    return top;
 }
 } // anon
 
@@ -24,20 +24,73 @@ BrowserPanel::BrowserPanel(QWidget* parent) : QWidget(parent) {
     search_ = new QLineEdit;
     search_->setPlaceholderText("Search library…");
     layout->addWidget(search_);
+    connect(search_, &QLineEdit::textChanged, this, &BrowserPanel::onFilterChanged);
 
     tree_ = new QTreeWidget;
     tree_->setHeaderHidden(true);
     tree_->setRootIsDecorated(false);
     tree_->setAlternatingRowColors(true);
     layout->addWidget(tree_, /*stretch=*/1);
+    connect(tree_, &QTreeWidget::itemActivated, this, &BrowserPanel::onItemActivated);
+    connect(tree_, &QTreeWidget::itemClicked,   this, &BrowserPanel::onItemActivated);
 
-    // Scaffolded content — categories & example entries so the panel
-    // isn't an empty box. Real wiring to LibraryService lands in A.3.
-    addCategory(tree_, "SOURCES",
-        {"Webcam", "File", "Image", "Text", "Shader", "Library", "Multi"});
-    addCategory(tree_, "EFFECTS",
-        {"Plasma", "Pixelate", "Color Grade", "Chromatic Aberration",
-         "Feedback", "Mirror", "Edge Detect", "Blur"});
-    addCategory(tree_, "STRANDS",
-        {"— no strand loaded —"});
+    // Placeholder categories visible before populateFromDir runs.
+    addCategory(tree_, "SOURCES")->addChild(new QTreeWidgetItem(QStringList{"(coming soon)"}));
+    addCategory(tree_, "EFFECTS")->addChild(new QTreeWidgetItem(QStringList{"(loading…)"}));
+    addCategory(tree_, "STRANDS")->addChild(new QTreeWidgetItem(QStringList{"— none loaded —"}));
+}
+
+void BrowserPanel::populateFromDir(const QString& shadersDir) {
+    tree_->clear();
+    addCategory(tree_, "SOURCES")->addChild(new QTreeWidgetItem(QStringList{"(Phase A.3)"}));
+
+    auto* effects = addCategory(tree_, "EFFECTS");
+    QDir dir(shadersDir);
+    QStringList names;
+    for (const QString& frag : dir.entryList({"*.frag"}, QDir::Files, QDir::Name)) {
+        const QString base = frag.left(frag.size() - 5);   // drop ".frag"
+        if (QFileInfo(dir.absoluteFilePath(base + ".vert")).exists())
+            names << base;
+    }
+    for (const QString& n : names) {
+        auto* leaf = new QTreeWidgetItem(effects, QStringList{n});
+        leaf->setData(0, Qt::UserRole, n);   // tag for click handler
+    }
+
+    addCategory(tree_, "STRANDS")->addChild(new QTreeWidgetItem(QStringList{"— none loaded —"}));
+}
+
+void BrowserPanel::setCurrentShader(const QString& name) {
+    for (int i = 0; i < tree_->topLevelItemCount(); ++i) {
+        auto* top = tree_->topLevelItem(i);
+        for (int j = 0; j < top->childCount(); ++j) {
+            auto* child = top->child(j);
+            if (child->data(0, Qt::UserRole).toString() == name) {
+                tree_->setCurrentItem(child);
+                return;
+            }
+        }
+    }
+}
+
+void BrowserPanel::onItemActivated(QTreeWidgetItem* item, int) {
+    if (!item) return;
+    const QString name = item->data(0, Qt::UserRole).toString();
+    if (!name.isEmpty()) emit shaderPicked(name);
+}
+
+void BrowserPanel::onFilterChanged(const QString& text) {
+    const QString needle = text.trimmed().toLower();
+    for (int i = 0; i < tree_->topLevelItemCount(); ++i) {
+        auto* top = tree_->topLevelItem(i);
+        int visible = 0;
+        for (int j = 0; j < top->childCount(); ++j) {
+            auto* child = top->child(j);
+            const bool hit = needle.isEmpty()
+                || child->text(0).toLower().contains(needle);
+            child->setHidden(!hit);
+            if (hit) ++visible;
+        }
+        top->setHidden(!needle.isEmpty() && visible == 0);
+    }
 }

@@ -126,6 +126,17 @@ void MainWindow::buildDocks() {
     inspector_    = new InspectorPanel(this);
     logPanel_     = new LogPanel(this);
 
+    const QString dir = nottawaShadersDir();
+    if (!dir.isEmpty()) {
+        browser_->populateFromDir(dir);
+        browser_->setCurrentShader("Accretion");
+    }
+    connect(browser_, &BrowserPanel::shaderPicked, this, [this](const QString& name) {
+        logPanel_->append("[browser] pick: " + name);
+        if (engine_)       engine_->requestShader(name);
+        if (shaderPicker_) shaderPicker_->setCurrentText(name);
+    });
+
     browserDock_ = new QDockWidget("LIBRARY", this);
     browserDock_->setWidget(browser_);
     browserDock_->setFeatures(QDockWidget::DockWidgetMovable |
@@ -180,7 +191,9 @@ void MainWindow::startEngineOnGlReady() {
         connect(engine_, &OFStageEngine::engineError, this, [this](QString s){
             logPanel_->append("[engine] ERROR " + s);
         }, Qt::QueuedConnection);
-        // Toolbar shader picker — relay selection to the engine thread.
+        // Toolbar shader picker + browser panel both route into the
+        // engine. BrowserPanel also mirrors into the picker so the
+        // toolbar shows the current selection regardless of source.
         if (shaderPicker_) {
             connect(shaderPicker_, &QComboBox::currentTextChanged, engine_,
                     &OFStageEngine::requestShader, Qt::QueuedConnection);
