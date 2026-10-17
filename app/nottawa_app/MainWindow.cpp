@@ -2,30 +2,25 @@
 
 #include "OFStageEngine.h"
 #include "StageWidget.h"
-
-#include <QComboBox>
-#include <QDir>
-
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <wingdi.h>
 #include "panels/BrowserPanel.h"
 #include "panels/InspectorPanel.h"
 #include "panels/LogPanel.h"
 #include "panels/WelcomeOverlay.h"
 
-#include <QAction>
+#include <windows.h>
+
+#include <QComboBox>
+#include <QDateTime>
 #include <QDockWidget>
+#include <QFile>
 #include <QFileDialog>
 #include <QKeySequence>
 #include <QLabel>
 #include <QMenuBar>
 #include <QMessageBox>
-#include <QOffscreenSurface>
-#include <QOpenGLContext>
 #include <QResizeEvent>
+#include <QSignalBlocker>
 #include <QStatusBar>
-#include <QSurfaceFormat>
 #include <QTimer>
 #include <QToolBar>
 
@@ -33,11 +28,18 @@ MainWindow::MainWindow() {
     setWindowTitle("Nottawa");
     resize(1600, 1000);
 
+    const QString logPath = qEnvironmentVariable("NOTTAWA_LOG");
+    if (!logPath.isEmpty()) {
+        logFile_ = new QFile(logPath, this);
+        if (!logFile_->open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text)) {
+            delete logFile_;
+            logFile_ = nullptr;
+        }
+    }
+
     stage_ = new StageWidget(this);
     setCentralWidget(stage_);
 
-    // Overlay lives inside the central widget, resized to track it in
-    // resizeEvent(). It's a child of stage_ so paintEvent order works.
     welcome_ = new WelcomeOverlay(stage_);
     welcome_->setGeometry(stage_->rect());
     connect(welcome_, &WelcomeOverlay::newStrandRequested,  this, &MainWindow::onNewStrand);
@@ -51,7 +53,15 @@ MainWindow::MainWindow() {
 }
 
 MainWindow::~MainWindow() {
-    if (engine_) { engine_->requestStop(); engine_->wait(2000); }
+    delete engine_;  // stops and joins the engine thread before the stage widget goes away
+}
+
+void MainWindow::log(const QString& line) {
+    if (logPanel_) logPanel_->append(line);
+    if (logFile_) {
+        logFile_->write((QDateTime::currentDateTime().toString("HH:mm:ss.zzz ") + line + '\n').toUtf8());
+        logFile_->flush();
+    }
 }
 
 void MainWindow::resizeEvent(QResizeEvent* e) {
@@ -60,60 +70,39 @@ void MainWindow::resizeEvent(QResizeEvent* e) {
 }
 
 void MainWindow::buildMenus() {
-    auto* mb = menuBar();
-
-    auto* file = mb->addMenu("&File");
-    file->addAction("&New Strand",  this, &MainWindow::onNewStrand,  QKeySequence::New);
-    file->addAction("&Open…",       this, &MainWindow::onOpenStrand, QKeySequence::Open);
-    file->addAction("&Save",        this, &MainWindow::onSaveStrand, QKeySequence::Save);
+    auto* file = menuBar()->addMenu("&File");
+    file->addAction("&New Strand", this, &MainWindow::onNewStrand,  QKeySequence::New);
+    file->addAction("&Open…",      this, &MainWindow::onOpenStrand, QKeySequence::Open);
+    file->addAction("&Save",       this, &MainWindow::onSaveStrand, QKeySequence::Save);
     file->addSeparator();
     file->addAction("E&xit", this, &QWidget::close, QKeySequence::Quit);
 
-    auto* view = mb->addMenu("&View");
-    view->addAction("Stage &Fullscreen", this, &MainWindow::onToggleStageFullscreen,
-                    QKeySequence("F11"));
+    auto* view = menuBar()->addMenu("&View");
+    view->addAction("Stage &Fullscreen", this, &MainWindow::onToggleStageFullscreen, QKeySequence("F11"));
 
-    auto* help = mb->addMenu("&Help");
-    help->addAction("&About Nottawa", [this]{
+    auto* help = menuBar()->addMenu("&Help");
+    help->addAction("&About Nottawa", this, [this] {
         QMessageBox::about(this, "About Nottawa",
-            "<b>Nottawa</b><br>Audio-reactive visuals for live performance.<br><br>"
-            "Windows UI — Phase A.1 shell on Qt 6.");
+            "<b>Nottawa</b><br>Audio-reactive visuals for live performance.");
     });
 }
 
 void MainWindow::buildToolbar() {
     auto* tb = addToolBar("Main");
     tb->setMovable(false);
-    tb->setIconSize(QSize(18, 18));
-
-    tb->addAction("New",      this, &MainWindow::onNewStrand);
-    tb->addAction("Open",     this, &MainWindow::onOpenStrand);
-    tb->addAction("Save",     this, &MainWindow::onSaveStrand);
+    tb->addAction("New",  this, &MainWindow::onNewStrand);
+    tb->addAction("Open", this, &MainWindow::onOpenStrand);
+    tb->addAction("Save", this, &MainWindow::onSaveStrand);
     tb->addSeparator();
     tb->addAction("Add Source");
     tb->addAction("Add Effect");
     tb->addSeparator();
 
-    // Shader picker — scans the repo's shaders/ for *.frag that have a
-    // matching *.vert. Phase A.3's LIBRARY panel takes this over with
-    // the real Nottawa shader catalog (type-tagged, with thumbnails);
-    // this inline picker ships the "pick a shader, see it render"
-    // interaction today.
     shaderPicker_ = new QComboBox;
     shaderPicker_->setMinimumWidth(220);
-    shaderPicker_->setToolTip("Switch stage shader");
-    const QString dir = nottawaShadersDir();
-    if (!dir.isEmpty()) {
-        QStringList names;
-        for (const QString& frag :
-             QDir(dir).entryList({"*.frag"}, QDir::Files, QDir::Name)) {
-            const QString base = frag.left(frag.size() - 5);  // drop ".frag"
-            if (QFileInfo(QDir(dir).absoluteFilePath(base + ".vert")).exists())
-                names << base;
-        }
-        shaderPicker_->addItems(names);
-        shaderPicker_->setCurrentText("Accretion");
-    }
+    shaderPicker_->addItems(nottawaShaderNames());
+    shaderPicker_->setCurrentText(nottawaDefaultShader());
+    connect(shaderPicker_, &QComboBox::currentTextChanged, this, &MainWindow::selectShader);
     tb->addWidget(new QLabel("  Shader: "));
     tb->addWidget(shaderPicker_);
 
@@ -122,139 +111,107 @@ void MainWindow::buildToolbar() {
 }
 
 void MainWindow::buildDocks() {
-    browser_      = new BrowserPanel(this);
-    inspector_    = new InspectorPanel(this);
-    logPanel_     = new LogPanel(this);
+    browser_   = new BrowserPanel(this);
+    inspector_ = new InspectorPanel(this);
+    logPanel_  = new LogPanel(this);
 
-    const QString dir = nottawaShadersDir();
-    if (!dir.isEmpty()) {
-        browser_->populateFromDir(dir);
-        browser_->setCurrentShader("Accretion");
-    }
-    connect(browser_, &BrowserPanel::shaderPicked, this, [this](const QString& name) {
-        logPanel_->append("[browser] pick: " + name);
-        if (engine_)       engine_->requestShader(name);
-        if (shaderPicker_) shaderPicker_->setCurrentText(name);
-        if (inspector_)    inspector_->setCurrentShader(name);
-        if (welcome_ && !welcomeDismissed_) {
-            welcomeDismissed_ = true;
-            welcome_->hide();
-        }
-    });
+    browser_->populate(nottawaShaderNames());
+    browser_->setCurrentShader(nottawaDefaultShader());
+    inspector_->setCurrentShader(nottawaDefaultShader());
+    connect(browser_, &BrowserPanel::shaderPicked, this, &MainWindow::selectShader);
 
-    browserDock_ = new QDockWidget("LIBRARY", this);
-    browserDock_->setWidget(browser_);
-    browserDock_->setFeatures(QDockWidget::DockWidgetMovable |
-                              QDockWidget::DockWidgetFloatable);
-    addDockWidget(Qt::LeftDockWidgetArea, browserDock_);
-    browserDock_->setMinimumWidth(240);
-
-    inspectorDock_ = new QDockWidget("INSPECTOR", this);
-    inspectorDock_->setWidget(inspector_);
-    inspectorDock_->setFeatures(QDockWidget::DockWidgetMovable |
-                                QDockWidget::DockWidgetFloatable);
-    addDockWidget(Qt::RightDockWidgetArea, inspectorDock_);
-    inspectorDock_->setMinimumWidth(300);
-
-    logDock_ = new QDockWidget("LOG", this);
-    logDock_->setWidget(logPanel_);
-    logDock_->setFeatures(QDockWidget::DockWidgetMovable |
-                          QDockWidget::DockWidgetFloatable);
-    addDockWidget(Qt::BottomDockWidgetArea, logDock_);
-    logDock_->setMinimumHeight(120);
+    auto addDock = [this](const QString& title, QWidget* w, Qt::DockWidgetArea area) {
+        auto* dock = new QDockWidget(title, this);
+        dock->setWidget(w);
+        dock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+        addDockWidget(area, dock);
+        return dock;
+    };
+    addDock("LIBRARY",   browser_,   Qt::LeftDockWidgetArea)->setMinimumWidth(240);
+    addDock("INSPECTOR", inspector_, Qt::RightDockWidgetArea)->setMinimumWidth(300);
+    addDock("LOG",       logPanel_,  Qt::BottomDockWidgetArea)->setMinimumHeight(120);
 }
 
 void MainWindow::buildStatusBar() {
-    auto* sb = statusBar();
     strandLabel_ = new QLabel("No strand");
     fpsLabel_    = new QLabel("engine: starting…");
-    sb->addWidget(strandLabel_, /*stretch=*/1);
-    sb->addPermanentWidget(fpsLabel_);
+    statusBar()->addWidget(strandLabel_, 1);
+    statusBar()->addPermanentWidget(fpsLabel_);
+}
+
+void MainWindow::selectShader(const QString& name) {
+    if (name.isEmpty()) return;
+    {
+        const QSignalBlocker block(shaderPicker_);
+        shaderPicker_->setCurrentText(name);
+    }
+    browser_->setCurrentShader(name);
+    inspector_->setCurrentShader(name);
+    if (engine_) engine_->requestShader(name);
+    dismissWelcome();
+}
+
+void MainWindow::dismissWelcome() {
+    if (welcome_) welcome_->hide();
 }
 
 void MainWindow::startEngineOnGlReady() {
-    // Qt side: when stage widget's GL context initializes, grab the
-    // raw HGLRC. Needed so the engine thread can call
-    // wglShareLists(qt_hglrc, glfw_hglrc) to merge object namespaces
-    // and OF-created textures become visible in Qt's context.
-    //
-    // glReady fires on the GUI thread with Qt's context current; it's
-    // the only safe moment to call wglGetCurrentContext().
-    connect(stage_, &StageWidget::glReady, this, [this]() {
+    // glReady fires on the GUI thread with the stage's context current —
+    // the moment to capture its HGLRC for wglShareLists.
+    connect(stage_, &StageWidget::glReady, this, [this] {
         HGLRC qtHglrc = wglGetCurrentContext();
-        if (!qtHglrc) {
-            logPanel_->append("[engine] FATAL — Qt's HGLRC was null at glReady");
-            return;
-        }
-        logPanel_->append(QString("[engine] Qt HGLRC captured: 0x%1")
-                          .arg(reinterpret_cast<quintptr>(qtHglrc), 0, 16));
+        if (!qtHglrc) { log("[engine] ERROR stage context missing at glReady"); return; }
 
         engine_ = new OFStageEngine(stage_, qtHglrc);
-        connect(engine_, &OFStageEngine::engineInfo,  this, [this](QString s){
-            logPanel_->append("[engine] " + s);
-        }, Qt::QueuedConnection);
-        connect(engine_, &OFStageEngine::engineError, this, [this](QString s){
-            logPanel_->append("[engine] ERROR " + s);
-        }, Qt::QueuedConnection);
-        // Toolbar shader picker + browser panel both route into the
-        // engine. BrowserPanel also mirrors into the picker so the
-        // toolbar shows the current selection regardless of source.
-        if (shaderPicker_) {
-            connect(shaderPicker_, &QComboBox::currentTextChanged, engine_,
-                    &OFStageEngine::requestShader, Qt::QueuedConnection);
-            connect(shaderPicker_, &QComboBox::currentTextChanged, this,
-                    [this](const QString& n) {
-                        if (inspector_) inspector_->setCurrentShader(n);
-                    });
-        }
-        // Inspector brightness slider → engine (uniform `brightness`).
-        if (inspector_) {
-            connect(inspector_, &InspectorPanel::brightnessChanged, engine_,
-                    &OFStageEngine::setBrightness, Qt::QueuedConnection);
-            inspector_->setCurrentShader("Accretion");
-        }
-        engine_->start();
-        logPanel_->append("[engine] OF stage engine thread started");
+        connect(engine_, &OFStageEngine::engineInfo,  this, [this](const QString& s) { log("[engine] " + s); });
+        connect(engine_, &OFStageEngine::engineError, this, [this](const QString& s) { log("[engine] ERROR " + s); });
+        connect(engine_, &OFStageEngine::benchFinished, this, &QWidget::close);
+        connect(inspector_, &InspectorPanel::brightnessChanged, engine_, &OFStageEngine::setBrightness);
+        // Normal priority showed occasional 25-31 ms frame intervals from
+        // scheduler preemption despite ~7 ms of GPU work.
+        engine_->start(QThread::HighestPriority);
     }, Qt::QueuedConnection);
 
     statsTimer_ = new QTimer(this);
     connect(statsTimer_, &QTimer::timeout, this, &MainWindow::sampleEngineStats);
-    statsTimer_->start(500);
+    statsTimer_->start(1000);
 }
 
 void MainWindow::sampleEngineStats() {
     if (!engine_) return;
-    const double fps = engine_->currentFps();
-    const double p99 = engine_->currentP99Ms();
-    fpsLabel_->setText(QString("OF engine: %1 fps · p99 %2 ms")
-                       .arg(fps, 0, 'f', 1)
-                       .arg(p99, 0, 'f', 2));
+    const EngineStats s = engine_->stats();
+    const quint64 shown = stage_->framesShown();
+    const quint64 shownPerSec = shown - lastShown_;
+    lastShown_ = shown;
+
+    const QString line = QString("engine %1 fps · interval p99 %2 ms max %3 ms · GPU %4 ms (p99 %5) · shown %6/s · hitches %7")
+        .arg(s.fps, 0, 'f', 1).arg(s.intervalP99Ms, 0, 'f', 1).arg(s.intervalMaxMs, 0, 'f', 1)
+        .arg(s.gpuAvgMs, 0, 'f', 2).arg(s.gpuP99Ms, 0, 'f', 2).arg(shownPerSec).arg(s.hitches);
+    fpsLabel_->setText(line);
+    if (logFile_) {
+        logFile_->write((QDateTime::currentDateTime().toString("HH:mm:ss.zzz ") + "[stats] " + line + '\n').toUtf8());
+        logFile_->flush();
+    }
 }
 
 void MainWindow::onNewStrand() {
-    welcomeDismissed_ = true;
-    welcome_->hide();
+    dismissWelcome();
     strandLabel_->setText("Untitled strand");
-    logPanel_->append("[shell] new strand (Phase A.3 wires engine)");
 }
 
 void MainWindow::onOpenStrand() {
-    const QString path = QFileDialog::getOpenFileName(
-        this, "Open strand", {},
-        "Nottawa strand (*.json);;All files (*)");
+    const QString path = QFileDialog::getOpenFileName(this, "Open strand", {},
+                                                      "Nottawa strand (*.json);;All files (*)");
     if (path.isEmpty()) return;
-    welcomeDismissed_ = true;
-    welcome_->hide();
+    dismissWelcome();
     strandLabel_->setText(path);
-    logPanel_->append(QString("[shell] opened %1 (Phase A.3 wires engine)").arg(path));
+    log("[shell] strand loading not implemented yet: " + path);
 }
 
 void MainWindow::onSaveStrand() {
-    logPanel_->append("[shell] save (Phase A.3)");
+    log("[shell] strand saving not implemented yet");
 }
 
 void MainWindow::onToggleStageFullscreen() {
-    // Phase A.1 placeholder — in A.4 we lift the central stage to its
-    // own borderless window on the configured output monitor.
-    logPanel_->append("[shell] stage fullscreen (Phase A.4)");
+    log("[shell] stage fullscreen not implemented yet");
 }

@@ -5,14 +5,12 @@ class QTreeWidget;
 class QTreeWidgetItem;
 class QLineEdit;
 
-// BrowserPanel — left sidebar. Scans the repo's shaders/ for real
-// Nottawa shaders, groups them under EFFECTS. Clicking emits
-// `shaderPicked` which MainWindow routes to the engine.
+// Left sidebar: Nottawa shaders under EFFECTS; clicking emits shaderPicked.
 class BrowserPanel : public QWidget {
     Q_OBJECT
 public:
     explicit BrowserPanel(QWidget* parent = nullptr);
-    void populateFromDir(const QString& shadersDir);
+    void populate(const QStringList& shaderNames);
     void setCurrentShader(const QString& name);
 
 signals:

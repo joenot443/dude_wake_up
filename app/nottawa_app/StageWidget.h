@@ -1,21 +1,25 @@
 #pragma once
 
-#include <QOpenGLWidget>
+#include "FrameExchange.h"
+
 #include <QOpenGLFunctions_3_3_Core>
+#include <QOpenGLWidget>
 #include <atomic>
 #include <cstdint>
 
-// StageWidget — displays the engine's current output FBO. One
-// QOpenGLWidget on the UI thread; a background StageEngine renders into
-// a shared texture; this widget binds that texture every paint. Mirror
-// of the spike's EngineWidget.
+// Displays the engine's newest finished frame. The engine publishes frames
+// into exchange() from its own thread and calls notifyFrameReady().
 class StageWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core {
     Q_OBJECT
 public:
     explicit StageWidget(QWidget* parent = nullptr);
     ~StageWidget() override;
 
-    void setEngineTexture(uint32_t id);
+    FrameExchange& exchange() { return exchange_; }
+    void notifyFrameReady();
+
+    // Count of distinct engine frames actually drawn by the UI.
+    quint64 framesShown() const { return framesShown_.load(); }
 
 signals:
     void glReady();
@@ -26,9 +30,11 @@ protected:
     void paintGL() override;
 
 private:
+    FrameExchange exchange_;
     uint32_t program_ = 0;
     uint32_t vao_     = 0;
     uint32_t vbo_     = 0;
     int      locTex_  = -1;
-    std::atomic<uint32_t> textureId_{0};
+    std::atomic<bool>    updatePending_{false};
+    std::atomic<quint64> framesShown_{0};
 };

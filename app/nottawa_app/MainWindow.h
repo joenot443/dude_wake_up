@@ -1,20 +1,22 @@
 #pragma once
 #include <QMainWindow>
+#include <QtGlobal>
+
+class QComboBox;
 class QDockWidget;
+class QFile;
 class QLabel;
 class QTimer;
-class StageWidget;
-class OFStageEngine;
-class QComboBox;
 class BrowserPanel;
 class InspectorPanel;
 class LogPanel;
+class OFStageEngine;
+class StageWidget;
 class WelcomeOverlay;
 
-// Main window — the Qt mirror of NottawaApp's MainEditorView. Toolbar
-// top; browser dock left; inspector dock right; log dock bottom; stage
-// output centered. Welcome overlay centered on stage until a strand is
-// opened.
+// Qt counterpart of NottawaApp's MainEditorView: toolbar, LIBRARY dock
+// (left), INSPECTOR dock (right), LOG dock (bottom), stage in the centre.
+// NOTTAWA_LOG=<path> mirrors the log plus a stats line per second to a file.
 class MainWindow : public QMainWindow {
     Q_OBJECT
 public:
@@ -37,23 +39,22 @@ private:
     void buildDocks();
     void buildStatusBar();
     void startEngineOnGlReady();
+    void selectShader(const QString& name);
+    void dismissWelcome();
+    void log(const QString& line);
 
-    StageWidget*     stage_        = nullptr;
-    WelcomeOverlay*  welcome_      = nullptr;
-    OFStageEngine*   engine_       = nullptr;
+    StageWidget*    stage_        = nullptr;
+    WelcomeOverlay* welcome_      = nullptr;
+    OFStageEngine*  engine_       = nullptr;
 
-    BrowserPanel*    browser_      = nullptr;
-    InspectorPanel*  inspector_    = nullptr;
-    LogPanel*        logPanel_     = nullptr;
+    BrowserPanel*   browser_      = nullptr;
+    InspectorPanel* inspector_    = nullptr;
+    LogPanel*       logPanel_     = nullptr;
+    QComboBox*      shaderPicker_ = nullptr;
 
-    QDockWidget*     browserDock_  = nullptr;
-    QDockWidget*     inspectorDock_= nullptr;
-    QDockWidget*     logDock_      = nullptr;
-
-    QLabel*          fpsLabel_     = nullptr;
-    QLabel*          strandLabel_  = nullptr;
-    QTimer*          statsTimer_   = nullptr;
-    QComboBox*       shaderPicker_ = nullptr;
-
-    bool             welcomeDismissed_ = false;
+    QLabel*         fpsLabel_     = nullptr;
+    QLabel*         strandLabel_  = nullptr;
+    QTimer*         statsTimer_   = nullptr;
+    QFile*          logFile_      = nullptr;
+    quint64         lastShown_    = 0;
 };

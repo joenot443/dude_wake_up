@@ -1,6 +1,4 @@
 #include "BrowserPanel.h"
-#include <QDir>
-#include <QFileInfo>
 #include <QLineEdit>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
@@ -31,30 +29,19 @@ BrowserPanel::BrowserPanel(QWidget* parent) : QWidget(parent) {
     tree_->setRootIsDecorated(false);
     tree_->setAlternatingRowColors(true);
     layout->addWidget(tree_, /*stretch=*/1);
-    connect(tree_, &QTreeWidget::itemActivated, this, &BrowserPanel::onItemActivated);
+    // itemClicked for mouse, itemActivated for keyboard Enter.
     connect(tree_, &QTreeWidget::itemClicked,   this, &BrowserPanel::onItemActivated);
-
-    // Placeholder categories visible before populateFromDir runs.
-    addCategory(tree_, "SOURCES")->addChild(new QTreeWidgetItem(QStringList{"(coming soon)"}));
-    addCategory(tree_, "EFFECTS")->addChild(new QTreeWidgetItem(QStringList{"(loading…)"}));
-    addCategory(tree_, "STRANDS")->addChild(new QTreeWidgetItem(QStringList{"— none loaded —"}));
+    connect(tree_, &QTreeWidget::itemActivated, this, &BrowserPanel::onItemActivated);
 }
 
-void BrowserPanel::populateFromDir(const QString& shadersDir) {
+void BrowserPanel::populate(const QStringList& shaderNames) {
     tree_->clear();
-    addCategory(tree_, "SOURCES")->addChild(new QTreeWidgetItem(QStringList{"(Phase A.3)"}));
+    addCategory(tree_, "SOURCES")->addChild(new QTreeWidgetItem(QStringList{"(not yet available)"}));
 
     auto* effects = addCategory(tree_, "EFFECTS");
-    QDir dir(shadersDir);
-    QStringList names;
-    for (const QString& frag : dir.entryList({"*.frag"}, QDir::Files, QDir::Name)) {
-        const QString base = frag.left(frag.size() - 5);   // drop ".frag"
-        if (QFileInfo(dir.absoluteFilePath(base + ".vert")).exists())
-            names << base;
-    }
-    for (const QString& n : names) {
+    for (const QString& n : shaderNames) {
         auto* leaf = new QTreeWidgetItem(effects, QStringList{n});
-        leaf->setData(0, Qt::UserRole, n);   // tag for click handler
+        leaf->setData(0, Qt::UserRole, n);  // only leaves carry a name, so headers never emit
     }
 
     addCategory(tree_, "STRANDS")->addChild(new QTreeWidgetItem(QStringList{"— none loaded —"}));

@@ -1,67 +1,84 @@
 # Nottawa Qt UI spike
 
-Three-day go/no-go on Qt 6 as the Windows native UI framework. **Result: PASS.** Qt is confirmed as the production framework for the Windows-native UI rebuild.
+Go/no-go on Qt 6 as the Windows native UI framework. **Result: pass**: Qt is
+the framework for the Windows UI rebuild (`app/nottawa_app/`).
 
 ## Layout
 
 ```
 spike/qt-of/
-├── hello/         Day 1: Qt 6.8 + MSVC 2022 toolchain, bare window
-├── engine-fbo/    Day 2+3: dual-context, shared texture, 1080p plasma, FPS overlay, 5-min soak
+├── hello/         Qt 6.8 + MSVC 2022 toolchain check, bare window
+├── engine-fbo/    dual-context shared texture, 1080p plasma
 └── build/         CMake build dir (gitignored)
 ```
 
-## What was validated
+## What the spike established
 
-A background `QThread` runs its own `QOpenGLContext` created with
-`setShareContext(QOpenGLContext::globalShareContext())`. It renders a
-plasma shader into an FBO's color texture every ~16 ms. The UI thread's
-`QOpenGLWidget` holds the Qt-side context (same share set) and binds the
-engine's texture directly in `paintGL()`. The texture ID crosses threads
-as a plain `uint32_t` — no copy, no translation, no vendor-specific GL↔D3D
-interop extension.
+A background `QThread` owns a `QOpenGLContext` created with
+`setShareContext(QOpenGLContext::globalShareContext())` and renders into an
+FBO; the UI's `QOpenGLWidget` binds that FBO's texture directly. Texture ids
+are valid across the share group, so no copy and no GL↔D3D interop is needed.
 
-## Day 3 soak results (RTX 3070, Qt 6.8.0, MSVC 2022)
+## Correction to the original results
 
-- Sustained **64.3 fps** engine thread @ 1920×1080
-- **p99 frame time 32 ms** (one monitor refresh — right at the vsync boundary)
-- **19,377 frames in 5 minutes**, zero crashes
-- Memory flat: **114 MB → 114.5 MB** across the full soak
-- Thread/handle counts flat (24–28 / 560–564)
-- Clean shutdown (exit 0)
+The figures first recorded here (64.3 fps, p99 32 ms, "clean shutdown") were
+not valid:
+
+- The frame limiter measured the interval *including* the previous frame's
+  sleep, so pacing alternated between sleeping and not sleeping; the fps
+  numbers reflect that bug, not rendering throughput.
+- `glFlush()` returns before the GPU finishes, so no GPU time was measured.
+- Frames were handed over with no fence or buffering. `glFlush()` does
+  **not** make one context's rendering visible to another; the GL spec
+  requires a fence (`glFenceSync` + `glWaitSync`) or `glFinish()`.
+- Every run ended with a force-kill, so shutdown was never tested.
+
+`engine-fbo/` is kept as the record of the context-sharing experiment and
+still has these flaws. The production path in `app/nottawa_app/` fixes them:
+a fenced triple buffer (`FrameExchange`), deadline-based 60 Hz pacing with
+1 ms timer resolution, and `GL_TIME_ELAPSED` GPU timing.
+
+## Measured results (`app/nottawa_app`, 2026-10-17)
+
+RTX 3070 (driver 581.57), Qt 6.8.0, MSVC 2022, 1920×1080, engine thread at
+highest priority, 5-minute soak of `FractalAudio`, the heaviest shader in
+the library (benchmark of all 193 below):
+
+| Metric | Result |
+|---|---|
+| Engine rate | 60.00 fps average, 59.3 worst 1 s window |
+| Frame intervals > 33 ms | 0 |
+| Worst frame interval | ~31 ms (rare scheduler stalls; see note) |
+| GPU time per frame | 7.09 ms average, 9.84 ms worst p99 |
+| New frames shown by the UI | ~59/s (engine and display clocks are not phase-locked) |
+| PCIe traffic | ~17 MB/s rendering vs 0–2 MB/s idle; a per-frame CPU copy would be ~500 MB/s each way |
+| Memory / handles / threads | flat (166 MB working set, ~1700 handles, 61–62 threads) |
+| Shutdown | normal window close, exit code 0 |
+
+Note: at normal thread priority, 8% of one-second windows contained a frame
+interval over 25 ms; at highest priority, 3%. The remainder is Windows sleep
+jitter. A high-resolution waitable timer, or pacing off the display's vsync,
+would tighten it further.
+
+`NOTTAWA_BENCH_ALL=1` ran every shader for 1.5 s: 188 compiled and ran; the
+heaviest averaged 7.1 ms of GPU time. Five fail to compile on this driver
+because of bugs in the GLSL source (leftover Shadertoy uniforms, undefined
+`outputColor`, `main` with parameters): `4DBeats`, `CubeGlow`, `Diffusion`,
+`Hilbert`, `SpectrumClash`. The last three are registered in `ShaderType`.
+
+## Fixes hit during the spike
+
+1. `QOpenGLWidget::show()` can run `initializeGL` synchronously, so connect to
+   `glReady` before calling `show()`.
+2. `QOffscreenSurface` must be created on the GUI thread.
 
 ## Build / run
 
 ```powershell
-# One-time Qt install (if not already there)
 pip install aqtinstall
 python -m aqt install-qt windows desktop 6.8.0 win64_msvc2022_64 --outputdir C:\Qt
 
-# Build either spike
-$cmake  = "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"
-$src    = "C:\Users\Joe\dev\dude_wake_up\spike\qt-of\engine-fbo"
-$build  = "C:\Users\Joe\dev\dude_wake_up\spike\qt-of\build\engine-fbo"
-& $cmake -S $src -B $build -G "Visual Studio 17 2022" -A x64
-& $cmake --build $build --config Release
-& "$build\Release\engine_fbo.exe"
+$cmake = "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"
+& $cmake -S spike\qt-of\engine-fbo -B spike\qt-of\build\engine-fbo -G "Visual Studio 17 2022" -A x64
+& $cmake --build spike\qt-of\build\engine-fbo --config Release
 ```
-
-## Three fixes we hit along the way
-
-1. **`main: glReady connect installed` fired AFTER the signal** — Qt 6's
-   `show()` can trigger `initializeGL` synchronously. Install the connect
-   BEFORE `w.show()`, not after.
-2. **`QOffscreenSurface` MUST be created on the GUI thread**, even though
-   it's used from the engine thread. Allocate on main, pass pointer to
-   the `QThread` subclass's constructor.
-3. **`glFinish()` per frame tanks fps** to ~34 (CPU blocks until GPU
-   drains). Replace with `glFlush()` — the driver auto-syncs shared
-   textures across contexts.
-
-## Next
-
-Commit to Qt. Phase A of the UI port (shell: main window + toolbar +
-stage output + empty panels) can start now. The engine FBO plumbing in
-this spike is the pattern Phase A inherits for the real `StageOutput`
-widget — only the shader source changes (ours → Nottawa's full
-`ShaderChainerService::processFrame()` output).

@@ -1,101 +1,89 @@
 #pragma once
 
-#include <QThread>
-#include <QObject>
-#include <QString>
 #include <QMutex>
+#include <QString>
+#include <QStringList>
+#include <QThread>
 #include <atomic>
 #include <cstdint>
+#include <memory>
 
 class StageWidget;
-struct GLFWwindow;
 namespace of_impl { struct State; }
 
-// Set once at startup — directory holding Nottawa .vert/.frag files.
-// Simple module-level setter so main.cpp can resolve it from the exe
-// path without the engine class growing a construction parameter.
 void setNottawaShadersDir(const QString& absPath);
 QString nottawaShadersDir();
+// Every shader in the shaders dir that has both a .vert and a .frag.
+QStringList nottawaShaderNames();
+// NOTTAWA_SHADER env var, else "Accretion".
+QString nottawaDefaultShader();
 
-// OFStageEngine — Phase A.2 engine thread. The dual-context pattern
-// from the spike + OpenFrameworks on top:
+// Measured over the most recent one-second window.
+struct EngineStats {
+    double  fps           = 0;
+    double  intervalP99Ms = 0;
+    double  intervalMaxMs = 0;
+    double  gpuAvgMs      = 0;   // GL_TIME_ELAPSED around the shader pass
+    double  gpuP99Ms      = 0;
+    quint64 hitches       = 0;   // cumulative frame intervals > 33.3 ms
+    quint64 frames        = 0;
+};
+
+// Renders Nottawa shaders with OpenFrameworks on its own thread and hands
+// finished frames to StageWidget through FrameExchange.
 //
-//   - Main thread: Qt's QOpenGLContext (owned by StageWidget).
-//   - Engine thread: owns a HIDDEN GLFW window + its WGL context so
-//     OpenFrameworks has a native GL context it understands. We call
-//     `wglShareLists(qtHglrc, glfwHglrc)` so that OF-created textures
-//     (ofFbo attachments) are visible from Qt's context — same zero-copy
-//     handoff proven in spike/qt-of/engine-fbo/, just with GLFW instead
-//     of a second QOpenGLContext.
+// Context setup: a bare GLFW context is created first and joined to Qt's via
+// wglShareLists while both are still empty (WGL refuses otherwise), then
+// OF's window is created with shareContextWith pointing at it.
 //
-// Phase A.2.a goal: prove this plumbing works end-to-end with ONE OF
-// render primitive (ofFbo + ofShader) producing a visible frame in Qt.
-// A.2.b wires EngineLoop + the Nottawa services on top.
+// Env: NOTTAWA_UNCAPPED=1 disables 60 Hz pacing; NOTTAWA_BENCH_ALL=1 cycles
+// every shader for 1.5 s, reports per-shader GPU cost, then emits
+// benchFinished().
 class OFStageEngine : public QThread {
     Q_OBJECT
 public:
-    // qtHglrc is HGLRC captured on the main thread while Qt's context
-    // was current (wglGetCurrentContext()). Needed so we can call
-    // wglShareLists from the engine thread.
     OFStageEngine(StageWidget* widget, void* qtHglrc);
     ~OFStageEngine() override;
 
     void requestStop();
-
-    double  currentFps()   const { return emaFps_.load();     }
-    quint64 currentFrame() const { return frameCount_.load(); }
-    double  currentP99Ms() const { return p99FrameMs_.load(); }
+    EngineStats stats() const;
 
 public slots:
-    // Switch to a different Nottawa .frag/.vert pair, loaded from the
-    // shaders/ dir set by setNottawaShadersDir(). Thread-safe — invoke
-    // via Qt::QueuedConnection; the engine thread picks it up at the
-    // top of the next renderFrame().
     void requestShader(const QString& name);
-
-    // Live brightness uniform. Many Nottawa shaders take a
-    // `uniform float brightness`; those that don't just ignore it.
     void setBrightness(double value);
 
 signals:
-    // Emitted once with the OF/GLFW version string so the UI can show
-    // "OpenFrameworks 0.12.1 loaded" in the log on startup. Confirms
-    // the lib really linked.
     void engineInfo(QString msg);
-
-    // Fatal error message if OF/GLFW init blew up. UI shows this in
-    // the log; the stage will stay dark.
     void engineError(QString msg);
+    void benchFinished();
 
 protected:
     void run() override;
 
 private:
-    bool initGLFWContext();
+    bool createShareRoot();
     bool shareWithQt();
     bool initOF();
+    bool switchShader(const QString& name);
+    void applyPendingShader();
     void renderFrame(float t);
+    void collectGpuTime();
     void teardown();
 
-    StageWidget*  widget_   = nullptr;
-    void*         qtHglrc_  = nullptr;
-
-    GLFWwindow*   window_   = nullptr;
+    StageWidget* widget_  = nullptr;
+    void*        qtHglrc_ = nullptr;
     std::unique_ptr<of_impl::State> of_;
 
-    std::atomic<bool>     stop_{false};
-    std::atomic<uint64_t> frameCount_{0};
-    std::atomic<double>   emaFps_{0.0};
-    std::atomic<double>   p99FrameMs_{0.0};
-    std::atomic<double>   brightness_{400.0};  // matches Nottawa default
+    const bool uncapped_;
+    const bool benchAll_;
 
-    // Pending shader name — set by the UI via requestShader(), read
-    // (and cleared) on the engine thread at the top of the next frame.
-    QMutex                pendingShaderMutex_;
-    QString               pendingShaderName_;
-    bool                  pendingShaderIsSet_ = false;
+    std::atomic<bool>   stop_{false};
+    std::atomic<double> brightness_{400.0};
+
+    QMutex  pendingMutex_;
+    QString pendingShader_;
+    bool    pendingSet_ = false;
+
+    mutable QMutex statsMutex_;
+    EngineStats    stats_;
 };
-
-// Forward decl needs the full type to compile the unique_ptr dtor — the
-// out-of-line destructor in OFStageEngine.cpp sees the full definition.
-#include <memory>

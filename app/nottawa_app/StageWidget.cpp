@@ -1,4 +1,5 @@
 #include "StageWidget.h"
+
 #include <QDebug>
 
 namespace {
@@ -24,16 +25,9 @@ uint32_t compile(QOpenGLFunctions_3_3_Core* gl, uint32_t type, const char* src) 
     int ok = 0; gl->glGetShaderiv(s, GL_COMPILE_STATUS, &ok);
     if (!ok) {
         char log[1024]{}; gl->glGetShaderInfoLog(s, sizeof(log), nullptr, log);
-        qWarning() << "[stage-widget] compile fail:" << log;
+        qWarning() << "[stage] compile fail:" << log;
     }
     return s;
-}
-uint32_t link(QOpenGLFunctions_3_3_Core* gl, uint32_t vs, uint32_t fs) {
-    uint32_t p = gl->glCreateProgram();
-    gl->glAttachShader(p, vs); gl->glAttachShader(p, fs);
-    gl->glLinkProgram(p);
-    gl->glDeleteShader(vs); gl->glDeleteShader(fs);
-    return p;
 }
 } // anon
 
@@ -44,6 +38,7 @@ StageWidget::StageWidget(QWidget* parent) : QOpenGLWidget(parent) {
 
 StageWidget::~StageWidget() {
     makeCurrent();
+    for (void* f : exchange_.takeAllFences()) glDeleteSync(static_cast<GLsync>(f));
     if (program_) glDeleteProgram(program_);
     if (vbo_)     glDeleteBuffers(1, &vbo_);
     if (vao_)     glDeleteVertexArrays(1, &vao_);
@@ -52,9 +47,14 @@ StageWidget::~StageWidget() {
 
 void StageWidget::initializeGL() {
     initializeOpenGLFunctions();
-    program_ = link(this,
-                    compile(this, GL_VERTEX_SHADER, kVert),
-                    compile(this, GL_FRAGMENT_SHADER, kFrag));
+    const uint32_t vs = compile(this, GL_VERTEX_SHADER, kVert);
+    const uint32_t fs = compile(this, GL_FRAGMENT_SHADER, kFrag);
+    program_ = glCreateProgram();
+    glAttachShader(program_, vs);
+    glAttachShader(program_, fs);
+    glLinkProgram(program_);
+    glDeleteShader(vs);
+    glDeleteShader(fs);
     locTex_ = glGetUniformLocation(program_, "uTex");
 
     const float verts[] = {
@@ -79,21 +79,36 @@ void StageWidget::initializeGL() {
 
 void StageWidget::resizeGL(int w, int h) { glViewport(0, 0, w, h); }
 
-void StageWidget::setEngineTexture(uint32_t id) {
-    textureId_.store(id, std::memory_order_release);
-    QMetaObject::invokeMethod(this, [this]{ update(); }, Qt::QueuedConnection);
+void StageWidget::notifyFrameReady() {
+    if (!updatePending_.exchange(true))
+        QMetaObject::invokeMethod(this, [this]{ update(); }, Qt::QueuedConnection);
 }
 
 void StageWidget::paintGL() {
-    const uint32_t tex = textureId_.load(std::memory_order_acquire);
-    glClearColor(0.055f, 0.059f, 0.075f, 1.f);  // #0e0f13 — matches Theme bg
+    updatePending_.store(false);
+
+    glClearColor(0.055f, 0.059f, 0.075f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
-    if (tex == 0) return;
+
+    void* writeFence = nullptr;
+    const int slot = exchange_.acquireReadSlot(&writeFence);
+    if (slot < 0) return;
+    if (writeFence) {
+        glWaitSync(static_cast<GLsync>(writeFence), 0, GL_TIMEOUT_IGNORED);
+        glDeleteSync(static_cast<GLsync>(writeFence));
+        framesShown_.fetch_add(1);
+    }
+
     glUseProgram(program_);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, tex);
+    glBindTexture(GL_TEXTURE_2D, exchange_.texture(slot));
     glUniform1i(locTex_, 0);
     glBindVertexArray(vao_);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
+
+    GLsync readFence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    glFlush();
+    if (void* old = exchange_.releaseReadSlot(slot, readFence))
+        glDeleteSync(static_cast<GLsync>(old));
 }
