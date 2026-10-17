@@ -189,18 +189,25 @@ QStringList NodeEditorView::selectedNodeIds() const {
 void NodeEditorView::drawNodePreview(QPainter* p, const NodeItem* node, const QRectF& bodyLocal, float opacity) {
     FrameExchange* ex = EngineBridge::instance()->frames(node->id());
     if (!ex) return;
-    const QRect vp = mapFromScene(node->mapToScene(bodyLocal)).boundingRect();
-    if (!vp.intersects(viewport()->rect())) return;
+    const QRectF vr = node->deviceTransform(viewportTransform()).mapRect(bodyLocal);
+    if (!vr.intersects(viewport()->rect())) return;
+
+    // Round each edge inward so the preview never spills past the node body
+    // (the rounded mask and border cover the sub-pixel remainder).
+    const qreal dpr = viewport()->devicePixelRatioF();
+    const int left   = int(std::ceil(vr.left() * dpr));
+    const int right  = int(std::floor(vr.right() * dpr));
+    const int top    = int(std::ceil(vr.top() * dpr));
+    const int bottom = int(std::floor(vr.bottom() * dpr));
+    if (right <= left || bottom <= top) return;
+    const int fbHeight = int(std::lround(viewport()->height() * dpr));
 
     p->beginNativePainting();
     QOpenGLFunctions* gl = QOpenGLContext::currentContext()->functions();
     if (!presenter_.isInitialized()) presenter_.initialize();
-    const qreal dpr = viewport()->devicePixelRatioF();
-    const int fbHeight = int(viewport()->height() * dpr);
     GLint saved[4];
     gl->glGetIntegerv(GL_VIEWPORT, saved);
-    gl->glViewport(int(vp.x() * dpr), fbHeight - int((vp.y() + vp.height()) * dpr),
-                   int(vp.width() * dpr), int(vp.height() * dpr));
+    gl->glViewport(left, fbHeight - bottom, right - left, bottom - top);
     presenter_.draw(ex, FramePresenter::NodeEditor, opacity);
     gl->glViewport(saved[0], saved[1], saved[2], saved[3]);
     p->endNativePainting();

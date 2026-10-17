@@ -121,7 +121,7 @@ void NodeItem::paint(QPainter* p, const QStyleOptionGraphicsItem*, QWidget*) {
     // The preview is drawn as a plain rectangle; mask its corners back to
     // the canvas colour so the node reads as rounded.
     QPainterPath corners;
-    corners.addRect(b);
+    corners.addRect(b.adjusted(-1, -1, 1, 1));
     p->fillPath(corners.subtracted(rounded), kCanvas);
 
     if (needsInput_) {
