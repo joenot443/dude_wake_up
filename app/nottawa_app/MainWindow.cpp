@@ -3,6 +3,9 @@
 #include "OFStageEngine.h"
 #include "StageWidget.h"
 
+#include <QComboBox>
+#include <QDir>
+
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <wingdi.h>
@@ -90,6 +93,31 @@ void MainWindow::buildToolbar() {
     tb->addAction("Add Source");
     tb->addAction("Add Effect");
     tb->addSeparator();
+
+    // Shader picker — scans the repo's shaders/ for *.frag that have a
+    // matching *.vert. Phase A.3's LIBRARY panel takes this over with
+    // the real Nottawa shader catalog (type-tagged, with thumbnails);
+    // this inline picker ships the "pick a shader, see it render"
+    // interaction today.
+    shaderPicker_ = new QComboBox;
+    shaderPicker_->setMinimumWidth(220);
+    shaderPicker_->setToolTip("Switch stage shader");
+    const QString dir = nottawaShadersDir();
+    if (!dir.isEmpty()) {
+        QStringList names;
+        for (const QString& frag :
+             QDir(dir).entryList({"*.frag"}, QDir::Files, QDir::Name)) {
+            const QString base = frag.left(frag.size() - 5);  // drop ".frag"
+            if (QFileInfo(QDir(dir).absoluteFilePath(base + ".vert")).exists())
+                names << base;
+        }
+        shaderPicker_->addItems(names);
+        shaderPicker_->setCurrentText("Accretion");
+    }
+    tb->addWidget(new QLabel("  Shader: "));
+    tb->addWidget(shaderPicker_);
+
+    tb->addSeparator();
     tb->addAction("Stage FS", this, &MainWindow::onToggleStageFullscreen);
 }
 
@@ -152,6 +180,11 @@ void MainWindow::startEngineOnGlReady() {
         connect(engine_, &OFStageEngine::engineError, this, [this](QString s){
             logPanel_->append("[engine] ERROR " + s);
         }, Qt::QueuedConnection);
+        // Toolbar shader picker — relay selection to the engine thread.
+        if (shaderPicker_) {
+            connect(shaderPicker_, &QComboBox::currentTextChanged, engine_,
+                    &OFStageEngine::requestShader, Qt::QueuedConnection);
+        }
         engine_->start();
         logPanel_->append("[engine] OF stage engine thread started");
     }, Qt::QueuedConnection);

@@ -3,6 +3,7 @@
 #include <QThread>
 #include <QObject>
 #include <QString>
+#include <QMutex>
 #include <atomic>
 #include <cstdint>
 
@@ -14,6 +15,7 @@ namespace of_impl { struct State; }
 // Simple module-level setter so main.cpp can resolve it from the exe
 // path without the engine class growing a construction parameter.
 void setNottawaShadersDir(const QString& absPath);
+QString nottawaShadersDir();
 
 // OFStageEngine — Phase A.2 engine thread. The dual-context pattern
 // from the spike + OpenFrameworks on top:
@@ -43,6 +45,13 @@ public:
     double  currentFps()   const { return emaFps_.load();     }
     quint64 currentFrame() const { return frameCount_.load(); }
     double  currentP99Ms() const { return p99FrameMs_.load(); }
+
+public slots:
+    // Switch to a different Nottawa .frag/.vert pair, loaded from the
+    // shaders/ dir set by setNottawaShadersDir(). Thread-safe — invoke
+    // via Qt::QueuedConnection; the engine thread picks it up at the
+    // top of the next renderFrame().
+    void requestShader(const QString& name);
 
 signals:
     // Emitted once with the OF/GLFW version string so the UI can show
@@ -74,6 +83,12 @@ private:
     std::atomic<uint64_t> frameCount_{0};
     std::atomic<double>   emaFps_{0.0};
     std::atomic<double>   p99FrameMs_{0.0};
+
+    // Pending shader name — set by the UI via requestShader(), read
+    // (and cleared) on the engine thread at the top of the next frame.
+    QMutex                pendingShaderMutex_;
+    QString               pendingShaderName_;
+    bool                  pendingShaderIsSet_ = false;
 };
 
 // Forward decl needs the full type to compile the unique_ptr dtor — the

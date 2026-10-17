@@ -5,6 +5,7 @@ class QLabel;
 class QTimer;
 class StageWidget;
 class OFStageEngine;
+class QComboBox;
 class BrowserPanel;
 class InspectorPanel;
 class LogPanel;
@@ -52,6 +53,7 @@ private:
     QLabel*          fpsLabel_     = nullptr;
     QLabel*          strandLabel_  = nullptr;
     QTimer*          statsTimer_   = nullptr;
+    QComboBox*       shaderPicker_ = nullptr;
 
     bool             welcomeDismissed_ = false;
 };

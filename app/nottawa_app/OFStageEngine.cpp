@@ -65,7 +65,8 @@ struct State {
     ofFbo      fbo;
     ofShader   shader;
     ofMesh     quad;
-    ofTexture  inputTex;   // 1x1 white dummy for the shader's `tex` uniform
+    ofTexture  inputTex;      // 1x1 white dummy for the shader's `tex` uniform
+    QString    currentShaderName;
 
     static constexpr int W = 1920;
     static constexpr int H = 1080;
@@ -75,18 +76,47 @@ struct State {
 
 namespace {
 
-// A.2.c — load an actual Nottawa shader from the repo's shaders/
-// directory via ofShader. Confirms Nottawa's shader content runs
-// through our OF+Qt pipeline unchanged.
-constexpr const char* kShaderName = "Accretion";
+// Default shader to show on cold boot. Phase A.3 persists the last
+// selection via ConfigService.
+constexpr const char* kDefaultShaderName = "Accretion";
 
 // Repo-root shaders dir, discovered relative to the exe. Set by main()
 // before engine starts.
 QString& shadersDir() { static QString s; return s; }
 
+// Try to load a Nottawa shader by name (vert + frag from shaders/<name>).
+// Replaces target in-place on success; leaves it unchanged on failure.
+bool loadNottawaShader(ofShader& target, const QString& name, QString* err) {
+    const QString vertPath = shadersDir() + "/" + name + ".vert";
+    const QString fragPath = shadersDir() + "/" + name + ".frag";
+    ofBuffer vertBuf = ofBufferFromFile(vertPath.toStdString(), false);
+    ofBuffer fragBuf = ofBufferFromFile(fragPath.toStdString(), false);
+    if (vertBuf.size() == 0 || fragBuf.size() == 0) {
+        if (err) *err = QString("missing: %1 / %2").arg(vertPath, fragPath);
+        return false;
+    }
+    ofShader fresh;
+    if (!fresh.setupShaderFromSource(GL_VERTEX_SHADER,   vertBuf.getText())) {
+        if (err) *err = QString("vert compile fail: %1").arg(vertPath);
+        return false;
+    }
+    if (!fresh.setupShaderFromSource(GL_FRAGMENT_SHADER, fragBuf.getText())) {
+        if (err) *err = QString("frag compile fail: %1").arg(fragPath);
+        return false;
+    }
+    fresh.bindDefaults();
+    if (!fresh.linkProgram()) {
+        if (err) *err = QString("link fail: %1").arg(name);
+        return false;
+    }
+    target = std::move(fresh);
+    return true;
+}
+
 } // anon
 
 void setNottawaShadersDir(const QString& absPath) { shadersDir() = absPath; }
+QString nottawaShadersDir() { return shadersDir(); }
 
 OFStageEngine::OFStageEngine(StageWidget* widget, void* qtHglrc)
   : widget_(widget), qtHglrc_(qtHglrc) {}
@@ -184,33 +214,14 @@ bool OFStageEngine::initOF() {
         return false;
     }
 
-    // Load the real Nottawa shader from shaders/<name>.vert + .frag.
-    // Can't use ofShader::load() because OF prepends the data path; we
-    // use the project's shader dir directly via ofBufferFromFile +
-    // setupShaderFromSource.
-    const QString vertPath = shadersDir() + "/" + kShaderName + ".vert";
-    const QString fragPath = shadersDir() + "/" + kShaderName + ".frag";
-
-    ofBuffer vertBuf = ofBufferFromFile(vertPath.toStdString(), false);
-    ofBuffer fragBuf = ofBufferFromFile(fragPath.toStdString(), false);
-    if (vertBuf.size() == 0 || fragBuf.size() == 0) {
-        emit engineError(QString("shader files missing: %1 / %2").arg(vertPath, fragPath));
+    // Load the default shader via the same helper the runtime
+    // switcher uses, so initial load and later switches share one path.
+    QString err;
+    if (!loadNottawaShader(of_->shader, kDefaultShaderName, &err)) {
+        emit engineError("initial shader load failed: " + err);
         return false;
     }
-
-    if (!of_->shader.setupShaderFromSource(GL_VERTEX_SHADER,   vertBuf.getText())) {
-        emit engineError(QString("vert compile failed: %1").arg(vertPath));
-        return false;
-    }
-    if (!of_->shader.setupShaderFromSource(GL_FRAGMENT_SHADER, fragBuf.getText())) {
-        emit engineError(QString("frag compile failed: %1").arg(fragPath));
-        return false;
-    }
-    of_->shader.bindDefaults();   // Binds `position`+`texcoord` so ofMesh.draw() routes correctly.
-    if (!of_->shader.linkProgram()) {
-        emit engineError("ofShader::linkProgram failed");
-        return false;
-    }
+    of_->currentShaderName = kDefaultShaderName;
 
     // 1x1 white dummy input texture — Accretion samples it but its
     // output doesn't depend on content. A.2.d will wire a real source.
@@ -231,17 +242,46 @@ bool OFStageEngine::initOF() {
     of_->quad.addVertex(glm::vec3(-1, 1, 0)); of_->quad.addTexCoord(glm::vec2(0, 1));
     of_->quad.addVertex(glm::vec3( 1, 1, 0)); of_->quad.addTexCoord(glm::vec2(1, 1));
 
-    emit engineInfo(QString("OF ready — renderer=%1 ofFbo=%2x%3 texId=%4 shader=%5 (real Nottawa shader)")
+    emit engineInfo(QString("OF ready — renderer=%1 ofFbo=%2x%3 texId=%4 shader=%5")
                     .arg(reinterpret_cast<const char*>(glGetString(GL_RENDERER)))
                     .arg(of_impl::State::W)
                     .arg(of_impl::State::H)
                     .arg(of_->fbo.getTexture().getTextureData().textureID)
-                    .arg(kShaderName));
+                    .arg(of_->currentShaderName));
     return true;
+}
+
+void OFStageEngine::requestShader(const QString& name) {
+    QMutexLocker lk(&pendingShaderMutex_);
+    pendingShaderName_   = name;
+    pendingShaderIsSet_  = true;
 }
 
 void OFStageEngine::renderFrame(float t) {
     frameCount_.fetch_add(1);
+
+    // Pick up a pending shader switch from the UI thread. Doing this
+    // at the top of the frame (while the engine's context is current)
+    // means loadNottawaShader's GL calls are safe without extra sync.
+    bool wantSwitch = false;
+    QString wantName;
+    {
+        QMutexLocker lk(&pendingShaderMutex_);
+        if (pendingShaderIsSet_) {
+            wantSwitch = true;
+            wantName   = pendingShaderName_;
+            pendingShaderIsSet_ = false;
+        }
+    }
+    if (wantSwitch && wantName != of_->currentShaderName) {
+        QString err;
+        if (loadNottawaShader(of_->shader, wantName, &err)) {
+            of_->currentShaderName = wantName;
+            emit engineInfo("shader switched: " + wantName);
+        } else {
+            emit engineError("shader switch failed: " + err);
+        }
+    }
     // Default OF_FBOMODE_PERSPECTIVE|MATRIXFLIP: OF pushes an ortho
     // projection matching the FBO size, so ofTexture::draw(0, 0, W, H)
     // becomes a fullscreen quad with correct MVP for Nottawa's
@@ -253,7 +293,7 @@ void OFStageEngine::renderFrame(float t) {
     of_->shader.setUniform2f("dimensions",
                              static_cast<float>(of_impl::State::W),
                              static_cast<float>(of_impl::State::H));
-    of_->shader.setUniform1f("brightness", 400.0f);   // matches Nottawa's AccretionSettings default
+    of_->shader.setUniform1f("brightness", 400.0f);
     of_->shader.setUniformTexture("tex", of_->inputTex, 0);
     // Mimic Nottawa's shade() pattern — use ofTexture::draw to produce
     // a fullscreen textured quad through the active shader.
