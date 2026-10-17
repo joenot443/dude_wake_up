@@ -165,7 +165,9 @@ if (Test-Path $AbletonInc) { $IncludeDirs += $AbletonInc }
 if (Test-Path $AsioInc)    { $IncludeDirs += $AsioInc }
 
 # ffmpeg linker settings — libs staged into libs\ffmpeg\lib\.
-$FfmpegLibDir = Join-Path $RepoRoot 'libs\ffmpeg\lib'
+# MSBuild macro rather than an absolute path so the project builds from
+# any checkout location (the vcxproj sits at the repo root).
+$FfmpegLibDir = '$(MSBuildProjectDirectory)\libs\ffmpeg\lib'
 $FfmpegLibs   = @('avformat.lib','avcodec.lib','avutil.lib','swscale.lib','swresample.lib')
 
 # Extra Windows system libs Nottawa needs beyond what OF's props sheet provides.
@@ -361,7 +363,7 @@ function Ensure-DefinesAndFlags {
         # arrays to scalars on assignment, even when the if-block uses
         # @(...). Use [string[]] cast to force array type — otherwise
         # `+= "x"` on a scalar does string-concatenation (LNK1170 bait).
-        [string[]]$existingLibDirs = if ($ald.InnerText) { $ald.InnerText.Split(';') | Where-Object { $_ -ne '' } } else { @() }
+        [string[]]$existingLibDirs = if ($ald.InnerText) { $ald.InnerText.Split(';') | Where-Object { $_ -ne '' -and ($_ -notlike '*\libs\ffmpeg\lib' -or $_ -eq $FfmpegLibDir) } } else { @() }
         if ($existingLibDirs -notcontains $FfmpegLibDir) { $existingLibDirs += $FfmpegLibDir }
         if ($existingLibDirs -notcontains '%(AdditionalLibraryDirectories)') { $existingLibDirs += '%(AdditionalLibraryDirectories)' }
         $ald.InnerText = ($existingLibDirs -join ';')
@@ -554,7 +556,11 @@ function Ensure-SourceItems {
         ForEach-Object {
             $rel = ($_.FullName.Substring($repoRoot.Length + 1)) -replace '/', '\'
             if (Should-ExcludeFile -RelPath $rel -ExcludeDirs $ExcludeDirs -ExcludeFiles $ExcludeFiles) { return }
-            $rel2 = ToProjectRelative $_.FullName $projectDirFull
+            # The vcxproj sits at the repo root, so repo-relative == project-
+            # relative whether it's opened directly or via the OF junction.
+            # ToProjectRelative from the junction dir would bake in the real
+            # absolute path (..\..\..\..\..\Users\<name>\...).
+            $rel2 = $rel
             $ext  = $_.Extension.ToLower()
             switch ($ext) {
                 '.cpp' { Add-Item $rel2 'ClCompile'; $counts.cpp++ }
@@ -571,8 +577,7 @@ function Ensure-SourceItems {
         if (-not (Test-Path $abs)) {
             Write-Warning "Missing lib source: $rel"; continue
         }
-        $rel2 = ToProjectRelative $abs $projectDirFull
-        Add-Item $rel2 'ClCompile'
+        Add-Item $rel 'ClCompile'
         if ($rel -like '*.c') { $counts.c++ } else { $counts.cpp++ }
     }
 
