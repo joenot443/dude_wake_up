@@ -42,6 +42,8 @@ public:
 
     void setInfo(const QString& name, bool isShader, bool active, int inputCount, bool hasAux);
     void setNeedsInput(bool on);
+    // Shows "enable audio" over the preview while audio is off.
+    void setAudioHint(bool on);
 
     const QString& id() const { return id_; }
     const QString& name() const { return name_; }
@@ -76,6 +78,7 @@ private:
     bool               isShader_  = false;
     bool               active_    = true;
     bool               needsInput_ = false;
+    bool               audioHint_  = false;
     int                inputCount_ = -1;
     bool               hasAux_    = false;
     Button             hovered_   = NoButton;

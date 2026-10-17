@@ -4,6 +4,7 @@
 
 #include <QGraphicsView>
 #include <QHash>
+#include <QSet>
 #include <QPointer>
 #include <functional>
 #include <QTimer>
@@ -109,4 +110,6 @@ private:
     bool   leftOnNode_ = false;
     bool   syncing_ = false;
     bool   fitted_ = false;
+    bool   audioActive_ = false;
+    QSet<QString> audioReactive_;
 };

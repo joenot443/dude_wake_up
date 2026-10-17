@@ -80,6 +80,7 @@ void NodeItem::setInfo(const QString& name, bool isShader, bool active, int inpu
 }
 
 void NodeItem::setNeedsInput(bool on) { if (needsInput_ != on) { needsInput_ = on; update(); } }
+void NodeItem::setAudioHint(bool on) { if (audioHint_ != on) { audioHint_ = on; update(); } }
 
 void NodeItem::rebuildPorts(int inputCount, bool hasAux) {
     inputCount_ = inputCount;
@@ -124,6 +125,11 @@ void NodeItem::paint(QPainter* p, const QStyleOptionGraphicsItem*, QWidget*) {
         p->setPen(QColor(0xd8, 0xd9, 0xdf, 200));
         QFont f = p->font(); f.setPointSizeF(9); p->setFont(f);
         p->drawText(b.adjusted(0, 0, 0, -kTitleH), Qt::AlignCenter, "Connect a source");
+    } else if (audioHint_) {
+        p->fillPath(rounded, QColor(0x14, 0x15, 0x19, 153));
+        p->setPen(QColor(0xd8, 0xd9, 0xdf, 200));
+        QFont f = p->font(); f.setPointSizeF(9); p->setFont(f);
+        p->drawText(b.adjusted(0, 0, 0, -kTitleH), Qt::AlignCenter, "Enable audio from the Audio menu");
     }
 
     // Title bar along the bottom.

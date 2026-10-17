@@ -9,6 +9,7 @@
 #include "panels/WelcomeOverlay.h"
 
 #include <QAction>
+#include <QActionGroup>
 #include <QComboBox>
 #include <QDateTime>
 #include <QDockWidget>
@@ -115,6 +116,25 @@ void MainWindow::buildMenusAndToolbar() {
     stageAction_ = view->addAction("&Stage Mode", QKeySequence("Ctrl+Return"), this, [this](bool on) { setStageMode(on); });
     stageAction_->setCheckable(true);
     view->addAction("Zoom to &Fit", QKeySequence("Ctrl+0"), editor_, &NodeEditorView::zoomToFit);
+
+    // Rebuilt each time it opens: sources can appear (devices plugged in)
+    // and capture state changes from elsewhere.
+    auto* audio = menuBar()->addMenu("&Audio");
+    connect(audio, &QMenu::aboutToShow, this, [audio, engine] {
+        audio->clear();
+        auto* enabled = audio->addAction("Audio &Enabled", engine, &EngineBridge::toggleAudio);
+        enabled->setCheckable(true);
+        enabled->setChecked(engine->isAudioActive());
+        audio->addSection("Source");
+        auto* group = new QActionGroup(audio);
+        const QString selected = engine->selectedAudioSource();
+        for (const AudioSourceItem& s : engine->audioSources()) {
+            auto* a = audio->addAction(s.name, engine, [engine, id = s.id] { engine->selectAudioSource(id); });
+            a->setCheckable(true);
+            a->setChecked(s.id == selected);
+            group->addAction(a);
+        }
+    });
 
     auto* help = menuBar()->addMenu("&Help");
     help->addAction("&About Nottawa", this, [this] {

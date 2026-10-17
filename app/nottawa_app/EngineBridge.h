@@ -26,6 +26,7 @@ struct GraphNode {
     QPointF position;
     bool    active = true;
     bool    hasAuxOutput = false;
+    bool    audioReactive = false;
 };
 
 // Shaders with an auxiliary output expose it on this output slot.
@@ -38,6 +39,11 @@ struct GraphEdge {
     int     connectionType = 0;  // 0 = shader start, 1 = source start
     int     outputSlot = 0;
     int     inputSlot  = 0;
+};
+
+struct AudioSourceItem {
+    QString id;
+    QString name;
 };
 
 struct ParamInfo {
@@ -100,6 +106,13 @@ public:
     void setParameter(const QString& paramId, int value);
     void setParameter(const QString& paramId, bool value);
     void setParameter(const QString& paramId, const QString& value);
+
+    QVector<AudioSourceItem> audioSources() const;
+    QString selectedAudioSource() const;
+    void    selectAudioSource(const QString& id);
+    // Starts or stops capture on the selected audio source.
+    void    toggleAudio();
+    bool    isAudioActive() const;
 
     // Texture sharing is reference counted per node: several views (stage,
     // node previews) may show the same node.

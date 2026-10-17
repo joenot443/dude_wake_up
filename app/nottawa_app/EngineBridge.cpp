@@ -82,18 +82,36 @@ QVector<GraphNode> EngineBridge::nodes() const {
         const auto& s = shaders[i];
         const QByteArray id(s.id);
         out.push_back({str(s.id), str(s.name), true, s.shaderTypeRaw, s.inputCount, QPointF(s.posX, s.posY),
-                       ntw_get_connectable_active(id.constData()), ntw_supports_aux_output(id.constData())});
+                       ntw_get_connectable_active(id.constData()), ntw_supports_aux_output(id.constData()),
+                       ntw_is_audio_reactive(id.constData())});
     }
     ntw_free_connectable_info_array(shaders, n);
     NTWVideoSourceInfo* srcs = ntw_get_all_video_sources(&n);
     for (int i = 0; i < n; ++i) {
         const auto& s = srcs[i];
         out.push_back({str(s.id), str(s.name), false, s.sourceType, s.inputCount, QPointF(s.posX, s.posY),
-                       ntw_get_connectable_active(s.id), false});
+                       ntw_get_connectable_active(s.id), false, ntw_is_audio_reactive(s.id)});
     }
     ntw_free_video_source_info_array(srcs, n);
     return out;
 }
+
+QVector<AudioSourceItem> EngineBridge::audioSources() const {
+    QVector<AudioSourceItem> out;
+    int n = 0;
+    NTWAudioSourceInfo* arr = ntw_get_all_audio_sources(&n);
+    for (int i = 0; i < n; ++i) out.push_back({str(arr[i].id), str(arr[i].name)});
+    ntw_free_audio_source_info_array(arr, n);
+    return out;
+}
+
+QString EngineBridge::selectedAudioSource() const {
+    return takeString(const_cast<char*>(ntw_get_selected_audio_source_id()));
+}
+
+void EngineBridge::selectAudioSource(const QString& id) { ntw_select_audio_source(id.toUtf8().constData()); }
+void EngineBridge::toggleAudio() { ntw_toggle_audio_source(); }
+bool EngineBridge::isAudioActive() const { return running_ && ntw_is_audio_active(); }
 
 QVector<GraphEdge> EngineBridge::edges() const {
     QVector<GraphEdge> out;

@@ -56,6 +56,15 @@ NodeEditorView::NodeEditorView(QWidget* parent) : QGraphicsView(parent) {
 
     repaintTimer_.setTimerType(Qt::PreciseTimer);
     connect(&repaintTimer_, &QTimer::timeout, this, [this] { if (isVisible()) viewport()->update(); });
+    // Audio on/off doesn't come through graphChanged, so poll it.
+    auto* audioPoll = new QTimer(this);
+    connect(audioPoll, &QTimer::timeout, this, [this] {
+        const bool audio = EngineBridge::instance()->isAudioActive();
+        if (audio == audioActive_) return;
+        audioActive_ = audio;
+        for (NodeItem* n : std::as_const(nodes_)) n->setAudioHint(!audio && audioReactive_.contains(n->id()));
+    });
+    audioPoll->start(500);
     const qreal hz = screen() ? screen()->refreshRate() : 60.0;
     repaintTimer_.start(qMax(1, int(1000.0 / (hz > 0 ? hz : 60.0))));
 }
@@ -112,10 +121,13 @@ void NodeEditorView::syncFromEngine() {
             if (port->kind() == PortItem::Input) anyInput |= on;
         }
         item->setNeedsInput(n.isShader && n.inputCount > 0 && !anyInput);
+        if (n.audioReactive) audioReactive_.insert(n.id); else audioReactive_.remove(n.id);
+        item->setAudioHint(n.audioReactive && !audioActive_);
     }
     for (auto it = nodes_.begin(); it != nodes_.end();) {
         if (liveNodes.contains(it.key())) { ++it; continue; }
         if (PreviewWindow* w = previews_.take(it.key())) w->close();
+        audioReactive_.remove(it.key());
         engine->releaseFrames(it.key());
         delete it.value();
         it = nodes_.erase(it);
