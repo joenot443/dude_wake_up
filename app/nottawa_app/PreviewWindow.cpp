@@ -3,6 +3,7 @@
 #include "EngineBridge.h"
 #include "Screenshots.h"
 #include "StageWidget.h"
+#include "ui/Flash.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -93,6 +94,7 @@ void PreviewWindow::keyPressEvent(QKeyEvent* e) {
     if (e->key() == Qt::Key_S && !(e->modifiers() & (Qt::ControlModifier | Qt::AltModifier))) {
         if ((e->modifiers() & Qt::ShiftModifier) && Screenshots::chooseFolder(this).isEmpty()) return;
         const QString file = Screenshots::save(capture_(id_), this);
+        if (!file.isEmpty()) Flash::over(this);
         flash(file.isEmpty() ? "Couldn't save the screenshot"
                              : "Saved to " + QDir::toNativeSeparators(QFileInfo(file).absolutePath()));
         return;

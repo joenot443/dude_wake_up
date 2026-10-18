@@ -19,6 +19,7 @@
 #include "panels/StageView.h"
 #include "PreviewWindow.h"
 #include "Screenshots.h"
+#include "ui/Flash.h"
 #include "SettingsDialog.h"
 #include "panels/WelcomeOverlay.h"
 #include "ui/ActionBar.h"
@@ -224,6 +225,7 @@ void MainWindow::buildMenus() {
         if (!settings_) {
             settings_ = new SettingsDialog(this);
             connect(settings_, &SettingsDialog::showHintsChanged, editor_, &NodeEditorView::setShowHints);
+            connect(settings_, &SettingsDialog::showHintsChanged, hintsAction_, &QAction::setChecked);
             connect(settings_, &SettingsDialog::restartRequested, this, [this] {
                 // main() relaunches once this instance has saved and shut down.
                 qApp->setProperty("restartRequested", true);
@@ -247,6 +249,12 @@ void MainWindow::buildMenus() {
     auto* stretch = view->addAction("S&tretch Preview Windows", this, [](bool on) { PreviewWindow::setStretchToFill(on); });
     stretch->setCheckable(true);
     stretch->setChecked(PreviewWindow::stretchToFill());
+    hintsAction_ = view->addAction("Show Node &Hints", this, [this](bool on) {
+        QSettings().setValue("ui/showNodeHints", on);
+        editor_->setShowHints(on);
+    });
+    hintsAction_->setCheckable(true);
+    hintsAction_->setChecked(QSettings().value("ui/showNodeHints", true).toBool());
     auto* showLog = view->addAction("Show &Log", this, [this](bool on) { logPanel_->setVisible(on); });
     showLog->setCheckable(true);
     view->addSeparator();
@@ -661,6 +669,7 @@ void MainWindow::captureScreenshot() {
     if (image.isNull()) { toast_->show("Nothing to capture yet"); return; }
     const QString file = Screenshots::save(image, this);
     if (!file.isEmpty()) {
+        Flash::over(centre_);
         toast_->show("Screenshot saved to " + QDir::toNativeSeparators(QFileInfo(file).absolutePath()));
         log("[screenshot] " + file);
     } else if (!Screenshots::folder().isEmpty()) {

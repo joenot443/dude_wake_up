@@ -93,6 +93,7 @@ private:
     QWidget*        deleteSeparator_ = nullptr;
     QLabel*         workspaceLabel_ = nullptr;
     QAction*        stageAction_ = nullptr;
+    QAction*        hintsAction_ = nullptr;
     QAction*        undoAction_ = nullptr;
     QAction*        redoAction_ = nullptr;
     QMenu*          recentMenu_ = nullptr;
