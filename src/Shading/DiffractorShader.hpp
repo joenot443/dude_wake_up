@@ -55,7 +55,6 @@ struct DiffractorSettings: public ShaderSettings {
 struct DiffractorShader: Shader {
   DiffractorSettings *settings;
   DiffractorShader(DiffractorSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   
   void setup() override {
     shader.load("shaders/Diffractor");

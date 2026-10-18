@@ -52,7 +52,6 @@ struct ReflectorSettings: public ShaderSettings {
 struct ReflectorShader: Shader {
   ReflectorSettings *settings;
   ReflectorShader(ReflectorSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   void setup() override {
     shader.load("shaders/Reflector");
   }

@@ -35,7 +35,6 @@ struct SwirlSettings: public ShaderSettings {
 struct SwirlShader: Shader {
   SwirlSettings *settings;
   SwirlShader(SwirlSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   
   void setup() override {
     shader.load("shaders/Swirl");

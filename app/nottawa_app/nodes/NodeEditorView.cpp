@@ -182,9 +182,11 @@ void NodeEditorView::syncFromEngine() {
     }
     syncing_ = false;
 
-    if (!fitted_ && !nodes_.isEmpty()) {
+    // Fit a restored session once the window has its size; nodes added to
+    // an empty canvas later keep the current zoom.
+    if (!fitted_) {
         fitted_ = true;
-        zoomToFit();
+        if (!nodes_.isEmpty()) QTimer::singleShot(0, this, &NodeEditorView::zoomToFit);
     }
 }
 

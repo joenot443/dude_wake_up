@@ -48,7 +48,6 @@ struct ColorWheelSettings: public ShaderSettings {
 struct ColorWheelShader: Shader {
   ColorWheelSettings *settings;
   ColorWheelShader(ColorWheelSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   
   void setup() override {
     shader.load("shaders/ColorWheel");

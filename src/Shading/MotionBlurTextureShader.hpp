@@ -36,7 +36,6 @@ struct MotionBlurTextureSettings: public ShaderSettings {
 struct MotionBlurTextureShader: Shader {
   MotionBlurTextureSettings *settings;
   MotionBlurTextureShader(MotionBlurTextureSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   std::shared_ptr<Texture> texture;
 
   

@@ -43,7 +43,6 @@ struct SpaceRingsSettings: public ShaderSettings {
 struct SpaceRingsShader: Shader {
   SpaceRingsSettings *settings;
   SpaceRingsShader(SpaceRingsSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   
   void setup() override {
     shader.load("shaders/SpaceRings");

@@ -30,7 +30,6 @@ struct OldTVSettings: public ShaderSettings {
 struct OldTVShader: Shader {
   OldTVSettings *settings;
   OldTVShader(OldTVSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   void setup() override {
     shader.load("shaders/OldTV");
   }

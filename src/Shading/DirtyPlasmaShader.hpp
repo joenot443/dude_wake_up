@@ -56,7 +56,6 @@ struct DirtyPlasmaShader: Shader {
   std::shared_ptr<Texture> texture;
 
   DirtyPlasmaShader(DirtyPlasmaSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   void setup() override {
     texture = TextureService::getService()->textureWithName("Granite");
     settings->textureOptions = TextureService::getService()->availableTextureNames();

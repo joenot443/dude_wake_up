@@ -58,7 +58,6 @@ struct TwistedTripSettings: public ShaderSettings {
 struct TwistedTripShader: Shader {
   TwistedTripSettings *settings;
   TwistedTripShader(TwistedTripSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   void setup() override {
     shader.load("shaders/TwistedTrip");
   }
