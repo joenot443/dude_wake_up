@@ -59,8 +59,20 @@ LONG WINAPI onCrash(EXCEPTION_POINTERS* info) {
     return EXCEPTION_CONTINUE_SEARCH;
 }
 
+// Heap corruption and stack-buffer overruns end the process as fail-fasts
+// that never reach the unhandled-exception filter; a vectored handler sees
+// them first. It only reports, leaving the failure to proceed.
+LONG WINAPI onFailFast(EXCEPTION_POINTERS* info) {
+    const DWORD code = info->ExceptionRecord->ExceptionCode;
+    if (code == STATUS_HEAP_CORRUPTION || code == STATUS_STACK_BUFFER_OVERRUN) onCrash(info);
+    return EXCEPTION_CONTINUE_SEARCH;
+}
+
 } // anon
 
-void install() { SetUnhandledExceptionFilter(&onCrash); }
+void install() {
+    SetUnhandledExceptionFilter(&onCrash);
+    AddVectoredExceptionHandler(1, &onFailFast);
+}
 
 } // namespace CrashHandler

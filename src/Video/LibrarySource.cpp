@@ -72,12 +72,12 @@ void LibrarySource::setup() {
     if (player.isLoaded()) {
       // File loaded successfully
       state = LibrarySourceState_Completed;
-      LibraryService::getService()->libraryFileIdDownloadedMap[libraryFile->id] = true;
+      LibraryService::getService()->setDownloaded(libraryFile->id, true);
     } else {
       // File on disk is corrupted or partial - delete and re-download
       log("LibrarySource: file on disk failed to load, re-downloading: %s", path.c_str());
       ofFile::removeFile(path);
-      LibraryService::getService()->libraryFileIdDownloadedMap[libraryFile->id] = false;
+      LibraryService::getService()->setDownloaded(libraryFile->id, false);
       // Fall through to the download path below
     }
   }

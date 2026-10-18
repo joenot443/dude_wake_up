@@ -216,7 +216,7 @@ void TileBrowserView::drawTile(std::shared_ptr<TileItem> tile, const ImVec2& til
       ImGui::SetCursorScreenPos(ImVec2(startPos.x + 4, startPos.y + 4));
       auto libraryTileItem = std::dynamic_pointer_cast<LibraryTileItem>(tile);
       auto file = libraryTileItem->libraryFile;
-      if (LibraryService::getService()->libraryFileIdDownloadedMap[file->id]) {
+      if (LibraryService::getService()->isDownloaded(file->id)) {
         CommonViews::IconTitle(ICON_MD_SAVE);
       } else if (file->isDownloading) {
         ImGui::Text("%s", formatString("%.0f %", libraryTileItem->libraryFile->progress * 100.0).c_str());

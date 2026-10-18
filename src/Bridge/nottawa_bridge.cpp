@@ -2947,12 +2947,12 @@ void ntw_fetch_library_files(void) {
 }
 
 int ntw_library_files_loaded(void) {
-  return LibraryService::getService()->libraryFiles.empty() ? 0 : 1;
+  return LibraryService::getService()->hasLibraryFiles() ? 1 : 0;
 }
 
 NTWLibraryFileInfo* ntw_get_library_files(int* outCount) {
   if (outCount) *outCount = 0;
-  auto& files = LibraryService::getService()->libraryFiles;
+  const auto files = LibraryService::getService()->libraryFilesSnapshot();
   int count = static_cast<int>(files.size());
   if (outCount) *outCount = count;
   if (count == 0) return nullptr;
@@ -2961,7 +2961,7 @@ NTWLibraryFileInfo* ntw_get_library_files(int* outCount) {
     calloc(count, sizeof(NTWLibraryFileInfo)));
 
   int i = 0;
-  for (auto& [fileId, file] : files) {
+  for (auto& file : files) {
     result[i].id = strdup_safe(file->id);
     result[i].name = strdup_safe(file->name);
     result[i].category = strdup_safe(file->category);

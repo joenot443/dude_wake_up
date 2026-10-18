@@ -69,10 +69,10 @@ void VideoSourceService::populateAvailableVideoSources()
 //  auto iconSource = std::make_shared<AvailableVideoSourceIcon>("Icon");
 //  availableSourceMap[iconSource->availableVideoSourceId] = iconSource;
   
-  for (auto const &file : LibraryService::getService()->libraryFiles)
+  for (auto const &file : LibraryService::getService()->libraryFilesSnapshot())
   {
     // Create an AvailableLibraryVideoSource for each LibraryFile
-    auto fileSource = std::make_shared<AvailableVideoSourceLibrary>(file.second->name, file.second);
+    auto fileSource = std::make_shared<AvailableVideoSourceLibrary>(file->name, file);
     fileSource->generatePreview();
     availableSourceMap[fileSource->availableVideoSourceId] = fileSource;
   }
