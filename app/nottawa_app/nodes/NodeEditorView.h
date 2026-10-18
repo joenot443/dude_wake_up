@@ -60,6 +60,10 @@ public:
     void openPreview(const QString& id);
     QStringList openPreviewIds() const;
     void closePreview(const QString& id);
+    // A node's bounds in viewport coordinates (null if it isn't shown).
+    QRect nodeViewportRect(const QString& id) const;
+    // A cable is being dragged out of a port.
+    bool isDraggingConnection() const { return !dragNodeId_.isEmpty(); }
     // "Connect a source" / "Enable audio" overlays on nodes (Settings).
     void setShowHints(bool on);
     // Adds a saved strand, its top-left node at `scenePos` when given.

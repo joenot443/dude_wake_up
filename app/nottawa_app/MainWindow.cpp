@@ -15,6 +15,7 @@
 #include "panels/LogPanel.h"
 #include "panels/OscillatorsPage.h"
 #include "panels/StrandsPage.h"
+#include "panels/HelpGuide.h"
 #include "panels/StageView.h"
 #include "Screenshots.h"
 #include "SettingsDialog.h"
@@ -104,6 +105,7 @@ MainWindow::MainWindow(const QString& dataPath) : dataPath_(dataPath) {
     connect(actionBar_, &ActionBar::screenshot, this, &MainWindow::captureScreenshot);
     connect(actionBar_, &ActionBar::clearAll, this, &MainWindow::onNew);
     connect(actionBar_, &ActionBar::zoomToFit, editor_, &NodeEditorView::zoomToFit);
+    connect(actionBar_, &ActionBar::helpToggled, this, [this] { help_->setEnabled(!help_->enabled()); });
     toast_ = new Toast(centre_);
     fpsOverlay_ = new QLabel(centre_);
     fpsOverlay_->setStyleSheet(QString("QLabel { background: %1; color: %2; border-radius: 6px; padding: 4px 8px;"
@@ -114,6 +116,10 @@ MainWindow::MainWindow(const QString& dataPath) : dataPath_(dataPath) {
     qApp->installEventFilter(this);  // Shift held shows the FPS overlay
 
     buildPanels();
+    help_ = new HelpGuide(centre_, editor_, inspector_, browser_, this);
+    help_->setBlocker(welcome_);
+    connect(help_, &HelpGuide::enabledChanged, actionBar_, &ActionBar::setHelpActive);
+    connect(help_, &HelpGuide::sidebarNeeded, this, [this] { if (!sidebarButton_->isChecked()) sidebarButton_->click(); });
     buildMenus();
 
     auto* root = new QWidget(this);
@@ -157,6 +163,7 @@ MainWindow::~MainWindow() {
     // The views release their shared textures (and the browser its
     // previews) when destroyed; do that while the engine is still running.
     browser_->shutdown();
+    EngineBridge::destroyAllPreviews();
     editor_->disconnect(this);
     delete rows_;
     EngineBridge::instance()->stop();
@@ -262,6 +269,7 @@ void MainWindow::buildMenus() {
     });
 
     auto* help = menuBar()->addMenu("&Help");
+    help->addAction("Nottawa &Tutorial", this, [this] { help_->restart(); });
     help->addAction("Show &Welcome Screen", this, [this] {
         welcome_->setGeometry(centre_->rect());
         welcome_->present();
@@ -487,6 +495,7 @@ void MainWindow::startEngine() {
         welcome_->setGeometry(centre_->rect());
         welcome_->present();
     }
+    if (qEnvironmentVariableIsEmpty("NOTTAWA_ADD")) help_->autoStartIfFirstLaunch();
     runScriptedAdds();
 }
 

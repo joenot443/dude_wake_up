@@ -847,3 +847,9 @@ void InspectorPanel::refresh() {
     if (textPanel_) textPanel_->setState(EngineBridge::instance()->textSourceState(nodeId_));
     if (filePanel_) filePanel_->setState(EngineBridge::instance()->fileSourceState(nodeId_));
 }
+
+QRect InspectorPanel::parameterRowRect(const QString& paramId) const {
+    const ParameterRow* row = rows_.value(paramId);
+    if (!row || !row->isVisible()) return {};
+    return QRect(row->mapToGlobal(QPoint(0, 0)), row->size());
+}

@@ -207,6 +207,10 @@ void EngineBridge::destroyPreview(const QString& id) {
     if (instance()->isRunning()) ntw_destroy_preview(id.toUtf8().constData());
 }
 
+void EngineBridge::destroyAllPreviews() {
+    if (instance()->isRunning()) ntw_destroy_all_previews();
+}
+
 void EngineBridge::setPreferredPreviewSource(const QString& id) {
     ntw_set_preferred_preview_source(id.isEmpty() ? nullptr : id.toUtf8().constData());
 }

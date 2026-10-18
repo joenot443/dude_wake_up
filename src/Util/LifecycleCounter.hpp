@@ -29,8 +29,10 @@ namespace lifecycle {
 class Registry {
 public:
   static Registry& instance() {
-    static Registry r;
-    return r;
+    // Never destroyed: counted objects held in statics are destroyed at
+    // exit, possibly after a function-local static registry would be.
+    static Registry* r = new Registry;
+    return *r;
   }
 
   void increment(const char* name) {

@@ -709,6 +709,11 @@ void NodeEditorView::advancePreview(const QString& fromId, const QString& toId, 
     previews_.insert(toId, window);
 }
 
+QRect NodeEditorView::nodeViewportRect(const QString& id) const {
+    const NodeItem* node = nodes_.value(id);
+    return node ? mapFromScene(node->sceneBoundingRect()).boundingRect() : QRect();
+}
+
 void NodeEditorView::setShowHints(bool on) {
     showHints_ = on;
     syncFromEngine();

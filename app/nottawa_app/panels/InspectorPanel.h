@@ -32,6 +32,8 @@ public:
     explicit InspectorPanel(QWidget* parent = nullptr);
     void setSelection(const QStringList& ids);
     QString node() const { return nodeId_; }
+    // A parameter row's rect in global coordinates (null if not shown).
+    QRect parameterRowRect(const QString& paramId) const;
 
 signals:
     void deselectRequested();

@@ -384,6 +384,8 @@ public:
     // from a worker thread.
     static QString createPreview(int typeRaw, bool isSource);
     static void    destroyPreview(const QString& previewId);
+    // Destroys every preview, and the shared source effect previews use.
+    static void    destroyAllPreviews();
     // Effect previews process this source's output (or any active one).
     void setPreferredPreviewSource(const QString& sourceId);
 

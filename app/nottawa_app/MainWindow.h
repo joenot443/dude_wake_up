@@ -10,6 +10,7 @@
 
 class ActionBar;
 class BrowserPanel;
+class HelpGuide;
 class InspectorPanel;
 class LogPanel;
 class NodeEditorView;
@@ -80,6 +81,7 @@ private:
     LogPanel*       logPanel_  = nullptr;
     ActionBar*      actionBar_ = nullptr;
     Toast*          toast_     = nullptr;
+    HelpGuide*      help_      = nullptr;
     QLabel*         fpsOverlay_ = nullptr;
 
     QToolButton*    undoButton_ = nullptr;

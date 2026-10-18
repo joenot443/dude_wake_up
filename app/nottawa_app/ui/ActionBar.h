@@ -13,6 +13,7 @@ class ActionBar : public QWidget {
 public:
     explicit ActionBar(QWidget* parent);
     void setUndoRedo(bool canUndo, bool canRedo);
+    void setHelpActive(bool on);
     // Keeps it in the parent's bottom-right corner.
     void place();
 
@@ -22,6 +23,7 @@ signals:
     void screenshot();
     void clearAll();
     void zoomToFit();
+    void helpToggled();
 
 protected:
     void paintEvent(QPaintEvent*) override;
@@ -36,5 +38,6 @@ private:
     QWidget*     expanded_;
     QToolButton* undo_;
     QToolButton* redo_;
+    QToolButton* help_;
     bool         isExpanded_ = true;
 };

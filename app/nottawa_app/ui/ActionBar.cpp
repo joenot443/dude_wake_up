@@ -40,6 +40,8 @@ ActionBar::ActionBar(QWidget* parent) : QWidget(parent) {
     undo_ = button(Icons::Undo, "Undo (Ctrl+Z)");
     redo_ = button(Icons::Redo, "Redo (Ctrl+Shift+Z)");
     auto* shot = button(Icons::Camera, "Capture screenshot");
+    help_ = button(Icons::Help, "Toggle help overlay");
+    connect(help_, &QToolButton::clicked, this, &ActionBar::helpToggled);
     auto* clear = button(Icons::Clear, "Clear all nodes");
     auto* fit = button(Icons::Fit, "Zoom to fit all nodes");
     connect(undo_, &QToolButton::clicked, this, &ActionBar::undo);
@@ -47,7 +49,7 @@ ActionBar::ActionBar(QWidget* parent) : QWidget(parent) {
     connect(shot, &QToolButton::clicked, this, &ActionBar::screenshot);
     connect(clear, &QToolButton::clicked, this, &ActionBar::clearAll);
     connect(fit, &QToolButton::clicked, this, &ActionBar::zoomToFit);
-    const QList<QWidget*> items = {undo_, redo_, separator(expanded_), shot, separator(expanded_), clear, fit};
+    const QList<QWidget*> items = {undo_, redo_, separator(expanded_), shot, help_, separator(expanded_), clear, fit};
     for (QWidget* w : items) {
         w->setParent(expanded_);
         row->addWidget(w);
@@ -88,6 +90,10 @@ void ActionBar::setUndoRedo(bool canUndo, bool canRedo) {
     redo_->setEnabled(canRedo);
     undo_->setIcon(Icons::icon(Icons::Undo, canUndo ? Theme::textPrimary : Theme::textTertiary));
     redo_->setIcon(Icons::icon(Icons::Redo, canRedo ? Theme::textPrimary : Theme::textTertiary));
+}
+
+void ActionBar::setHelpActive(bool on) {
+    help_->setIcon(Icons::icon(Icons::Help, on ? Theme::accent : Theme::textPrimary));
 }
 
 void ActionBar::place() {
