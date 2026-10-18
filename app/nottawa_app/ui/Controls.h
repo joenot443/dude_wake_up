@@ -77,6 +77,27 @@ private:
     bool    small_ = false;
 };
 
+// A row of mutually exclusive options (macOS segmented picker).
+class DSSegmented : public QWidget {
+    Q_OBJECT
+public:
+    explicit DSSegmented(const QStringList& options, QWidget* parent = nullptr);
+    void setCurrentIndex(int index);  // doesn't emit
+    int  currentIndex() const { return index_; }
+    QSize sizeHint() const override;
+
+signals:
+    void currentIndexChanged(int index);
+
+protected:
+    void paintEvent(QPaintEvent*) override;
+    void mouseReleaseEvent(QMouseEvent*) override;
+
+private:
+    QStringList options_;
+    int index_ = 0;
+};
+
 // A borderless "Value ⌄" button that picks one of a list from a menu.
 class DSPicker : public QToolButton {
     Q_OBJECT

@@ -342,6 +342,57 @@ void EngineBridge::setOscillatorRange(const QString& id, float minOutput, float 
 }
 void EngineBridge::setOscillatorWaveShape(const QString& id, int shape) { ntw_set_oscillator_wave_shape(id.toUtf8().constData(), shape); }
 
+AudioAnalysis EngineBridge::audioAnalysis() const {
+    AudioAnalysis a;
+    if (!running_) return a;
+    const NTWExtendedAudioAnalysisInfo s = ntw_get_extended_audio_analysis();
+    a.rms = s.rms; a.lows = s.lows; a.mids = s.mids; a.highs = s.highs;
+    a.bpm = s.bpm; a.beatPulse = s.beatPulse;
+    a.bpmMode = s.bpmMode; a.bpmLocked = s.bpmLocked; a.bpmNudge = s.bpmNudge; a.bpmEnabled = s.bpmEnabled;
+    a.smoothingMode = s.smoothingMode;
+    a.frequencyRelease = s.frequencyRelease; a.frequencyScale = s.frequencyScale;
+    a.loudnessRelease = s.loudnessRelease; a.loudnessScale = s.loudnessScale;
+    a.beatCount = s.beatCount; a.audioActive = s.audioActive; a.sourceType = s.audioSourceType;
+    a.melSpectrum = QVector<float>(s.melSpectrum, s.melSpectrum + qBound(0, s.melSpectrumCount, 13));
+    a.waveform = QVector<float>(s.waveform, s.waveform + qBound(0, s.waveformCount, 256));
+    return a;
+}
+
+FileAudioState EngineBridge::fileAudioState() const {
+    FileAudioState f;
+    if (!running_) return f;
+    const NTWFileAudioState s = ntw_get_file_audio_state();
+    f.volume = s.volume; f.paused = s.isPaused; f.position = s.playbackPosition;
+    f.duration = s.totalDuration; f.isFileSource = s.isFileSource; f.track = s.selectedTrackIndex;
+    return f;
+}
+
+QVector<AudioTrack> EngineBridge::sampleTracks() const {
+    QVector<AudioTrack> out;
+    if (!running_) return out;
+    int n = 0;
+    NTWAudioTrackInfo* arr = ntw_get_sample_tracks(&n);
+    for (int i = 0; i < n; ++i) out.push_back({str(arr[i].name), arr[i].index});
+    ntw_free_audio_track_info_array(arr, n);
+    return out;
+}
+
+void EngineBridge::setBpmMode(int m) { ntw_set_bpm_mode(m); }
+void EngineBridge::setBpmLocked(bool on) { ntw_set_bpm_locked(on); }
+void EngineBridge::setBpmEnabled(bool on) { ntw_set_bpm_enabled(on); }
+void EngineBridge::setBpm(float bpm) { ntw_set_bpm_value(bpm); }
+void EngineBridge::nudgeBpm(float d) { ntw_nudge_bpm(d); }
+void EngineBridge::tapBpm() { ntw_tap_bpm(); }
+void EngineBridge::setSmoothingMode(int m) { ntw_set_smoothing_mode(m); }
+void EngineBridge::setFrequencyRelease(float v) { ntw_set_frequency_release(v); }
+void EngineBridge::setFrequencyScale(float v) { ntw_set_frequency_scale(v); }
+void EngineBridge::setLoudnessRelease(float v) { ntw_set_loudness_release(v); }
+void EngineBridge::setLoudnessScale(float v) { ntw_set_loudness_scale(v); }
+void EngineBridge::selectSampleTrack(int i) { ntw_select_sample_track(i); }
+void EngineBridge::setFileAudioVolume(float v) { ntw_set_file_audio_volume(v); }
+void EngineBridge::toggleFileAudioPause() { ntw_toggle_file_audio_pause(); }
+void EngineBridge::setFileAudioPosition(float p) { ntw_set_file_audio_position(p); }
+
 QVector<AudioSourceItem> EngineBridge::audioSources() const {
     QVector<AudioSourceItem> out;
     int n = 0;

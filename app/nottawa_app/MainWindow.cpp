@@ -7,6 +7,7 @@
 #include "StageWidget.h"
 #include "Theme.h"
 #include "nodes/NodeEditorView.h"
+#include "panels/AudioPanel.h"
 #include "panels/BrowserPanel.h"
 #include "panels/CommunityPage.h"
 #include "panels/InspectorPanel.h"
@@ -425,10 +426,7 @@ void MainWindow::buildPanels() {
     inspector_->setMaximumWidth(500);
     columns_->setSizes({260, 1000, 320});
 
-    // The audio panel arrives with its own commit; a placeholder for now.
-    audioPanel_ = new QLabel("Audio panel", this);
-    static_cast<QLabel*>(audioPanel_)->setAlignment(Qt::AlignCenter);
-    audioPanel_->setMinimumHeight(150);
+    audioPanel_ = new AudioPanel(this);
     audioPanel_->hide();
     logPanel_ = new LogPanel(this);
     logPanel_->setMinimumHeight(80);

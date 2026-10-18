@@ -49,6 +49,8 @@ qt_add_executable(nottawa_app WIN32
     ui/Controls.h            ui/Controls.cpp
     ui/ActionBar.h           ui/ActionBar.cpp
     ui/Toast.h               ui/Toast.cpp
+    ui/AudioGraphs.h         ui/AudioGraphs.cpp
+    panels/AudioPanel.h      panels/AudioPanel.cpp
     inspector/ParameterRow.h inspector/ParameterRow.cpp
     inspector/PositionPad.h  inspector/PositionPad.cpp
     inspector/SourcePanels.h inspector/SourcePanels.cpp

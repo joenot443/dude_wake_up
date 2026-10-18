@@ -226,6 +226,50 @@ void DSToggle::mouseReleaseEvent(QMouseEvent* e) {
     emit toggled(checked_);
 }
 
+// --------------------------------------------------------------- segmented
+
+DSSegmented::DSSegmented(const QStringList& options, QWidget* parent) : QWidget(parent), options_(options) {
+    setCursor(Qt::PointingHandCursor);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+}
+
+void DSSegmented::setCurrentIndex(int index) { index_ = index; update(); }
+
+QSize DSSegmented::sizeHint() const { return QSize(60 * int(options_.size()), 22); }
+
+void DSSegmented::paintEvent(QPaintEvent*) {
+    QPainter p(this);
+    p.setRenderHint(QPainter::Antialiasing);
+    const QRectF r = QRectF(rect()).adjusted(0.5, 0.5, -0.5, -0.5);
+    p.setPen(Qt::NoPen);
+    p.setBrush(Theme::backgroundTertiary);
+    p.drawRoundedRect(r, 6, 6);
+    const int n = int(options_.size());
+    if (n == 0) return;
+    const qreal w = r.width() / n;
+    p.setFont(captionFont(font()));
+    for (int i = 0; i < n; ++i) {
+        const QRectF seg(r.left() + i * w, r.top(), w, r.height());
+        if (i == index_) {
+            p.setBrush(Theme::surfacePressed);
+            p.drawRoundedRect(seg.adjusted(2, 2, -2, -2), 5, 5);
+        }
+        p.setPen(i == index_ ? Theme::textPrimary : Theme::textSecondary);
+        p.drawText(seg, Qt::AlignCenter, options_[i]);
+        p.setPen(Qt::NoPen);
+    }
+}
+
+void DSSegmented::mouseReleaseEvent(QMouseEvent* e) {
+    const int n = int(options_.size());
+    if (n == 0 || !rect().contains(e->position().toPoint())) return;
+    const int i = std::clamp(int(e->position().x() / (width() / qreal(n))), 0, n - 1);
+    if (i == index_) return;
+    index_ = i;
+    update();
+    emit currentIndexChanged(i);
+}
+
 // ------------------------------------------------------------------ picker
 
 DSPicker::DSPicker(QWidget* parent) : QToolButton(parent) {

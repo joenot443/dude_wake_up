@@ -223,6 +223,19 @@ void paint(QPainter* p, const QRectF& rect, Kind kind, const QColor& color) {
     case ChevronLeft:
         p->drawPolyline(QPolygonF({QPointF(10, 4), QPointF(6, 8), QPointF(10, 12)}));
         break;
+    case Lock:
+    case Unlock:
+        p->setBrush(color);
+        p->drawRoundedRect(QRectF(3.5, 7.5, 9, 7), 1.2, 1.2);
+        p->setBrush(Qt::NoBrush);
+        if (kind == Lock) p->drawArc(QRectF(5, 2.5, 6, 10), 0, 180 * 16);
+        else p->drawArc(QRectF(8, 1.5, 6, 10), 20 * 16, 160 * 16);
+        if (kind == Lock) { p->drawLine(QPointF(5, 7.5), QPointF(5, 7)); p->drawLine(QPointF(11, 7.5), QPointF(11, 7)); }
+        break;
+    case Stop:
+        p->setBrush(color);
+        p->drawRoundedRect(QRectF(3.5, 3.5, 9, 9), 1.5, 1.5);
+        break;
     case Plus:
         p->drawLine(QPointF(8, 3.5), QPointF(8, 12.5));
         p->drawLine(QPointF(3.5, 8), QPointF(12.5, 8));

@@ -92,6 +92,32 @@ struct OscillatorInfo {
     float   paramMin = 0, paramMax = 1, value = 0;
 };
 
+// One poll of the audio analysis (ntw_get_extended_audio_analysis).
+struct AudioAnalysis {
+    float rms = 0, lows = 0, mids = 0, highs = 0, bpm = 120, beatPulse = 0;
+    int   bpmMode = 0;          // 0 Auto, 1 Manual, 2 Link
+    bool  bpmLocked = false, bpmEnabled = true;
+    float bpmNudge = 0;
+    int   smoothingMode = 0;    // 0 Exponential, 1 Moving average, 2 None, 3 Peak hold
+    float frequencyRelease = 0, frequencyScale = 1, loudnessRelease = 0, loudnessScale = 1;
+    quint32 beatCount = 0;
+    bool  audioActive = false;
+    int   sourceType = 0;       // 0 Mic, 1 File, 2 System
+    QVector<float> melSpectrum;
+    QVector<float> waveform;
+};
+
+struct FileAudioState {
+    float volume = 1, position = 0, duration = 0;
+    bool  paused = false, isFileSource = false;
+    int   track = -1;
+};
+
+struct AudioTrack {
+    QString name;
+    int     index = 0;
+};
+
 struct AudioSourceItem {
     QString id;
     QString name;
@@ -306,6 +332,25 @@ public:
     void setOscillatorFrequency(const QString& paramId, float frequency);
     void setOscillatorRange(const QString& paramId, float minOutput, float maxOutput);
     void setOscillatorWaveShape(const QString& paramId, int shape);
+
+    AudioAnalysis audioAnalysis() const;
+    FileAudioState fileAudioState() const;
+    QVector<AudioTrack> sampleTracks() const;
+    void setBpmMode(int mode);
+    void setBpmLocked(bool on);
+    void setBpmEnabled(bool on);
+    void setBpm(float bpm);
+    void nudgeBpm(float delta);
+    void tapBpm();
+    void setSmoothingMode(int mode);
+    void setFrequencyRelease(float v);
+    void setFrequencyScale(float v);
+    void setLoudnessRelease(float v);
+    void setLoudnessScale(float v);
+    void selectSampleTrack(int index);
+    void setFileAudioVolume(float v);
+    void toggleFileAudioPause();
+    void setFileAudioPosition(float p);
 
     QVector<AudioSourceItem> audioSources() const;
     QString selectedAudioSource() const;
