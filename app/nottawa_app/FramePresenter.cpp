@@ -20,6 +20,21 @@ uniform float uOpacity;
 uniform vec4  uRect;    // viewport x, y, w, h in framebuffer pixels
 uniform float uRadius;  // corner radius in pixels; 0 = square
 out vec4 outColor;
+
+// Shrunk frames (a 720p output in a node card) alias with one bilinear tap
+// per pixel; average a grid of taps over the pixel's footprint instead.
+vec3 sampleFiltered(vec2 uv) {
+    vec2 footprint = abs(dFdx(uv)) + abs(dFdy(uv));   // in UV units
+    vec2 texels = footprint * vec2(textureSize(uTex, 0));
+    int n = int(clamp(ceil(max(texels.x, texels.y) * 0.5), 1.0, 6.0));
+    if (n == 1) return texture(uTex, uv).rgb;
+    vec3 sum = vec3(0.0);
+    for (int y = 0; y < n; ++y)
+        for (int x = 0; x < n; ++x)
+            sum += texture(uTex, uv + (vec2(x, y) + 0.5) / float(n) * footprint - footprint * 0.5).rgb;
+    return sum / float(n * n);
+}
+
 void main() {
     float coverage = 1.0;
     if (uRadius > 0.0) {
@@ -29,7 +44,7 @@ void main() {
         float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - uRadius;
         coverage = clamp(0.5 - d, 0.0, 1.0);
     }
-    outColor = vec4(texture(uTex, vUV).rgb, uOpacity * coverage);
+    outColor = vec4(sampleFiltered(vUV), uOpacity * coverage);
 }
 )";
 } // anon

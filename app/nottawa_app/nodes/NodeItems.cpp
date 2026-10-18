@@ -5,7 +5,9 @@
 #include "EngineBridge.h"
 #include "NodeEditorView.h"
 
+#include <QGraphicsScene>
 #include <QGraphicsSceneHoverEvent>
+#include <QGraphicsView>
 #include <QGraphicsSceneMouseEvent>
 #include <QLinearGradient>
 #include <QPainter>
@@ -120,7 +122,7 @@ PortItem* NodeItem::port(PortItem::Kind kind, int slot) const {
 }
 
 QRectF NodeItem::boundingRect() const {
-    return body().adjusted(-8, -8, 8, 8);  // room for the selection glow
+    return body().adjusted(-10, -10, 10, 14);  // room for the selection glow and shadow
 }
 
 void NodeItem::paint(QPainter* p, const QStyleOptionGraphicsItem*, QWidget*) {
@@ -128,6 +130,13 @@ void NodeItem::paint(QPainter* p, const QStyleOptionGraphicsItem*, QWidget*) {
     const QRectF b = body();
     QPainterPath rounded;
     rounded.addRoundedRect(b, kRadius, kRadius);
+
+    // A soft drop shadow (the macOS node's 40% black, 8 radius, 4 down):
+    // stacked translucent outlines whose opacity builds up towards the card.
+    p->setPen(Qt::NoPen);
+    p->setBrush(QColor(0, 0, 0, 15));
+    for (int spread = 8; spread >= 1; --spread)
+        p->drawRoundedRect(b.adjusted(-spread, -spread + 4, spread, spread + 4), kRadius + spread, kRadius + spread);
 
     p->fillPath(rounded, kBody);
     view_->drawNodePreview(p, this, b, kRadius, active_ ? 1.0f : 0.4f);
@@ -211,7 +220,10 @@ void NodeItem::paint(QPainter* p, const QStyleOptionGraphicsItem*, QWidget*) {
         p->drawPath(rounded);
         p->setPen(QPen(kAccent, 2.5));
     } else {
-        p->setPen(QPen(QColor(255, 255, 255, 102), 1));
+        // A hairline at any zoom, like the macOS 1 pt border.
+        QPen hairline(QColor(255, 255, 255, 102), 1);
+        hairline.setCosmetic(true);
+        p->setPen(hairline);
     }
     p->drawPath(rounded);
 }
@@ -320,9 +332,16 @@ void EdgeItem::updatePath() {
     if (from_ && to_) setPath(curve(from_->anchor(), to_->anchor()));
 }
 
+// The glow and hit area are sized in screen pixels; this covers them down to
+// the minimum zoom (6 px half-width at 0.2x is 30 scene units).
+QRectF EdgeItem::boundingRect() const { return path().boundingRect().adjusted(-40, -40, 40, 40); }
+
 QPainterPath EdgeItem::shape() const {
+    // A 12 px wide target on screen, whatever the zoom.
+    qreal zoom = 1;
+    if (scene() && !scene()->views().isEmpty()) zoom = scene()->views().first()->transform().m11();
     QPainterPathStroker stroker;
-    stroker.setWidth(12);
+    stroker.setWidth(12 / std::max(zoom, 0.05));
     return stroker.createStroke(path());
 }
 
@@ -335,9 +354,13 @@ void EdgeItem::paint(QPainter* p, const QStyleOptionGraphicsItem*, QWidget*) {
     glow.setAlphaF((sel ? 0.25 : 0.12) * fade);
     line.setAlphaF((sel ? 1.0 : 0.8) * fade);
     p->setBrush(Qt::NoBrush);
-    p->setPen(QPen(glow, sel ? 12 : 8, Qt::SolidLine, Qt::RoundCap));
+    // Screen-pixel widths, as on macOS: cables keep their weight at any zoom.
+    QPen glowPen(glow, sel ? 12 : 8, Qt::SolidLine, Qt::RoundCap);
+    glowPen.setCosmetic(true);
+    p->setPen(glowPen);
     p->drawPath(path());
     QPen pen(line, sel ? 4 : 2.5, Qt::SolidLine, Qt::RoundCap);
+    pen.setCosmetic(true);
     if (aux_) pen.setDashPattern({6.0 / pen.widthF(), 4.0 / pen.widthF()});
     p->setPen(pen);
     p->drawPath(path());
