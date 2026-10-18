@@ -52,6 +52,8 @@ qt_add_executable(nottawa_app WIN32
     ui/AudioGraphs.h         ui/AudioGraphs.cpp
     panels/AudioPanel.h      panels/AudioPanel.cpp
     panels/StageView.h       panels/StageView.cpp
+    SettingsDialog.h         SettingsDialog.cpp
+    Screenshots.h            Screenshots.cpp
     inspector/ParameterRow.h inspector/ParameterRow.cpp
     inspector/PositionPad.h  inspector/PositionPad.cpp
     inspector/SourcePanels.h inspector/SourcePanels.cpp

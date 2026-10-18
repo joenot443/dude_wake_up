@@ -16,6 +16,8 @@
 #include "panels/OscillatorsPage.h"
 #include "panels/StrandsPage.h"
 #include "panels/StageView.h"
+#include "Screenshots.h"
+#include "SettingsDialog.h"
 #include "panels/WelcomeOverlay.h"
 #include "ui/ActionBar.h"
 #include "ui/Toast.h"
@@ -209,6 +211,16 @@ void MainWindow::buildMenus() {
     // when it doesn't have focus.
     undoAction_->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     redoAction_->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    edit->addSeparator();
+    edit->addAction("&Settings…", QKeySequence("Ctrl+,"), this, [this] {
+        if (!settings_) {
+            settings_ = new SettingsDialog(this);
+            connect(settings_, &SettingsDialog::showHintsChanged, editor_, &NodeEditorView::setShowHints);
+        }
+        settings_->show();
+        settings_->raise();
+        settings_->activateWindow();
+    });
 
     auto* view = menuBar()->addMenu("&View");
     view->addAction("Toggle &Full Screen", QKeySequence(Qt::Key_F11), this, [this] {
@@ -621,22 +633,13 @@ void MainWindow::captureScreenshot() {
     auto* engine = EngineBridge::instance();
     const QString id = selectedId_.isEmpty() ? engine->outputNodeId() : selectedId_;
     if (id.isEmpty()) return;
-    QSettings settings;
-    QString folder = settings.value("screenshots/folder").toString();
-    if (folder.isEmpty() || !QFileInfo(folder).isDir()) {
-        folder = QFileDialog::getExistingDirectory(this, "Choose a folder for screenshots",
-                                                   QStandardPaths::writableLocation(QStandardPaths::PicturesLocation));
-        if (folder.isEmpty()) return;
-        settings.setValue("screenshots/folder", folder);
-    }
     const QImage image = editor_->captureNode(id, engine->resolution());
     if (image.isNull()) { toast_->show("Nothing to capture yet"); return; }
-    const QString file = QDir(folder).filePath(
-        QString("Nottawa %1.png").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd 'at' HH.mm.ss")));
-    if (image.save(file)) {
-        toast_->show("Screenshot saved to " + QDir::toNativeSeparators(folder));
+    const QString file = Screenshots::save(image, this);
+    if (!file.isEmpty()) {
+        toast_->show("Screenshot saved to " + QDir::toNativeSeparators(QFileInfo(file).absolutePath()));
         log("[screenshot] " + file);
-    } else {
+    } else if (!Screenshots::folder().isEmpty()) {
         toast_->show("Couldn't save the screenshot", 5000);
     }
 }

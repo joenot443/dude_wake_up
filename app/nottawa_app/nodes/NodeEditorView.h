@@ -60,6 +60,8 @@ public:
     void openPreview(const QString& id);
     QStringList openPreviewIds() const;
     void closePreview(const QString& id);
+    // "Connect a source" / "Enable audio" overlays on nodes (Settings).
+    void setShowHints(bool on);
     // Adds a saved strand, its top-left node at `scenePos` when given.
     void loadStrand(const QString& strandId, const QPointF* scenePos = nullptr);
     // Downloads a community strand and adds it likewise.
@@ -113,6 +115,10 @@ private:
     QPointF nextFreePosition() const;
     // Positions a just-added node, selects it and syncs.
     void placeNew(const QString& id, QPointF pos);
+    // With "Automatically advance output window" on, a preview window
+    // showing `fromId` moves to `toId` when they're newly connected from
+    // the main output.
+    void advancePreview(const QString& fromId, const QString& toId, int outSlot);
 
     QHash<QString, NodeItem*> nodes_;
     QHash<QString, EdgeItem*> edges_;
@@ -140,6 +146,7 @@ private:
     bool   syncing_ = false;
     bool   fitted_ = false;
     bool   audioActive_ = false;
+    bool   showHints_ = true;
     quint64 framesPainted_ = 0;
     QSet<QString> audioReactive_;
 };

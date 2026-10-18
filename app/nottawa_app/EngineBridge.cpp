@@ -134,6 +134,9 @@ void EngineBridge::stop() {
 
 float EngineBridge::fps() const { return running_ ? ntw_engine_fps() : 0.f; }
 
+int  EngineBridge::resolutionIndex() const { return running_ ? ntw_get_resolution_setting_index() : 3; }
+void EngineBridge::setResolutionIndex(int index) { if (running_) ntw_set_resolution(index); }
+
 QSize EngineBridge::resolution() const {
     return QSize(int(ntw_get_resolution_width()), int(ntw_get_resolution_height()));
 }
@@ -602,6 +605,32 @@ void EngineBridge::setParameterDriverScale(const QString& id, float v) { ntw_set
 void EngineBridge::beginMidiLearning(const QString& id) { ntw_begin_midi_learning(id.toUtf8().constData()); }
 void EngineBridge::stopMidiLearning() { ntw_stop_midi_learning(); }
 void EngineBridge::removeMidiBinding(const QString& id) { ntw_remove_midi_binding(id.toUtf8().constData()); }
+
+QVector<EngineBridge::MidiInput> EngineBridge::midiInputs() const {
+    QVector<MidiInput> out;
+    if (!running_) return out;
+    int n = 0;
+    NTWMidiInputInfo* arr = ntw_get_midi_inputs(&n);
+    for (int i = 0; i < n; ++i) out.push_back({str(arr[i].name), arr[i].port, arr[i].isOpen != 0});
+    ntw_free_midi_input_info_array(arr, n);
+    return out;
+}
+
+QVector<EngineBridge::MidiAssignment> EngineBridge::midiAssignments() const {
+    QVector<MidiAssignment> out;
+    if (!running_) return out;
+    int n = 0;
+    NTWMidiAssignmentInfo* arr = ntw_get_midi_assignments(&n);
+    for (int i = 0; i < n; ++i)
+        out.push_back({str(arr[i].paramId), str(arr[i].paramName), str(arr[i].ownerName), str(arr[i].midiDescriptor)});
+    ntw_free_midi_assignment_info_array(arr, n);
+    return out;
+}
+
+bool  EngineBridge::midiSmoothingEnabled() const { return running_ && ntw_get_midi_smoothing_enabled(); }
+void  EngineBridge::setMidiSmoothingEnabled(bool on) { if (running_) ntw_set_midi_smoothing_enabled(on); }
+float EngineBridge::midiSmoothingMs() const { return running_ ? ntw_get_midi_smoothing_duration_ms() : 0.0f; }
+void  EngineBridge::setMidiSmoothingMs(float ms) { if (running_) ntw_set_midi_smoothing_duration_ms(ms); }
 
 QVector<OptionalEffect> EngineBridge::optionalEffects(const QString& id) const {
     QVector<OptionalEffect> out;

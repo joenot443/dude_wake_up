@@ -21,6 +21,7 @@ class QSplitter;
 class QStackedWidget;
 class QTimer;
 class QToolButton;
+class SettingsDialog;
 class ShaderCodeEditor;
 class StageView;
 class Toast;
@@ -93,6 +94,7 @@ private:
     QAction*        undoAction_ = nullptr;
     QAction*        redoAction_ = nullptr;
     QMenu*          recentMenu_ = nullptr;
+    SettingsDialog* settings_ = nullptr;
 
     QTimer*         statsTimer_  = nullptr;
     QTimer*         chromeTimer_ = nullptr;

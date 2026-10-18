@@ -6,6 +6,7 @@
 #include "Theme.h"
 
 #include <QApplication>
+#include <QSettings>
 #include <QTimer>
 #include <QGraphicsLineItem>
 #include <QGraphicsScene>
@@ -38,6 +39,7 @@ constexpr qreal kStackStep = 228.0;
 } // anon
 
 NodeEditorView::NodeEditorView(QWidget* parent) : QGraphicsView(parent) {
+    showHints_ = QSettings().value("ui/showNodeHints", true).toBool();
     // Live previews are drawn with GL straight into the viewport, which
     // shares textures with the engine through Qt's global share context.
     setViewport(new QOpenGLWidget);
@@ -69,7 +71,7 @@ NodeEditorView::NodeEditorView(QWidget* parent) : QGraphicsView(parent) {
         const bool audio = EngineBridge::instance()->isAudioActive();
         if (audio == audioActive_) return;
         audioActive_ = audio;
-        for (NodeItem* n : std::as_const(nodes_)) n->setAudioHint(!audio && audioReactive_.contains(n->id()));
+        for (NodeItem* n : std::as_const(nodes_)) n->setAudioHint(showHints_ && !audio && audioReactive_.contains(n->id()));
     });
     audioPoll->start(500);
 
@@ -139,9 +141,9 @@ void NodeEditorView::syncFromEngine() {
             port->setConnected(on);
             if (port->kind() == PortItem::Input) anyInput |= on;
         }
-        item->setNeedsInput(n.isShader && n.inputCount > 0 && !anyInput);
+        item->setNeedsInput(showHints_ && n.isShader && n.inputCount > 0 && !anyInput);
         if (n.audioReactive) audioReactive_.insert(n.id); else audioReactive_.remove(n.id);
-        item->setAudioHint(n.audioReactive && !audioActive_);
+        item->setAudioHint(showHints_ && n.audioReactive && !audioActive_);
     }
     for (auto it = nodes_.begin(); it != nodes_.end();) {
         if (liveNodes.contains(it.key())) { ++it; continue; }
@@ -404,7 +406,9 @@ void NodeEditorView::finishPortDrag(const QPoint& viewPos) {
     }
     const PortItem* out = from->kind() == PortItem::Output ? from : to;
     const PortItem* in  = from->kind() == PortItem::Input ? from : to;
-    engine->connectNodes(out->nodeId(), in->nodeId(), out->slot(), in->slot());
+    const QString outId = out->nodeId(), inId = in->nodeId();
+    const int outSlot = out->slot();
+    if (!engine->connectNodes(outId, inId, outSlot, in->slot()).isEmpty()) advancePreview(outId, inId, outSlot);
 }
 
 void NodeEditorView::finishCut() {
@@ -676,7 +680,9 @@ void NodeEditorView::openPreview(const QString& id) {
     NodeItem* node = nodes_.value(id);
     if (!node) return;
     QPointer<PreviewWindow>& window = previews_[id];
-    if (!window) window = new PreviewWindow(id, node->name(), this->window());
+    if (!window) window = new PreviewWindow(id, node->name(), [this](const QString& source) {
+        return captureNode(source, EngineBridge::instance()->resolution());
+    }, this->window());
     window->show();
     window->raise();
     window->activateWindow();
@@ -691,6 +697,21 @@ QStringList NodeEditorView::openPreviewIds() const {
 
 void NodeEditorView::closePreview(const QString& id) {
     if (PreviewWindow* w = previews_.value(id)) w->close();
+}
+
+void NodeEditorView::advancePreview(const QString& fromId, const QString& toId, int outSlot) {
+    if (outSlot != 0 || !QSettings().value("ui/autoAdvanceOutputWindow", true).toBool()) return;
+    PreviewWindow* window = previews_.value(fromId);
+    if (!window || previews_.value(toId)) return;
+    NodeItem* to = nodes_.value(toId);
+    window->setSource(toId, to ? to->name() : QStringLiteral("Preview"));
+    previews_.remove(fromId);
+    previews_.insert(toId, window);
+}
+
+void NodeEditorView::setShowHints(bool on) {
+    showHints_ = on;
+    syncFromEngine();
 }
 
 void NodeEditorView::cycleSelection(bool backwards) {
@@ -723,6 +744,7 @@ QString NodeEditorView::addFromCatalog(int typeRaw, bool isSource, const QString
     else if (anchor) pos = anchor->pos() + QPointF(kChainStep, 0);
     else pos = nextFreePosition();
     placeNew(id, pos);
+    if (anchor) advancePreview(connectFrom, id, 0);
     return id;
 }
 

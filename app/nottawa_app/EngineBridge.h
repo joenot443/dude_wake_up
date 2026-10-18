@@ -205,6 +205,10 @@ public:
     bool isRunning() const { return running_; }
     float fps() const;
     QSize resolution() const;
+    // Output resolution preset: 0 240p, 1 360p, 2 480p, 3 720p, 4 1080p,
+    // 5 1440p, 6 4K.
+    int   resolutionIndex() const;
+    void  setResolutionIndex(int index);
 
     QVector<CatalogItem> effects() const;
     QVector<CatalogItem> sources() const;
@@ -269,6 +273,15 @@ public:
     void beginMidiLearning(const QString& paramId);
     void stopMidiLearning();
     void removeMidiBinding(const QString& paramId);
+    struct MidiInput { QString name; int port = 0; bool open = false; };
+    struct MidiAssignment { QString paramId, paramName, ownerName, descriptor; };
+    QVector<MidiInput>      midiInputs() const;
+    QVector<MidiAssignment> midiAssignments() const;
+    // Eases MIDI control changes over a duration (toggles aren't eased).
+    bool  midiSmoothingEnabled() const;
+    void  setMidiSmoothingEnabled(bool on);
+    float midiSmoothingMs() const;
+    void  setMidiSmoothingMs(float ms);
 
     // Optional effects built into every node (HSB, Blur, Mirror...).
     QVector<OptionalEffect> optionalEffects(const QString& connectableId) const;
