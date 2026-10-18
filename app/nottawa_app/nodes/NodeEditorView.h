@@ -131,6 +131,9 @@ private:
     QHash<QString, NodeItem*> nodes_;
     QHash<QString, EdgeItem*> edges_;
     QHash<QString, QPointer<PreviewWindow>> previews_;
+    // Each node's main-input upstream as of the last sync, so a preview of
+    // a deleted node can fall back to what fed it.
+    QHash<QString, QString> upstream_;
     QString lastAddedId_;
     QHash<QString, QPointF> sharedDrops_;  // slug -> drop point, while downloading
 

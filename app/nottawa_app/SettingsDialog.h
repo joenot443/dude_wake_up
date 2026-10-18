@@ -31,6 +31,8 @@ private:
     DSPicker*    resolution_;
     DSToggle*    hints_;
     DSToggle*    advance_;
+    DSSlider*    fade_;
+    QLabel*      fadeLabel_;
     QLabel*      folder_;
     DSPicker*    format_;
     DSToggle*    smoothing_;

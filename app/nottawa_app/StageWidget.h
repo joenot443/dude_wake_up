@@ -4,6 +4,7 @@
 
 #include <QOpenGLWidget>
 #include <QString>
+#include <QElapsedTimer>
 #include <QTimer>
 #include <atomic>
 
@@ -18,6 +19,8 @@ public:
     ~StageWidget() override;
 
     void setSourceNode(const QString& connectableId);
+    // Switches to another node, fading the current one out over `ms`.
+    void crossfadeTo(const QString& connectableId, int ms);
     // Slower repaints for thumbnails (default: the display's refresh rate).
     void setRefreshInterval(int ms) { repaintTimer_.setInterval(ms); }
     QString sourceNode() const { return nodeId_; }
@@ -34,5 +37,8 @@ private:
     FramePresenter presenter_;
     FramePresenter::Reader reader_;
     QString        nodeId_;
+    QString        outgoing_;  // fading out over the current node
+    QElapsedTimer  fade_;
+    int            fadeMs_ = 0;
     std::atomic<quint64> framesShown_{0};
 };

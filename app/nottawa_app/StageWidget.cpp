@@ -18,6 +18,7 @@ StageWidget::StageWidget(QWidget* parent, FramePresenter::Reader reader)
 
 StageWidget::~StageWidget() {
     if (!nodeId_.isEmpty()) EngineBridge::instance()->releaseFrames(nodeId_);
+    if (!outgoing_.isEmpty()) EngineBridge::instance()->releaseFrames(outgoing_);
     makeCurrent();
     presenter_.destroy();
     doneCurrent();
@@ -26,9 +27,23 @@ StageWidget::~StageWidget() {
 void StageWidget::setSourceNode(const QString& connectableId) {
     if (connectableId == nodeId_) return;
     auto* engine = EngineBridge::instance();
+    if (!outgoing_.isEmpty()) { engine->releaseFrames(outgoing_); outgoing_.clear(); }
     if (!nodeId_.isEmpty()) engine->releaseFrames(nodeId_);
     nodeId_ = connectableId;
     if (!nodeId_.isEmpty()) engine->retainFrames(nodeId_);
+    update();
+}
+
+void StageWidget::crossfadeTo(const QString& connectableId, int ms) {
+    if (connectableId == nodeId_) return;
+    if (ms <= 0 || nodeId_.isEmpty()) { setSourceNode(connectableId); return; }
+    auto* engine = EngineBridge::instance();
+    if (!outgoing_.isEmpty()) engine->releaseFrames(outgoing_);
+    outgoing_ = nodeId_;  // keeps its retain until the fade ends
+    nodeId_ = connectableId;
+    if (!nodeId_.isEmpty()) engine->retainFrames(nodeId_);
+    fadeMs_ = ms;
+    fade_.start();
     update();
 }
 
@@ -44,4 +59,13 @@ void StageWidget::paintGL() {
     bool isNew = false;
     presenter_.draw(EngineBridge::instance()->frames(nodeId_), reader_, 1.0f, 0.0f, &isNew);
     if (isNew) framesShown_.fetch_add(1);
+    if (!outgoing_.isEmpty()) {
+        const float t = float(fade_.elapsed()) / float(fadeMs_);
+        if (t >= 1.0f) {
+            EngineBridge::instance()->releaseFrames(outgoing_);
+            outgoing_.clear();
+        } else {
+            presenter_.draw(EngineBridge::instance()->frames(outgoing_), reader_, 1.0f - t);
+        }
+    }
 }

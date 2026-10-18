@@ -147,9 +147,32 @@ void NodeEditorView::syncFromEngine() {
         if (n.audioReactive) audioReactive_.insert(n.id); else audioReactive_.remove(n.id);
         item->setAudioHint(showHints_ && n.audioReactive && !audioActive_);
     }
+    // Previews of deleted nodes retreat to the nearest surviving node
+    // upstream along main inputs, as on macOS; with none, they close.
+    for (auto it = nodes_.begin(); it != nodes_.end(); ++it) {
+        if (liveNodes.contains(it.key())) continue;
+        PreviewWindow* w = previews_.take(it.key());
+        if (!w) continue;
+        QString fallback = upstream_.value(it.key());
+        QSet<QString> seen{it.key()};
+        while (!fallback.isEmpty() && !liveNodes.contains(fallback) && !seen.contains(fallback)) {
+            seen.insert(fallback);
+            fallback = upstream_.value(fallback);
+        }
+        if (fallback.isEmpty() || !liveNodes.contains(fallback) || previews_.value(fallback)) {
+            w->close();
+            continue;
+        }
+        QString name;
+        for (const GraphNode& n : graphNodes) if (n.id == fallback) name = n.name;
+        w->setSource(fallback, name);
+        previews_.insert(fallback, w);
+    }
+    upstream_.clear();
+    for (const GraphEdge& e : graphEdges)
+        if (e.inputSlot == 0) upstream_.insert(e.endId, e.startId);
     for (auto it = nodes_.begin(); it != nodes_.end();) {
         if (liveNodes.contains(it.key())) { ++it; continue; }
-        if (PreviewWindow* w = previews_.take(it.key())) w->close();
         audioReactive_.remove(it.key());
         engine->releaseFrames(it.key());
         delete it.value();
@@ -709,7 +732,7 @@ void NodeEditorView::advancePreview(const QString& fromId, const QString& toId, 
     PreviewWindow* window = previews_.value(fromId);
     if (!window || previews_.value(toId)) return;
     NodeItem* to = nodes_.value(toId);
-    window->setSource(toId, to ? to->name() : QStringLiteral("Preview"));
+    window->advanceTo(toId, to ? to->name() : QStringLiteral("Preview"));
     previews_.remove(fromId);
     previews_.insert(toId, window);
 }

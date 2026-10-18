@@ -101,9 +101,30 @@ SettingsDialog::SettingsDialog(QWidget* parent) : QDialog(parent) {
     });
     display->addWidget(row("Show Node Hints", hints_, content));
     advance_ = new DSToggle({}, content);
-    connect(advance_, &DSToggle::toggled, this, [](bool on) { QSettings().setValue("ui/autoAdvanceOutputWindow", on); });
+    connect(advance_, &DSToggle::toggled, this, [this](bool on) {
+        QSettings().setValue("ui/autoAdvanceOutputWindow", on);
+        fade_->setEnabled(on);
+    });
     display->addWidget(row("Automatically advance output window", advance_, content));
-    display->addWidget(caption("A preview window follows its node's output onto an effect you connect after it.", content));
+    auto* fadeBox = new QWidget(content);
+    auto* fadeRow = new QHBoxLayout(fadeBox);
+    fadeRow->setContentsMargins(0, 0, 0, 0);
+    fade_ = new DSSlider(fadeBox);
+    fade_->setRange(0, 2);
+    fade_->setMinimumWidth(160);
+    fadeLabel_ = new QLabel(fadeBox);
+    fadeLabel_->setFixedWidth(36);
+    fadeLabel_->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    fadeLabel_->setStyleSheet(QString("color: %1; font-size: 8pt;").arg(Theme::textSecondary.name()));
+    connect(fade_, &DSSlider::valueChanged, this, [this](float s) {
+        QSettings().setValue("ui/outputWindowFadeSeconds", double(s));
+        fadeLabel_->setText(QString::number(s, 'f', 1) + "s");
+    });
+    fadeRow->addWidget(fade_, 1);
+    fadeRow->addWidget(fadeLabel_);
+    display->addWidget(row("Advance Fade", fadeBox, content));
+    display->addWidget(caption("A preview window follows its node's output onto an effect you connect after it, "
+                               "crossfading over the Advance Fade time.", content));
 
     // Screenshots.
     QVBoxLayout* shots = group("Screenshots");
@@ -176,6 +197,10 @@ void SettingsDialog::refresh() {
     resolution_->setCurrentIndex(eng->resolutionIndex());
     hints_->setChecked(settings.value("ui/showNodeHints", true).toBool());
     advance_->setChecked(settings.value("ui/autoAdvanceOutputWindow", true).toBool());
+    const float fade = float(settings.value("ui/outputWindowFadeSeconds", 0.3).toDouble());
+    fade_->setValue(fade);
+    fade_->setEnabled(advance_->isChecked());
+    fadeLabel_->setText(QString::number(fade, 'f', 1) + "s");
     const QString folder = Screenshots::folder();
     const QString shown = folder.isEmpty() ? QStringLiteral("Not set — chosen on first capture") : QDir::toNativeSeparators(folder);
     folder_->setText(folder_->fontMetrics().elidedText(shown, folder.isEmpty() ? Qt::ElideRight : Qt::ElideLeft, 200));

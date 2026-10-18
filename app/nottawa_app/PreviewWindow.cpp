@@ -60,6 +60,16 @@ void PreviewWindow::setSource(const QString& connectableId, const QString& name)
     setNodeName(name);
 }
 
+int PreviewWindow::fadeMs() {
+    return int(QSettings().value("ui/outputWindowFadeSeconds", 0.3).toDouble() * 1000);
+}
+
+void PreviewWindow::advanceTo(const QString& connectableId, const QString& name) {
+    id_ = connectableId;
+    view_->crossfadeTo(connectableId, fadeMs());
+    setNodeName(name);
+}
+
 void PreviewWindow::toggleFullscreen() {
     isFullScreen() ? showNormal() : showFullScreen();
 }

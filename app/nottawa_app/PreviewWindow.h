@@ -21,6 +21,9 @@ public:
     void setNodeName(const QString& name);
     // Switches the window to another node's output.
     void setSource(const QString& connectableId, const QString& name);
+    // As setSource, crossfading over the "Advance Fade" duration (Settings).
+    void advanceTo(const QString& connectableId, const QString& name);
+    static int fadeMs();
     QString source() const { return id_; }
 
     // Stretch every preview window to fill (else fit the aspect ratio).
