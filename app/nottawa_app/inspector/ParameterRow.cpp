@@ -1,5 +1,7 @@
 #include "ParameterRow.h"
 
+#include "ui/ParamSelection.h"
+
 #include "Icons.h"
 #include "Theme.h"
 #include "ui/Controls.h"
@@ -362,6 +364,15 @@ ParameterRow::ParameterRow(const ParamInfo& p, Mode mode, const QString& axisLab
     }
     updateButtons();
     updateDrivenState();
+    ParamSelection::instance()->track(this, p.id);
+}
+
+bool ParameterRow::beginEdit(const QString& initialText) {
+    if (!valueField_ || !valueField_->isEnabled()) return false;
+    valueField_->setFocus(Qt::OtherFocusReason);
+    valueField_->setText(initialText);
+    valueField_->setCursorPosition(int(initialText.size()));
+    return true;
 }
 
 void ParameterRow::buildHeader(QVBoxLayout* layout) {

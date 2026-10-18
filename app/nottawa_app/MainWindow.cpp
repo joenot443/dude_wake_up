@@ -19,6 +19,7 @@
 #include "panels/StageView.h"
 #include "PreviewWindow.h"
 #include "Screenshots.h"
+#include "ui/ParamSelection.h"
 #include "ui/Flash.h"
 #include "SettingsDialog.h"
 #include "panels/WelcomeOverlay.h"
@@ -43,6 +44,13 @@
 #include <QMessageBox>
 #include <QOpenGLContext>
 #include <QResizeEvent>
+#include <QAbstractSpinBox>
+#include <QClipboard>
+#include <QComboBox>
+#include <QElapsedTimer>
+#include <QLineEdit>
+#include <QPlainTextEdit>
+#include <QTextEdit>
 #include <QSettings>
 #include <QSplitter>
 #include <QStackedWidget>
@@ -184,7 +192,123 @@ void MainWindow::resizeEvent(QResizeEvent* e) {
     welcome_->setGeometry(centre_->rect());
 }
 
+// The macOS editor's parameter keys: Tab / Shift+Tab select the next or
+// previous parameter (inspector, or the stage strips in stage mode); with one
+// selected, Up/Down step it (Shift coarse, Alt fine), a digit, '-' or '.'
+// starts typing its value, and Escape clears it. Escape otherwise deselects
+// the nodes. Text fields keep their keys.
+bool MainWindow::handleParameterKey(QObject* watched, QKeyEvent* e) {
+    auto* target = qobject_cast<QWidget*>(watched);
+    if (!target || target->window() != this || welcome_->isVisible()) return false;
+    if (QApplication::activePopupWidget() || QApplication::activeModalWidget()) return false;
+    QWidget* focus = QApplication::focusWidget();
+    if (qobject_cast<QLineEdit*>(focus) || qobject_cast<QAbstractSpinBox*>(focus) ||
+        qobject_cast<QPlainTextEdit*>(focus) || qobject_cast<QTextEdit*>(focus) || qobject_cast<QComboBox*>(focus))
+        return false;
+    if (target != (focus ? focus : this)) return false;  // once per key press, at its first receiver
+
+    const bool stage = centre_->currentWidget() == stage_;
+    const Qt::KeyboardModifiers mods = e->modifiers();
+    auto* selection = ParamSelection::instance();
+    const QVector<ParamInfo> params = stage ? stage_->navigableParameters() : inspector_->navigableParameters();
+    auto reveal = [&](const QString& id) { stage ? stage_->revealParameter(id) : inspector_->revealParameter(id); };
+
+    if ((e->key() == Qt::Key_Tab || e->key() == Qt::Key_Backtab) && !(mods & (Qt::ControlModifier | Qt::AltModifier))) {
+        if (params.isEmpty()) return false;
+        const bool back = e->key() == Qt::Key_Backtab || (mods & Qt::ShiftModifier);
+        int current = -1;
+        for (int i = 0; i < params.size(); ++i) if (params[i].id == selection->id()) current = i;
+        const int n = int(params.size());
+        const int next = current < 0 ? (back ? n - 1 : 0) : (current + (back ? -1 : 1) + n) % n;
+        selection->set(params[next].id);
+        reveal(params[next].id);
+        return true;
+    }
+
+    const ParamInfo* param = nullptr;
+    for (const ParamInfo& p : params) if (p.id == selection->id()) param = &p;
+    if (param) {
+        if (e->key() == Qt::Key_Up || e->key() == Qt::Key_Down) {
+            stepParameter(*param, e->key() == Qt::Key_Up ? 1 : -1, mods);
+            return true;
+        }
+        if (e->key() == Qt::Key_Escape) {
+            selection->clear();
+            return true;
+        }
+        const QString text = e->text();
+        if (!stage && param->type == ParamInfo::Standard && !(mods & (Qt::ControlModifier | Qt::AltModifier)) &&
+            text.size() == 1 && (text[0].isDigit() || text[0] == '-' || text[0] == '.'))
+            return inspector_->beginEdit(param->id, text);
+    }
+    // Stage mode, as on macOS: S saves a screenshot of the output (Shift+S
+    // chooses the folder first), C copies it.
+    if (stage && !(mods & (Qt::ControlModifier | Qt::AltModifier)) && (e->key() == Qt::Key_S || e->key() == Qt::Key_C)) {
+        const QString id = stage_->outputId();
+        if (id.isEmpty()) return false;
+        const QImage image = editor_->captureNode(id, EngineBridge::instance()->resolution());
+        if (image.isNull()) return true;
+        if (e->key() == Qt::Key_C) {
+            QApplication::clipboard()->setImage(image);
+            toast_->show("Copied the output");
+            return true;
+        }
+        if ((mods & Qt::ShiftModifier) && Screenshots::chooseFolder(this).isEmpty()) return true;
+        const QString file = Screenshots::save(image, this);
+        if (!file.isEmpty()) {
+            Flash::over(stage_);
+            toast_->show("Screenshot saved to " + QDir::toNativeSeparators(QFileInfo(file).absolutePath()));
+        }
+        return true;
+    }
+    if (e->key() == Qt::Key_Escape && !stage && !editor_->selectedNodeIds().isEmpty()) {
+        editor_->scene()->clearSelection();
+        return true;
+    }
+    return false;
+}
+
+// One keyboard step: 1% of the range (Shift 10%, Alt 0.1%); ints by 1 (Shift
+// 10); bools on for Up, off for Down. Repeats build on the last value set,
+// since the controls only refresh a few times a second.
+void MainWindow::stepParameter(const ParamInfo& p, int direction, Qt::KeyboardModifiers mods) {
+    static QString lastId;
+    static double lastValue = 0;
+    static QElapsedTimer lastTime;
+    const bool recent = lastId == p.id && lastTime.isValid() && lastTime.elapsed() < 600;
+    auto* eng = EngineBridge::instance();
+    switch (p.type) {
+    case ParamInfo::Standard: {
+        const double range = p.max - p.min;
+        const double fraction = (mods & Qt::ShiftModifier) ? 0.1 : (mods & Qt::AltModifier) ? 0.001 : 0.01;
+        const double from = recent ? lastValue : p.value;
+        const double value = std::clamp(from + direction * std::max(range * fraction, 1e-6),
+                                        double(std::min(p.min, p.max)), double(std::max(p.min, p.max)));
+        eng->setParameter(p.id, float(value));
+        lastValue = value;
+        break;
+    }
+    case ParamInfo::Int: {
+        const int step = (mods & Qt::ShiftModifier) ? 10 : 1;
+        const int from = recent ? int(lastValue) : p.intValue;
+        const int value = std::clamp(from + direction * step, int(p.min), int(p.max));
+        eng->setParameter(p.id, value);
+        lastValue = value;
+        break;
+    }
+    case ParamInfo::Bool:
+        eng->setParameter(p.id, direction > 0);
+        emit inspector_->graphMayChange();  // bools can add or remove pins
+        break;
+    default:
+        return;
+    }
+    lastId = p.id;
+    lastTime.restart();
+}
+
 bool MainWindow::eventFilter(QObject* watched, QEvent* e) {
+    if (e->type() == QEvent::KeyPress && handleParameterKey(watched, static_cast<QKeyEvent*>(e))) return true;
     if ((e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease)
         && static_cast<QKeyEvent*>(e)->key() == Qt::Key_Shift && !static_cast<QKeyEvent*>(e)->isAutoRepeat()) {
         const bool down = e->type() == QEvent::KeyPress;

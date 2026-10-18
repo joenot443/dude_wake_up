@@ -103,6 +103,9 @@ public:
     ParameterRow(const ParamInfo& p, Mode mode = Full, const QString& axisLabel = {}, QWidget* parent = nullptr);
 
     const QString& paramId() const { return info_.id; }
+    const ParamInfo& info() const { return info_; }
+    // Starts typing a value (keyboard: a digit with the row selected).
+    bool beginEdit(const QString& initialText);
     // Takes fresh engine state; skipped for controls being edited.
     void setInfo(const ParamInfo& p);
 

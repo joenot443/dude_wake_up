@@ -2,6 +2,8 @@
 
 #include "Icons.h"
 #include "StageWidget.h"
+#include "panels/CompactParameterControl.h"
+#include "ui/ParamSelection.h"
 #include "Theme.h"
 #include "nodes/NodeEditorView.h"
 #include "ui/Controls.h"
@@ -122,6 +124,8 @@ public:
         }
         layout->addLayout(header);
         grid_ = new QGridLayout;
+        grid_->setColumnStretch(0, 1);
+        grid_->setColumnStretch(1, 1);
         grid_->setHorizontalSpacing(8);
         grid_->setVerticalSpacing(4);
         layout->addLayout(grid_);
@@ -135,7 +139,7 @@ public:
     void setSoloed(bool on) { solo_->setChecked(on); }
 
     // Rebuilds the controls when the shown parameters change; otherwise
-    // updates their values.
+    // updates their values (and Bypass, which can change elsewhere).
     void refresh(bool showAll) {
         QVector<ParamInfo> shown;
         for (const ParamInfo& p : EngineBridge::instance()->parameters(node_.id))
@@ -146,16 +150,19 @@ public:
             signature_ = signature;
             rebuildControls(shown);
         }
-        for (const ParamInfo& p : shown) {
-            const auto it = controls_.find(p.id);
-            if (it == controls_.end()) continue;
-            QWidget* w = it.value();
-            if (auto* s = qobject_cast<DSSlider*>(w)) s->setValue(p.type == ParamInfo::Int ? float(p.intValue) : p.value);
-            else if (auto* t = qobject_cast<DSToggle*>(w)) t->setChecked(p.boolValue);
-            else if (auto* k = qobject_cast<DSPicker*>(w)) k->setCurrentIndex(p.intValue);
-        }
+        shown_ = shown;
+        for (const ParamInfo& p : shown)
+            if (CompactParameterControl* c = controls_.value(p.id)) c->setInfo(p);
         empty_->setVisible(shown.isEmpty() && !showAll);
+        if (bypass_) {
+            const QSignalBlocker block(bypass_);
+            bypass_->setChecked(EngineBridge::instance()->isShaderBypassed(node_.id));
+            update();
+        }
     }
+
+    const QVector<ParamInfo>& shown() const { return shown_; }
+    QWidget* control(const QString& paramId) const { return controls_.value(paramId); }
 
 protected:
     void paintEvent(QPaintEvent*) override {
@@ -191,48 +198,15 @@ private:
             delete item;
         }
         controls_.clear();
-        auto* eng = EngineBridge::instance();
         int i = 0;
         for (const ParamInfo& p : params) {
-            QWidget* control = nullptr;
-            if (p.type == ParamInfo::Bool) {
-                auto* t = new DSToggle(p.name, this);
-                t->setSmall(true);
-                connect(t, &DSToggle::toggled, this, [eng, id = p.id](bool on) { eng->setParameter(id, on); });
-                control = t;
-            } else if (p.type == ParamInfo::Int && !p.options.isEmpty()) {
-                auto* box = new QWidget(this);
-                auto* row = new QHBoxLayout(box);
-                row->setContentsMargins(0, 0, 0, 0);
-                auto* label = new QLabel(p.name, box);
-                label->setStyleSheet(QString("color: %1; font-size: 8pt;").arg(Theme::textSecondary.name()));
-                auto* picker = new DSPicker(box);
-                picker->setOptions(p.options);
-                connect(picker, &DSPicker::currentIndexChanged, this, [eng, id = p.id](int v) { eng->setParameter(id, v); });
-                row->addWidget(label);
-                row->addStretch(1);
-                row->addWidget(picker);
-                controls_.insert(p.id, picker);
-                grid_->addWidget(box, i / 2, i % 2);
-                ++i;
-                continue;
-            } else if (p.type == ParamInfo::Standard || p.type == ParamInfo::Int) {
-                auto* s = new DSSlider(this);
-                s->setLabel(p.name);
-                s->setShowValue(true);
-                s->setRange(p.min, p.max);
-                if (p.type == ParamInfo::Int) { s->setStep(1); s->setDecimals(0); }
-                s->setEnabled(!p.driven());
-                const bool isInt = p.type == ParamInfo::Int;
-                connect(s, &DSSlider::valueChanged, this, [eng, id = p.id, isInt](float v) {
-                    if (isInt) eng->setParameter(id, int(std::lround(v)));
-                    else eng->setParameter(id, v);
-                });
-                control = s;
-            }
-            if (!control) continue;
+            auto* control = new CompactParameterControl(p, this);
+            // An unfavourited parameter leaves the favourites-only list.
+            connect(control, &CompactParameterControl::favoritesChanged, stage_, [this] {
+                QMetaObject::invokeMethod(stage_, [stage = stage_] { stage->refreshNow(); }, Qt::QueuedConnection);
+            });
             controls_.insert(p.id, control);
-            grid_->addWidget(control, i / 2, i % 2);
+            grid_->addWidget(control, i / 2, i % 2, Qt::AlignTop);
             ++i;
         }
     }
@@ -245,7 +219,8 @@ private:
     QToolButton* bypass_ = nullptr;
     QGridLayout* grid_;
     QLabel*      empty_;
-    QHash<QString, QWidget*> controls_;
+    QHash<QString, CompactParameterControl*> controls_;
+    QVector<ParamInfo> shown_;
     QString      signature_;
     QPoint       pressPos_;
 };
@@ -328,10 +303,12 @@ StageView::StageView(NodeEditorView* editor, QWidget* parent) : QWidget(parent),
     leftLayout->addLayout(filter);
     leftLayout->addWidget(hline(left));
     auto* scroll = new QScrollArea(left);
+    scroll_ = scroll;
     scroll->setWidgetResizable(true);
     scroll->setFrameShape(QFrame::NoFrame);
     scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     stripList_ = new QWidget(scroll);
+    stripList_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);  // fit the column
     stripLayout_ = new QVBoxLayout(stripList_);
     stripLayout_->setContentsMargins(12, 8, 12, 8);
     stripLayout_->setSpacing(8);
@@ -679,4 +656,18 @@ void StageView::dropEvent(QDropEvent* e) {
     QSettings().setValue("stage/order", order_);
     signature_.clear();
     rebuild();
+}
+
+void StageView::refreshNow() { refreshValues(); }
+
+QVector<ParamInfo> StageView::navigableParameters() const {
+    QVector<ParamInfo> out;
+    for (const Strip& s : strips_)
+        if (ChannelStrip* w = stripWidgets_.value(s.node.id)) out += w->shown();
+    return out;
+}
+
+void StageView::revealParameter(const QString& paramId) {
+    for (ChannelStrip* w : std::as_const(stripWidgets_))
+        if (QWidget* c = w->control(paramId)) scroll_->ensureWidgetVisible(c, 0, 24);
 }

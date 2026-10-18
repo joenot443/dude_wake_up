@@ -34,6 +34,10 @@ public:
     QString node() const { return nodeId_; }
     // A parameter row's rect in global coordinates (null if not shown).
     QRect parameterRowRect(const QString& paramId) const;
+    // The shown parameters, top to bottom (for Tab navigation).
+    QVector<ParamInfo> navigableParameters() const;
+    void revealParameter(const QString& paramId);
+    bool beginEdit(const QString& paramId, const QString& initialText);
 
 signals:
     void deselectRequested();

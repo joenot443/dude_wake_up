@@ -27,6 +27,10 @@ public:
     void rebuild();
     // The node shown on the monitor.
     QString outputId() const;
+    // The strips' shown parameters, top to bottom (for Tab navigation).
+    QVector<ParamInfo> navigableParameters() const;
+    void revealParameter(const QString& paramId);
+    void refreshNow();
 
 signals:
     void exitRequested();
@@ -58,6 +62,7 @@ private:
     QToolButton* favoritesButton_;
     QLabel*      favoritesLabel_;
     QToolButton* resetOrder_;
+    class QScrollArea* scroll_;
     QWidget*     stripList_;
     QVBoxLayout* stripLayout_;
     QWidget*     dropIndicator_;

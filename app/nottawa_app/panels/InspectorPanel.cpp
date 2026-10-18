@@ -853,3 +853,23 @@ QRect InspectorPanel::parameterRowRect(const QString& paramId) const {
     if (!row || !row->isVisible()) return {};
     return QRect(row->mapToGlobal(QPoint(0, 0)), row->size());
 }
+
+QVector<ParamInfo> InspectorPanel::navigableParameters() const {
+    QVector<QPair<int, ParamInfo>> rows;
+    for (const ParameterRow* row : rows_)
+        if (row->isVisibleTo(scroll_->widget()) && row->info().type != ParamInfo::Hidden)
+            rows.push_back({row->mapTo(scroll_->widget(), QPoint(0, 0)).y(), row->info()});
+    std::stable_sort(rows.begin(), rows.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
+    QVector<ParamInfo> out;
+    for (const auto& r : rows) out.push_back(r.second);
+    return out;
+}
+
+void InspectorPanel::revealParameter(const QString& paramId) {
+    if (ParameterRow* row = rows_.value(paramId)) scroll_->ensureWidgetVisible(row, 0, 24);
+}
+
+bool InspectorPanel::beginEdit(const QString& paramId, const QString& initialText) {
+    ParameterRow* row = rows_.value(paramId);
+    return row && row->beginEdit(initialText);
+}
