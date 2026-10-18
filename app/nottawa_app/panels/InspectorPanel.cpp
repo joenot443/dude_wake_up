@@ -12,6 +12,8 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMouseEvent>
+#include <QSet>
+#include <QMenu>
 #include <QPainter>
 #include <QPushButton>
 #include <QScrollArea>
@@ -294,6 +296,135 @@ private:
     QLabel*   placeLabel_ = nullptr;
 };
 
+// ------------------------------------------------------------ aux strand
+
+// The chain processing a node's auxiliary output (Feedback and the mask
+// makers), after the macOS FeedbackAuxStrandView: chips for its nodes
+// (click selects, × disconnects) and a button that appends a filter.
+class AuxStrandSection : public QWidget {
+public:
+    AuxStrandSection(InspectorPanel* panel, const GraphNode& node, QWidget* parent)
+        : QWidget(parent), panel_(panel), node_(node) {
+        auto* layout = new QVBoxLayout(this);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->setSpacing(6);
+        layout->addWidget(divider(this));
+        auto* title = new QLabel("Auxiliary Strand", this);
+        title->setStyleSheet(QString("color: %1; font-weight: 600;").arg(Theme::textSecondary.name()));
+        layout->addWidget(title);
+        auto* blurb = new QLabel("Each feedback frame is processed through this chain before mixing back in.", this);
+        blurb->setWordWrap(true);
+        blurb->setStyleSheet(QString("color: %1; font-size: 8pt;").arg(Theme::textTertiary.name()));
+        layout->addWidget(blurb);
+        chips_ = new QWidget(this);
+        chipLayout_ = new QHBoxLayout(chips_);
+        chipLayout_->setContentsMargins(0, 2, 0, 2);
+        chipLayout_->setSpacing(6);
+        layout->addWidget(chips_);
+        refresh();
+    }
+
+    // Rebuilds the chips when the chain changed.
+    void refresh() {
+        const QVector<GraphEdge> edges = EngineBridge::instance()->edges();
+        QVector<GraphNode> nodes = EngineBridge::instance()->nodes();
+        // First link from the aux output (slot 10), then main outputs.
+        QVector<GraphNode> chain;
+        QVector<QString> incoming;  // connection anchoring each chain node
+        QSet<QString> seen{node_.id};
+        QString current = node_.id;
+        int slot = kAuxOutputSlot;
+        for (;;) {
+            const GraphEdge* next = nullptr;
+            for (const GraphEdge& e : edges) if (e.startId == current && e.outputSlot == slot) { next = &e; break; }
+            if (!next || seen.contains(next->endId)) break;
+            const auto it = std::find_if(nodes.begin(), nodes.end(), [&](const GraphNode& n) { return n.id == next->endId; });
+            if (it == nodes.end()) break;
+            chain.push_back(*it);
+            incoming.push_back(next->id);
+            seen.insert(next->endId);
+            current = next->endId;
+            slot = 0;
+        }
+        QString signature;
+        for (const GraphNode& n : chain) signature += n.id + n.name + ';';
+        if (signature == signature_ && chipLayout_->count() > 0) return;
+        signature_ = signature;
+        chain_ = chain;
+
+        while (QLayoutItem* item = chipLayout_->takeAt(0)) {
+            if (item->widget()) item->widget()->deleteLater();
+            delete item;
+        }
+        const QString chipStyle = QString("QToolButton { background: %1; color: %2; border: 1px solid %3; border-radius: 10px;"
+                                          " padding: 2px 8px; font-size: 8pt; }"
+                                          "QToolButton:hover { background: %4; }")
+                                      .arg(Theme::surface.name(), Theme::textPrimary.name(),
+                                           Theme::warning.darker(140).name(), Theme::surfaceHover.name());
+        for (int i = 0; i < chain.size(); ++i) {
+            auto* chip = new QToolButton(chips_);
+            chip->setText(chain[i].name + "  ×");
+            chip->setToolTip("Click to select; × at the end removes it from the strand");
+            chip->setStyleSheet(chipStyle);
+            chip->setCursor(Qt::PointingHandCursor);
+            const QString id = chain[i].id, connection = incoming[i];
+            connect(chip, &QToolButton::clicked, this, [this, chip, id, connection] {
+                // The trailing "×" disconnects; the rest of the chip selects.
+                if (chip->mapFromGlobal(QCursor::pos()).x() > chip->width() - 18) {
+                    EngineBridge::instance()->removeConnection(connection);
+                    refresh();
+                } else {
+                    emit panel_->nodeRequested(id);
+                }
+            });
+            chipLayout_->addWidget(chip);
+            auto* arrow = new QLabel("→", chips_);
+            arrow->setStyleSheet(QString("color: %1;").arg(Theme::textTertiary.name()));
+            chipLayout_->addWidget(arrow);
+        }
+        auto* add = new QToolButton(chips_);
+        add->setText(chain.isEmpty() ? "+ Add Filter" : "+ Add");
+        add->setCursor(Qt::PointingHandCursor);
+        add->setStyleSheet(QString("QToolButton { background: transparent; color: %1; border: 1px solid %2; border-radius: 10px;"
+                                   " padding: 2px 8px; font-size: 8pt; }"
+                                   "QToolButton:hover { background: %3; }")
+                               .arg(Theme::accent.name(), Theme::accent.darker(140).name(), Theme::accentSubtle.name()));
+        connect(add, &QToolButton::clicked, this, [this, add] {
+            QMenu menu(this);
+            QHash<QString, QMenu*> categories;
+            for (const CatalogItem& item : EngineBridge::instance()->effects()) {
+                QMenu*& sub = categories[item.category];
+                if (!sub) sub = menu.addMenu(item.category);
+                const int type = item.typeRaw;
+                sub->addAction(item.name, this, [this, type] { addFilter(type); });
+            }
+            menu.exec(add->mapToGlobal(QPoint(0, add->height())));
+        });
+        chipLayout_->addWidget(add);
+        chipLayout_->addStretch(1);
+    }
+
+private:
+    void addFilter(int type) {
+        auto* engine = EngineBridge::instance();
+        const QString start = chain_.isEmpty() ? node_.id : chain_.last().id;
+        QPointF anchor = node_.position;
+        for (const GraphNode& n : engine->nodes()) if (n.id == start) anchor = n.position;
+        const QString id = engine->addEffect(type, {});
+        if (id.isEmpty()) return;
+        engine->setNodePosition(id, anchor + QPointF(320, 0));
+        engine->connectNodes(start, id, chain_.isEmpty() ? kAuxOutputSlot : 0, 0);
+        refresh();
+    }
+
+    InspectorPanel* panel_;
+    GraphNode    node_;
+    QWidget*     chips_;
+    QHBoxLayout* chipLayout_;
+    QVector<GraphNode> chain_;
+    QString      signature_;
+};
+
 // -------------------------------------------------------------- inspector
 
 InspectorPanel::InspectorPanel(QWidget* parent) : QWidget(parent) {
@@ -374,6 +505,9 @@ void InspectorPanel::clearContent() {
     params_ = nullptr;
     paramsLayout_ = nullptr;
     optional_ = nullptr;
+    aux_ = nullptr;
+    modPill_ = nullptr;
+    maskPresets_ = nullptr;
     textPanel_ = nullptr;
     iconPanel_ = nullptr;
     filePanel_ = nullptr;
@@ -456,6 +590,51 @@ void InspectorPanel::showNode(const GraphNode& node) {
     contentLayout_->addWidget(previewBox);
     contentLayout_->addWidget(divider(content_));
 
+    // The Mask shader's presets set its Source Mode (and a matching Output
+    // Mode); the shader then shows the parameters for that mode.
+    constexpr int kShaderMaskEngine = 182;
+    if (node.isShader && node.typeRaw == kShaderMaskEngine) {
+        const QVector<ParamInfo> params = EngineBridge::instance()->parameters(nodeId_);
+        QString sourceMode, outputMode;
+        for (const ParamInfo& p : params) {
+            if (p.name == "Source Mode") sourceMode = p.id;
+            if (p.name == "Output Mode") outputMode = p.id;
+        }
+        if (!sourceMode.isEmpty()) {
+            maskPresets_ = new QWidget(content_);
+            auto* layout = new QVBoxLayout(maskPresets_);
+            layout->setContentsMargins(16, 8, 16, 8);
+            layout->setSpacing(6);
+            auto* label = new QLabel("Preset", maskPresets_);
+            label->setStyleSheet(QString("color: %1; font-size: 8pt;").arg(Theme::textSecondary.name()));
+            layout->addWidget(label);
+            auto* row = new QHBoxLayout;
+            row->setSpacing(6);
+            const QStringList presets = {"Luma", "Color Key", "Match Blend"};
+            for (int i = 0; i < presets.size(); ++i) {
+                auto* b = new QPushButton(presets[i], maskPresets_);
+                b->setCheckable(true);
+                b->setCursor(Qt::PointingHandCursor);
+                b->setProperty("preset", i);
+                b->setStyleSheet(QString("QPushButton { background: %1; color: %2; border: 1px solid %3; border-radius: 6px;"
+                                         " padding: 4px; font-size: 8pt; }"
+                                         "QPushButton:checked { background: %4; color: white; border-color: %4; }")
+                                     .arg(Theme::surface.name(), Theme::textPrimary.name(), Theme::border.name(),
+                                          Theme::accent.name()));
+                connect(b, &QPushButton::clicked, this, [this, i, sourceMode, outputMode] {
+                    EngineBridge::instance()->setParameter(sourceMode, i);
+                    // Blend output suits Match Blend; the others output a mask.
+                    if (!outputMode.isEmpty()) EngineBridge::instance()->setParameter(outputMode, i == 2 ? 1 : 0);
+                    refresh();
+                });
+                row->addWidget(b);
+            }
+            layout->addLayout(row);
+            contentLayout_->addWidget(maskPresets_);
+            contentLayout_->addWidget(divider(content_));
+        }
+    }
+
     // Source-specific controls, replacing some of the parameter rows.
     if (!node.isShader) {
         const TextSourceState text = EngineBridge::instance()->textSourceState(nodeId_);
@@ -488,6 +667,22 @@ void InspectorPanel::showNode(const GraphNode& node) {
     auto* actionsLayout = new QVBoxLayout(actions);
     actionsLayout->setContentsMargins(16, 4, 16, 4);
     actionsLayout->setSpacing(8);
+    // Shader nodes and shader-generated sources carry editable GLSL.
+    constexpr int kVideoSourceShader = 4;
+    if (node.isShader || node.typeRaw == kVideoSourceShader) {
+        auto* row = new QHBoxLayout;
+        auto* b = actionButton("Edit Shader Code…", actions);
+        b->setToolTip("Edit this shader's fragment GLSL for the current session");
+        connect(b, &QPushButton::clicked, this, [this] { emit editShaderRequested(nodeId_, node_.name); });
+        modPill_ = new QLabel("MOD", actions);
+        modPill_->setToolTip("This shader has a session-only edit. Open the editor to revert.");
+        modPill_->setStyleSheet(QString("color: %1; border: 1px solid %1; border-radius: 3px; padding: 1px 5px;"
+                                        " font-family: Consolas; font-size: 7pt; font-weight: 700;").arg(Theme::warning.name()));
+        modPill_->setVisible(EngineBridge::instance()->shaderHasOverride(nodeId_));
+        row->addWidget(b, 1);
+        row->addWidget(modPill_);
+        actionsLayout->addLayout(row);
+    }
     if (node.isShader && node.typeRaw == kShaderFeedback) {
         auto* b = actionButton("Clear Feedback Buffer", actions);
         connect(b, &QPushButton::clicked, this, [this] { EngineBridge::instance()->clearFeedbackBuffer(nodeId_); });
@@ -499,6 +694,15 @@ void InspectorPanel::showNode(const GraphNode& node) {
         actionsLayout->addWidget(b);
     }
     contentLayout_->addWidget(actions);
+
+    if (node.isShader && node.hasAuxOutput) {
+        auto* auxBox = new QWidget(content_);
+        auto* auxLayout = new QVBoxLayout(auxBox);
+        auxLayout->setContentsMargins(16, 4, 16, 4);
+        aux_ = new AuxStrandSection(this, node, auxBox);
+        auxLayout->addWidget(aux_);
+        contentLayout_->addWidget(auxBox);
+    }
 
     auto* optionalBox = new QWidget(content_);
     auto* optionalLayout = new QVBoxLayout(optionalBox);
@@ -534,6 +738,8 @@ QVector<ParamInfo> InspectorPanel::visibleParameters(const QVector<ParamInfo>& a
         if (p.type == ParamInfo::Hidden || p.hidden || kPlumbing.contains(p.name) || pairedY.contains(p.id)) continue;
         if (transform && kTransformPads.contains(p.name)) continue;
         if (textPanel_ && kTextPosition.contains(p.name)) continue;
+        // The aux strand section replaces this switch (C++ spells it so).
+        if (node_.hasAuxOutput && p.name == "Allow Auxillary") continue;
         if (iconPanel_ && kIconPicker.contains(p.name)) continue;
         out.push_back(p);
     }
@@ -631,6 +837,13 @@ void InspectorPanel::refresh() {
         g.yRow->setInfo(*y);
     }
     if (optional_) optional_->refresh();
+    if (aux_) aux_->refresh();
+    if (maskPresets_)
+        for (const ParamInfo& p : all)
+            if (p.name == "Source Mode")
+                for (QPushButton* b : maskPresets_->findChildren<QPushButton*>())
+                    b->setChecked(b->property("preset").toInt() == p.intValue);
+    if (modPill_) modPill_->setVisible(EngineBridge::instance()->shaderHasOverride(nodeId_));
     if (textPanel_) textPanel_->setState(EngineBridge::instance()->textSourceState(nodeId_));
     if (filePanel_) filePanel_->setState(EngineBridge::instance()->fileSourceState(nodeId_));
 }

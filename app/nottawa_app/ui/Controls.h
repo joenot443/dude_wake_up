@@ -10,7 +10,8 @@
 class QLineEdit;
 
 // A capsule slider with an optional label and value above it. Clicking the
-// value lets you type one. valueChanged fires while dragging.
+// value lets you type one. valueChanged fires while dragging. The wheel is
+// left to the enclosing scroll area, so scrolling never changes a value.
 class DSSlider : public QWidget {
     Q_OBJECT
 public:
@@ -36,7 +37,6 @@ protected:
     void mousePressEvent(QMouseEvent*) override;
     void mouseMoveEvent(QMouseEvent*) override;
     void mouseReleaseEvent(QMouseEvent*) override;
-    void wheelEvent(QWheelEvent*) override;
 
 private:
     QRectF trackRect() const;

@@ -38,6 +38,7 @@ qt_add_executable(nottawa_app WIN32
     FramePresenter.h         FramePresenter.cpp
     PreviewWindow.h          PreviewWindow.cpp
     ShareStrandDialog.h      ShareStrandDialog.cpp
+    ShaderCodeEditor.h       ShaderCodeEditor.cpp
     Icons.h                  Icons.cpp
     panels/PreviewPool.h     panels/PreviewPool.cpp
     panels/TileGridView.h    panels/TileGridView.cpp

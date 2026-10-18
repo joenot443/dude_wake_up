@@ -151,16 +151,6 @@ void DSSlider::mouseReleaseEvent(QMouseEvent*) {
     update();
 }
 
-void DSSlider::wheelEvent(QWheelEvent* e) {
-    // Fine adjustment: a hundredth of the range per notch (step if set).
-    const float notch = e->angleDelta().y() / 120.0f;
-    if (notch == 0) { e->ignore(); return; }
-    const float delta = (step_ > 0 ? step_ : (max_ - min_) / 100.0f) * notch;
-    const float v = std::clamp(value_ + delta, std::min(min_, max_), std::max(min_, max_));
-    if (v != value_) { value_ = v; update(); emit valueChanged(v); }
-    e->accept();
-}
-
 void DSSlider::editValue() {
     auto* editor = new InlineEditor(QString::number(value_, 'f', decimals_), this);
     editor_ = editor;

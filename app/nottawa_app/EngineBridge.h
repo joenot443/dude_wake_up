@@ -135,6 +135,12 @@ struct TextSourceState {
     QStringList fonts;
 };
 
+struct ShaderCompileResult {
+    bool    ok = false;
+    QString log;
+    int     errorLine = 0;  // first source line the log refers to, or 0
+};
+
 struct FileSourceState {
     bool  valid = false;  // the node plays a video file (file or library source)
     float speed = 1, position = 0, duration = 0;
@@ -240,6 +246,12 @@ public:
     void setTextSourceFont(const QString& sourceId, int fontIndex);
     void setTextSourcePosition(const QString& sourceId, float x, float y);
     void centerTextSource(const QString& sourceId);
+
+    // Live GLSL editing: session-only fragment overrides.
+    QString shaderSource(const QString& shaderId) const;
+    ShaderCompileResult setShaderSource(const QString& shaderId, const QString& source);
+    void    revertShaderSource(const QString& shaderId);
+    bool    shaderHasOverride(const QString& shaderId) const;
 
     FileSourceState fileSourceState(const QString& sourceId) const;
     void setFileSourcePlaying(const QString& sourceId, bool playing);

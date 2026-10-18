@@ -48,6 +48,9 @@ public:
     const QString& id() const { return id_; }
     const QString& name() const { return name_; }
     bool isShader() const { return isShader_; }
+    // ShaderType for effects, VideoSourceType for sources.
+    int  typeRaw() const { return typeRaw_; }
+    void setTypeRaw(int type) { typeRaw_ = type; }
     bool isActive() const { return active_; }
     const QVector<PortItem*>& ports() const { return ports_; }
     PortItem* port(PortItem::Kind kind, int slot) const;
@@ -76,6 +79,7 @@ private:
     QString            id_;
     QString            name_;
     bool               isShader_  = false;
+    int                typeRaw_   = 0;
     bool               active_    = true;
     bool               needsInput_ = false;
     bool               audioHint_  = false;

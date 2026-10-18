@@ -72,6 +72,7 @@ signals:
     void strandSaved(const QString& name);
     void strandLoadFailed(const QString& error);
     void shareRequested(const QString& nodeId, const QString& nodeName);
+    void editShaderRequested(const QString& shaderId, const QString& name);
     void nodeSelected(const QString& id);
     void selectionChanged(const QStringList& ids);
 

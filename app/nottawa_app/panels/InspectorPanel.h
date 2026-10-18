@@ -10,6 +10,7 @@
 class FileSourcePanel;
 class IconSourcePanel;
 class OptionalEffectsSection;
+class AuxStrandSection;
 class TextSourcePanel;
 class TransformSection;
 class ParameterRow;
@@ -37,6 +38,7 @@ signals:
     void nodeRequested(const QString& id);
     // A parameter change that can alter the graph (e.g. adds a pin).
     void graphMayChange();
+    void editShaderRequested(const QString& shaderId, const QString& name);
 
 protected:
     void showEvent(QShowEvent* e) override;
@@ -82,6 +84,9 @@ private:
     IconSourcePanel* iconPanel_ = nullptr;   // icon sources
     FileSourcePanel* filePanel_ = nullptr;   // video file / library sources
     TransformSection* transform_ = nullptr;  // crop / place pads
+    AuxStrandSection* aux_ = nullptr;        // nodes with an aux output
+    QLabel*      modPill_ = nullptr;         // shader has a session edit
+    QWidget*     maskPresets_ = nullptr;     // the Mask shader's presets
     QString      signature_;
     QTimer       refreshTimer_;
 };

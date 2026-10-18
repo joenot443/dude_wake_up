@@ -96,6 +96,11 @@ void onStrandsChanged() {
 
 const char* const kEffectCategories[] = {"Basic", "Mix", "Transform", "Filter", "Mask", "Glitch"};
 
+// Shaders whose aux output pin always shows, as macOS lists them (the
+// engine only reports one once "Allow Auxillary" is on; connecting to the
+// pin turns that on): Feedback, Luma Mask Maker, Color Key Mask Maker.
+bool shaderTypeHasAuxOutput(int type) { return type == 7 || type == 41 || type == 45; }
+
 } // anon
 
 QString CatalogItem::payload() const {
@@ -211,7 +216,7 @@ QVector<GraphNode> EngineBridge::nodes() const {
         const auto& s = shaders[i];
         const QByteArray id(s.id);
         out.push_back({str(s.id), str(s.name), true, s.shaderTypeRaw, s.inputCount, QPointF(s.posX, s.posY),
-                       ntw_get_connectable_active(id.constData()), ntw_supports_aux_output(id.constData()),
+                       ntw_get_connectable_active(id.constData()), shaderTypeHasAuxOutput(s.shaderTypeRaw),
                        ntw_is_audio_reactive(id.constData())});
     }
     ntw_free_connectable_info_array(shaders, n);
@@ -572,6 +577,20 @@ void EngineBridge::setTextSourcePosition(const QString& id, float x, float y) {
     ntw_set_text_source_position(id.toUtf8().constData(), x, y);
 }
 void EngineBridge::centerTextSource(const QString& id) { ntw_center_text_source(id.toUtf8().constData()); }
+
+QString EngineBridge::shaderSource(const QString& id) const {
+    return takeString(ntw_get_shader_fragment_source(id.toUtf8().constData()));
+}
+ShaderCompileResult EngineBridge::setShaderSource(const QString& id, const QString& source) {
+    NTWShaderCompileResult r = ntw_set_shader_fragment_source(id.toUtf8().constData(), source.toUtf8().constData());
+    ShaderCompileResult out{r.ok != 0, str(r.errorLog), r.errorLine};
+    ntw_free_shader_compile_result(r);
+    return out;
+}
+void EngineBridge::revertShaderSource(const QString& id) { ntw_revert_shader_source(id.toUtf8().constData()); }
+bool EngineBridge::shaderHasOverride(const QString& id) const {
+    return running_ && ntw_shader_has_session_override(id.toUtf8().constData());
+}
 
 FileSourceState EngineBridge::fileSourceState(const QString& id) const {
     FileSourceState out;

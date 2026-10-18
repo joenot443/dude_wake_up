@@ -1,7 +1,10 @@
 #pragma once
 
 #include "EngineBridge.h"
+
+#include <QHash>
 #include <QMainWindow>
+#include <QPointer>
 #include <QString>
 #include <QtGlobal>
 
@@ -45,6 +48,7 @@ private:
     void setStageMode(bool on);
     void updateStageSource();
     void addFromLibrary(const CatalogItem& item);
+    void openShaderEditor(const QString& shaderId, const QString& name);
     void runScriptedAdds();
     void log(const QString& line);
 
@@ -67,4 +71,5 @@ private:
     int             lastNodeCount_ = -1;
     int             lastEdgeCount_ = -1;
     QString         selectedId_;
+    QHash<QString, QPointer<class ShaderCodeEditor>> shaderEditors_;
 };

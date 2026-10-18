@@ -3,6 +3,7 @@
 #include "EngineBridge.h"
 #include "StageWidget.h"
 #include "nodes/NodeEditorView.h"
+#include "ShaderCodeEditor.h"
 #include "ShareStrandDialog.h"
 #include "panels/BrowserPanel.h"
 #include "panels/CommunityPage.h"
@@ -180,6 +181,7 @@ void MainWindow::buildDocks() {
         emit editor_->nodeSelected(id);
     });
     connect(inspector_, &InspectorPanel::graphMayChange, this, &MainWindow::refreshGraph);
+    connect(inspector_, &InspectorPanel::editShaderRequested, this, &MainWindow::openShaderEditor);
     logPanel_  = new LogPanel(this);
     connect(browser_, &BrowserPanel::itemPicked, this, &MainWindow::addFromLibrary);
     auto* oscillators = new OscillatorsPage(browser_);
@@ -206,6 +208,7 @@ void MainWindow::buildDocks() {
         editor_->loadSharedStrand(slug);
         welcome_->hide();
     });
+    connect(editor_, &NodeEditorView::editShaderRequested, this, &MainWindow::openShaderEditor);
     connect(editor_, &NodeEditorView::shareRequested, this, [this, strands, community](const QString& id, const QString& name) {
         auto* dialog = new ShareStrandDialog(id, name, editor_->captureNode(id), this);
         dialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -297,6 +300,15 @@ void MainWindow::addFromLibrary(const CatalogItem& item) {
     // An image input that was cancelled in its file dialog isn't an error.
     if (!id.isEmpty()) welcome_->hide();
     else if (!(item.isInput && item.typeRaw == VideoSourceKind::Image)) log("[graph] ERROR could not add node");
+}
+
+// One editor window per shader; asking again raises it.
+void MainWindow::openShaderEditor(const QString& shaderId, const QString& name) {
+    QPointer<ShaderCodeEditor>& editor = shaderEditors_[shaderId];
+    if (!editor) editor = new ShaderCodeEditor(shaderId, name, this);
+    editor->show();
+    editor->raise();
+    editor->activateWindow();
 }
 
 void MainWindow::refreshGraph() {

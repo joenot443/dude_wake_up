@@ -126,6 +126,7 @@ void NodeEditorView::syncFromEngine() {
             if (item->pos() != n.position) item->setPos(n.position);
         }
         item->setInfo(n.name, n.isShader, n.active, n.inputCount, n.hasAuxOutput);
+        item->setTypeRaw(n.typeRaw);
         bool anyInput = false;
         for (PortItem* port : item->ports()) {
             const QString key = n.id + '/' + QString::number(port->slot());
@@ -488,6 +489,8 @@ void NodeEditorView::showContextMenu(const QPoint& viewPos) {
         fillCatalogMenu(menu.addMenu(isSource ? "Swap Source" : "Swap Effect"), isSource,
                         [this, id, isSource](int type) { swapNode(id, isSource, type); });
         menu.addAction("Open Preview Window", this, [this, id] { openPreview(id); });
+        if (node->isShader() || node->typeRaw() == 4)  // effects and shader-generated sources
+            menu.addAction("Edit Shader Code…", this, [this, id, node] { emit editShaderRequested(id, node->name()); });
         menu.addAction("Save Strand...", this, [this, id] { saveStrand(id); });
         const QString name = node->name();
         menu.addAction("Share Strand...", this, [this, id, name] { emit shareRequested(id, name); });
