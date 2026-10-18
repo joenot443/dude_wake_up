@@ -20,6 +20,7 @@ public:
     bool hasHeightForWidth() const override { return true; }
     int  heightForWidth(int w) const override { return w * 9 / 16; }
     QSize sizeHint() const override { return QSize(240, 135); }
+    QSize minimumSizeHint() const override { return QSize(64, 36); }
 
 signals:
     void moved(float x, float y);

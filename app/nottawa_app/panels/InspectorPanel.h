@@ -7,7 +7,10 @@
 #include <QTimer>
 #include <QWidget>
 
+class FileSourcePanel;
+class IconSourcePanel;
 class OptionalEffectsSection;
+class TextSourcePanel;
 class ParameterRow;
 class PositionPad;
 class QLabel;
@@ -74,6 +77,9 @@ private:
     QHash<QString, ParameterRow*> rows_;
     QVector<PadGroup> pads_;
     OptionalEffectsSection* optional_ = nullptr;
+    TextSourcePanel* textPanel_ = nullptr;   // text sources
+    IconSourcePanel* iconPanel_ = nullptr;   // icon sources
+    FileSourcePanel* filePanel_ = nullptr;   // video file / library sources
     QString      signature_;
     QTimer       refreshTimer_;
 };

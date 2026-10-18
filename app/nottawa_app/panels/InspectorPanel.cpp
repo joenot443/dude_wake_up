@@ -5,6 +5,7 @@
 #include "Theme.h"
 #include "inspector/ParameterRow.h"
 #include "inspector/PositionPad.h"
+#include "inspector/SourcePanels.h"
 #include "ui/Controls.h"
 
 #include <QHBoxLayout>
@@ -82,6 +83,9 @@ public:
     bool hasHeightForWidth() const override { return true; }
     int heightForWidth(int w) const override { return w * 9 / 16; }
     QSize sizeHint() const override { return QSize(288, 162); }
+    // Without this the layout treats the preferred width as the minimum
+    // and the panel's content can't narrow to fit.
+    QSize minimumSizeHint() const override { return QSize(64, 36); }
 };
 
 } // anon
@@ -264,6 +268,9 @@ void InspectorPanel::clearContent() {
     params_ = nullptr;
     paramsLayout_ = nullptr;
     optional_ = nullptr;
+    textPanel_ = nullptr;
+    iconPanel_ = nullptr;
+    filePanel_ = nullptr;
     rows_.clear();
     pads_.clear();
     signature_.clear();
@@ -343,6 +350,28 @@ void InspectorPanel::showNode(const GraphNode& node) {
     contentLayout_->addWidget(previewBox);
     contentLayout_->addWidget(divider(content_));
 
+    // Source-specific controls, replacing some of the parameter rows.
+    if (!node.isShader) {
+        const TextSourceState text = EngineBridge::instance()->textSourceState(nodeId_);
+        if (text.valid) {
+            textPanel_ = new TextSourcePanel(nodeId_, text, content_);
+            contentLayout_->addWidget(textPanel_);
+            contentLayout_->addWidget(divider(content_));
+        }
+        const FileSourceState file = EngineBridge::instance()->fileSourceState(nodeId_);
+        if (file.valid) {
+            filePanel_ = new FileSourcePanel(nodeId_, file, content_);
+            contentLayout_->addWidget(filePanel_);
+            contentLayout_->addWidget(divider(content_));
+        }
+        const IconSourceState icons = EngineBridge::instance()->iconSourceState(nodeId_);
+        if (icons.valid) {
+            iconPanel_ = new IconSourcePanel(nodeId_, icons, content_);
+            contentLayout_->addWidget(iconPanel_);
+            contentLayout_->addWidget(divider(content_));
+        }
+    }
+
     params_ = new QWidget(content_);
     paramsLayout_ = new QVBoxLayout(params_);
     paramsLayout_->setContentsMargins(10, 10, 10, 10);
@@ -387,9 +416,14 @@ QVector<ParamInfo> InspectorPanel::visibleParameters(const QVector<ParamInfo>& a
             if (q.name == y && q.type != ParamInfo::Hidden && (y == "Orb Y" || (q.min >= 0 && q.max <= 1.0f)))
                 pairedY << q.id;
     }
+    // Covered by the text panel's position pad / the icon picker.
+    static const QStringList kTextPosition = {"X", "Y", "X Position", "Y Position", "Orb X", "Orb Y"};
+    static const QStringList kIconPicker = {"icon", "texture", "Enable Texture"};
     QVector<ParamInfo> out;
     for (const ParamInfo& p : all) {
         if (p.type == ParamInfo::Hidden || p.hidden || kPlumbing.contains(p.name) || pairedY.contains(p.id)) continue;
+        if (textPanel_ && kTextPosition.contains(p.name)) continue;
+        if (iconPanel_ && kIconPicker.contains(p.name)) continue;
         out.push_back(p);
     }
     return out;
@@ -479,4 +513,6 @@ void InspectorPanel::refresh() {
         g.yRow->setInfo(*y);
     }
     if (optional_) optional_->refresh();
+    if (textPanel_) textPanel_->setState(EngineBridge::instance()->textSourceState(nodeId_));
+    if (filePanel_) filePanel_->setState(EngineBridge::instance()->fileSourceState(nodeId_));
 }

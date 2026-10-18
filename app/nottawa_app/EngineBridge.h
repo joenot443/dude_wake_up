@@ -126,6 +126,33 @@ struct ParamInfo {
     bool driven() const { return oscEnabled || hasDriver; }
 };
 
+struct TextSourceState {
+    bool        valid = false;  // the node is a text source
+    QString     text;
+    int         fontSize = 0;
+    float       x = 0.5f, y = 0.5f;  // 0..1, y down
+    int         fontIndex = 0;
+    QStringList fonts;
+};
+
+struct FileSourceState {
+    bool  valid = false;  // the node plays a video file (file or library source)
+    float speed = 1, position = 0, duration = 0;
+    bool  playing = false;
+};
+
+struct IconEntry {
+    QString name;
+    QString path;
+    QString category;
+};
+
+struct IconSourceState {
+    bool               valid = false;  // the node is an icon source
+    int                selected = -1;
+    QVector<IconEntry> icons;
+};
+
 struct OptionalEffect {
     QString name;
     bool    enabled = false;
@@ -206,6 +233,21 @@ public:
     QVector<OptionalEffect> optionalEffects(const QString& connectableId) const;
     void toggleOptionalEffect(const QString& connectableId, int index);
     QVector<ParamInfo> optionalEffectParameters(const QString& connectableId, int index) const;
+
+    TextSourceState textSourceState(const QString& sourceId) const;
+    void setTextSourceText(const QString& sourceId, const QString& text);
+    void setTextSourceFontSize(const QString& sourceId, int size);
+    void setTextSourceFont(const QString& sourceId, int fontIndex);
+    void setTextSourcePosition(const QString& sourceId, float x, float y);
+    void centerTextSource(const QString& sourceId);
+
+    FileSourceState fileSourceState(const QString& sourceId) const;
+    void setFileSourcePlaying(const QString& sourceId, bool playing);
+    void setFileSourcePosition(const QString& sourceId, float position);
+    void setFileSourceSpeed(const QString& sourceId, float speed);
+
+    IconSourceState iconSourceState(const QString& sourceId) const;
+    void setIconSourceIcon(const QString& sourceId, int index);
 
     void clearFeedbackBuffer(const QString& shaderId);
     void resetBouncePosition(const QString& shaderId);

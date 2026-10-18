@@ -275,7 +275,7 @@ void MainWindow::runScriptedAdds() {
     for (int i = 0; i < names.size(); ++i) {
         const QString name = names[i].trimmed();
         QTimer::singleShot(1000 * (i + 1), this, [this, engine, name] {
-            for (const auto& list : {engine->sources(), engine->effects()}) {
+            for (const auto& list : {engine->sources(), engine->effects(), engine->inputs()}) {
                 for (const auto& item : list) {
                     if (item.name.compare(name, Qt::CaseInsensitive) != 0) continue;
                     addFromLibrary(item);

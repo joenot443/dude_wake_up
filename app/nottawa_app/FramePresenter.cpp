@@ -60,11 +60,14 @@ void FramePresenter::initialize() {
     locRect_ = glGetUniformLocation(program_, "uRect");
     locRadius_ = glGetUniformLocation(program_, "uRadius");
 
+    // Texture row 0 at the top, as macOS shows engine frames (its IOSurface
+    // goes to Core Animation, whose origin is top-left); in GL terms that's
+    // a vertical flip.
     const float verts[] = {
-        -1.f,-1.f, 0.f,0.f,
-         1.f,-1.f, 1.f,0.f,
-        -1.f, 1.f, 0.f,1.f,
-         1.f, 1.f, 1.f,1.f,
+        -1.f,-1.f, 0.f,1.f,
+         1.f,-1.f, 1.f,1.f,
+        -1.f, 1.f, 0.f,0.f,
+         1.f, 1.f, 1.f,0.f,
     };
     glGenVertexArrays(1, &vao_);
     glGenBuffers(1, &vbo_);

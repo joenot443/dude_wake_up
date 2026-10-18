@@ -156,6 +156,15 @@ void paint(QPainter* p, const QRectF& rect, Kind kind, const QColor& color) {
         p->setBrush(color);
         p->drawPolygon(QPolygonF({QPointF(2.0, 2.4), QPointF(5.6, 3.6), QPointF(3.0, 6.4)}));
         break;
+    case Play:
+        p->setBrush(color);
+        p->drawPolygon(QPolygonF({QPointF(4.5, 2.5), QPointF(13, 8), QPointF(4.5, 13.5)}));
+        break;
+    case Pause:
+        p->setBrush(color);
+        p->drawRoundedRect(QRectF(4, 3, 2.8, 10), 0.8, 0.8);
+        p->drawRoundedRect(QRectF(9.2, 3, 2.8, 10), 0.8, 0.8);
+        break;
     case Plus:
         p->drawLine(QPointF(8, 3.5), QPointF(8, 12.5));
         p->drawLine(QPointF(3.5, 8), QPointF(12.5, 8));

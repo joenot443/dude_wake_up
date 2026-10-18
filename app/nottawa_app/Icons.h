@@ -15,7 +15,7 @@ enum Kind {
     Search, Star, StarFilled, Refresh, Close,
     Text, Smiley, Photo, Webcam,
     ChevronDown, ChevronRight, ChevronUp, Film, Cloud,
-    Note, Keys, Reset, Plus, Minus,
+    Note, Keys, Reset, Plus, Minus, Play, Pause,
 };
 
 void  paint(QPainter* p, const QRectF& rect, Kind kind, const QColor& color);

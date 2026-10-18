@@ -546,6 +546,61 @@ QVector<ParamInfo> EngineBridge::optionalEffectParameters(const QString& id, int
     return toParams(arr, n);
 }
 
+TextSourceState EngineBridge::textSourceState(const QString& id) const {
+    TextSourceState out;
+    if (!running_) return out;
+    NTWTextSourceState s = ntw_get_text_source_state(id.toUtf8().constData());
+    out.valid = s.isTextSource != 0;
+    out.text = str(s.text);
+    out.fontSize = s.fontSize;
+    out.x = s.xPosition;
+    out.y = s.yPosition;
+    out.fontIndex = s.fontIndex;
+    for (int i = 0; i < s.fontCount; ++i) out.fonts << str(s.fontNames[i]);
+    // No free function for this struct; its strings are malloc'd.
+    std::free(const_cast<char*>(s.text));
+    for (int i = 0; i < s.fontCount; ++i) std::free(const_cast<char*>(s.fontNames[i]));
+    std::free(const_cast<char**>(s.fontNames));
+    return out;
+}
+void EngineBridge::setTextSourceText(const QString& id, const QString& text) {
+    ntw_set_text_source_text(id.toUtf8().constData(), text.toUtf8().constData());
+}
+void EngineBridge::setTextSourceFontSize(const QString& id, int size) { ntw_set_text_source_font_size(id.toUtf8().constData(), size); }
+void EngineBridge::setTextSourceFont(const QString& id, int index) { ntw_set_text_source_font_index(id.toUtf8().constData(), index); }
+void EngineBridge::setTextSourcePosition(const QString& id, float x, float y) {
+    ntw_set_text_source_position(id.toUtf8().constData(), x, y);
+}
+void EngineBridge::centerTextSource(const QString& id) { ntw_center_text_source(id.toUtf8().constData()); }
+
+FileSourceState EngineBridge::fileSourceState(const QString& id) const {
+    FileSourceState out;
+    if (!running_) return out;
+    const NTWFileSourceState s = ntw_get_file_source_state(id.toUtf8().constData());
+    out.valid = s.isFileSource != 0;
+    out.speed = s.speed;
+    out.position = s.position;
+    out.duration = s.duration;
+    out.playing = s.playing != 0;
+    return out;
+}
+void EngineBridge::setFileSourcePlaying(const QString& id, bool on) { ntw_set_file_source_playing(id.toUtf8().constData(), on); }
+void EngineBridge::setFileSourcePosition(const QString& id, float p) { ntw_set_file_source_position(id.toUtf8().constData(), p); }
+void EngineBridge::setFileSourceSpeed(const QString& id, float s) { ntw_set_file_source_speed(id.toUtf8().constData(), s); }
+
+IconSourceState EngineBridge::iconSourceState(const QString& id) const {
+    IconSourceState out;
+    if (!running_) return out;
+    NTWIconSourceState s = ntw_get_icon_source_state(id.toUtf8().constData());
+    out.valid = s.isIconSource != 0;
+    out.selected = s.selectedIndex;
+    for (int i = 0; i < s.iconCount; ++i)
+        out.icons.push_back({str(s.iconNames[i]), str(s.iconPaths[i]), str(s.iconCategories[i])});
+    ntw_free_icon_source_state(&s);
+    return out;
+}
+void EngineBridge::setIconSourceIcon(const QString& id, int index) { ntw_set_icon_source_icon(id.toUtf8().constData(), index); }
+
 void EngineBridge::clearFeedbackBuffer(const QString& id) { ntw_clear_feedback_buffer(id.toUtf8().constData()); }
 void EngineBridge::resetBouncePosition(const QString& id) { ntw_reset_bounce_position(id.toUtf8().constData()); }
 
