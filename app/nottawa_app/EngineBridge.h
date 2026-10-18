@@ -239,6 +239,10 @@ public:
     // Whether disconnecting an input clears the node's frame (macOS's
     // "Clear on Disconnect").
     void    setClearOnDisconnect(bool on);
+    // Bypassed shaders pass their input through unprocessed.
+    void    setShaderBypassed(const QString& shaderId, bool bypassed);
+    bool    isShaderBypassed(const QString& shaderId) const;
+    float   currentBpm() const;
     void    clearGraph();
     bool    loadWorkspace(const QString& path);
     void    saveWorkspace(const QString& path, const QString& name);

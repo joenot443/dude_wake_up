@@ -9,7 +9,6 @@
 StageWidget::StageWidget(QWidget* parent, FramePresenter::Reader reader)
     : QOpenGLWidget(parent), reader_(reader) {
     setUpdateBehavior(QOpenGLWidget::NoPartialUpdate);
-    setMinimumSize(320, 180);
     repaintTimer_.setTimerType(Qt::PreciseTimer);
     connect(&repaintTimer_, &QTimer::timeout, this, [this] { if (isVisible()) update(); });
     const qreal hz = screen() ? screen()->refreshRate() : 60.0;

@@ -58,6 +58,8 @@ public:
     quint64 framesPainted() const { return framesPainted_; }
     // Opens (or raises) a separate window showing the node's output.
     void openPreview(const QString& id);
+    QStringList openPreviewIds() const;
+    void closePreview(const QString& id);
     // Adds a saved strand, its top-left node at `scenePos` when given.
     void loadStrand(const QString& strandId, const QPointF* scenePos = nullptr);
     // Downloads a community strand and adds it likewise.

@@ -22,7 +22,7 @@ class QStackedWidget;
 class QTimer;
 class QToolButton;
 class ShaderCodeEditor;
-class StageWidget;
+class StageView;
 class Toast;
 class WelcomeOverlay;
 
@@ -71,7 +71,7 @@ private:
     QSplitter*      rows_      = nullptr;  // columns / audio panel / log
     QStackedWidget* centre_    = nullptr;
     NodeEditorView* editor_    = nullptr;
-    StageWidget*    stage_     = nullptr;
+    StageView*      stage_     = nullptr;
     WelcomeOverlay* welcome_   = nullptr;
     BrowserPanel*   browser_   = nullptr;
     InspectorPanel* inspector_ = nullptr;

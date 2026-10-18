@@ -682,6 +682,17 @@ void NodeEditorView::openPreview(const QString& id) {
     window->activateWindow();
 }
 
+QStringList NodeEditorView::openPreviewIds() const {
+    QStringList ids;
+    for (auto it = previews_.cbegin(); it != previews_.cend(); ++it)
+        if (it.value() && it.value()->isVisible()) ids << it.key();
+    return ids;
+}
+
+void NodeEditorView::closePreview(const QString& id) {
+    if (PreviewWindow* w = previews_.value(id)) w->close();
+}
+
 void NodeEditorView::cycleSelection(bool backwards) {
     if (nodes_.isEmpty()) return;
     QList<NodeItem*> order = nodes_.values();

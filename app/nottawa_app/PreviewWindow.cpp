@@ -12,6 +12,7 @@ PreviewWindow::PreviewWindow(const QString& connectableId, const QString& name, 
     auto* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     view_ = new StageWidget(this, FramePresenter::Preview);
+    view_->setMinimumSize(320, 180);
     // Let double-clicks reach this window for the fullscreen toggle.
     view_->setAttribute(Qt::WA_TransparentForMouseEvents);
     layout->addWidget(view_);

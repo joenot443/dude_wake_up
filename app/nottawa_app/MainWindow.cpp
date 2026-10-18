@@ -15,6 +15,7 @@
 #include "panels/LogPanel.h"
 #include "panels/OscillatorsPage.h"
 #include "panels/StrandsPage.h"
+#include "panels/StageView.h"
 #include "panels/WelcomeOverlay.h"
 #include "ui/ActionBar.h"
 #include "ui/Toast.h"
@@ -83,7 +84,8 @@ MainWindow::MainWindow(const QString& dataPath) : dataPath_(dataPath) {
 
     centre_ = new QStackedWidget;
     editor_ = new NodeEditorView(centre_);
-    stage_  = new StageWidget(centre_);
+    stage_  = new StageView(editor_, centre_);
+    connect(stage_, &StageView::exitRequested, this, [this] { stageButton_->setChecked(false); });
     centre_->addWidget(editor_);
     centre_->addWidget(stage_);
 
@@ -535,6 +537,7 @@ void MainWindow::refreshGraph() {
 }
 
 void MainWindow::setStageMode(bool on) {
+    if (on) editor_->scene()->clearSelection();  // as macOS does on entering
     centre_->setCurrentWidget(on ? static_cast<QWidget*>(stage_) : editor_);
     actionBar_->setVisible(!on);
     stageAction_->setChecked(on);
@@ -544,10 +547,8 @@ void MainWindow::setStageMode(bool on) {
     updateChrome();
 }
 
-// The stage only holds a shared texture while it is shown.
 void MainWindow::updateStageSource() {
-    const bool shown = centre_->currentWidget() == stage_;
-    stage_->setSourceNode(shown ? EngineBridge::instance()->outputNodeId() : QString());
+    if (centre_->currentWidget() == stage_) stage_->rebuild();
 }
 
 // -------------------------------------------------------------- workspaces

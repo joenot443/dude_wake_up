@@ -18,6 +18,8 @@ public:
     ~StageWidget() override;
 
     void setSourceNode(const QString& connectableId);
+    // Slower repaints for thumbnails (default: the display's refresh rate).
+    void setRefreshInterval(int ms) { repaintTimer_.setInterval(ms); }
     QString sourceNode() const { return nodeId_; }
 
     // Count of distinct engine frames drawn so far.

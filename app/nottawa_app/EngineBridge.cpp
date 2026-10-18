@@ -509,6 +509,11 @@ void EngineBridge::clearGraph() { ntw_clear_graph(); }
 bool EngineBridge::canUndo() const { return running_ && ntw_can_undo(); }
 bool EngineBridge::canRedo() const { return running_ && ntw_can_redo(); }
 void EngineBridge::setClearOnDisconnect(bool on) { if (running_) ntw_set_clear_on_disconnect(on ? 1 : 0); }
+void EngineBridge::setShaderBypassed(const QString& id, bool on) { ntw_set_shader_bypassed(id.toUtf8().constData(), on ? 1 : 0); }
+bool EngineBridge::isShaderBypassed(const QString& id) const {
+    return running_ && ntw_get_shader_bypassed(id.toUtf8().constData()) != 0;
+}
+float EngineBridge::currentBpm() const { return running_ ? ntw_get_current_bpm() : 0.0f; }
 bool EngineBridge::loadWorkspace(const QString& path) { return ntw_load_workspace(path.toUtf8().constData()); }
 
 void EngineBridge::saveWorkspace(const QString& path, const QString& name) {
