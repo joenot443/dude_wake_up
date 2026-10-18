@@ -1,5 +1,6 @@
 #include "TileGridView.h"
 
+#include "EngineBridge.h"
 #include "Icons.h"
 #include "PreviewPool.h"
 #include "Theme.h"
@@ -17,6 +18,8 @@
 #include <QOpenGLWidget>
 #include <QPainter>
 #include <QPainterPath>
+#include <QPointer>
+#include <QThreadPool>
 #include <QScreen>
 #include <QScrollBar>
 #include <cmath>
@@ -32,17 +35,6 @@ constexpr int kTileRadius   = 8;
 constexpr int kPreviewRadius = 6;
 constexpr int kMaxLive      = 24;  // previews kept rendering at once
 constexpr qint64 kSettleMs  = 400; // let a new preview animate before a still capture
-const QColor kInputTint(0x3b, 0x82, 0xf6);
-
-Icons::Kind inputIcon(int videoSourceType) {
-    switch (videoSourceType) {
-    case VideoSourceKind::Text:   return Icons::Text;
-    case VideoSourceKind::Icon:   return Icons::Smiley;
-    case VideoSourceKind::Image:  return Icons::Photo;
-    case VideoSourceKind::Webcam: return Icons::Webcam;
-    }
-    return Icons::Video;
-}
 } // anon
 
 TileGridView::TileGridView(PreviewPool* pool, QWidget* parent) : QAbstractScrollArea(parent), pool_(pool) {
@@ -53,7 +45,7 @@ TileGridView::TileGridView(PreviewPool* pool, QWidget* parent) : QAbstractScroll
     viewport()->setMouseTracking(true);
     verticalScrollBar()->setSingleStep(24);
 
-    connect(pool_, &PreviewPool::changed, viewport(), qOverload<>(&QWidget::update));
+    if (pool_) connect(pool_, &PreviewPool::changed, viewport(), qOverload<>(&QWidget::update));
     repaintTimer_.setTimerType(Qt::PreciseTimer);
     connect(&repaintTimer_, &QTimer::timeout, this, [this] { if (isVisible()) viewport()->update(); });
     const qreal hz = screen() ? screen()->refreshRate() : 60.0;
@@ -89,6 +81,7 @@ void TileGridView::setLivePreview(bool on) {
 }
 
 void TileGridView::refreshSnapshots() {
+    if (!pool_) return;
     pool_->clearSnapshots();
     liveSince_.clear();
     updateWanted();
@@ -147,14 +140,15 @@ QRect TileGridView::starRect(const QRect& tile) const {
 // engine doesn't render too many at once. Still mode only wants previews
 // for tiles still missing a snapshot.
 void TileGridView::updateWanted() {
+    if (!pool_) return;
     const int top = verticalScrollBar()->value();
     const QRect visible(0, top, viewport()->width(), viewport()->height());
     const QRect nearby = visible.adjusted(0, -visible.height() / 2, 0, visible.height() / 2);
     QStringList wanted, later;
     for (const Tile& t : std::as_const(tiles_)) {
-        const CatalogItem* item = itemAt(t);
-        if (item->isInput) continue;
-        const QString key = item->payload();
+        const TileItem* item = itemAt(t);
+        if (!item->live) continue;
+        const QString& key = item->payload;
         if (!live_ && !pool_->snapshot(key).isNull()) continue;
         if (t.rect.intersects(visible)) wanted << key;
         else if (t.rect.intersects(nearby)) later << key;
@@ -175,6 +169,12 @@ void TileGridView::paintEvent(QPaintEvent*) {
     p.setRenderHint(QPainter::Antialiasing);
     p.setRenderHint(QPainter::TextAntialiasing);
     p.fillRect(viewport()->rect(), Theme::backgroundSecondary);
+    if (tiles_.isEmpty() && headers_.isEmpty() && !emptyText_.isEmpty()) {
+        QFont f = font(); f.setPixelSize(12); p.setFont(f);
+        p.setPen(Theme::textTertiary);
+        p.drawText(viewport()->rect().adjusted(16, 0, -16, 0), Qt::AlignCenter | Qt::TextWordWrap, emptyText_);
+        return;
+    }
 
     const int top = verticalScrollBar()->value();
     const QRect visible(0, top, viewport()->width(), viewport()->height());
@@ -185,9 +185,9 @@ void TileGridView::paintEvent(QPaintEvent*) {
         paintTile(p, t, i == hovered_);
 
         // Still mode: grab a settled preview into the snapshot cache.
-        const CatalogItem* item = itemAt(t);
-        if (live_ || item->isInput) continue;
-        const QString key = item->payload();
+        const TileItem* item = itemAt(t);
+        if (live_ || !item->live || !pool_) continue;
+        const QString& key = item->payload;
         const QString id = pool_->previewId(key);
         if (id.isEmpty() || !pool_->snapshot(key).isNull()) continue;
         const qint64 now = QDateTime::currentMSecsSinceEpoch();
@@ -215,7 +215,7 @@ void TileGridView::paintEvent(QPaintEvent*) {
 }
 
 void TileGridView::paintTile(QPainter& p, const Tile& t, bool hovered) {
-    const CatalogItem* item = itemAt(t);
+    const TileItem* item = itemAt(t);
     const QRect r = toView(t.rect);
     QPainterPath body;
     body.addRoundedRect(QRectF(r).adjusted(0.5, 0.5, -0.5, -0.5), kTileRadius, kTileRadius);
@@ -226,42 +226,65 @@ void TileGridView::paintTile(QPainter& p, const Tile& t, bool hovered) {
     const QRect pr = toView(previewRect(t.rect));
     QPainterPath previewShape;
     previewShape.addRoundedRect(QRectF(pr), kPreviewRadius, kPreviewRadius);
-    const QString key = item->payload();
+    const QString& key = item->payload;
+    QColor background = Theme::backgroundTertiary;
+    if (item->tint.isValid()) { background = item->tint; background.setAlphaF(0.15); }
+    p.fillPath(previewShape, background);
+
     bool drawn = false;
-    if (item->isInput) {
-        QColor tint = kInputTint; tint.setAlphaF(0.15);
-        p.fillPath(previewShape, tint);
-        const int s = qMin(pr.height() - 8, 24);
-        Icons::paint(&p, QRectF(pr.center().x() - s / 2.0, pr.center().y() - s / 2.0, s, s),
-                     inputIcon(item->typeRaw), kInputTint);
-        drawn = true;
-    } else {
-        p.fillPath(previewShape, Theme::backgroundTertiary);
+    QImage still;
+    if (item->live && pool_) {
         // A preview, when one exists, shows in either mode — in still mode
         // only until its snapshot is captured.
         const QString id = pool_->previewId(key);
-        const QImage still = pool_->snapshot(key);
+        still = pool_->snapshot(key);
         if (!id.isEmpty() && (live_ || still.isNull())) drawn = drawPreview(p, id, pr);
-        if (!drawn) {
-            if (!still.isNull()) {
-                p.save();
-                p.setClipPath(previewShape);
-                p.drawImage(QRectF(pr), still);
-                p.restore();
-                drawn = true;
-            }
-        }
-        if (drawn && !id.isEmpty() && !liveSince_.contains(key))
-            liveSince_.insert(key, QDateTime::currentMSecsSinceEpoch());
-        if (!drawn) {
-            Icons::paint(&p, QRectF(pr.center().x() - 7, pr.center().y() - 7, 14, 14),
-                         item->isSource ? Icons::Video : Icons::Sparkles, Theme::textTertiary);
-        }
+        if (drawn && !liveSince_.contains(key)) liveSince_.insert(key, QDateTime::currentMSecsSinceEpoch());
+    } else if (!item->imagePath.isEmpty()) {
+        still = thumbnail(item->imagePath);
+    }
+    if (!drawn && !still.isNull()) {
+        // Fill the preview, cropping the image to 16:9.
+        const QSizeF size = QSizeF(still.size()).scaled(pr.size(), Qt::KeepAspectRatioByExpanding);
+        const QRectF target(pr.center().x() - size.width() / 2, pr.center().y() - size.height() / 2,
+                            size.width(), size.height());
+        p.save();
+        p.setClipPath(previewShape);
+        p.setRenderHint(QPainter::SmoothPixmapTransform);
+        p.drawImage(target, still);
+        p.restore();
+        drawn = true;
+    }
+    if (!drawn) {
+        const bool tinted = item->tint.isValid();
+        const int s = tinted ? qMin(pr.height() - 8, 24) : 14;
+        Icons::paint(&p, QRectF(pr.center().x() - s / 2.0, pr.center().y() - s / 2.0, s, s),
+                     item->icon, tinted ? item->tint : Theme::textTertiary);
+    }
+
+    // Download state.
+    if (item->progress >= 0) {
+        const QRectF ring(pr.center().x() - 12, pr.center().y() - 12, 24, 24);
+        p.setPen(Qt::NoPen);
+        p.setBrush(QColor(0, 0, 0, 150));
+        p.drawEllipse(ring.adjusted(-3, -3, 3, 3));
+        p.setBrush(Qt::NoBrush);
+        p.setPen(QPen(QColor(255, 255, 255, 60), 2.5));
+        p.drawEllipse(ring);
+        p.setPen(QPen(Theme::accent, 2.5, Qt::SolidLine, Qt::RoundCap));
+        p.drawArc(ring, 90 * 16, -int(360 * 16 * qBound(0.0f, item->progress, 1.0f)));
+    } else if (item->cloud) {
+        const QRectF badge(pr.right() - 21, pr.bottom() - 21, 18, 18);
+        p.setPen(Qt::NoPen);
+        p.setBrush(QColor(0, 0, 0, 140));
+        p.drawEllipse(badge);
+        Icons::paint(&p, badge.adjusted(3, 3, -3, -3), Icons::Cloud, QColor(255, 255, 255, 220));
     }
 
     // Favourite star.
     const QRect sr = toView(starRect(t.rect));
-    if (item->favorite) {
+    if (!item->starrable) {
+    } else if (item->favorite) {
         Icons::paint(&p, sr, Icons::StarFilled, Theme::warning);
     } else if (hovered) {
         Icons::paint(&p, sr.translated(0, 1), Icons::Star, QColor(0, 0, 0, 130));
@@ -391,9 +414,9 @@ void TileGridView::mouseMoveEvent(QMouseEvent* e) {
     const QPoint pos = e->position().toPoint();
     if (pressed_ >= 0 && (e->buttons() & Qt::LeftButton)
         && (pos - pressPos_).manhattanLength() >= QApplication::startDragDistance()) {
-        const CatalogItem item = *itemAt(tiles_[pressed_]);
+        const TileItem item = *itemAt(tiles_[pressed_]);
         pressed_ = -1;
-        startDrag(item);
+        if (!item.payload.isEmpty()) startDrag(item);
         return;
     }
     const int h = tileAt(pos);
@@ -409,14 +432,19 @@ void TileGridView::mouseReleaseEvent(QMouseEvent* e) {
     const int t = pressed_;
     pressed_ = -1;
     if (t < 0 || e->button() != Qt::LeftButton || tileAt(e->position().toPoint()) != t) return;
-    if (toView(starRect(tiles_[t].rect)).adjusted(-3, -3, 3, 3).contains(e->position().toPoint()))
-        emit favoriteToggled(*itemAt(tiles_[t]));
+    const TileItem* item = itemAt(tiles_[t]);
+    if (item->starrable && toView(starRect(tiles_[t].rect)).adjusted(-3, -3, 3, 3).contains(e->position().toPoint()))
+        emit favoriteToggled(*item);
+    else if (activateOnClick_)
+        emit activated(*item);
 }
 
 void TileGridView::mouseDoubleClickEvent(QMouseEvent* e) {
     const int t = tileAt(e->position().toPoint());
-    if (t < 0 || toView(starRect(tiles_[t].rect)).adjusted(-3, -3, 3, 3).contains(e->position().toPoint())) return;
-    emit activated(*itemAt(tiles_[t]));
+    if (t < 0 || activateOnClick_) return;
+    const TileItem* item = itemAt(tiles_[t]);
+    if (item->starrable && toView(starRect(tiles_[t].rect)).adjusted(-3, -3, 3, 3).contains(e->position().toPoint())) return;
+    emit activated(*item);
 }
 
 void TileGridView::leaveEvent(QEvent*) {
@@ -428,24 +456,23 @@ void TileGridView::leaveEvent(QEvent*) {
 void TileGridView::contextMenuEvent(QContextMenuEvent* e) {
     const int t = tileAt(e->pos());
     if (t < 0) return;
-    const CatalogItem item = *itemAt(tiles_[t]);
-    QMenu menu(this);
-    menu.addAction("Add to Canvas", this, [this, item] { emit activated(item); });
-    menu.addAction(item.favorite ? "Unfavorite" : "Favorite", this, [this, item] { emit favoriteToggled(item); });
-    menu.exec(e->globalPos());
+    emit contextMenuRequested(*itemAt(tiles_[t]), e->globalPos());
 }
 
-void TileGridView::startDrag(const CatalogItem& item) {
+void TileGridView::startDrag(const TileItem& item) {
     // Drag image: the tile's current frame (or its icon) with the name.
     QImage frame;
-    const QString id = pool_->previewId(item.payload());
-    if (!id.isEmpty()) {
-        auto* gl = static_cast<QOpenGLWidget*>(viewport());
-        gl->makeCurrent();
-        frame = capture(id, QSize(160, 90));
-        gl->doneCurrent();
+    if (item.live && pool_) {
+        if (const QString id = pool_->previewId(item.payload); !id.isEmpty()) {
+            auto* gl = static_cast<QOpenGLWidget*>(viewport());
+            gl->makeCurrent();
+            frame = capture(id, QSize(160, 90));
+            gl->doneCurrent();
+        }
+        if (frame.isNull()) frame = pool_->snapshot(item.payload);
+    } else if (!item.imagePath.isEmpty()) {
+        frame = thumbnail(item.imagePath);
     }
-    if (frame.isNull()) frame = pool_->snapshot(item.payload());
 
     const qreal dpr = devicePixelRatioF();
     QPixmap pm(QSize(124, 92) * dpr);
@@ -464,11 +491,15 @@ void TileGridView::startDrag(const CatalogItem& item) {
         shape.addRoundedRect(pr, kPreviewRadius, kPreviewRadius);
         p.fillPath(shape, Theme::backgroundTertiary);
         if (!frame.isNull()) {
-            p.save(); p.setClipPath(shape); p.drawImage(pr, frame); p.restore();
+            const QSizeF size = QSizeF(frame.size()).scaled(pr.size(), Qt::KeepAspectRatioByExpanding);
+            p.save();
+            p.setClipPath(shape);
+            p.drawImage(QRectF(pr.center().x() - size.width() / 2, pr.center().y() - size.height() / 2,
+                               size.width(), size.height()), frame);
+            p.restore();
         } else {
-            Icons::paint(&p, QRectF(pr.center().x() - 10, pr.center().y() - 10, 20, 20),
-                         item.isInput ? inputIcon(item.typeRaw) : item.isSource ? Icons::Video : Icons::Sparkles,
-                         Theme::textSecondary);
+            Icons::paint(&p, QRectF(pr.center().x() - 10, pr.center().y() - 10, 20, 20), item.icon,
+                         item.tint.isValid() ? item.tint : Theme::textSecondary);
         }
         QFont f = font(); f.setPixelSize(11); p.setFont(f);
         p.setPen(Theme::textPrimary);
@@ -477,10 +508,29 @@ void TileGridView::startDrag(const CatalogItem& item) {
     }
 
     auto* mime = new QMimeData;
-    mime->setData(NodeEditorView::kCatalogMime, item.payload().toUtf8());
+    mime->setData(NodeEditorView::kCatalogMime, item.payload.toUtf8());
     auto* drag = new QDrag(this);
     drag->setMimeData(mime);
     drag->setPixmap(pm);
     drag->setHotSpot(QPoint(62, 46));
     drag->exec(Qt::CopyAction);
+}
+
+// Loads (and scales) a thumbnail off the GUI thread; repaints when ready.
+QImage TileGridView::thumbnail(const QString& path) {
+    auto it = thumbnails_.find(path);
+    if (it != thumbnails_.end()) return it.value();
+    thumbnails_.insert(path, QImage());
+    QPointer<TileGridView> self(this);
+    QThreadPool::globalInstance()->start([self, path] {
+        QImage image(path);
+        if (!image.isNull() && image.width() > 640)
+            image = image.scaledToWidth(640, Qt::SmoothTransformation);
+        QMetaObject::invokeMethod(QCoreApplication::instance(), [self, path, image] {
+            if (!self) return;
+            self->thumbnails_.insert(path, image);
+            self->viewport()->update();
+        }, Qt::QueuedConnection);
+    });
+    return {};
 }

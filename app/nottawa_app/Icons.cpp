@@ -133,6 +133,27 @@ void paint(QPainter* p, const QRectF& rect, Kind kind, const QColor& color) {
     case ChevronRight:
         p->drawPolyline(QPolygonF({QPointF(6, 4), QPointF(10, 8), QPointF(6, 12)}));
         break;
+    case Film:
+        p->drawRoundedRect(QRectF(2.5, 1.5, 11, 13), 1.2, 1.2);
+        p->drawLine(QPointF(5, 1.5), QPointF(5, 14.5));
+        p->drawLine(QPointF(11, 1.5), QPointF(11, 14.5));
+        p->drawLine(QPointF(5, 8), QPointF(11, 8));
+        for (const qreal y : {4.0, 8.0, 12.0}) {
+            p->drawLine(QPointF(2.5, y), QPointF(5, y));
+            p->drawLine(QPointF(11, y), QPointF(13.5, y));
+        }
+        break;
+    case Cloud: {
+        QPainterPath cloud;
+        cloud.moveTo(4.5, 11.5);
+        cloud.cubicTo(1.5, 11.5, 1.2, 7.4, 4.2, 7.0);
+        cloud.cubicTo(4.6, 3.4, 9.6, 2.6, 10.8, 5.8);
+        cloud.cubicTo(14.4, 5.6, 15.4, 11.5, 11.8, 11.5);
+        p->drawPath(cloud);
+        p->drawLine(QPointF(8, 7.5), QPointF(8, 14.5));
+        p->drawPolyline(QPolygonF({QPointF(6, 12.5), QPointF(8, 14.5), QPointF(10, 12.5)}));
+        break;
+    }
     }
     p->restore();
 }

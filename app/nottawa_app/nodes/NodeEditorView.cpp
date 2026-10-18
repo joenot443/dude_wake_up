@@ -5,6 +5,7 @@
 #include "PreviewWindow.h"
 
 #include <QApplication>
+#include <QTimer>
 #include <QGraphicsLineItem>
 #include <QGraphicsScene>
 #include <QKeyEvent>
@@ -13,7 +14,10 @@
 #include <QMouseEvent>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
+#include <QDir>
 #include <QFileDialog>
+#include <QFileInfo>
+#include <QOpenGLFramebufferObject>
 #include <QOpenGLWidget>
 #include <QScreen>
 #include <QScrollBar>
@@ -475,6 +479,7 @@ void NodeEditorView::showContextMenu(const QPoint& viewPos) {
         fillCatalogMenu(menu.addMenu(isSource ? "Swap Source" : "Swap Effect"), isSource,
                         [this, id, isSource](int type) { swapNode(id, isSource, type); });
         menu.addAction("Open Preview Window", this, [this, id] { openPreview(id); });
+        menu.addAction("Save Strand...", this, [this, id] { saveStrand(id); });
         menu.addSeparator();
         QList<EdgeItem*> nodeEdges;
         for (EdgeItem* edge : std::as_const(edges_))
@@ -530,6 +535,88 @@ void NodeEditorView::fillCatalogMenu(QMenu* menu, bool sources, const std::funct
 }
 
 // --------------------------------------------------------- node operations
+
+void NodeEditorView::loadStrand(const QString& strandId, const QPointF* scenePos) {
+    auto* engine = EngineBridge::instance();
+    const QStringList ids = engine->loadStrand(strandId);
+    if (ids.isEmpty()) return;
+    if (scenePos) {
+        // Move the strand so its top-left node lands on the drop point.
+        QPointF topLeft(qInf(), qInf());
+        QHash<QString, QPointF> positions;
+        for (const GraphNode& n : engine->nodes()) {
+            if (!ids.contains(n.id)) continue;
+            positions.insert(n.id, n.position);
+            topLeft = QPointF(qMin(topLeft.x(), n.position.x()), qMin(topLeft.y(), n.position.y()));
+        }
+        for (auto it = positions.cbegin(); it != positions.cend(); ++it)
+            engine->setNodePosition(it.key(), it.value() - topLeft + *scenePos);
+    }
+    syncFromEngine();
+    if (!scenePos) {
+        // Saved positions can land on existing nodes (e.g. the graph the
+        // strand was saved from); then put the strand below the graph.
+        QRectF loaded, existing;
+        for (auto it = nodes_.cbegin(); it != nodes_.cend(); ++it)
+            (ids.contains(it.key()) ? loaded : existing) |= it.value()->sceneBoundingRect();
+        bool overlaps = false;
+        for (const QString& id : ids) {
+            const NodeItem* n = nodes_.value(id);
+            if (!n) continue;
+            for (auto it = nodes_.cbegin(); it != nodes_.cend() && !overlaps; ++it)
+                overlaps = !ids.contains(it.key()) && it.value()->sceneBoundingRect().intersects(n->sceneBoundingRect());
+        }
+        if (overlaps) {
+            const QPointF shift(existing.left() - loaded.left(), existing.bottom() + 60 - loaded.top());
+            for (const QString& id : ids)
+                if (const NodeItem* n = nodes_.value(id)) engine->setNodePosition(id, n->pos() + shift);
+            syncFromEngine();
+        }
+    }
+    scene()->clearSelection();
+    for (const QString& id : ids) if (NodeItem* n = nodes_.value(id)) n->setSelected(true);
+    if (!scenePos) {
+        // Saved positions may be anywhere; bring the new nodes into view.
+        QRectF bounds;
+        for (const QString& id : ids) if (NodeItem* n = nodes_.value(id)) bounds |= n->sceneBoundingRect();
+        if (!bounds.isEmpty() && !mapToScene(viewport()->rect()).boundingRect().contains(bounds)) zoomToFit();
+    }
+}
+
+void NodeEditorView::saveStrand(const QString& nodeId) {
+    auto* engine = EngineBridge::instance();
+    const NodeItem* node = nodes_.value(nodeId);
+    const QString folder = engine->strandsFolder();
+    if (!node || folder.isEmpty()) return;
+    QDir().mkpath(folder);
+    // A unique file name: "<node>.json", "<node> 2.json", ...
+    const QString base = node->name().isEmpty() ? QStringLiteral("Strand") : node->name();
+    QString name = base;
+    for (int n = 2; QFileInfo::exists(QDir(folder).filePath(name + ".json")); ++n)
+        name = QString("%1 %2").arg(base).arg(n);
+    const QString path = QDir(folder).filePath(name + ".json");
+    QString preview = QDir(folder).filePath(name + ".png");
+    if (!captureNode(nodeId).save(preview)) preview.clear();
+    if (!engine->saveStrand(nodeId, path, name, preview)) QFile::remove(preview);
+    else emit strandSaved(name);
+}
+
+// The node's current output as an image (null if it has none yet).
+QImage NodeEditorView::captureNode(const QString& id) {
+    FrameExchange* ex = EngineBridge::instance()->frames(id);
+    auto* gl = qobject_cast<QOpenGLWidget*>(viewport());
+    if (!ex || !gl) return {};
+    gl->makeCurrent();
+    if (!presenter_.isInitialized()) presenter_.initialize();
+    QOpenGLFramebufferObject fbo(640, 360);
+    fbo.bind();
+    QOpenGLContext::currentContext()->functions()->glViewport(0, 0, 640, 360);
+    const bool ok = presenter_.draw(ex, FramePresenter::NodeEditor);
+    QImage image = ok ? fbo.toImage().convertToFormat(QImage::Format_RGB32) : QImage();
+    fbo.release();
+    gl->doneCurrent();
+    return image;
+}
 
 void NodeEditorView::nodeButtonClicked(NodeItem* node, int button, QPoint screenPos) {
     auto* engine = EngineBridge::instance();
@@ -648,6 +735,10 @@ void NodeEditorView::dropEvent(QDropEvent* e) {
     const QPoint viewPos = e->position().toPoint();
     const QPointF scenePos = mapToScene(viewPos);
     e->acceptProposedAction();
+    if (kind == u"strand") {
+        loadStrand(payload.mid(colon + 1), &scenePos);
+        return;
+    }
     if (kind == u"input") {
         // Return to the event loop first: the image file dialog is modal.
         QTimer::singleShot(0, this, [this, type, scenePos] { addInput(type, &scenePos); });

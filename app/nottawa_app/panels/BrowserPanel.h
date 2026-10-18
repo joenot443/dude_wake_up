@@ -56,6 +56,7 @@ private:
 
     Tab tab_ = Effects;
     QVector<CatalogItem> sources_, effects_, inputs_;
+    QHash<QString, CatalogItem> byPayload_;
     QString sourceCategory_ = "All", effectCategory_ = "All";
     bool favoriteSourcesOnly_ = false, favoriteEffectsOnly_ = false;
     QString selectedSourceId_;

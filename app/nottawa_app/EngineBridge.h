@@ -51,6 +51,12 @@ struct GraphEdge {
     int     inputSlot  = 0;
 };
 
+struct StrandItem {
+    QString id;
+    QString name;
+    QString imagePath;
+};
+
 struct AudioSourceItem {
     QString id;
     QString name;
@@ -121,6 +127,17 @@ public:
     void setParameter(const QString& paramId, bool value);
     void setParameter(const QString& paramId, const QString& value);
 
+    QVector<StrandItem> strands() const;
+    QString     strandsFolder() const;
+    // Saves the chain ending at `nodeId` as a strand file; `previewPath` is
+    // an optional thumbnail already written to disk.
+    bool        saveStrand(const QString& nodeId, const QString& path, const QString& name,
+                           const QString& previewPath = {});
+    // Adds a saved strand's nodes to the graph; returns their ids.
+    QStringList loadStrand(const QString& strandId);
+    void        deleteStrand(const QString& strandId);
+    void        renameStrand(const QString& strandId, const QString& name);
+
     QVector<AudioSourceItem> audioSources() const;
     QString selectedAudioSource() const;
     void    selectAudioSource(const QString& id);
@@ -146,6 +163,7 @@ public:
 
 signals:
     void graphChanged();
+    void strandsChanged();
 
 private:
     EngineBridge() = default;

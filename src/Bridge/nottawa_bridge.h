@@ -637,6 +637,11 @@ char* ntw_get_strands_folder_path(void);
 // Returns true on success.
 bool ntw_save_strand_from_node(const char* nodeId, const char* path, const char* name);
 
+// As ntw_save_strand_from_node, recording `previewPath` (an image the caller
+// has written, or NULL) as the strand's thumbnail.
+bool ntw_save_strand_from_node_with_preview(const char* nodeId, const char* path, const char* name,
+                                            const char* previewPath);
+
 typedef struct {
     const char* id;        // Owned by caller (strdup'd) - must free
     const char* name;      // Owned by caller (strdup'd) - must free

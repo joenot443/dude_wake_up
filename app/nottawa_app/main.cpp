@@ -50,10 +50,12 @@ int main(int argc, char** argv) {
     QApplication app(argc, argv);
     app.setApplicationName("Nottawa");
     app.setOrganizationName("Nottawa");
-    // UI settings live in an INI file beside the engine's config (not the
-    // registry), so a throwaway NOTTAWA_APPDATA isolates them too.
+    // UI settings live in an INI file under the app data folder (not the
+    // registry), so a throwaway NOTTAWA_APPDATA isolates them too. Kept in
+    // settings/: the organisation subfolder would otherwise be "Nottawa",
+    // which on Windows is the engine's own "nottawa" folder.
     QSettings::setDefaultFormat(QSettings::IniFormat);
-    QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, appDataDir());
+    QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, QDir(appDataDir()).filePath("settings"));
     Theme::apply(app);
 
     MainWindow w(findDataDir());

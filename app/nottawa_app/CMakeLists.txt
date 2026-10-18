@@ -40,6 +40,7 @@ qt_add_executable(nottawa_app WIN32
     Icons.h                  Icons.cpp
     panels/PreviewPool.h     panels/PreviewPool.cpp
     panels/TileGridView.h    panels/TileGridView.cpp
+    panels/StrandsPage.h     panels/StrandsPage.cpp
     nodes/NodeEditorView.h   nodes/NodeEditorView.cpp
     nodes/NodeItems.h        nodes/NodeItems.cpp
     Theme.h                  Theme.cpp

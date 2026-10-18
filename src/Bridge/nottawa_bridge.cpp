@@ -2622,16 +2622,21 @@ char* ntw_get_strands_folder_path(void) {
 }
 
 bool ntw_save_strand_from_node(const char* nodeId, const char* path, const char* name) {
-  if (!nodeId || !path || !name) return false;
-  std::string sid(nodeId), spath(path), sname(name);
+  return ntw_save_strand_from_node_with_preview(nodeId, path, name, nullptr);
+}
 
-  bool result = runOnEngineThread([sid, spath, sname]() -> bool {
+bool ntw_save_strand_from_node_with_preview(const char* nodeId, const char* path, const char* name,
+                                            const char* previewPath) {
+  if (!nodeId || !path || !name) return false;
+  std::string sid(nodeId), spath(path), sname(name), spreview(previewPath ? previewPath : "");
+
+  bool result = runOnEngineThread([sid, spath, sname, spreview]() -> bool {
     auto connectable = findConnectable(sid.c_str());
     if (!connectable) return false;
 
     auto strand = ShaderChainerService::getService()->strandForConnectable(connectable);
     strand.name = sname;
-    ConfigService::getService()->saveStrandFile(strand, spath, "");
+    ConfigService::getService()->saveStrandFile(strand, spath, spreview);
     StrandService::getService()->populate();
     return true;
   });

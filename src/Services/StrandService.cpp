@@ -1,6 +1,24 @@
 #include "StrandService.hpp"
+#include <set>
 #include "ConfigService.hpp"
+#include <algorithm>
+#include <cctype>
 #include <filesystem>
+
+namespace {
+// Paths reach the maps in different spellings (separators, doubled
+// slashes), so compare them normalised.
+std::string normalizedPath(const std::string& path)
+{
+  if (path.empty()) return path;
+  std::string out = std::filesystem::path(path).lexically_normal().generic_string();
+#ifdef _WIN32
+  // Windows paths are case-insensitive.
+  std::transform(out.begin(), out.end(), out.begin(), [](unsigned char c) { return char(std::tolower(c)); });
+#endif
+  return out;
+}
+} // namespace
 
 std::shared_ptr<AvailableStrand> StrandService::availableStrandForId(std::string id)
 {
@@ -21,14 +39,17 @@ std::shared_ptr<AvailableStrand> StrandService::availableStrandForId(std::string
 
 std::vector<std::shared_ptr<AvailableStrand>> StrandService::availableStrands()
 {
+  // A strand saved this session is in strandMap and, once the folder is
+  // rescanned, in folderMap too; list each file once.
   std::vector<std::shared_ptr<AvailableStrand>> strands;
-  for (auto const &[key, val] : strandMap)
+  std::set<std::string> paths;
+  for (auto const *map : {&strandMap, &folderMap})
   {
-    strands.push_back(val);
-  }
-  for (auto const &[key, val] : folderMap)
-  {
-    strands.push_back(val);
+    for (auto const &[key, val] : *map)
+    {
+      if (!val->path.empty() && !paths.insert(normalizedPath(val->path)).second) continue;
+      strands.push_back(val);
+    }
   }
   return strands;
 }
@@ -78,14 +99,24 @@ void StrandService::addStrand(std::shared_ptr<AvailableStrand> strand)
 
 void StrandService::removeStrand(std::string id)
 {
-  if (strandMap.count(id) == 0)
+  auto strand = availableStrandForId(id);
+  if (strand == nullptr)
   {
     log("Tried to remove Strand %s, but it doesn't exist",
         id.c_str());
     return;
   }
-  auto strand = strandMap[id];
-  strandMap.erase(id);
+  // Drop every entry for the strand's file, from either map.
+  for (auto *map : {&strandMap, &folderMap})
+  {
+    for (auto it = map->begin(); it != map->end();)
+    {
+      if (it->first == id || (!strand->path.empty() && normalizedPath(it->second->path) == normalizedPath(strand->path)))
+        it = map->erase(it);
+      else ++it;
+    }
+  }
+  strandNames.erase(strand->name);
   notifyStrandsUpdated();
 }
 
@@ -272,9 +303,19 @@ void StrandService::renameStrand(std::string id, std::string newName)
     return;
   }
 
-  // Update AvailableStrand metadata
-  strand->name = newName;
-  strand->path = newPath.string();
+  // Update every entry for the file (it can be in both maps).
+  const std::string oldPathString = normalizedPath(oldPath.string());
+  strandNames.erase(strand->name);
+  strandNames.insert(newName);
+  for (auto *map : {&strandMap, &folderMap})
+  {
+    for (auto &[key, entry] : *map)
+    {
+      if (entry != strand && normalizedPath(entry->path) != oldPathString) continue;
+      entry->name = newName;
+      entry->path = newPath.string();
+    }
+  }
 
   notifyStrandsUpdated();
 }

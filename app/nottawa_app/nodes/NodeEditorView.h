@@ -52,6 +52,10 @@ public:
 
     // Opens (or raises) a separate window showing the node's output.
     void openPreview(const QString& id);
+    // Adds a saved strand, its top-left node at `scenePos` when given.
+    void loadStrand(const QString& strandId, const QPointF* scenePos = nullptr);
+    // Saves the chain ending at a node as a strand, with a thumbnail.
+    void saveStrand(const QString& nodeId);
 
     // Called by NodeItem.
     void drawNodePreview(QPainter* p, const NodeItem* node, const QRectF& bodyLocal, qreal cornerRadius, float opacity);
@@ -59,6 +63,7 @@ public:
     void nodeButtonClicked(NodeItem* node, int button, QPoint screenPos);
 
 signals:
+    void strandSaved(const QString& name);
     void nodeSelected(const QString& id);
 
 protected:
@@ -87,6 +92,7 @@ private:
     void fillCatalogMenu(QMenu* menu, bool sources, const std::function<void(int)>& pick);
     void swapNode(const QString& id, bool isSource, int typeRaw);
     void cycleSelection(bool backwards);
+    QImage captureNode(const QString& id);
     QPointF nextFreePosition() const;
     // Positions a just-added node, selects it and syncs.
     void placeNew(const QString& id, QPointF pos);

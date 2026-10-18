@@ -22,6 +22,7 @@
 #include "ShaderChainerService.hpp"
 #include "StrandService.hpp"
 #include "TransformShader.hpp"
+#include "UUID.hpp"
 #include "VideoSourceService.hpp"
 #include "json.hpp"
 #include "ofMain.h"
@@ -441,6 +442,68 @@ bool ConfigService::loadWorkspaceDialogue() {
 }
 
 
+namespace {
+
+void collectParamIds(const json& j, std::vector<std::string>& out)
+{
+  if (j.is_object())
+  {
+    for (auto it = j.begin(); it != j.end(); ++it)
+    {
+      if (it.key() == "paramId" && it.value().is_string()) out.push_back(it.value().get<std::string>());
+      else collectParamIds(it.value(), out);
+    }
+  }
+  else if (j.is_array())
+  {
+    for (const auto& item : j) collectParamIds(item, out);
+  }
+}
+
+// Strands are templates: loading one gives its nodes, connections and
+// parameters fresh identities, so a strand can be loaded next to the graph it
+// was saved from (or loaded twice) without IDs colliding. Every reference
+// inside the strand (connection ends, drivers, favourites...) is rewritten
+// with them.
+json withFreshIds(const json& data)
+{
+  std::vector<std::string> ids, paramIds;
+  for (const std::string& section : {ShadersJsonKey, SourcesJsonKey, ConnectionsJsonKey})
+  {
+    if (!data.contains(section)) continue;
+    const json& entries = data[section];
+    if (entries.is_object())
+    {
+      for (auto it = entries.begin(); it != entries.end(); ++it) ids.push_back(it.key());
+    }
+    else if (entries.is_array())
+    {
+      for (const auto& entry : entries)
+        for (const char* key : {"shaderId", "sourceId", "id"})
+          if (entry.is_object() && entry.contains(key) && entry[key].is_string())
+            ids.push_back(entry[key].get<std::string>());
+    }
+  }
+  collectParamIds(data, paramIds);
+
+  std::string text = data.dump();
+  auto replaceAll = [&text](const std::string& from, const std::string& to) {
+    if (from.empty()) return;
+    for (size_t pos = text.find(from); pos != std::string::npos; pos = text.find(from, pos + to.size()))
+      text.replace(pos, from.size(), to);
+  };
+  for (const auto& id : ids) replaceAll(id, NottawaUUID::generateUUID());
+  for (const auto& paramId : paramIds)
+  {
+    const size_t dash = paramId.rfind('-');
+    const std::string name = dash == std::string::npos ? paramId : paramId.substr(0, dash);
+    replaceAll(paramId, NottawaUUID::generateParamId(name));
+  }
+  return json::parse(text);
+}
+
+} // namespace
+
 std::vector<std::string> ConfigService::loadStrandFile(std::string path)
 {
   std::fstream fileStream;
@@ -468,6 +531,7 @@ std::vector<std::string> ConfigService::loadStrandFile(std::string path)
     }
   }
   
+  data = withFreshIds(data);
   std::vector<std::string> ids;
   
   if (data[ShadersJsonKey].is_object())
@@ -506,6 +570,7 @@ std::vector<std::string> ConfigService::loadStrandJson(const std::string &jsonSt
     log("Could not parse strand JSON: %s", e.what());
     return {};
   }
+  data = withFreshIds(data);
 
   std::vector<std::string> ids;
 

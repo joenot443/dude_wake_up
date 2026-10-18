@@ -21,6 +21,10 @@ void onGraphChanged() {
     QMetaObject::invokeMethod(EngineBridge::instance(), &EngineBridge::graphChanged, Qt::QueuedConnection);
 }
 
+void onStrandsChanged() {
+    QMetaObject::invokeMethod(EngineBridge::instance(), &EngineBridge::strandsChanged, Qt::QueuedConnection);
+}
+
 const char* const kEffectCategories[] = {"Basic", "Mix", "Transform", "Filter", "Mask", "Glitch"};
 
 } // anon
@@ -40,6 +44,7 @@ bool EngineBridge::start(void* shareContext, const QString& dataPath) {
     ntw_set_share_context(shareContext);
     if (!ntw_engine_init()) return false;
     ntw_register_graph_changed_callback(&onGraphChanged);
+    ntw_register_strands_updated_callback(&onStrandsChanged);
     ntw_engine_start();
     running_ = true;
     return true;
@@ -147,6 +152,40 @@ QVector<GraphNode> EngineBridge::nodes() const {
     }
     ntw_free_video_source_info_array(srcs, n);
     return out;
+}
+
+QVector<StrandItem> EngineBridge::strands() const {
+    QVector<StrandItem> out;
+    int n = 0;
+    NTWAvailableStrandInfo* arr = ntw_get_available_strands(&n);
+    for (int i = 0; i < n; ++i) out.push_back({str(arr[i].id), str(arr[i].name), str(arr[i].imagePath)});
+    ntw_free_available_strand_info_array(arr, n);
+    return out;
+}
+
+QString EngineBridge::strandsFolder() const { return takeString(ntw_get_strands_folder_path()); }
+
+bool EngineBridge::saveStrand(const QString& nodeId, const QString& path, const QString& name,
+                              const QString& previewPath) {
+    const QByteArray preview = previewPath.toUtf8();
+    return ntw_save_strand_from_node_with_preview(nodeId.toUtf8().constData(), path.toUtf8().constData(),
+                                                  name.toUtf8().constData(),
+                                                  previewPath.isEmpty() ? nullptr : preview.constData());
+}
+
+QStringList EngineBridge::loadStrand(const QString& strandId) {
+    int n = 0;
+    char** ids = ntw_load_strand(strandId.toUtf8().constData(), &n);
+    QStringList out;
+    for (int i = 0; i < n; ++i) out << str(ids[i]);
+    ntw_free_string_array(ids, n);
+    return out;
+}
+
+void EngineBridge::deleteStrand(const QString& id) { ntw_delete_strand(id.toUtf8().constData()); }
+
+void EngineBridge::renameStrand(const QString& id, const QString& name) {
+    ntw_rename_strand(id.toUtf8().constData(), name.toUtf8().constData());
 }
 
 QVector<AudioSourceItem> EngineBridge::audioSources() const {

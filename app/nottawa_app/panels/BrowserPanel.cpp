@@ -32,6 +32,28 @@ QToolButton* iconButton(Icons::Kind kind, const QString& tip, QWidget* parent) {
     return b;
 }
 
+TileItem toTile(const CatalogItem& c) {
+    TileItem t;
+    t.name = c.name;
+    t.payload = c.payload();
+    t.starrable = true;
+    t.favorite = c.favorite;
+    if (c.isInput) {
+        t.tint = QColor(0x3b, 0x82, 0xf6);
+        switch (c.typeRaw) {
+        case VideoSourceKind::Text:   t.icon = Icons::Text; break;
+        case VideoSourceKind::Icon:   t.icon = Icons::Smiley; break;
+        case VideoSourceKind::Image:  t.icon = Icons::Photo; break;
+        case VideoSourceKind::Webcam: t.icon = Icons::Webcam; break;
+        default:                      t.icon = Icons::Video; break;
+        }
+    } else {
+        t.live = true;
+        t.icon = c.isSource ? Icons::Video : Icons::Sparkles;
+    }
+    return t;
+}
+
 QFrame* divider(QWidget* parent) {
     auto* line = new QFrame(parent);
     line->setFixedHeight(1);
@@ -173,10 +195,24 @@ BrowserPanel::BrowserPanel(QWidget* parent) : QWidget(parent) {
 
     pool_ = new PreviewPool(this);
     grid_ = new TileGridView(pool_, catalogPage_);
-    connect(grid_, &TileGridView::activated, this, &BrowserPanel::itemPicked);
-    connect(grid_, &TileGridView::favoriteToggled, this, [this](const CatalogItem& item) {
-        EngineBridge::instance()->toggleFavorite(item);
+    connect(grid_, &TileGridView::activated, this, [this](const TileItem& tile) {
+        if (byPayload_.contains(tile.payload)) emit itemPicked(byPayload_[tile.payload]);
+    });
+    connect(grid_, &TileGridView::favoriteToggled, this, [this](const TileItem& tile) {
+        if (!byPayload_.contains(tile.payload)) return;
+        EngineBridge::instance()->toggleFavorite(byPayload_[tile.payload]);
         reload();
+    });
+    connect(grid_, &TileGridView::contextMenuRequested, this, [this](const TileItem& tile, QPoint pos) {
+        if (!byPayload_.contains(tile.payload)) return;
+        const CatalogItem item = byPayload_[tile.payload];
+        QMenu menu(this);
+        menu.addAction("Add to Canvas", this, [this, item] { emit itemPicked(item); });
+        menu.addAction(item.favorite ? "Unfavorite" : "Favorite", this, [this, item] {
+            EngineBridge::instance()->toggleFavorite(item);
+            reload();
+        });
+        menu.exec(pos);
     });
     connect(grid_, &TileGridView::collapsedChanged, this, [this] {
         const QSet<QString> c = grid_->collapsed();
@@ -225,6 +261,9 @@ void BrowserPanel::reload() {
     sources_ = engine->sources();
     effects_ = engine->effects();
     inputs_  = engine->inputs();
+    byPayload_.clear();
+    for (const auto* list : {&sources_, &effects_, &inputs_})
+        for (const CatalogItem& c : *list) byPayload_.insert(c.payload(), c);
     rebuild();
 }
 
@@ -296,7 +335,7 @@ void BrowserPanel::rebuild() {
     auto section = [&](const QString& title, const QVector<CatalogItem>& items, const QString* inCategory) {
         TileSection s{title, {}};
         for (const CatalogItem& item : items)
-            if ((!inCategory || item.category == *inCategory) && keep(item)) s.items.push_back(item);
+            if ((!inCategory || item.category == *inCategory) && keep(item)) s.items.push_back(toTile(item));
         return s;
     };
 
