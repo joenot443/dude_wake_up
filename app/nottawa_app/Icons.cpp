@@ -236,6 +236,20 @@ void paint(QPainter* p, const QRectF& rect, Kind kind, const QColor& color) {
         p->setBrush(color);
         p->drawRoundedRect(QRectF(3.5, 3.5, 9, 9), 1.5, 1.5);
         break;
+    case Speaker:
+    case SpeakerMuted:
+        p->setBrush(color);
+        p->drawPolygon(QPolygonF({QPointF(2, 6), QPointF(4.5, 6), QPointF(8, 3), QPointF(8, 13),
+                                  QPointF(4.5, 10), QPointF(2, 10)}));
+        p->setBrush(Qt::NoBrush);
+        if (kind == Speaker) {
+            p->drawArc(QRectF(6.5, 5, 5, 6), -60 * 16, 120 * 16);
+            p->drawArc(QRectF(6.5, 2.5, 8, 11), -60 * 16, 120 * 16);
+        } else {
+            p->drawLine(QPointF(10.5, 6), QPointF(14.5, 10));
+            p->drawLine(QPointF(14.5, 6), QPointF(10.5, 10));
+        }
+        break;
     case Folder:
         p->drawPolyline(QPolygonF({QPointF(1.5, 13.5), QPointF(1.5, 3), QPointF(6, 3), QPointF(7.5, 4.8),
                                    QPointF(14.5, 4.8), QPointF(14.5, 13.5), QPointF(1.5, 13.5)}));

@@ -26,7 +26,7 @@ struct CatalogItem {
     QString payload() const;
 };
 
-namespace VideoSourceKind { enum { Webcam = 0, Image = 2, Icon = 3, Text = 5 }; }
+namespace VideoSourceKind { enum { Webcam = 0, File = 1, Image = 2, Icon = 3, Text = 5 }; }
 
 struct GraphNode {
     QString id;
@@ -171,6 +171,8 @@ struct FileSourceState {
     bool  valid = false;  // the node plays a video file (file or library source)
     float speed = 1, position = 0, duration = 0;
     bool  playing = false;
+    float volume = 0.5f;
+    bool  muted = true;
 };
 
 struct IconEntry {
@@ -305,6 +307,8 @@ public:
     void setFileSourcePlaying(const QString& sourceId, bool playing);
     void setFileSourcePosition(const QString& sourceId, float position);
     void setFileSourceSpeed(const QString& sourceId, float speed);
+    void setFileSourceVolume(const QString& sourceId, float volume);
+    void setFileSourceMuted(const QString& sourceId, bool muted);
 
     IconSourceState iconSourceState(const QString& sourceId) const;
     void setIconSourceIcon(const QString& sourceId, int index);

@@ -192,10 +192,13 @@ QString EngineBridge::addInput(int type, const QString& path) {
     case VideoSourceKind::Text:   return takeString(ntw_add_text_video_source("Text"));
     case VideoSourceKind::Icon:   return takeString(ntw_add_icon_video_source("Icon"));
     case VideoSourceKind::Webcam: return takeString(ntw_add_webcam_video_source("Webcam", 0));
-    case VideoSourceKind::Image: {
+    case VideoSourceKind::Image:
+    case VideoSourceKind::File: {
         if (path.isEmpty()) return {};
         const QByteArray name = QFileInfo(path).fileName().toUtf8();
-        return takeString(ntw_add_image_video_source(name.constData(), path.toUtf8().constData()));
+        const QByteArray file = path.toUtf8();
+        return takeString(type == VideoSourceKind::File ? ntw_add_file_video_source(name.constData(), file.constData())
+                                                        : ntw_add_image_video_source(name.constData(), file.constData()));
     }
     }
     return {};
@@ -721,11 +724,15 @@ FileSourceState EngineBridge::fileSourceState(const QString& id) const {
     out.position = s.position;
     out.duration = s.duration;
     out.playing = s.playing != 0;
+    out.volume = s.volume;
+    out.muted = s.mute != 0;
     return out;
 }
 void EngineBridge::setFileSourcePlaying(const QString& id, bool on) { ntw_set_file_source_playing(id.toUtf8().constData(), on); }
 void EngineBridge::setFileSourcePosition(const QString& id, float p) { ntw_set_file_source_position(id.toUtf8().constData(), p); }
 void EngineBridge::setFileSourceSpeed(const QString& id, float s) { ntw_set_file_source_speed(id.toUtf8().constData(), s); }
+void EngineBridge::setFileSourceVolume(const QString& id, float v) { ntw_set_file_source_volume(id.toUtf8().constData(), v); }
+void EngineBridge::setFileSourceMuted(const QString& id, bool on) { ntw_set_file_source_mute(id.toUtf8().constData(), on ? 1 : 0); }
 
 IconSourceState EngineBridge::iconSourceState(const QString& id) const {
     IconSourceState out;

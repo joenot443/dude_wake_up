@@ -512,6 +512,12 @@ void MainWindow::runScriptedAdds() {
     for (int i = 0; i < names.size(); ++i) {
         const QString name = names[i].trimmed();
         QTimer::singleShot(1000 * (i + 1), this, [this, engine, name] {
+            // "file:<path>" adds a video or image file.
+            if (name.startsWith("file:")) {
+                const bool ok = !editor_->addMediaFile(name.mid(5)).isEmpty();
+                log(QString("[script] %1 %2").arg(ok ? "added" : "ERROR could not add", name.mid(5)));
+                return;
+            }
             for (const auto& list : {engine->sources(), engine->effects(), engine->inputs()}) {
                 for (const auto& item : list) {
                     if (item.name.compare(name, Qt::CaseInsensitive) != 0) continue;

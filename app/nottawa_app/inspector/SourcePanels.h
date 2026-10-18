@@ -48,6 +48,8 @@ private:
     QLabel*      total_;
     QLabel*      speedLabel_;
     DSSlider*    speed_;
+    class QToolButton* mute_;
+    DSSlider*    volume_;
 };
 
 // Icon source picker, after the macOS IconSourceControlsView: category

@@ -17,7 +17,7 @@ enum Kind {
     ChevronDown, ChevronRight, ChevronUp, Film, Cloud,
     Note, Keys, Reset, Plus, Minus, Play, Pause,
     Undo, Redo, Sidebar, Sliders, Trash, Camera, Help, Fit, ChevronLeft, Clear,
-    Lock, Unlock, Stop, Folder, NewSquare,
+    Lock, Unlock, Stop, Folder, NewSquare, Speaker, SpeakerMuted,
 };
 
 void  paint(QPainter* p, const QRectF& rect, Kind kind, const QColor& color);

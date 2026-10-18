@@ -169,6 +169,29 @@ FileSourcePanel::FileSourcePanel(const QString& sourceId, const FileSourceState&
     top->addLayout(scrub, 1);
     layout->addLayout(top);
 
+    // Volume, with a mute toggle (videos start muted).
+    auto* volumeRow = new QHBoxLayout;
+    volumeRow->setSpacing(8);
+    mute_ = new QToolButton(this);
+    mute_->setFixedSize(24, 24);
+    mute_->setIconSize(QSize(16, 16));
+    mute_->setAutoRaise(true);
+    mute_->setCursor(Qt::PointingHandCursor);
+    connect(mute_, &QToolButton::clicked, this, [this, eng] {
+        state_.muted = !state_.muted;
+        eng->setFileSourceMuted(sourceId_, state_.muted);
+        setState(state_);
+    });
+    volume_ = new DSSlider(this);
+    volume_->setRange(0, 1);
+    connect(volume_, &DSSlider::valueChanged, this, [this, eng](float v) {
+        state_.volume = v;
+        eng->setFileSourceVolume(sourceId_, v);
+    });
+    volumeRow->addWidget(mute_);
+    volumeRow->addWidget(volume_, 1);
+    layout->addLayout(volumeRow);
+
     auto* speedRow = new QHBoxLayout;
     speedRow->setSpacing(8);
     speedLabel_ = sectionLabel({}, this);
@@ -195,6 +218,10 @@ void FileSourcePanel::setState(const FileSourceState& s) {
     total_->setText(formatTime(s.duration));
     speed_->setValue(s.speed);
     if (!speed_->isDragging()) speedLabel_->setText(QString("%1x").arg(s.speed, 0, 'f', 1));
+    mute_->setIcon(Icons::icon(s.muted ? Icons::SpeakerMuted : Icons::Speaker, s.muted ? Theme::textSecondary : Theme::textPrimary));
+    mute_->setToolTip(s.muted ? "Unmute" : "Mute");
+    volume_->setValue(s.volume);
+    volume_->setEnabled(!s.muted);
 }
 
 // ---------------------------------------------------------------- icon

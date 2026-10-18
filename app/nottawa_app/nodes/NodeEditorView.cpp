@@ -7,6 +7,7 @@
 
 #include <QApplication>
 #include <QSettings>
+#include <QUrl>
 #include <QTimer>
 #include <QGraphicsLineItem>
 #include <QGraphicsScene>
@@ -804,15 +805,49 @@ void NodeEditorView::placeNew(const QString& id, QPointF pos) {
 
 // ------------------------------------------------------------ drag & drop
 
+namespace {
+const QStringList kVideoExtensions = {"mp4", "mov", "avi", "mkv", "flv", "wmv", "webm", "m4v"};
+const QStringList kImageExtensions = {"png", "jpg", "jpeg", "gif", "bmp", "webp"};
+
+// The first local video or image file in a drag from Explorer, if any.
+QString droppedMediaFile(const QMimeData* mime) {
+    for (const QUrl& url : mime->urls()) {
+        if (!url.isLocalFile()) continue;
+        const QString ext = QFileInfo(url.toLocalFile()).suffix().toLower();
+        if (kVideoExtensions.contains(ext) || kImageExtensions.contains(ext)) return url.toLocalFile();
+    }
+    return {};
+}
+} // anon
+
+QString NodeEditorView::addMediaFile(const QString& path, const QPointF* scenePos) {
+    const QString ext = QFileInfo(path).suffix().toLower();
+    const int kind = kVideoExtensions.contains(ext)   ? VideoSourceKind::File
+                     : kImageExtensions.contains(ext) ? VideoSourceKind::Image
+                                                      : -1;
+    if (kind < 0) return {};
+    const QString id = EngineBridge::instance()->addInput(kind, path);
+    if (!id.isEmpty()) placeNew(id, scenePos ? *scenePos : nextFreePosition());
+    return id;
+}
+
 void NodeEditorView::dragEnterEvent(QDragEnterEvent* e) {
-    if (e->mimeData()->hasFormat(kCatalogMime)) e->acceptProposedAction();
+    if (e->mimeData()->hasFormat(kCatalogMime) || !droppedMediaFile(e->mimeData()).isEmpty()) e->acceptProposedAction();
 }
 
 void NodeEditorView::dragMoveEvent(QDragMoveEvent* e) {
-    if (e->mimeData()->hasFormat(kCatalogMime)) e->acceptProposedAction();
+    if (e->mimeData()->hasFormat(kCatalogMime) || !droppedMediaFile(e->mimeData()).isEmpty()) e->acceptProposedAction();
 }
 
 void NodeEditorView::dropEvent(QDropEvent* e) {
+    if (!e->mimeData()->hasFormat(kCatalogMime)) {
+        const QString file = droppedMediaFile(e->mimeData());
+        if (file.isEmpty()) return;
+        e->acceptProposedAction();
+        const QPointF scenePos = mapToScene(e->position().toPoint());
+        addMediaFile(file, &scenePos);
+        return;
+    }
     const QString payload = QString::fromUtf8(e->mimeData()->data(kCatalogMime));
     const int colon = payload.indexOf(':');
     if (colon < 0) return;
