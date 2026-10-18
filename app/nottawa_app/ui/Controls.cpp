@@ -209,7 +209,9 @@ void DSToggle::paintEvent(QPaintEvent*) {
     }
     const QRectF track(x, (height() - trackH) / 2.0, trackW, trackH);
     p.setPen(Qt::NoPen);
-    p.setBrush(checked_ ? Theme::accent : Theme::backgroundTertiary);
+    // On light palettes the tertiary background is too close to the white
+    // thumb; use the border colour, which reads as a track there.
+    p.setBrush(checked_ ? Theme::accent : Theme::isDark() ? Theme::backgroundTertiary : Theme::border);
     p.drawRoundedRect(track, trackH / 2.0, trackH / 2.0);
     const qreal inset = (trackH - thumb) / 2.0;
     const qreal tx = checked_ ? track.right() - inset - thumb : track.left() + inset;

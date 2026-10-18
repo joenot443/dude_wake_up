@@ -1,4 +1,6 @@
 #include "LogPanel.h"
+
+#include "Theme.h"
 #include <QPlainTextEdit>
 #include <QVBoxLayout>
 
@@ -9,9 +11,10 @@ LogPanel::LogPanel(QWidget* parent) : QWidget(parent) {
     text_ = new QPlainTextEdit;
     text_->setReadOnly(true);
     text_->setMaximumBlockCount(2000);
-    text_->setStyleSheet("QPlainTextEdit { background: #0e0f13; color: #a8aab6;"
-                         " font-family: Consolas, monospace; font-size: 9pt;"
-                         " border: none; padding: 4px; }");
+    text_->setStyleSheet(QString("QPlainTextEdit { background: %1; color: %2;"
+                                 " font-family: Consolas, monospace; font-size: 9pt;"
+                                 " border: none; padding: 4px; }")
+                             .arg(Theme::background.name(), Theme::textSecondary.name()));
     layout->addWidget(text_);
 }
 

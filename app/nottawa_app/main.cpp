@@ -5,6 +5,7 @@
 #include <QApplication>
 #include <QDir>
 #include <QFileInfo>
+#include <QProcess>
 #include <QSettings>
 #include <QSurfaceFormat>
 #include <cstdio>
@@ -71,7 +72,14 @@ int main(int argc, char** argv) {
     captureEngineLog();
     CrashHandler::install();
 
-    MainWindow w(findDataDir());
-    w.show();
-    return app.exec();
+    int code = 0;
+    {
+        MainWindow w(findDataDir());
+        w.show();
+        code = app.exec();
+    }  // the window stops the engine and saves the session here
+    // Settings > Theme > Restart Now: relaunch once this instance is done.
+    if (app.property("restartRequested").toBool())
+        QProcess::startDetached(QCoreApplication::applicationFilePath(), QCoreApplication::arguments().mid(1));
+    return code;
 }

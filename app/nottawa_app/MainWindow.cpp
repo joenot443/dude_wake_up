@@ -224,6 +224,11 @@ void MainWindow::buildMenus() {
         if (!settings_) {
             settings_ = new SettingsDialog(this);
             connect(settings_, &SettingsDialog::showHintsChanged, editor_, &NodeEditorView::setShowHints);
+            connect(settings_, &SettingsDialog::restartRequested, this, [this] {
+                // main() relaunches once this instance has saved and shut down.
+                qApp->setProperty("restartRequested", true);
+                close();
+            });
         }
         settings_->show();
         settings_->raise();

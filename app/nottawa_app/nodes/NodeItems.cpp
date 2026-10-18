@@ -45,7 +45,9 @@ void PortItem::paint(QPainter* p, const QStyleOptionGraphicsItem*, QWidget*) {
     p->setRenderHint(QPainter::Antialiasing);
     // Pill backing straddling the node edge.
     p->setPen(Qt::NoPen);
-    p->setBrush(QColor(0x0f, 0x10, 0x14, 200));
+    QColor backing = Theme::background;
+    backing.setAlpha(200);
+    p->setBrush(backing);
     p->drawRoundedRect(QRectF(-kPortHit, -kPortHit, 2 * kPortHit, 2 * kPortHit), kPortHit, kPortHit);
 
     const QColor color = dragState_ == 2 ? kSuccess : (slot_ == kAuxOutputSlot ? kWarning : kAccent);
@@ -130,13 +132,18 @@ void NodeItem::paint(QPainter* p, const QStyleOptionGraphicsItem*, QWidget*) {
     p->fillPath(rounded, kBody);
     view_->drawNodePreview(p, this, b, kRadius, active_ ? 1.0f : 0.4f);
 
+    // The hints follow the macOS NodeView: a scrim of the background colour
+    // with secondary text.
+    QColor scrim = Theme::background;
+    scrim.setAlphaF(0.6);
     if (needsInput_) {
-        p->setPen(QColor(0xd8, 0xd9, 0xdf, 200));
+        p->fillPath(rounded, scrim);
+        p->setPen(Theme::textSecondary);
         QFont f = p->font(); f.setPointSizeF(9); p->setFont(f);
         p->drawText(b.adjusted(0, 0, 0, -kTitleH), Qt::AlignCenter, "Connect a source");
     } else if (audioHint_) {
-        p->fillPath(rounded, QColor(0x14, 0x15, 0x19, 153));
-        p->setPen(QColor(0xd8, 0xd9, 0xdf, 200));
+        p->fillPath(rounded, scrim);
+        p->setPen(Theme::textSecondary);
         QFont f = p->font(); f.setPointSizeF(9); p->setFont(f);
         p->drawText(b.adjusted(0, 0, 0, -kTitleH), Qt::AlignCenter, "Enable audio from the Audio menu");
     }

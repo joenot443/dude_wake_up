@@ -19,6 +19,8 @@ public:
 
 signals:
     void showHintsChanged(bool on);
+    // The user chose to restart to apply a new theme.
+    void restartRequested();
 
 protected:
     void showEvent(QShowEvent*) override;
@@ -29,6 +31,7 @@ private:
     void refreshMidi();
 
     DSPicker*    resolution_;
+    DSPicker*    theme_;
     DSToggle*    hints_;
     DSToggle*    advance_;
     DSSlider*    fade_;

@@ -9,6 +9,7 @@
 #include <QDir>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QScrollArea>
 #include <QSettings>
@@ -94,6 +95,21 @@ SettingsDialog::SettingsDialog(QWidget* parent) : QDialog(parent) {
     resolution_->setOptions(kResolutions);
     connect(resolution_, &DSPicker::currentIndexChanged, this, [eng](int i) { eng->setResolutionIndex(i); });
     display->addWidget(row("Resolution", resolution_, content));
+    theme_ = new DSPicker(content);
+    theme_->setOptions(Theme::presets());
+    connect(theme_, &DSPicker::currentIndexChanged, this, [this](int i) {
+        const QString name = Theme::presets().value(i);
+        if (name == Theme::preset()) return;
+        Theme::setPreset(name);
+        // Widgets take their colours as they're built, so restart to apply.
+        QMessageBox box(QMessageBox::NoIcon, "Theme", QString("%1 will be used the next time Nottawa starts.").arg(name),
+                        QMessageBox::NoButton, this);
+        QPushButton* restart = box.addButton("Restart Now", QMessageBox::AcceptRole);
+        box.addButton("Later", QMessageBox::RejectRole);
+        box.exec();
+        if (box.clickedButton() == restart) emit restartRequested();
+    });
+    display->addWidget(row("Theme", theme_, content));
     hints_ = new DSToggle({}, content);
     connect(hints_, &DSToggle::toggled, this, [this](bool on) {
         QSettings().setValue("ui/showNodeHints", on);
@@ -195,6 +211,7 @@ void SettingsDialog::refresh() {
     auto* eng = EngineBridge::instance();
     QSettings settings;
     resolution_->setCurrentIndex(eng->resolutionIndex());
+    theme_->setCurrentIndex(int(Theme::presets().indexOf(Theme::preset())));
     hints_->setChecked(settings.value("ui/showNodeHints", true).toBool());
     advance_->setChecked(settings.value("ui/autoAdvanceOutputWindow", true).toBool());
     const float fade = float(settings.value("ui/outputWindowFadeSeconds", 0.3).toDouble());
