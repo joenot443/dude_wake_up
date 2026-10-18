@@ -6,105 +6,96 @@
 
 namespace Theme {
 
-// Palette approximation of the NottawaApp SwiftUI dark theme. Not pixel
-// identical — a close dark theme we can refine in Phase A.4.
+// The app-wide stylesheet, from the Midnight tokens in Theme.h. Panels add
+// their own rules on top for specifics.
 QString stylesheet() {
-    return R"CSS(
-        QMainWindow, QDialog { background: #16171c; color: #d8d9df; }
-        QWidget             { background: #16171c; color: #d8d9df;
-                              font-family: "Segoe UI"; font-size: 10pt; }
+    QString css = R"CSS(
+        QMainWindow, QDialog      { background: @background; color: @text; }
+        QWidget                   { background: @bg2; color: @text;
+                                    font-family: "Segoe UI"; font-size: 9pt; }
         /* Labels sit on whatever surface they're placed on (cards, panels). */
-        QLabel              { background: transparent; }
+        QLabel                    { background: transparent; }
+        QToolTip                  { background: @surface; color: @text; border: 1px solid @border;
+                                    padding: 4px 6px; border-radius: 4px; }
 
-        /* Dock titles + section headers */
-        QDockWidget::title {
-            background: #1e2029; color: #d8d9df;
-            padding: 6px 10px;
-            border-bottom: 1px solid #0f1014;
-            text-align: left; font-weight: 600; font-size: 9pt;
-        }
-        QDockWidget {
-            titlebar-close-icon: none; titlebar-normal-icon: none;
-        }
-
-        /* Toolbar */
-        QToolBar {
-            background: #1b1d26; border-bottom: 1px solid #0f1014;
-            spacing: 2px; padding: 4px;
-        }
-        QToolBar QToolButton {
-            background: transparent; color: #d8d9df;
-            padding: 4px 10px; border-radius: 4px;
-        }
-        QToolBar QToolButton:hover    { background: #2a2d3a; }
-        QToolBar QToolButton:pressed  { background: #343849; }
-        QToolBar QToolButton:checked  { background: #3f87e6; color: #ffffff; }
-
-        /* Menu bar */
-        QMenuBar          { background: #16171c; color: #d8d9df; padding: 2px; }
-        QMenuBar::item    { padding: 4px 10px; background: transparent; }
-        QMenuBar::item:selected { background: #2a2d3a; border-radius: 3px; }
-        QMenu             { background: #1e2029; border: 1px solid #0f1014; padding: 4px; }
-        QMenu::item       { padding: 5px 20px 5px 24px; }
-        QMenu::item:selected { background: #3f87e6; color: #ffffff; }
-
-        /* Status bar */
-        QStatusBar        { background: #1b1d26; color: #a8aab6; border-top: 1px solid #0f1014; }
-        QStatusBar::item  { border: none; }
-
-        /* Tree / list in sidebar */
-        QTreeWidget, QListWidget {
-            background: #1a1c25; border: none; outline: 0;
-            alternate-background-color: #1e2029;
-        }
-        QTreeWidget::item, QListWidget::item {
-            padding: 4px 8px;
-        }
-        QTreeWidget::item:selected, QListWidget::item:selected {
-            background: #3f87e6; color: #ffffff;
-        }
-        QHeaderView::section {
-            background: #1e2029; color: #a8aab6;
-            padding: 4px 8px; border: none;
-            border-bottom: 1px solid #0f1014;
-        }
+        /* Menu bar and menus */
+        QMenuBar                  { background: @bg2; color: @text; padding: 2px; border-bottom: 1px solid @border; }
+        QMenuBar::item            { padding: 4px 10px; background: transparent; border-radius: 4px; }
+        QMenuBar::item:selected   { background: @hover; }
+        QMenu                     { background: @surface; border: 1px solid @border; padding: 4px; border-radius: 6px; }
+        QMenu::item               { padding: 5px 22px 5px 22px; border-radius: 4px; color: @text; }
+        QMenu::item:selected      { background: @accent; color: #ffffff; }
+        QMenu::item:disabled      { color: @text3; }
+        QMenu::separator          { height: 1px; background: @border; margin: 4px 6px; }
+        QMenu::indicator          { width: 12px; height: 12px; left: 6px; }
 
         /* Buttons */
-        QPushButton {
-            background: #2a2d3a; color: #d8d9df;
-            border: 1px solid #0f1014; padding: 6px 14px; border-radius: 4px;
-        }
-        QPushButton:hover   { background: #343849; }
-        QPushButton:pressed { background: #3f87e6; color: #ffffff; }
-        QPushButton:default { background: #3f87e6; color: #ffffff; border: none; }
+        QPushButton               { background: @surface; color: @text; border: 1px solid @border;
+                                    padding: 5px 14px; border-radius: 6px; }
+        QPushButton:hover         { background: @hover; }
+        QPushButton:pressed       { background: @pressed; }
+        QPushButton:default       { background: @accent; color: #ffffff; border: none; }
+        QPushButton:default:hover { background: @accentHover; }
+        QPushButton:disabled      { color: @text3; }
+        QToolButton               { background: transparent; color: @text2; border: none; border-radius: 6px; padding: 4px; }
+        QToolButton:hover         { background: @hover; color: @text; }
+        QToolButton:checked       { color: @accent; }
 
-        /* Scroll */
-        QScrollBar:vertical {
-            background: #16171c; width: 10px; margin: 0;
-        }
-        QScrollBar::handle:vertical {
-            background: #343849; border-radius: 5px; min-height: 20px;
-        }
-        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }
+        /* Text entry */
+        QLineEdit, QPlainTextEdit, QTextEdit, QSpinBox, QComboBox {
+                                    background: @bg3; color: @text; border: 1px solid @border;
+                                    border-radius: 5px; padding: 3px 6px;
+                                    selection-background-color: @accent; selection-color: #ffffff; }
+        QLineEdit:focus, QPlainTextEdit:focus, QSpinBox:focus, QComboBox:focus { border-color: @accent; }
+        QComboBox::drop-down      { border: none; width: 18px; }
+        QComboBox QAbstractItemView { background: @surface; border: 1px solid @border; selection-background-color: @accent; }
+
+        /* Lists */
+        QListWidget, QTreeWidget  { background: @bg2; border: none; outline: 0; }
+        QListWidget::item:selected, QTreeWidget::item:selected { background: @accent; color: #ffffff; }
+
+        /* Scroll bars: thin, rounded */
+        QScrollArea               { border: none; }
+        QScrollBar:vertical       { background: transparent; width: 10px; margin: 2px; }
+        QScrollBar::handle:vertical { background: @pressed; border-radius: 3px; min-height: 24px; }
+        QScrollBar::handle:vertical:hover { background: @border; }
+        QScrollBar:horizontal     { background: transparent; height: 10px; margin: 2px; }
+        QScrollBar::handle:horizontal { background: @pressed; border-radius: 3px; min-width: 24px; }
+        QScrollBar::add-line, QScrollBar::sub-line { width: 0; height: 0; }
+        QScrollBar::add-page, QScrollBar::sub-page { background: transparent; }
+
+        /* Splitters (panel resize handles) */
+        QSplitter::handle         { background: @border; }
+        QSplitter::handle:hover   { background: @accent; }
     )CSS";
+    // Longer tokens before the ones they start with (@text3 before @text...).
+    const struct { const char* token; const QColor& color; } tokens[] = {
+        {"@background", background}, {"@bg2", backgroundSecondary}, {"@bg3", backgroundTertiary},
+        {"@surface", surface}, {"@hover", surfaceHover}, {"@pressed", surfacePressed},
+        {"@border", border}, {"@text3", textTertiary}, {"@text2", textSecondary}, {"@text", textPrimary},
+        {"@accentHover", accentHover}, {"@accent", accent},
+    };
+    for (const auto& t : tokens) css.replace(t.token, t.color.name());
+    return css;
 }
 
 void apply(QApplication& app) {
     app.setStyle("Fusion");
 
     QPalette pal;
-    pal.setColor(QPalette::Window,          QColor("#16171c"));
-    pal.setColor(QPalette::WindowText,      QColor("#d8d9df"));
-    pal.setColor(QPalette::Base,            QColor("#1a1c25"));
-    pal.setColor(QPalette::AlternateBase,   QColor("#1e2029"));
-    pal.setColor(QPalette::Text,            QColor("#d8d9df"));
-    pal.setColor(QPalette::Button,          QColor("#2a2d3a"));
-    pal.setColor(QPalette::ButtonText,      QColor("#d8d9df"));
-    pal.setColor(QPalette::Highlight,       QColor("#3f87e6"));
-    pal.setColor(QPalette::HighlightedText, QColor("#ffffff"));
-    pal.setColor(QPalette::ToolTipBase,     QColor("#1e2029"));
-    pal.setColor(QPalette::ToolTipText,     QColor("#d8d9df"));
-    pal.setColor(QPalette::PlaceholderText, QColor("#6b6e7c"));
+    pal.setColor(QPalette::Window,          backgroundSecondary);
+    pal.setColor(QPalette::WindowText,      textPrimary);
+    pal.setColor(QPalette::Base,            backgroundTertiary);
+    pal.setColor(QPalette::AlternateBase,   surface);
+    pal.setColor(QPalette::Text,            textPrimary);
+    pal.setColor(QPalette::Button,          surface);
+    pal.setColor(QPalette::ButtonText,      textPrimary);
+    pal.setColor(QPalette::Highlight,       accent);
+    pal.setColor(QPalette::HighlightedText, Qt::white);
+    pal.setColor(QPalette::ToolTipBase,     surface);
+    pal.setColor(QPalette::ToolTipText,     textPrimary);
+    pal.setColor(QPalette::PlaceholderText, textTertiary);
+    pal.setColor(QPalette::Link,            accent);
     app.setPalette(pal);
 
     app.setStyleSheet(stylesheet());

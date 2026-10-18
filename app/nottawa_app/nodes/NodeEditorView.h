@@ -52,6 +52,10 @@ public:
     QString addFromCatalog(int typeRaw, bool isSource, const QString& connectFrom = {},
                            const QPointF* scenePos = nullptr);
 
+    // Deletes the selected nodes (and selected cable, if any).
+    void deleteSelection();
+    // Canvas repaints so far (the Shift-held FPS overlay's UI rate).
+    quint64 framesPainted() const { return framesPainted_; }
     // Opens (or raises) a separate window showing the node's output.
     void openPreview(const QString& id);
     // Adds a saved strand, its top-left node at `scenePos` when given.
@@ -61,7 +65,7 @@ public:
     // Saves the chain ending at a node as a strand, with a thumbnail.
     void saveStrand(const QString& nodeId);
     // The node's current output as an image (null if it has none yet).
-    QImage captureNode(const QString& id);
+    QImage captureNode(const QString& id, QSize size = QSize(640, 360));
 
     // Called by NodeItem.
     void drawNodePreview(QPainter* p, const NodeItem* node, const QRectF& bodyLocal, qreal cornerRadius, float opacity);
@@ -83,6 +87,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent* e) override;
     void keyPressEvent(QKeyEvent* e) override;
     void drawBackground(QPainter* p, const QRectF& rect) override;
+    void drawForeground(QPainter* p, const QRectF& rect) override;
     void dragEnterEvent(QDragEnterEvent* e) override;
     void dragMoveEvent(QDragMoveEvent* e) override;
     void dropEvent(QDropEvent* e) override;
@@ -94,7 +99,6 @@ private:
     NodeItem* nodeAt(const QPoint& viewPos) const;
     EdgeItem* edgeAt(const QPoint& viewPos) const;
     void showContextMenu(const QPoint& viewPos);
-    void deleteSelection();
     void commitMovedNodes();
     void finishPortDrag(const QPoint& viewPos);
     void finishCut();
@@ -134,5 +138,6 @@ private:
     bool   syncing_ = false;
     bool   fitted_ = false;
     bool   audioActive_ = false;
+    quint64 framesPainted_ = 0;
     QSet<QString> audioReactive_;
 };

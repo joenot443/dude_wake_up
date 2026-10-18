@@ -455,6 +455,9 @@ void EngineBridge::redo() { ntw_redo(); }
 
 QString EngineBridge::addSource(int typeRaw) { return takeString(ntw_add_shader_video_source(typeRaw)); }
 void EngineBridge::clearGraph() { ntw_clear_graph(); }
+bool EngineBridge::canUndo() const { return running_ && ntw_can_undo(); }
+bool EngineBridge::canRedo() const { return running_ && ntw_can_redo(); }
+void EngineBridge::setClearOnDisconnect(bool on) { if (running_) ntw_set_clear_on_disconnect(on ? 1 : 0); }
 bool EngineBridge::loadWorkspace(const QString& path) { return ntw_load_workspace(path.toUtf8().constData()); }
 
 void EngineBridge::saveWorkspace(const QString& path, const QString& name) {

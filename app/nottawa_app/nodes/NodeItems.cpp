@@ -1,5 +1,7 @@
 #include "NodeItems.h"
 
+#include "Theme.h"
+
 #include "EngineBridge.h"
 #include "NodeEditorView.h"
 
@@ -10,12 +12,12 @@
 #include <QPainterPathStroker>
 
 namespace {
-const QColor kAccent(0x3f, 0x87, 0xe6);
-const QColor kSuccess(0x3c, 0xc8, 0x7a);
-const QColor kWarning(0xe6, 0xa2, 0x3f);
-const QColor kSourceDot(0x3c, 0xc8, 0x7a);
-const QColor kInactiveDot(0x6b, 0x6e, 0x7c);
-const QColor kBody(0x1a, 0x1c, 0x25);
+const QColor& kAccent      = Theme::accent;
+const QColor& kSuccess     = Theme::success;
+const QColor& kWarning     = Theme::warning;
+const QColor& kSourceDot   = Theme::success;
+const QColor& kInactiveDot = Theme::textTertiary;
+const QColor& kBody        = Theme::backgroundTertiary;
 constexpr qreal kRadius     = 14.0;
 constexpr qreal kTitleH     = 30.0;
 constexpr qreal kPortDot    = 3.0;   // radius of the 6 px dot
@@ -190,7 +192,7 @@ NodeItem::Button NodeItem::buttonAt(QPointF pos) const {
 
 void NodeItem::paintButton(QPainter* p, Button b) const {
     const QRectF r = buttonRect(b);
-    const QColor fg = b == Delete ? QColor(0xe6, 0x5a, 0x5a) : QColor(0xd8, 0xd9, 0xdf);
+    const QColor fg = b == Delete ? Theme::destructive : Theme::textPrimary;
     p->setPen(Qt::NoPen);
     p->setBrush(hovered_ == b ? QColor(255, 255, 255, 40) : QColor(255, 255, 255, 18));
     p->drawRoundedRect(r, 5, 5);

@@ -1,3 +1,4 @@
+#include "CrashHandler.h"
 #include "MainWindow.h"
 #include "Theme.h"
 
@@ -68,6 +69,7 @@ int main(int argc, char** argv) {
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, QDir(appDataDir()).filePath("settings"));
     Theme::apply(app);
     captureEngineLog();
+    CrashHandler::install();
 
     MainWindow w(findDataDir());
     w.show();

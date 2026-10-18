@@ -3,6 +3,7 @@
 #include "EngineBridge.h"
 #include "NodeItems.h"
 #include "PreviewWindow.h"
+#include "Theme.h"
 
 #include <QApplication>
 #include <QTimer>
@@ -84,6 +85,9 @@ NodeEditorView::NodeEditorView(QWidget* parent) : QGraphicsView(parent) {
 }
 
 NodeEditorView::~NodeEditorView() {
+    // Deleting the scene removes the selected items, which would announce
+    // a selection change to listeners that may already be gone.
+    scene()->disconnect(this);
     for (const auto& w : std::as_const(previews_)) if (w) delete w.data();
     for (const QString& id : nodes_.keys()) EngineBridge::instance()->releaseFrames(id);
     if (auto* gl = qobject_cast<QOpenGLWidget*>(viewport())) {
@@ -322,14 +326,14 @@ void NodeEditorView::mousePressEvent(QMouseEvent* e) {
             dragKind_ = port->kind();
             dragSlot_ = port->slot();
             dragEdge_ = new QGraphicsPathItem;
-            dragEdge_->setPen(QPen(QColor(0x3f, 0x87, 0xe6), 2.5, Qt::DashLine));
+            dragEdge_->setPen(QPen(Theme::accent, 2.5, Qt::DashLine));
             dragEdge_->setZValue(3);
             scene()->addItem(dragEdge_);
             setDragHighlights(port, nullptr);
             return;
         }
         if ((e->modifiers() & Qt::AltModifier) && !nodeAt(e->pos())) {
-            cutLine_ = scene()->addLine(QLineF(scenePos, scenePos), QPen(QColor(0xe6, 0x5a, 0x5a), 2, Qt::DashLine));
+            cutLine_ = scene()->addLine(QLineF(scenePos, scenePos), QPen(Theme::destructive, 2, Qt::DashLine));
             cutLine_->setZValue(3);
             return;
         }
@@ -624,15 +628,15 @@ void NodeEditorView::saveStrand(const QString& nodeId) {
     else emit strandSaved(name);
 }
 
-QImage NodeEditorView::captureNode(const QString& id) {
+QImage NodeEditorView::captureNode(const QString& id, QSize size) {
     FrameExchange* ex = EngineBridge::instance()->frames(id);
     auto* gl = qobject_cast<QOpenGLWidget*>(viewport());
     if (!ex || !gl) return {};
     gl->makeCurrent();
     if (!presenter_.isInitialized()) presenter_.initialize();
-    QOpenGLFramebufferObject fbo(640, 360);
+    QOpenGLFramebufferObject fbo(size);
     fbo.bind();
-    QOpenGLContext::currentContext()->functions()->glViewport(0, 0, 640, 360);
+    QOpenGLContext::currentContext()->functions()->glViewport(0, 0, size.width(), size.height());
     const bool ok = presenter_.draw(ex, FramePresenter::NodeEditor);
     QImage image = ok ? fbo.toImage().convertToFormat(QImage::Format_RGB32) : QImage();
     fbo.release();
@@ -805,11 +809,15 @@ void NodeEditorView::dropEvent(QDropEvent* e) {
 
 // -------------------------------------------------------------- background
 
+void NodeEditorView::drawForeground(QPainter*, const QRectF&) { ++framesPainted_; }
+
 void NodeEditorView::drawBackground(QPainter* p, const QRectF& rect) {
-    p->fillRect(rect, QColor(0x13, 0x14, 0x19));
+    p->fillRect(rect, Theme::background);
     const qreal scale = transform().m11();
     if (kGrid * scale <= 4.0) return;
-    QPen dot(QColor(0x2a, 0x2c, 0x38), 3.0, Qt::SolidLine, Qt::RoundCap);
+    QColor grid = Theme::textTertiary;
+    grid.setAlphaF(0.3);
+    QPen dot(grid, 3.0, Qt::SolidLine, Qt::RoundCap);
     dot.setCosmetic(true);
     p->setPen(dot);
     QVector<QPointF> points;

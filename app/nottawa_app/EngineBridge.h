@@ -208,6 +208,11 @@ public:
     QStringList pasteNodes();
     void    undo();
     void    redo();
+    bool    canUndo() const;
+    bool    canRedo() const;
+    // Whether disconnecting an input clears the node's frame (macOS's
+    // "Clear on Disconnect").
+    void    setClearOnDisconnect(bool on);
     void    clearGraph();
     bool    loadWorkspace(const QString& path);
     void    saveWorkspace(const QString& path, const QString& name);

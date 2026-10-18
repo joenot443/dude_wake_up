@@ -1,5 +1,7 @@
 #include "Icons.h"
 
+#include "Theme.h"
+
 #include <QPainter>
 #include <QPainterPath>
 #include <QPixmap>
@@ -164,6 +166,62 @@ void paint(QPainter* p, const QRectF& rect, Kind kind, const QColor& color) {
         p->setBrush(color);
         p->drawRoundedRect(QRectF(4, 3, 2.8, 10), 0.8, 0.8);
         p->drawRoundedRect(QRectF(9.2, 3, 2.8, 10), 0.8, 0.8);
+        break;
+    case Undo:
+    case Redo: {
+        p->save();
+        if (kind == Redo) { p->translate(16, 0); p->scale(-1, 1); }
+        QPainterPath arc;
+        arc.moveTo(4, 6);
+        arc.lineTo(10, 6);
+        arc.cubicTo(14.5, 6, 14.5, 13, 10, 13);
+        arc.lineTo(6, 13);
+        p->drawPath(arc);
+        p->drawPolyline(QPolygonF({QPointF(6.5, 3.2), QPointF(3.6, 6), QPointF(6.5, 8.8)}));
+        p->restore();
+        break;
+    }
+    case Sidebar:
+        p->drawRoundedRect(QRectF(1.5, 2.5, 13, 11), 2, 2);
+        p->drawLine(QPointF(6, 2.5), QPointF(6, 13.5));
+        break;
+    case Sliders:
+        p->drawLine(QPointF(2, 5), QPointF(14, 5));
+        p->drawLine(QPointF(2, 11), QPointF(14, 11));
+        p->setBrush(Theme::backgroundSecondary);
+        p->drawEllipse(QPointF(10, 5), 2, 2);
+        p->drawEllipse(QPointF(6, 11), 2, 2);
+        break;
+    case Trash:
+    case Clear:
+        p->drawLine(QPointF(2.5, 4), QPointF(13.5, 4));
+        p->drawLine(QPointF(6.2, 2), QPointF(9.8, 2));
+        p->drawPolyline(QPolygonF({QPointF(4, 4), QPointF(4.8, 14), QPointF(11.2, 14), QPointF(12, 4)}));
+        if (kind == Clear) p->drawLine(QPointF(2, 15), QPointF(14, 1));
+        else { p->drawLine(QPointF(6.7, 6.5), QPointF(6.9, 11.5)); p->drawLine(QPointF(9.3, 6.5), QPointF(9.1, 11.5)); }
+        break;
+    case Camera:
+        p->drawRoundedRect(QRectF(1.5, 4.5, 13, 9), 1.8, 1.8);
+        p->drawPolyline(QPolygonF({QPointF(5.5, 4.5), QPointF(6.5, 2.5), QPointF(9.5, 2.5), QPointF(10.5, 4.5)}));
+        p->drawEllipse(QPointF(8, 9), 2.6, 2.6);
+        break;
+    case Help:
+        p->drawEllipse(QPointF(8, 8), 6.5, 6.5);
+        p->drawArc(QRectF(5.8, 3.8, 4.4, 4.4), 180 * 16, -250 * 16);
+        p->drawLine(QPointF(8, 8.4), QPointF(8, 9.6));
+        p->setBrush(color);
+        p->drawEllipse(QPointF(8, 11.8), 0.6, 0.6);
+        break;
+    case Fit:
+        for (const int sx : {-1, 1})
+            for (const int sy : {-1, 1}) {
+                const QPointF c(8 + sx * 2, 8 + sy * 2), far(8 + sx * 6.5, 8 + sy * 6.5);
+                p->drawLine(far, c);
+                p->drawPolyline(QPolygonF({c + QPointF(sx * 3, 0), c, c + QPointF(0, sy * 3)}));
+            }
+        break;
+    case ChevronLeft:
+        p->drawPolyline(QPolygonF({QPointF(10, 4), QPointF(6, 8), QPointF(10, 12)}));
         break;
     case Plus:
         p->drawLine(QPointF(8, 3.5), QPointF(8, 12.5));

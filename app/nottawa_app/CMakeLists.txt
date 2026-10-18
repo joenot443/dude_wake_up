@@ -47,6 +47,8 @@ qt_add_executable(nottawa_app WIN32
     panels/CommunityPage.h   panels/CommunityPage.cpp
     panels/OscillatorsPage.h panels/OscillatorsPage.cpp
     ui/Controls.h            ui/Controls.cpp
+    ui/ActionBar.h           ui/ActionBar.cpp
+    ui/Toast.h               ui/Toast.cpp
     inspector/ParameterRow.h inspector/ParameterRow.cpp
     inspector/PositionPad.h  inspector/PositionPad.cpp
     inspector/SourcePanels.h inspector/SourcePanels.cpp
@@ -55,6 +57,7 @@ qt_add_executable(nottawa_app WIN32
     nodes/NodeEditorView.h   nodes/NodeEditorView.cpp
     nodes/NodeItems.h        nodes/NodeItems.cpp
     Theme.h                  Theme.cpp
+    CrashHandler.h           CrashHandler.cpp
     panels/BrowserPanel.h    panels/BrowserPanel.cpp
     panels/InspectorPanel.h  panels/InspectorPanel.cpp
     panels/LogPanel.h        panels/LogPanel.cpp
@@ -75,6 +78,10 @@ target_link_libraries(nottawa_app PRIVATE
     winmm ole32 uuid avrt propsys shlwapi opengl32)
 # The engine objects are compiled with /GL.
 target_link_options(nottawa_app PRIVATE /LTCG)
+# Symbols in a separate PDB (optimisation unchanged), so crash reports have
+# readable stacks; /OPT keeps the exe as lean as without /DEBUG.
+target_compile_options(nottawa_app PRIVATE $<$<CONFIG:Release>:/Zi>)
+target_link_options(nottawa_app PRIVATE $<$<CONFIG:Release>:/DEBUG /OPT:REF /OPT:ICF>)
 
 # OF's VS release libs use the dynamic CRT.
 set_property(TARGET nottawa_app PROPERTY
