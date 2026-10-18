@@ -13,6 +13,8 @@ QString stylesheet() {
         QMainWindow, QDialog { background: #16171c; color: #d8d9df; }
         QWidget             { background: #16171c; color: #d8d9df;
                               font-family: "Segoe UI"; font-size: 10pt; }
+        /* Labels sit on whatever surface they're placed on (cards, panels). */
+        QLabel              { background: transparent; }
 
         /* Dock titles + section headers */
         QDockWidget::title {

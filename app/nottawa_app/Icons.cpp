@@ -133,6 +133,36 @@ void paint(QPainter* p, const QRectF& rect, Kind kind, const QColor& color) {
     case ChevronRight:
         p->drawPolyline(QPolygonF({QPointF(6, 4), QPointF(10, 8), QPointF(6, 12)}));
         break;
+    case ChevronUp:
+        p->drawPolyline(QPolygonF({QPointF(4, 10), QPointF(8, 6), QPointF(12, 10)}));
+        break;
+    case Note:
+        p->drawLine(QPointF(6, 12), QPointF(6, 3));
+        p->drawLine(QPointF(6, 3), QPointF(13, 1.8));
+        p->drawLine(QPointF(13, 1.8), QPointF(13, 10.5));
+        p->setBrush(color);
+        p->drawEllipse(QPointF(4.3, 12.4), 2.1, 1.7);
+        p->drawEllipse(QPointF(11.3, 10.9), 2.1, 1.7);
+        break;
+    case Keys:
+        p->drawRoundedRect(QRectF(1.5, 3, 13, 10), 1.2, 1.2);
+        for (const qreal x : {4.75, 8.0, 11.25}) p->drawLine(QPointF(x, 8.5), QPointF(x, 13));
+        p->setBrush(color);
+        p->setPen(Qt::NoPen);
+        for (const qreal x : {4.75, 8.0, 11.25}) p->drawRect(QRectF(x - 0.9, 3, 1.8, 5.5));
+        break;
+    case Reset:
+        p->drawArc(QRectF(2.5, 2.5, 11, 11), 120 * 16, 290 * 16);
+        p->setBrush(color);
+        p->drawPolygon(QPolygonF({QPointF(2.0, 2.4), QPointF(5.6, 3.6), QPointF(3.0, 6.4)}));
+        break;
+    case Plus:
+        p->drawLine(QPointF(8, 3.5), QPointF(8, 12.5));
+        p->drawLine(QPointF(3.5, 8), QPointF(12.5, 8));
+        break;
+    case Minus:
+        p->drawLine(QPointF(3.5, 8), QPointF(12.5, 8));
+        break;
     case Film:
         p->drawRoundedRect(QRectF(2.5, 1.5, 11, 13), 1.2, 1.2);
         p->drawLine(QPointF(5, 1.5), QPointF(5, 14.5));

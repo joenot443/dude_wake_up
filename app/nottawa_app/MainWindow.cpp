@@ -21,6 +21,7 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QGraphicsScene>
 #include <QKeySequence>
 #include <QLabel>
 #include <QMenuBar>
@@ -79,7 +80,7 @@ MainWindow::MainWindow(const QString& dataPath) : dataPath_(dataPath) {
         bool isSource = false;
         for (const auto& n : EngineBridge::instance()->nodes())
             if (n.id == id) { name = n.name; isSource = !n.isShader; }
-        inspector_->setNode(id, name);
+        inspector_->setSelection(editor_->selectedNodeIds());
         browser_->setSelectedNode(id, isSource);
     });
 
@@ -171,6 +172,14 @@ void MainWindow::buildMenusAndToolbar() {
 void MainWindow::buildDocks() {
     browser_   = new BrowserPanel(this);
     inspector_ = new InspectorPanel(this);
+    connect(inspector_, &InspectorPanel::deselectRequested, this, [this] {
+        editor_->scene()->clearSelection();
+    });
+    connect(inspector_, &InspectorPanel::nodeRequested, this, [this](const QString& id) {
+        editor_->selectNode(id);
+        emit editor_->nodeSelected(id);
+    });
+    connect(inspector_, &InspectorPanel::graphMayChange, this, &MainWindow::refreshGraph);
     logPanel_  = new LogPanel(this);
     connect(browser_, &BrowserPanel::itemPicked, this, &MainWindow::addFromLibrary);
     auto* oscillators = new OscillatorsPage(browser_);
@@ -313,12 +322,12 @@ void MainWindow::refreshGraph() {
     }
     updateStageSource();
     if (!nodes.isEmpty()) welcome_->hide();
+    inspector_->setSelection(editor_->selectedNodeIds());
 
     bool selectedExists = false;
     for (const auto& n : nodes) selectedExists |= (n.id == selectedId_);
     if (!selectedExists && !selectedId_.isEmpty()) {
         selectedId_.clear();
-        inspector_->setNode({}, {});
     }
 }
 

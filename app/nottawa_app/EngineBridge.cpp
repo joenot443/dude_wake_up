@@ -83,6 +83,13 @@ void onShare(bool ok, const char* slugOrError) {
     }, Qt::QueuedConnection);
 }
 
+void onMidiLearned(const char* paramId, const char* descriptor) {
+    const QString id = str(paramId), desc = str(descriptor);
+    QMetaObject::invokeMethod(EngineBridge::instance(), [=] {
+        emit EngineBridge::instance()->midiLearned(id, desc);
+    }, Qt::QueuedConnection);
+}
+
 void onStrandsChanged() {
     QMetaObject::invokeMethod(EngineBridge::instance(), &EngineBridge::strandsChanged, Qt::QueuedConnection);
 }
@@ -108,6 +115,7 @@ bool EngineBridge::start(void* shareContext, const QString& dataPath) {
     ntw_register_graph_changed_callback(&onGraphChanged);
     ntw_register_strands_updated_callback(&onStrandsChanged);
     ntw_register_library_update_callback(&onLibraryChanged);
+    ntw_register_midi_learned_callback(&onMidiLearned);
     ntw_engine_start();
     running_ = true;
     return true;
@@ -448,10 +456,9 @@ void EngineBridge::saveWorkspace(const QString& path, const QString& name) {
     ntw_save_workspace_to_path(path.toUtf8().constData(), name.toUtf8().constData());
 }
 
-QVector<ParamInfo> EngineBridge::parameters(const QString& connectableId) const {
+namespace {
+QVector<ParamInfo> toParams(NTWParameterInfo* arr, int n) {
     QVector<ParamInfo> out;
-    int n = 0;
-    NTWParameterInfo* arr = ntw_get_parameters(connectableId.toUtf8().constData(), &n);
     for (int i = 0; i < n; ++i) {
         const NTWParameterInfo& p = arr[i];
         ParamInfo info;
@@ -465,11 +472,82 @@ QVector<ParamInfo> EngineBridge::parameters(const QString& connectableId) const 
         info.boolValue = p.boolValue != 0;
         info.stringValue = str(p.stringValue);
         for (int o = 0; o < p.optionCount; ++o) info.options << str(p.options[o]);
+        info.favorite = p.isFavorited != 0;
+        info.color = QColor::fromRgbF(p.colorR, p.colorG, p.colorB, p.colorA);
+        info.hidden = p.hiddenFromNode != 0;
+        info.hasOscillator = p.hasOscillator != 0;
+        info.oscEnabled = p.oscillatorEnabled != 0;
+        info.oscFrequency = p.oscillatorFrequency;
+        info.oscMin = p.oscillatorMinOutput;
+        info.oscMax = p.oscillatorMaxOutput;
+        info.oscShape = p.oscillatorWaveShape;
+        info.hasDriver = p.hasDriver != 0;
+        info.driverName = str(p.driverName);
+        info.driverShift = p.driverShift;
+        info.driverScale = p.driverScale;
+        info.hasMidi = p.hasMidiBinding != 0;
+        info.midiDescriptor = str(p.midiDescriptor);
         out.push_back(info);
     }
     ntw_free_parameter_info_array(arr, n);
     return out;
 }
+} // anon
+
+QVector<ParamInfo> EngineBridge::parameters(const QString& connectableId) const {
+    if (!running_) return {};
+    int n = 0;
+    NTWParameterInfo* arr = ntw_get_parameters(connectableId.toUtf8().constData(), &n);
+    return toParams(arr, n);
+}
+
+void EngineBridge::setParameterColor(const QString& id, const QColor& c) {
+    ntw_set_parameter_color(id.toUtf8().constData(), c.redF(), c.greenF(), c.blueF(), c.alphaF());
+}
+void EngineBridge::resetParameter(const QString& id) { ntw_reset_parameter(id.toUtf8().constData()); }
+void EngineBridge::resetAllParameters(const QString& id) { ntw_reset_all_parameters(id.toUtf8().constData()); }
+void EngineBridge::toggleParameterFavorite(const QString& id) { ntw_toggle_parameter_favorite(id.toUtf8().constData()); }
+
+QStringList EngineBridge::audioDriverNames() const {
+    QStringList out;
+    int n = 0;
+    NTWAudioDriverParam* arr = ntw_get_available_audio_drivers(&n);
+    for (int i = 0; i < n; ++i) out << str(arr[i].name);
+    ntw_free_audio_driver_param_array(arr, n);
+    return out;
+}
+void EngineBridge::setParameterDriver(const QString& id, const QString& feature) {
+    ntw_set_parameter_driver(id.toUtf8().constData(), feature.toUtf8().constData());
+}
+void EngineBridge::removeParameterDriver(const QString& id) { ntw_remove_parameter_driver(id.toUtf8().constData()); }
+void EngineBridge::setParameterDriverShift(const QString& id, float v) { ntw_set_parameter_driver_shift(id.toUtf8().constData(), v); }
+void EngineBridge::setParameterDriverScale(const QString& id, float v) { ntw_set_parameter_driver_scale(id.toUtf8().constData(), v); }
+
+void EngineBridge::beginMidiLearning(const QString& id) { ntw_begin_midi_learning(id.toUtf8().constData()); }
+void EngineBridge::stopMidiLearning() { ntw_stop_midi_learning(); }
+void EngineBridge::removeMidiBinding(const QString& id) { ntw_remove_midi_binding(id.toUtf8().constData()); }
+
+QVector<OptionalEffect> EngineBridge::optionalEffects(const QString& id) const {
+    QVector<OptionalEffect> out;
+    if (!running_) return out;
+    int n = 0;
+    NTWOptionalShaderInfo* arr = ntw_get_optional_shaders(id.toUtf8().constData(), &n);
+    for (int i = 0; i < n; ++i) out.push_back({str(arr[i].name), arr[i].enabled, arr[i].index});
+    ntw_free_optional_shader_info_array(arr, n);
+    return out;
+}
+void EngineBridge::toggleOptionalEffect(const QString& id, int index) {
+    ntw_toggle_optional_shader(id.toUtf8().constData(), index);
+}
+QVector<ParamInfo> EngineBridge::optionalEffectParameters(const QString& id, int index) const {
+    if (!running_) return {};
+    int n = 0;
+    NTWParameterInfo* arr = ntw_get_optional_shader_parameters(id.toUtf8().constData(), index, &n);
+    return toParams(arr, n);
+}
+
+void EngineBridge::clearFeedbackBuffer(const QString& id) { ntw_clear_feedback_buffer(id.toUtf8().constData()); }
+void EngineBridge::resetBouncePosition(const QString& id) { ntw_reset_bounce_position(id.toUtf8().constData()); }
 
 void EngineBridge::setParameter(const QString& id, float v)          { ntw_set_parameter_value(id.toUtf8().constData(), v); }
 void EngineBridge::setParameter(const QString& id, int v)            { ntw_set_parameter_int(id.toUtf8().constData(), v); }

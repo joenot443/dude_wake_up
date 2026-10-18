@@ -92,6 +92,7 @@ void IOSurfaceTextureManager::publish(SharedTexture& tex, unsigned int srcFboId,
     glDeleteSync(static_cast<GLsync>(fence));
   }
   if (oldWriteFence) glDeleteSync(static_cast<GLsync>(oldWriteFence));
+  if (!ensureSlot(tex, slot)) return;
   glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFboId);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, tex.slotFbos[slot]);
   glBlitFramebuffer(0, 0, srcW, srcH, 0, 0, tex.width, tex.height,
@@ -155,27 +156,7 @@ constexpr int kSlots = FrameExchange::kSlots;
 void IOSurfaceTextureManager::setupSharedTexture(SharedTexture& tex, int width, int height) {
   glGenTextures(kSlots, tex.slotTextures);
   glGenFramebuffers(kSlots, tex.slotFbos);
-  bool ok = true;
-  for (int i = 0; i < kSlots; ++i) {
-    glBindTexture(GL_TEXTURE_2D, tex.slotTextures[i]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glBindFramebuffer(GL_FRAMEBUFFER, tex.slotFbos[i]);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex.slotTextures[i], 0);
-    ok = ok && glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
-    glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-  }
-  glBindTexture(GL_TEXTURE_2D, 0);
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  if (!ok) {
-    ofLogError("IOSurfaceTextureManager") << "shared texture FBO incomplete (" << width << "x" << height << ")";
-    cleanupSharedTexture(tex);
-    return;
-  }
+  for (bool& ready : tex.slotReady) ready = false;
   uint32_t ids[kSlots];
   for (int i = 0; i < kSlots; ++i) ids[i] = tex.slotTextures[i];
   tex.exchange->setTextures(ids);
@@ -184,12 +165,34 @@ void IOSurfaceTextureManager::setupSharedTexture(SharedTexture& tex, int width, 
   tex.needsSetup = false;
 }
 
+// Gives a slot storage and its blit FBO, the first time it's written.
+bool IOSurfaceTextureManager::ensureSlot(SharedTexture& tex, int slot) {
+  if (tex.slotReady[slot]) return true;
+  glBindTexture(GL_TEXTURE_2D, tex.slotTextures[slot]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex.width, tex.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glBindFramebuffer(GL_FRAMEBUFFER, tex.slotFbos[slot]);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex.slotTextures[slot], 0);
+  const bool ok = glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  if (!ok) {
+    ofLogError("IOSurfaceTextureManager") << "shared texture FBO incomplete (" << tex.width << "x" << tex.height << ")";
+    return false;
+  }
+  tex.slotReady[slot] = true;
+  return true;
+}
+
 void IOSurfaceTextureManager::cleanupSharedTexture(SharedTexture& tex) {
   if (tex.exchange)
     for (void* fence : tex.exchange->takeAllFences()) glDeleteSync(static_cast<GLsync>(fence));
   if (tex.slotFbos[0]) glDeleteFramebuffers(kSlots, tex.slotFbos);
   if (tex.slotTextures[0]) glDeleteTextures(kSlots, tex.slotTextures);
-  for (int i = 0; i < kSlots; ++i) tex.slotFbos[i] = tex.slotTextures[i] = 0;
+  for (int i = 0; i < kSlots; ++i) { tex.slotFbos[i] = tex.slotTextures[i] = 0; tex.slotReady[i] = false; }
   tex.width = tex.height = 0;
   tex.needsSetup = true;
   tex.lastBlittedTick = UINT64_MAX;

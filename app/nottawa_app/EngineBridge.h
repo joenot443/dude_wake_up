@@ -6,6 +6,7 @@
 #include <QSize>
 #include <QString>
 #include <QStringList>
+#include <QColor>
 #include <QVector>
 #include <atomic>
 
@@ -106,6 +107,29 @@ struct ParamInfo {
     bool        boolValue = false;
     QString     stringValue;
     QStringList options;
+    bool        favorite = false;
+    QColor      color;
+    bool        hidden = false;       // hidden at runtime by its shader
+    // Paired WaveformOscillator, if any.
+    bool        hasOscillator = false;
+    bool        oscEnabled = false;
+    float       oscFrequency = 0, oscMin = 0, oscMax = 1;
+    int         oscShape = 0;
+    // Audio driver.
+    bool        hasDriver = false;
+    QString     driverName;
+    float       driverShift = 0, driverScale = 1;
+    // MIDI binding.
+    bool        hasMidi = false;
+    QString     midiDescriptor;
+
+    bool driven() const { return oscEnabled || hasDriver; }
+};
+
+struct OptionalEffect {
+    QString name;
+    bool    enabled = false;
+    int     index = 0;
 };
 
 // Qt wrapper over src/Bridge/nottawa_bridge.h, the same C API the macOS
@@ -160,6 +184,31 @@ public:
     void setParameter(const QString& paramId, int value);
     void setParameter(const QString& paramId, bool value);
     void setParameter(const QString& paramId, const QString& value);
+    void setParameterColor(const QString& paramId, const QColor& color);
+    void resetParameter(const QString& paramId);
+    void resetAllParameters(const QString& connectableId);
+    void toggleParameterFavorite(const QString& paramId);
+
+    // Audio drivers: an audio feature (by name) driving a parameter.
+    QStringList audioDriverNames() const;
+    void setParameterDriver(const QString& paramId, const QString& audioFeature);
+    void removeParameterDriver(const QString& paramId);
+    void setParameterDriverShift(const QString& paramId, float shift);
+    void setParameterDriverScale(const QString& paramId, float scale);
+
+    // MIDI learn: the next control moved binds to the parameter
+    // (midiLearned fires).
+    void beginMidiLearning(const QString& paramId);
+    void stopMidiLearning();
+    void removeMidiBinding(const QString& paramId);
+
+    // Optional effects built into every node (HSB, Blur, Mirror...).
+    QVector<OptionalEffect> optionalEffects(const QString& connectableId) const;
+    void toggleOptionalEffect(const QString& connectableId, int index);
+    QVector<ParamInfo> optionalEffectParameters(const QString& connectableId, int index) const;
+
+    void clearFeedbackBuffer(const QString& shaderId);
+    void resetBouncePosition(const QString& shaderId);
 
     QVector<StrandItem> strands() const;
     QString     strandsFolder() const;
@@ -226,6 +275,7 @@ signals:
     void graphChanged();
     void strandsChanged();
     void libraryChanged();
+    void midiLearned(const QString& paramId, const QString& descriptor);
     void communityFeedFetched(bool ok, const QVector<SharedStrand>& strands, int page, int totalPages);
     void strandVoted(const QString& slug, bool ok, int upvotes, int downvotes, int score, const QString& userVote);
     void sharedStrandFetched(const QString& slug, bool ok, const QString& jsonOrError);

@@ -91,6 +91,7 @@ QRect DSSlider::valueRect() const {
 void DSSlider::paintEvent(QPaintEvent*) {
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
+    if (!isEnabled()) p.setOpacity(0.4);
     if (hasHeader()) {
         p.setFont(captionFont(font()));
         p.setPen(Theme::textSecondary);

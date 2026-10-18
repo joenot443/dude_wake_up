@@ -57,6 +57,7 @@ NodeEditorView::NodeEditorView(QWidget* parent) : QGraphicsView(parent) {
         if (syncing_) return;
         const QStringList ids = selectedNodeIds();
         emit nodeSelected(ids.isEmpty() ? QString() : ids.first());
+        emit selectionChanged(ids);
     });
 
     repaintTimer_.setTimerType(Qt::PreciseTimer);

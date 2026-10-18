@@ -73,6 +73,7 @@ signals:
     void strandLoadFailed(const QString& error);
     void shareRequested(const QString& nodeId, const QString& nodeName);
     void nodeSelected(const QString& id);
+    void selectionChanged(const QStringList& ids);
 
 protected:
     void wheelEvent(QWheelEvent* e) override;

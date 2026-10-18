@@ -38,8 +38,11 @@ struct SharedTexture {
   uint64_t lastBlittedTick = UINT64_MAX;
 #ifndef __APPLE__
   std::shared_ptr<FrameExchange> exchange;  // `surface` points at this
-  unsigned int slotTextures[5] = {};  // FrameExchange::kSlots
-  unsigned int slotFbos[5] = {};
+  unsigned int slotTextures[7] = {};  // FrameExchange::kSlots
+  unsigned int slotFbos[7] = {};
+  // Storage is allocated on a slot's first write: the engine reuses the
+  // lowest free slot, so with few readers most slots never need any.
+  bool slotReady[7] = {};
 #endif
 };
 
@@ -97,6 +100,7 @@ private:
   // next blitTrackedTextures(). Exchanges outlive their entries because the
   // UI may still hold the pointer.
   void publish(SharedTexture& tex, unsigned int srcFboId, int srcW, int srcH);
+  bool ensureSlot(SharedTexture& tex, int slot);
   std::vector<SharedTexture> pendingCleanup;
   std::vector<std::shared_ptr<FrameExchange>> retiredExchanges;
 #endif

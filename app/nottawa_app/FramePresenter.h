@@ -10,7 +10,8 @@ class FrameExchange;
 // initialize() with that context current.
 class FramePresenter : protected QOpenGLFunctions_3_3_Core {
 public:
-    enum Reader { Stage = 0, NodeEditor = 1, Preview = 2 };
+    // One per view that may show a node at the same time as the others.
+    enum Reader { Stage = 0, NodeEditor = 1, Preview = 2, Inspector = 3, InspectorPad = 4 };
 
     void initialize();
     void destroy();

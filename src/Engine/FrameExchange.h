@@ -4,9 +4,9 @@
 #include <mutex>
 #include <vector>
 
-// Hands finished engine frames to up to kReaders UI contexts (the stage,
-// the node editor's live preview, a preview window) through a ring of GL
-// textures in the shared namespace.
+// Hands finished engine frames to up to kReaders UI views (the stage, the
+// node editor's live preview, a preview window, the inspector's preview and
+// position pad) through a ring of GL textures in the shared namespace.
 //
 // Each slot has:
 //   writeFence     — inserted by the engine after rendering into the slot;
@@ -22,8 +22,8 @@
 // headers: the engine side uses GLEW, the UI side Qt's GL headers.
 class FrameExchange {
 public:
-    // Stage, node-editor preview, and a preview window.
-    static constexpr int kReaders = 3;
+    // Stage, node editor, preview window, inspector, inspector pad.
+    static constexpr int kReaders = 5;
     static constexpr int kSlots   = kReaders + 2;
 
     FrameExchange();
