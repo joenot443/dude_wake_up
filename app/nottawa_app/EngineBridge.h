@@ -312,6 +312,10 @@ public:
     void clearFeedbackBuffer(const QString& shaderId);
     void resetBouncePosition(const QString& shaderId);
 
+    // Download state of a library video source node (waiting or
+    // downloading: `downloading`).
+    struct LibraryDownload { bool downloading = false; bool paused = false; float progress = 0; };
+    LibraryDownload librarySourceState(const QString& sourceId) const;
     QVector<StrandItem> strands() const;
     // Strands bundled with the app (loadStrand takes their ids too).
     QVector<StrandItem> templateStrands() const;
@@ -400,6 +404,8 @@ signals:
     void graphChanged();
     void strandsChanged();
     void libraryChanged();
+    // The output resolution changed (from any thread; delivered queued).
+    void resolutionChanged();
     void midiLearned(const QString& paramId, const QString& descriptor);
     void communityFeedFetched(bool ok, const QVector<SharedStrand>& strands, int page, int totalPages);
     void strandVoted(const QString& slug, bool ok, int upvotes, int downvotes, int score, const QString& userVote);

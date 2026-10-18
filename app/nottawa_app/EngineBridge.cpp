@@ -23,6 +23,10 @@ void onGraphChanged() {
     QMetaObject::invokeMethod(EngineBridge::instance(), &EngineBridge::graphChanged, Qt::QueuedConnection);
 }
 
+void onResolutionChanged() {
+    QMetaObject::invokeMethod(EngineBridge::instance(), &EngineBridge::resolutionChanged, Qt::QueuedConnection);
+}
+
 void onLibraryChanged() {
     QMetaObject::invokeMethod(EngineBridge::instance(), &EngineBridge::libraryChanged, Qt::QueuedConnection);
 }
@@ -120,6 +124,7 @@ bool EngineBridge::start(void* shareContext, const QString& dataPath) {
     ntw_register_graph_changed_callback(&onGraphChanged);
     ntw_register_strands_updated_callback(&onStrandsChanged);
     ntw_register_library_update_callback(&onLibraryChanged);
+    ntw_register_resolution_changed_callback(&onResolutionChanged);
     ntw_register_midi_learned_callback(&onMidiLearned);
     ntw_engine_start();
     running_ = true;
@@ -234,6 +239,17 @@ QVector<GraphNode> EngineBridge::nodes() const {
                        ntw_get_connectable_active(s.id), false, ntw_is_audio_reactive(s.id)});
     }
     ntw_free_video_source_info_array(srcs, n);
+    return out;
+}
+
+EngineBridge::LibraryDownload EngineBridge::librarySourceState(const QString& sourceId) const {
+    LibraryDownload out;
+    if (!running_) return out;
+    NTWLibrarySourceState s = ntw_get_library_source_state(sourceId.toUtf8().constData());
+    out.downloading = s.state == 0 || s.state == 1;
+    out.paused = s.isPaused != 0;
+    out.progress = s.progress;
+    std::free(const_cast<char*>(s.libraryFileId));
     return out;
 }
 

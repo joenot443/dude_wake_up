@@ -44,6 +44,8 @@ public:
     void setNeedsInput(bool on);
     // Shows "enable audio" over the preview while audio is off.
     void setAudioHint(bool on);
+    // A download progress ring over the preview (progress < 0: none).
+    void setDownload(float progress, bool paused);
 
     const QString& id() const { return id_; }
     const QString& name() const { return name_; }
@@ -83,6 +85,8 @@ private:
     bool               active_    = true;
     bool               needsInput_ = false;
     bool               audioHint_  = false;
+    float              download_ = -1;
+    bool               downloadPaused_ = false;
     int                inputCount_ = -1;
     bool               hasAux_    = false;
     Button             hovered_   = NoButton;

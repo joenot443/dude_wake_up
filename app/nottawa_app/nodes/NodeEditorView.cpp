@@ -40,6 +40,7 @@ constexpr qreal kStackStep = 228.0;
 
 NodeEditorView::NodeEditorView(QWidget* parent) : QGraphicsView(parent) {
     showHints_ = QSettings().value("ui/showNodeHints", true).toBool();
+    connect(&downloadPoll_, &QTimer::timeout, this, &NodeEditorView::refreshDownloads);
     // Live previews are drawn with GL straight into the viewport, which
     // shares textures with the engine through Qt's global share context.
     setViewport(new QOpenGLWidget);
@@ -181,6 +182,7 @@ void NodeEditorView::syncFromEngine() {
         it = edges_.erase(it);
     }
     syncing_ = false;
+    refreshDownloads();
 
     // Fit a restored session once the window has its size; nodes added to
     // an empty canvas later keep the current zoom.
@@ -714,6 +716,19 @@ void NodeEditorView::advancePreview(const QString& fromId, const QString& toId, 
 QRect NodeEditorView::nodeViewportRect(const QString& id) const {
     const NodeItem* node = nodes_.value(id);
     return node ? mapFromScene(node->sceneBoundingRect()).boundingRect() : QRect();
+}
+
+void NodeEditorView::refreshDownloads() {
+    constexpr int kLibrarySourceType = 8;
+    bool any = false;
+    for (NodeItem* n : std::as_const(nodes_)) {
+        if (n->isShader() || n->typeRaw() != kLibrarySourceType) continue;
+        const auto state = EngineBridge::instance()->librarySourceState(n->id());
+        n->setDownload(state.downloading ? state.progress : -1, state.paused);
+        any |= state.downloading;
+    }
+    if (any && !downloadPoll_.isActive()) downloadPoll_.start(500);
+    else if (!any) downloadPoll_.stop();
 }
 
 void NodeEditorView::setShowHints(bool on) {

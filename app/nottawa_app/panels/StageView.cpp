@@ -58,7 +58,10 @@ void styleStageButton(QToolButton* b, const QColor& active) {
 // Centres one child at the engine's aspect ratio.
 class AspectBox : public QWidget {
 public:
-    explicit AspectBox(QWidget* parent) : QWidget(parent) { setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding); }
+    explicit AspectBox(QWidget* parent) : QWidget(parent) {
+        setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        connect(EngineBridge::instance(), &EngineBridge::resolutionChanged, this, [this] { place(); });
+    }
     void setChild(QWidget* child) { child_ = child; place(); }
 protected:
     void resizeEvent(QResizeEvent*) override { place(); }

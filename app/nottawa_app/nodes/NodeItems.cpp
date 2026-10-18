@@ -84,6 +84,13 @@ void NodeItem::setInfo(const QString& name, bool isShader, bool active, int inpu
 void NodeItem::setNeedsInput(bool on) { if (needsInput_ != on) { needsInput_ = on; update(); } }
 void NodeItem::setAudioHint(bool on) { if (audioHint_ != on) { audioHint_ = on; update(); } }
 
+void NodeItem::setDownload(float progress, bool paused) {
+    if (progress == download_ && paused == downloadPaused_) return;
+    download_ = progress;
+    downloadPaused_ = paused;
+    update();
+}
+
 void NodeItem::rebuildPorts(int inputCount, bool hasAux) {
     inputCount_ = inputCount;
     hasAux_ = hasAux;
@@ -132,6 +139,39 @@ void NodeItem::paint(QPainter* p, const QStyleOptionGraphicsItem*, QWidget*) {
         p->setPen(QColor(0xd8, 0xd9, 0xdf, 200));
         QFont f = p->font(); f.setPointSizeF(9); p->setFont(f);
         p->drawText(b.adjusted(0, 0, 0, -kTitleH), Qt::AlignCenter, "Enable audio from the Audio menu");
+    }
+
+    // Download progress, after the macOS NodeDownloadOverlay.
+    if (download_ >= 0) {
+        p->save();
+        QColor scrim = Theme::background;
+        scrim.setAlphaF(0.8);
+        p->fillPath(rounded, scrim);
+        const QPointF c = b.adjusted(0, 0, 0, -kTitleH).center() - QPointF(0, 8);
+        const QRectF ring(c.x() - 25, c.y() - 25, 50, 50);
+        QColor track = Theme::textTertiary;
+        track.setAlphaF(0.3);
+        p->setBrush(Qt::NoBrush);
+        p->setPen(QPen(track, 4));
+        p->drawEllipse(ring);
+        p->setPen(QPen(downloadPaused_ ? QColor(0xff, 0x95, 0x00) : Theme::accent, 4, Qt::SolidLine, Qt::RoundCap));
+        p->drawArc(ring, 90 * 16, -int(std::clamp(download_, 0.0f, 1.0f) * 360 * 16));
+        QFont f = p->font();
+        f.setFamily("Consolas");
+        f.setPointSizeF(10);
+        f.setBold(true);
+        p->setFont(f);
+        p->setPen(Theme::textPrimary);
+        p->drawText(ring, Qt::AlignCenter, QString("%1%").arg(int(download_ * 100)));
+        p->restore();
+        p->save();
+        f = p->font();
+        f.setPointSizeF(8);
+        p->setFont(f);
+        p->setPen(Theme::textSecondary);
+        p->drawText(QRectF(b.left(), ring.bottom() + 4, b.width(), 18), Qt::AlignHCenter | Qt::AlignTop,
+                    downloadPaused_ ? "Paused" : "Downloading...");
+        p->restore();
     }
 
     // Title bar along the bottom.

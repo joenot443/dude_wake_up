@@ -117,6 +117,8 @@ private:
     // Positions, selects and reveals just-loaded strand nodes.
     void placeLoadedStrand(const QStringList& ids, const QPointF* scenePos);
     QPointF nextFreePosition() const;
+    // Updates library sources' download rings; polls while any downloads.
+    void refreshDownloads();
     // Positions a just-added node, selects it and syncs.
     void placeNew(const QString& id, QPointF pos);
     // With "Automatically advance output window" on, a preview window
@@ -132,6 +134,7 @@ private:
 
     FramePresenter presenter_;
     QTimer repaintTimer_;
+    QTimer downloadPoll_;
 
     // Port a connection drag started from, re-resolved on use because a
     // graph refresh mid-drag may rebuild or remove it.

@@ -17,6 +17,7 @@
 #include "panels/StrandsPage.h"
 #include "panels/HelpGuide.h"
 #include "panels/StageView.h"
+#include "PreviewWindow.h"
 #include "Screenshots.h"
 #include "SettingsDialog.h"
 #include "panels/WelcomeOverlay.h"
@@ -238,6 +239,9 @@ void MainWindow::buildMenus() {
     view->addAction("&Audio Panel", QKeySequence("Ctrl+Shift+A"), this, [this] { audioButton_->click(); });
     stageAction_ = view->addAction("&Stage Mode", QKeySequence("Ctrl+Return"), this, [this] { stageButton_->click(); });
     view->addAction("Zoom to &Fit", QKeySequence("Ctrl+0"), editor_, &NodeEditorView::zoomToFit);
+    auto* stretch = view->addAction("S&tretch Preview Windows", this, [](bool on) { PreviewWindow::setStretchToFill(on); });
+    stretch->setCheckable(true);
+    stretch->setChecked(PreviewWindow::stretchToFill());
     auto* showLog = view->addAction("Show &Log", this, [this](bool on) { logPanel_->setVisible(on); });
     showLog->setCheckable(true);
     view->addSeparator();
