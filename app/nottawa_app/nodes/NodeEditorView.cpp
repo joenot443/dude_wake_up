@@ -70,6 +70,14 @@ NodeEditorView::NodeEditorView(QWidget* parent) : QGraphicsView(parent) {
         for (NodeItem* n : std::as_const(nodes_)) n->setAudioHint(!audio && audioReactive_.contains(n->id()));
     });
     audioPoll->start(500);
+
+    connect(EngineBridge::instance(), &EngineBridge::sharedStrandFetched, this,
+            [this](const QString& slug, bool ok, const QString& jsonOrError) {
+        const bool dropped = sharedDrops_.contains(slug);
+        const QPointF at = sharedDrops_.take(slug);
+        if (!ok) { emit strandLoadFailed(jsonOrError); return; }
+        placeLoadedStrand(EngineBridge::instance()->loadStrandJson(jsonOrError), dropped ? &at : nullptr);
+    });
     const qreal hz = screen() ? screen()->refreshRate() : 60.0;
     repaintTimer_.start(qMax(1, int(1000.0 / (hz > 0 ? hz : 60.0))));
 }
@@ -480,6 +488,8 @@ void NodeEditorView::showContextMenu(const QPoint& viewPos) {
                         [this, id, isSource](int type) { swapNode(id, isSource, type); });
         menu.addAction("Open Preview Window", this, [this, id] { openPreview(id); });
         menu.addAction("Save Strand...", this, [this, id] { saveStrand(id); });
+        const QString name = node->name();
+        menu.addAction("Share Strand...", this, [this, id, name] { emit shareRequested(id, name); });
         menu.addSeparator();
         QList<EdgeItem*> nodeEdges;
         for (EdgeItem* edge : std::as_const(edges_))
@@ -537,8 +547,17 @@ void NodeEditorView::fillCatalogMenu(QMenu* menu, bool sources, const std::funct
 // --------------------------------------------------------- node operations
 
 void NodeEditorView::loadStrand(const QString& strandId, const QPointF* scenePos) {
+    placeLoadedStrand(EngineBridge::instance()->loadStrand(strandId), scenePos);
+}
+
+void NodeEditorView::loadSharedStrand(const QString& slug, const QPointF* scenePos) {
+    if (scenePos) sharedDrops_.insert(slug, *scenePos);
+    else sharedDrops_.remove(slug);
+    EngineBridge::instance()->fetchSharedStrand(slug);
+}
+
+void NodeEditorView::placeLoadedStrand(const QStringList& ids, const QPointF* scenePos) {
     auto* engine = EngineBridge::instance();
-    const QStringList ids = engine->loadStrand(strandId);
     if (ids.isEmpty()) return;
     if (scenePos) {
         // Move the strand so its top-left node lands on the drop point.
@@ -601,7 +620,6 @@ void NodeEditorView::saveStrand(const QString& nodeId) {
     else emit strandSaved(name);
 }
 
-// The node's current output as an image (null if it has none yet).
 QImage NodeEditorView::captureNode(const QString& id) {
     FrameExchange* ex = EngineBridge::instance()->frames(id);
     auto* gl = qobject_cast<QOpenGLWidget*>(viewport());
@@ -743,6 +761,10 @@ void NodeEditorView::dropEvent(QDropEvent* e) {
     e->acceptProposedAction();
     if (kind == u"library") {
         addLibrarySource(payload.mid(colon + 1), &scenePos);
+        return;
+    }
+    if (kind == u"shared_strand") {
+        loadSharedStrand(payload.mid(colon + 1), &scenePos);
         return;
     }
     if (kind == u"strand") {

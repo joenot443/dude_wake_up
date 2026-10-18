@@ -3,7 +3,9 @@
 #include "EngineBridge.h"
 #include "StageWidget.h"
 #include "nodes/NodeEditorView.h"
+#include "ShareStrandDialog.h"
 #include "panels/BrowserPanel.h"
+#include "panels/CommunityPage.h"
 #include "panels/InspectorPanel.h"
 #include "panels/LibraryPage.h"
 #include "panels/StrandsPage.h"
@@ -181,6 +183,27 @@ void MainWindow::buildDocks() {
     connect(strands, &StrandsPage::loadRequested, this, [this](const QString& id) {
         editor_->loadStrand(id);
         welcome_->hide();
+    });
+    auto* community = new CommunityPage(strands);
+    strands->setCommunityPage(community);
+    connect(community, &CommunityPage::loadRequested, this, [this](const QString& slug) {
+        editor_->loadSharedStrand(slug);
+        welcome_->hide();
+    });
+    connect(editor_, &NodeEditorView::shareRequested, this, [this, strands, community](const QString& id, const QString& name) {
+        auto* dialog = new ShareStrandDialog(id, name, editor_->captureNode(id), this);
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
+        connect(dialog, &ShareStrandDialog::shared, this, [this, strands, community](const QString& slug) {
+            log("[strand] shared https://nottawa.app/strands/" + slug);
+            browser_->showTab(BrowserPanel::Strands);
+            strands->showCommunity();
+            community->refresh();
+        });
+        dialog->open();
+    });
+    connect(editor_, &NodeEditorView::strandLoadFailed, this, [this](const QString& error) {
+        log("[strand] ERROR " + error);
+        statusBar()->showMessage("Couldn't load strand: " + error, 6000);
     });
     connect(editor_, &NodeEditorView::strandSaved, this, [this](const QString& name) {
         log("[strand] saved " + name);

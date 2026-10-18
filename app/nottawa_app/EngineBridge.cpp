@@ -6,6 +6,8 @@
 #include <QHash>
 #include <QSet>
 #include <cstdlib>
+#include <deque>
+#include <mutex>
 
 namespace {
 
@@ -23,6 +25,62 @@ void onGraphChanged() {
 
 void onLibraryChanged() {
     QMetaObject::invokeMethod(EngineBridge::instance(), &EngineBridge::libraryChanged, Qt::QueuedConnection);
+}
+
+// The community callbacks carry no context and arrive on worker threads;
+// requests of each kind are answered in order, so queue what each needs.
+std::mutex g_communityMutex;
+std::deque<int>     g_feedPages;
+std::deque<QString> g_voteSlugs;
+std::deque<QString> g_fetchSlugs;
+
+template <typename T>
+T popFront(std::deque<T>& queue) {
+    std::lock_guard<std::mutex> lk(g_communityMutex);
+    if (queue.empty()) return T();
+    T value = queue.front();
+    queue.pop_front();
+    return value;
+}
+
+void onFeed(bool ok, NTWSharedStrandInfo* arr, int count, int totalPages) {
+    QVector<SharedStrand> strands;
+    for (int i = 0; i < count; ++i) {
+        const auto& s = arr[i];
+        strands.push_back({str(s.slug), str(s.title), str(s.description), str(s.previewUrl), str(s.author),
+                           s.upvotes, s.downvotes, s.score, s.views, s.opens, str(s.createdAt), str(s.userVote)});
+    }
+    ntw_free_shared_strand_info_array(arr, count);
+    const int page = popFront(g_feedPages);
+    QMetaObject::invokeMethod(EngineBridge::instance(), [=] {
+        emit EngineBridge::instance()->communityFeedFetched(ok, strands, page, totalPages);
+    }, Qt::QueuedConnection);
+}
+
+void onVote(bool ok, int up, int down, int score, const char* userVote) {
+    const QString vote = str(userVote);
+    if (userVote) ntw_free_string(const_cast<char*>(userVote));
+    const QString slug = popFront(g_voteSlugs);
+    QMetaObject::invokeMethod(EngineBridge::instance(), [=] {
+        emit EngineBridge::instance()->strandVoted(slug, ok, up, down, score, vote);
+    }, Qt::QueuedConnection);
+}
+
+void onFetchStrand(bool ok, const char* jsonOrError) {
+    const QString text = str(jsonOrError);
+    if (jsonOrError) ntw_free_string(const_cast<char*>(jsonOrError));
+    const QString slug = popFront(g_fetchSlugs);
+    QMetaObject::invokeMethod(EngineBridge::instance(), [=] {
+        emit EngineBridge::instance()->sharedStrandFetched(slug, ok, text);
+    }, Qt::QueuedConnection);
+}
+
+void onShare(bool ok, const char* slugOrError) {
+    const QString text = str(slugOrError);
+    if (slugOrError) ntw_free_string(const_cast<char*>(slugOrError));
+    QMetaObject::invokeMethod(EngineBridge::instance(), [=] {
+        emit EngineBridge::instance()->strandShared(ok, text);
+    }, Qt::QueuedConnection);
 }
 
 void onStrandsChanged() {
@@ -215,6 +273,37 @@ QString EngineBridge::addLibrarySource(const QString& id) {
 
 void EngineBridge::pauseLibraryDownload(const QString& id) { ntw_pause_library_download(id.toUtf8().constData()); }
 void EngineBridge::resumeLibraryDownload(const QString& id) { ntw_resume_library_download(id.toUtf8().constData()); }
+
+void EngineBridge::fetchCommunityFeed(int page, int limit, const QString& voterId) {
+    { std::lock_guard<std::mutex> lk(g_communityMutex); g_feedPages.push_back(page); }
+    ntw_fetch_community_feed(page, limit, voterId.toUtf8().constData(), &onFeed);
+}
+
+void EngineBridge::voteOnStrand(const QString& slug, const QString& voterId, const QString& vote) {
+    { std::lock_guard<std::mutex> lk(g_communityMutex); g_voteSlugs.push_back(slug); }
+    ntw_vote_strand(slug.toUtf8().constData(), voterId.toUtf8().constData(), vote.toUtf8().constData(), &onVote);
+}
+
+void EngineBridge::fetchSharedStrand(const QString& slug) {
+    { std::lock_guard<std::mutex> lk(g_communityMutex); g_fetchSlugs.push_back(slug); }
+    ntw_fetch_shared_strand(slug.toUtf8().constData(), &onFetchStrand);
+}
+
+void EngineBridge::shareStrand(const QString& nodeId, const QString& title, const QString& description,
+                               const QString& author, const QByteArray& previewPng) {
+    ntw_share_strand(nodeId.toUtf8().constData(), title.toUtf8().constData(), description.toUtf8().constData(),
+                     author.toUtf8().constData(), previewPng.isEmpty() ? nullptr : previewPng.constData(),
+                     int(previewPng.size()), &onShare);
+}
+
+QStringList EngineBridge::loadStrandJson(const QString& json) {
+    int n = 0;
+    char** ids = ntw_load_strand_from_json(json.toUtf8().constData(), &n);
+    QStringList out;
+    for (int i = 0; i < n; ++i) out << str(ids[i]);
+    ntw_free_string_array(ids, n);
+    return out;
+}
 
 QVector<AudioSourceItem> EngineBridge::audioSources() const {
     QVector<AudioSourceItem> out;

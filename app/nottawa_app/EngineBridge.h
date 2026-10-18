@@ -68,6 +68,18 @@ struct LibraryItem {
     float   progress    = 0;
 };
 
+// A strand shared to the nottawa.app community.
+struct SharedStrand {
+    QString slug;
+    QString title;
+    QString description;
+    QString previewUrl;
+    QString author;
+    int     upvotes = 0, downvotes = 0, score = 0, views = 0, opens = 0;
+    QString createdAt;
+    QString userVote;  // "up", "down" or empty
+};
+
 struct AudioSourceItem {
     QString id;
     QString name;
@@ -158,6 +170,17 @@ public:
     void    pauseLibraryDownload(const QString& libraryFileId);
     void    resumeLibraryDownload(const QString& libraryFileId);
 
+    // Community strands (nottawa.app). Each request answers with the
+    // matching signal below, on the GUI thread. voterId identifies this
+    // install's votes.
+    void fetchCommunityFeed(int page, int limit, const QString& voterId);
+    void voteOnStrand(const QString& slug, const QString& voterId, const QString& vote);  // "up"/"down"/"none"
+    void fetchSharedStrand(const QString& slug);
+    // Publishes the chain ending at `nodeId` to the community.
+    void shareStrand(const QString& nodeId, const QString& title, const QString& description,
+                     const QString& author, const QByteArray& previewPng);
+    QStringList loadStrandJson(const QString& json);
+
     QVector<AudioSourceItem> audioSources() const;
     QString selectedAudioSource() const;
     void    selectAudioSource(const QString& id);
@@ -185,6 +208,10 @@ signals:
     void graphChanged();
     void strandsChanged();
     void libraryChanged();
+    void communityFeedFetched(bool ok, const QVector<SharedStrand>& strands, int page, int totalPages);
+    void strandVoted(const QString& slug, bool ok, int upvotes, int downvotes, int score, const QString& userVote);
+    void sharedStrandFetched(const QString& slug, bool ok, const QString& jsonOrError);
+    void strandShared(bool ok, const QString& slugOrError);
 
 private:
     EngineBridge() = default;

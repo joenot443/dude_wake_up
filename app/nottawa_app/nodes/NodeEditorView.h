@@ -56,8 +56,12 @@ public:
     void openPreview(const QString& id);
     // Adds a saved strand, its top-left node at `scenePos` when given.
     void loadStrand(const QString& strandId, const QPointF* scenePos = nullptr);
+    // Downloads a community strand and adds it likewise.
+    void loadSharedStrand(const QString& slug, const QPointF* scenePos = nullptr);
     // Saves the chain ending at a node as a strand, with a thumbnail.
     void saveStrand(const QString& nodeId);
+    // The node's current output as an image (null if it has none yet).
+    QImage captureNode(const QString& id);
 
     // Called by NodeItem.
     void drawNodePreview(QPainter* p, const NodeItem* node, const QRectF& bodyLocal, qreal cornerRadius, float opacity);
@@ -66,6 +70,8 @@ public:
 
 signals:
     void strandSaved(const QString& name);
+    void strandLoadFailed(const QString& error);
+    void shareRequested(const QString& nodeId, const QString& nodeName);
     void nodeSelected(const QString& id);
 
 protected:
@@ -94,7 +100,8 @@ private:
     void fillCatalogMenu(QMenu* menu, bool sources, const std::function<void(int)>& pick);
     void swapNode(const QString& id, bool isSource, int typeRaw);
     void cycleSelection(bool backwards);
-    QImage captureNode(const QString& id);
+    // Positions, selects and reveals just-loaded strand nodes.
+    void placeLoadedStrand(const QStringList& ids, const QPointF* scenePos);
     QPointF nextFreePosition() const;
     // Positions a just-added node, selects it and syncs.
     void placeNew(const QString& id, QPointF pos);
@@ -103,6 +110,7 @@ private:
     QHash<QString, EdgeItem*> edges_;
     QHash<QString, QPointer<PreviewWindow>> previews_;
     QString lastAddedId_;
+    QHash<QString, QPointF> sharedDrops_;  // slug -> drop point, while downloading
 
     FramePresenter presenter_;
     QTimer repaintTimer_;

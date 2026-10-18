@@ -17,6 +17,7 @@ public:
     explicit StrandsPage(QWidget* parent = nullptr);
     // Shown in place of the community feed until it's available.
     void setCommunityPage(QWidget* page);
+    void showCommunity();
 
 public slots:
     void reload();

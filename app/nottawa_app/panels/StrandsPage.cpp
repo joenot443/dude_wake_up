@@ -140,6 +140,8 @@ void StrandsPage::setCommunityPage(QWidget* page) {
     setCommunity(communityButton_->isChecked());
 }
 
+void StrandsPage::showCommunity() { communityButton_->setChecked(true); }
+
 void StrandsPage::setCommunity(bool on) {
     modes_->setCurrentWidget(on ? communityPage_ : localPage_);
 }

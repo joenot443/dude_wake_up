@@ -29,6 +29,7 @@ public:
     void setSelectedNode(const QString& id, bool isSource);
     // Destroys live previews; call before the engine stops.
     void shutdown();
+    void showTab(Tab tab) { setTab(tab); }
     // Replaces the page shown for a tab (Oscillators, Library, Strands).
     void setPage(Tab tab, QWidget* page);
 

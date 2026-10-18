@@ -10,7 +10,7 @@ if(NOT DEFINED CMAKE_PREFIX_PATH AND EXISTS "C:/Qt/6.8.0/msvc2022_64")
 endif()
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Widgets OpenGL OpenGLWidgets)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Widgets OpenGL OpenGLWidgets Network)
 find_package(OF REQUIRED)
 
 get_filename_component(NOTTAWA_REPO "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)
@@ -37,11 +37,13 @@ qt_add_executable(nottawa_app WIN32
     StageWidget.h            StageWidget.cpp
     FramePresenter.h         FramePresenter.cpp
     PreviewWindow.h          PreviewWindow.cpp
+    ShareStrandDialog.h      ShareStrandDialog.cpp
     Icons.h                  Icons.cpp
     panels/PreviewPool.h     panels/PreviewPool.cpp
     panels/TileGridView.h    panels/TileGridView.cpp
     panels/StrandsPage.h     panels/StrandsPage.cpp
     panels/LibraryPage.h     panels/LibraryPage.cpp
+    panels/CommunityPage.h   panels/CommunityPage.cpp
     nodes/NodeEditorView.h   nodes/NodeEditorView.cpp
     nodes/NodeItems.h        nodes/NodeItems.cpp
     Theme.h                  Theme.cpp
@@ -58,7 +60,7 @@ target_include_directories(nottawa_app PRIVATE
 target_link_directories(nottawa_app PRIVATE ${NOTTAWA_REPO}/libs/ffmpeg/lib)
 # Same link inputs as Nottawa.exe (Nottawa.vcxproj AdditionalDependencies).
 target_link_libraries(nottawa_app PRIVATE
-    Qt6::Widgets Qt6::OpenGL Qt6::OpenGLWidgets
+    Qt6::Widgets Qt6::OpenGL Qt6::OpenGLWidgets Qt6::Network
     ${NOTTAWA_ENGINE_LIB}
     OF::OF
     avformat avcodec avutil swscale swresample
