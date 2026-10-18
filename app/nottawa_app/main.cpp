@@ -6,6 +6,7 @@
 #include <QFileInfo>
 #include <QSettings>
 #include <QSurfaceFormat>
+#include <cstdio>
 
 namespace {
 // The engine's data root (fonts, images, shaders, templates): data/ next to
@@ -29,6 +30,15 @@ QString appDataDir() {
     const QString override = qEnvironmentVariable("NOTTAWA_APPDATA");
     if (!override.isEmpty()) return override;
     return QDir(qEnvironmentVariable("LOCALAPPDATA")).absoluteFilePath("Nottawa");
+}
+// The engine logs to stdout/stderr, which a Windows GUI app discards; send
+// them to <app data>/logs/engine.log (rewritten each launch).
+void captureEngineLog() {
+    const QString dir = QDir(appDataDir()).filePath("logs");
+    QDir().mkpath(dir);
+    const std::wstring path = QDir::toNativeSeparators(QDir(dir).filePath("engine.log")).toStdWString();
+    if (_wfreopen(path.c_str(), L"w", stdout)) setvbuf(stdout, nullptr, _IONBF, 0);
+    if (_wfreopen(path.c_str(), L"a", stderr)) setvbuf(stderr, nullptr, _IONBF, 0);
 }
 } // anon
 
@@ -57,6 +67,7 @@ int main(int argc, char** argv) {
     QSettings::setDefaultFormat(QSettings::IniFormat);
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, QDir(appDataDir()).filePath("settings"));
     Theme::apply(app);
+    captureEngineLog();
 
     MainWindow w(findDataDir());
     w.show();

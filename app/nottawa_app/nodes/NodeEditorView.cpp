@@ -702,6 +702,12 @@ QString NodeEditorView::addInput(int type, const QPointF* scenePos) {
     return id;
 }
 
+QString NodeEditorView::addLibrarySource(const QString& libraryFileId, const QPointF* scenePos) {
+    const QString id = EngineBridge::instance()->addLibrarySource(libraryFileId);
+    if (!id.isEmpty()) placeNew(id, scenePos ? *scenePos : nextFreePosition());
+    return id;
+}
+
 QPointF NodeEditorView::nextFreePosition() const {
     if (const NodeItem* last = nodes_.value(lastAddedId_)) return last->pos() + QPointF(0, kStackStep);
     return mapToScene(viewport()->rect().center());
@@ -735,6 +741,10 @@ void NodeEditorView::dropEvent(QDropEvent* e) {
     const QPoint viewPos = e->position().toPoint();
     const QPointF scenePos = mapToScene(viewPos);
     e->acceptProposedAction();
+    if (kind == u"library") {
+        addLibrarySource(payload.mid(colon + 1), &scenePos);
+        return;
+    }
     if (kind == u"strand") {
         loadStrand(payload.mid(colon + 1), &scenePos);
         return;

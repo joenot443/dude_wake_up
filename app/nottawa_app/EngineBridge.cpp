@@ -21,6 +21,10 @@ void onGraphChanged() {
     QMetaObject::invokeMethod(EngineBridge::instance(), &EngineBridge::graphChanged, Qt::QueuedConnection);
 }
 
+void onLibraryChanged() {
+    QMetaObject::invokeMethod(EngineBridge::instance(), &EngineBridge::libraryChanged, Qt::QueuedConnection);
+}
+
 void onStrandsChanged() {
     QMetaObject::invokeMethod(EngineBridge::instance(), &EngineBridge::strandsChanged, Qt::QueuedConnection);
 }
@@ -45,6 +49,7 @@ bool EngineBridge::start(void* shareContext, const QString& dataPath) {
     if (!ntw_engine_init()) return false;
     ntw_register_graph_changed_callback(&onGraphChanged);
     ntw_register_strands_updated_callback(&onStrandsChanged);
+    ntw_register_library_update_callback(&onLibraryChanged);
     ntw_engine_start();
     running_ = true;
     return true;
@@ -187,6 +192,29 @@ void EngineBridge::deleteStrand(const QString& id) { ntw_delete_strand(id.toUtf8
 void EngineBridge::renameStrand(const QString& id, const QString& name) {
     ntw_rename_strand(id.toUtf8().constData(), name.toUtf8().constData());
 }
+
+void EngineBridge::fetchLibrary() { if (running_) ntw_fetch_library_files(); }
+
+QVector<LibraryItem> EngineBridge::libraryItems() const {
+    QVector<LibraryItem> out;
+    if (!running_) return out;
+    int n = 0;
+    NTWLibraryFileInfo* arr = ntw_get_library_files(&n);
+    for (int i = 0; i < n; ++i) {
+        const auto& f = arr[i];
+        out.push_back({str(f.id), str(f.name), str(f.category), str(f.thumbnailPath), f.isDownloaded != 0,
+                       f.isDownloading != 0, f.isPaused != 0, f.downloadProgress});
+    }
+    ntw_free_library_file_info_array(arr, n);
+    return out;
+}
+
+QString EngineBridge::addLibrarySource(const QString& id) {
+    return takeString(ntw_add_library_video_source(id.toUtf8().constData()));
+}
+
+void EngineBridge::pauseLibraryDownload(const QString& id) { ntw_pause_library_download(id.toUtf8().constData()); }
+void EngineBridge::resumeLibraryDownload(const QString& id) { ntw_resume_library_download(id.toUtf8().constData()); }
 
 QVector<AudioSourceItem> EngineBridge::audioSources() const {
     QVector<AudioSourceItem> out;

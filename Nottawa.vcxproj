@@ -558,8 +558,8 @@ exit /b 0</Command>
     <ClInclude Include="src\Network\Backblaze.hpp" />
     <ClCompile Include="src\Network\LibraryFile.cpp" />
     <ClInclude Include="src\Network\LibraryFile.hpp" />
+    <ClCompile Include="src\Network\LibraryService.cpp" />
     <ClInclude Include="src\Network\LibraryService.hpp" />
-    <ClCompile Include="src\Network\LibraryService_win.cpp" />
     <ClCompile Include="src\NodeLayout\node-editor\crude_json.cpp" />
     <ClInclude Include="src\NodeLayout\node-editor\crude_json.h" />
     <ClInclude Include="src\NodeLayout\node-editor\imgui_bezier_math.h" />
@@ -874,7 +874,8 @@ exit /b 0</Command>
     <ClInclude Include="src\Util\File.hpp" />
     <ClInclude Include="src\Util\Fonts.hpp" />
     <ClInclude Include="src\Util\httplib.h" />
-    <ClInclude Include="src\Util\HttplibSslStub.hpp" />
+    <ClInclude Include="src\Util\HttpsClient.hpp" />
+    <ClCompile Include="src\Util\HttpsClient_win.cpp" />
     <ClInclude Include="src\Util\imgui_markdown.h" />
     <ClInclude Include="src\Util\json.hpp" />
     <ClInclude Include="src\Util\JSONSerializable.hpp" />

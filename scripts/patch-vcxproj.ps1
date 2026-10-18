@@ -77,9 +77,6 @@ $ExcludeFiles = @(
     'src\Services\URLSchemeHandler.mm',
     # IOSurface implementation; Windows uses IOSurfaceTextureManager_win.cpp.
     'src\Engine\IOSurfaceTextureManager.cpp',
-    # LibraryService needs OpenSSL for HTTPS — until Phase 5+ Windows uses
-    # the no-op stub in LibraryService_win.cpp.
-    'src\Network\LibraryService.cpp',
     # BookmarkService's mac impl uses CoreFoundation extensively — the
     # header-side typedef fallback covers callers, but the .cpp itself
     # needs to be replaced by BookmarkService_win.cpp on Windows.

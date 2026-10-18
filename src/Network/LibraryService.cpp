@@ -15,7 +15,7 @@
 #include "EngineLoop.hpp"
 #endif
 #include "httplib.h"
-#include "HttplibSslStub.hpp"   // stubs SSLClient when built without OpenSSL
+#include "HttpsClient.hpp"       // SSLClient on every platform; NOTTAWA_HAS_HTTPS
 #include "json.hpp"
 #include <memory>
 //#include <sentry.h>
@@ -24,6 +24,18 @@
 #include <mutex>
 
 using json = nlohmann::json;
+
+// Runs `task` on the thread that owns the services: the engine thread in
+// engine-only builds (the macOS/Windows apps, where MainApp's loop never
+// runs), else the OF main thread.
+static void runOnMainThread(std::function<void()> task)
+{
+#ifdef NOTTAWA_ENGINE_ONLY
+  EngineLoop::getInstance()->executeOnEngineThread(std::move(task));
+#else
+  MainApp::getApp()->executeOnMainThread(std::move(task));
+#endif
+}
 
 // Helper function to parse HTTPS URL into host and path
 // Returns false if parsing fails
@@ -107,7 +119,7 @@ void LibraryService::didFetchLibraryFiles() {
 }
 
 void LibraryService::repopulateVideoSourcesFromMainThread() {
-  MainApp::getApp()->executeOnMainThread([]() {
+  runOnMainThread([]() {
     VideoSourceService::getService()->populateAvailableVideoSources();
   });
 }
@@ -129,7 +141,7 @@ void LibraryService::fetchLibraryFiles()
     return;
   }
   
-#ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+#ifndef NOTTAWA_HAS_HTTPS
   log("Error: HTTPS URL provided but httplib not compiled with SSL support for library files.");
   std::cerr << "Error: HTTPS URL provided but httplib not compiled with SSL support for library files." << std::endl;
   return;
@@ -213,7 +225,7 @@ void LibraryService::downloadThumbnail(std::shared_ptr<LibraryFile> file)
     return; // Stop if URL is invalid
   }
   
-#ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+#ifndef NOTTAWA_HAS_HTTPS
   log("Error: HTTPS URL provided but httplib not compiled with SSL support for thumbnail download.");
   std::cerr << "Error: HTTPS URL provided but httplib not compiled with SSL support for thumbnail download." << std::endl;
   return; // Stop if SSL support is missing
@@ -310,7 +322,7 @@ void LibraryService::downloadFile(std::shared_ptr<LibraryFile> file, std::functi
     return;
   }
 
-#ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+#ifndef NOTTAWA_HAS_HTTPS
   log("Error: HTTPS URL provided but httplib not compiled with SSL support.");
   std::cerr << "Error: HTTPS URL provided but httplib not compiled with SSL support." << std::endl;
   file->isDownloading = false;
@@ -399,17 +411,7 @@ void LibraryService::downloadFile(std::shared_ptr<LibraryFile> file, std::functi
         file->isDownloading = false;
         file->progress = 1.0f;
 
-        if (callback) {
-#ifdef NOTTAWA_ENGINE_ONLY
-          EngineLoop::getInstance()->executeOnEngineThread([callback]() {
-            callback();
-          });
-#else
-          MainApp::getApp()->executeOnMainThread([callback](){
-            callback();
-          });
-#endif
-        }
+        if (callback) runOnMainThread(callback);
       } else {
         // Download was paused - keep partial file
         file->isDownloading = false;
@@ -512,7 +514,7 @@ void LibraryService::fetchShaderCredits()
     return;
   }
   
-#ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+#ifndef NOTTAWA_HAS_HTTPS
   log("Error: HTTPS URL provided but httplib not compiled with SSL support for shader credits.");
   std::cerr << "Error: HTTPS URL provided but httplib not compiled with SSL support for shader credits." << std::endl;
   return;
@@ -613,16 +615,16 @@ void LibraryService::submitFeedback(const std::string &text,
     std::string host, dummy;
     if (!parseHttpsUrl(API_URL, host, dummy)) {
       if (callback) {
-        MainApp::getApp()->executeOnMainThread([callback]() {
+        runOnMainThread([callback]() {
           callback(false, "Invalid API URL");
         });
       }
       return;
     }
     
-#ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+#ifndef NOTTAWA_HAS_HTTPS
     if (callback) {
-      MainApp::getApp()->executeOnMainThread([callback]() {
+      runOnMainThread([callback]() {
         callback(false, "cpp-httplib built without SSL support");
       });
     }
@@ -669,7 +671,7 @@ void LibraryService::submitFeedback(const std::string &text,
     
     // Invoke callback on main thread
     if (callback) {
-      MainApp::getApp()->executeOnMainThread([callback, ok, err]() {
+      runOnMainThread([callback, ok, err]() {
         callback(ok, err);
       });
     }
@@ -692,16 +694,16 @@ void LibraryService::shareStrand(const std::string &title,
     std::string host, dummy;
     if (!parseHttpsUrl(API_URL, host, dummy)) {
       if (callback) {
-        MainApp::getApp()->executeOnMainThread([callback]() {
+        runOnMainThread([callback]() {
           callback(false, "", "Invalid API URL");
         });
       }
       return;
     }
 
-#ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+#ifndef NOTTAWA_HAS_HTTPS
     if (callback) {
-      MainApp::getApp()->executeOnMainThread([callback]() {
+      runOnMainThread([callback]() {
         callback(false, "", "cpp-httplib built without SSL support");
       });
     }
@@ -767,7 +769,7 @@ void LibraryService::shareStrand(const std::string &title,
 
     // Invoke callback on main thread
     if (callback) {
-      MainApp::getApp()->executeOnMainThread([callback, ok, url, err]() {
+      runOnMainThread([callback, ok, url, err]() {
         callback(ok, url, err);
       });
     }
@@ -783,16 +785,16 @@ void LibraryService::fetchSharedStrand(const std::string &slug,
     std::string host, dummy;
     if (!parseHttpsUrl(API_URL, host, dummy)) {
       if (callback) {
-        MainApp::getApp()->executeOnMainThread([callback]() {
+        runOnMainThread([callback]() {
           callback(false, "", "", "Invalid API URL");
         });
       }
       return;
     }
 
-#ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+#ifndef NOTTAWA_HAS_HTTPS
     if (callback) {
-      MainApp::getApp()->executeOnMainThread([callback]() {
+      runOnMainThread([callback]() {
         callback(false, "", "", "cpp-httplib built without SSL support");
       });
     }
@@ -848,7 +850,7 @@ void LibraryService::fetchSharedStrand(const std::string &slug,
 
     // Invoke callback on main thread
     if (callback) {
-      MainApp::getApp()->executeOnMainThread([callback, ok, strandJson, title, err]() {
+      runOnMainThread([callback, ok, strandJson, title, err]() {
         callback(ok, strandJson, title, err);
       });
     }

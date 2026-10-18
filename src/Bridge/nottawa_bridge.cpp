@@ -40,7 +40,7 @@
 #include "IconService.hpp"
 #include "ofMain.h"
 
-#include "httplib.h"
+#include "HttpsClient.hpp"
 
 #include <cstdio>
 #include <cstring>
@@ -3401,7 +3401,7 @@ int ntw_is_source_type_favorited(int sourceType) {
 // MARK: - Strand Sharing & Community
 // ---------------------------------------------------------------------------
 
-#ifdef CPPHTTPLIB_OPENSSL_SUPPORT
+#ifdef NOTTAWA_HAS_HTTPS
 void ntw_share_strand(const char* nodeId, const char* title, const char* description,
                       const char* author, const void* previewPngData, int previewLen,
                       NTWShareStrandCallback callback) {
@@ -3613,8 +3613,8 @@ void ntw_fetch_shared_strand(const char* slug, NTWFetchStrandCallback callback) 
   }).detach();
 }
 #else
-// HTTPS needs CPPHTTPLIB_OPENSSL_SUPPORT, which the Windows build doesn't
-// enable yet (see LibraryService_win.cpp). Report the feature as unavailable.
+// No HTTPS backend in this build (see HttpsClient.hpp): report the feature
+// as unavailable.
 static const char* kNoHttps = "Community features are not available in this build";
 void ntw_share_strand(const char*, const char*, const char*, const char*, const void*, int,
                       NTWShareStrandCallback callback) {

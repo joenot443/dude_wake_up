@@ -57,6 +57,17 @@ struct StrandItem {
     QString imagePath;
 };
 
+struct LibraryItem {
+    QString id;
+    QString name;
+    QString category;
+    QString thumbnailPath;  // empty until downloaded
+    bool    downloaded  = false;
+    bool    downloading = false;
+    bool    paused      = false;
+    float   progress    = 0;
+};
+
 struct AudioSourceItem {
     QString id;
     QString name;
@@ -138,6 +149,15 @@ public:
     void        deleteStrand(const QString& strandId);
     void        renameStrand(const QString& strandId, const QString& name);
 
+    // The nottawa.app video library. fetchLibrary() runs in the background;
+    // libraryChanged fires when it completes.
+    void fetchLibrary();
+    QVector<LibraryItem> libraryItems() const;
+    // Adds a source for a library video (downloading it if needed).
+    QString addLibrarySource(const QString& libraryFileId);
+    void    pauseLibraryDownload(const QString& libraryFileId);
+    void    resumeLibraryDownload(const QString& libraryFileId);
+
     QVector<AudioSourceItem> audioSources() const;
     QString selectedAudioSource() const;
     void    selectAudioSource(const QString& id);
@@ -164,6 +184,7 @@ public:
 signals:
     void graphChanged();
     void strandsChanged();
+    void libraryChanged();
 
 private:
     EngineBridge() = default;

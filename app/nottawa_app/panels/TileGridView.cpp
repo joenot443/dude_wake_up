@@ -63,7 +63,16 @@ TileGridView::~TileGridView() {
 // ---------------------------------------------------------------- content
 
 void TileGridView::setSections(const QVector<TileSection>& sections) {
+    // Same tiles in the same places (e.g. a progress update): keep hover
+    // and any press in progress, just repaint.
+    bool sameLayout = sections.size() == sections_.size();
+    for (int s = 0; sameLayout && s < sections.size(); ++s) {
+        sameLayout = sections[s].title == sections_[s].title && sections[s].items.size() == sections_[s].items.size();
+        for (int i = 0; sameLayout && i < sections[s].items.size(); ++i)
+            sameLayout = sections[s].items[i].payload == sections_[s].items[i].payload;
+    }
     sections_ = sections;
+    if (sameLayout) { viewport()->update(); return; }
     hovered_ = pressed_ = -1;
     relayout();
 }

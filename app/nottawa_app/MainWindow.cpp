@@ -5,6 +5,7 @@
 #include "nodes/NodeEditorView.h"
 #include "panels/BrowserPanel.h"
 #include "panels/InspectorPanel.h"
+#include "panels/LibraryPage.h"
 #include "panels/StrandsPage.h"
 #include "panels/LogPanel.h"
 #include "panels/WelcomeOverlay.h"
@@ -169,6 +170,12 @@ void MainWindow::buildDocks() {
     inspector_ = new InspectorPanel(this);
     logPanel_  = new LogPanel(this);
     connect(browser_, &BrowserPanel::itemPicked, this, &MainWindow::addFromLibrary);
+    auto* library = new LibraryPage(browser_);
+    browser_->setPage(BrowserPanel::Library, library);
+    connect(library, &LibraryPage::addRequested, this, [this](const QString& id) {
+        if (editor_->addLibrarySource(id).isEmpty()) log("[library] ERROR could not add " + id);
+        else welcome_->hide();
+    });
     auto* strands = new StrandsPage(browser_);
     browser_->setPage(BrowserPanel::Strands, strands);
     connect(strands, &StrandsPage::loadRequested, this, [this](const QString& id) {

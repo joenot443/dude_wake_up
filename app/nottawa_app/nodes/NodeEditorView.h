@@ -47,6 +47,8 @@ public:
     // below the last added node, else at the view centre.
     // Adds a text, icon, image (asks for the file) or webcam source.
     QString addInput(int videoSourceType, const QPointF* scenePos = nullptr);
+    // Adds a library video source (downloading the video if needed).
+    QString addLibrarySource(const QString& libraryFileId, const QPointF* scenePos = nullptr);
     QString addFromCatalog(int typeRaw, bool isSource, const QString& connectFrom = {},
                            const QPointF* scenePos = nullptr);
 
