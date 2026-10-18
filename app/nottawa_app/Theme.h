@@ -30,7 +30,7 @@ namespace Theme {
     inline QColor warning;
 
     // Preset names, as in Settings: Default (Midnight, or Daylight when
-    // Windows is in light mode), Ember, Arctic, Forest.
+    // Windows is in light mode), Midnight, Daylight, Ember, Arctic, Forest.
     QStringList presets();
     QString     preset();           // the saved choice
     void        setPreset(const QString& name);  // saved; applies on next launch

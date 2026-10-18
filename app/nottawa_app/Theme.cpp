@@ -45,7 +45,9 @@ void load() {
 }
 } // anon
 
-QStringList presets() { return {"Default", "Ember", "Arctic", "Forest"}; }
+// macOS lists Default, Ember, Arctic and Forest; Midnight and Daylight are
+// offered too, so the dark look is available whatever Windows' mode.
+QStringList presets() { return {"Default", "Midnight", "Daylight", "Ember", "Arctic", "Forest"}; }
 QString preset() {
     const QString name = QSettings().value("ui/theme", "Default").toString();
     return presets().contains(name) ? name : QStringLiteral("Default");
