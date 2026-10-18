@@ -91,8 +91,10 @@ MainWindow::MainWindow(const QString& dataPath) : dataPath_(dataPath) {
 
     welcome_ = new WelcomeOverlay(centre_);
     welcome_->setGeometry(centre_->rect());
-    connect(welcome_, &WelcomeOverlay::newStrandRequested,  this, [this] { welcome_->hide(); });
-    connect(welcome_, &WelcomeOverlay::openStrandRequested, this, &MainWindow::onOpen);
+    welcome_->hide();
+    connect(welcome_, &WelcomeOverlay::newRequested, this, &MainWindow::onNew);
+    connect(welcome_, &WelcomeOverlay::openRequested, this, &MainWindow::onOpen);
+    connect(welcome_, &WelcomeOverlay::strandPicked, this, [this](const QString& id) { editor_->loadStrand(id); });
 
     actionBar_ = new ActionBar(centre_);
     connect(actionBar_, &ActionBar::undo, this, [] { EngineBridge::instance()->undo(); });
@@ -250,8 +252,7 @@ void MainWindow::buildMenus() {
     auto* help = menuBar()->addMenu("&Help");
     help->addAction("Show &Welcome Screen", this, [this] {
         welcome_->setGeometry(centre_->rect());
-        welcome_->show();
-        welcome_->raise();
+        welcome_->present();
     });
     help->addSeparator();
     help->addAction("Visit nottawa.app", this, [] { QDesktopServices::openUrl(QUrl("https://nottawa.app")); });
@@ -469,6 +470,11 @@ void MainWindow::startEngine() {
         .arg(res.width()).arg(res.height()).arg(sources.size()).arg(effects.size()));
     refreshGraph();
     editor_->setFocus();
+    // Scripted runs skip it so their clicks land on the canvas.
+    if (WelcomeOverlay::enabledAtLaunch() && qEnvironmentVariableIsEmpty("NOTTAWA_ADD")) {
+        welcome_->setGeometry(centre_->rect());
+        welcome_->present();
+    }
     runScriptedAdds();
 }
 
@@ -527,7 +533,6 @@ void MainWindow::refreshGraph() {
         log(QString("[graph] %1 nodes, %2 connections").arg(lastNodeCount_).arg(lastEdgeCount_));
     }
     updateStageSource();
-    if (!nodes.isEmpty()) welcome_->hide();
     inspector_->setSelection(editor_->selectedNodeIds());
 
     bool selectedExists = false;

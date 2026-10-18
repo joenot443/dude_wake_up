@@ -239,6 +239,18 @@ QVector<StrandItem> EngineBridge::strands() const {
     return out;
 }
 
+QVector<StrandItem> EngineBridge::templateStrands() const {
+    QVector<StrandItem> out;
+    int n = 0;
+    NTWAvailableStrandInfo* arr = ntw_get_available_template_strands(&n);
+    for (int i = 0; i < n; ++i) out.push_back({str(arr[i].id), str(arr[i].name), str(arr[i].imagePath)});
+    ntw_free_available_strand_info_array(arr, n);
+    std::sort(out.begin(), out.end(), [](const StrandItem& a, const StrandItem& b) {
+        return a.name.compare(b.name, Qt::CaseInsensitive) < 0;
+    });
+    return out;
+}
+
 QString EngineBridge::strandsFolder() const { return takeString(ntw_get_strands_folder_path()); }
 
 bool EngineBridge::saveStrand(const QString& nodeId, const QString& path, const QString& name,

@@ -258,8 +258,12 @@ void StrandService::populateMapFromFolder(std::map<std::string, std::shared_ptr<
     std::string imagePath;
     if (json.contains("preview")) {
       imagePath = json["preview"];
-    } else {
-      imagePath = "";
+    }
+    // Without a recorded preview, use a same-named PNG beside the file.
+    if (imagePath.empty()) {
+      auto sibling = std::filesystem::path(file.getAbsolutePath()).replace_extension(".png");
+      std::error_code ec;
+      if (std::filesystem::exists(sibling, ec)) imagePath = sibling.string();
     }
     
     auto strand = std::make_shared<AvailableStrand>(removeFileExtension(file.getFileName()), file.getAbsolutePath(), imagePath, NottawaUUID::generateUUID());

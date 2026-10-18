@@ -300,6 +300,8 @@ public:
     void resetBouncePosition(const QString& shaderId);
 
     QVector<StrandItem> strands() const;
+    // Strands bundled with the app (loadStrand takes their ids too).
+    QVector<StrandItem> templateStrands() const;
     QString     strandsFolder() const;
     // Saves the chain ending at `nodeId` as a strand file; `previewPath` is
     // an optional thumbnail already written to disk.

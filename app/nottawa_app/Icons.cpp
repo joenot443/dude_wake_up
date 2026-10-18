@@ -236,6 +236,22 @@ void paint(QPainter* p, const QRectF& rect, Kind kind, const QColor& color) {
         p->setBrush(color);
         p->drawRoundedRect(QRectF(3.5, 3.5, 9, 9), 1.5, 1.5);
         break;
+    case Folder:
+        p->drawPolyline(QPolygonF({QPointF(1.5, 13.5), QPointF(1.5, 3), QPointF(6, 3), QPointF(7.5, 4.8),
+                                   QPointF(14.5, 4.8), QPointF(14.5, 13.5), QPointF(1.5, 13.5)}));
+        p->drawLine(QPointF(1.5, 6.8), QPointF(14.5, 6.8));
+        break;
+    case NewSquare: {
+        QPen dashed = p->pen();
+        dashed.setDashPattern({1.6, 1.4});
+        p->setPen(dashed);
+        p->drawRoundedRect(QRectF(1.5, 1.5, 13, 13), 2, 2);
+        dashed.setStyle(Qt::SolidLine);
+        p->setPen(dashed);
+        p->drawLine(QPointF(8, 5), QPointF(8, 11));
+        p->drawLine(QPointF(5, 8), QPointF(11, 8));
+        break;
+    }
     case Plus:
         p->drawLine(QPointF(8, 3.5), QPointF(8, 12.5));
         p->drawLine(QPointF(3.5, 8), QPointF(12.5, 8));
