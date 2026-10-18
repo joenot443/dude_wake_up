@@ -11,6 +11,7 @@ class FileSourcePanel;
 class IconSourcePanel;
 class OptionalEffectsSection;
 class TextSourcePanel;
+class TransformSection;
 class ParameterRow;
 class PositionPad;
 class QLabel;
@@ -80,6 +81,7 @@ private:
     TextSourcePanel* textPanel_ = nullptr;   // text sources
     IconSourcePanel* iconPanel_ = nullptr;   // icon sources
     FileSourcePanel* filePanel_ = nullptr;   // video file / library sources
+    TransformSection* transform_ = nullptr;  // crop / place pads
     QString      signature_;
     QTimer       refreshTimer_;
 };

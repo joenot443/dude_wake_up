@@ -49,6 +49,7 @@ qt_add_executable(nottawa_app WIN32
     inspector/ParameterRow.h inspector/ParameterRow.cpp
     inspector/PositionPad.h  inspector/PositionPad.cpp
     inspector/SourcePanels.h inspector/SourcePanels.cpp
+    inspector/TransformPads.h inspector/TransformPads.cpp
     ui/WaveformPreview.h     ui/WaveformPreview.cpp
     nodes/NodeEditorView.h   nodes/NodeEditorView.cpp
     nodes/NodeItems.h        nodes/NodeItems.cpp

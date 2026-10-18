@@ -6,6 +6,7 @@
 #include "inspector/ParameterRow.h"
 #include "inspector/PositionPad.h"
 #include "inspector/SourcePanels.h"
+#include "inspector/TransformPads.h"
 #include "ui/Controls.h"
 
 #include <QHBoxLayout>
@@ -186,6 +187,111 @@ private:
     QVector<OptionalEffect> effects_;
     QHash<QString, ParameterRow*> rows_;
     int                     expanded_ = -1;
+};
+
+// ------------------------------------------------------------- transform
+
+// Crop and Place pads for nodes with the SourceTransform pipeline (the
+// Transform shader, webcams), replacing their crop/placement sliders.
+class TransformSection : public QWidget {
+public:
+    static bool applies(const QVector<ParamInfo>& params) {
+        static const QStringList required = {"Min X", "Max X", "Min Y", "Max Y", "X", "Y", "Scale", "Mode"};
+        for (const QString& name : required)
+            if (std::none_of(params.begin(), params.end(), [&](const ParamInfo& p) { return p.name == name; })) return false;
+        return true;
+    }
+
+    TransformSection(const GraphNode& node, QWidget* parent) : QWidget(parent) {
+        auto* layout = new QVBoxLayout(this);
+        layout->setContentsMargins(6, 4, 6, 8);
+        layout->setSpacing(6);
+        layout->addLayout(header("Crop", "Reset crop to full frame", [this] { setParams({{"Min X", 0}, {"Max X", 1}, {"Min Y", 0}, {"Max Y", 1}}); }));
+        crop_ = new CropPad(this);
+        // Sources expose their pre-transform frame under "sourceRaw:<id>";
+        // effects crop whatever feeds their main input.
+        QString input = node.isShader ? QString() : "sourceRaw:" + node.id;
+        if (node.isShader)
+            for (const GraphEdge& e : EngineBridge::instance()->edges())
+                if (e.endId == node.id && e.inputSlot == 0) input = e.startId;
+        crop_->setFrameSource(input);
+        connect(crop_, &CropPad::cropChanged, this, [this](float x0, float x1, float y0, float y1) {
+            setParams({{"Min X", x0}, {"Max X", x1}, {"Min Y", y0}, {"Max Y", y1}});
+            cropLabel_->setText(cropText(x0, x1, y0, y1));
+        });
+        layout->addWidget(crop_);
+        cropLabel_ = caption(this);
+        layout->addWidget(cropLabel_);
+
+        placeBox_ = new QWidget(this);
+        auto* placeLayout = new QVBoxLayout(placeBox_);
+        placeLayout->setContentsMargins(0, 6, 0, 0);
+        placeLayout->setSpacing(6);
+        placeLayout->addLayout(header("Place", "Reset position and scale", [this] { setParams({{"X", 0}, {"Y", 0}, {"Scale", 1}}); }));
+        place_ = new PlacePad(placeBox_);
+        place_->setFrameSource("transformCrop:" + node.id);
+        connect(place_, &PlacePad::placementChanged, this, [this](float x, float y, float s) {
+            setParams({{"X", x}, {"Y", y}, {"Scale", s}});
+            placeLabel_->setText(placeText(x, y, s));
+        });
+        placeLayout->addWidget(place_);
+        placeLabel_ = caption(placeBox_);
+        placeLayout->addWidget(placeLabel_);
+        layout->addWidget(placeBox_);
+    }
+
+    void setParams(const QVector<ParamInfo>& params) {
+        params_ = params;
+        auto v = [&](const char* name) {
+            for (const ParamInfo& p : params) if (p.name == name) return p.type == ParamInfo::Int ? float(p.intValue) : p.value;
+            return 0.0f;
+        };
+        const float x0 = v("Min X"), x1 = v("Max X"), y0 = v("Min Y"), y1 = v("Max Y");
+        crop_->setCrop(x0, x1, y0, y1);
+        if (!crop_->isDragging()) cropLabel_->setText(cropText(x0, x1, y0, y1));
+        // Placement only applies in Standard mode; the auto-fit modes
+        // compute it.
+        placeBox_->setVisible(int(v("Mode")) == 0);
+        place_->setPlacement(v("X"), v("Y"), v("Scale"), std::max(0.0f, x1 - x0), std::max(0.0f, y1 - y0));
+        if (!place_->isDragging()) placeLabel_->setText(placeText(v("X"), v("Y"), v("Scale")));
+    }
+
+private:
+    QHBoxLayout* header(const QString& title, const QString& resetTip, std::function<void()> onReset) {
+        auto* row = new QHBoxLayout;
+        auto* label = new QLabel(title, this);
+        label->setStyleSheet(QString("color: %1; font-weight: 600;").arg(Theme::textSecondary.name()));
+        auto* reset = headerButton(Icons::Reset, resetTip, this);
+        reset->setIconSize(QSize(11, 11));
+        connect(reset, &QToolButton::clicked, this, std::move(onReset));
+        row->addWidget(label);
+        row->addStretch(1);
+        row->addWidget(reset);
+        return row;
+    }
+    static QLabel* caption(QWidget* parent) {
+        auto* l = new QLabel(parent);
+        l->setStyleSheet(QString("color: %1; font-size: 8pt; font-family: Consolas;").arg(Theme::textTertiary.name()));
+        return l;
+    }
+    static QString cropText(float x0, float x1, float y0, float y1) {
+        return QString("X %1 – %2      Y %3 – %4").arg(x0, 0, 'f', 2).arg(x1, 0, 'f', 2).arg(y0, 0, 'f', 2).arg(y1, 0, 'f', 2);
+    }
+    static QString placeText(float x, float y, float s) {
+        return QString("X %1  Y %2      Scale %3").arg(x, 0, 'f', 2).arg(y, 0, 'f', 2).arg(s, 0, 'f', 2);
+    }
+    void setParams(std::initializer_list<std::pair<const char*, float>> values) {
+        for (const auto& [name, value] : values)
+            for (const ParamInfo& p : params_)
+                if (p.name == name) EngineBridge::instance()->setParameter(p.id, value);
+    }
+
+    QVector<ParamInfo> params_;
+    CropPad*  crop_ = nullptr;
+    PlacePad* place_ = nullptr;
+    QWidget*  placeBox_ = nullptr;
+    QLabel*   cropLabel_ = nullptr;
+    QLabel*   placeLabel_ = nullptr;
 };
 
 // -------------------------------------------------------------- inspector
@@ -409,7 +515,7 @@ void InspectorPanel::showNode(const GraphNode& node) {
 QVector<ParamInfo> InspectorPanel::visibleParameters(const QVector<ParamInfo>& all) const {
     static const QStringList kPlumbing = {"width", "height", "start", "end"};  // VideoSourceSettings internals
     QStringList pairedY;
-    for (const ParamInfo& p : all) {
+    for (const ParamInfo& p : TransformSection::applies(all) ? QVector<ParamInfo>() : all) {
         const QString y = pairedYName(p);
         if (y.isEmpty()) continue;
         for (const ParamInfo& q : all)
@@ -419,9 +525,14 @@ QVector<ParamInfo> InspectorPanel::visibleParameters(const QVector<ParamInfo>& a
     // Covered by the text panel's position pad / the icon picker.
     static const QStringList kTextPosition = {"X", "Y", "X Position", "Y Position", "Orb X", "Orb Y"};
     static const QStringList kIconPicker = {"icon", "texture", "Enable Texture"};
+    // Covered by the Crop / Place pads (Scale stays: it also applies in
+    // the auto-fit modes, where the Place pad is hidden).
+    static const QStringList kTransformPads = {"Min X", "Max X", "Min Y", "Max Y", "X", "Y", "Center", "Scale From Center"};
+    const bool transform = TransformSection::applies(all);
     QVector<ParamInfo> out;
     for (const ParamInfo& p : all) {
         if (p.type == ParamInfo::Hidden || p.hidden || kPlumbing.contains(p.name) || pairedY.contains(p.id)) continue;
+        if (transform && kTransformPads.contains(p.name)) continue;
         if (textPanel_ && kTextPosition.contains(p.name)) continue;
         if (iconPanel_ && kIconPicker.contains(p.name)) continue;
         out.push_back(p);
@@ -443,8 +554,14 @@ void InspectorPanel::rebuildParameters(const QVector<ParamInfo>& all) {
     }
     rows_.clear();
     pads_.clear();
+    transform_ = nullptr;
     const QVector<ParamInfo> visible = visibleParameters(all);
     signature_ = signature(visible);
+    if (TransformSection::applies(all)) {
+        transform_ = new TransformSection(node_, params_);
+        transform_->setParams(all);
+        paramsLayout_->addWidget(transform_);
+    }
 
     for (const ParamInfo& p : visible) {
         const QString yName = pairedYName(p);
@@ -501,6 +618,7 @@ void InspectorPanel::refresh() {
     for (const ParamInfo& p : all) byId.insert(p.id, &p);
     for (auto it = rows_.begin(); it != rows_.end(); ++it)
         if (const ParamInfo* p = byId.value(it.key())) it.value()->setInfo(*p);
+    if (transform_) transform_->setParams(all);
     for (PadGroup& g : pads_) {
         const ParamInfo* x = byId.value(g.x.id);
         const ParamInfo* y = byId.value(g.y.id);
