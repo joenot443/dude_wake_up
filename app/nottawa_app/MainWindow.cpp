@@ -8,6 +8,7 @@
 #include "panels/CommunityPage.h"
 #include "panels/InspectorPanel.h"
 #include "panels/LibraryPage.h"
+#include "panels/OscillatorsPage.h"
 #include "panels/StrandsPage.h"
 #include "panels/LogPanel.h"
 #include "panels/WelcomeOverlay.h"
@@ -172,6 +173,12 @@ void MainWindow::buildDocks() {
     inspector_ = new InspectorPanel(this);
     logPanel_  = new LogPanel(this);
     connect(browser_, &BrowserPanel::itemPicked, this, &MainWindow::addFromLibrary);
+    auto* oscillators = new OscillatorsPage(browser_);
+    browser_->setPage(BrowserPanel::Oscillators, oscillators);
+    connect(oscillators, &OscillatorsPage::nodeRequested, this, [this](const QString& id) {
+        editor_->selectNode(id);
+        emit editor_->nodeSelected(id);
+    });
     auto* library = new LibraryPage(browser_);
     browser_->setPage(BrowserPanel::Library, library);
     connect(library, &LibraryPage::addRequested, this, [this](const QString& id) {

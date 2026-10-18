@@ -44,6 +44,9 @@ qt_add_executable(nottawa_app WIN32
     panels/StrandsPage.h     panels/StrandsPage.cpp
     panels/LibraryPage.h     panels/LibraryPage.cpp
     panels/CommunityPage.h   panels/CommunityPage.cpp
+    panels/OscillatorsPage.h panels/OscillatorsPage.cpp
+    ui/Controls.h            ui/Controls.cpp
+    ui/WaveformPreview.h     ui/WaveformPreview.cpp
     nodes/NodeEditorView.h   nodes/NodeEditorView.cpp
     nodes/NodeItems.h        nodes/NodeItems.cpp
     Theme.h                  Theme.cpp

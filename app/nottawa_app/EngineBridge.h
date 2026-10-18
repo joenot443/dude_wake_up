@@ -80,6 +80,17 @@ struct SharedStrand {
     QString userVote;  // "up", "down" or empty
 };
 
+struct OscillatorInfo {
+    QString paramId;
+    QString paramName;
+    QString ownerName;
+    QString connectableId;
+    bool    enabled = false;
+    float   frequency = 0, minOutput = 0, maxOutput = 1;
+    int     waveShape = 0;
+    float   paramMin = 0, paramMax = 1, value = 0;
+};
+
 struct AudioSourceItem {
     QString id;
     QString name;
@@ -180,6 +191,13 @@ public:
     void shareStrand(const QString& nodeId, const QString& title, const QString& description,
                      const QString& author, const QByteArray& previewPng);
     QStringList loadStrandJson(const QString& json);
+
+    // Enabled waveform oscillators across all nodes.
+    QVector<OscillatorInfo> activeOscillators() const;
+    void setOscillatorEnabled(const QString& paramId, bool on);
+    void setOscillatorFrequency(const QString& paramId, float frequency);
+    void setOscillatorRange(const QString& paramId, float minOutput, float maxOutput);
+    void setOscillatorWaveShape(const QString& paramId, int shape);
 
     QVector<AudioSourceItem> audioSources() const;
     QString selectedAudioSource() const;

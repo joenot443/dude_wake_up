@@ -305,6 +305,30 @@ QStringList EngineBridge::loadStrandJson(const QString& json) {
     return out;
 }
 
+QVector<OscillatorInfo> EngineBridge::activeOscillators() const {
+    QVector<OscillatorInfo> out;
+    if (!running_) return out;
+    int n = 0;
+    NTWActiveOscillatorInfo* arr = ntw_get_active_oscillators(&n);
+    for (int i = 0; i < n; ++i) {
+        const auto& o = arr[i];
+        out.push_back({str(o.paramId), str(o.paramName), str(o.ownerName), str(o.connectableId),
+                       o.oscillatorEnabled != 0, o.frequency, o.minOutput, o.maxOutput, o.waveShape,
+                       o.paramMin, o.paramMax, o.currentValue});
+    }
+    ntw_free_active_oscillator_array(arr, n);
+    return out;
+}
+
+void EngineBridge::setOscillatorEnabled(const QString& id, bool on) { ntw_set_oscillator_enabled(id.toUtf8().constData(), on); }
+void EngineBridge::setOscillatorFrequency(const QString& id, float f) { ntw_set_oscillator_frequency(id.toUtf8().constData(), f); }
+void EngineBridge::setOscillatorRange(const QString& id, float minOutput, float maxOutput) {
+    const QByteArray utf8 = id.toUtf8();
+    ntw_set_oscillator_min_output(utf8.constData(), minOutput);
+    ntw_set_oscillator_max_output(utf8.constData(), maxOutput);
+}
+void EngineBridge::setOscillatorWaveShape(const QString& id, int shape) { ntw_set_oscillator_wave_shape(id.toUtf8().constData(), shape); }
+
 QVector<AudioSourceItem> EngineBridge::audioSources() const {
     QVector<AudioSourceItem> out;
     int n = 0;
