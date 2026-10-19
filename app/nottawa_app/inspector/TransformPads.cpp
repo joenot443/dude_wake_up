@@ -8,6 +8,7 @@
 #include <QOpenGLFunctions>
 #include <QPainter>
 #include <QPainterPath>
+#include <QSurfaceFormat>
 #include <algorithm>
 #include <cmath>
 
@@ -24,6 +25,10 @@ float clampf(float v, float lo, float hi) { return std::max(lo, std::min(hi, v))
 // ---------------------------------------------------------------- FramePad
 
 FramePad::FramePad(QWidget* parent) : QOpenGLWidget(parent) {
+    // Multisampled so the painter's thin guides and handles are antialiased.
+    QSurfaceFormat fmt = format();
+    fmt.setSamples(4);
+    setFormat(fmt);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     repaintTimer_.setInterval(33);
     connect(&repaintTimer_, &QTimer::timeout, this, [this] { if (isVisible()) update(); });

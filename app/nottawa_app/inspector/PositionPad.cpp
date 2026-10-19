@@ -8,10 +8,16 @@
 #include <QOpenGLFunctions>
 #include <QPainter>
 #include <QPainterPath>
+#include <QSurfaceFormat>
 #include <algorithm>
 
 PositionPad::PositionPad(const QString& connectableId, QWidget* parent)
     : QOpenGLWidget(parent), nodeId_(connectableId) {
+    // Multisampled, so the painter's thin lines and the handle are
+    // antialiased (without it 0.5 px lines drop out between pixels).
+    QSurfaceFormat fmt = format();
+    fmt.setSamples(4);
+    setFormat(fmt);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     setCursor(Qt::CrossCursor);
     EngineBridge::instance()->retainFrames(nodeId_);
@@ -52,22 +58,29 @@ void PositionPad::paintGL() {
         p.fillPath(frame, QColor(0, 0, 0, 77));  // dim so the handle stands out
     }
 
+    // As the macOS PositionPadView: a 4x3 grid at 8% white, a 35% crosshair
+    // through the handle, the accent handle with a shadow and white ring,
+    // and a hairline border.
     p.setClipPath(frame);
     p.setPen(QPen(QColor(255, 255, 255, 20), 0.5));
     for (int i = 1; i < 4; ++i) p.drawLine(QPointF(r.left() + r.width() * i / 4, r.top()), QPointF(r.left() + r.width() * i / 4, r.bottom()));
     for (int i = 1; i < 3; ++i) p.drawLine(QPointF(r.left(), r.top() + r.height() * i / 3), QPointF(r.right(), r.top() + r.height() * i / 3));
     const QPointF pt(r.left() + x_ * r.width(), r.top() + y_ * r.height());
-    p.setPen(QPen(QColor(255, 255, 255, 90), 0.5));
+    p.setPen(QPen(QColor(255, 255, 255, 89), 0.5));
     p.drawLine(QPointF(pt.x(), r.top()), QPointF(pt.x(), r.bottom()));
     p.drawLine(QPointF(r.left(), pt.y()), QPointF(r.right(), pt.y()));
     p.setClipping(false);
     p.setPen(Qt::NoPen);
-    p.setBrush(QColor(0, 0, 0, 128));
-    p.drawEllipse(pt + QPointF(0, 1), 7, 7);
+    for (int i = 3; i >= 1; --i) {  // soft shadow, 50% black, 1 px down
+        p.setBrush(QColor(0, 0, 0, 40));
+        p.drawEllipse(pt + QPointF(0, 1), 6.0 + i, 6.0 + i);
+    }
     p.setBrush(Theme::accent);
     p.drawEllipse(pt, 6, 6);
     p.setBrush(Qt::NoBrush);
-    p.setPen(QPen(Theme::borderSubtle, 1));
+    p.setPen(QPen(Qt::white, 1.5));
+    p.drawEllipse(pt, 7.25, 7.25);
+    p.setPen(QPen(Theme::border, 0.5));
     p.drawPath(frame);
 }
 
