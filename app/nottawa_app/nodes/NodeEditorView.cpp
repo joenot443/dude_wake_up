@@ -3,6 +3,7 @@
 #include "EngineBridge.h"
 #include "NodeItems.h"
 #include "PreviewWindow.h"
+#include "panels/CatalogPopup.h"
 #include "Theme.h"
 
 #include <QApplication>
@@ -19,6 +20,7 @@
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 #include <QDesktopServices>
+#include <QCursor>
 #include <QDir>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -528,8 +530,10 @@ void NodeEditorView::showContextMenu(const QPoint& viewPos) {
         const bool isSource = !node->isShader();
         menu.addAction(node->isActive() ? "Pause" : "Resume", this, [engine, id, node] { engine->setNodeActive(id, !node->isActive()); });
         menu.addAction(QString("Delete %1").arg(node->name()), this, [engine, id] { engine->removeNode(id); });
-        fillCatalogMenu(menu.addMenu(isSource ? "Swap Source" : "Swap Effect"), isSource,
-                        [this, id, isSource](int type) { swapNode(id, isSource, type); });
+        menu.addAction(isSource ? "Swap Source…" : "Swap Effect…", this, [this, id, isSource] {
+            auto* browser = new CatalogPopup(!isSource, [this, id, isSource](int type) { swapNode(id, isSource, type); }, this);
+            browser->popup(QCursor::pos());
+        });
         menu.addAction("Open Preview Window", this, [this, id] { openPreview(id); });
         if (node->isShader() || node->typeRaw() == 4)  // effects and shader-generated sources
             menu.addAction("Edit Shader Code…", this, [this, id, node] { emit editShaderRequested(id, node->name()); });
@@ -571,27 +575,18 @@ void NodeEditorView::showContextMenu(const QPoint& viewPos) {
             });
         }
     } else {
-        fillCatalogMenu(menu.addMenu("Add Effect"), false,
-                        [this, scenePos](int type) { addFromCatalog(type, false, {}, &scenePos); });
-        fillCatalogMenu(menu.addMenu("Add Source"), true,
-                        [this, scenePos](int type) { addFromCatalog(type, true, {}, &scenePos); });
+        // The live-preview browser; the pick lands where the menu was opened.
+        const QPoint at = mapToGlobal(viewPos);
+        for (const bool isSource : {false, true}) {
+            menu.addAction(isSource ? "Add Source…" : "Add Effect…", this, [this, scenePos, at, isSource] {
+                auto* browser = new CatalogPopup(!isSource, [this, scenePos, isSource](int type) {
+                    addFromCatalog(type, isSource, {}, &scenePos);
+                }, this);
+                browser->popup(at);
+            });
+        }
     }
     if (!menu.isEmpty()) menu.exec(mapToGlobal(viewPos));
-}
-
-void NodeEditorView::fillCatalogMenu(QMenu* menu, bool sources, const std::function<void(int)>& pick) {
-    auto* engine = EngineBridge::instance();
-    QHash<QString, QMenu*> categories;
-    for (const CatalogItem& item : sources ? engine->sources() : engine->effects()) {
-        QMenu* target = menu;
-        if (!sources) {
-            QMenu*& sub = categories[item.category];
-            if (!sub) sub = menu->addMenu(item.category);
-            target = sub;
-        }
-        const int type = item.typeRaw;
-        target->addAction(item.name, this, [pick, type] { pick(type); });
-    }
 }
 
 // --------------------------------------------------------- node operations
@@ -695,9 +690,8 @@ void NodeEditorView::nodeButtonClicked(NodeItem* node, int button, QPoint screen
         break;
     case NodeItem::Swap: {
         const bool isSource = !node->isShader();
-        QMenu menu(this);
-        fillCatalogMenu(&menu, isSource, [this, id, isSource](int type) { swapNode(id, isSource, type); });
-        menu.exec(screenPos);
+        auto* browser = new CatalogPopup(!isSource, [this, id, isSource](int type) { swapNode(id, isSource, type); }, this);
+        browser->popup(screenPos);
         break;
     }
     case NodeItem::Delete:

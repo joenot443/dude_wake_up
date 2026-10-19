@@ -113,8 +113,6 @@ private:
     void commitMovedNodes();
     void finishPortDrag(const QPoint& viewPos);
     void finishCut();
-    // Adds catalog entries of one kind to `menu`, grouped like the library.
-    void fillCatalogMenu(QMenu* menu, bool sources, const std::function<void(int)>& pick);
     void swapNode(const QString& id, bool isSource, int typeRaw);
     void cycleSelection(bool backwards);
     // Positions, selects and reveals just-loaded strand nodes.

@@ -1,5 +1,7 @@
 #include "InspectorPanel.h"
 
+#include "panels/CatalogPopup.h"
+
 #include "Icons.h"
 #include "StageWidget.h"
 #include "Theme.h"
@@ -390,15 +392,9 @@ public:
                                    "QToolButton:hover { background: %3; }")
                                .arg(Theme::accent.name(), Theme::accent.darker(140).name(), Theme::accentSubtle.name()));
         connect(add, &QToolButton::clicked, this, [this, add] {
-            QMenu menu(this);
-            QHash<QString, QMenu*> categories;
-            for (const CatalogItem& item : EngineBridge::instance()->effects()) {
-                QMenu*& sub = categories[item.category];
-                if (!sub) sub = menu.addMenu(item.category);
-                const int type = item.typeRaw;
-                sub->addAction(item.name, this, [this, type] { addFilter(type); });
-            }
-            menu.exec(add->mapToGlobal(QPoint(0, add->height())));
+            // The live-preview effect browser, as on macOS.
+            auto* browser = new CatalogPopup(true, [this](int type) { addFilter(type); }, this);
+            browser->popup(add->mapToGlobal(QPoint(0, add->height() + 4)));
         });
         chipLayout_->addWidget(add);
         chipLayout_->addStretch(1);
