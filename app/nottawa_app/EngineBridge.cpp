@@ -770,3 +770,7 @@ void EngineBridge::releaseFrames(const QString& id) {
 FrameExchange* EngineBridge::frames(const QString& id) const {
     return static_cast<FrameExchange*>(ntw_get_connectable_texture(id.toUtf8().constData()));
 }
+
+QString EngineBridge::shaderFilePath(const QString& shaderId) const {
+    return running_ ? takeString(ntw_get_shader_file_path(shaderId.toUtf8().constData())) : QString();
+}

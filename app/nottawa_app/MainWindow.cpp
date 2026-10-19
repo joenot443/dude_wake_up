@@ -512,8 +512,10 @@ void MainWindow::updateChrome() {
     if (undoAction_) { undoAction_->setEnabled(canUndo); redoAction_->setEnabled(canRedo); }
     actionBar_->setUndoRedo(canUndo, canRedo);
     const bool selection = !editor_->selectedNodeIds().isEmpty();
-    deleteButton_->setVisible(selection);
-    deleteSeparator_->setVisible(selection);
+    // Delete also removes a selected cable, as on macOS.
+    const bool deletable = !editor_->scene()->selectedItems().isEmpty();
+    deleteButton_->setVisible(deletable);
+    deleteSeparator_->setVisible(deletable);
     sidebarButton_->setEnabled(!stageButton_->isChecked());
     inspector_->setVisible(selection && !stageButton_->isChecked());
 }
@@ -787,7 +789,14 @@ void MainWindow::onSaveAs() {
 // engine's resolution, to a folder chosen once and remembered.
 void MainWindow::captureScreenshot() {
     auto* engine = EngineBridge::instance();
-    const QString id = selectedId_.isEmpty() ? engine->outputNodeId() : selectedId_;
+    // The selected node, else the most recent effect, else the most recent
+    // node (the macOS action bar's choice).
+    QString id = selectedId_;
+    if (id.isEmpty()) {
+        const QVector<GraphNode> nodes = engine->nodes();
+        for (const GraphNode& n : nodes) if (n.isShader) id = n.id;
+        if (id.isEmpty() && !nodes.isEmpty()) id = nodes.last().id;
+    }
     if (id.isEmpty()) return;
     const QImage image = editor_->captureNode(id, engine->resolution());
     if (image.isNull()) { toast_->show("Nothing to capture yet"); return; }

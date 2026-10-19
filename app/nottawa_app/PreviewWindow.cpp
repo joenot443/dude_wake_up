@@ -31,6 +31,20 @@ PreviewWindow::PreviewWindow(const QString& connectableId, const QString& name, 
     notice_ = new QLabel(this);
     notice_->setStyleSheet("QLabel { background: rgba(0,0,0,170); color: white; border-radius: 6px; padding: 6px 10px; }");
     notice_->hide();
+    // Hold Shift for the engine's and this window's frame rates, as on macOS.
+    fps_ = new QLabel(this);
+    fps_->setStyleSheet("QLabel { background: rgba(30,36,51,220); color: white; border-radius: 6px; padding: 4px 8px;"
+                        " font-family: Consolas; font-size: 8pt; }");
+    fps_->move(8, 8);
+    fps_->hide();
+    fpsTimer_ = new QTimer(this);
+    fpsTimer_->setInterval(1000);
+    connect(fpsTimer_, &QTimer::timeout, this, [this] {
+        const quint64 frames = view_->framesShown();
+        fps_->setText(QString("Engine %1 FPS\nPreview %2 FPS").arg(int(EngineBridge::instance()->fps())).arg(frames - lastFrames_));
+        fps_->adjustSize();
+        lastFrames_ = frames;
+    });
     setNodeName(name);
 }
 
@@ -84,7 +98,24 @@ void PreviewWindow::flash(const QString& text) {
     QTimer::singleShot(1800, notice_, &QWidget::hide);
 }
 
+void PreviewWindow::keyReleaseEvent(QKeyEvent* e) {
+    if (e->key() == Qt::Key_Shift && !e->isAutoRepeat()) {
+        fps_->hide();
+        fpsTimer_->stop();
+    }
+    QWidget::keyReleaseEvent(e);
+}
+
 void PreviewWindow::keyPressEvent(QKeyEvent* e) {
+    if (e->key() == Qt::Key_Shift && !e->isAutoRepeat()) {
+        lastFrames_ = view_->framesShown();
+        fps_->setText(QString("Engine %1 FPS\nPreview -- FPS").arg(int(EngineBridge::instance()->fps())));
+        fps_->adjustSize();
+        fps_->show();
+        fps_->raise();
+        fpsTimer_->start();
+        return;
+    }
     if (e->key() == Qt::Key_F11) { toggleFullscreen(); return; }
     if (e->key() == Qt::Key_Escape) {
         if (isFullScreen()) showNormal();

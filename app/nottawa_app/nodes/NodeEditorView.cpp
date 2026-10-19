@@ -17,6 +17,7 @@
 #include <QMouseEvent>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
+#include <QDesktopServices>
 #include <QDir>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -481,7 +482,8 @@ void NodeEditorView::keyPressEvent(QKeyEvent* e) {
     if (ctrl && e->key() == Qt::Key_Z) { (e->modifiers() & Qt::ShiftModifier) ? engine->redo() : engine->undo(); return; }
     if (ctrl && e->key() == Qt::Key_Y) { engine->redo(); return; }
     if (ctrl && (e->key() == Qt::Key_Tab || e->key() == Qt::Key_Backtab)) {
-        cycleSelection(e->key() == Qt::Key_Backtab || (e->modifiers() & Qt::ShiftModifier));
+        // As on macOS: Ctrl+Tab steps back through the nodes, Ctrl+Shift+Tab forward.
+        cycleSelection(!(e->key() == Qt::Key_Backtab || (e->modifiers() & Qt::ShiftModifier)));
         return;
     }
     QGraphicsView::keyPressEvent(e);
@@ -527,6 +529,10 @@ void NodeEditorView::showContextMenu(const QPoint& viewPos) {
         menu.addAction("Open Preview Window", this, [this, id] { openPreview(id); });
         if (node->isShader() || node->typeRaw() == 4)  // effects and shader-generated sources
             menu.addAction("Edit Shader Code…", this, [this, id, node] { emit editShaderRequested(id, node->name()); });
+            // The shader's file in the system's editor for it.
+            const QString file = EngineBridge::instance()->shaderFilePath(id);
+            if (!file.isEmpty())
+                menu.addAction("Edit Effect File", this, [file] { QDesktopServices::openUrl(QUrl::fromLocalFile(file)); });
         menu.addAction("Save Strand...", this, [this, id] { saveStrand(id); });
         const QString name = node->name();
         menu.addAction("Share Strand...", this, [this, id, name] { emit shareRequested(id, name); });

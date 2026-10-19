@@ -297,6 +297,8 @@ public:
     void setTextSourcePosition(const QString& sourceId, float x, float y);
     void centerTextSource(const QString& sourceId);
 
+    // The shader's .frag file on disk (empty for non-shaders).
+    QString shaderFilePath(const QString& shaderId) const;
     // Live GLSL editing: session-only fragment overrides.
     QString shaderSource(const QString& shaderId) const;
     ShaderCompileResult setShaderSource(const QString& shaderId, const QString& source);

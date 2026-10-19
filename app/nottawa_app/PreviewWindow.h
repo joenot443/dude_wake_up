@@ -32,6 +32,7 @@ public:
 
 protected:
     void keyPressEvent(QKeyEvent* e) override;
+    void keyReleaseEvent(QKeyEvent* e) override;
     void resizeEvent(QResizeEvent* e) override;
     void mouseDoubleClickEvent(QMouseEvent* e) override;
 
@@ -42,6 +43,9 @@ private:
 
     StageWidget* view_ = nullptr;
     QLabel*      notice_ = nullptr;
+    QLabel*      fps_ = nullptr;     // shown while Shift is held
+    class QTimer* fpsTimer_ = nullptr;
+    quint64      lastFrames_ = 0;
     QString      id_;
     Capture      capture_;
 };
