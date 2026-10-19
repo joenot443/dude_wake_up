@@ -226,6 +226,14 @@ void NodeItem::paint(QPainter* p, const QStyleOptionGraphicsItem*, QWidget*) {
         p->setPen(hairline);
     }
     p->drawPath(rounded);
+    if (dropHover_) {  // a browser drop would chain onto this node
+        QColor ring = Theme::success;
+        ring.setAlphaF(0.3);
+        p->setPen(QPen(ring, 8));
+        p->drawPath(rounded);
+        p->setPen(QPen(Theme::success, 2.5));
+        p->drawPath(rounded);
+    }
 }
 
 QVariant NodeItem::itemChange(GraphicsItemChange change, const QVariant& value) {
@@ -364,4 +372,17 @@ void EdgeItem::paint(QPainter* p, const QStyleOptionGraphicsItem*, QWidget*) {
     if (aux_) pen.setDashPattern({6.0 / pen.widthF(), 4.0 / pen.widthF()});
     p->setPen(pen);
     p->drawPath(path());
+    if (dropHover_) {  // the macOS insertion highlight
+        QColor warm = Theme::warning;
+        warm.setAlphaF(0.25);
+        QPen hoverGlow(warm, 10, Qt::SolidLine, Qt::RoundCap);
+        hoverGlow.setCosmetic(true);
+        p->setPen(hoverGlow);
+        p->drawPath(path());
+        warm.setAlphaF(0.9);
+        QPen hoverLine(warm, 3, Qt::SolidLine, Qt::RoundCap);
+        hoverLine.setCosmetic(true);
+        p->setPen(hoverLine);
+        p->drawPath(path());
+    }
 }

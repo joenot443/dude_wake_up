@@ -46,6 +46,8 @@ public:
     void setAudioHint(bool on);
     // A download progress ring over the preview (progress < 0: none).
     void setDownload(float progress, bool paused);
+    // A drag from the browser would chain onto this node (green ring).
+    void setDropHover(bool on) { if (dropHover_ != on) { dropHover_ = on; update(); } }
 
     const QString& id() const { return id_; }
     const QString& name() const { return name_; }
@@ -86,6 +88,7 @@ private:
     bool               needsInput_ = false;
     bool               audioHint_  = false;
     float              download_ = -1;
+    bool               dropHover_ = false;
     bool               downloadPaused_ = false;
     int                inputCount_ = -1;
     bool               hasAux_    = false;
@@ -102,6 +105,8 @@ public:
     PortItem* from() const { return from_; }
     PortItem* to() const { return to_; }
     void setDimmed(bool on) { dimmed_ = on; update(); }
+    // An effect dragged here would be spliced into this cable.
+    void setDropHover(bool on) { if (dropHover_ != on) { dropHover_ = on; update(); } }
 
     static QPainterPath curve(QPointF from, QPointF to);
 
@@ -113,6 +118,7 @@ private:
     QString   id_;
     bool      aux_    = false;
     bool      dimmed_ = false;
+    bool      dropHover_ = false;
     PortItem* from_ = nullptr;
     PortItem* to_   = nullptr;
 };

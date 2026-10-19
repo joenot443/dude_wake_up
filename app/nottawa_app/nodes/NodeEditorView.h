@@ -100,6 +100,7 @@ protected:
     void drawForeground(QPainter* p, const QRectF& rect) override;
     void dragEnterEvent(QDragEnterEvent* e) override;
     void dragMoveEvent(QDragMoveEvent* e) override;
+    void dragLeaveEvent(QDragLeaveEvent* e) override;
     void dropEvent(QDropEvent* e) override;
 
 private:
@@ -160,5 +161,17 @@ private:
     bool   audioActive_ = false;
     bool   showHints_ = true;
     quint64 framesPainted_ = 0;
+    // Drag-and-drop feedback, as on macOS: a canvas border while a drop is
+    // possible, the node a drop would chain onto, or the cable an effect
+    // would be spliced into with its insertion point.
+    void updateDropHover(const class QMimeData* mime, QPoint viewPos);
+    void clearDropHover();
+    bool      dropActive_ = false;
+    NodeItem* dropNode_ = nullptr;
+    EdgeItem* dropEdge_ = nullptr;
+    QPointF   dropPoint_;
+    // Output dragged onto output: where to show "Blend?" (scene), if anywhere.
+    bool      blendSnap_ = false;
+    QPointF   blendMid_;
     QSet<QString> audioReactive_;
 };

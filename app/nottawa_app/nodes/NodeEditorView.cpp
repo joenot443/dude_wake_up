@@ -7,6 +7,7 @@
 
 #include <QApplication>
 #include <QSettings>
+#include <limits>
 #include <QUrl>
 #include <QTimer>
 #include <QGraphicsLineItem>
@@ -391,6 +392,8 @@ void NodeEditorView::mouseMoveEvent(QMouseEvent* e) {
         PortItem* snapped = portNear(scenePos, from);
         setDragHighlights(from, snapped);
         const QPointF end = snapped ? snapped->anchor() : scenePos;
+        blendSnap_ = snapped && from->kind() == PortItem::Output && snapped->kind() == PortItem::Output;
+        blendMid_ = (from->anchor() + end) / 2;
         dragEdge_->setPath(from->kind() == PortItem::Output ? EdgeItem::curve(from->anchor(), end)
                                                             : EdgeItem::curve(end, from->anchor()));
         return;
@@ -423,6 +426,7 @@ void NodeEditorView::finishPortDrag(const QPoint& viewPos) {
     dragNodeId_.clear();
     PortItem* to = from ? portNear(mapToScene(viewPos), from) : nullptr;
     setDragHighlights(nullptr, nullptr);
+    blendSnap_ = false;
     if (!from || !to) return;
     auto* engine = EngineBridge::instance();
     if (from->kind() == PortItem::Output && to->kind() == PortItem::Output) {
@@ -861,14 +865,58 @@ QString NodeEditorView::addMediaFile(const QString& path, const QPointF* scenePo
 }
 
 void NodeEditorView::dragEnterEvent(QDragEnterEvent* e) {
-    if (e->mimeData()->hasFormat(kCatalogMime) || !droppedMediaFile(e->mimeData()).isEmpty()) e->acceptProposedAction();
+    if (!e->mimeData()->hasFormat(kCatalogMime) && droppedMediaFile(e->mimeData()).isEmpty()) return;
+    e->acceptProposedAction();
+    dropActive_ = true;
+    updateDropHover(e->mimeData(), e->position().toPoint());
 }
 
 void NodeEditorView::dragMoveEvent(QDragMoveEvent* e) {
-    if (e->mimeData()->hasFormat(kCatalogMime) || !droppedMediaFile(e->mimeData()).isEmpty()) e->acceptProposedAction();
+    if (!e->mimeData()->hasFormat(kCatalogMime) && droppedMediaFile(e->mimeData()).isEmpty()) return;
+    e->acceptProposedAction();
+    updateDropHover(e->mimeData(), e->position().toPoint());
+}
+
+void NodeEditorView::dragLeaveEvent(QDragLeaveEvent*) { clearDropHover(); }
+
+void NodeEditorView::updateDropHover(const QMimeData* mime, QPoint viewPos) {
+    // Effects chain onto a node or splice into a cable; other drops just land.
+    const bool effect = QString::fromUtf8(mime->data(kCatalogMime)).startsWith("shader:");
+    NodeItem* node = effect ? nodeAt(viewPos) : nullptr;
+    EdgeItem* edge = effect && !node ? edgeAt(viewPos) : nullptr;
+    if (dropNode_ != node) {
+        if (dropNode_ && nodes_.values().contains(dropNode_)) dropNode_->setDropHover(false);
+        dropNode_ = node;
+        if (node) node->setDropHover(true);
+    }
+    if (dropEdge_ != edge) {
+        if (dropEdge_ && edges_.values().contains(dropEdge_)) dropEdge_->setDropHover(false);
+        dropEdge_ = edge;
+        if (edge) edge->setDropHover(true);
+    }
+    if (edge) {  // the closest point on the cable, sampled
+        const QPointF at = mapToScene(viewPos);
+        qreal best = std::numeric_limits<qreal>::max();
+        for (int i = 0; i <= 64; ++i) {
+            const QPointF pt = edge->path().pointAtPercent(i / 64.0);
+            const qreal d = QLineF(pt, at).length();
+            if (d < best) { best = d; dropPoint_ = pt; }
+        }
+    }
+    viewport()->update();
+}
+
+void NodeEditorView::clearDropHover() {
+    if (dropNode_ && nodes_.values().contains(dropNode_)) dropNode_->setDropHover(false);
+    if (dropEdge_ && edges_.values().contains(dropEdge_)) dropEdge_->setDropHover(false);
+    dropNode_ = nullptr;
+    dropEdge_ = nullptr;
+    dropActive_ = false;
+    viewport()->update();
 }
 
 void NodeEditorView::dropEvent(QDropEvent* e) {
+    clearDropHover();
     if (!e->mimeData()->hasFormat(kCatalogMime)) {
         const QString file = droppedMediaFile(e->mimeData());
         if (file.isEmpty()) return;
@@ -928,7 +976,50 @@ void NodeEditorView::dropEvent(QDropEvent* e) {
 
 // -------------------------------------------------------------- background
 
-void NodeEditorView::drawForeground(QPainter*, const QRectF&) { ++framesPainted_; }
+void NodeEditorView::drawForeground(QPainter* p, const QRectF&) {
+    ++framesPainted_;
+    if (!dropActive_ && !blendSnap_) return;
+    // Screen-pixel overlays.
+    p->save();
+    p->resetTransform();
+    p->setRenderHint(QPainter::Antialiasing);
+    if (dropActive_) {
+        QColor fill = Theme::accent, edge = Theme::accent;
+        fill.setAlphaF(0.05);
+        edge.setAlphaF(0.6);
+        p->setPen(QPen(edge, 2));
+        p->setBrush(fill);
+        p->drawRoundedRect(QRectF(viewport()->rect()).adjusted(1, 1, -1, -1), 8, 8);
+        if (dropEdge_) {  // the insertion diamond
+            const QPointF c = mapFromScene(dropPoint_);
+            const qreal r = 10;
+            QColor outline(255, 255, 255);
+            outline.setAlphaF(0.8);
+            p->setPen(QPen(outline, 1.5));
+            p->setBrush(Theme::warning);
+            p->drawPolygon(QPolygonF({c + QPointF(0, -r), c + QPointF(r, 0), c + QPointF(0, r), c + QPointF(-r, 0)}));
+        }
+    }
+    if (blendSnap_) {  // "Blend?" pill over the cable's middle
+        QFont f = font();
+        f.setPixelSize(13);
+        f.setWeight(QFont::DemiBold);
+        p->setFont(f);
+        const QString label = "Blend?";
+        const QSizeF text = QFontMetricsF(f).size(0, label);
+        const QPointF mid = mapFromScene(blendMid_);
+        const QRectF pill(mid.x() - text.width() / 2 - 6, mid.y() - text.height() / 2 - 6 - 16,
+                          text.width() + 12, text.height() + 12);
+        QColor bg = Theme::surface;
+        bg.setAlphaF(0.95);
+        p->setPen(QPen(Theme::border, 1));
+        p->setBrush(bg);
+        p->drawRoundedRect(pill, 8, 8);
+        p->setPen(Theme::textPrimary);
+        p->drawText(pill, Qt::AlignCenter, label);
+    }
+    p->restore();
+}
 
 void NodeEditorView::drawBackground(QPainter* p, const QRectF& rect) {
     p->fillRect(rect, Theme::background);
