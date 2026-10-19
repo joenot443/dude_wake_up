@@ -44,6 +44,7 @@
 #include <QMessageBox>
 #include <QOpenGLContext>
 #include <QResizeEvent>
+#include <QAbstractButton>
 #include <QAbstractSpinBox>
 #include <QClipboard>
 #include <QComboBox>
@@ -264,6 +265,20 @@ bool MainWindow::handleParameterKey(QObject* watched, QKeyEvent* e) {
     if (e->key() == Qt::Key_Escape && !stage && !editor_->selectedNodeIds().isEmpty()) {
         editor_->scene()->clearSelection();
         return true;
+    }
+    // The canvas's keys work wherever focus is (macOS handles them
+    // app-wide): delete, Space to pause, copy / paste / select all, undo.
+    if (!stage && target != editor_ && !editor_->isAncestorOf(target)) {
+        const bool ctrl = mods & Qt::ControlModifier;
+        const int key = e->key();
+        const bool canvasKey = key == Qt::Key_Delete || key == Qt::Key_Backspace ||
+                               (key == Qt::Key_Space && !qobject_cast<QAbstractButton*>(focus)) ||
+                               (ctrl && (key == Qt::Key_C || key == Qt::Key_V || key == Qt::Key_A ||
+                                         key == Qt::Key_Z || key == Qt::Key_Y));
+        if (canvasKey) {
+            QApplication::sendEvent(editor_, e);
+            return true;
+        }
     }
     return false;
 }
