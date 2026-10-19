@@ -60,6 +60,7 @@ private:
     };
 
     void showNode(const GraphNode& node);
+    void addPositionPad(const ParamInfo& x, const ParamInfo& y);
     void showMultiple(const QVector<GraphNode>& nodes);
     void clearContent();
     void rebuildParameters(const QVector<ParamInfo>& params);

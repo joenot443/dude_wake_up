@@ -781,35 +781,50 @@ void InspectorPanel::rebuildParameters(const QVector<ParamInfo>& all) {
             paramsLayout_->addWidget(row);
             continue;
         }
-        // An X/Y pair: a pad plus reactivity rows per axis.
-        auto* box = new QWidget(params_);
-        auto* boxLayout = new QVBoxLayout(box);
-        boxLayout->setContentsMargins(6, 4, 6, 4);
-        boxLayout->setSpacing(4);
-        auto* label = new QLabel("Position", box);
-        label->setStyleSheet(QString("color: %1; font-size: 8pt;").arg(Theme::textSecondary.name()));
-        boxLayout->addWidget(label);
-        PadGroup group;
-        group.x = p;
-        group.y = *y;
-        group.invertY = y->name != "Orb Y";  // the orb is in screen space already
-        group.pad = new PositionPad(nodeId_, box);
-        boxLayout->addWidget(group.pad);
-        group.xRow = new ParameterRow(p, ParameterRow::Axis, "X", box);
-        group.yRow = new ParameterRow(*y, ParameterRow::Axis, "Y", box);
-        boxLayout->addWidget(group.xRow);
-        boxLayout->addWidget(group.yRow);
-        const int index = int(pads_.size());
-        connect(group.pad, &PositionPad::moved, this, [this, index](float nx, float ny) {
-            const PadGroup& g = pads_[index];
-            auto denorm = [](float n, const ParamInfo& q) { return q.min + n * (q.max - q.min); };
-            EngineBridge::instance()->setParameter(g.x.id, denorm(nx, g.x));
-            EngineBridge::instance()->setParameter(g.y.id, denorm(g.invertY ? 1.0f - ny : ny, g.y));
-        });
-        pads_.push_back(group);
-        paramsLayout_->addWidget(box);
+        addPositionPad(p, *y);
     }
+    // macOS adds a Position pad for X/Y outside 0..1 too (Feedback, Swirling
+    // Soul), below their sliders; not for text or transform-pipeline nodes.
+    const ParamInfo* x = nullptr;
+    const ParamInfo* y = nullptr;
+    for (const ParamInfo& q : all) {
+        if (q.type == ParamInfo::Hidden) continue;
+        if (q.name == "X") x = &q;
+        if (q.name == "Y") y = &q;
+    }
+    if (x && y && pairedYName(*x).isEmpty() && !textPanel_ && !transform_) addPositionPad(*x, *y);
     refresh();
+}
+
+// A pad over the node's output plus per-axis reactivity rows, for an X/Y
+// pair mapped from each parameter's range.
+void InspectorPanel::addPositionPad(const ParamInfo& x, const ParamInfo& y) {
+    auto* box = new QWidget(params_);
+    auto* boxLayout = new QVBoxLayout(box);
+    boxLayout->setContentsMargins(6, 4, 6, 4);
+    boxLayout->setSpacing(4);
+    auto* label = new QLabel("Position", box);
+    label->setStyleSheet(QString("color: %1; font-size: 8pt;").arg(Theme::textSecondary.name()));
+    boxLayout->addWidget(label);
+    PadGroup group;
+    group.x = x;
+    group.y = y;
+    group.invertY = y.name != "Orb Y";  // the orb is in screen space already
+    group.pad = new PositionPad(nodeId_, box);
+    boxLayout->addWidget(group.pad);
+    group.xRow = new ParameterRow(x, ParameterRow::Axis, "X", box);
+    group.yRow = new ParameterRow(y, ParameterRow::Axis, "Y", box);
+    boxLayout->addWidget(group.xRow);
+    boxLayout->addWidget(group.yRow);
+    const int index = int(pads_.size());
+    connect(group.pad, &PositionPad::moved, this, [this, index](float nx, float ny) {
+        const PadGroup& g = pads_[index];
+        auto denorm = [](float n, const ParamInfo& q) { return q.min + n * (q.max - q.min); };
+        EngineBridge::instance()->setParameter(g.x.id, denorm(nx, g.x));
+        EngineBridge::instance()->setParameter(g.y.id, denorm(g.invertY ? 1.0f - ny : ny, g.y));
+    });
+    pads_.push_back(group);
+    paramsLayout_->addWidget(box);
 }
 
 void InspectorPanel::refresh() {
