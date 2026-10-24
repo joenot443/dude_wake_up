@@ -38,6 +38,7 @@ private:
   bool midiInitialized;
   void addMessage(std::string msg);
   void newMidiMessage(ofxMidiMessage& msg) override;
+  void handleMidiMessage(ofxMidiMessage& msg);
   void midiInputAdded(std::string name, bool isNetwork) override;
   void midiInputRemoved(std::string name, bool isNetwork) override;
   void midiOutputAdded(std::string nam, bool isNetwork) override;

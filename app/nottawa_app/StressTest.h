@@ -8,6 +8,17 @@
 #include <random>
 
 class MainWindow;
+class QUrl;
+
+// Swallows QDesktopServices URL opens in test runs (NOTTAWA_NO_PUBLISH), so
+// random clicking can't launch a browser, mail client or editor.
+class UrlSink : public QObject {
+    Q_OBJECT
+public:
+    using QObject::QObject;
+public slots:
+    void open(const QUrl& url);
+};
 
 // Automated stress runs for finding crashes and leaks: NOTTAWA_STRESS lists
 // scenarios (comma separated; "all" for every one), NOTTAWA_STRESS_ROUNDS how
@@ -45,6 +56,7 @@ private:
     void optional(int cycles);
     void parameters(int cycles);
     void memory(int nodes);
+    void audio(int cycles);
 
     // Helpers working on the live graph.
     QString randomSource();

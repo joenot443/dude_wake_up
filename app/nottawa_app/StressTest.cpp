@@ -12,13 +12,15 @@
 #include <QJsonObject>
 #include <QStandardPaths>
 #include <QToolButton>
+#include <QUrl>
 
 #include <windows.h>
 #include <psapi.h>
 
 namespace {
 const QStringList kAllScenarios = {"churn", "swap", "connect", "undo", "strands", "workspace", "previews",
-                                   "stage", "resolution", "inputs", "copypaste", "optional", "parameters"};
+                                   "stage", "resolution", "inputs", "copypaste", "optional", "parameters",
+                                   "audio"};
 
 QString processStats() {
     PROCESS_MEMORY_COUNTERS_EX mem = {};
@@ -57,6 +59,8 @@ StressTest::StressTest(MainWindow* window) : QObject(window), window_(window) {
     timer_.setSingleShot(true);
     QObject::connect(&timer_, &QTimer::timeout, this, &StressTest::next);
 }
+
+void UrlSink::open(const QUrl& url) { qInfo("[test] not opening %s", qPrintable(url.toString())); }
 
 bool StressTest::requested() { return !qEnvironmentVariableIsEmpty("NOTTAWA_STRESS"); }
 
@@ -104,6 +108,7 @@ void StressTest::enqueueScenario(const QString& name) {
     else if (name == "optional") optional(cycles);
     else if (name == "parameters") parameters(cycles);
     else if (name == "memory") memory(cycles);
+    else if (name == "audio") audio(cycles);
     else add([this, name] { window_->log("[stress] unknown scenario " + name); });
     // Settle, clear, settle, measure.
     add([] {}, 1000);
@@ -414,6 +419,39 @@ void StressTest::optional(int cycles) {
             window_->editor_->selectNode(id);
         }, 60);
     }
+}
+
+// Audio capture started and stopped, sources and sample tracks switched and
+// BPM settings changed, while audio-reactive nodes come and go.
+void StressTest::audio(int cycles) {
+    for (int c = 0; c < cycles; ++c) {
+        add([this] {
+            auto* eng = EngineBridge::instance();
+            const auto sources = eng->audioSources();
+            if (!sources.isEmpty()) eng->selectAudioSource(sources[int(rng_() % uint32_t(sources.size()))].id);
+            const auto tracks = eng->sampleTracks();
+            if (!tracks.isEmpty()) eng->selectSampleTrack(int(rng_() % uint32_t(tracks.size())));
+            eng->toggleAudio();
+            // An audio-reactive source (they're listed first) with an effect.
+            const auto catalog = eng->sources();
+            const QString src = window_->editor_->addFromCatalog(catalog[int(rng_() % uint32_t(std::min<qsizetype>(catalog.size(), 12)))].typeRaw, true);
+            const auto effects = eng->effects();
+            window_->editor_->addFromCatalog(effects[int(rng_() % uint32_t(effects.size()))].typeRaw, false, src);
+        }, 80);
+        add([this] {
+            auto* eng = EngineBridge::instance();
+            eng->setBpmMode(int(rng_() % 3));
+            eng->setSmoothingMode(int(rng_() % 3));
+            eng->tapBpm();
+            eng->nudgeBpm(float(int(rng_() % 3)) - 1.0f);
+        }, 400);
+        add([this] {
+            auto* eng = EngineBridge::instance();
+            if (rng_() % 2) eng->toggleAudio();
+            if (rng_() % 2) eng->clearGraph();
+        }, 300);
+    }
+    add([] { if (EngineBridge::instance()->isAudioActive()) EngineBridge::instance()->toggleAudio(); });
 }
 
 // Where memory goes: N source + effect pairs, then cleared (undo still holds

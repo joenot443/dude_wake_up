@@ -330,7 +330,11 @@ void EngineBridge::fetchCommunityFeed(int page, int limit, const QString& voterI
     ntw_fetch_community_feed(page, limit, voterId.toUtf8().constData(), &onFeed);
 }
 
+// Test runs (NOTTAWA_NO_PUBLISH) never reach the public community.
+static bool publishingDisabled() { return !qEnvironmentVariableIsEmpty("NOTTAWA_NO_PUBLISH"); }
+
 void EngineBridge::voteOnStrand(const QString& slug, const QString& voterId, const QString& vote) {
+    if (publishingDisabled()) return;
     { std::lock_guard<std::mutex> lk(g_communityMutex); g_voteSlugs.push_back(slug); }
     ntw_vote_strand(slug.toUtf8().constData(), voterId.toUtf8().constData(), vote.toUtf8().constData(), &onVote);
 }
@@ -342,6 +346,11 @@ void EngineBridge::fetchSharedStrand(const QString& slug) {
 
 void EngineBridge::shareStrand(const QString& nodeId, const QString& title, const QString& description,
                                const QString& author, const QByteArray& previewPng) {
+    if (publishingDisabled()) {
+        QMetaObject::invokeMethod(this, [this] { emit strandShared(false, "Sharing is disabled in test runs"); },
+                                  Qt::QueuedConnection);
+        return;
+    }
     ntw_share_strand(nodeId.toUtf8().constData(), title.toUtf8().constData(), description.toUtf8().constData(),
                      author.toUtf8().constData(), previewPng.isEmpty() ? nullptr : previewPng.constData(),
                      int(previewPng.size()), &onShare);

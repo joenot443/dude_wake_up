@@ -12,6 +12,11 @@
 #include "json.hpp"
 #include "Console.hpp"
 #include "Strings.hpp"
+#ifdef NOTTAWA_ENGINE_ONLY
+#include "EngineLoop.hpp"
+#else
+#include "MainApp.h"
+#endif
 #include <ostream>
 
 using json = nlohmann::json;
@@ -123,7 +128,19 @@ void MidiService::midiOutputRemoved(std::string name, bool isNetwork) {
 }
 
 //--------------------------------------------------------------
+// ofxMidi calls this on its driver's thread, while the engine thread is
+// reading the parameters, assignments and pairings it changes: hand a copy
+// of the message over to the thread that owns the services.
 void MidiService::newMidiMessage(ofxMidiMessage& msg) {
+  ofxMidiMessage copy = msg;
+#ifdef NOTTAWA_ENGINE_ONLY
+  EngineLoop::getInstance()->executeOnEngineThread([this, copy]() mutable { handleMidiMessage(copy); });
+#else
+  MainApp::getApp()->executeOnMainThread([this, copy]() mutable { handleMidiMessage(copy); });
+#endif
+}
+
+void MidiService::handleMidiMessage(ofxMidiMessage& msg) {
   if (learningParam != NULL) {
     std::string descriptor = descriptorFrom(msg);
     saveAssignment(learningParam, descriptor);

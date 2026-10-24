@@ -135,14 +135,27 @@ static auto runOnEngineThread(F&& func) -> decltype(func()) {
   std::promise<R> prom;
   auto fut = prom.get_future();
   EngineLoop::getInstance()->executeOnEngineThread([&prom, &func]() {
-    if constexpr (std::is_void_v<R>) {
-      func();
-      prom.set_value();
-    } else {
-      prom.set_value(func());
+    // A throw must still answer the caller (it's blocked on the future) and
+    // mustn't take the engine thread down with it.
+    try {
+      if constexpr (std::is_void_v<R>) {
+        func();
+        prom.set_value();
+      } else {
+        prom.set_value(func());
+      }
+    } catch (...) {
+      prom.set_exception(std::current_exception());
     }
   });
-  return fut.get();
+  try {
+    return fut.get();
+  } catch (const std::exception& e) {
+    ofLogError("Bridge") << "engine task threw: " << e.what();
+  } catch (...) {
+    ofLogError("Bridge") << "engine task threw";
+  }
+  if constexpr (!std::is_void_v<R>) return R{};
 }
 
 // ---------------------------------------------------------------------------
@@ -1176,9 +1189,12 @@ void ntw_set_parameter_bool(const char* paramId, bool value) {
 }
 
 void ntw_set_parameter_string(const char* paramId, const char* value) {
-  if (!paramId || !value) return;
-  auto param = ParameterService::getService()->parameterForId(std::string(paramId));
-  if (param) param->stringValue = std::string(value);
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    if (!paramId || !value) return;
+    auto param = ParameterService::getService()->parameterForId(std::string(paramId));
+    if (param) param->stringValue = std::string(value);
+  });
 }
 
 void ntw_set_parameter_color(const char* paramId,
@@ -1215,17 +1231,20 @@ void ntw_set_parameter_color(const char* paramId,
 }
 
 void ntw_toggle_parameter_favorite(const char* paramId) {
-  if (!paramId) return;
-  auto param = ParameterService::getService()->parameterForId(std::string(paramId));
-  if (!param) return;
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    if (!paramId) return;
+    auto param = ParameterService::getService()->parameterForId(std::string(paramId));
+    if (!param) return;
 
-  if (param->favorited) {
-    ParameterService::getService()->removeFavoriteParameter(param);
-    param->favorited = false;
-  } else {
-    ParameterService::getService()->addFavoriteParameter(param);
-    param->favorited = true;
-  }
+    if (param->favorited) {
+      ParameterService::getService()->removeFavoriteParameter(param);
+      param->favorited = false;
+    } else {
+      ParameterService::getService()->addFavoriteParameter(param);
+      param->favorited = true;
+    }
+  });
 }
 
 void ntw_reset_parameter(const char* paramId) {
@@ -1612,15 +1631,21 @@ NTWAvailableShaderInfo* ntw_get_available_shader_sources(int* outCount) {
 // ---------------------------------------------------------------------------
 
 void ntw_select_connectable(const char* connectableId) {
-  if (!connectableId) return;
-  auto conn = findConnectable(connectableId);
-  if (conn) {
-    ShaderChainerService::getService()->selectConnectable(conn);
-  }
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    if (!connectableId) return;
+    auto conn = findConnectable(connectableId);
+    if (conn) {
+      ShaderChainerService::getService()->selectConnectable(conn);
+    }
+  });
 }
 
 void ntw_deselect_connectable(void) {
-  ShaderChainerService::getService()->deselectConnectable();
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    ShaderChainerService::getService()->deselectConnectable();
+  });
 }
 
 char* ntw_get_selected_connectable_id(void) {
@@ -1676,11 +1701,14 @@ NTWAudioSourceInfo* ntw_get_all_audio_sources(int* outCount) {
 }
 
 void ntw_select_audio_source(const char* audioSourceId) {
-  if (!audioSourceId) return;
-  auto source = AudioSourceService::getService()->audioSourceForId(std::string(audioSourceId));
-  if (source) {
-    AudioSourceService::getService()->selectAudioSource(source);
-  }
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    if (!audioSourceId) return;
+    auto source = AudioSourceService::getService()->audioSourceForId(std::string(audioSourceId));
+    if (source) {
+      AudioSourceService::getService()->selectAudioSource(source);
+    }
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -1721,30 +1749,17 @@ NTWExtendedAudioAnalysisInfo ntw_get_extended_audio_analysis(void) {
   info.audioActive = source->active;
   info.audioSourceType = static_cast<int>(source->type());
 
-  // Mel spectrum (copy up to 13 bins)
-  auto melSpec = analysis.getSafeMelSpectrum();
-  info.melSpectrumCount = std::min(static_cast<int>(melSpec.size()), 13);
-  for (int i = 0; i < info.melSpectrumCount; i++) {
-    info.melSpectrum[i] = melSpec[i];
-  }
-
-  // Waveform (downsample to 256 if needed)
-  auto wave = analysis.getSafeWaveform();
-  if (wave.empty()) {
-    info.waveformCount = 0;
-  } else if (wave.size() <= 256) {
-    info.waveformCount = static_cast<int>(wave.size());
-    for (int i = 0; i < info.waveformCount; i++) {
-      info.waveform[i] = wave[i];
-    }
-  } else {
-    // Downsample
-    info.waveformCount = 256;
-    float step = static_cast<float>(wave.size()) / 256.0f;
-    for (int i = 0; i < 256; i++) {
-      info.waveform[i] = wave[static_cast<int>(i * step)];
-    }
-  }
+  // The spectrum and waveform vectors are replaced by the audio thread (and
+  // the engine's preview audio) while we'd be copying them; read the
+  // fixed-size render copies made for cross-thread readers instead (a
+  // concurrent update can tear a frame, but can't free what we read).
+  // Their sizes are only used as counts, clamped to the arrays.
+  const size_t melSize = std::min(analysis.smoothMelSpectrum.size(), AudioAnalysis::kSpectrumSize);
+  info.melSpectrumCount = std::min(static_cast<int>(melSize), 13);
+  for (int i = 0; i < info.melSpectrumCount; i++) info.melSpectrum[i] = analysis.renderMelSpectrum[size_t(i)];
+  const size_t waveSize = std::min(analysis.smoothWaveform.size(), AudioAnalysis::kSpectrumSize);
+  info.waveformCount = std::min(static_cast<int>(waveSize), 256);
+  for (int i = 0; i < info.waveformCount; i++) info.waveform[i] = analysis.renderWaveform[size_t(i)];
 
   return info;
 }
@@ -2361,11 +2376,14 @@ void ntw_destroy_all_previews(void) {
 static std::string preferredPreviewSourceId;
 
 void ntw_set_preferred_preview_source(const char* sourceId) {
-  if (sourceId) {
-    preferredPreviewSourceId = std::string(sourceId);
-  } else {
-    preferredPreviewSourceId.clear();
-  }
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    if (sourceId) {
+      preferredPreviewSourceId = std::string(sourceId);
+    } else {
+      preferredPreviewSourceId.clear();
+    }
+  });
 }
 
 // Find the best active VideoSource frame for effect previews.
@@ -3120,16 +3138,19 @@ NTWFileSourceState ntw_get_file_source_state(const char* sourceId) {
 }
 
 void ntw_set_file_source_volume(const char* sourceId, float volume) {
-  if (!sourceId) return;
-  std::string sid(sourceId);
-  auto src = VideoSourceService::getService()->videoSourceForId(sid);
-  if (!src) return;
-  auto* fileSrc = dynamic_cast<FileSource*>(src.get());
-  if (!fileSrc || !fileSrc->volume) return;
-  fileSrc->volume->setValue(volume);
-  if (!fileSrc->mute->boolValue) {
-    fileSrc->player.setVolume(volume);
-  }
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    if (!sourceId) return;
+    std::string sid(sourceId);
+    auto src = VideoSourceService::getService()->videoSourceForId(sid);
+    if (!src) return;
+    auto* fileSrc = dynamic_cast<FileSource*>(src.get());
+    if (!fileSrc || !fileSrc->volume) return;
+    fileSrc->volume->setValue(volume);
+    if (!fileSrc->mute->boolValue) {
+      fileSrc->player.setVolume(volume);
+    }
+  });
 }
 
 void ntw_set_file_source_speed(const char* sourceId, float speed) {
@@ -3155,15 +3176,18 @@ void ntw_set_file_source_position(const char* sourceId, float position) {
 }
 
 void ntw_set_file_source_mute(const char* sourceId, int mute) {
-  if (!sourceId) return;
-  std::string sid(sourceId);
-  auto src = VideoSourceService::getService()->videoSourceForId(sid);
-  if (!src) return;
-  auto* fileSrc = dynamic_cast<FileSource*>(src.get());
-  if (!fileSrc || !fileSrc->mute) return;
-  fileSrc->mute->boolValue = (mute != 0);
-  fileSrc->mute->value = mute ? 1.0f : 0.0f;
-  fileSrc->player.setVolume(mute ? 0.0f : fileSrc->volume->value);
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    if (!sourceId) return;
+    std::string sid(sourceId);
+    auto src = VideoSourceService::getService()->videoSourceForId(sid);
+    if (!src) return;
+    auto* fileSrc = dynamic_cast<FileSource*>(src.get());
+    if (!fileSrc || !fileSrc->mute) return;
+    fileSrc->mute->boolValue = (mute != 0);
+    fileSrc->mute->value = mute ? 1.0f : 0.0f;
+    fileSrc->player.setVolume(mute ? 0.0f : fileSrc->volume->value);
+  });
 }
 
 void ntw_set_file_source_playing(const char* sourceId, int playing) {
@@ -3235,13 +3259,16 @@ NTWTextSourceState ntw_get_text_source_state(const char* sourceId) {
 }
 
 void ntw_set_text_source_text(const char* sourceId, const char* text) {
-  if (!sourceId || !text) return;
-  std::string sid(sourceId), stext(text);
-  auto src = VideoSourceService::getService()->videoSourceForId(sid);
-  if (!src || src->type != VideoSource_text) return;
-  auto* textSrc = dynamic_cast<TextSource*>(src.get());
-  if (!textSrc || !textSrc->displayText) return;
-  textSrc->displayText->text = stext;
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    if (!sourceId || !text) return;
+    std::string sid(sourceId), stext(text);
+    auto src = VideoSourceService::getService()->videoSourceForId(sid);
+    if (!src || src->type != VideoSource_text) return;
+    auto* textSrc = dynamic_cast<TextSource*>(src.get());
+    if (!textSrc || !textSrc->displayText) return;
+    textSrc->displayText->text = stext;
+  });
 }
 
 void ntw_set_text_source_font_size(const char* sourceId, int fontSize) {
@@ -3255,19 +3282,22 @@ void ntw_set_text_source_font_size(const char* sourceId, int fontSize) {
 }
 
 void ntw_set_text_source_font_index(const char* sourceId, int fontIndex) {
-  if (!sourceId) return;
-  std::string sid(sourceId);
-  auto src = VideoSourceService::getService()->videoSourceForId(sid);
-  if (!src || src->type != VideoSource_text) return;
-  auto* textSrc = dynamic_cast<TextSource*>(src.get());
-  if (!textSrc || !textSrc->displayText) return;
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    if (!sourceId) return;
+    std::string sid(sourceId);
+    auto src = VideoSourceService::getService()->videoSourceForId(sid);
+    if (!src || src->type != VideoSource_text) return;
+    auto* textSrc = dynamic_cast<TextSource*>(src.get());
+    if (!textSrc || !textSrc->displayText) return;
 
-  auto& fonts = FontService::getService()->fonts;
-  if (fontIndex < 0 || fontIndex >= static_cast<int>(fonts.size())) return;
+    auto& fonts = FontService::getService()->fonts;
+    if (fontIndex < 0 || fontIndex >= static_cast<int>(fonts.size())) return;
 
-  textSrc->displayText->fontSelector->intValue = fontIndex;
-  textSrc->displayText->fontSelector->affirmIntValue();
-  textSrc->displayText->font = fonts[fontIndex];
+    textSrc->displayText->fontSelector->intValue = fontIndex;
+    textSrc->displayText->fontSelector->affirmIntValue();
+    textSrc->displayText->font = fonts[fontIndex];
+  });
 }
 
 void ntw_set_text_source_position(const char* sourceId, float x, float y) {
@@ -3282,13 +3312,16 @@ void ntw_set_text_source_position(const char* sourceId, float x, float y) {
 }
 
 void ntw_center_text_source(const char* sourceId) {
-  if (!sourceId) return;
-  std::string sid(sourceId);
-  auto src = VideoSourceService::getService()->videoSourceForId(sid);
-  if (!src || src->type != VideoSource_text) return;
-  auto* textSrc = dynamic_cast<TextSource*>(src.get());
-  if (!textSrc) return;
-  textSrc->centerText();
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    if (!sourceId) return;
+    std::string sid(sourceId);
+    auto src = VideoSourceService::getService()->videoSourceForId(sid);
+    if (!src || src->type != VideoSource_text) return;
+    auto* textSrc = dynamic_cast<TextSource*>(src.get());
+    if (!textSrc) return;
+    textSrc->centerText();
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -3426,7 +3459,10 @@ void ntw_free_available_non_shader_source_info_array(NTWAvailableNonShaderSource
 // ---------------------------------------------------------------------------
 
 void ntw_toggle_favorite_shader_type(int shaderTypeRaw) {
-  ParameterService::getService()->toggleFavoriteShaderType(static_cast<ShaderType>(shaderTypeRaw));
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    ParameterService::getService()->toggleFavoriteShaderType(static_cast<ShaderType>(shaderTypeRaw));
+  });
 }
 
 int ntw_is_shader_type_favorited(int shaderTypeRaw) {
@@ -3434,7 +3470,10 @@ int ntw_is_shader_type_favorited(int shaderTypeRaw) {
 }
 
 void ntw_toggle_favorite_source_type(int sourceType) {
-  ParameterService::getService()->toggleFavoriteSourceType(sourceType);
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    ParameterService::getService()->toggleFavoriteSourceType(sourceType);
+  });
 }
 
 int ntw_is_source_type_favorited(int sourceType) {

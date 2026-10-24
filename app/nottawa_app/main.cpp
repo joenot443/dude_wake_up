@@ -1,8 +1,10 @@
 #include "CrashHandler.h"
 #include "MainWindow.h"
+#include "StressTest.h"
 #include "Theme.h"
 
 #include <QApplication>
+#include <QDesktopServices>
 #include <QDir>
 #include <QFileInfo>
 #include <QProcess>
@@ -69,6 +71,10 @@ int main(int argc, char** argv) {
     QSettings::setDefaultFormat(QSettings::IniFormat);
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, QDir(appDataDir()).filePath("settings"));
     Theme::apply(app);
+    if (!qEnvironmentVariableIsEmpty("NOTTAWA_NO_PUBLISH")) {  // test runs open nothing outside the app
+        auto* sink = new UrlSink(&app);
+        for (const char* scheme : {"http", "https", "mailto", "file"}) QDesktopServices::setUrlHandler(scheme, sink, "open");
+    }
     captureEngineLog();
     CrashHandler::install();
 
