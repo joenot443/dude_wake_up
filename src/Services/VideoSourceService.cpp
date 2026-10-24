@@ -197,6 +197,13 @@ void VideoSourceService::releaseSource(std::shared_ptr<VideoSource> source)
   source->teardown();
   OscillationService::getService()->removeOscillatorsFor(source->settings->parameters);
   ParameterService::getService()->unregisterParameters(source->settings->parameters);
+  // Text and webcam sources keep their parameters in settings of their own
+  // (settingsRef()); a ShaderSource's are its shader's, handled below.
+  if (auto own = source->settingsRef(); own && own != source->settings &&
+      !std::dynamic_pointer_cast<ShaderSource>(source)) {
+    OscillationService::getService()->removeOscillatorsFor(own->parameters);
+    ParameterService::getService()->unregisterParameters(own->parameters);
+  }
 
   // Walk every optional shader created via the VideoSource's helper as
   // well as any shader nested inside a ShaderSource. Each shader has its

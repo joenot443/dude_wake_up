@@ -44,6 +44,7 @@ private:
     void copyPaste(int cycles);
     void optional(int cycles);
     void parameters(int cycles);
+    void memory(int nodes);
 
     // Helpers working on the live graph.
     QString randomSource();
@@ -59,4 +60,5 @@ private:
     QStringList scenarios_;
     QString scratch_;   // folder for workspace / strand files
     int counter_ = 0;
+    int savedNodes_ = 0;
 };

@@ -2314,12 +2314,33 @@ char* ntw_create_preview(int shaderTypeRaw, bool isSource) {
   });
 }
 
+// A preview's source or shader registered its parameters and oscillators
+// with the global services when it was built, like any node's; drop them
+// (and its frames) before the preview goes, or every preview created --
+// browser scrolling, tab changes, the sidebar hiding in stage mode --
+// leaks its registrations. The shared plasma input is released separately.
+static void releasePreview(PreviewInstance& inst) {
+  if (inst.source && inst.source != sharedPlasmaSource)
+    VideoSourceService::getService()->releaseSource(inst.source);
+  std::function<void(std::shared_ptr<Shader>)> cleanShader = [&cleanShader](std::shared_ptr<Shader> s) {
+    if (!s || !s->settings) return;
+    OscillationService::getService()->removeOscillatorsFor(s->settings->parameters);
+    ParameterService::getService()->unregisterParameters(s->settings->parameters);
+    for (auto& opt : s->optionalShaders) cleanShader(opt);
+  };
+  cleanShader(inst.shader);
+  if (inst.shader) inst.shader->releaseFrames();
+}
+
 void ntw_destroy_preview(const char* previewId) {
   if (!previewId) return;
   std::string pid(previewId);
   runOnEngineThread([pid]() {
     IOSurfaceTextureManager::getInstance()->stopSharing(pid);
-    previewInstances.erase(pid);
+    auto it = previewInstances.find(pid);
+    if (it == previewInstances.end()) return;
+    releasePreview(it->second);
+    previewInstances.erase(it);
   });
 }
 
@@ -2327,8 +2348,10 @@ void ntw_destroy_all_previews(void) {
   runOnEngineThread([]() {
     for (auto& [pid, inst] : previewInstances) {
       IOSurfaceTextureManager::getInstance()->stopSharing(pid);
+      releasePreview(inst);
     }
     previewInstances.clear();
+    if (sharedPlasmaSource) VideoSourceService::getService()->releaseSource(sharedPlasmaSource);
     sharedPlasmaSource.reset();
     previewCounter = 0;
   });

@@ -103,6 +103,7 @@ void StressTest::enqueueScenario(const QString& name) {
     else if (name == "copypaste") copyPaste(cycles);
     else if (name == "optional") optional(cycles);
     else if (name == "parameters") parameters(cycles);
+    else if (name == "memory") memory(cycles);
     else add([this, name] { window_->log("[stress] unknown scenario " + name); });
     // Settle, clear, settle, measure.
     add([] {}, 1000);
@@ -278,12 +279,16 @@ void StressTest::workspace(int cycles) {
                 const auto effects = EngineBridge::instance()->effects();
                 window_->editor_->addFromCatalog(effects[int(rng_() % uint32_t(effects.size()))].typeRaw, false, src);
             }
+            savedNodes_ = int(EngineBridge::instance()->nodes().size());
             EngineBridge::instance()->saveWorkspace(QDir(scratch_).filePath("ws.json"), "stress");
         }, 60);
         add([] { EngineBridge::instance()->clearGraph(); }, 60);
         add([this] {
             if (!EngineBridge::instance()->loadWorkspace(QDir(scratch_).filePath("ws.json")))
                 window_->log("[stress] FAIL loadWorkspace returned false");
+            const int loaded = int(EngineBridge::instance()->nodes().size());
+            if (loaded != savedNodes_)
+                window_->log(QString("[stress] FAIL workspace saved %1 nodes, loaded %2").arg(savedNodes_).arg(loaded));
         }, 150);
     }
 }
@@ -409,6 +414,26 @@ void StressTest::optional(int cycles) {
             window_->editor_->selectNode(id);
         }, 60);
     }
+}
+
+// Where memory goes: N source + effect pairs, then cleared (undo still holds
+// them), then the undo history flushed with small actions.
+void StressTest::memory(int nodes) {
+    add([this, nodes] {
+        const auto effects = EngineBridge::instance()->effects();
+        for (int i = 0; i < nodes; ++i) {
+            const QString src = randomSource();
+            window_->editor_->addFromCatalog(effects[int(rng_() % uint32_t(effects.size()))].typeRaw, false, src);
+        }
+    }, 100);
+    add([this, nodes] { checkpoint(QString("memory: %1 pairs live").arg(nodes)); }, 2000);
+    add([] { EngineBridge::instance()->clearGraph(); });
+    add([this] { checkpoint("memory: cleared, held by undo"); }, 2000);
+    for (int i = 0; i < 12; ++i) {
+        add([this] { randomSource(); }, 50);
+        add([] { EngineBridge::instance()->clearGraph(); }, 50);
+    }
+    add([this] { checkpoint("memory: undo history flushed"); }, 2000);
 }
 
 // Every parameter of random nodes thrown to its extremes, with oscillators

@@ -71,6 +71,13 @@ void WebcamSource::setup() {
   lastDeviceId = settings->deviceId->intValue;
 }
 
+void WebcamSource::teardown() {
+  grabberReady = false;
+  grabber.close();
+  if (fbo) fbo->clear();
+  if (optionalFbo) optionalFbo->clear();
+}
+
 void WebcamSource::saveFrame() {
   // Re-initialize if device selection changed (e.g. from SwiftUI inspector)
   if (settings->deviceId->intValue != lastDeviceId) {

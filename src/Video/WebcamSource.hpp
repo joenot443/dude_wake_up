@@ -42,6 +42,9 @@ public:
   : VideoSource(id, name, VideoSource_webcam),
     settings(std::make_shared<WebcamVideoSourceSettings>(id, 0)) {};
   void setup() override;
+  // Releases the camera (a deleted node lives on in the undo history; undo
+  // re-adds it, which runs setup() again).
+  void teardown() override;
   void saveFrame() override;
   json serialize() override;
   void load(json j) override;
