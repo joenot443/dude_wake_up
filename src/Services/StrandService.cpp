@@ -283,15 +283,30 @@ void StrandService::populateMapFromFolder(std::map<std::string, std::shared_ptr<
 void StrandService::renameStrand(std::string id, std::string newName)
 {
   auto strand = availableStrandForId(id);
-  if (strand == nullptr)
+  if (strand == nullptr || isTemplate(id))
   {
-    log("Tried to rename Strand %s, but it doesn't exist", id.c_str());
+    log("Tried to rename Strand %s, but it doesn't exist or is a template", id.c_str());
+    return;
+  }
+  // The name becomes a file name in the same folder: no separators or
+  // characters Windows forbids, so it can't point anywhere else.
+  if (newName.empty() || newName == "." || newName == ".." ||
+      newName.find_first_of("/\\:*?\"<>|") != std::string::npos)
+  {
+    log("Tried to rename Strand %s to an invalid name", id.c_str());
     return;
   }
 
   // Determine new file path (same directory, new filename)
   std::filesystem::path oldPath(strand->path);
   std::filesystem::path newPath = oldPath.parent_path() / (newName + ".json");
+  // Renaming onto another strand's file would replace it.
+  std::error_code existsError;
+  if (newPath != oldPath && std::filesystem::exists(newPath, existsError))
+  {
+    log("Tried to rename Strand %s to %s, which already exists", id.c_str(), newName.c_str());
+    return;
+  }
 
   try
   {

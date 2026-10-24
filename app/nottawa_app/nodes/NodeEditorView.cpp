@@ -6,6 +6,7 @@
 #include "panels/CatalogPopup.h"
 #include "Theme.h"
 
+#include <QCoreApplication>
 #include <QApplication>
 #include <QSettings>
 #include <limits>
@@ -535,12 +536,17 @@ void NodeEditorView::showContextMenu(const QPoint& viewPos) {
             browser->popup(QCursor::pos());
         });
         menu.addAction("Open Preview Window", this, [this, id] { openPreview(id); });
-        if (node->isShader() || node->typeRaw() == 4)  // effects and shader-generated sources
+        if (node->isShader() || node->typeRaw() == 4) {  // effects and shader-generated sources
             menu.addAction("Edit Shader Code…", this, [this, id, node] { emit editShaderRequested(id, node->name()); });
-            // The shader's file in the system's editor for it.
+            // The shader's file in the system's editor for it: only when
+            // running from the source tree. An installed copy's files are
+            // in the install folder (read-only, replaced on upgrade).
             const QString file = EngineBridge::instance()->shaderFilePath(id);
-            if (!file.isEmpty())
+            const bool installed = QFileInfo(file).absoluteFilePath().startsWith(
+                QDir(QCoreApplication::applicationDirPath()).absolutePath() + "/", Qt::CaseInsensitive);
+            if (!file.isEmpty() && !installed)
                 menu.addAction("Edit Effect File", this, [file] { QDesktopServices::openUrl(QUrl::fromLocalFile(file)); });
+        }
         menu.addAction("Save Strand...", this, [this, id] { saveStrand(id); });
         const QString name = node->name();
         menu.addAction("Share Strand...", this, [this, id, name] { emit shareRequested(id, name); });

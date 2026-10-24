@@ -2028,7 +2028,10 @@ bool ntw_load_workspace(const char* path) {
     // Windows, where /tmp doesn't exist.)
     std::error_code tmpError;
     std::filesystem::path tmpFile = std::filesystem::temp_directory_path(tmpError);
-    if (tmpError) tmpFile = ".";
+    if (tmpError) {  // never fall back to the working directory: that's the install folder
+      ofLogError("Bridge") << "ntw_load_workspace: no temp directory (" << tmpError.message() << ")";
+      return false;
+    }
     tmpFile /= "ntw_load_" + std::to_string((unsigned long long)ofGetElapsedTimeMillis()) + ".json";
     const std::string tmpPath = tmpFile.string();
     std::ofstream tmpOut(tmpPath);
@@ -2828,14 +2831,15 @@ void ntw_delete_strand(const char* strandId) {
 
   runOnEngineThread([sid]() {
     auto strand = StrandService::getService()->availableStrandForId(sid);
-    if (!strand) return;
+    if (!strand || StrandService::getService()->isTemplate(sid)) return;  // templates ship with the app
 
     // Remove files from disk
+    std::error_code error;
     if (!strand->path.empty()) {
-      std::filesystem::remove(strand->path);
+      std::filesystem::remove(strand->path, error);
     }
     if (!strand->imagePath.empty()) {
-      std::filesystem::remove(strand->imagePath);
+      std::filesystem::remove(strand->imagePath, error);
     }
 
     StrandService::getService()->removeStrand(sid);
