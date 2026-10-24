@@ -264,7 +264,7 @@ void ParameterService::toggleFavoriteShaderType(ShaderType type) {
   } else {
     favoriteShaderTypes.insert(type);
   }
-  ConfigService::getService()->saveDefaultConfigFile();
+  ConfigService::getService()->requestSave();
   notifyFavoritesUpdate();
 }
 
@@ -278,7 +278,7 @@ void ParameterService::toggleFavoriteSourceType(int sourceType) {
   } else {
     favoriteSourceTypes.insert(sourceType);
   }
-  ConfigService::getService()->saveDefaultConfigFile();
+  ConfigService::getService()->requestSave();
   notifyFavoritesUpdate();
 }
 
@@ -304,6 +304,6 @@ void ParameterService::toggleStageShaderId(std::string shaderId) {
     } else {
         stageShaderIds.insert(shaderId);
     }
-    ConfigService::getService()->saveDefaultConfigFile();
+    ConfigService::getService()->requestSave();
     notifyFavoritesUpdate();
 }

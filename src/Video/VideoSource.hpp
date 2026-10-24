@@ -73,8 +73,6 @@ public:
   
   void applyOptionalShaders();
   
-  void generateOptionalShaders();
-  
   virtual json serialize() { return 0; };
   int inputCount() override { return 0; };
   
@@ -118,7 +116,7 @@ public:
     }
   };
 
-  OptionalShadersHelper optionalShadersHelper;
+  OptionalShadersHelper optionalShadersHelper{OptionalShadersHelper::sourceTypes(), true};
 
   // Subscription to LayoutStateService resolution updates. Held here so it
   // is severed automatically when the source is destroyed, and explicitly

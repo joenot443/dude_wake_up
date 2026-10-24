@@ -133,6 +133,8 @@ bool EngineBridge::start(void* shareContext, const QString& dataPath) {
 
 void EngineBridge::stop() {
     if (!running_) return;
+    // The session: changes since the last (debounced or periodic) save.
+    ntw_save_default_config();
     ntw_engine_stop();
     running_ = false;
 }

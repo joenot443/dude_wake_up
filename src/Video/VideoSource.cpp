@@ -68,10 +68,6 @@ void VideoSource::applyOptionalShaders() {
     optionalShadersHelper.applyOptionalShaders(fbo, optionalFbo);
 }
 
-void VideoSource::generateOptionalShaders() {
-    optionalShadersHelper.generateOptionalShaders();
-}
-
 std::shared_ptr<Settings> VideoSource::settingsRef() {
   if (type == VideoSource_shader) {
     std::shared_ptr<ShaderSource> shaderSource = std::dynamic_pointer_cast<ShaderSource>(shared_from_this());

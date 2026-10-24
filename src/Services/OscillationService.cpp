@@ -86,7 +86,7 @@ void OscillationService::selectOscillator(std::shared_ptr<Oscillator> osc, std::
   loadOscillatorSettings(osc);
   ParameterService::getService()->selectedParameter = param;
   setEnabled(osc, true);
-  ConfigService::getService()->saveDefaultConfigFile();
+  ConfigService::getService()->requestSave();
 }
 
 void OscillationService::clear() {

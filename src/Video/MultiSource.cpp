@@ -13,7 +13,6 @@
 void MultiSource::setup()
 {
   fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
-  optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   fbo->begin();
   fbo->end();
 }

@@ -52,7 +52,6 @@ void WebcamSource::setup() {
   }
 
   fbo->allocate(rx, ry);
-  optionalFbo->allocate(rx, ry);
   maskShader.load("shaders/ColorKeyMaskMaker");
 
   // Collect the device names

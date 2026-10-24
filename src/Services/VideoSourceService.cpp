@@ -174,7 +174,6 @@ void VideoSourceService::addVideoSource(std::shared_ptr<VideoSource> videoSource
     videoSource->load(j);
   }
   videoSource->setup();
-  videoSource->generateOptionalShaders();
   // Subscribe the Source's setup() to resolution updates. Token stored on
   // the source so it can be unsubscribed in removeVideoSource.
   std::weak_ptr<VideoSource> weakSrc = videoSource;
@@ -214,9 +213,9 @@ void VideoSourceService::releaseSource(std::shared_ptr<VideoSource> source)
       if (!s || !s->settings) return;
       OscillationService::getService()->removeOscillatorsFor(s->settings->parameters);
       ParameterService::getService()->unregisterParameters(s->settings->parameters);
-      for (auto& opt : s->optionalShaders) cleanShader(opt);
+      for (auto& opt : s->optionalShaders.created()) cleanShader(opt);
     };
-  for (auto& opt : source->optionalShadersHelper.optionalShaders) cleanShader(opt);
+  for (auto& opt : source->optionalShadersHelper.created()) cleanShader(opt);
   if (auto shaderSrc = std::dynamic_pointer_cast<ShaderSource>(source)) {
     cleanShader(shaderSrc->shader);
   }
@@ -240,7 +239,7 @@ void VideoSourceService::removeVideoSource(std::string id)
         id.c_str(), source.use_count());
   }
   
-  ConfigService::getService()->saveDefaultConfigFile();
+  ConfigService::getService()->requestSave();
 }
 
 // Return a vector of all video sources

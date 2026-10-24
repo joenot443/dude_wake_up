@@ -520,7 +520,7 @@ std::vector<std::string> ShaderChainerService::idsFromLoadingConfig(json j) {
     if (shader == nullptr) continue;
     addShader(shader);
 
-    // Restore optional shaders (must be after addShader which calls generateOptionalShaders)
+    // Restore optional shaders
     shader->load(val);
 
     // Set the position of the Shader
@@ -660,7 +660,6 @@ void ShaderChainerService::addShader(std::shared_ptr<Shader> shader)
   FeedbackSourceService::getService()->registerFeedbackSource(feedbackSource);
   shader->feedbackDestination = feedbackSource;
   shader->allocateFrames();
-  shader->generateOptionalShaders();
   shader->settings->selectorParam->setValue(shader->type());
   shadersMap[shader->shaderId] = shader;
   
@@ -675,7 +674,7 @@ void ShaderChainerService::addShader(std::shared_ptr<Shader> shader)
       }
     });
   
-  ConfigService::getService()->saveDefaultConfigFile();
+  ConfigService::getService()->requestSave();
 }
 
 void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader, bool fromMap)
@@ -726,7 +725,7 @@ void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader, bool fro
       if (!s || !s->settings) return;
       OscillationService::getService()->removeOscillatorsFor(s->settings->parameters);
       ParameterService::getService()->unregisterParameters(s->settings->parameters);
-      for (auto& opt : s->optionalShaders) cleanShader(opt);
+      for (auto& opt : s->optionalShaders.created()) cleanShader(opt);
     };
   cleanShader(shader);
   
@@ -763,7 +762,7 @@ void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader, bool fro
   shader.reset();
   
   // Save configuration changes
-  ConfigService::getService()->saveDefaultConfigFile();
+  ConfigService::getService()->requestSave();
 }
 std::vector<std::shared_ptr<Connectable>> ShaderChainerService::pasteConnectables(const std::vector<std::shared_ptr<Connectable>>& connectables) {
   std::map<std::shared_ptr<Connectable>, std::shared_ptr<Connectable>> originalToNewMap;
@@ -892,7 +891,7 @@ void ShaderChainerService::removeConnectable(std::shared_ptr<Connectable> connec
     connectionMap.erase(connId);
   }
 
-  ConfigService::getService()->saveDefaultConfigFile();
+  ConfigService::getService()->requestSave();
 }
 
 void ShaderChainerService::insert(std::shared_ptr<Connectable> start, std::shared_ptr<Connectable> connectable, OutputSlot slot) {
@@ -1050,7 +1049,7 @@ void ShaderChainerService::breakConnectionForConnectionId(std::string connection
     }
   }
 
-  ConfigService::getService()->saveDefaultConfigFile();
+  ConfigService::getService()->requestSave();
 }
 
 std::shared_ptr<Connection> ShaderChainerService::makeConnection(std::shared_ptr<Connectable> start,
@@ -1093,7 +1092,7 @@ std::shared_ptr<Connection> ShaderChainerService::makeConnection(std::shared_ptr
   
   if (shouldSaveConfig)
   {
-    ConfigService::getService()->saveDefaultConfigFile();
+    ConfigService::getService()->requestSave();
   }
   
   return connection;

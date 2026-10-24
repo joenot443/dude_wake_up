@@ -1761,7 +1761,7 @@ void NodeLayoutView::clear() {
   VideoSourceService::getService()->clear();
   ParameterService::getService()->clear();
   ActionService::getService()->clear();
-  ConfigService::getService()->saveDefaultConfigFile();
+  ConfigService::getService()->requestSave();
   OscillationService::getService()->clear();
   ed::SetCurrentEditor(nullptr);
 }

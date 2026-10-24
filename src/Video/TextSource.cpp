@@ -25,7 +25,6 @@ void TextSource::setup() {
   settings.maxFilter = GL_LINEAR;
 
   fbo->allocate(settings);
-  optionalFbo->allocate(settings);
   tempFbo.allocate(settings);
 
   // Enable better font rendering
@@ -112,7 +111,6 @@ void TextSource::saveFrame() {
     fboSettings.maxFilter = GL_LINEAR;
 
     fbo->allocate(fboSettings);
-    optionalFbo->allocate(fboSettings);
     tempFbo.allocate(fboSettings);
 
     font.setLetterSpacing(1.0);

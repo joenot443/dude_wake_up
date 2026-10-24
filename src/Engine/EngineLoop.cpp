@@ -321,6 +321,7 @@ void EngineLoop::tick() {
 
   // 7. Auto-save config if needed
 #ifdef NOTTAWA_ENGINE_ONLY
+  ConfigService::getService()->flushRequestedSave();
   // ofGetFrameNum() is always 0 in NottawaApp (no OF main loop), so
   // ConfigService::checkAndSaveDefaultConfigFile() never triggers.
   // Use time-based auto-save instead.

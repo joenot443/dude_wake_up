@@ -69,7 +69,7 @@ void StrandService::setup() {
   strandsUpdatedSubject.subscribe([this]()
   {
     if (running)
-    	ConfigService::getService()->saveDefaultConfigFile();
+    	ConfigService::getService()->requestSave();
   });
   
   populate();

@@ -94,6 +94,14 @@ public:
   void saveShaderConfigFile(std::shared_ptr<Shader> shader, std::string name);
   void checkAndSaveDefaultConfigFile();
   void saveDefaultConfigFile();
+  // Saves the default config once changes settle: a burst of them (loading
+  // a workspace adds every node) writes the file once, not per change.
+  void requestSave();
+  // Called every frame; performs a requested save after kSaveDelay quiet.
+  void flushRequestedSave();
+  static constexpr float kSaveDelay = 1.0f;
+  bool saveRequested = false;
+  float saveRequestedAt = 0;
   void loadDefaultConfigFile();
 
   

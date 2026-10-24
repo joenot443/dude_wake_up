@@ -59,7 +59,6 @@ void FileSource::setup()
   player.setLoopState(OF_LOOP_NORMAL);
   playing = true;
   fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
-  optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   sliderPosition->value = settings->start->value;
   position = start;
   maskShader.load("shaders/ColorKeyMaskMaker");
@@ -131,7 +130,6 @@ void FileSource::saveFrameStreaming()
   if (fbo->getWidth() != LayoutStateService::getService()->resolution.x ||
       fbo->getHeight() != LayoutStateService::getService()->resolution.y) {
     fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
-    optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   }
 
   if (player.getSpeed() != speed->value) {
@@ -166,7 +164,6 @@ void FileSource::saveFrameCached()
   if (fbo->getWidth() != LayoutStateService::getService()->resolution.x ||
       fbo->getHeight() != LayoutStateService::getService()->resolution.y) {
     fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
-    optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   }
 
   if (cachedFrames.empty() || nativeDuration <= 0.0f) {

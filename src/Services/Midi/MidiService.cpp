@@ -232,7 +232,7 @@ void MidiService::saveAssignment(std::shared_ptr<Parameter> param, std::string d
   descriptorToPairing[descriptor] = pairing;
   parameterIdToPairing[param->paramId] = pairing;
   
-  ConfigService::getService()->saveDefaultConfigFile();
+  ConfigService::getService()->requestSave();
 
   // Notify bridge layer (fires Swift callback)
   if (onMidiLearned) {

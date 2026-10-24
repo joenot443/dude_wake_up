@@ -36,6 +36,8 @@ final class NottawaEngine {
 
     func stop() {
         guard isRunning else { return }
+        // The session: changes since the last (debounced or periodic) save.
+        ntw_save_default_config()
         ntw_engine_stop()
         isRunning = false
     }

@@ -2301,7 +2301,6 @@ char* ntw_create_preview(int shaderTypeRaw, bool isSource) {
       // Reallocate to preview size. ofFbo::allocate calls clear() first, so the
       // full-resolution FBOs that setup() allocated are released here.
       if (src->fbo) src->fbo->allocate(kPreviewWidth, kPreviewHeight, GL_RGBA);
-      if (src->optionalFbo) src->optionalFbo->allocate(kPreviewWidth, kPreviewHeight, GL_RGBA);
       if (src->canvas) src->canvas->allocate(kPreviewWidth, kPreviewHeight, GL_RGBA);
       inst.source = std::dynamic_pointer_cast<VideoSource>(src);
       inst.isSourceOnly = true;
@@ -2341,7 +2340,7 @@ static void releasePreview(PreviewInstance& inst) {
     if (!s || !s->settings) return;
     OscillationService::getService()->removeOscillatorsFor(s->settings->parameters);
     ParameterService::getService()->unregisterParameters(s->settings->parameters);
-    for (auto& opt : s->optionalShaders) cleanShader(opt);
+    for (auto& opt : s->optionalShaders.created()) cleanShader(opt);
   };
   cleanShader(inst.shader);
   if (inst.shader) inst.shader->releaseFrames();
@@ -2590,8 +2589,10 @@ void ntw_tick_previews(void) {
 
       resultFrame = fbo;
     } else if (inst.shader) {
-      // Same transient-compile recovery as the source branch above.
-      if (!inst.shader->shader.isLoaded() && inst.loadRetries < 60) {
+      // Same transient-compile recovery as the source branch above (for
+      // effects with a program: some, like On Off, draw without one).
+      if (!inst.shader->shader.isLoaded() && inst.loadRetries < 60 &&
+          ofFile::doesFileExist("shaders/" + inst.shader->fileName() + ".frag")) {
         inst.loadRetries++;
         inst.shader->shader.load("shaders/" + inst.shader->fileName());
       }
@@ -2866,13 +2867,13 @@ void ntw_register_strands_updated_callback(NTWStrandsUpdatedCallback callback) {
 // MARK: - Optional Shaders
 // ---------------------------------------------------------------------------
 
-// Helper to find optional shaders for either a shader or video source.
-static std::vector<std::shared_ptr<Shader>>* findOptionalShaders(const std::string& id) {
+// The optional shaders of a shader or video source, kept alive by their owner.
+static std::shared_ptr<OptionalShadersHelper> findOptionalShaders(const std::string& id) {
   auto shader = ShaderChainerService::getService()->shaderForId(id);
-  if (shader) return &shader->optionalShaders;
+  if (shader) return std::shared_ptr<OptionalShadersHelper>(shader, &shader->optionalShaders);
 
   auto source = VideoSourceService::getService()->videoSourceForId(id);
-  if (source) return &source->optionalShadersHelper.optionalShaders;
+  if (source) return std::shared_ptr<OptionalShadersHelper>(source, &source->optionalShadersHelper);
 
   return nullptr;
 }
@@ -2881,7 +2882,7 @@ NTWOptionalShaderInfo* ntw_get_optional_shaders(const char* connectableId, int* 
   if (outCount) *outCount = 0;
   if (!connectableId) return nullptr;
 
-  auto* optionals = findOptionalShaders(std::string(connectableId));
+  auto optionals = findOptionalShaders(std::string(connectableId));
   if (!optionals) return nullptr;
 
   int count = static_cast<int>(optionals->size());
@@ -2891,9 +2892,10 @@ NTWOptionalShaderInfo* ntw_get_optional_shaders(const char* connectableId, int* 
   auto* result = static_cast<NTWOptionalShaderInfo*>(
     calloc(count, sizeof(NTWOptionalShaderInfo)));
 
+  // Names come from the types, so listing doesn't create the shaders.
   for (int i = 0; i < count; i++) {
-    result[i].name = strdup_safe((*optionals)[i]->name());
-    result[i].enabled = (*optionals)[i]->optionallyEnabled;
+    result[i].name = strdup_safe(optionals->name(size_t(i)));
+    result[i].enabled = optionals->enabled(size_t(i));
     result[i].index = i;
   }
 
@@ -2913,12 +2915,9 @@ void ntw_toggle_optional_shader(const char* connectableId, int index) {
   std::string sid(connectableId);
 
   runOnEngineThread([sid, index]() {
-    auto* optionals = findOptionalShaders(sid);
-    if (!optionals) return;
-
-    if (index >= 0 && index < static_cast<int>(optionals->size())) {
-      (*optionals)[index]->optionallyEnabled = !(*optionals)[index]->optionallyEnabled;
-    }
+    auto optionals = findOptionalShaders(sid);
+    if (!optionals || index < 0) return;
+    optionals->toggle(size_t(index));
   });
 }
 
@@ -2926,12 +2925,16 @@ NTWParameterInfo* ntw_get_optional_shader_parameters(const char* connectableId, 
   if (outCount) *outCount = 0;
   if (!connectableId) return nullptr;
 
-  auto* optionals = findOptionalShaders(std::string(connectableId));
+  auto optionals = findOptionalShaders(std::string(connectableId));
   if (!optionals) return nullptr;
 
   if (optionalIndex < 0 || optionalIndex >= static_cast<int>(optionals->size())) return nullptr;
 
-  auto optShader = (*optionals)[optionalIndex];
+  // Opening an optional shader's settings creates it (on the engine thread,
+  // which compiles its program).
+  auto optShader = optionals->existing(size_t(optionalIndex));
+  if (!optShader) optShader = runOnEngineThread([&]() { return optionals->shader(size_t(optionalIndex)); });
+  if (!optShader) return nullptr;
   auto settings = optShader->settingsRef();
   if (!settings) return nullptr;
 
