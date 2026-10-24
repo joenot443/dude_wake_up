@@ -1,10 +1,10 @@
 #include "CrashHandler.h"
+#include "SingleInstance.h"
 #include "MainWindow.h"
 #include "StressTest.h"
 #include "Theme.h"
 
 #include <QApplication>
-#include <QLockFile>
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QDir>
@@ -68,6 +68,7 @@ int main(int argc, char** argv) {
     QApplication app(argc, argv);
     app.setApplicationName("Nottawa");
     app.setOrganizationName("Nottawa");
+    app.setApplicationVersion(NOTTAWA_VERSION);
     // UI settings live in an INI file under the app data folder (not the
     // registry), so a throwaway NOTTAWA_APPDATA isolates them too. Kept in
     // settings/: the organisation subfolder would otherwise be "Nottawa",
@@ -79,16 +80,19 @@ int main(int argc, char** argv) {
         auto* sink = new UrlSink(&app);
         for (const char* scheme : {"http", "https", "mailto", "file"}) QDesktopServices::setUrlHandler(scheme, sink, "open");
     }
-    // One instance per app data folder: two would share (and overwrite) the
-    // session, config and logs. A crashed instance's lock is stale (its
-    // process is gone) and is taken over.
-    QDir().mkpath(appDataDir());
-    auto instanceLock = std::make_unique<QLockFile>(QDir(appDataDir()).filePath("nottawa.lock"));
-    instanceLock->setStaleLockTime(0);
-    if (!instanceLock->tryLock(500)) {
-        QMessageBox::information(nullptr, "Nottawa", "Nottawa is already running.");
+    // A nottawa:// link this launch was opened with (a shared strand).
+    QString link;
+    for (const QString& arg : app.arguments().mid(1))
+        if (arg.startsWith("nottawa:", Qt::CaseInsensitive)) link = arg;
+    // One instance per app data folder: a second launch hands its link (or
+    // just "come to the front") to the running one.
+    SingleInstance instance(appDataDir());
+    if (!instance.acquire()) {
+        if (!instance.forwardToRunning(link))
+            QMessageBox::information(nullptr, "Nottawa", "Nottawa is already running.");
         return 0;
     }
+    app.setProperty("appDataDir", appDataDir());  // for Help > Show Logs Folder
     captureEngineLog();
     CrashHandler::install();
 
@@ -96,6 +100,8 @@ int main(int argc, char** argv) {
     {
         MainWindow w(findDataDir());
         w.show();
+        QObject::connect(&instance, &SingleInstance::requestReceived, &w, &MainWindow::handleExternalRequest);
+        if (!link.isEmpty()) QTimer::singleShot(0, &w, [&w, link] { w.handleExternalRequest(link); });
         QTimer heartbeat;
         QObject::connect(&heartbeat, &QTimer::timeout, &CrashHandler::heartbeat);
         heartbeat.start(250);
@@ -104,8 +110,11 @@ int main(int argc, char** argv) {
     }  // the window stops the engine and saves the session here
     // Settings > Theme > Restart Now: relaunch once this instance is done.
     if (app.property("restartRequested").toBool()) {
-        instanceLock.reset();  // the new instance takes it
-        QProcess::startDetached(QCoreApplication::applicationFilePath(), QCoreApplication::arguments().mid(1));
+        instance.release();  // the new instance takes over
+        QStringList args;
+        for (const QString& arg : app.arguments().mid(1))
+            if (!arg.startsWith("nottawa:", Qt::CaseInsensitive)) args << arg;  // the link's been opened
+        QProcess::startDetached(QCoreApplication::applicationFilePath(), args);
     }
     return code;
 }

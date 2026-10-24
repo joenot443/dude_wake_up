@@ -27,6 +27,8 @@
 #include "ui/ActionBar.h"
 #include "ui/Toast.h"
 
+#include <windows.h>
+#include <QRegularExpression>
 #include <QAction>
 #include <QActionGroup>
 #include <QApplication>
@@ -436,10 +438,38 @@ void MainWindow::buildMenus() {
     help->addAction("Send Feedback…", this, [] {
         QDesktopServices::openUrl(QUrl("mailto:joe@nottawa.app?subject=Nottawa%20Feedback"));
     });
+    // engine.log, with the stack of any crash or hang: to attach to a report.
+    help->addAction("Show &Logs Folder", this, [] {
+        QDesktopServices::openUrl(QUrl::fromLocalFile(QDir(qApp->property("appDataDir").toString()).filePath("logs")));
+    });
     help->addSeparator();
     help->addAction("&About Nottawa", this, [this] {
-        QMessageBox::about(this, "About Nottawa", "<b>Nottawa</b><br>Audio-reactive visuals for live performance.");
+        QMessageBox::about(this, "About Nottawa",
+                           QString("<b>Nottawa</b> %1<br>Audio-reactive visuals for live performance.<br><br>"
+                                   "Free software under the GNU GPL v3. Third-party notices are in the "
+                                   "licenses folder next to Nottawa.exe.")
+                               .arg(QCoreApplication::applicationVersion()));
     });
+}
+
+void MainWindow::handleExternalRequest(const QString& request) {
+    if (isMinimized()) showNormal();
+    raise();
+    activateWindow();
+    SetForegroundWindow(reinterpret_cast<HWND>(winId()));  // the sender allowed it
+    if (request.isEmpty()) return;
+    const QUrl url(request);
+    const QStringList path = url.path().split('/', Qt::SkipEmptyParts);
+    static const QRegularExpression slugPattern("^[A-Za-z0-9_-]{1,128}$");
+    if (url.scheme().compare("nottawa", Qt::CaseInsensitive) != 0 || url.host().compare("strands", Qt::CaseInsensitive) != 0
+        || path.isEmpty() || !slugPattern.match(path.first()).hasMatch()) {
+        log("[link] ignored " + request);
+        toast_->show("Nottawa can't open that link", 5000);
+        return;
+    }
+    log("[link] opening shared strand " + path.first());
+    editor_->loadSharedStrand(path.first());
+    welcome_->hide();
 }
 
 void MainWindow::rebuildRecentMenu() {

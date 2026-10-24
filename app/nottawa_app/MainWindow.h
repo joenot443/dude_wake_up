@@ -40,6 +40,11 @@ public:
     explicit MainWindow(const QString& dataPath);
     ~MainWindow() override;
 
+    // From another launch (see SingleInstance) or this one's command line:
+    // a nottawa://strands/<slug> link loads that shared strand; anything
+    // else just brings the window to the front.
+    void handleExternalRequest(const QString& request);
+
 protected:
     void resizeEvent(QResizeEvent* e) override;
     bool eventFilter(QObject* watched, QEvent* e) override;

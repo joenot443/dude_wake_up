@@ -1,214 +1,185 @@
 <#
 .SYNOPSIS
-End-to-end Windows release build for Nottawa.
+Builds the Windows release of Nottawa (the Qt app, app/nottawa_app).
 
 .DESCRIPTION
-Reproducible pipeline used by CI and manual releases:
-  1. Restore ffmpeg LGPL binaries (if missing).
-  2. Patch the .vcxproj so Nottawa's flags survive projectGenerator regen.
-  3. MSBuild Release|x64.
-  4. Stage bin/ + data/ into a signed layout.
-  5. Sign the .exe with signtool (EV cert if -Certificate provided,
-     self-signed fallback for preview builds).
-  6. Compile the Inno Setup installer.
-  7. Sign the installer.
+  1. Builds the engine and the app (Release) into app\build\release.
+  2. Stages dist\Nottawa-<version>\: Nottawa.exe, Qt (windeployqt), the
+     ffmpeg LGPL DLLs, the Visual C++ runtime (app-local), data\ and
+     licenses\.
+  3. Smoke-tests the staged copy: launches it with a throwaway app data
+     folder and runs a short stress scenario, which must exit cleanly.
+  4. Signs the exe (when -Certificate is given).
+  5. Builds the installer with Inno Setup (when installed) and signs it.
+  6. Zips a portable copy and the symbols (PDB) for crash reports.
 
-Output: dist\Nottawa-Setup-{Version}-{Channel}.exe
+The version comes from the VERSION file at the repo root.
 
-.PARAMETER Version
-Version string embedded in the installer filename and metadata.
-
-.PARAMETER Channel
-'release' or 'preview'. Preview builds accept self-signed cert; release
-builds require an EV cert and fail if signing fails.
+Output (dist\):
+  Nottawa-Setup-<version>.exe     the installer
+  Nottawa-<version>-portable.zip  the staged folder, zipped
+  Nottawa-<version>-symbols.zip   Nottawa.pdb, to symbolise crash logs
 
 .PARAMETER Certificate
-Thumbprint (SHA1) or path to .pfx of the signing cert. Optional for preview.
-
-.PARAMETER PfxPassword
-Password if -Certificate is a .pfx path. Ignored otherwise.
-
-.PARAMETER TimestampUrl
-RFC 3161 timestamp server. Default is DigiCert's RFC 3161 endpoint.
-
-.PARAMETER InnoSetup
-Path to ISCC.exe. Autodetected from PATH and default install location.
-
-.PARAMETER SkipBuild
-Skip MSBuild step (useful for iterating on installer packaging).
+SHA1 thumbprint (CurrentUser\My) or path to a .pfx. Without it nothing is
+signed, and Windows SmartScreen will warn whoever runs the installer.
 
 .EXAMPLE
-pwsh packaging\windows\build_release.ps1 -Version 0.0.0 -Channel preview
-pwsh packaging\windows\build_release.ps1 -Version 1.0.0 -Channel release -Certificate <thumbprint>
+powershell -File packaging\windows\build_release.ps1
+powershell -File packaging\windows\build_release.ps1 -Certificate <thumbprint>
 #>
 
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory=$true)][string]$Version,
-    [ValidateSet('release','preview')][string]$Channel = 'preview',
     [string]$Certificate,
     [string]$PfxPassword,
     [string]$TimestampUrl = 'http://timestamp.digicert.com',
     [string]$InnoSetup,
-    [switch]$SkipBuild
+    [string]$QtDir = 'C:\Qt\6.8.0\msvc2022_64',
+    [switch]$SkipBuild,
+    [switch]$SkipSmokeTest
 )
 
 $ErrorActionPreference = 'Stop'
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
-$Proj     = Join-Path $RepoRoot 'apps\myApps\Nottawa\Nottawa.vcxproj'
-$Sln      = Join-Path $RepoRoot 'apps\myApps\Nottawa\Nottawa.sln'
-$BinDir   = Join-Path $RepoRoot 'apps\myApps\Nottawa\bin'
-$DataDir  = Join-Path $RepoRoot 'data'
+$Version  = (Get-Content (Join-Path $RepoRoot 'VERSION') -TotalCount 1).Trim()
+if ($Version -notmatch '^\d+\.\d+\.\d+$') { throw "VERSION must be MAJOR.MINOR.PATCH, got '$Version'" }
+$BuildDir = Join-Path $RepoRoot 'app\build\release'
 $DistDir  = Join-Path $RepoRoot 'dist'
-$StageDir = Join-Path $RepoRoot "dist\stage-$Channel"
+$Stage    = Join-Path $DistDir "Nottawa-$Version"
 
-Write-Host "Nottawa release build: v$Version ($Channel)" -ForegroundColor Cyan
+function Step($text) { Write-Host "==> $text" -ForegroundColor Cyan }
 
-# ----- 1. ffmpeg present ------------------------------------------------
+# ----- Tools ---------------------------------------------------------------
 
-$fetchScript = Join-Path $RepoRoot 'scripts\fetch_ffmpeg_lgpl.ps1'
-$anyFfmpeg = Get-ChildItem -Path $BinDir -Filter 'avcodec-*.dll' -ErrorAction SilentlyContinue
-if (-not $anyFfmpeg) {
-    Write-Host "ffmpeg DLLs missing from $BinDir; invoking fetch script." -ForegroundColor Yellow
-    & pwsh -File $fetchScript
-    if ($LASTEXITCODE -ne 0) {
-        throw "fetch_ffmpeg_lgpl.ps1 exited $LASTEXITCODE"
-    }
-}
+$vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+if (-not (Test-Path $vswhere)) { throw 'vswhere.exe not found: install Visual Studio 2022 with the C++ workload.' }
+$vs = & $vswhere -latest -products '*' -requires Microsoft.Component.MSBuild -property installationPath
+if (-not $vs) { throw 'No Visual Studio installation with MSBuild found.' }
+$cmake = Join-Path $vs 'Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe'
+$windeployqt = Join-Path $QtDir 'bin\windeployqt.exe'
+if (-not (Test-Path $windeployqt)) { throw "windeployqt not found under $QtDir (pass -QtDir)." }
+# The newest Visual C++ runtime matching the compiler (app-local deployment).
+$crt = Get-ChildItem (Join-Path $vs 'VC\Redist\MSVC') -Directory |
+       Where-Object { $_.Name -match '^\d+\.' } | Sort-Object { [version]$_.Name } -Descending |
+       ForEach-Object { Join-Path $_.FullName 'x64\Microsoft.VC143.CRT' } |
+       Where-Object { Test-Path $_ } | Select-Object -First 1
+if (-not $crt) { throw 'Visual C++ runtime (Microsoft.VC143.CRT) not found in the Visual Studio install.' }
 
-# ----- 2. vcxproj patch -------------------------------------------------
+Write-Host "Nottawa $Version" -ForegroundColor Green
 
-$patchScript = Join-Path $RepoRoot 'scripts\patch-vcxproj.ps1'
-if (Test-Path $patchScript) {
-    & pwsh -File $patchScript -Project $Proj -RepoRoot $RepoRoot
-} else {
-    Write-Warning "patch-vcxproj.ps1 not found; assuming .vcxproj is hand-maintained."
-}
-
-# ----- 3. MSBuild -------------------------------------------------------
+# ----- 1. Build ------------------------------------------------------------
 
 if (-not $SkipBuild) {
-    $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-    if (-not (Test-Path $vswhere)) {
-        throw "vswhere.exe not found. Install Visual Studio 2022 with C++ workload."
-    }
-    $vsPath = & $vswhere -latest -products '*' -requires Microsoft.Component.MSBuild -property installationPath
-    if (-not $vsPath) { throw "No VS install with MSBuild found." }
-    $msbuild = Join-Path $vsPath 'MSBuild\Current\Bin\MSBuild.exe'
-    if (-not (Test-Path $msbuild)) { throw "MSBuild not found at $msbuild" }
+    Step 'Building engine and app (Release)'
+    & $cmake -S (Join-Path $RepoRoot 'app\nottawa_app') -B $BuildDir | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "CMake configure failed ($LASTEXITCODE)" }
+    & $cmake --build $BuildDir --config Release
+    if ($LASTEXITCODE -ne 0) { throw "Build failed ($LASTEXITCODE)" }
+}
+$built = Join-Path $BuildDir 'Release'
+$exe = Join-Path $built 'Nottawa.exe'
+if (-not (Test-Path $exe)) { throw "$exe not found; build first." }
 
-    Write-Host "Building $Sln" -ForegroundColor Cyan
-    & $msbuild $Sln `
-        /p:Configuration=Release `
-        /p:Platform=x64 `
-        /p:PlatformToolset=v143 `
-        /verbosity:minimal `
-        /nologo
-    if ($LASTEXITCODE -ne 0) { throw "MSBuild failed ($LASTEXITCODE)" }
+# ----- 2. Stage ------------------------------------------------------------
+
+Step "Staging $Stage"
+if (Test-Path $Stage) { Remove-Item $Stage -Recurse -Force }
+New-Item -ItemType Directory -Path $Stage | Out-Null
+Copy-Item $exe $Stage
+
+# Qt: only what the app uses. No translations, no software OpenGL, no D3D/DXC
+# shader compilers (the app renders with OpenGL).
+& $windeployqt --release --no-translations --no-opengl-sw --no-system-d3d-compiler --no-system-dxc-compiler `
+    --no-compiler-runtime (Join-Path $Stage 'Nottawa.exe') | Out-Null
+if ($LASTEXITCODE -ne 0) { throw "windeployqt failed ($LASTEXITCODE)" }
+
+# ffmpeg (LGPL build, dynamically linked).
+$ffmpeg = Get-ChildItem (Join-Path $RepoRoot 'bin') -File | Where-Object { $_.Name -match '^(avcodec|avformat|avutil|swscale|swresample)-\d+\.dll$' }
+if ($ffmpeg.Count -ne 5) { throw "Expected 5 ffmpeg DLLs in bin\, found $($ffmpeg.Count) (run scripts\fetch_ffmpeg_lgpl.ps1)." }
+$ffmpeg | Copy-Item -Destination $Stage
+
+# Visual C++ runtime, app-local, so no separate redistributable is needed.
+Get-ChildItem $crt -Filter '*.dll' | Copy-Item -Destination $Stage
+
+# Data: the same folders the Mac app bundles, without development scripts.
+$data = Join-Path $Stage 'data'
+foreach ($folder in 'images', 'shaders', 'markdown', 'fonts', 'misc', 'audio') {
+    robocopy (Join-Path $RepoRoot $folder) (Join-Path $data $folder) /E /XF *.sh *.js .DS_Store Thumbs.db /NFL /NDL /NJH /NJS /NP | Out-Null
+    if ($LASTEXITCODE -ge 8) { throw "Copying $folder failed (robocopy $LASTEXITCODE)" }
 }
 
-# ----- 4. Stage ---------------------------------------------------------
+# Licences: Nottawa's own, and every third-party component's.
+$licenses = Join-Path $Stage 'licenses'
+New-Item -ItemType Directory -Path $licenses | Out-Null
+# Nottawa is GPL-3.0 (licenses\GPL-3.0.txt, see THIRD_PARTY_NOTICES.txt).
+Copy-Item (Join-Path $PSScriptRoot 'licenses\*') $licenses -Recurse
 
-if (Test-Path $StageDir) { Remove-Item $StageDir -Recurse -Force }
-New-Item -ItemType Directory -Path $StageDir | Out-Null
-New-Item -ItemType Directory -Path $DistDir -Force | Out-Null
+# ----- 3. Smoke test -------------------------------------------------------
 
-$exe = Join-Path $BinDir 'Nottawa.exe'
-if (-not (Test-Path $exe)) {
-    # OF generator sometimes lowercases; fall back.
-    $exe = Get-ChildItem -Path $BinDir -Filter '*.exe' | Select-Object -First 1 -ExpandProperty FullName
-    if (-not $exe) { throw "No .exe found in $BinDir. Did MSBuild actually produce output?" }
-}
-
-Copy-Item -LiteralPath $exe -Destination $StageDir
-Get-ChildItem -Path $BinDir -Filter '*.dll' | Copy-Item -Destination $StageDir
-
-$stagedData = Join-Path $StageDir 'data'
-if (Test-Path $DataDir) {
-    robocopy $DataDir $stagedData /MIR /NFL /NDL /NJH /NJS /NC /NS /NP | Out-Null
-    if ($LASTEXITCODE -ge 8) { throw "robocopy data failed ($LASTEXITCODE)" }
-}
-
-# ----- 5. Sign the exe --------------------------------------------------
-
-function Invoke-Signtool {
-    param([string]$Target)
-    if (-not $Certificate) {
-        if ($Channel -eq 'release') {
-            throw "release build requires -Certificate (EV cert thumbprint or .pfx)"
+if (-not $SkipSmokeTest) {
+    Step 'Smoke-testing the staged copy'
+    $appData = Join-Path $env:TEMP "nottawa-smoke-$PID"
+    if (Test-Path $appData) { Remove-Item $appData -Recurse -Force }
+    $env:NOTTAWA_APPDATA = $appData
+    $env:NOTTAWA_NO_PUBLISH = '1'
+    $env:NOTTAWA_STRESS = 'churn,previews,workspace'
+    $env:NOTTAWA_STRESS_ROUNDS = '1'
+    $env:NOTTAWA_STRESS_CYCLES = '3'
+    try {
+        $p = Start-Process (Join-Path $Stage 'Nottawa.exe') -WorkingDirectory $Stage -PassThru
+        if (-not $p.WaitForExit(300000)) { Stop-Process -Id $p.Id -Force; throw 'Smoke test timed out' }
+        $log = Join-Path $appData 'logs\engine.log'
+        $crashed = (Test-Path $log) -and (Select-String -Path $log -Pattern '=== CRASH' -Quiet)
+        if ($p.ExitCode -ne 0 -or $crashed) { throw "Smoke test failed (exit $($p.ExitCode); see $log)" }
+        Remove-Item $appData -Recurse -Force
+    } finally {
+        foreach ($v in 'NOTTAWA_APPDATA', 'NOTTAWA_NO_PUBLISH', 'NOTTAWA_STRESS', 'NOTTAWA_STRESS_ROUNDS', 'NOTTAWA_STRESS_CYCLES') {
+            Remove-Item "env:$v" -ErrorAction SilentlyContinue
         }
-        Write-Warning "No -Certificate; leaving $Target UNSIGNED (preview channel only)."
-        return
     }
-
-    $signtool = (Get-Command signtool.exe -ErrorAction SilentlyContinue).Source
-    if (-not $signtool) {
-        # Fallback: check latest Windows SDK.
-        $sdk = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin" -Directory `
-             | Where-Object { $_.Name -match '^10\.' } `
-             | Sort-Object Name -Descending | Select-Object -First 1
-        if ($sdk) {
-            $signtool = Join-Path $sdk.FullName 'x64\signtool.exe'
-        }
-    }
-    if (-not $signtool -or -not (Test-Path $signtool)) {
-        throw "signtool.exe not found. Install Windows 10/11 SDK."
-    }
-
-    $args = @('sign', '/fd', 'SHA256', '/td', 'SHA256', '/tr', $TimestampUrl)
-    if ($Certificate -like '*.pfx') {
-        $args += @('/f', $Certificate)
-        if ($PfxPassword) { $args += @('/p', $PfxPassword) }
-    } else {
-        # Treat as SHA1 thumbprint from CurrentUser\My.
-        $args += @('/sha1', $Certificate)
-    }
-    $args += $Target
-
-    & $signtool @args
-    if ($LASTEXITCODE -ne 0) { throw "signtool sign failed on $Target ($LASTEXITCODE)" }
 }
 
-$stagedExe = Join-Path $StageDir (Split-Path -Leaf $exe)
-Invoke-Signtool -Target $stagedExe
+# ----- 4. Sign -------------------------------------------------------------
 
-# ----- 6. Inno Setup ---------------------------------------------------
+function Invoke-Sign([string]$Target) {
+    if (-not $Certificate) { Write-Warning "Not signed (no -Certificate): $Target"; return }
+    $signtool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin" -Recurse -Filter signtool.exe -ErrorAction SilentlyContinue |
+                Where-Object { $_.FullName -match '\\x64\\' } | Sort-Object FullName -Descending | Select-Object -First 1 -ExpandProperty FullName
+    if (-not $signtool) { throw 'signtool.exe not found: install the Windows 10/11 SDK.' }
+    $a = @('sign', '/fd', 'SHA256', '/td', 'SHA256', '/tr', $TimestampUrl)
+    if ($Certificate -like '*.pfx') { $a += @('/f', $Certificate); if ($PfxPassword) { $a += @('/p', $PfxPassword) } }
+    else { $a += @('/sha1', $Certificate) }
+    & $signtool @a $Target
+    if ($LASTEXITCODE -ne 0) { throw "Signing $Target failed ($LASTEXITCODE)" }
+}
+Step 'Signing'
+Invoke-Sign (Join-Path $Stage 'Nottawa.exe')
+
+# ----- 5. Installer --------------------------------------------------------
 
 if (-not $InnoSetup) {
-    $InnoSetup = (Get-Command ISCC.exe -ErrorAction SilentlyContinue).Source
-    if (-not $InnoSetup) {
-        $cand = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
-        if (Test-Path $cand) { $InnoSetup = $cand }
-    }
+    $InnoSetup = @((Get-Command ISCC.exe -ErrorAction SilentlyContinue).Source,
+                   "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
+                   "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe") | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
 }
-if (-not $InnoSetup) {
-    Write-Warning "Inno Setup (ISCC.exe) not found; skipping installer build."
-    Write-Host "Staged tree at $StageDir" -ForegroundColor Green
-    exit 0
-}
-
-$iss = Join-Path $PSScriptRoot 'Nottawa.iss'
-if (-not (Test-Path $iss)) {
-    Write-Warning "$iss not found — installer .iss must exist to build installer. Staged tree only."
-    exit 0
-}
-
-$installerName = "Nottawa-Setup-$Version-$Channel.exe"
-& $InnoSetup `
-    "/DAppVersion=$Version" `
-    "/DAppChannel=$Channel" `
-    "/DStageDir=$StageDir" `
-    "/DOutputDir=$DistDir" `
-    "/DOutputBaseFilename=$($installerName -replace '\.exe$','')" `
-    $iss
-if ($LASTEXITCODE -ne 0) { throw "ISCC failed ($LASTEXITCODE)" }
-
-# ----- 7. Sign the installer --------------------------------------------
-
-$installerPath = Join-Path $DistDir $installerName
-if (Test-Path $installerPath) {
-    Invoke-Signtool -Target $installerPath
-    Write-Host "Installer: $installerPath" -ForegroundColor Green
+if ($InnoSetup) {
+    Step 'Building the installer'
+    & $InnoSetup /Q "/DAppVersion=$Version" "/DStageDir=$Stage" "/DOutputDir=$DistDir" (Join-Path $PSScriptRoot 'Nottawa.iss')
+    if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed ($LASTEXITCODE)" }
+    Invoke-Sign (Join-Path $DistDir "Nottawa-Setup-$Version.exe")
 } else {
-    Write-Warning "Installer not found at $installerPath — check ISCC output naming."
+    Write-Warning 'Inno Setup (ISCC.exe) not found: no installer built.'
 }
+
+# ----- 6. Portable zip and symbols ----------------------------------------
+
+Step 'Zipping portable copy and symbols'
+$portable = Join-Path $DistDir "Nottawa-$Version-portable.zip"
+$symbols  = Join-Path $DistDir "Nottawa-$Version-symbols.zip"
+Remove-Item $portable, $symbols -ErrorAction SilentlyContinue
+Compress-Archive -Path $Stage -DestinationPath $portable -CompressionLevel Optimal
+Compress-Archive -Path (Join-Path $built 'Nottawa.pdb') -DestinationPath $symbols -CompressionLevel Optimal
+
+Write-Host ''
+Get-ChildItem $DistDir -File -Filter "Nottawa*$Version*" | ForEach-Object { '{0,-40} {1,8:N1} MB' -f $_.Name, ($_.Length / 1MB) }

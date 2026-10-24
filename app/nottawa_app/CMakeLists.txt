@@ -69,12 +69,30 @@ qt_add_executable(nottawa_app WIN32
     nodes/NodeItems.h        nodes/NodeItems.cpp
     Theme.h                  Theme.cpp
     CrashHandler.h           CrashHandler.cpp
+    SingleInstance.h         SingleInstance.cpp
     panels/BrowserPanel.h    panels/BrowserPanel.cpp
     panels/InspectorPanel.h  panels/InspectorPanel.cpp
     panels/LogPanel.h        panels/LogPanel.cpp
     panels/WelcomeOverlay.h  panels/WelcomeOverlay.cpp
 )
 add_dependencies(nottawa_app nottawa_engine)
+
+# Version (from VERSION), icon and manifest. Shipped as Nottawa.exe.
+file(STRINGS "${NOTTAWA_REPO}/VERSION" NOTTAWA_VERSION LIMIT_COUNT 1)
+string(STRIP "${NOTTAWA_VERSION}" NOTTAWA_VERSION)
+string(REGEX MATCH "^([0-9]+)\\.([0-9]+)\\.([0-9]+)" _version_ok "${NOTTAWA_VERSION}")
+if(NOT _version_ok)
+    message(FATAL_ERROR "VERSION must be MAJOR.MINOR.PATCH, got '${NOTTAWA_VERSION}'")
+endif()
+set(NOTTAWA_VERSION_MAJOR ${CMAKE_MATCH_1})
+set(NOTTAWA_VERSION_MINOR ${CMAKE_MATCH_2})
+set(NOTTAWA_VERSION_PATCH ${CMAKE_MATCH_3})
+set(NOTTAWA_ICON "${CMAKE_CURRENT_SOURCE_DIR}/resources/nottawa.ico")
+configure_file(resources/nottawa.rc.in "${CMAKE_CURRENT_BINARY_DIR}/nottawa.rc" @ONLY)
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${NOTTAWA_REPO}/VERSION")
+target_sources(nottawa_app PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/nottawa.rc" resources/Nottawa.manifest)
+target_compile_definitions(nottawa_app PRIVATE NOTTAWA_VERSION="${NOTTAWA_VERSION}")
+set_target_properties(nottawa_app PROPERTIES OUTPUT_NAME Nottawa)
 target_include_directories(nottawa_app PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${NOTTAWA_REPO}/src/Bridge
@@ -102,7 +120,7 @@ get_target_property(_qmake Qt6::qmake IMPORTED_LOCATION)
 get_filename_component(_qt_bin "${_qmake}" DIRECTORY)
 file(GLOB _ffmpeg_dlls "${NOTTAWA_REPO}/bin/av*.dll" "${NOTTAWA_REPO}/bin/sw*.dll")
 add_custom_command(TARGET nottawa_app POST_BUILD
-    COMMAND "${_qt_bin}/windeployqt.exe" --no-translations --no-system-d3d-compiler --no-opengl-sw
+    COMMAND "${_qt_bin}/windeployqt.exe" --no-translations --no-system-d3d-compiler --no-system-dxc-compiler --no-opengl-sw
             "$<TARGET_FILE:nottawa_app>"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${_ffmpeg_dlls} "$<TARGET_FILE_DIR:nottawa_app>"
     COMMENT "Deploying Qt and ffmpeg DLLs")

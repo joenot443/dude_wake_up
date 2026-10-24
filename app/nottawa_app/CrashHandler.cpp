@@ -20,9 +20,12 @@ namespace {
 constexpr int kMaxFrames = 48;
 
 // Writes one symbolised frame. DbgHelp must already be initialised.
+// Without the PDB (it isn't shipped) the name is only an export, or none;
+// module+offset is printed too, for symbolising against the archived PDB.
 void printFrame(HANDLE process, int index, DWORD64 address) {
     char module[MAX_PATH] = "?";
-    if (const DWORD64 base = SymGetModuleBase64(process, address)) {
+    const DWORD64 base = SymGetModuleBase64(process, address);
+    if (base) {
         GetModuleFileNameA(reinterpret_cast<HMODULE>(base), module, MAX_PATH);
         const char* slash = std::strrchr(module, '\\');
         if (slash) std::memmove(module, slash + 1, std::strlen(slash));
@@ -38,8 +41,8 @@ void printFrame(HANDLE process, int index, DWORD64 address) {
     if (SymGetLineFromAddr64(process, address, &lineDisplacement, &line))
         std::fprintf(stderr, "  #%02d %s!%s  %s:%lu\n", index, module, named ? symbol->Name : "?", line.FileName, line.LineNumber);
     else
-        std::fprintf(stderr, "  #%02d %s!%s+0x%llx\n", index, module, named ? symbol->Name : "?",
-                     named ? displacement : address);
+        std::fprintf(stderr, "  #%02d %s+0x%llx  %s+0x%llx\n", index, module, address - base,
+                     named ? symbol->Name : "?", named ? displacement : 0ull);
 }
 
 LONG WINAPI onCrash(EXCEPTION_POINTERS* info) {
