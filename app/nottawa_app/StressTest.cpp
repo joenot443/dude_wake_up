@@ -8,6 +8,7 @@
 
 #include <QApplication>
 #include <QDir>
+#include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QStandardPaths>
@@ -20,7 +21,7 @@
 namespace {
 const QStringList kAllScenarios = {"churn", "swap", "connect", "undo", "strands", "workspace", "previews",
                                    "stage", "resolution", "inputs", "copypaste", "optional", "parameters",
-                                   "audio"};
+                                   "audio", "badfiles"};
 
 QString processStats() {
     PROCESS_MEMORY_COUNTERS_EX mem = {};
@@ -109,6 +110,8 @@ void StressTest::enqueueScenario(const QString& name) {
     else if (name == "parameters") parameters(cycles);
     else if (name == "memory") memory(cycles);
     else if (name == "audio") audio(cycles);
+    else if (name == "badfiles") badFiles(cycles);
+    else if (name == "fonts") fonts();
     else add([this, name] { window_->log("[stress] unknown scenario " + name); });
     // Settle, clear, settle, measure.
     add([] {}, 1000);
@@ -419,6 +422,78 @@ void StressTest::optional(int cycles) {
             window_->editor_->selectNode(id);
         }, 60);
     }
+}
+
+// Damaged and hostile inputs: workspaces and strands that are truncated, of
+// the wrong types or garbage; video and image files that aren't; text that's
+// huge or exotic. Each must fail cleanly.
+void StressTest::badFiles(int cycles) {
+    add([this] {
+        QDir dir(scratch_);
+        auto write = [&](const QString& name, const QByteArray& data) {
+            QFile f(dir.filePath(name));
+            if (f.open(QIODevice::WriteOnly)) f.write(data);
+        };
+        // A real workspace to mangle.
+        const QString src = randomSource();
+        const auto effects = EngineBridge::instance()->effects();
+        window_->editor_->addFromCatalog(effects[0].typeRaw, false, src);
+        EngineBridge::instance()->saveWorkspace(dir.filePath("good.json"), "good");
+        QFile good(dir.filePath("good.json"));
+        good.open(QIODevice::ReadOnly);
+        const QByteArray ws = good.readAll();
+        write("empty.json", {});
+        write("truncated.json", ws.left(ws.size() / 2));
+        write("garbage.json", QByteArray(4096, '\x9c'));
+        write("array.json", "[1,2,3]");
+        write("null.json", "null");
+        write("wrongtypes.json", QByteArray(ws).replace("\"x\":", "\"x\":\"left\",\"_x\":")
+                                     .replace("\"shaderType\":", "\"shaderType\":\"oops\",\"_t\":"));
+        write("hugenumbers.json", QByteArray(ws).replace(": 0.", ": 1e308").replace(": 1,", ": -2147483648,"));
+        write("fake.mp4", QByteArray("this is not a video\n").repeated(200));
+        write("zero.mp4", {});
+        write("fake.png", QByteArray(64, '\x00'));
+        write("zero.png", {});
+    }, 100);
+    for (int c = 0; c < cycles; ++c) {
+        add([this] {
+            auto* eng = EngineBridge::instance();
+            QDir dir(scratch_);
+            for (const char* name : {"empty.json", "truncated.json", "garbage.json", "array.json", "null.json",
+                                     "wrongtypes.json", "hugenumbers.json", "missing.json"})
+                eng->loadWorkspace(dir.filePath(name));
+            QFile wrong(dir.filePath("wrongtypes.json"));
+            wrong.open(QIODevice::ReadOnly);
+            eng->loadStrandJson(QString::fromUtf8(wrong.readAll()));
+            eng->loadStrandJson("{not json");
+            eng->loadStrandJson("{\"shaders\": 5, \"sources\": \"x\", \"connections\": [null]}");
+        }, 100);
+        add([this] {
+            QDir dir(scratch_);
+            for (const char* name : {"fake.mp4", "zero.mp4", "fake.png", "zero.png", "missing.mp4"})
+                window_->editor_->addMediaFile(dir.filePath(name));
+            auto* eng = EngineBridge::instance();
+            const QString text = eng->addInput(VideoSourceKind::Text);
+            const QStringList samples = {QString(20000, QChar('W')), QString::fromUtf8("\xf0\x9f\x94\xa5\xe6\xbc\xa2\xe5\xad\x97 \xd9\x85\xd8\xb1\xd8\xad\xd8\xa8\xd8\xa7"),
+                                         QString(), QStringLiteral("\n\n\t\t"), QString(500, QChar(0x200B))};
+            eng->setTextSourceText(text, samples[int(rng_() % uint32_t(samples.size()))]);
+            eng->setTextSourceFontSize(text, rng_() % 2 ? 0 : 2000);
+        }, 300);
+        add([] { EngineBridge::instance()->clearGraph(); }, 100);
+    }
+}
+
+// Text at a few sizes, then the size slider dragged 8 -> 400.
+void StressTest::fonts() {
+    add([this] { textId_ = EngineBridge::instance()->addInput(VideoSourceKind::Text); });
+    for (int size : {24, 72, 200, 400}) {
+        add([this, size] { EngineBridge::instance()->setTextSourceFontSize(textId_, size); }, 100);
+        add([this, size] { checkpoint(QString("fonts: size %1").arg(size)); }, 1500);
+    }
+    add([this] { window_->log("[stress] fonts: drag start"); });
+    for (int size = 8; size <= 400; size += 4)
+        add([this, size] { EngineBridge::instance()->setTextSourceFontSize(textId_, size); }, 16);
+    add([this] { checkpoint("fonts: drag end"); }, 100);
 }
 
 // Audio capture started and stopped, sources and sample tracks switched and

@@ -36,6 +36,11 @@ protected:
   TextEditorView textEditorView;
   ofTrueTypeFont font;
   std::string fontPath;
+  static constexpr int   kMinFontSize = 8;    // the size slider's range
+  static constexpr int   kMaxFontSize = 400;
+  static constexpr float kFontReloadDelay = 0.15f;  // seconds a new size must hold
+  int   pendingFontSize = 0;
+  float pendingFontSince = 0;
   std::string lastText;
   ofShader strokeShader;
   ofFbo tempFbo;

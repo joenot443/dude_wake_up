@@ -30,7 +30,7 @@ void TextSource::setup() {
 
   // Enable better font rendering
   font.setLetterSpacing(1.0);
-  font.load(displayText->font.path, displayText->fontSize, true, true, true); // antialiased, full character set, make contours
+  font.load(displayText->font.path, std::clamp(displayText->fontSize, kMinFontSize, kMaxFontSize), true, true, true); // antialiased, full character set, make contours
   fontPath = displayText->font.path;
   strokeShader.load("shaders/Stroke");
 
@@ -38,7 +38,7 @@ void TextSource::setup() {
       displayText->fontSelector->intValue < static_cast<int>(FontService::getService()->fonts.size()) &&
       displayText->font.name != FontService::getService()->fonts[displayText->fontSelector->intValue].name) {
     displayText->font = FontService::getService()->fonts[displayText->fontSelector->intValue];
-    font.load(displayText->font.path, displayText->fontSize, true, true, true);
+    font.load(displayText->font.path, std::clamp(displayText->fontSize, kMinFontSize, kMaxFontSize), true, true, true);
   }
 }
 
@@ -53,22 +53,39 @@ void TextSource::saveFrame() {
     }
   }
 
-  // Reload font if size or path changed
+  // Reload the font when its file or size changes. Loading builds a glyph
+  // atlas for the full character set, slow enough at large sizes to stall
+  // the engine for frames; while the size is still changing (a slider being
+  // dragged), the loaded font is drawn scaled and reloaded once the size has
+  // held for a moment. Sizes are kept to the UI's range (files can hold any).
   bool fontChanged = false;
-  if (!font.isLoaded() ||
-      font.getSize() != displayText->fontSize
-      || fontPath != displayText->font.path) {
+  const int wantedSize = std::clamp(displayText->fontSize, kMinFontSize, kMaxFontSize);
+  const float now = ofGetElapsedTimef();
+  if (!font.isLoaded() || fontPath != displayText->font.path) {
     fontPath = displayText->font.path;
-    font.load(displayText->font.path, displayText->fontSize, true, true, true);
+    font.load(displayText->font.path, wantedSize, true, true, true);
     fontChanged = true;
+  } else if (font.getSize() != wantedSize) {
+    if (wantedSize != pendingFontSize) {
+      pendingFontSize = wantedSize;
+      pendingFontSince = now;
+    } else if (now - pendingFontSince > kFontReloadDelay) {
+      font.load(displayText->font.path, wantedSize, true, true, true);
+      fontChanged = true;
+    }
   }
+  const float fontScale = font.isLoaded() && font.getSize() > 0 ? float(wantedSize) / float(font.getSize()) : 1.0f;
+  auto scaledBounds = [&]() {
+    ofRectangle b = font.getStringBoundingBox(displayText->text, 0, 0);
+    return ofRectangle(b.x * fontScale, b.y * fontScale, b.width * fontScale, b.height * fontScale);
+  };
 
   // Determine target FBO size
   int targetWidth = LayoutStateService::getService()->resolution.x;
   int targetHeight = LayoutStateService::getService()->resolution.y;
 
   if (displayText->cropToText->boolValue && font.isLoaded() && !displayText->text.empty()) {
-    ofRectangle bounds = font.getStringBoundingBox(displayText->text, 0, 0);
+    ofRectangle bounds = scaledBounds();
     // Add padding for stroke weight and edge softness
     float padding = displayText->strokeEnabled->boolValue
       ? displayText->strokeWeight->value + displayText->edgeSoftness->value
@@ -105,7 +122,7 @@ void TextSource::saveFrame() {
   // Compute draw position
   float drawX, drawY;
   if (displayText->cropToText->boolValue && font.isLoaded() && !displayText->text.empty()) {
-    ofRectangle bounds = font.getStringBoundingBox(displayText->text, 0, 0);
+    ofRectangle bounds = scaledBounds();
     float padding = displayText->strokeEnabled->boolValue
       ? displayText->strokeWeight->value + displayText->edgeSoftness->value
       : displayText->edgeSoftness->value;
@@ -140,7 +157,11 @@ void TextSource::saveFrame() {
   // Draw the text
   ofSetColor(ofColor(255.0 * displayText->color->color->data()[0], 255.0 * displayText->color->color->data()[1], 255.0 * displayText->color->color->data()[2], 255.0 * displayText->color->color->data()[3]));
 
-  font.drawString(displayText->text, xPos, yPos);
+  ofPushMatrix();
+  ofTranslate(xPos, yPos);
+  ofScale(fontScale, fontScale);
+  font.drawString(displayText->text, 0, 0);
+  ofPopMatrix();
 
   // Restore rendering settings
   ofDisableAntiAliasing();

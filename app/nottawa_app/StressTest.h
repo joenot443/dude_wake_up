@@ -57,6 +57,8 @@ private:
     void parameters(int cycles);
     void memory(int nodes);
     void audio(int cycles);
+    void badFiles(int cycles);
+    void fonts();
 
     // Helpers working on the live graph.
     QString randomSource();
@@ -73,4 +75,5 @@ private:
     QString scratch_;   // folder for workspace / strand files
     int counter_ = 0;
     int savedNodes_ = 0;
+    QString textId_;
 };
