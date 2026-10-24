@@ -185,39 +185,48 @@ void VideoSourceService::addVideoSource(std::shared_ptr<VideoSource> videoSource
 }
 
 // Remove a video source from the map
+// Tears a source down and drops everything the services hold for it: its
+// oscillators, its parameters (and those of its optional shaders and, for a
+// ShaderSource, its shader) and its feedback source. Shared by removing one
+// source and clearing them all.
+void VideoSourceService::releaseSource(std::shared_ptr<VideoSource> source)
+{
+  // Unsubscribe from resolution updates BEFORE teardown so a stray
+  // notification can't re-run setup() on a source mid-teardown.
+  source->resolutionUpdateSubscription = observable::unique_subscription{};
+  source->teardown();
+  OscillationService::getService()->removeOscillatorsFor(source->settings->parameters);
+  ParameterService::getService()->unregisterParameters(source->settings->parameters);
+
+  // Walk every optional shader created via the VideoSource's helper as
+  // well as any shader nested inside a ShaderSource. Each shader has its
+  // own settings + parameters that were registered at construction time
+  // and would otherwise leak into the global parameterMap forever.
+  std::function<void(std::shared_ptr<Shader>)> cleanShader =
+    [&cleanShader](std::shared_ptr<Shader> s) {
+      if (!s || !s->settings) return;
+      OscillationService::getService()->removeOscillatorsFor(s->settings->parameters);
+      ParameterService::getService()->unregisterParameters(s->settings->parameters);
+      for (auto& opt : s->optionalShaders) cleanShader(opt);
+    };
+  for (auto& opt : source->optionalShadersHelper.optionalShaders) cleanShader(opt);
+  if (auto shaderSrc = std::dynamic_pointer_cast<ShaderSource>(source)) {
+    cleanShader(shaderSrc->shader);
+  }
+  FeedbackSourceService::getService()->removeFeedbackSource(source->id);
+  // Drop the back-ref so the FeedbackSource shell can actually die once the
+  // service map entry is gone. Without this, undo-held VideoSources keep
+  // the FeedbackSource alive forever (and any pending frame-buffer state
+  // along with it).
+  source->feedbackDestination = nullptr;
+}
+
 void VideoSourceService::removeVideoSource(std::string id)
 {
   if (videoSourceMap.find(id) != videoSourceMap.end())
   {
     auto source = videoSourceMap[id];
-    // Unsubscribe from resolution updates BEFORE teardown so a stray
-    // notification can't re-run setup() on a source mid-teardown.
-    source->resolutionUpdateSubscription = observable::unique_subscription{};
-    source->teardown();
-    OscillationService::getService()->removeOscillatorsFor(source->settings->parameters);
-    ParameterService::getService()->unregisterParameters(source->settings->parameters);
-
-    // Walk every optional shader created via the VideoSource's helper as
-    // well as any shader nested inside a ShaderSource. Each shader has its
-    // own settings + parameters that were registered at construction time
-    // and would otherwise leak into the global parameterMap forever.
-    std::function<void(std::shared_ptr<Shader>)> cleanShader =
-      [&cleanShader](std::shared_ptr<Shader> s) {
-        if (!s || !s->settings) return;
-        OscillationService::getService()->removeOscillatorsFor(s->settings->parameters);
-        ParameterService::getService()->unregisterParameters(s->settings->parameters);
-        for (auto& opt : s->optionalShaders) cleanShader(opt);
-      };
-    for (auto& opt : source->optionalShadersHelper.optionalShaders) cleanShader(opt);
-    if (auto shaderSrc = std::dynamic_pointer_cast<ShaderSource>(source)) {
-      cleanShader(shaderSrc->shader);
-    }
-    FeedbackSourceService::getService()->removeFeedbackSource(id);
-    // Drop the back-ref so the FeedbackSource shell can actually die once the
-    // service map entry is gone. Without this, undo-held VideoSources keep
-    // the FeedbackSource alive forever (and any pending frame-buffer state
-    // along with it).
-    source->feedbackDestination = nullptr;
+    releaseSource(source);
     ShaderChainerService::getService()->removeConnectable(source);
     videoSourceMap.erase(id);
     log("removeVideoSource(%s): source.use_count=%ld (anything > 1 is held by undo or copies)",
@@ -685,12 +694,11 @@ void VideoSourceService::appendConfig(json j)
 
 void VideoSourceService::clear()
 {
+  // Each source is released as removeVideoSource does; tearing down alone
+  // left their parameters registered and their oscillators ticking.
   for (auto it = videoSourceMap.begin(); it != videoSourceMap.end();)
   {
-    auto key = it->first;
-    auto source = videoSourceMap[key];
-    source->teardown();
-    FeedbackSourceService::getService()->removeFeedbackSource(key);
+    releaseSource(it->second);
     it = videoSourceMap.erase(it);
   }
   

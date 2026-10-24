@@ -35,6 +35,7 @@ class WelcomeOverlay;
 // NOTTAWA_LOG=<path> mirrors the log plus a stats line per second to a file.
 class MainWindow : public QMainWindow {
     Q_OBJECT
+    friend class StressTest;  // drives the editor and window for stress runs
 public:
     explicit MainWindow(const QString& dataPath);
     ~MainWindow() override;

@@ -702,6 +702,26 @@ char* ntw_dump_object_counts(void) {
   return strdup_safe(s);
 }
 
+char* ntw_dump_registry_sizes(void) {
+  return runOnEngineThread([]() -> char* {
+    json j;
+    j["parameters"] = ParameterService::getService()->parameterMap.size();
+    j["favorites"] = ParameterService::getService()->favoriteParameterMap.size();
+    j["oscillators"] = OscillationService::getService()->oscillators.size();
+    // The most common owners of registered parameters.
+    std::map<std::string, int> owners;
+    for (auto const& [id, param] : ParameterService::getService()->parameterMap)
+      owners[param ? param->ownerName : "(null)"]++;
+    std::vector<std::pair<int, std::string>> top;
+    for (auto const& [name, count] : owners) top.push_back({count, name});
+    std::sort(top.rbegin(), top.rend());
+    json topJ = json::object();
+    for (size_t i = 0; i < top.size() && i < 6; ++i) topJ[top[i].second] = top[i].first;
+    j["topOwners"] = topJ;
+    return strdup_safe(j.dump());
+  });
+}
+
 void ntw_reset_object_counts(void) {
   ::lifecycle::Registry::instance().resetCounters();
 }
@@ -1031,15 +1051,6 @@ static void populateOscillatorDriverFields(NTWParameterInfo& info, const std::sh
   // Oscillator lookup
   auto osc = OscillationService::getService()->oscillatorForParameter(p);
   auto waveOsc = std::dynamic_pointer_cast<WaveformOscillator>(osc);
-  {
-    FILE* dbg = fopen("/tmp/ntw_osc_debug.log", "a");
-    if (dbg) {
-      fprintf(dbg, "param '%s' (id=%s): osc=%p waveOsc=%p, total_oscs=%zu\n",
-              p->name.c_str(), p->paramId.c_str(), (void*)osc.get(), (void*)waveOsc.get(),
-              OscillationService::getService()->oscillators.size());
-      fclose(dbg);
-    }
-  }
   if (waveOsc) {
     info.hasOscillator = 1;
     info.oscillatorEnabled = (waveOsc->enabled && waveOsc->enabled->boolValue) ? 1 : 0;
@@ -1998,11 +2009,13 @@ bool ntw_load_workspace(const char* path) {
     // own writable tmp dir — NSOpenPanel grants read access to the picked file
     // but not write access to its parent directory, so a sibling temp file
     // fails in the sandbox. $TMPDIR resolves to the per-container tmp dir.
-    const char* tmpDir = std::getenv("TMPDIR");
-    std::string tmpBase = tmpDir ? tmpDir : "/tmp";
-    if (!tmpBase.empty() && tmpBase.back() != '/') tmpBase += '/';
-    std::string tmpPath = tmpBase + "ntw_load_" +
-      std::to_string((unsigned long long)ofGetElapsedTimeMillis()) + ".json";
+    // (std::filesystem's temp directory is $TMPDIR on macOS and %TEMP% on
+    // Windows, where /tmp doesn't exist.)
+    std::error_code tmpError;
+    std::filesystem::path tmpFile = std::filesystem::temp_directory_path(tmpError);
+    if (tmpError) tmpFile = ".";
+    tmpFile /= "ntw_load_" + std::to_string((unsigned long long)ofGetElapsedTimeMillis()) + ".json";
+    const std::string tmpPath = tmpFile.string();
     std::ofstream tmpOut(tmpPath);
     if (!tmpOut.is_open()) {
       ofLogError("Bridge") << "ntw_load_workspace: failed to write temp file at " << tmpPath;
@@ -2014,12 +2027,8 @@ bool ntw_load_workspace(const char* path) {
     ConfigService::getService()->loadConfigFile(tmpPath);
     std::remove(tmpPath.c_str());
 
-    // Extract name from path (filename without extension).
-    std::string name = spath;
-    auto lastSlash = name.rfind('/');
-    if (lastSlash != std::string::npos) name = name.substr(lastSlash + 1);
-    auto lastDot = name.rfind('.');
-    if (lastDot != std::string::npos) name = name.substr(0, lastDot);
+    // The name is the file's, without extension (either slash separates).
+    const std::string name = std::filesystem::path(spath).stem().string();
 
     ConfigService::getService()->currentWorkspace =
       std::make_shared<Workspace>(name, spath);

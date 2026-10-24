@@ -19,6 +19,7 @@
 #include "panels/StageView.h"
 #include "PreviewWindow.h"
 #include "Screenshots.h"
+#include "StressTest.h"
 #include "ui/ParamSelection.h"
 #include "ui/Flash.h"
 #include "SettingsDialog.h"
@@ -649,12 +650,14 @@ void MainWindow::startEngine() {
     refreshGraph();
     editor_->setFocus();
     // Scripted runs skip it so their clicks land on the canvas.
-    if (WelcomeOverlay::enabledAtLaunch() && qEnvironmentVariableIsEmpty("NOTTAWA_ADD")) {
+    const bool scripted = !qEnvironmentVariableIsEmpty("NOTTAWA_ADD") || StressTest::requested();
+    if (WelcomeOverlay::enabledAtLaunch() && !scripted) {
         welcome_->setGeometry(centre_->rect());
         welcome_->present();
     }
-    if (qEnvironmentVariableIsEmpty("NOTTAWA_ADD")) help_->autoStartIfFirstLaunch();
+    if (!scripted) help_->autoStartIfFirstLaunch();
     runScriptedAdds();
+    if (StressTest::requested()) (new StressTest(this))->start();
 }
 
 // NOTTAWA_ADD="Plasma Two;Kaleidoscope" adds catalog entries by name, one per

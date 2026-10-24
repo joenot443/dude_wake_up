@@ -84,6 +84,7 @@ public:
   std::vector<std::string> getWebcamNames();
   void updateVideoSources();
   void removeVideoSource(std::string id);
+  void releaseSource(std::shared_ptr<VideoSource> source);
   void addVideoSource(std::shared_ptr<VideoSource> videoSource, std::string id, json j = 0);
   void populateAvailableVideoSources();
   void addAvailableVideoSources(std::vector<std::shared_ptr<AvailableVideoSource>> sources);

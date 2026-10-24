@@ -73,6 +73,12 @@ void ParameterService::registerParameter(std::shared_ptr<Parameter> parameter) {
   }
 }
 
+void ParameterService::reregisterParameter(const std::string& oldId, std::shared_ptr<Parameter> parameter) {
+  auto it = parameterMap.find(oldId);
+  if (it != parameterMap.end() && it->second == parameter) parameterMap.erase(it);
+  registerParameter(parameter);
+}
+
 void ParameterService::unregisterParameters(const std::vector<std::shared_ptr<Parameter>>& parameters) {
   for (auto const& p : parameters) {
     if (p == nullptr) continue;

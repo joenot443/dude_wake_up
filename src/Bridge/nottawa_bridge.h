@@ -297,6 +297,11 @@ char* ntw_dump_object_counts(void);
 // Reset all lifecycle counters to zero (establishes a baseline).
 void ntw_reset_object_counts(void);
 
+// Sizes of the engine's global registries (parameters, oscillators,
+// favourites, MIDI assignments) as JSON, for telling a leak's holder.
+// Caller must free with ntw_free_string.
+char* ntw_dump_registry_sizes(void);
+
 // Run an automated leak test: for `cycles` iterations, add a Plasma source
 // and an HSB shader, connect them, then remove both. Logs counts each cycle.
 // Returns a JSON summary string (caller must free).

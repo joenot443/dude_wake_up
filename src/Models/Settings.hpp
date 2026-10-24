@@ -119,9 +119,12 @@ public:
       if (p != NULL) {
         std::string oldParamId = p->paramId;
         p->load(it.value());
-        // Re-register if paramId changed (load() restores saved paramId)
+        // load() restores the saved paramId: move the registrations to it,
+        // or the entries under the old id outlive the parameter's owner
+        // (removal only unregisters current ids).
         if (p->paramId != oldParamId) {
-          ParameterService::getService()->registerParameter(p);
+          ParameterService::getService()->reregisterParameter(oldParamId, p);
+          OscillationService::getService()->renameOscillatorKey(oldParamId, p);
         }
         // If the parameter has a midiDescriptor, add it to the MidiService
         if (p->midiDescriptor != "") {
