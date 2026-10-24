@@ -6,6 +6,7 @@
 
 class DSPicker;
 class DSSlider;
+class DSToggle;
 class PositionPad;
 class QHBoxLayout;
 class QLabel;
@@ -50,6 +51,8 @@ private:
     DSSlider*    speed_;
     class QToolButton* mute_;
     DSSlider*    volume_;
+    DSToggle*    cache_;
+    QLabel*      cacheStatus_;
 };
 
 // Icon source picker, after the macOS IconSourceControlsView: category

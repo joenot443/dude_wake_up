@@ -21,6 +21,13 @@
 // keeping each sample at the playback clock (skipping or padding small
 // drift, re-seeking on jumps such as seeks and loops). It plays only at 1x
 // forward speed; other speeds are silent.
+//
+// Frame cache: after load, a low-priority thread with its own decoder
+// decodes the whole clip into RAM as YUV 4:2:0 (1.5 bytes a pixel), if it
+// fits a budget shared by every player (a quarter of physical memory, at
+// most half of that for one clip). Until it completes, playback streams;
+// then the decode thread serves frames from the cache by index, so seeks,
+// loops, scrubbing and reverse are lookups rather than keyframe decodes.
 
 #ifndef TARGET_OSX
 
@@ -40,6 +47,7 @@ extern "C" {
 #include <audioclient.h>
 #include <mmdeviceapi.h>
 
+#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <cmath>
@@ -66,6 +74,36 @@ struct DecodedFrame {
   double pts = 0;               // seconds
   std::vector<uint8_t> bgra;    // width * height * 4
 };
+
+// The frame caches' shared allowance of RAM.
+class CacheBudget {
+public:
+  static CacheBudget& instance() {
+    static CacheBudget* budget = new CacheBudget;  // outlives players in statics
+    return *budget;
+  }
+  bool reserve(uint64_t bytes) {
+    std::lock_guard<std::mutex> lk(m_);
+    if (bytes > limit_ / 2 || used_ + bytes > limit_) return false;
+    used_ += bytes;
+    return true;
+  }
+  void release(uint64_t bytes) {
+    std::lock_guard<std::mutex> lk(m_);
+    used_ -= std::min(bytes, used_);
+  }
+private:
+  CacheBudget() {
+    MEMORYSTATUSEX status = {};
+    status.dwLength = sizeof(status);
+    limit_ = GlobalMemoryStatusEx(&status) ? status.ullTotalPhys / 4 : (2ULL << 30);
+  }
+  std::mutex m_;
+  uint64_t limit_ = 0, used_ = 0;
+};
+
+// A cached frame: YUV 4:2:0 planes packed with no padding.
+using CachedFrame = std::shared_ptr<const std::vector<uint8_t>>;
 
 // ---------------------------------------------------------------- audio
 
@@ -383,6 +421,18 @@ struct IOSurfaceVideoPlayer::Impl {
   std::unique_ptr<AudioTrack> audio;  // created once a volume above zero is set
   bool  noAudio = false;              // the file has no playable audio
 
+  // ---- frame cache ----
+  std::vector<CachedFrame> cache;     // by frame index (guarded by cacheMutex)
+  mutable std::mutex cacheMutex;
+  std::thread       cacheThread;
+  std::atomic<bool> cacheQuit{false}, cacheComplete{false}, cacheOverBudget{false}, cacheEnabled{true};
+  std::atomic<int>  cachedFrames{0};
+  int      cacheTotal = 0;             // frames in the clip (cache slots)
+  uint64_t cacheReserved = 0;          // bytes held from the budget
+  SwsContext* cacheToBgra = nullptr;   // decode thread: cached frame -> BGRA
+  bool useCacheNow() const { return cacheEnabled && cacheComplete; }
+  void cacheLoop();
+
   double mediaTimeLocked() const {
     double t = clockBase;
     if (playing) t += (nowSeconds() - wallBase) * speed;
@@ -407,33 +457,60 @@ struct IOSurfaceVideoPlayer::Impl {
   void decodeLoop();
   bool decodeUntilFrame(AVPacket* packet, AVFrame* frame, uint64_t generation, double dropBefore);
   void pushFrame(AVFrame* frame, uint64_t generation);
+  void pushCached(const CachedFrame& frame, double pts, uint64_t generation);
+  std::vector<uint8_t> takeBuffer();
+  void enqueue(double pts, std::vector<uint8_t>&& buffer, uint64_t generation);
   void freeLibav();
 };
 
 // ---------------------------------------------------------------- decoding
 
-void IOSurfaceVideoPlayer::Impl::pushFrame(AVFrame* frame, uint64_t generation) {
-  int64_t ts = frame->best_effort_timestamp;
-  if (ts == AV_NOPTS_VALUE) ts = frame->pts;
-  const double pts = (ts == AV_NOPTS_VALUE ? 0 : ts * timeBase) - startTime;
-
+std::vector<uint8_t> IOSurfaceVideoPlayer::Impl::takeBuffer() {
   std::vector<uint8_t> buffer;
   {
     std::lock_guard<std::mutex> lk(m);
     if (!spare.empty()) { buffer = std::move(spare.back()); spare.pop_back(); }
   }
   buffer.resize(size_t(width) * height * 4);
+  return buffer;
+}
+
+// Waits for room in the queue, then adds the frame (dropped if a seek or
+// close came in meanwhile).
+void IOSurfaceVideoPlayer::Impl::enqueue(double pts, std::vector<uint8_t>&& buffer, uint64_t generation) {
+  std::unique_lock<std::mutex> lk(m);
+  cv.wait(lk, [&] { return quit || seekGeneration != generation || queue.size() < kQueueFrames; });
+  if (quit || seekGeneration != generation) { spare.push_back(std::move(buffer)); return; }
+  queue.push_back({pts, std::move(buffer)});
+}
+
+void IOSurfaceVideoPlayer::Impl::pushFrame(AVFrame* frame, uint64_t generation) {
+  int64_t ts = frame->best_effort_timestamp;
+  if (ts == AV_NOPTS_VALUE) ts = frame->pts;
+  const double pts = (ts == AV_NOPTS_VALUE ? 0 : ts * timeBase) - startTime;
+
+  std::vector<uint8_t> buffer = takeBuffer();
   sws = sws_getCachedContext(sws, frame->width, frame->height, AVPixelFormat(frame->format),
                              width, height, AV_PIX_FMT_BGRA, SWS_BILINEAR, nullptr, nullptr, nullptr);
   if (!sws) return;
   uint8_t* dst[1] = {buffer.data()};
   const int dstStride[1] = {width * 4};
   sws_scale(sws, frame->data, frame->linesize, 0, frame->height, dst, dstStride);
+  enqueue(pts, std::move(buffer), generation);
+}
 
-  std::unique_lock<std::mutex> lk(m);
-  cv.wait(lk, [&] { return quit || seekGeneration != generation || queue.size() < kQueueFrames; });
-  if (quit || seekGeneration != generation) { spare.push_back(std::move(buffer)); return; }
-  queue.push_back({pts, std::move(buffer)});
+void IOSurfaceVideoPlayer::Impl::pushCached(const CachedFrame& frame, double pts, uint64_t generation) {
+  std::vector<uint8_t> buffer = takeBuffer();
+  cacheToBgra = sws_getCachedContext(cacheToBgra, width, height, AV_PIX_FMT_YUV420P, width, height, AV_PIX_FMT_BGRA,
+                                     SWS_BILINEAR, nullptr, nullptr, nullptr);
+  if (!cacheToBgra) return;
+  uint8_t* src[4];
+  int srcStride[4];
+  av_image_fill_arrays(src, srcStride, frame->data(), AV_PIX_FMT_YUV420P, width, height, 1);
+  uint8_t* dst[1] = {buffer.data()};
+  const int dstStride[1] = {width * 4};
+  sws_scale(cacheToBgra, src, srcStride, 0, height, dst, dstStride);
+  enqueue(pts, std::move(buffer), generation);
 }
 
 // Feeds packets until the decoder yields frames; pushes those at or after
@@ -468,16 +545,32 @@ void IOSurfaceVideoPlayer::Impl::decodeLoop() {
   AVPacket* packet = av_packet_alloc();
   AVFrame*  frame  = av_frame_alloc();
   double dropBefore = 0;
+  bool cacheMode = false;  // serving frames from the cache
+  int  cursor = 0;         // next cached frame to serve
   for (;;) {
     uint64_t generation;
+    CachedFrame cached;
+    double cachedPts = 0;
     {
       std::unique_lock<std::mutex> lk(m);
-      cv.wait(lk, [&] { return quit || seekRequested || (!eof && queue.size() < kQueueFrames); });
+      cv.wait(lk, [&] {
+        return quit || seekRequested || useCacheNow() != cacheMode || (!eof && queue.size() < kQueueFrames);
+      });
       if (quit) break;
+      // The cache completing (or being switched off) changes where frames
+      // come from: resync at the playback clock.
+      if (useCacheNow() != cacheMode) {
+        cacheMode = !cacheMode;
+        requestSeekLocked(mediaTimeLocked());
+      }
       generation = seekGeneration;
       if (seekRequested) {
         seekRequested = false;
         const double target = seekTarget;
+        if (cacheMode) {
+          cursor = std::clamp(int(std::lround(target * fps)), 0, std::max(0, cacheTotal - 1));
+          continue;
+        }
         lk.unlock();
         const int64_t ts = int64_t((target + startTime) / timeBase);
         av_seek_frame(format, stream, ts, AVSEEK_FLAG_BACKWARD);
@@ -485,6 +578,17 @@ void IOSurfaceVideoPlayer::Impl::decodeLoop() {
         dropBefore = target;
         continue;
       }
+      if (cacheMode) {
+        if (cursor >= cacheTotal) { eof = true; continue; }
+        std::lock_guard<std::mutex> ck(cacheMutex);
+        cached = cache[size_t(cursor)];
+        cachedPts = cursor / double(fps);
+        ++cursor;
+      }
+    }
+    if (cacheMode) {
+      if (cached) pushCached(cached, cachedPts, generation);
+      continue;
     }
     if (!decodeUntilFrame(packet, frame, generation, dropBefore)) {
       std::lock_guard<std::mutex> lk(m);
@@ -493,6 +597,89 @@ void IOSurfaceVideoPlayer::Impl::decodeLoop() {
   }
   av_frame_free(&frame);
   av_packet_free(&packet);
+}
+
+// Decodes the whole clip into the cache with a decoder of its own, at low
+// priority, if the clip fits the shared budget. Frames land in slots by
+// their timestamp; any slot left empty repeats the frame before it.
+void IOSurfaceVideoPlayer::Impl::cacheLoop() {
+  SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL);
+  const int frameBytes = av_image_get_buffer_size(AV_PIX_FMT_YUV420P, width, height, 1);
+  if (frameBytes <= 0 || cacheTotal <= 0) return;
+  const uint64_t bytes = uint64_t(frameBytes) * uint64_t(cacheTotal);
+  if (!CacheBudget::instance().reserve(bytes)) {
+    cacheOverBudget = true;
+    ofLogNotice("IOSurfaceVideoPlayer") << "not caching " << path << " (" << (bytes >> 20) << " MB is over the budget)";
+    return;
+  }
+  cacheReserved = bytes;
+
+  AVFormatContext* fmt = nullptr;
+  AVCodecContext* dec = nullptr;
+  SwsContext* toYuv = nullptr;
+  AVPacket* packet = av_packet_alloc();
+  AVFrame* frame = av_frame_alloc();
+  int videoStream = -1;
+  const AVCodec* decoder = nullptr;
+  bool ok = avformat_open_input(&fmt, path.c_str(), nullptr, nullptr) >= 0 &&
+            avformat_find_stream_info(fmt, nullptr) >= 0 &&
+            (videoStream = av_find_best_stream(fmt, AVMEDIA_TYPE_VIDEO, -1, -1, &decoder, 0)) >= 0 && decoder;
+  if (ok) {
+    dec = avcodec_alloc_context3(decoder);
+    avcodec_parameters_to_context(dec, fmt->streams[videoStream]->codecpar);
+    dec->thread_count = 0;
+    dec->thread_type = FF_THREAD_FRAME | FF_THREAD_SLICE;
+    ok = avcodec_open2(dec, decoder, nullptr) >= 0;
+  }
+  auto store = [&] {
+    int64_t ts = frame->best_effort_timestamp;
+    if (ts == AV_NOPTS_VALUE) ts = frame->pts;
+    const double pts = (ts == AV_NOPTS_VALUE ? 0 : ts * timeBase) - startTime;
+    const int index = std::clamp(int(std::lround(pts * fps)), 0, cacheTotal - 1);
+    auto data = std::make_shared<std::vector<uint8_t>>(size_t(frameBytes));
+    uint8_t* dst[4];
+    int dstStride[4];
+    av_image_fill_arrays(dst, dstStride, data->data(), AV_PIX_FMT_YUV420P, width, height, 1);
+    toYuv = sws_getCachedContext(toYuv, frame->width, frame->height, AVPixelFormat(frame->format), width, height,
+                                 AV_PIX_FMT_YUV420P, SWS_BILINEAR, nullptr, nullptr, nullptr);
+    if (!toYuv) return;
+    sws_scale(toYuv, frame->data, frame->linesize, 0, frame->height, dst, dstStride);
+    std::lock_guard<std::mutex> lk(cacheMutex);
+    if (!cache[size_t(index)]) ++cachedFrames;
+    cache[size_t(index)] = std::move(data);
+  };
+  bool draining = false;
+  while (ok && !cacheQuit) {
+    const int got = avcodec_receive_frame(dec, frame);
+    if (got == 0) { store(); av_frame_unref(frame); continue; }
+    if (got == AVERROR_EOF) break;
+    if (got != AVERROR(EAGAIN)) { ok = false; break; }
+    if (draining) break;
+    if (av_read_frame(fmt, packet) < 0) {
+      avcodec_send_packet(dec, nullptr);
+      draining = true;
+      continue;
+    }
+    if (packet->stream_index == videoStream) avcodec_send_packet(dec, packet);
+    av_packet_unref(packet);
+  }
+  if (ok && !cacheQuit && cachedFrames > 0) {
+    std::lock_guard<std::mutex> lk(cacheMutex);
+    CachedFrame last;
+    for (auto& slot : cache) { if (slot) last = slot; else slot = last; }
+    for (auto it = cache.rbegin(); it != cache.rend(); ++it) { if (*it) last = *it; else *it = last; }
+    ofLogNotice("IOSurfaceVideoPlayer") << "cached " << cachedFrames << " frames (" << (bytes >> 20) << " MB) of " << path;
+  }
+  if (ok && !cacheQuit && cachedFrames > 0) {
+    std::lock_guard<std::mutex> lk(m);  // so the decode thread can't miss it
+    cacheComplete = true;
+    cv.notify_all();                    // it switches over
+  }
+  if (toYuv) sws_freeContext(toYuv);
+  av_frame_free(&frame);
+  av_packet_free(&packet);
+  if (dec) avcodec_free_context(&dec);
+  if (fmt) avformat_close_input(&fmt);
 }
 
 void IOSurfaceVideoPlayer::Impl::freeLibav() {
@@ -578,6 +765,13 @@ bool IOSurfaceVideoPlayer::load(const std::string& path) {
   d.movieDone = false;
   d.frameNew = false;
   d.thread = std::thread([&d] { d.decodeLoop(); });
+  d.cacheTotal = std::max(1, int(std::lround(d.fps * d.duration)) + 1);
+  d.cache.assign(size_t(d.cacheTotal), nullptr);
+  d.cacheQuit = false;
+  d.cacheComplete = false;
+  d.cacheOverBudget = false;
+  d.cachedFrames = 0;
+  d.cacheThread = std::thread([&d] { d.cacheLoop(); });
   return true;
 }
 
@@ -585,6 +779,8 @@ bool IOSurfaceVideoPlayer::isLoaded() const { return impl_->loaded; }
 
 void IOSurfaceVideoPlayer::close() {
   Impl& d = *impl_;
+  d.cacheQuit = true;
+  if (d.cacheThread.joinable()) d.cacheThread.join();
   if (d.thread.joinable()) {
     {
       std::lock_guard<std::mutex> lk(d.m);
@@ -595,6 +791,15 @@ void IOSurfaceVideoPlayer::close() {
   }
   d.audio.reset();
   d.noAudio = false;
+  {
+    std::lock_guard<std::mutex> lk(d.cacheMutex);
+    d.cache.clear();
+  }
+  CacheBudget::instance().release(d.cacheReserved);
+  d.cacheReserved = 0;
+  d.cacheComplete = false;
+  d.cachedFrames = 0;
+  if (d.cacheToBgra) { sws_freeContext(d.cacheToBgra); d.cacheToBgra = nullptr; }
   d.freeLibav();
   d.queue.clear();
   d.spare.clear();
@@ -743,6 +948,22 @@ void IOSurfaceVideoPlayer::update() {
       play();
     }
   }
+}
+
+IOSurfaceVideoPlayer::CacheStatus IOSurfaceVideoPlayer::cacheStatus() const {
+  CacheStatus status;
+  status.enabled = impl_->cacheEnabled;
+  status.complete = impl_->cacheComplete;
+  status.overBudget = impl_->cacheOverBudget;
+  status.frames = impl_->cachedFrames;
+  status.total = impl_->cacheTotal;
+  return status;
+}
+
+void IOSurfaceVideoPlayer::setCacheEnabled(bool on) {
+  std::lock_guard<std::mutex> lk(impl_->m);
+  impl_->cacheEnabled = on;
+  impl_->cv.notify_all();  // the decode thread switches over
 }
 
 bool IOSurfaceVideoPlayer::isFrameNew() const { return impl_->frameNew; }

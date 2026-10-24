@@ -32,9 +32,8 @@ void FileSource::setup()
   playbackMode = FilePlaybackMode_Streaming;
 
   applyRanges();
-  if (player.isLoaded()) {
-    player.close();
-  }
+  // No close() first: load() keeps a file that's already open (setup() re-runs
+  // on every resolution change) and closes the old one when the path differs.
   // RGBA: ofAVFoundationPlayer's getPixels() can use vImagePermuteChannels_ARGB8888
   // (SIMD channel shuffle, same memory layout) instead of vImageConvert_ARGB8888toRGB888
   // (drops alpha + repacks rows). 30-50% less CPU per frame on the decode side.
@@ -87,6 +86,11 @@ void FileSource::setup()
       fsize > 0 && fsize < kCacheFileSizeThresholdBytes &&
       mem > 0 && mem < kCacheMemoryBudgetBytes;
 
+#ifndef TARGET_OSX
+  // The Windows player keeps its own frame cache (in RAM, built in the
+  // background); see IOSurfaceVideoPlayer_win.cpp.
+  eligibleForCache = false;
+#endif
   if (eligibleForCache) {
     if (buildFrameCache()) {
       playbackMode = FilePlaybackMode_Cached;

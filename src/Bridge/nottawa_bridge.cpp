@@ -3071,9 +3071,18 @@ NTWFileSourceState ntw_get_file_source_state(const char* sourceId) {
   result.duration = fileSrc->player.getDuration();
   result.mute = (fileSrc->mute && fileSrc->mute->boolValue) ? 1 : 0;
   result.playing = fileSrc->playing ? 1 : 0;
+#ifdef TARGET_OSX
   result.cacheAvailable = !fileSrc->cachedFrames.empty() ? 1 : 0;
   result.useCachedMode = fileSrc->useCachedMode ? 1 : 0;
   result.cachedFrameCount = static_cast<int>(fileSrc->cachedFrames.size());
+#else
+  // The player's own cache: available once complete; the count grows while
+  // it builds.
+  const auto cache = fileSrc->player.cacheStatus();
+  result.cacheAvailable = cache.complete ? 1 : 0;
+  result.useCachedMode = cache.enabled ? 1 : 0;
+  result.cachedFrameCount = cache.frames;
+#endif
 
   return result;
 }
@@ -3149,6 +3158,9 @@ void ntw_set_file_source_use_cached_mode(const char* sourceId, int enabled) {
   auto* fileSrc = dynamic_cast<FileSource*>(src.get());
   if (!fileSrc) return;
   fileSrc->useCachedMode = (enabled != 0);
+#ifndef TARGET_OSX
+  fileSrc->player.setCacheEnabled(enabled != 0);
+#endif
 }
 
 // ---------------------------------------------------------------------------

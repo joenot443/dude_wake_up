@@ -726,12 +726,18 @@ FileSourceState EngineBridge::fileSourceState(const QString& id) const {
     out.playing = s.playing != 0;
     out.volume = s.volume;
     out.muted = s.mute != 0;
+    out.cacheAvailable = s.cacheAvailable != 0;
+    out.cacheEnabled = s.useCachedMode != 0;
+    out.cachedFrames = s.cachedFrameCount;
     return out;
 }
 void EngineBridge::setFileSourcePlaying(const QString& id, bool on) { ntw_set_file_source_playing(id.toUtf8().constData(), on); }
 void EngineBridge::setFileSourcePosition(const QString& id, float p) { ntw_set_file_source_position(id.toUtf8().constData(), p); }
 void EngineBridge::setFileSourceSpeed(const QString& id, float s) { ntw_set_file_source_speed(id.toUtf8().constData(), s); }
 void EngineBridge::setFileSourceVolume(const QString& id, float v) { ntw_set_file_source_volume(id.toUtf8().constData(), v); }
+void EngineBridge::setFileSourceUseCache(const QString& id, bool on) {
+    ntw_set_file_source_use_cached_mode(id.toUtf8().constData(), on ? 1 : 0);
+}
 void EngineBridge::setFileSourceMuted(const QString& id, bool on) { ntw_set_file_source_mute(id.toUtf8().constData(), on ? 1 : 0); }
 
 IconSourceState EngineBridge::iconSourceState(const QString& id) const {

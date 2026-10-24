@@ -206,6 +206,22 @@ FileSourcePanel::FileSourcePanel(const QString& sourceId, const FileSourceState&
     speedRow->addWidget(speedLabel_);
     speedRow->addWidget(speed_, 1);
     layout->addLayout(speedRow);
+
+    // The frame cache (built in the background; scrubbing, looping and
+    // reverse are instant once it's complete).
+    auto* cacheRow = new QHBoxLayout;
+    cacheRow->setSpacing(8);
+    cache_ = new DSToggle("Use frame cache", this);
+    cache_->setSmall(true);
+    connect(cache_, &DSToggle::toggled, this, [this, eng](bool on) {
+        state_.cacheEnabled = on;
+        eng->setFileSourceUseCache(sourceId_, on);
+    });
+    cacheStatus_ = sectionLabel({}, this);
+    cacheRow->addWidget(cache_);
+    cacheRow->addStretch(1);
+    cacheRow->addWidget(cacheStatus_);
+    layout->addLayout(cacheRow);
     setState(state);
 }
 
@@ -222,6 +238,11 @@ void FileSourcePanel::setState(const FileSourceState& s) {
     mute_->setToolTip(s.muted ? "Unmute" : "Mute");
     volume_->setValue(s.volume);
     volume_->setEnabled(!s.muted);
+    cache_->setChecked(s.cacheEnabled);
+    cache_->setEnabled(s.cacheAvailable);
+    cacheStatus_->setText(s.cacheAvailable ? QString("%1 frames cached").arg(s.cachedFrames)
+                          : s.cachedFrames > 0 ? QString("Caching… %1 frames").arg(s.cachedFrames)
+                                               : QStringLiteral("No cache"));
 }
 
 // ---------------------------------------------------------------- icon

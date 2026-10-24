@@ -173,6 +173,10 @@ struct FileSourceState {
     bool  playing = false;
     float volume = 0.5f;
     bool  muted = true;
+    // Frame cache: complete (in use when enabled), frames cached so far.
+    bool  cacheAvailable = false;
+    bool  cacheEnabled = true;
+    int   cachedFrames = 0;
 };
 
 struct IconEntry {
@@ -311,6 +315,7 @@ public:
     void setFileSourceSpeed(const QString& sourceId, float speed);
     void setFileSourceVolume(const QString& sourceId, float volume);
     void setFileSourceMuted(const QString& sourceId, bool muted);
+    void setFileSourceUseCache(const QString& sourceId, bool on);
 
     IconSourceState iconSourceState(const QString& sourceId) const;
     void setIconSourceIcon(const QString& sourceId, int index);

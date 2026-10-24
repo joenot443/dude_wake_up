@@ -68,6 +68,22 @@ public:
   // Draws the current bound texture into the active draw target.
   void  draw(float x, float y, float w, float h);
 
+#ifndef TARGET_OSX
+  // ---- Frame cache (Windows) ---------------------------------------------
+  // After load, a background thread decodes the whole clip into RAM (as
+  // YUV 4:2:0) if it fits the shared budget; once complete, playback in any
+  // direction, scrubbing and looping read from it instead of the decoder.
+  struct CacheStatus {
+    bool enabled = true;      // the runtime switch (Use frame cache)
+    bool complete = false;    // every frame is cached and in use
+    bool overBudget = false;  // the clip didn't fit; it streams
+    int  frames = 0;          // frames cached so far
+    int  total = 0;           // frames in the clip
+  };
+  CacheStatus cacheStatus() const;
+  void setCacheEnabled(bool on);
+#endif
+
 private:
   struct Impl;
   std::unique_ptr<Impl> impl_;
