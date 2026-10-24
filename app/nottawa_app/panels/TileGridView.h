@@ -45,6 +45,8 @@ public:
 
     void setSections(const QVector<TileSection>& sections);
     void setActivateOnClick(bool on) { activateOnClick_ = on; }
+    // Tiles drag onto the canvas (the default).
+    void setDragEnabled(bool on) { dragEnabled_ = on; }
     // Shown centred when there are no tiles.
     void setEmptyText(const QString& text) { emptyText_ = text; viewport()->update(); }
     void setLivePreview(bool on);
@@ -103,6 +105,7 @@ private:
     QString emptyText_;
     bool  live_ = true;
     bool  activateOnClick_ = false;
+    bool  dragEnabled_ = true;
     int   contentHeight_ = 0;
     int   hovered_ = -1;
     int   pressed_ = -1;

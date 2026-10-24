@@ -4,13 +4,17 @@
 #include "Theme.h"
 
 #include <QApplication>
+#include <QLockFile>
+#include <QMessageBox>
 #include <QDesktopServices>
 #include <QDir>
 #include <QFileInfo>
 #include <QProcess>
 #include <QSettings>
 #include <QSurfaceFormat>
+#include <QTimer>
 #include <cstdio>
+#include <memory>
 
 namespace {
 // The engine's data root (fonts, images, shaders, templates): data/ next to
@@ -75,6 +79,16 @@ int main(int argc, char** argv) {
         auto* sink = new UrlSink(&app);
         for (const char* scheme : {"http", "https", "mailto", "file"}) QDesktopServices::setUrlHandler(scheme, sink, "open");
     }
+    // One instance per app data folder: two would share (and overwrite) the
+    // session, config and logs. A crashed instance's lock is stale (its
+    // process is gone) and is taken over.
+    QDir().mkpath(appDataDir());
+    auto instanceLock = std::make_unique<QLockFile>(QDir(appDataDir()).filePath("nottawa.lock"));
+    instanceLock->setStaleLockTime(0);
+    if (!instanceLock->tryLock(500)) {
+        QMessageBox::information(nullptr, "Nottawa", "Nottawa is already running.");
+        return 0;
+    }
     captureEngineLog();
     CrashHandler::install();
 
@@ -82,10 +96,16 @@ int main(int argc, char** argv) {
     {
         MainWindow w(findDataDir());
         w.show();
+        QTimer heartbeat;
+        QObject::connect(&heartbeat, &QTimer::timeout, &CrashHandler::heartbeat);
+        heartbeat.start(250);
+        CrashHandler::startHangWatchdog(2000);
         code = app.exec();
     }  // the window stops the engine and saves the session here
     // Settings > Theme > Restart Now: relaunch once this instance is done.
-    if (app.property("restartRequested").toBool())
+    if (app.property("restartRequested").toBool()) {
+        instanceLock.reset();  // the new instance takes it
         QProcess::startDetached(QCoreApplication::applicationFilePath(), QCoreApplication::arguments().mid(1));
+    }
     return code;
 }

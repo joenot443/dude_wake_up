@@ -59,6 +59,7 @@ private:
     void audio(int cycles);
     void badFiles(int cycles);
     void fonts();
+    void swapAll();
 
     // Helpers working on the live graph.
     QString randomSource();
@@ -76,4 +77,5 @@ private:
     int counter_ = 0;
     int savedNodes_ = 0;
     QString textId_;
+    QString swapId_;
 };

@@ -7,7 +7,9 @@
 #include "panels/StageView.h"
 
 #include <QApplication>
+#include <cmath>
 #include <QDir>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -112,6 +114,7 @@ void StressTest::enqueueScenario(const QString& name) {
     else if (name == "audio") audio(cycles);
     else if (name == "badfiles") badFiles(cycles);
     else if (name == "fonts") fonts();
+    else if (name == "swapall") swapAll();
     else add([this, name] { window_->log("[stress] unknown scenario " + name); });
     // Settle, clear, settle, measure.
     add([] {}, 1000);
@@ -200,6 +203,39 @@ void StressTest::swap(int cycles) {
             const QString id = eng->replaceNode(n.id, list[int(rng_() % uint32_t(list.size()))].typeRaw, !n.isShader);
             if (!id.isEmpty()) window_->editor_->selectNode(id);
         }, 80);
+    }
+}
+
+// One effect swapped into every effect type in turn (each logged first, so
+// a crash names its type), then one source into every source type.
+void StressTest::swapAll() {
+    add([this] {
+        const QString src = randomSource();
+        swapId_ = window_->editor_->addFromCatalog(EngineBridge::instance()->effects()[0].typeRaw, false, src);
+    });
+    const auto effects = EngineBridge::instance()->effects();
+    for (const auto& e : effects) {
+        add([this, e] {
+            window_->log(QString("[stress] swapall: effect -> %1").arg(e.name));
+            const QString id = EngineBridge::instance()->replaceNode(swapId_, e.typeRaw, false);
+            if (id.isEmpty()) window_->log(QString("[stress] FAIL swapall: replacing with %1 failed").arg(e.name));
+            else swapId_ = id;
+            window_->editor_->selectNode(swapId_);
+        }, 120);
+    }
+    add([this] {
+        EngineBridge::instance()->clearGraph();
+        swapId_ = randomSource();
+    }, 100);
+    const auto sources = EngineBridge::instance()->sources();
+    for (const auto& s : sources) {
+        add([this, s] {
+            window_->log(QString("[stress] swapall: source -> %1").arg(s.name));
+            const QString id = EngineBridge::instance()->replaceNode(swapId_, s.typeRaw, true);
+            if (id.isEmpty()) window_->log(QString("[stress] FAIL swapall: replacing with %1 failed").arg(s.name));
+            else swapId_ = id;
+            window_->editor_->selectNode(swapId_);
+        }, 120);
     }
 }
 
@@ -292,9 +328,12 @@ void StressTest::workspace(int cycles) {
         }, 60);
         add([] { EngineBridge::instance()->clearGraph(); }, 60);
         add([this] {
+            QElapsedTimer timer;
+            timer.start();
             if (!EngineBridge::instance()->loadWorkspace(QDir(scratch_).filePath("ws.json")))
                 window_->log("[stress] FAIL loadWorkspace returned false");
             const int loaded = int(EngineBridge::instance()->nodes().size());
+            window_->log(QString("[stress] workspace: loaded %1 nodes in %2 ms").arg(loaded).arg(timer.elapsed()));
             if (loaded != savedNodes_)
                 window_->log(QString("[stress] FAIL workspace saved %1 nodes, loaded %2").arg(savedNodes_).arg(loaded));
         }, 150);
@@ -422,6 +461,54 @@ void StressTest::optional(int cycles) {
             window_->editor_->selectNode(id);
         }, 60);
     }
+    // Optional effects survive a save and load: one enabled, one only
+    // adjusted (its settings kept although it's never been switched on).
+    struct Expect { float enabledValue = 0, adjustedValue = 0; };
+    auto expect = std::make_shared<Expect>();
+    auto firstStandard = [](const QVector<ParamInfo>& params) -> const ParamInfo* {
+        for (const ParamInfo& p : params) if (p.type == ParamInfo::Standard && p.max > p.min) return &p;
+        return nullptr;
+    };
+    add([this, expect, firstStandard] {
+        auto* eng = EngineBridge::instance();
+        eng->clearGraph();
+        const QString src = randomSource();
+        const auto effects = eng->effects();
+        const QString fx = window_->editor_->addFromCatalog(effects[0].typeRaw, false, src);
+        eng->toggleOptionalEffect(fx, 0);
+        const auto enabledParams = eng->optionalEffectParameters(fx, 0);
+        if (const ParamInfo* p = firstStandard(enabledParams)) {
+            expect->enabledValue = p->min + 0.37f * (p->max - p->min);
+            eng->setParameter(p->id, expect->enabledValue);
+        }
+        const auto adjustedParams = eng->optionalEffectParameters(fx, 3);
+        if (const ParamInfo* p = firstStandard(adjustedParams)) {
+            expect->adjustedValue = p->min + 0.61f * (p->max - p->min);
+            eng->setParameter(p->id, expect->adjustedValue);
+        }
+        eng->saveWorkspace(QDir(scratch_).filePath("optional.json"), "optional");
+        eng->clearGraph();
+    }, 100);
+    add([this, expect, firstStandard] {
+        auto* eng = EngineBridge::instance();
+        eng->loadWorkspace(QDir(scratch_).filePath("optional.json"));
+        QString fx;
+        for (const QString& id : nodeIds())
+            if (eng->optionalEffects(id).size() == 10) fx = id;  // an effect's list (a source's has 9)
+        if (fx.isEmpty()) { window_->log("[stress] FAIL optional: effect missing after load"); return; }
+        const auto effects = eng->optionalEffects(fx);
+        if (!effects[0].enabled) window_->log("[stress] FAIL optional: enabled effect came back disabled");
+        if (effects[3].enabled) window_->log("[stress] FAIL optional: adjusted effect came back enabled");
+        const auto enabledParams = eng->optionalEffectParameters(fx, 0);
+        const auto adjustedParams = eng->optionalEffectParameters(fx, 3);
+        const ParamInfo* a = firstStandard(enabledParams);
+        const ParamInfo* b = firstStandard(adjustedParams);
+        if (!a || std::abs(a->value - expect->enabledValue) > 1e-3f)
+            window_->log(QString("[stress] FAIL optional: enabled effect's value %1, expected %2").arg(a ? a->value : -1).arg(expect->enabledValue));
+        if (!b || std::abs(b->value - expect->adjustedValue) > 1e-3f)
+            window_->log(QString("[stress] FAIL optional: adjusted effect's value %1, expected %2").arg(b ? b->value : -1).arg(expect->adjustedValue));
+        window_->log("[stress] optional: save/load checked");
+    }, 300);
 }
 
 // Damaged and hostile inputs: workspaces and strands that are truncated, of

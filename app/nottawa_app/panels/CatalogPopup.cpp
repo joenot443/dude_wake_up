@@ -83,6 +83,9 @@ CatalogPopup::CatalogPopup(bool effects, std::function<void(int)> onPick, QWidge
     pool_ = new PreviewPool(this);
     grid_ = new TileGridView(pool_, this);
     grid_->setActivateOnClick(true);
+    // A pick is a click. A drag would also run Windows' drag loop inside this
+    // popup, which deletes itself (and the grid) when it closes mid-drag.
+    grid_->setDragEnabled(false);
     grid_->setEmptyText("No matches");
     connect(grid_, &TileGridView::activated, this, [this](const TileItem& tile) {
         const int type = tile.payload.section(':', 1).toInt();

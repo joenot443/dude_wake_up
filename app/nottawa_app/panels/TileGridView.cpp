@@ -421,7 +421,7 @@ void TileGridView::mousePressEvent(QMouseEvent* e) {
 
 void TileGridView::mouseMoveEvent(QMouseEvent* e) {
     const QPoint pos = e->position().toPoint();
-    if (pressed_ >= 0 && (e->buttons() & Qt::LeftButton)
+    if (dragEnabled_ && pressed_ >= 0 && (e->buttons() & Qt::LeftButton)
         && (pos - pressPos_).manhattanLength() >= QApplication::startDragDistance()) {
         const TileItem item = *itemAt(tiles_[pressed_]);
         pressed_ = -1;
