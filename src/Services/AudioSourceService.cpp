@@ -109,6 +109,16 @@ void AudioSourceService::populateSources() {
   systemAudioSource->id = "system-audio-source";
   systemAudioSource->name = "System Audio";
   audioSourceMap[systemAudioSource->id] = systemAudioSource;
+
+  // With no default input device (none plugged in), fall back to the first
+  // input there is, else the sample track, so a source is always selected.
+  if (!selectedAudioSource) {
+    for (auto const &[id, source] : audioSourceMap) {
+      if (source->type() == AudioSourceType_Microphone) { selectedAudioSource = source; break; }
+    }
+    if (!selectedAudioSource) selectedAudioSource = fileAudioSource;
+  }
+  if (!defaultAudioSource) defaultAudioSource = selectedAudioSource;
 }
 
 std::vector<std::shared_ptr<AudioSource>> AudioSourceService::audioSources() {
