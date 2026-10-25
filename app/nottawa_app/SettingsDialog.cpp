@@ -1,4 +1,5 @@
 #include "SettingsDialog.h"
+#include "UpdateCheck.h"
 
 #include "EngineBridge.h"
 #include "Icons.h"
@@ -122,6 +123,11 @@ SettingsDialog::SettingsDialog(QWidget* parent) : QDialog(parent) {
         fade_->setEnabled(on);
     });
     display->addWidget(row("Automatically advance output window", advance_, content));
+    if (UpdateCheck::supported()) {  // Store copies update through the Store
+        updates_ = new DSToggle({}, content);
+        connect(updates_, &DSToggle::toggled, this, [](bool on) { QSettings().setValue("updates/check", on); });
+        display->addWidget(row("Check for updates", updates_, content));
+    }
     auto* fadeBox = new QWidget(content);
     auto* fadeRow = new QHBoxLayout(fadeBox);
     fadeRow->setContentsMargins(0, 0, 0, 0);
@@ -214,6 +220,7 @@ void SettingsDialog::refresh() {
     theme_->setCurrentIndex(int(Theme::presets().indexOf(Theme::preset())));
     hints_->setChecked(settings.value("ui/showNodeHints", true).toBool());
     advance_->setChecked(settings.value("ui/autoAdvanceOutputWindow", true).toBool());
+    if (updates_) updates_->setChecked(settings.value("updates/check", true).toBool());
     const float fade = float(settings.value("ui/outputWindowFadeSeconds", 0.3).toDouble());
     fade_->setValue(fade);
     fade_->setEnabled(advance_->isChecked());

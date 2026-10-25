@@ -2,6 +2,7 @@
 
 #include "EngineBridge.h"
 #include "Icons.h"
+#include "UpdateCheck.h"
 #include "ShaderCodeEditor.h"
 #include "ShareStrandDialog.h"
 #include "StageWidget.h"
@@ -428,6 +429,22 @@ void MainWindow::buildMenus() {
     });
 
     auto* help = menuBar()->addMenu("&Help");
+    updateAction_ = help->addAction(QString());
+    updateAction_->setVisible(false);
+    updates_ = new UpdateCheck(this);
+    connect(updates_, &UpdateCheck::available, this, [this, help](const QString& version, const QUrl& url, const QString& notes) {
+        updateAction_->setText(QString("Download Nottawa %1…").arg(version));
+        updateAction_->setToolTip(notes);
+        updateAction_->setVisible(true);
+        help->setToolTipsVisible(!notes.isEmpty());
+        disconnect(updateAction_, &QAction::triggered, nullptr, nullptr);
+        connect(updateAction_, &QAction::triggered, this, [url] { QDesktopServices::openUrl(url); });
+        // Mentioned once, quietly, and never over a performance.
+        if (!stageAction_ || !stageAction_->isChecked())
+            toast_->show(QString("Nottawa %1 is available: Help > Download Nottawa %1").arg(version), 8000);
+        log(QString("[update] %1 available at %2").arg(version, url.toString()));
+    });
+    QTimer::singleShot(5000, updates_, [this] { updates_->start(); });
     help->addAction("Nottawa &Tutorial", this, [this] { help_->restart(); });
     help->addAction("Show &Welcome Screen", this, [this] {
         welcome_->setGeometry(centre_->rect());

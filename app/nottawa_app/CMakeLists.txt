@@ -70,6 +70,7 @@ qt_add_executable(nottawa_app WIN32
     Theme.h                  Theme.cpp
     CrashHandler.h           CrashHandler.cpp
     SingleInstance.h         SingleInstance.cpp
+    UpdateCheck.h            UpdateCheck.cpp
     panels/BrowserPanel.h    panels/BrowserPanel.cpp
     panels/InspectorPanel.h  panels/InspectorPanel.cpp
     panels/LogPanel.h        panels/LogPanel.cpp

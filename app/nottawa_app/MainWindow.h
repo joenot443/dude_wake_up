@@ -101,6 +101,8 @@ private:
     QWidget*        deleteSeparator_ = nullptr;
     QLabel*         workspaceLabel_ = nullptr;
     QAction*        stageAction_ = nullptr;
+    QAction*        updateAction_ = nullptr;  // Help > Download Nottawa X (when there is one)
+    class UpdateCheck* updates_ = nullptr;
     QAction*        hintsAction_ = nullptr;
     QAction*        undoAction_ = nullptr;
     QAction*        redoAction_ = nullptr;

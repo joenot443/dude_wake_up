@@ -34,6 +34,7 @@ private:
     DSPicker*    theme_;
     DSToggle*    hints_;
     DSToggle*    advance_;
+    DSToggle*    updates_ = nullptr;
     DSSlider*    fade_;
     QLabel*      fadeLabel_;
     QLabel*      folder_;
