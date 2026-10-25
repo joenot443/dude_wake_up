@@ -6,7 +6,14 @@ the old ImGui `Nottawa.exe`. `[x]` done, `[ ]` to do, **(you)** needs a
 decision or action from Joe.
 
 Build a release: `powershell -File packaging\windows\build_release.ps1`
-(add `-Certificate <thumbprint or .pfx>` to sign). Version: `VERSION`.
+(installer, portable zip, symbols), then
+`powershell -File packaging\windows\build_msix.ps1 -IdentityName ... -Publisher ...`
+(the Store package). Version: `VERSION`.
+
+Decisions so far: distributed through the **Microsoft Store** (MSIX, signed
+by Microsoft, updated by the Store); the Inno installer stays for direct
+downloads and testers (unsigned). Non-Store copies check for new versions.
+A minimal LGPL ffmpeg build ships in the first release.
 
 ## 1. Package
 
@@ -25,12 +32,18 @@ Build a release: `powershell -File packaging\windows\build_release.ps1`
       Start menu entry, optional desktop shortcut, `nottawa://` handler,
       closes a running Nottawa on upgrade, clears the old `data\`, keeps the
       user's own data on uninstall.
-- [ ] **(you)** Install Inno Setup on this machine (`winget install
-      JRSoftware.InnoSetup`), then build and test the installer.
-- [ ] Smaller ffmpeg: the downloaded LGPL build is 104 MB of the 132 MB of
-      DLLs and bundles ~50 codec libraries (each a licence/source obligation,
-      plus openh264 patent questions). A decode-only LGPL build of our own
-      would be ~10-15 MB. **(you)** worth doing for the first release?
+- [x] Installer built (Inno Setup 6.7, per-user) and tested: silent install,
+      files, Start menu, `nottawa://`, Add/Remove Programs entry, a smoke run
+      of the installed copy, and an uninstall that removes all of it.
+- [x] MSIX for the Store (`build_msix.ps1`): manifest, tile/taskbar images
+      from the icon, resources.pri. Registered and run locally (Developer
+      Mode) with test identity values.
+- [ ] Minimal ffmpeg: `scripts/build_ffmpeg_lgpl.sh` (decoders/demuxers for
+      common formats, LGPL-2.1+, no external libraries) replaces the 104 MB
+      BtbN build. **(you)** install the cross-compiler in WSL once:
+      `sudo apt-get install -y mingw-w64 nasm make pkg-config`. Dropped
+      against the old build: AV1 playback (needs the dav1d library; can be
+      added later). HAP needs snappy and wasn't supported before either.
 
 ## 2. App readiness
 
@@ -46,9 +59,13 @@ Build a release: `powershell -File packaging\windows\build_release.ps1`
       front). Malformed links are rejected.
 - [x] Help: About shows the version; Show Logs Folder (crash and hang stacks
       are written to `engine.log`, as module+offset when the PDB isn't there).
-- [ ] **(you)** Updates: none for the first release, a "new version
-      available" check against a small JSON file on nottawa.app, or
-      WinSparkle (full in-app updater).
+- [x] Update check (non-Store copies): once a day reads
+      `https://nottawa.app/windows/latest.json`; a newer version adds "Download
+      Nottawa X…" to the Help menu and a toast (not during stage mode).
+      Settings switch to turn it off. **(you)** publish that file with each
+      release: `{"version": "2.1.1", "url": "https://...", "notes": "..."}`.
+- [x] engine.log kept crash/hang reports intact (stdout used to overwrite
+      them); the hang watchdog ignores startup.
 - [ ] Minor: icon thumbnails log load errors (a `previews/` folder that
       doesn't exist); harmless.
 
@@ -75,11 +92,15 @@ Build a release: `powershell -File packaging\windows\build_release.ps1`
 
 ## 4. Signing and distribution
 
-- [ ] **(you)** Code signing. Unsigned, SmartScreen shows "Windows protected
-      your PC". Options: Azure Trusted Signing (cheapest, monthly, identity
-      validation), an OV certificate (yearly; warnings fade as downloads build
-      reputation), or the Microsoft Store (signs for you, handles updates).
-- [ ] **(you)** Where the installer is hosted (nottawa.app, GitHub Releases).
+- [ ] **(you)** Partner Center: register as an app developer (free for
+      individuals), reserve the name "Nottawa", and send me the package
+      identity values (Product identity page: Package/Identity/Name,
+      Package/Identity/Publisher, Package/Properties/PublisherDisplayName).
+- [ ] Run the Windows App Certification Kit on the MSIX (needs admin:
+      `appcert.exe test -appxpackagepath dist\Nottawa-<ver>.msix -reportoutputpath ...`).
+- [ ] Store listing: description, screenshots, privacy policy URL (the app
+      talks to nottawa.app for community strands), age rating.
+- [ ] **(you)** Where the direct-download installer is hosted, if anywhere.
 - [ ] Release checklist: bump `VERSION`, notes, build, sign, upload, smoke
       test the download.
 
