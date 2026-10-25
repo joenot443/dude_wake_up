@@ -14,6 +14,7 @@
 #include <QSurfaceFormat>
 #include <QTimer>
 #include <cstdio>
+#include <io.h>
 #include <memory>
 
 namespace {
@@ -45,8 +46,14 @@ void captureEngineLog() {
     const QString dir = QDir(appDataDir()).filePath("logs");
     QDir().mkpath(dir);
     const std::wstring path = QDir::toNativeSeparators(QDir(dir).filePath("engine.log")).toStdWString();
-    if (_wfreopen(path.c_str(), L"w", stdout)) setvbuf(stdout, nullptr, _IONBF, 0);
-    if (_wfreopen(path.c_str(), L"a", stderr)) setvbuf(stderr, nullptr, _IONBF, 0);
+    if (!_wfreopen(path.c_str(), L"w", stdout)) return;
+    setvbuf(stdout, nullptr, _IONBF, 0);
+    // stderr (crash and hang reports) writes through stdout's descriptor:
+    // two separately opened streams each keep their own position, and
+    // stdout would write over what stderr had added. (A GUI app's stderr
+    // has no descriptor until it's opened, hence NUL first.)
+    if (_wfreopen(L"NUL", L"w", stderr) && _dup2(_fileno(stdout), _fileno(stderr)) == 0)
+        setvbuf(stderr, nullptr, _IONBF, 0);
 }
 } // anon
 
@@ -66,6 +73,11 @@ int main(int argc, char** argv) {
     QSurfaceFormat::setDefaultFormat(fmt);
 
     QApplication app(argc, argv);
+    // --appdata <folder>: as NOTTAWA_APPDATA (which the engine reads too), for
+    // testing builds that can't be given environment variables (MSIX).
+    const QStringList args = app.arguments();
+    const qsizetype appDataArg = args.indexOf("--appdata");
+    if (appDataArg > 0 && appDataArg + 1 < args.size()) qputenv("NOTTAWA_APPDATA", args[appDataArg + 1].toUtf8());
     app.setApplicationName("Nottawa");
     app.setOrganizationName("Nottawa");
     app.setApplicationVersion(NOTTAWA_VERSION);
@@ -105,7 +117,9 @@ int main(int argc, char** argv) {
         QTimer heartbeat;
         QObject::connect(&heartbeat, &QTimer::timeout, &CrashHandler::heartbeat);
         heartbeat.start(250);
-        CrashHandler::startHangWatchdog(2000);
+        // From the first event after startup: the window queued its engine
+        // start (seconds of shader compiles on this thread) before this.
+        QTimer::singleShot(0, &w, [] { CrashHandler::startHangWatchdog(2000); });
         code = app.exec();
     }  // the window stops the engine and saves the session here
     // Settings > Theme > Restart Now: relaunch once this instance is done.
