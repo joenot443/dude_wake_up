@@ -12,7 +12,7 @@
 #include "ofMain.h"
 #include "Gist.h"
 #include "AudioSettings.hpp"
-#include "BTrackDetector.hpp"
+#include "BeatTracker.hpp"
 #include <chrono>
 #include <functional>
 #include <mutex>
@@ -36,11 +36,11 @@ public:
   bool active = false;
   AudioAnalysis audioAnalysis;
   Gist<float> gist = Gist<float>(512, 44100);
-  BTrackDetector btrackDetector;
-
-  // Beat detection results (updated by audio thread, read by main thread)
-  float lastDetectedBpm = 120.0f;
-  std::chrono::steady_clock::time_point lastBeatTime;
+  // Tempo and beats, from every buffer (audio thread); read through
+  // beatTracker.snapshot() (any thread).
+  BeatTracker beatTracker;
+  std::chrono::steady_clock::time_point lastAudioTime;
+  std::vector<float> monoBuffer;
 
   // Audio recording callback (called from audio thread)
   AudioRecordingCallback recordingCallback;

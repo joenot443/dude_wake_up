@@ -115,6 +115,7 @@ void StressTest::enqueueScenario(const QString& name) {
     else if (name == "badfiles") badFiles(cycles);
     else if (name == "fonts") fonts();
     else if (name == "swapall") swapAll();
+    else if (name == "bpm") bpm();
     else add([this, name] { window_->log("[stress] unknown scenario " + name); });
     // Settle, clear, settle, measure.
     add([] {}, 1000);
@@ -204,6 +205,35 @@ void StressTest::swap(int cycles) {
             if (!id.isEmpty()) window_->editor_->selectNode(id);
         }, 80);
     }
+}
+
+// The whole tempo path in the app: bundled sample tracks played through the
+// file source, the BPM and beat count the app reports logged each second
+// ("[stress] bpm: <track> t=<s> bpm=<x> beats=<n>").
+void StressTest::bpm() {
+    add([] {
+        auto* eng = EngineBridge::instance();
+        for (const auto& s : eng->audioSources())
+            if (s.name.contains("Sample", Qt::CaseInsensitive)) eng->selectAudioSource(s.id);
+        eng->setBpmMode(0);  // Auto
+    }, 200);
+    const auto tracks = EngineBridge::instance()->sampleTracks();
+    for (const auto& track : tracks) {
+        if (!track.name.contains("Nottawa Song") && !track.name.contains("Bass Cascade") && !track.name.contains("Velvet"))
+            continue;
+        const QString name = track.name;
+        const int index = track.index;
+        add([index] { EngineBridge::instance()->selectSampleTrack(index); }, 500);  // starts it playing
+        add([] { if (!EngineBridge::instance()->isAudioActive()) EngineBridge::instance()->toggleAudio(); }, 500);
+        for (int second = 1; second <= 20; ++second) {
+            add([this, name, second] {
+                const AudioAnalysis a = EngineBridge::instance()->audioAnalysis();
+                window_->log(QString("[stress] bpm: %1 t=%2 bpm=%3 beats=%4 active=%5")
+                                 .arg(name).arg(second).arg(a.bpm, 0, 'f', 2).arg(a.beatCount).arg(a.audioActive));
+            }, 1000);
+        }
+    }
+    add([] { if (EngineBridge::instance()->isAudioActive()) EngineBridge::instance()->toggleAudio(); });
 }
 
 // One effect swapped into every effect type in turn (each logged first, so

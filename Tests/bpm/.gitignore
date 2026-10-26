@@ -1,0 +1,5 @@
+build/
+build-trace/
+results/
+*.csv
+sweep-*.txt

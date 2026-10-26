@@ -1885,15 +1885,13 @@ void ntw_tap_bpm(void) {
     auto svc = AudioSourceService::getService();
     auto source = svc->selectedAudioSource;
     if (!source) return;
-    // If tapper has been idle, reset it
-    if (svc->tapper.bpm() < 1.0f) {
-      svc->tapper.startFresh();
-    }
     svc->tapper.tap();
-    float bpm = svc->tapper.bpm();
-    if (bpm > 0) {
-      source->audioAnalysis.adjustBpmStartTimeForPhase(bpm);
-    }
+    // A tap is a beat: the clock restarts on it, and from the second tap
+    // on runs at the tapped tempo (the mean of the taps so far).
+    auto& analysis = source->audioAnalysis;
+    if (svc->tapper.tapCount() >= 2) analysis.bpm->setValue(svc->tapper.bpm());
+    analysis.bpmStartTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count();
   });
 }
 

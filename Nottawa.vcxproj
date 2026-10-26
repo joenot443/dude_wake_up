@@ -507,9 +507,8 @@ exit /b 0</Command>
     <ClInclude Include="src\Audio\AudioSettings.hpp" />
     <ClCompile Include="src\Audio\AudioSource.cpp" />
     <ClInclude Include="src\Audio\AudioSource.hpp" />
+    <ClInclude Include="src\Audio\BeatTracker.hpp" />
     <ClInclude Include="src\Audio\AudioTrack.hpp" />
-    <ClCompile Include="src\Audio\BTrackDetector.cpp" />
-    <ClInclude Include="src\Audio\BTrackDetector.hpp" />
     <ClInclude Include="src\Audio\dr_flac.h" />
     <ClInclude Include="src\Audio\dr_mp3.h" />
     <ClInclude Include="src\Audio\dr_wav.h" />

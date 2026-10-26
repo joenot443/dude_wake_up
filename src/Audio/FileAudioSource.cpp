@@ -26,10 +26,16 @@ void FileAudioSource::setup() {
     settings.numInputChannels = 0;
     settings.numOutputChannels = audioFile.channels();
     settings.bufferSize = frameSize;
-    
-    soundStream.setup(settings);
-    
-    active = true;
+#ifdef TARGET_WIN32
+    // The default output through WASAPI. Left unspecified, RtAudio takes the
+    // first API with a driver installed, ASIO included, and an ASIO driver
+    // for an unplugged interface fails to open: no sound at all.
+    settings.setApi(ofSoundDevice::Api::MS_WASAPI);
+#endif
+
+    // Active only if the stream really opened.
+    active = soundStream.setup(settings);
+    if (!active) ofLogError("FileAudioSource") << "couldn't open an output stream for " << track->path;
     currentSample = 0;
     isPaused = false;
   } else {
@@ -41,8 +47,8 @@ void FileAudioSource::setup() {
 void FileAudioSource::loadFile(std::shared_ptr<AudioTrack> audioTrack) {
   track = audioTrack;
   disable();
-  setup();
-  active = true;
+  beatTracker.requestReset();  // new music: find its beat afresh
+  setup();  // sets active from whether the stream opened
   // Start the BPM clock
   audioAnalysis.bpmEnabled = true;
   audioAnalysis.bpmStartTime = ofGetSystemTimeMillis();

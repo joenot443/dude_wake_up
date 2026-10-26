@@ -60,6 +60,7 @@ private:
     void badFiles(int cycles);
     void fonts();
     void swapAll();
+    void bpm();
 
     // Helpers working on the live graph.
     QString randomSource();

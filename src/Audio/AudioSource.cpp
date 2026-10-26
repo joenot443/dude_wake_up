@@ -42,21 +42,37 @@ void AudioSource::audioIn(ofSoundBuffer &soundBuffer) {
     }
   }
 
+  const size_t frames = soundBuffer.getNumFrames();
+  const size_t channels = std::max<size_t>(1, soundBuffer.getNumChannels());
+  const auto& buffer = soundBuffer.getBuffer();
+  if (frames == 0 || buffer.size() < frames * channels) return;
+
+  // Tempo and beats: every buffer, silence included (the audio is the
+  // tracker's clock), in its own rate and channel layout. After a gap (the
+  // source stopped and started again) the old beat is no longer valid.
+  const auto now = std::chrono::steady_clock::now();
+  if (now - lastAudioTime > std::chrono::seconds(2)) beatTracker.reset();
+  lastAudioTime = now;
+  beatTracker.process(buffer.data(), static_cast<int>(frames), static_cast<int>(channels),
+                      soundBuffer.getSampleRate());
+
+  // Spectrum and levels from a mono mix (the buffer is interleaved).
+  monoBuffer.resize(frames);
   float avg = 0.0f;
-  for (size_t i = 0; i < soundBuffer.getNumFrames(); i++) {
-    for (size_t c = 0; c < soundBuffer.getNumChannels(); c++) {
-      avg += abs(soundBuffer.getSample(i, c));
-    }
+  for (size_t i = 0; i < frames; i++) {
+    float sum = 0.0f;
+    for (size_t c = 0; c < channels; c++) sum += buffer[i * channels + c];
+    monoBuffer[i] = sum / static_cast<float>(channels);
+    avg += std::fabs(monoBuffer[i]);
   }
-  avg /= static_cast<float>(soundBuffer.getNumFrames() * soundBuffer.getNumChannels());
+  avg /= static_cast<float>(frames);
 
   // If we have mostly silence, return (but recording still captured above)
-  if (abs(avg) < 0.001f) {
+  if (avg < 0.001f) {
     return;
   }
 
-  auto& buffer = soundBuffer.getBuffer();
-  processFrame(buffer);
+  processFrame(monoBuffer);
   debugGist();
 }
 
@@ -97,27 +113,6 @@ void AudioSource::processFrame(const std::vector<float>& frame) {
       const size_t n = AudioAnalysis::kSpectrumSize;
       std::move(h.begin() + n, h.end(), h.begin());
       std::copy_n(audioAnalysis.renderRawWaveform.begin(), n, h.end() - n);
-    }
-
-    // Run beat detection only in Auto mode. BTrack expects one call per 512-sample hop.
-    if (audioAnalysis.bpmEnabled && audioAnalysis.bpmMode == BpmMode_Auto) {
-      SimpleBeat beat = btrackDetector.processAudioFrame(chunk);
-
-      if (beat.bpm > 0 && beat.bpm >= 50 && beat.bpm <= 200) {
-        lastDetectedBpm = beat.bpm;
-      }
-
-      if (beat.isBeat) {
-        auto now = std::chrono::steady_clock::now();
-        auto msSinceLast = std::chrono::duration_cast<std::chrono::milliseconds>(
-            now - lastBeatTime).count();
-        // Debounce: reject beats within 60% of a beat duration.
-        float minIntervalMs = 36000.0f / std::max(1.0f, audioAnalysis.bpm->value);
-        if (msSinceLast > minIntervalMs) {
-          lastBeatTime = now;
-          audioAnalysis.beatCount++;
-        }
-      }
     }
 
     gistAccumulator.erase(gistAccumulator.begin(),
