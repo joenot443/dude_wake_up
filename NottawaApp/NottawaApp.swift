@@ -15,9 +15,7 @@ struct NottawaApp: App {
     @State private var helpGuide = HelpGuideViewModel()
     @State private var recents = RecentWorkspacesService.shared
     @State private var engineStatus: EngineStatus = .idle
-    @State private var stretchPreviewWindows = false
-    @AppStorage("showNodeHints") private var showNodeHints: Bool = true
-    @AppStorage("clearOnDisconnect") private var clearOnDisconnect: Bool = true
+    @State private var settings = SettingsStore.shared
 
     var body: some Scene {
         Window("Nottawa", id: "main") {
@@ -72,6 +70,9 @@ struct NottawaApp: App {
             }
             .onAppear {
                 initializeEngine()
+            }
+            .onChange(of: settings.theme, initial: true) { _, theme in
+                themeManager.preset = theme
             }
             .onOpenURL { url in
                 guard url.scheme == "nottawa",
@@ -161,15 +162,10 @@ struct NottawaApp: App {
 
                 Divider()
 
-                Toggle("Stretch Preview Windows", isOn: $stretchPreviewWindows)
-                    .onChange(of: stretchPreviewWindows) { _, newValue in
-                        PreviewWindowManager.shared.setStretchToFill(newValue)
-                    }
-                Toggle("Show Node Hints", isOn: $showNodeHints)
-                Toggle("Clear on Disconnect", isOn: $clearOnDisconnect)
-                    .onChange(of: clearOnDisconnect) { _, newValue in
-                        NottawaEngine.shared.setClearOnDisconnect(newValue)
-                    }
+                // Mirrors of settings: they follow changes made anywhere.
+                Toggle("Stretch Preview Windows", isOn: settings.binding("output.stretchPreviews"))
+                Toggle("Show Node Hints", isOn: settings.binding("display.nodeHints"))
+                Toggle("Clear on Disconnect", isOn: settings.binding("graph.clearOnDisconnect"))
             }
 
             CommandGroup(replacing: .undoRedo) {
@@ -237,7 +233,8 @@ struct NottawaApp: App {
 
         if success {
             engine.start()
-            engine.setClearOnDisconnect(clearOnDisconnect)
+            settings.load()
+            settings.migrateLegacyDefaults()
             engineStatus = .ready
             viewModel.setup()
             helpGuide.viewModel = viewModel

@@ -90,7 +90,7 @@ struct SidebarBrowserView: View {
     @State private var showFavoriteSourcesOnly = false
     @State private var favoritesRefreshToken = UUID()
     private let previewManager = BrowserPreviewManager.shared
-    @AppStorage("sidebarLivePreview") private var livePreview = true
+    private var livePreview: Bool { SettingsStore.shared.bool("browser.livePreview") }
 
     private let columns = [
         GridItem(.adaptive(minimum: 78), spacing: 4),
@@ -327,7 +327,7 @@ struct SidebarBrowserView: View {
             Spacer()
 
             // Live preview toggle
-            DSToggle(isOn: $livePreview, style: .checkbox, size: .sm)
+            DSToggle(isOn: SettingsStore.shared.binding("browser.livePreview"), style: .checkbox, size: .sm)
                 .help(livePreview ? "Live Preview On" : "Live Preview Off")
                 .accessibilityIdentifier("live-preview-toggle")
         }

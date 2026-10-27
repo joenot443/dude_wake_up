@@ -15,7 +15,7 @@ struct NodeView: View {
     @Environment(NodeEditorViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var theme
     @Environment(HelpGuideViewModel.self) private var helpGuide
-    @AppStorage("showNodeHints") private var showNodeHints: Bool = true
+    private var showNodeHints: Bool { SettingsStore.shared.bool("display.nodeHints") }
 
     // Base dimensions (at scale 1.0)
     private let baseNodeWidth: CGFloat = 260

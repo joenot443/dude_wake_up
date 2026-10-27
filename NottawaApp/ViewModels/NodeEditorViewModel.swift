@@ -536,7 +536,7 @@ final class NodeEditorViewModel {
     /// so the fade's own cleanup runs first and clears the outgoing surface
     /// before its source is torn down).
     private func scheduleDeferredDeletion(_ ids: [String]) {
-        let duration = UserDefaults.standard.double(forKey: "outputWindowFadeDuration")
+        let duration = SettingsStore.shared.number("output.advanceFade")
         DispatchQueue.main.asyncAfter(deadline: .now() + duration + 0.1) { [weak self] in
             guard let self else { return }
             for id in ids {
@@ -555,9 +555,8 @@ final class NodeEditorViewModel {
     /// on something that'll still exist when the fade completes.
     @discardableResult
     private func attemptRetreatFade(forNodeId id: String, deletingIds: Set<String>) -> Bool {
-        let enabled = UserDefaults.standard.object(forKey: "autoAdvanceOutputWindow") as? Bool ?? true
-        guard enabled else { return false }
-        let duration = UserDefaults.standard.double(forKey: "outputWindowFadeDuration")
+        guard SettingsStore.shared.bool("output.autoAdvance") else { return false }
+        let duration = SettingsStore.shared.number("output.advanceFade")
         guard duration > 0 else { return false }
         guard PreviewWindowManager.shared.openNodeIds.contains(id) else { return false }
 
@@ -611,19 +610,15 @@ final class NodeEditorViewModel {
     /// that window onto the new downstream node. Only fires for main-output
     /// connections (outputSlot 0) — auxiliary strand wiring shouldn't hijack
     /// the main preview. The fade duration comes from the "Advance Fade"
-    /// slider in Settings (`outputWindowFadeDuration`); 0 = instant.
+    /// slider in Settings (`output.advanceFade`); 0 = instant.
     private func advanceOutputWindowIfApplicable(fromNodeId: String, toNodeId: String, outputSlot: Int) {
         guard outputSlot == 0 else { return }
-        let enabled = UserDefaults.standard.object(forKey: "autoAdvanceOutputWindow") as? Bool ?? true
-        guard enabled else { return }
+        guard SettingsStore.shared.bool("output.autoAdvance") else { return }
         guard PreviewWindowManager.shared.openNodeIds.contains(fromNodeId) else { return }
         // Names come from this VM's current node list; if the new node isn't
         // there yet (mid-refresh race), fall back to a generic title.
         let name = nodes.first(where: { $0.id == toNodeId })?.name ?? "Preview"
-        // UserDefaults.double returns 0 if the key isn't set — same as
-        // "no fade", which is a safe default for installs predating the
-        // setting.
-        let duration = UserDefaults.standard.double(forKey: "outputWindowFadeDuration")
+        let duration = SettingsStore.shared.number("output.advanceFade")
         let advanced = PreviewWindowManager.shared.advanceWindow(
             from: fromNodeId,
             to: toNodeId,

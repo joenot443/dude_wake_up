@@ -53,7 +53,6 @@ final class ScreenshotService {
     static let shared = ScreenshotService()
 
     private static let bookmarkKey = "nottawa.screenshotFolderBookmark"
-    private static let formatKey = "nottawa.screenshotFormat"
 
     /// Trigger value bumped whenever a capture succeeds — observed by
     /// `ScreenshotFlashOverlay` to fire its animation.
@@ -65,14 +64,15 @@ final class ScreenshotService {
         return url.path
     }
 
+    /// The screenshots.format setting (its choice ids are these raw values),
+    /// read from the engine directly since captures aren't on the main actor.
     var format: ScreenshotFormat {
         get {
-            let raw = UserDefaults.standard.string(forKey: Self.formatKey) ?? ScreenshotFormat.png.rawValue
-            return ScreenshotFormat(rawValue: raw) ?? .png
+            guard let c = ntw_get_setting_string("screenshots.format") else { return .png }
+            defer { ntw_free_string(c) }
+            return ScreenshotFormat(rawValue: String(cString: c)) ?? .png
         }
-        set {
-            UserDefaults.standard.set(newValue.rawValue, forKey: Self.formatKey)
-        }
+        set { ntw_set_setting_string("screenshots.format", newValue.rawValue) }
     }
 
     private init() {}
@@ -116,6 +116,11 @@ final class ScreenshotService {
 
     /// Run picker, save bookmark, then write the image. Used for both first-run
     /// quickSave and explicit forcePicker requests.
+    /// Forgets the folder; the next capture asks again.
+    func clearFolder() {
+        UserDefaults.standard.removeObject(forKey: Self.bookmarkKey)
+    }
+
     private func saveWithPicker(_ image: CGImage) -> ScreenshotResult {
         guard let folder = runFolderPicker() else { return .cancelled }
         storeBookmark(for: folder)
