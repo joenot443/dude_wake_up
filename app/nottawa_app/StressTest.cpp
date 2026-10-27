@@ -130,6 +130,7 @@ void StressTest::enqueueScenario(const QString& name) {
     else if (name == "settingsui") settingsUi();
     else if (name == "audiosettings") audioSettings();
     else if (name == "audiolaunch") audioLaunch();
+    else if (name == "cachesettings") cacheSettings();
     else add([this, name] { window_->log("[stress] unknown scenario " + name); });
     // Settle, clear, settle, measure.
     add([] {}, 1000);
@@ -422,6 +423,44 @@ void StressTest::audioSettings() {
         window_->log(QString("[stress] audiosettings: done; input %1, start on launch on").arg(eng->selectedAudioSource()));
     }, 1000);
     add([] {}, 800);  // preferences.json written
+}
+
+// Cache Video Clips: off, a clip loads without a cache (and builds one if
+// switched on for it); on, it caches. ("[stress] cachesettings: ...")
+void StressTest::cacheSettings() {
+    const QString video = qEnvironmentVariable("NOTTAWA_STRESS_VIDEO");
+    auto fileNode = [this] {
+        for (const QString& id : nodeIds()) if (EngineBridge::instance()->fileSourceState(id).valid) return id;
+        return QString();
+    };
+    add([this, video] {
+        EngineBridge::instance()->clearGraph();
+        Prefs::set("performance.frameCache", 0.0);
+        window_->editor_->addMediaFile(video);
+    }, 300);
+    add([this, fileNode] {
+        const QString id = fileNode();
+        const FileSourceState f = EngineBridge::instance()->fileSourceState(id);
+        window_->log(QString("[stress] cachesettings: off: enabled %1, frames %2").arg(f.cacheEnabled).arg(f.cachedFrames));
+        if (id.isEmpty() || f.cacheEnabled || f.cachedFrames > 0) window_->log("[stress] FAIL cachesettings: a clip cached with the setting off");
+        EngineBridge::instance()->setFileSourceUseCache(id, true);
+    }, 4000);
+    add([this, fileNode, video] {
+        const FileSourceState f = EngineBridge::instance()->fileSourceState(fileNode());
+        window_->log(QString("[stress] cachesettings: switched on for the clip: frames %1, complete %2").arg(f.cachedFrames).arg(f.cacheAvailable));
+        if (f.cachedFrames == 0) window_->log("[stress] FAIL cachesettings: switching the clip's cache on built nothing");
+        EngineBridge::instance()->clearGraph();
+        Prefs::set("performance.frameCache", 1.0);
+        Prefs::set("performance.frameCacheBudget", QString("1024"));
+        window_->editor_->addMediaFile(video);
+    }, 4000);
+    add([this, fileNode] {
+        const FileSourceState f = EngineBridge::instance()->fileSourceState(fileNode());
+        window_->log(QString("[stress] cachesettings: on (1 GB): enabled %1, frames %2, complete %3").arg(f.cacheEnabled).arg(f.cachedFrames).arg(f.cacheAvailable));
+        if (!f.cacheEnabled || f.cachedFrames == 0) window_->log("[stress] FAIL cachesettings: no cache with the setting on");
+        EngineBridge::instance()->clearGraph();
+        EngineBridge::instance()->resetSettings("Performance");
+    }, 4000);
 }
 
 // The second launch after "audiosettings": the sample tracks selected and

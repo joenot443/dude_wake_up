@@ -24,8 +24,9 @@
 //
 // Frame cache: after load, a low-priority thread with its own decoder
 // decodes the whole clip into RAM as YUV 4:2:0 (1.5 bytes a pixel), if it
-// fits a budget shared by every player (a quarter of physical memory, at
-// most half of that for one clip). Until it completes, playback streams;
+// fits a budget shared by every player (the Cache Memory setting, by
+// default a quarter of physical memory; at most half of it for one clip).
+// With Cache Video Clips off, clips load without one (until switched on). Until it completes, playback streams;
 // then the decode thread serves frames from the cache by index, so seeks,
 // loops, scrubbing and reverse are lookups rather than keyframe decodes.
 
@@ -92,11 +93,18 @@ public:
     std::lock_guard<std::mutex> lk(m_);
     used_ -= std::min(bytes, used_);
   }
+  // 0: automatic. (Caches already over a lowered limit stay until released.)
+  void setLimit(uint64_t bytes) {
+    std::lock_guard<std::mutex> lk(m_);
+    limit_ = bytes > 0 ? bytes : automatic();
+  }
+  std::atomic<bool> enabled{true};  // new clips cache
 private:
-  CacheBudget() {
+  CacheBudget() : limit_(automatic()) {}
+  static uint64_t automatic() {
     MEMORYSTATUSEX status = {};
     status.dwLength = sizeof(status);
-    limit_ = GlobalMemoryStatusEx(&status) ? status.ullTotalPhys / 4 : (2ULL << 30);
+    return GlobalMemoryStatusEx(&status) ? status.ullTotalPhys / 4 : (2ULL << 30);
   }
   std::mutex m_;
   uint64_t limit_ = 0, used_ = 0;
@@ -771,7 +779,8 @@ bool IOSurfaceVideoPlayer::load(const std::string& path) {
   d.cacheComplete = false;
   d.cacheOverBudget = false;
   d.cachedFrames = 0;
-  d.cacheThread = std::thread([&d] { d.cacheLoop(); });
+  d.cacheEnabled = CacheBudget::instance().enabled.load();
+  if (d.cacheEnabled) d.cacheThread = std::thread([&d] { d.cacheLoop(); });
   return true;
 }
 
@@ -961,9 +970,21 @@ IOSurfaceVideoPlayer::CacheStatus IOSurfaceVideoPlayer::cacheStatus() const {
 }
 
 void IOSurfaceVideoPlayer::setCacheEnabled(bool on) {
-  std::lock_guard<std::mutex> lk(impl_->m);
-  impl_->cacheEnabled = on;
-  impl_->cv.notify_all();  // the decode thread switches over
+  {
+    std::lock_guard<std::mutex> lk(impl_->m);
+    impl_->cacheEnabled = on;
+    impl_->cv.notify_all();  // the decode thread switches over
+  }
+  // Loaded without a cache (the setting was off): build it now.
+  if (on && impl_->loaded && !impl_->cacheThread.joinable()) {
+    Impl& d = *impl_;
+    d.cacheThread = std::thread([&d] { d.cacheLoop(); });
+  }
+}
+
+void IOSurfaceVideoPlayer::setCacheSettings(bool enabled, uint64_t budgetBytes) {
+  CacheBudget::instance().enabled = enabled;
+  CacheBudget::instance().setLimit(budgetBytes);
 }
 
 bool IOSurfaceVideoPlayer::isFrameNew() const { return impl_->frameNew; }

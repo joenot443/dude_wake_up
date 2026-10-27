@@ -245,9 +245,10 @@ void EngineLoop::setup() {
   // Create app support directories (needed by services during tick)
   setupDirectories();
 
-  // Load saved config to restore last session
+  // App preferences (apart from the session; seeded from it on first run),
+  // then the last session.
+  EnginePreferences::load();
   ConfigService::getService()->loadDefaultConfigFile();
-  // App preferences (apart from the session; seeded from it on first run).
   EnginePreferences::setup();
 
   StrandService::getService()->setup();

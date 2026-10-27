@@ -151,9 +151,10 @@ public:
   using Observer = std::function<void(const std::string& id)>;
   void subscribe(Observer observer) { observers_.push_back(std::move(observer)); }
 
-  // Reads the file. `seed` is called when there isn't one yet (first run:
-  // carries values over from where they used to live), then it's written.
-  void load(const std::string& path, const std::function<void()>& seed = nullptr) {
+  // Reads the file; whether there was one. Without one (first run), values
+  // stay defaults and loaded() false until seeded() (after the caller has
+  // carried values over from where they used to live).
+  bool load(const std::string& path) {
     path_ = path;
     bool found = false;
     {
@@ -175,14 +176,17 @@ public:
         } catch (...) {}
       }
     }
-    if (!found) {
-      if (seed) seed();
-      save();
-    }
+    loaded_ = found;
+    return found;
+  }
+
+  // First run: the carried-over values are set; writes the file.
+  void seeded() {
+    save();
     loaded_ = true;
   }
 
-  // Whether load() has run (until then, values are defaults).
+  // Whether the values are the user's: read from the file, or seeded.
   bool loaded() const { return loaded_.load(); }
 
   // Writes the file now.
@@ -352,6 +356,16 @@ private:
            "Moves the beat pulse earlier (+) or later (-) to line up with what you hear. Automatic tempo only.");
     offset("audio.beatOffsetInput", "Inputs", "Microphones and audio interfaces.");
     offset("audio.beatOffsetSystem", "System Audio", "Audio playing on this computer.");
+
+    // Performance
+    addBool("performance.frameCache", "Performance", "Cache Video Clips",
+            "Decode clips into memory so looping, scrubbing and reverse play are instant. Applies to clips as they load.", true)
+        .keywords = "video file ram memory scrub reverse frame";
+    addChoice("performance.frameCacheBudget", "Performance", "Cache Memory",
+              "The most memory clip caches use. Automatic suits most computers.",
+              {{"auto", "Automatic"}, {"1024", "1 GB"}, {"2048", "2 GB"}, {"4096", "4 GB"},
+               {"8192", "8 GB"}, {"16384", "16 GB"}}, "auto")
+        .dependsOn = "performance.frameCache";
 
     // Graph
     addBool("graph.clearOnDisconnect", "Graph", "Clear Output on Disconnect",

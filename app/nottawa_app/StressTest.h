@@ -65,6 +65,7 @@ private:
     void settingsUi();
     void audioSettings();
     void audioLaunch();
+    void cacheSettings();
 
     // Helpers working on the live graph.
     QString randomSource();
