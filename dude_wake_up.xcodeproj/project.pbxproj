@@ -12,7 +12,7 @@
 		01D7CFE15E9742198ED4F637 /* ToolbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0EA4081EB5D43659596CABF /* ToolbarView.swift */; };
 		0208F63C2EB2F44700529661 /* TypewriterTextSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0208F63B2EB2F44700529661 /* TypewriterTextSource.cpp */; };
 		0208F6412EB3D0B600529661 /* ScrollingTextSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0208F6402EB3D0B600529661 /* ScrollingTextSource.cpp */; };
-		021162772E6CC3A000B15198 /* SystemAudioSource.mm in Sources */ = {isa = PBXBuildFile; fileRef = 021162762E6CC3A000B15198 /* SystemAudioSource.mm */; };
+		021162772E6CC3A000B15198 /* SystemAudioSource_mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 021162762E6CC3A000B15198 /* SystemAudioSource_mac.mm */; };
 		02145B012E525064009C1855 /* DiffusionShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02145B002E525040009C1855 /* DiffusionShader.cpp */; };
 		024FAE772DA0207D00DE3197 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 024FAE5B2DA0207D00DE3197 /* .gitignore */; };
 		024FAE812DA0207D00DE3197 /* ofxFastFboReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 024FAE592DA0207D00DE3197 /* ofxFastFboReader.cpp */; };
@@ -85,7 +85,7 @@
 		19068B801B2A49B8A626F986 /* ParameterControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520EA3DA17B5417AA6C0D7C9 /* ParameterControlView.swift */; };
 		19763EE3730D42918A9ADD2E /* ofxAudioFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 028651352D94673B000CE0D4 /* ofxAudioFile.cpp */; };
 		19D1C8D646574136B1386C17 /* BarPlotView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "6AA88847-35AD-4AED-8FA7-DAF1469E1A9C" /* BarPlotView.cpp */; };
-		19F5982E574F4103B19260D4 /* SystemAudioSource.mm in Sources */ = {isa = PBXBuildFile; fileRef = 021162762E6CC3A000B15198 /* SystemAudioSource.mm */; };
+		19F5982E574F4103B19260D4 /* SystemAudioSource_mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 021162762E6CC3A000B15198 /* SystemAudioSource_mac.mm */; };
 		"1BBA5C49-4387-4DF1-B018-9F6E016F444A" /* FileAudioSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "7F50B89F-0348-43F2-A58C-1C5504692393" /* FileAudioSource.cpp */; };
 		1E4CEF1DC2744889B46CB0A3 /* TileBrowserView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "C0C10A63-424F-4447-B591-0A9CC6766A15" /* TileBrowserView.cpp */; };
 		1EE5F08D950518B3D3576703 /* ThemePresets.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCC00000000000100000003 /* ThemePresets.swift */; };
@@ -597,7 +597,7 @@
 		020F8F502F4907C000DE1990 /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
 		020FA6682F4910BF00DE1990 /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
 		021162752E6CC3A000B15198 /* SystemAudioSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SystemAudioSource.hpp; sourceTree = "<group>"; };
-		021162762E6CC3A000B15198 /* SystemAudioSource.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SystemAudioSource.mm; sourceTree = "<group>"; };
+		021162762E6CC3A000B15198 /* SystemAudioSource_mac.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SystemAudioSource_mac.mm; sourceTree = "<group>"; };
 		021171AA2E6E3F8F00B15198 /* btrack~.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "btrack~.xcodeproj"; sourceTree = "<group>"; };
 		02145B002E525040009C1855 /* DiffusionShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DiffusionShader.cpp; sourceTree = "<group>"; };
 		02145B022E525095009C1855 /* DiffusionShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DiffusionShader.hpp; sourceTree = "<group>"; };
@@ -2005,7 +2005,7 @@
 				"B19D76F5-D648-45E6-A505-7EEDF67F1CC8" /* MicrophoneAudioSource.cpp */,
 				"FAB19008-CE87-4037-B0E7-BA9EC8F76835" /* MicrophoneAudioSource.hpp */,
 				021162752E6CC3A000B15198 /* SystemAudioSource.hpp */,
-				021162762E6CC3A000B15198 /* SystemAudioSource.mm */,
+				021162762E6CC3A000B15198 /* SystemAudioSource_mac.mm */,
 			);
 			path = Audio;
 			sourceTree = "<group>";
@@ -2902,7 +2902,7 @@
 				6C6C154F08BC4241BAB958A4 /* ScrollingTextSource.cpp in Sources */,
 				682581AE48264EB8810A3322 /* ConfigService.cpp in Sources */,
 				3A53FD5E7A6F44A8A06C78BF /* ofxFastFboReader.cpp in Sources */,
-				19F5982E574F4103B19260D4 /* SystemAudioSource.mm in Sources */,
+				19F5982E574F4103B19260D4 /* SystemAudioSource_mac.mm in Sources */,
 				BE6489A6692647C5BC5EA33A /* FontService.cpp in Sources */,
 				3316DE4418534721A9F3A424 /* crude_json.cpp in Sources */,
 				0AECC98CFB2447E0B19BC6F3 /* IconService.cpp in Sources */,
@@ -3178,7 +3178,7 @@
 				0208F6412EB3D0B600529661 /* ScrollingTextSource.cpp in Sources */,
 				"490D2AA0-72C3-4FBF-A054-652CAB6089DD" /* ConfigService.cpp in Sources */,
 				024FAE812DA0207D00DE3197 /* ofxFastFboReader.cpp in Sources */,
-				021162772E6CC3A000B15198 /* SystemAudioSource.mm in Sources */,
+				021162772E6CC3A000B15198 /* SystemAudioSource_mac.mm in Sources */,
 				"24B5DF02-1F3E-489D-B35B-BD8D3F822727" /* FontService.cpp in Sources */,
 				0286514C2D9468F8000CE0D4 /* crude_json.cpp in Sources */,
 				"912A58AE-8DD4-4B5B-82C4-85E44708C835" /* IconService.cpp in Sources */,

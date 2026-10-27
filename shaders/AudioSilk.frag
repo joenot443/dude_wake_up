@@ -12,6 +12,9 @@ uniform float gust;
 uniform float hueShift;
 uniform float audioSensitivity;
 uniform float brightness;
+uniform float kickLevel;   // CPU: relative bass onset envelope (0..1)
+uniform float midLevel;    // CPU: mids against their own 8 s level (0.5 = typical)
+uniform float highLevel;   // CPU: highs against their own 8 s level
 
 in vec2 coord;
 out vec4 outputColor;
@@ -118,10 +121,11 @@ void main(){
     float e = totalEnergy();
     float live = smoothstep(0.05, 0.4, e);
     float sens = audioSensitivity;
-    float kick = smoothstep(0.30, 0.85, band(0.0, 0.08) * sens) * live;
-    float bass = mix(0.3, pow(clamp(band(0.0, 0.08) * sens, 0.0, 1.5), 0.6), live);
-    float mid  = mix(0.3, pow(clamp(band(0.10, 0.45) * sens, 0.0, 1.5), 0.6), live);
-    float high = mix(0.1, pow(clamp(band(0.50, 1.00) * sens, 0.0, 1.5), 0.6), live);
+    // kick / mid / high come from the CPU (relative onsets and auto-gained levels): absolute
+    // thresholds on the spectrum pin on loud masters, where the low and mid bins clamp at 1
+    float kick = (0.3 + 0.7 * kickLevel) * live;   // a resting gust, so the cloth keeps its sheen between beats
+    float mid  = mix(0.3, 0.2 + 0.9 * midLevel, live);
+    float high = mix(0.1, 0.1 + 0.9 * highLevel, live);
 
     // slow camera: drift, gentle roll, breathing zoom
     float t = time;
