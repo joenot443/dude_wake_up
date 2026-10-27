@@ -139,10 +139,7 @@ BrowserPanel::BrowserPanel(QWidget* parent) : QWidget(parent) {
     connect(searchButton_, &QToolButton::clicked, this, &BrowserPanel::toggleSearch);
     favoritesButton_ = iconButton(Icons::Star, "Show Favorites", controls);
     favoritesButton_->setCheckable(true);
-    QIcon star;
-    star.addPixmap(Icons::icon(Icons::Star, Theme::textSecondary).pixmap(28, 28), QIcon::Normal, QIcon::Off);
-    star.addPixmap(Icons::icon(Icons::StarFilled, Theme::warning).pixmap(28, 28), QIcon::Normal, QIcon::On);
-    favoritesButton_->setIcon(star);
+    favoritesButton_->setIcon(Icons::toggle(Icons::Star, Theme::textSecondary, Icons::StarFilled, Theme::warning));
     connect(favoritesButton_, &QToolButton::toggled, this, [this](bool on) {
         (tab_ == Sources ? favoriteSourcesOnly_ : favoriteEffectsOnly_) = on;
         favoritesButton_->setToolTip(on ? "Showing Favorites" : "Show Favorites");

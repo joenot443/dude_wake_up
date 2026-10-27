@@ -21,6 +21,10 @@ enum Kind {
 };
 
 void  paint(QPainter* p, const QRectF& rect, Kind kind, const QColor& color);
+// Drawn at the size and pixel ratio it's shown at. `activeColor`: when
+// checked (QIcon::On).
 QIcon icon(Kind kind, const QColor& color, const QColor& activeColor = QColor());
+// Two shapes: `off`, and `on` when checked.
+QIcon toggle(Kind off, const QColor& offColor, Kind on, const QColor& onColor);
 
 } // namespace Icons

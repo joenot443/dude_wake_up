@@ -4,8 +4,12 @@
 
 #include <QPainter>
 #include <QPainterPath>
+#include <QIconEngine>
 #include <QPixmap>
 #include <QtMath>
+
+#include <algorithm>
+#include <cmath>
 
 namespace Icons {
 
@@ -40,9 +44,23 @@ void paint(QPainter* p, const QRectF& rect, Kind kind, const QColor& color) {
     p->save();
     p->setRenderHint(QPainter::Antialiasing);
     const qreal s = qMin(rect.width(), rect.height()) / 16.0;
-    p->translate(rect.center() - QPointF(8 * s, 8 * s));
+    // Hinting for small sizes: the grid's origin on a whole device pixel,
+    // and strokes a whole number of device pixels wide (at least one), so
+    // lines stay sharp instead of smearing across two half-lit pixels.
+    QPointF origin = rect.center() - QPointF(8 * s, 8 * s);
+    const QTransform device = p->deviceTransform();
+    qreal pixelsPerUnit = s;
+    if (device.type() <= QTransform::TxScale) {
+        const QPointF d = device.map(origin);
+        origin = device.inverted().map(QPointF(std::round(d.x()), std::round(d.y())));
+        pixelsPerUnit = s * device.m11();
+    }
+    const auto hinted = [pixelsPerUnit](qreal width) {
+        return pixelsPerUnit > 0 ? std::max(1.0, std::round(width * pixelsPerUnit)) / pixelsPerUnit : width;
+    };
+    p->translate(origin);
     p->scale(s, s);
-    QPen pen(color, 1.3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+    QPen pen(color, hinted(1.3), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
     p->setPen(pen);
     p->setBrush(Qt::NoBrush);
 
@@ -104,7 +122,7 @@ void paint(QPainter* p, const QRectF& rect, Kind kind, const QColor& color) {
         p->drawLine(QPointF(12, 4), QPointF(4, 12));
         break;
     case Text: {
-        QPen thick = pen; thick.setWidthF(1.6); p->setPen(thick);
+        QPen thick = pen; thick.setWidthF(std::max(hinted(1.6), pen.widthF())); p->setPen(thick);
         p->drawLine(QPointF(3, 3.5), QPointF(13, 3.5));
         p->drawLine(QPointF(8, 3.5), QPointF(8, 13.5));
         p->drawLine(QPointF(6, 13.5), QPointF(10, 13.5));
@@ -298,21 +316,53 @@ void paint(QPainter* p, const QRectF& rect, Kind kind, const QColor& color) {
     p->restore();
 }
 
-QIcon icon(Kind kind, const QColor& color, const QColor& activeColor) {
-    QIcon out;
-    for (const qreal dpr : {1.0, 2.0}) {
-        auto render = [&](const QColor& c) {
-            QPixmap pm(QSize(32, 32) * dpr);
-            pm.setDevicePixelRatio(dpr);
-            pm.fill(Qt::transparent);
-            QPainter p(&pm);
-            paint(&p, QRectF(0, 0, 32, 32), kind, c);
-            return pm;
-        };
-        out.addPixmap(render(color), QIcon::Normal, QIcon::Off);
-        if (activeColor.isValid()) out.addPixmap(render(activeColor), QIcon::Normal, QIcon::On);
+namespace {
+
+// Draws the icon's vectors at whatever size and device pixel ratio it's
+// shown at (100%, 125%, 150%, 200%...). Rendering fixed 32 px pixmaps and
+// letting Qt shrink them to 12-16 px, as before, blurred and thinned them.
+class VectorIconEngine : public QIconEngine {
+public:
+    VectorIconEngine(Kind off, QColor offColor, Kind on, QColor onColor)
+        : off_(off), on_(on), offColor_(offColor), onColor_(onColor) {}
+
+    void paint(QPainter* painter, const QRect& rect, QIcon::Mode mode, QIcon::State state) override {
+        const bool checked = state == QIcon::On && onColor_.isValid();
+        QColor c = checked ? onColor_ : offColor_;
+        if (mode == QIcon::Disabled) c.setAlphaF(c.alphaF() * 0.5);
+        Icons::paint(painter, rect, checked ? on_ : off_, c);
     }
-    return out;
+
+    QPixmap pixmap(const QSize& size, QIcon::Mode mode, QIcon::State state) override {
+        return scaledPixmap(size, mode, state, 1.0);
+    }
+
+    QPixmap scaledPixmap(const QSize& size, QIcon::Mode mode, QIcon::State state, qreal scale) override {
+        QPixmap pm(QSize(qCeil(size.width() * scale), qCeil(size.height() * scale)));
+        pm.setDevicePixelRatio(scale);
+        pm.fill(Qt::transparent);
+        QPainter p(&pm);
+        paint(&p, QRect(QPoint(0, 0), size), mode, state);
+        return pm;
+    }
+
+    QSize actualSize(const QSize& size, QIcon::Mode, QIcon::State) override { return size; }
+    QIconEngine* clone() const override { return new VectorIconEngine(*this); }
+    QString key() const override { return QStringLiteral("NottawaVectorIcon"); }
+
+private:
+    Kind off_, on_;
+    QColor offColor_, onColor_;
+};
+
+} // anon
+
+QIcon icon(Kind kind, const QColor& color, const QColor& activeColor) {
+    return QIcon(new VectorIconEngine(kind, color, kind, activeColor));
+}
+
+QIcon toggle(Kind off, const QColor& offColor, Kind on, const QColor& onColor) {
+    return QIcon(new VectorIconEngine(off, offColor, on, onColor));
 }
 
 } // namespace Icons
