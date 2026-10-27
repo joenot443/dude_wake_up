@@ -17,6 +17,9 @@
 #include "MidiSmoothingService.hpp"
 #include "PreferencesService.hpp"
 #include "ShaderChainerService.hpp"
+#ifndef TARGET_OSX
+#include "IOSurfaceVideoPlayer.hpp"
+#endif
 
 #include <atomic>
 #include <cstdlib>
@@ -62,6 +65,12 @@ inline void apply() {
   audio->beatOffsetMs[AudioSourceType_File] = prefs->number("audio.beatOffsetFile");
   audio->beatOffsetMs[AudioSourceType_Microphone] = prefs->number("audio.beatOffsetInput");
   audio->beatOffsetMs[AudioSourceType_System] = prefs->number("audio.beatOffsetSystem");
+#ifndef TARGET_OSX
+  // (macOS: FileSource reads them as each clip loads.)
+  const std::string budget = prefs->string("performance.frameCacheBudget");
+  const long long mb = budget == "auto" ? 0 : std::atoll(budget.c_str());
+  IOSurfaceVideoPlayer::setCacheSettings(prefs->boolean("performance.frameCache"), mb > 0 ? uint64_t(mb) << 20 : 0);
+#endif
   auto* midi = MidiSmoothingService::getService();
   midi->setEnabled(prefs->boolean("midi.smoothing"));
   midi->setDurationMs(static_cast<float>(prefs->number("midi.smoothingMs")));
@@ -94,14 +103,25 @@ inline void setupAudio() {
     audio->selectAudioSource(audio->selectedAudioSource);  // (sets it up, which starts it)
 }
 
-// At engine startup, after the session has loaded.
+// At engine startup, before the session loads: in effect as it loads
+// (clips cache by them, for one).
+inline void load() {
+  auto* prefs = PreferencesService::getService();
+  if (prefs->load(ConfigService::getService()->nottawaFolderFilePath() + "/preferences.json")) apply();
+}
+
+// After the session has loaded: on first run, seeded from it.
 inline void setup() {
   auto* prefs = PreferencesService::getService();
-  prefs->load(ConfigService::getService()->nottawaFolderFilePath() + "/preferences.json", seedFromSession);
+  if (!prefs->loaded()) {
+    seedFromSession();
+    prefs->seeded();
+  }
   apply();
   setupAudio();
   prefs->subscribe([](const std::string& id) {
-    if (id.rfind("output.", 0) == 0 || id.rfind("audio.", 0) == 0 || id.rfind("midi.", 0) == 0 || id == "graph.clearOnDisconnect")
+    if (id.rfind("output.", 0) == 0 || id.rfind("audio.", 0) == 0 || id.rfind("midi.", 0) == 0 ||
+        id.rfind("performance.", 0) == 0 || id == "graph.clearOnDisconnect")
       apply();
   });
 }

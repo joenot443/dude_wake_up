@@ -13,12 +13,23 @@
 #include "CommonViews.hpp"
 #include "LayoutStateService.hpp"
 #include "Console.hpp"
+#include "PreferencesService.hpp"
 #include "ofFileUtils.h"
 #include <algorithm>
+#include <cstdlib>
 #include <cmath>
 
 static constexpr uint64_t kCacheFileSizeThresholdBytes = 100ULL * 1024 * 1024;
-static constexpr uint64_t kCacheMemoryBudgetBytes      = 4ULL * 1024ULL * 1024ULL * 1024ULL; // 4 GB
+static constexpr uint64_t kCacheMemoryBudgetBytes      = 4ULL * 1024ULL * 1024ULL * 1024ULL; // 4 GB (Cache Memory: Automatic)
+
+// The Performance settings: Cache Video Clips, and Cache Memory (here a
+// clip's estimated cache must fit it).
+static bool frameCacheEnabled() { return PreferencesService::getService()->boolean("performance.frameCache"); }
+static uint64_t frameCacheBudgetBytes() {
+  const std::string budget = PreferencesService::getService()->string("performance.frameCacheBudget");
+  const long long mb = budget == "auto" ? 0 : std::atoll(budget.c_str());
+  return mb > 0 ? uint64_t(mb) * 1024ULL * 1024ULL : kCacheMemoryBudgetBytes;
+}
 static constexpr int      kCacheStride                 = 1; // keep every Nth source frame
 
 void FileSource::setup()
@@ -83,7 +94,8 @@ void FileSource::setup()
       nativeFrameCount > 0 &&
       nativeWidth > 0 && nativeHeight > 0 &&
       fsize > 0 && fsize < kCacheFileSizeThresholdBytes &&
-      mem > 0 && mem < kCacheMemoryBudgetBytes;
+      mem > 0 && mem < frameCacheBudgetBytes() &&
+      frameCacheEnabled();
 
 #ifndef TARGET_OSX
   // The Windows player keeps its own frame cache (in RAM, built in the

@@ -82,6 +82,10 @@ public:
   };
   CacheStatus cacheStatus() const;
   void setCacheEnabled(bool on);
+  // The app-wide settings (performance.frameCache / frameCacheBudget): whether
+  // clips cache as they load, and the RAM all caches share (0: a quarter of
+  // physical memory). Clips already loaded keep theirs.
+  static void setCacheSettings(bool enabled, uint64_t budgetBytes);
 #endif
 
 private:
