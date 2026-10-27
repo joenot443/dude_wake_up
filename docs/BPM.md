@@ -168,6 +168,10 @@ on both inputs.
 (The engine runs at 60 fps, so a shown beat is up to one frame stale; that
 is included.)
 
+Defaults (Joe): Audio Files and Inputs 0 ms; System Audio the capture path,
++35 ms on Windows and +45 ms on macOS, so it lines up as a file does
+whatever the speakers. Speaker latency is left to each setup.
+
 ## Running the evaluation
 
 ```

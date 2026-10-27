@@ -347,15 +347,23 @@ private:
               {{"auto", "Automatic (60-200)"}, {"60-120", "60-120 BPM"}, {"80-160", "80-160 BPM"},
                {"90-180", "90-180 BPM"}, {"100-200", "100-200 BPM"}}, "auto")
         .keywords = "bpm octave half double drum bass";
-    auto offset = [&](std::string id, std::string label, std::string help) {
-      auto& d = addNumber(id, "Audio", label, help, SettingType_Float, -250.0, 250.0, 1.0, 0, "ms", 0.0);
+    auto offset = [&](std::string id, std::string label, std::string help, double def) {
+      auto& d = addNumber(id, "Audio", label, help, SettingType_Float, -250.0, 250.0, 1.0, 0, "ms", def);
       d.group = "Beat Timing";
       d.keywords = "latency delay sync nudge offset";
     };
     offset("audio.beatOffsetFile", "Audio Files",
-           "Moves the beat pulse earlier (+) or later (-) to line up with what you hear. Automatic tempo only.");
-    offset("audio.beatOffsetInput", "Inputs", "Microphones and audio interfaces.");
-    offset("audio.beatOffsetSystem", "System Audio", "Audio playing on this computer.");
+           "Moves the beat pulse earlier (+) or later (-) to line up with what you hear. Automatic tempo only.", 0.0);
+    offset("audio.beatOffsetInput", "Inputs", "Microphones and audio interfaces.", 0.0);
+    // System Audio is captured after it's mixed for the speakers, later than
+    // a file is analysed: by default it makes up that difference (measured,
+    // docs/BPM.md), so it lines up as a file does whatever the speakers.
+#ifdef __APPLE__
+    constexpr double kSystemCaptureMs = 45.0;
+#else
+    constexpr double kSystemCaptureMs = 35.0;
+#endif
+    offset("audio.beatOffsetSystem", "System Audio", "Audio playing on this computer.", kSystemCaptureMs);
 
     // Performance
     addBool("performance.frameCache", "Performance", "Cache Video Clips",

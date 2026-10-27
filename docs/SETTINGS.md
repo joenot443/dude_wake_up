@@ -98,7 +98,7 @@ Step 3, batch 1 (Audio and Output):
 | output.frameRate | Output | choice | 60 | 24/30/60/120: the engine loop's rate |
 | audio.startOnLaunch | Audio | bool | false | starts the input used last |
 | audio.tempoRange | Audio | choice | auto | auto, 60-120, 80-160, 90-180, 100-200: Auto's tempo shown folded into it by octaves (beat count and phase with it) |
-| audio.beatOffsetFile / Input / System | Audio | float ms -250..250 | 0 | group Beat Timing; + shows the pulse earlier; Auto only; taps are moved back by it before hinting |
+| audio.beatOffsetFile / Input / System | Audio | float ms -250..250 | 0 / 0 / +35 (Win), +45 (Mac) | group Beat Timing; + shows the pulse earlier; Auto only; taps are moved back by it before hinting |
 
 The audio input is remembered app-wide (preferences.json `state`, not a
 setting): selecting one records it, it's selected (not started) at launch,

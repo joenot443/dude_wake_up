@@ -237,6 +237,7 @@ void StressTest::settings() {
         for (const auto& s : all) if (!sections.contains(s.section)) sections << s.section;
         window_->log(QString("[stress] settings: %1 settings in %2").arg(all.size()).arg(sections.join(", ")));
         if (all.isEmpty()) window_->log("[stress] FAIL settings: no schema");
+        if (eng->settingNumber("audio.beatOffsetSystem") != 35.0) window_->log("[stress] FAIL settings: System Audio offset default isn't 35 ms");
         for (const auto& s : all) {
             if (s.id == "output.advanceFade" && (s.dependsOn != "output.autoAdvance" || s.decimals != 1 || s.defaultNumber != 0.3))
                 window_->log("[stress] FAIL settings: advanceFade's dependsOn/decimals/default");
