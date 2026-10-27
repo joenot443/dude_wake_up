@@ -66,6 +66,8 @@ private:
     void audioSettings();
     void audioLaunch();
     void cacheSettings();
+    void beatTiming();
+    void measureBeat(const QString& label, bool video);
 
     // Helpers working on the live graph.
     QString randomSource();
@@ -74,6 +76,7 @@ private:
     QString pick(const QStringList& ids);
 
     MainWindow* window_;
+    QString     calibVideo_;  // beattiming's video node
     struct Queued { Step step; int delayMs; };
     std::deque<Queued> steps_;
     QTimer timer_;

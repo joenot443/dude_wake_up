@@ -469,6 +469,12 @@ void EngineBridge::resetSettings(const QString& section) {
     if (running_) ntw_reset_settings(section.isEmpty() ? nullptr : section.toUtf8().constData());
 }
 
+EngineBridge::BeatProbe EngineBridge::beatProbe(const QString& videoSourceId) const {
+    if (!running_) return {};
+    const NTWBeatProbe p = ntw_get_beat_probe(videoSourceId.isEmpty() ? nullptr : videoSourceId.toUtf8().constData());
+    return {p.phase, p.bpm, p.fileAudioSeconds, p.videoSeconds};
+}
+
 void EngineBridge::tapBpm(double seconds) {
     if (!running_) return;
     if (seconds < 0) seconds = std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();

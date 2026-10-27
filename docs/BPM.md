@@ -147,6 +147,27 @@ Correcting Auto mode with 8 taps (20 ms wobble) on the true beats at 10 s
 (201 recordings' beats improve by over 0.15 F; 14 get worse, mostly
 quickstep whose strongest onsets are off the beat at the tapped tempo.)
 
+## Beat timing in the app
+
+How late the shown beat is against the music, with the Beat Timing
+offsets at 0 (stress scenario `beattiming`). The track is synthetic, so its
+beats are exact: `Tests/bpm/calib_drums.py` (128 BPM, first beat at 0.5 s).
+It's played as a sample track (copy it into `audio/` as
+`128Z Calibration.wav` for the run, then remove it), and inside a video
+(`NOTTAWA_CALIB_VIDEO`) while System Audio listens. Clocks: the samples the
+file source has written to the output; the video's media time. Neither
+includes the output device's latency, which delays what's heard equally
+on both inputs.
+
+| Input | Windows | macOS |
+|---|---|---|
+| Audio file | 12 ms late (spread 5) | ~19 ms late |
+| System Audio | 47 ms late (spread 0.6) | ~63 ms late |
+| System minus File (the capture path) | ~35 ms | ~45 ms |
+
+(The engine runs at 60 fps, so a shown beat is up to one frame stale; that
+is included.)
+
 ## Running the evaluation
 
 ```

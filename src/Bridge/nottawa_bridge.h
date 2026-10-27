@@ -592,6 +592,18 @@ char* ntw_get_current_workspace_path(void);
 // Caller must free the returned string.
 char* ntw_get_current_workspace_name(void);
 
+// Testing: the beat phase the pulse shows (0 on a beat) together with the
+// playback clocks it's measured against, read in one engine frame. Seconds:
+// the file audio source's position (samples written to the output), and a
+// video node's media time (or -1 without one).
+typedef struct {
+  double phase;
+  double bpm;
+  double fileAudioSeconds;
+  double videoSeconds;
+} NTWBeatProbe;
+NTWBeatProbe ntw_get_beat_probe(const char* videoSourceId);
+
 // ---------------------------------------------------------------------------
 // MARK: - Settings (app preferences, shared by both apps; docs/SETTINGS.md)
 // ---------------------------------------------------------------------------

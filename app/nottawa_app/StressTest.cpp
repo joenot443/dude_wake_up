@@ -1,3 +1,6 @@
+#define _USE_MATH_DEFINES
+#include <memory>
+#include <QTimer>
 #include <QFrame>
 #include <QLabel>
 #include <QLineEdit>
@@ -131,6 +134,7 @@ void StressTest::enqueueScenario(const QString& name) {
     else if (name == "audiosettings") audioSettings();
     else if (name == "audiolaunch") audioLaunch();
     else if (name == "cachesettings") cacheSettings();
+    else if (name == "beattiming") beatTiming();
     else add([this, name] { window_->log("[stress] unknown scenario " + name); });
     // Settle, clear, settle, measure.
     add([] {}, 1000);
@@ -461,6 +465,89 @@ void StressTest::cacheSettings() {
         EngineBridge::instance()->clearGraph();
         EngineBridge::instance()->resetSettings("Performance");
     }, 4000);
+}
+
+// How far the shown beat is from the music's, for the Beat Timing
+// defaults: a drum track with exactly known beats (128 BPM, first beat at
+// 0.5 s; .cache/calib) played (1) as a sample track by the file source,
+// whose clock is the samples written to the output, and (2) by a video
+// node (NOTTAWA_CALIB_VIDEO, the same audio) while System Audio listens,
+// against the video's media time. Neither includes the output device's
+// own latency. Results: "[stress] beattiming: <input> late <ms> ...".
+void StressTest::beatTiming() {
+    add([] {
+        auto* eng = EngineBridge::instance();
+        for (const char* id : {"audio.beatOffsetFile", "audio.beatOffsetInput", "audio.beatOffsetSystem"}) Prefs::set(id, 0.0);
+        Prefs::set("audio.tempoRange", QString("auto"));
+        for (const auto& s : eng->audioSources())
+            if (s.name.contains("Sample", Qt::CaseInsensitive)) eng->selectAudioSource(s.id);
+        eng->setBpmMode(0);
+        for (const auto& t : eng->sampleTracks()) if (t.name.contains("Calibration")) eng->selectSampleTrack(t.index);
+    }, 500);
+    add([] { if (!EngineBridge::instance()->isAudioActive()) EngineBridge::instance()->toggleAudio(); }, 500);
+    add([] {}, 12000);  // the tracker locks
+    measureBeat("file", false);
+    add([this] {
+        auto* eng = EngineBridge::instance();
+        if (eng->isAudioActive()) eng->toggleAudio();
+        for (const auto& s : eng->audioSources())
+            if (s.name.contains("System", Qt::CaseInsensitive)) eng->selectAudioSource(s.id);
+        eng->setBpmMode(0);
+        window_->editor_->addMediaFile(qEnvironmentVariable("NOTTAWA_CALIB_VIDEO"));
+    }, 500);
+    add([this] {
+        for (const QString& id : nodeIds())
+            if (EngineBridge::instance()->fileSourceState(id).valid) {
+                calibVideo_ = id;
+                EngineBridge::instance()->setFileSourceMuted(id, false);
+                EngineBridge::instance()->setFileSourceVolume(id, 1.0f);
+            }
+        if (!EngineBridge::instance()->isAudioActive()) EngineBridge::instance()->toggleAudio();
+    }, 1500);
+    add([] {}, 12000);
+    measureBeat("system", true);
+    add([this] {
+        auto* eng = EngineBridge::instance();
+        if (eng->isAudioActive()) eng->toggleAudio();
+        eng->clearGraph();
+    }, 100);
+}
+
+// Samples the beat probe every 5 ms for 30 s; logs the shown beat's mean
+// lateness against the calibration track's beats (circular mean), its
+// spread, and how many samples had the tempo right.
+void StressTest::measureBeat(const QString& label, bool video) {
+    struct Acc { double s = 0, c = 0; int n = 0, total = 0; QTimer timer; };
+    auto acc = std::make_shared<Acc>();
+    add([this, acc, label, video] {
+        constexpr double kT0 = 0.5, kPeriod = 60.0 / 128.0;
+        const QString videoId = video ? calibVideo_ : QString();
+        acc->timer.setTimerType(Qt::PreciseTimer);
+        acc->timer.setInterval(5);
+        QObject::connect(&acc->timer, &QTimer::timeout, [acc, videoId] {
+            const auto p = EngineBridge::instance()->beatProbe(videoId);
+            const double media = videoId.isEmpty() ? p.fileAudioSeconds : p.videoSeconds;
+            ++acc->total;
+            if (media < kT0 || std::abs(p.bpm / 128.0 - 1) > 0.01) return;
+            const double truth = std::fmod((media - kT0) / kPeriod, 1.0);
+            const double err = (p.phase - truth) * 2 * M_PI;  // + : shown ahead
+            acc->s += std::sin(err);
+            acc->c += std::cos(err);
+            ++acc->n;
+        });
+        acc->timer.start();
+        window_->log(QString("[stress] beattiming: measuring %1").arg(label));
+    });
+    add([this, acc, label] {
+        acc->timer.stop();
+        constexpr double kPeriod = 60.0 / 128.0;
+        if (acc->n == 0) { window_->log(QString("[stress] FAIL beattiming: %1: tempo never right (%2 samples)").arg(label).arg(acc->total)); return; }
+        const double mean = std::atan2(acc->s, acc->c) / (2 * M_PI);       // cycles, + ahead
+        const double r = std::hypot(acc->s, acc->c) / acc->n;
+        const double spread = std::sqrt(std::max(0.0, -2 * std::log(r))) / (2 * M_PI) * kPeriod * 1000;
+        window_->log(QString("[stress] beattiming: %1 late %2 ms (spread %3 ms, %4 of %5 samples at 128)")
+                         .arg(label).arg(-mean * kPeriod * 1000, 0, 'f', 1).arg(spread, 0, 'f', 1).arg(acc->n).arg(acc->total));
+    }, 30000);
 }
 
 // The second launch after "audiosettings": the sample tracks selected and

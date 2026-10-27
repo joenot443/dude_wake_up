@@ -401,6 +401,10 @@ public:
     void    setSetting(const QString& id, double value);
     void    setSetting(const QString& id, const QString& value);
     void    resetSettings(const QString& section = QString());
+
+    // Testing: ntw_get_beat_probe.
+    struct BeatProbe { double phase = 0, bpm = 0, fileAudioSeconds = -1, videoSeconds = -1; };
+    BeatProbe beatProbe(const QString& videoSourceId = QString()) const;
     void setSmoothingMode(int mode);
     void setFrequencyRelease(float v);
     void setFrequencyScale(float v);

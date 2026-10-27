@@ -6,6 +6,9 @@
 //  C++ singleton services.
 //
 
+#ifdef __APPLE__
+#include <pthread.h>
+#endif
 #include "EnginePreferences.hpp"
 #include "nottawa_bridge.h"
 
@@ -80,6 +83,10 @@ static void engineThreadFunc() {
   // process asks for 1 ms resolution, which capped the engine near 40 fps.
   timeBeginPeriod(1);
   SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
+#elif defined(__APPLE__)
+  // The default QoS lets the kernel add ~10% leeway to timed sleeps, more
+  // than the spin margin below: the loop ran 9% under 24/30 fps.
+  pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0);
 #endif
   try {
     engineThreadId = std::this_thread::get_id();
@@ -1998,6 +2005,24 @@ void ntw_save_default_config(void) {
   runOnEngineThread([]() {
     ConfigService::getService()->saveDefaultConfigFile();
     PreferencesService::getService()->save();
+  });
+}
+
+NTWBeatProbe ntw_get_beat_probe(const char* videoSourceId) {
+  const std::string vid(videoSourceId ? videoSourceId : "");
+  return runOnEngineThread([vid]() {
+    NTWBeatProbe probe = {0, 0, -1, -1};
+    auto source = AudioSourceService::getService()->selectedAudioSource;
+    if (!source) return probe;
+    probe.phase = source->audioAnalysis.lastBpmPct;
+    probe.bpm = source->audioAnalysis.bpm->value;
+    if (auto* file = dynamic_cast<FileAudioSource*>(source.get()); file && file->audioFile.samplerate() > 0)
+      probe.fileAudioSeconds = double(file->currentSample) / double(file->audioFile.samplerate());
+    if (!vid.empty())
+      if (auto src = VideoSourceService::getService()->videoSourceForId(vid))
+        if (auto* fileSrc = dynamic_cast<FileSource*>(src.get()))
+          probe.videoSeconds = double(fileSrc->player.getPosition()) * double(fileSrc->player.getDuration());
+    return probe;
   });
 }
 
