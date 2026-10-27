@@ -28,6 +28,9 @@
 //                   rules (saved frame, centred on its display, display gone)
 //    outputwindows-set / outputwindows-check  a window reopened at launch
 //                   where it was at quit; then closed
+//    diagnostics    the Copy Diagnostics text: its parts, and nothing naming the user
+//    diagnostics-set / diagnostics-check  an abrupt exit, then the relaunch
+//                   reports the previous session didn't quit normally
 //    cachesettings  a video clip (NOTTAWA_SELFTEST_CLIP, ~1.1 GB to cache)
 //                   loaded under each Cache Video Clips / Cache Memory choice
 //
@@ -91,6 +94,11 @@ final class SelfTest {
             case "audiolaunch-check": audioLaunchCheck()
             case "cachesettings": await cacheSettings()
             case "outputwindows": await outputWindows()
+            case "diagnostics": diagnostics()
+            case "diagnostics-set":
+                log("diagnostics-set: exiting without quitting")
+                exit(0)  // no willTerminate: as a crash would
+            case "diagnostics-check": diagnosticsCheck()
             case "outputwindows-set": await outputWindowsSet(); return  // quits, on purpose
             case "outputwindows-check": outputWindowsCheck()
             default: log("FAIL unknown scenario \(scenario)")
@@ -872,6 +880,33 @@ extension SelfTest {
         log("\(ok ? "PASS" : "FAIL") outputwindows launch: reopened at \(frame.map(NSStringFromRect) ?? "not reopened") (want \(NSStringFromRect(state.frame)))")
         PreviewWindowManager.shared.closePreview(for: state.nodeId)  // the quit-time save then records it closed
         try? FileManager.default.removeItem(at: windowsLaunchURL)
+    }
+}
+
+// MARK: - Diagnostics
+
+extension SelfTest {
+    func diagnostics() {
+        let text = Diagnostics.text()
+        try? text.write(to: dir.appendingPathComponent("diagnostics.txt"), atomically: true, encoding: .utf8)
+        let parts = ["Nottawa ", "System: macOS", "Graphics: ", "Display 1: ", "Engine: ", "Audio: ", "Settings changed: ", "Previous session: "]
+        let missing = parts.filter { !text.contains($0) }
+        let user = NSUserName(), home = "/Users/\(NSUserName())"
+        let names = text.contains(user) || text.contains(home) || text.contains(NSHomeDirectory())
+        log("\(missing.isEmpty && !names ? "PASS" : "FAIL") diagnostics: \(text.split(separator: "\n").count) lines\(missing.isEmpty ? "" : ", missing \(missing)")\(names ? ", NAMES THE USER" : "") (diagnostics.txt)")
+        log("diagnostics: previous session \(Diagnostics.uncleanPreviousSession == nil ? "quit normally" : "didn't quit normally")")
+        // The folder actions, from the sandbox (opt-in: they open Finder windows).
+        if ProcessInfo.processInfo.environment["NOTTAWA_SELFTEST_OPENFOLDERS"] == "1" {
+            // (Whether Finder showed them is checked from outside: activateFileViewerSelecting reports nothing.)
+            SettingsStore.openLogsFolder()
+            log("\(NSWorkspace.shared.open(SettingsStore.dataFolder) ? "PASS" : "FAIL") open data folder from the sandbox; logs folder asked of Finder")
+        }
+    }
+
+    func diagnosticsCheck() {
+        let unclean = Diagnostics.uncleanPreviousSession != nil
+        let text = Diagnostics.text()
+        log("\(unclean && text.contains("didn't quit normally") ? "PASS" : "FAIL") diagnostics after an abrupt exit: \(text.split(separator: "\n").last ?? "")")
     }
 }
 

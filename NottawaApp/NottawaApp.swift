@@ -85,6 +85,7 @@ struct NottawaApp: App {
                 PreviewWindowManager.shared.saveOpenWindows()
                 viewModel.cleanup()
                 NottawaEngine.shared.stop()
+                Diagnostics.noteCleanQuit()
             }
             .handlesExternalEvents(preferring: Set(["*"]), allowing: Set(["*"]))
         }
@@ -217,6 +218,7 @@ struct NottawaApp: App {
     }
 
     private func initializeEngine() {
+        Diagnostics.noteLaunch()
         engineStatus = .initializing
         let engine = NottawaEngine.shared
 
