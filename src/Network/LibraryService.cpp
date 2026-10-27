@@ -15,6 +15,7 @@
 #include "EngineLoop.hpp"
 #endif
 #include "httplib.h"
+#include "HttpsClient.hpp"       // SSLClient on every platform; NOTTAWA_HAS_HTTPS
 #include "json.hpp"
 #include <memory>
 //#include <sentry.h>
@@ -23,6 +24,18 @@
 #include <mutex>
 
 using json = nlohmann::json;
+
+// Runs `task` on the thread that owns the services: the engine thread in
+// engine-only builds (the macOS/Windows apps, where MainApp's loop never
+// runs), else the OF main thread.
+static void runOnMainThread(std::function<void()> task)
+{
+#ifdef NOTTAWA_ENGINE_ONLY
+  EngineLoop::getInstance()->executeOnEngineThread(std::move(task));
+#else
+  MainApp::getApp()->executeOnMainThread(std::move(task));
+#endif
+}
 
 // Helper function to parse HTTPS URL into host and path
 // Returns false if parsing fails
@@ -93,7 +106,7 @@ void LibraryService::setup()
 
 void LibraryService::backgroundFetchLibraryFiles()
 {
-  downloadFutures.push_back(std::async(std::launch::async, &LibraryService::fetchLibraryFiles, this));
+  launchAsync(&LibraryService::fetchLibraryFiles, this);
 }
 
 void LibraryService::didFetchLibraryFiles() {
@@ -102,11 +115,11 @@ void LibraryService::didFetchLibraryFiles() {
   repopulateVideoSourcesFromMainThread();
 #endif
   // Then download thumbnails and repopulate again when done
-  downloadFutures.push_back(std::async(std::launch::async, &LibraryService::downloadAllThumbnails, this));
+  launchAsync(&LibraryService::downloadAllThumbnails, this);
 }
 
 void LibraryService::repopulateVideoSourcesFromMainThread() {
-  MainApp::getApp()->executeOnMainThread([]() {
+  runOnMainThread([]() {
     VideoSourceService::getService()->populateAvailableVideoSources();
   });
 }
@@ -128,7 +141,7 @@ void LibraryService::fetchLibraryFiles()
     return;
   }
   
-#ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+#ifndef NOTTAWA_HAS_HTTPS
   log("Error: HTTPS URL provided but httplib not compiled with SSL support for library files.");
   std::cerr << "Error: HTTPS URL provided but httplib not compiled with SSL support for library files." << std::endl;
   return;
@@ -156,7 +169,9 @@ void LibraryService::fetchLibraryFiles()
   if (res && res->status == 200)
   {
     nlohmann::json json_body = nlohmann::json::parse(res->body);
-    libraryFiles.clear();
+    // Build the new catalogue here, then swap it in under the lock.
+    std::map<std::string, std::shared_ptr<LibraryFile>> files;
+    std::map<std::string, bool> downloaded;
     
     for (auto &library_file : json_body)
     {
@@ -170,8 +185,13 @@ void LibraryService::fetchLibraryFiles()
       file.category = library_file["category"];
       
       auto shared = std::make_shared<LibraryFile>(file);
-      libraryFileIdDownloadedMap[file.id] = hasMediaOnDisk(shared);
-      libraryFiles[file.id] = shared;
+      downloaded[file.id] = hasMediaOnDisk(shared);
+      files[file.id] = shared;
+    }
+    {
+      std::lock_guard<std::mutex> lock(filesMutex);
+      libraryFiles = std::move(files);
+      libraryFileIdDownloadedMap = std::move(downloaded);
     }
     
     didFetchLibraryFiles();
@@ -212,7 +232,7 @@ void LibraryService::downloadThumbnail(std::shared_ptr<LibraryFile> file)
     return; // Stop if URL is invalid
   }
   
-#ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+#ifndef NOTTAWA_HAS_HTTPS
   log("Error: HTTPS URL provided but httplib not compiled with SSL support for thumbnail download.");
   std::cerr << "Error: HTTPS URL provided but httplib not compiled with SSL support for thumbnail download." << std::endl;
   return; // Stop if SSL support is missing
@@ -274,15 +294,15 @@ void LibraryService::downloadAllThumbnails()
   // thread. Downloading one at a time also prevents excessive resource
   // consumption that previously led to crashes.
   bool downloadedAny = false;
-  for (const auto &file : libraryFiles)
+  for (const auto &file : libraryFilesSnapshot())
   {
-    if (hasThumbnailOnDisk(file.second)) {
+    if (hasThumbnailOnDisk(file)) {
       continue;  // Skip if thumbnail already exists on disk
     }
 
     // Download the thumbnail synchronously. The method handles its own error
     // reporting and will block until the download completes (or fails).
-    downloadThumbnail(file.second);
+    downloadThumbnail(file);
     downloadedAny = true;
   }
 
@@ -309,7 +329,7 @@ void LibraryService::downloadFile(std::shared_ptr<LibraryFile> file, std::functi
     return;
   }
 
-#ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+#ifndef NOTTAWA_HAS_HTTPS
   log("Error: HTTPS URL provided but httplib not compiled with SSL support.");
   std::cerr << "Error: HTTPS URL provided but httplib not compiled with SSL support." << std::endl;
   file->isDownloading = false;
@@ -393,22 +413,12 @@ void LibraryService::downloadFile(std::shared_ptr<LibraryFile> file, std::functi
 
       // Only mark as complete if not paused
       if (!file->isPaused) {
-        libraryFileIdDownloadedMap[file->id] = true;
+        setDownloaded(file->id, true);
         log("Successfully downloaded file %s", file->filename.c_str());
         file->isDownloading = false;
         file->progress = 1.0f;
 
-        if (callback) {
-#ifdef NOTTAWA_ENGINE_ONLY
-          EngineLoop::getInstance()->executeOnEngineThread([callback]() {
-            callback();
-          });
-#else
-          MainApp::getApp()->executeOnMainThread([callback](){
-            callback();
-          });
-#endif
-        }
+        if (callback) runOnMainThread(callback);
       } else {
         // Download was paused - keep partial file
         file->isDownloading = false;
@@ -449,21 +459,43 @@ void LibraryService::resumeDownload(std::shared_ptr<LibraryFile> file, std::func
     log("Resuming download for file %s", file->filename.c_str());
 
     // Launch new download thread that will resume from downloadedBytes
-    downloadFutures.push_back(
-      std::async(std::launch::async, &LibraryService::downloadFile, this, file, callback));
+    launchAsync(&LibraryService::downloadFile, this, file, callback);
   }
 }
 
 std::shared_ptr<LibraryFile> LibraryService::libraryFileForId(std::string id)
 {
-  if (libraryFiles.empty())
-  {
-    return nullptr;
-  }
-  if (libraryFiles.count(id) != 0) {
-    return libraryFiles[id];
-  }
-  return nullptr;
+  std::lock_guard<std::mutex> lock(filesMutex);
+  auto it = libraryFiles.find(id);
+  return it == libraryFiles.end() ? nullptr : it->second;
+}
+
+std::vector<std::shared_ptr<LibraryFile>> LibraryService::libraryFilesSnapshot()
+{
+  std::lock_guard<std::mutex> lock(filesMutex);
+  std::vector<std::shared_ptr<LibraryFile>> files;
+  files.reserve(libraryFiles.size());
+  for (auto const &[id, file] : libraryFiles) files.push_back(file);
+  return files;
+}
+
+bool LibraryService::hasLibraryFiles()
+{
+  std::lock_guard<std::mutex> lock(filesMutex);
+  return !libraryFiles.empty();
+}
+
+bool LibraryService::isDownloaded(const std::string &id)
+{
+  std::lock_guard<std::mutex> lock(filesMutex);
+  auto it = libraryFileIdDownloadedMap.find(id);
+  return it != libraryFileIdDownloadedMap.end() && it->second;
+}
+
+void LibraryService::setDownloaded(const std::string &id, bool downloaded)
+{
+  std::lock_guard<std::mutex> lock(filesMutex);
+  libraryFileIdDownloadedMap[id] = downloaded;
 }
 
 // Helper function to convert shader name string to ShaderType enum
@@ -511,7 +543,7 @@ void LibraryService::fetchShaderCredits()
     return;
   }
   
-#ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+#ifndef NOTTAWA_HAS_HTTPS
   log("Error: HTTPS URL provided but httplib not compiled with SSL support for shader credits.");
   std::cerr << "Error: HTTPS URL provided but httplib not compiled with SSL support for shader credits." << std::endl;
   return;
@@ -578,7 +610,7 @@ void LibraryService::fetchShaderCredits()
 
 void LibraryService::backgroundFetchShaderCredits()
 {
-  downloadFutures.push_back(std::async(std::launch::async, &LibraryService::fetchShaderCredits, this));
+  launchAsync(&LibraryService::fetchShaderCredits, this);
 }
 
 std::shared_ptr<Credit> LibraryService::getShaderCredit(ShaderType type)
@@ -607,21 +639,21 @@ void LibraryService::submitFeedback(const std::string &text,
                                     std::function<void(bool success, const std::string &error)> callback)
 {
   // Launch in background similar to other async operations
-  downloadFutures.push_back(std::async(std::launch::async, [=]() {
+  launchAsync([=]() {
     
     std::string host, dummy;
     if (!parseHttpsUrl(API_URL, host, dummy)) {
       if (callback) {
-        MainApp::getApp()->executeOnMainThread([callback]() {
+        runOnMainThread([callback]() {
           callback(false, "Invalid API URL");
         });
       }
       return;
     }
     
-#ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+#ifndef NOTTAWA_HAS_HTTPS
     if (callback) {
-      MainApp::getApp()->executeOnMainThread([callback]() {
+      runOnMainThread([callback]() {
         callback(false, "cpp-httplib built without SSL support");
       });
     }
@@ -668,11 +700,11 @@ void LibraryService::submitFeedback(const std::string &text,
     
     // Invoke callback on main thread
     if (callback) {
-      MainApp::getApp()->executeOnMainThread([callback, ok, err]() {
+      runOnMainThread([callback, ok, err]() {
         callback(ok, err);
       });
     }
-  }));
+  });
 }
 
 // MARK: - Strand Sharing
@@ -686,21 +718,21 @@ void LibraryService::shareStrand(const std::string &title,
                                   std::function<void(bool success, const std::string &url, const std::string &error)> callback)
 {
   // Launch in background similar to other async operations
-  downloadFutures.push_back(std::async(std::launch::async, [=]() {
+  launchAsync([=]() {
 
     std::string host, dummy;
     if (!parseHttpsUrl(API_URL, host, dummy)) {
       if (callback) {
-        MainApp::getApp()->executeOnMainThread([callback]() {
+        runOnMainThread([callback]() {
           callback(false, "", "Invalid API URL");
         });
       }
       return;
     }
 
-#ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+#ifndef NOTTAWA_HAS_HTTPS
     if (callback) {
-      MainApp::getApp()->executeOnMainThread([callback]() {
+      runOnMainThread([callback]() {
         callback(false, "", "cpp-httplib built without SSL support");
       });
     }
@@ -766,32 +798,32 @@ void LibraryService::shareStrand(const std::string &title,
 
     // Invoke callback on main thread
     if (callback) {
-      MainApp::getApp()->executeOnMainThread([callback, ok, url, err]() {
+      runOnMainThread([callback, ok, url, err]() {
         callback(ok, url, err);
       });
     }
-  }));
+  });
 }
 
 void LibraryService::fetchSharedStrand(const std::string &slug,
                                         std::function<void(bool success, const std::string &strandJson, const std::string &title, const std::string &error)> callback)
 {
   // Launch in background similar to other async operations
-  downloadFutures.push_back(std::async(std::launch::async, [=]() {
+  launchAsync([=]() {
 
     std::string host, dummy;
     if (!parseHttpsUrl(API_URL, host, dummy)) {
       if (callback) {
-        MainApp::getApp()->executeOnMainThread([callback]() {
+        runOnMainThread([callback]() {
           callback(false, "", "", "Invalid API URL");
         });
       }
       return;
     }
 
-#ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+#ifndef NOTTAWA_HAS_HTTPS
     if (callback) {
-      MainApp::getApp()->executeOnMainThread([callback]() {
+      runOnMainThread([callback]() {
         callback(false, "", "", "cpp-httplib built without SSL support");
       });
     }
@@ -847,9 +879,9 @@ void LibraryService::fetchSharedStrand(const std::string &slug,
 
     // Invoke callback on main thread
     if (callback) {
-      MainApp::getApp()->executeOnMainThread([callback, ok, strandJson, title, err]() {
+      runOnMainThread([callback, ok, strandJson, title, err]() {
         callback(ok, strandJson, title, err);
       });
     }
-  }));
+  });
 }

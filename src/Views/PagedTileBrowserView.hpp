@@ -22,7 +22,7 @@ public:
     , rowCount(rows)
     , currentPage(0)
     , viewWidth(0)
-    , tileBrowserId(UUID::generateUUID()) {};
+    , tileBrowserId(NottawaUUID::generateUUID()) {};
   
   PagedTileBrowserView(std::vector<std::shared_ptr<TileItem>> items, int columns, int rows)
     : tileItems(items)
@@ -30,7 +30,7 @@ public:
     , rowCount(rows)
     , currentPage(0)
     , viewWidth(0)
-    , tileBrowserId(UUID::generateUUID()) {};
+    , tileBrowserId(NottawaUUID::generateUUID()) {};
 
 private:
   std::vector<std::shared_ptr<TileItem>> tileItems;

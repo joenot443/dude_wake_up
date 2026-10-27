@@ -109,6 +109,16 @@ void AudioSourceService::populateSources() {
   systemAudioSource->id = "system-audio-source";
   systemAudioSource->name = "System Audio";
   audioSourceMap[systemAudioSource->id] = systemAudioSource;
+
+  // With no default input device (none plugged in), fall back to the first
+  // input there is, else the sample track, so a source is always selected.
+  if (!selectedAudioSource) {
+    for (auto const &[id, source] : audioSourceMap) {
+      if (source->type() == AudioSourceType_Microphone) { selectedAudioSource = source; break; }
+    }
+    if (!selectedAudioSource) selectedAudioSource = fileAudioSource;
+  }
+  if (!defaultAudioSource) defaultAudioSource = selectedAudioSource;
 }
 
 std::vector<std::shared_ptr<AudioSource>> AudioSourceService::audioSources() {
@@ -133,29 +143,22 @@ void AudioSourceService::update() {
     return;
   }
 
-  // Update BPM value based on mode (if not locked)
-  if (!selectedAudioSource->audioAnalysis.bpmLocked->boolValue) {
-    if (selectedAudioSource->audioAnalysis.bpmMode == BpmMode_Auto) {
-      // Use detected BPM from audio thread
-      selectedAudioSource->audioAnalysis.bpm->setValue(selectedAudioSource->lastDetectedBpm);
-    }
-    else if (selectedAudioSource->audioAnalysis.bpmMode == BpmMode_Link && link != nullptr) {
-      // Use Ableton Link BPM
-      selectedAudioSource->audioAnalysis.bpm->setValue(link->captureAppSessionState().tempo() * 2.0);
-    }
-    // Manual mode: don't update BPM, user controls it
+  auto& analysis = selectedAudioSource->audioAnalysis;
+
+  // Auto: the tracker's tempo, beat phase and beat count (the phase carried
+  // on from its last buffer to now). Locked keeps the tempo the user locked,
+  // on its own clock (as Manual).
+  if (analysis.bpmMode == BpmMode_Auto && !analysis.bpmLocked->boolValue) {
+    const BeatTracker::Snapshot beat = selectedAudioSource->beatTracker.snapshot();
+    if (beat.locked) analysis.bpm->setValue(static_cast<float>(beat.bpm));
+    analysis.updateBeat(static_cast<float>(BeatTracker::phaseAt(beat, std::chrono::steady_clock::now())));
+    analysis.beatCount = static_cast<uint32_t>(beat.beats);
+    return;
   }
 
-  // Sync timing to detected beats in Auto mode
-  if (selectedAudioSource->audioAnalysis.bpmMode == BpmMode_Auto) {
-    auto timeSinceLastBeat = std::chrono::steady_clock::now() - selectedAudioSource->lastBeatTime;
-    auto msSinceLastBeat = std::chrono::duration_cast<std::chrono::milliseconds>(timeSinceLastBeat).count();
-
-    // If we got a beat recently (within last 100ms), sync our timing
-    if (msSinceLastBeat < 100) {
-      selectedAudioSource->audioAnalysis.bpmStartTime =
-        std::chrono::duration_cast<std::chrono::milliseconds>(selectedAudioSource->lastBeatTime.time_since_epoch()).count();
-    }
+  // Link: its session tempo (beats are quarter notes at that tempo).
+  if (analysis.bpmMode == BpmMode_Link && link != nullptr && !analysis.bpmLocked->boolValue) {
+    analysis.bpm->setValue(link->captureAppSessionState().tempo());
   }
 
   // Drive the beat pulse based on mode
@@ -165,21 +168,17 @@ void AudioSourceService::update() {
     selectedAudioSource->audioAnalysis.updateBeat(linkBeatCount - floor(linkBeatCount));
   }
   else {
-    // Auto/Manual mode: use bpmPct() calculation
+    // Manual (and a locked Auto): the clock at the set tempo.
     selectedAudioSource->audioAnalysis.updateBeat(selectedAudioSource->audioAnalysis.bpmPct());
   }
 
-  // Beat counter for Manual/Link: detect phase wrap
-  // (Auto mode counts beats directly from BTrack in AudioSource.cpp)
-  auto& analysis = selectedAudioSource->audioAnalysis;
-  if (analysis.bpmMode != BpmMode_Auto) {
-    float pulse = analysis.beatPulse->value;
-    if (pulse > 0.9f && !analysis.beatCounted) {
-      analysis.beatCount++;
-      analysis.beatCounted = true;
-    } else if (pulse < 0.3f) {
-      analysis.beatCounted = false;
-    }
+  // Beat counter for the clocks above: count each phase wrap.
+  float pulse = analysis.beatPulse->value;
+  if (pulse > 0.9f && !analysis.beatCounted) {
+    analysis.beatCount++;
+    analysis.beatCounted = true;
+  } else if (pulse < 0.3f) {
+    analysis.beatCounted = false;
   }
 }
 

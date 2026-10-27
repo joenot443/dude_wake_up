@@ -89,7 +89,6 @@ struct WarpspeedSettings: public ShaderSettings {
 struct WarpspeedShader: Shader {
   WarpspeedSettings *settings;
   WarpspeedShader(WarpspeedSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   void setup() override {
     shader.load("shaders/Warpspeed");
   }

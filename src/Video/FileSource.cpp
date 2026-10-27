@@ -32,9 +32,8 @@ void FileSource::setup()
   playbackMode = FilePlaybackMode_Streaming;
 
   applyRanges();
-  if (player.isLoaded()) {
-    player.close();
-  }
+  // No close() first: load() keeps a file that's already open (setup() re-runs
+  // on every resolution change) and closes the old one when the path differs.
   // RGBA: ofAVFoundationPlayer's getPixels() can use vImagePermuteChannels_ARGB8888
   // (SIMD channel shuffle, same memory layout) instead of vImageConvert_ARGB8888toRGB888
   // (drops alpha + repacks rows). 30-50% less CPU per frame on the decode side.
@@ -60,7 +59,6 @@ void FileSource::setup()
   player.setLoopState(OF_LOOP_NORMAL);
   playing = true;
   fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
-  optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   sliderPosition->value = settings->start->value;
   position = start;
   maskShader.load("shaders/ColorKeyMaskMaker");
@@ -87,6 +85,11 @@ void FileSource::setup()
       fsize > 0 && fsize < kCacheFileSizeThresholdBytes &&
       mem > 0 && mem < kCacheMemoryBudgetBytes;
 
+#ifndef TARGET_OSX
+  // The Windows player keeps its own frame cache (in RAM, built in the
+  // background); see IOSurfaceVideoPlayer_win.cpp.
+  eligibleForCache = false;
+#endif
   if (eligibleForCache) {
     if (buildFrameCache()) {
       playbackMode = FilePlaybackMode_Cached;
@@ -127,7 +130,6 @@ void FileSource::saveFrameStreaming()
   if (fbo->getWidth() != LayoutStateService::getService()->resolution.x ||
       fbo->getHeight() != LayoutStateService::getService()->resolution.y) {
     fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
-    optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   }
 
   if (player.getSpeed() != speed->value) {
@@ -162,7 +164,6 @@ void FileSource::saveFrameCached()
   if (fbo->getWidth() != LayoutStateService::getService()->resolution.x ||
       fbo->getHeight() != LayoutStateService::getService()->resolution.y) {
     fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
-    optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   }
 
   if (cachedFrames.empty() || nativeDuration <= 0.0f) {

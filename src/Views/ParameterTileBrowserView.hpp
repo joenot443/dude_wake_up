@@ -38,7 +38,7 @@ public:
   std::string tileBrowserId;
 
   ParameterTileBrowserView(std::vector<std::shared_ptr<ParameterTileItem>> tileItems, std::shared_ptr<Parameter> parameter) : tileItems(tileItems), parameter(parameter),
-  tileBrowserId(UUID::generateUUID())
+  tileBrowserId(NottawaUUID::generateUUID())
   {};
 };
 

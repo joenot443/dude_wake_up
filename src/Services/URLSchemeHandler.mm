@@ -1,3 +1,7 @@
+// Windows portability: entire body gated. Project excludes this file from Windows
+// builds; this gate is belt-and-braces so an accidental compile fails cleanly.
+#ifdef __APPLE__
+
 // Include OpenFrameworks first to set up GLEW properly
 #import "ofMain.h"
 
@@ -171,3 +175,5 @@ void URLSchemeHandler::handleURL(const std::string& url) {
 void URLSchemeHandler::setStrandLoadedCallback(StrandLoadedCallback callback) {
     strandLoadedCallback = callback;
 }
+
+#endif // __APPLE__

@@ -12,6 +12,7 @@
 #include <functional>
 #include <mutex>
 #include <queue>
+#include <string>
 
 class EngineLoop {
 public:
@@ -20,6 +21,15 @@ public:
   // Initialize all services in dependency order.
   // Must be called from a thread with a valid OpenGL context.
   void setup();
+
+  // Optional, before setup(). Overrides the OF data root (otherwise the
+  // macOS bundle's Resources/data/).
+  void setDataPath(const std::string& path);
+
+  // Optional, before setup(). Native GL context of the host UI (Windows:
+  // HGLRC) to join to the engine's share group, so textures shared through
+  // IOSurfaceTextureManager are usable directly in the UI's context.
+  void setShareContext(void* nativeContext);
 
   // Run one frame of the engine pipeline:
   //   oscillators -> modulation -> parameters -> video sources ->

@@ -86,7 +86,7 @@ void OscillationService::selectOscillator(std::shared_ptr<Oscillator> osc, std::
   loadOscillatorSettings(osc);
   ParameterService::getService()->selectedParameter = param;
   setEnabled(osc, true);
-  ConfigService::getService()->saveDefaultConfigFile();
+  ConfigService::getService()->requestSave();
 }
 
 void OscillationService::clear() {
@@ -157,6 +157,14 @@ void OscillationService::loadConfig(json data) {
       }
     }
   }
+}
+
+void OscillationService::renameOscillatorKey(const std::string& oldId, std::shared_ptr<Parameter> parameter) {
+  auto it = oscillators.find(oldId);
+  if (it == oscillators.end() || it->second->value != parameter) return;
+  auto osc = it->second;
+  oscillators.erase(it);
+  oscillators[parameter->paramId] = osc;
 }
 
 void OscillationService::removeOscillatorsFor(std::vector<std::shared_ptr<Parameter>> parameters) {

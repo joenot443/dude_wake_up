@@ -1,0 +1,34 @@
+// Generated into the build folder by CMake (configure_file) from VERSION.
+#include <winver.h>
+
+// IDI_ICON1: the name Qt looks for to give its windows the application icon.
+IDI_ICON1 ICON "@NOTTAWA_ICON@"
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     @NOTTAWA_VERSION_MAJOR@,@NOTTAWA_VERSION_MINOR@,@NOTTAWA_VERSION_PATCH@,0
+PRODUCTVERSION  @NOTTAWA_VERSION_MAJOR@,@NOTTAWA_VERSION_MINOR@,@NOTTAWA_VERSION_PATCH@,0
+FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+FILEFLAGS       0
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_APP
+FILESUBTYPE     VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName",      "Joe Crozier"
+            VALUE "FileDescription",  "Nottawa"
+            VALUE "FileVersion",      "@NOTTAWA_VERSION@"
+            VALUE "InternalName",     "Nottawa"
+            VALUE "LegalCopyright",   "Copyright (C) Joe Crozier. Licensed under the GNU GPL v3."
+            VALUE "OriginalFilename", "Nottawa.exe"
+            VALUE "ProductName",      "Nottawa"
+            VALUE "ProductVersion",   "@NOTTAWA_VERSION@"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END

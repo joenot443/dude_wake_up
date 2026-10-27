@@ -61,6 +61,8 @@ public:
   json config() override;
   void loadConfig(json j) override;
 
+  // Moves the oscillator of a parameter whose id changed to its new id.
+  void renameOscillatorKey(const std::string& oldId, std::shared_ptr<Parameter> parameter);
   void removeOscillatorsFor(std::vector<std::shared_ptr<Parameter>> parameters);
 
 private:

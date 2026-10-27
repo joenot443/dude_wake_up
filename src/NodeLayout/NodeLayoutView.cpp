@@ -346,7 +346,7 @@ void NodeLayoutView::drawPinHoverView() {
   }
 
   // Get all ShaderLinks for this pin (check even if not currently hovering)
-  long pinKey = lastHoveredPin.Get();
+  uintptr_t pinKey = lastHoveredPin.Get();
   if (pinKey == 0 || pinIdConnectionMap.find(pinKey) == pinIdConnectionMap.end()) {
     isHovering = false;
     return;
@@ -1761,7 +1761,7 @@ void NodeLayoutView::clear() {
   VideoSourceService::getService()->clear();
   ParameterService::getService()->clear();
   ActionService::getService()->clear();
-  ConfigService::getService()->saveDefaultConfigFile();
+  ConfigService::getService()->requestSave();
   OscillationService::getService()->clear();
   ed::SetCurrentEditor(nullptr);
 }

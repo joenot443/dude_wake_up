@@ -43,11 +43,11 @@ public:
   bool singleCategory;
   
   template <typename T>
-  TileBrowserView(const std::vector<std::shared_ptr<T>>& items, bool singleCategory = false) : tileBrowserId(UUID::generateUUID()), singleCategory(singleCategory) {
+  TileBrowserView(const std::vector<std::shared_ptr<T>>& items, bool singleCategory = false) : tileBrowserId(NottawaUUID::generateUUID()), singleCategory(singleCategory) {
     setTileItems(std::vector<std::shared_ptr<TileItem>>(items.begin(), items.end()));
   }
 
-  TileBrowserView(std::vector<std::shared_ptr<TileItem>> items, bool singleCategory = false) : tileBrowserId(UUID::generateUUID()), singleCategory(singleCategory) {
+  TileBrowserView(std::vector<std::shared_ptr<TileItem>> items, bool singleCategory = false) : tileBrowserId(NottawaUUID::generateUUID()), singleCategory(singleCategory) {
     setTileItems(items);
   }
   

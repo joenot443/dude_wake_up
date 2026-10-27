@@ -15,7 +15,6 @@ void ImageSource::setup()
 {
   image.load(path);
   fbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
-  optionalFbo->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y);
   saveFrame();
 }
 

@@ -34,9 +34,9 @@ public:
   // Audio
   std::shared_ptr<Parameter> audioReactiveParameter;
   
-  Settings() : name("None"), settingsId(UUID::generateUUID()) {};
+  Settings() : name("None"), settingsId(NottawaUUID::generateUUID()) {};
 
-  Settings(std::string name) : name(name), audioReactiveParameter(nullptr), settingsId(UUID::generateUUID()) {};
+  Settings(std::string name) : name(name), audioReactiveParameter(nullptr), settingsId(NottawaUUID::generateUUID()) {};
 
   // Settings is held via shared_ptr<ShaderSettings> / shared_ptr<Settings>
   // upstream. Without a virtual destructor, deleting through the base pointer
@@ -119,9 +119,12 @@ public:
       if (p != NULL) {
         std::string oldParamId = p->paramId;
         p->load(it.value());
-        // Re-register if paramId changed (load() restores saved paramId)
+        // load() restores the saved paramId: move the registrations to it,
+        // or the entries under the old id outlive the parameter's owner
+        // (removal only unregisters current ids).
         if (p->paramId != oldParamId) {
-          ParameterService::getService()->registerParameter(p);
+          ParameterService::getService()->reregisterParameter(oldParamId, p);
+          OscillationService::getService()->renameOscillatorKey(oldParamId, p);
         }
         // If the parameter has a midiDescriptor, add it to the MidiService
         if (p->midiDescriptor != "") {

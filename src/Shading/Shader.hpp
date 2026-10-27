@@ -15,6 +15,7 @@
 #include "ShaderType.hpp"
 #include "VideoSource.hpp"
 #include "WaveformOscillator.hpp"
+#include "CachedShader.hpp"
 #include "json.hpp"
 #include "ofMain.h"
 #include "ofxImGui.h"
@@ -37,13 +38,13 @@ public:
   creationTime(ofGetUnixTime()),
   lastModified(ofGetUnixTime()),
   lastFrame(std::make_shared<ofFbo>()),
-  shader(ofShader()),
   optionalFrame(std::make_shared<ofFbo>())
   {
     color = colorFromName(settings->name);
   };
   
-  ofShader shader;
+  // Shared with other instances of the same effect (see CachedShader).
+  CachedShader shader;
   
   std::shared_ptr<ShaderSettings> settings;
   
@@ -52,13 +53,13 @@ public:
   std::string shaderId;
   
   // Whether this Shader is an optional phase in another Shader
-  bool isOptional;
+  bool isOptional = false;
   
   // If this Shader is optional, whether it is presently enabled
-  bool optionallyEnabled;
+  bool optionallyEnabled = false;
 
   // Whether this Shader is "dry" i.e. not rendering new frames but still allowing traversal
-  bool isDry;
+  bool isDry = false;
 
   std::shared_ptr<ofFbo> lastFrame;
   
@@ -66,7 +67,7 @@ public:
   std::shared_ptr<ofFbo> optionalFrame;
   
   // Shaders which can be optionally applied to an existing Shader.
-  std::vector<std::shared_ptr<Shader>> optionalShaders;
+  OptionalShadersHelper optionalShaders{OptionalShadersHelper::shaderTypes(), false};
   
   std::shared_ptr<ofFbo> parentFrame() override;
   
@@ -200,12 +201,9 @@ public:
   void activateParameters();
   
   // Optional Shaders
-  
-  void generateOptionalShaders();
-  
+
   void drawOptionalSettings();
   void applyOptionalShaders();
-  void populateLastFrame();
 
   void setAudioUniform(std::vector<float> *audio);
   void setAudioUniform(const float *data, size_t count);

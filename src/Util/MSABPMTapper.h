@@ -33,6 +33,8 @@ namespace msa {
 		
 		// returns number of beats per minute
 		float bpm();
+		// taps since starting fresh (bpm() is from these once there are 2)
+		int tapCount() const { return _tapCount; }
 		
 		// returns beat time since last tap
 		// integer is the beat number

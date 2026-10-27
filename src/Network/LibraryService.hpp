@@ -15,7 +15,11 @@
 #include "Credit.hpp"
 #include <memory>
 #include "observable.hpp"
+#include <algorithm>
+#include <chrono>
 #include <future>
+#include <mutex>
+#include <vector>
 
 enum DownloadState
 {
@@ -56,6 +60,12 @@ public:
   void resumeDownload(std::shared_ptr<LibraryFile> file, std::function<void()> callback);
 
   std::shared_ptr<LibraryFile> libraryFileForId(std::string id);
+  // Thread-safe views of the library: fetches and downloads run on worker
+  // threads while the UI reads.
+  std::vector<std::shared_ptr<LibraryFile>> libraryFilesSnapshot();
+  bool hasLibraryFiles();
+  void setDownloaded(const std::string &id, bool downloaded);
+  bool isDownloaded(const std::string &id);
 
   bool hasThumbnailOnDisk(std::shared_ptr<LibraryFile> file);
 
@@ -93,14 +103,30 @@ public:
 
   observable::subject<void()> libraryThumbnailUpdateSubject;
 
+  // Guarded by filesMutex; use the accessors above from other threads.
   std::map<std::string, std::shared_ptr<LibraryFile>> libraryFiles;
-  
   std::map<std::string, bool> libraryFileIdDownloadedMap;
+  std::mutex filesMutex;
 
   // Shader credits data
   std::map<ShaderType, std::shared_ptr<Credit>> shaderCredits;
 
+  // Runs a task on its own thread, keeping its future (guarded, since
+  // tasks are started from worker threads as well as the main thread).
+  template <class... Args>
+  void launchAsync(Args &&...args)
+  {
+    std::lock_guard<std::mutex> lock(futuresMutex);
+    // Drop finished tasks so the list doesn't grow without bound.
+    downloadFutures.erase(std::remove_if(downloadFutures.begin(), downloadFutures.end(),
+                                         [](std::future<void> &f) {
+                                           return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
+                                         }),
+                          downloadFutures.end());
+    downloadFutures.push_back(std::async(std::launch::async, std::forward<Args>(args)...));
+  }
   std::vector<std::future<void>> downloadFutures;
+  std::mutex futuresMutex;
 
   ofEvent<LibraryFile> downloadNotification;
   ofEvent<void> thumbnailNotification;

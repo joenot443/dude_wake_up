@@ -6,7 +6,7 @@
 //
 
 #include "Console.hpp"
-#import "ofMain.h"
+#include "ofMain.h"
 #include "FontService.hpp"
 #include "ConfigService.hpp"
 #include "Fonts.hpp"
@@ -19,6 +19,11 @@ void FontService::setup() {
   loadFonts();
   loadFontSet(retinaFonts, 2.0f);
   loadFontSet(standardFonts, 1.0f);
+  // Point `current` at a loaded set WITHOUT running useFontSetForScale's
+  // ImGui-io-mutation (which needs ImGui's atlas state built — fragile
+  // during early setup on Windows). Later affirmScale() → useFontSetForScale()
+  // will do the full binding when ImGui is ready.
+  if (!current) current = &standardFonts;
 }
 
 void FontService::useFontSetForScale(float scale) {

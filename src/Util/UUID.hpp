@@ -9,13 +9,13 @@
 
 // Random generation courtesy of https://lowrey.me/guid-generation-in-c-11/
 
-class UUID {
+class NottawaUUID {
 public:
   
   
   static std::string generateParamId(std::string name) {
     std::stringstream stream;
-    stream << name << "-" << UUID::generate_hex(4);
+    stream << name << "-" << NottawaUUID::generate_hex(4);
     return stream.str();
   }
   
@@ -27,9 +27,9 @@ public:
    */
   static std::string generateUUID() {
     std::stringstream hexstream;
-    hexstream << UUID::generate_hex(4) << "-" << UUID::generate_hex(2) << "-"
-              << UUID::generate_hex(2) << "-" << UUID::generate_hex(2) << "-"
-              << UUID::generate_hex(6);
+    hexstream << NottawaUUID::generate_hex(4) << "-" << NottawaUUID::generate_hex(2) << "-"
+              << NottawaUUID::generate_hex(2) << "-" << NottawaUUID::generate_hex(2) << "-"
+              << NottawaUUID::generate_hex(6);
     return hexstream.str();
   }
 

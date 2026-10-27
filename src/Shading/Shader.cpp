@@ -99,18 +99,7 @@ void Shader::load(json j)
   if (!j.is_object()) return;
 
   // Restore optional shaders (enabled state + parameters)
-  if (j.contains("optionalShaders") && j["optionalShaders"].is_array()) {
-    auto& optJson = j["optionalShaders"];
-    for (size_t i = 0; i < optJson.size() && i < optionalShaders.size(); i++) {
-      auto& entry = optJson[i];
-      if (entry.contains("enabled")) {
-        optionalShaders[i]->optionallyEnabled = entry["enabled"].get<bool>();
-      }
-      if (entry.contains("settings")) {
-        optionalShaders[i]->settings->load(entry["settings"]);
-      }
-    }
-  }
+  if (j.contains("optionalShaders") && !isOptional) optionalShaders.load(j["optionalShaders"]);
 }
 
 json Shader::serialize()
@@ -129,17 +118,8 @@ json Shader::serialize()
   j["y"] = settings->y->value;
 
   // Serialize optional shaders (enabled state + parameters)
-  if (!optionalShaders.empty()) {
-    json optJson = json::array();
-    for (auto& opt : optionalShaders) {
-      json entry;
-      entry["type"] = opt->type();
-      entry["enabled"] = opt->optionallyEnabled;
-      entry["settings"] = opt->settings->serialize();
-      optJson.push_back(entry);
-    }
-    j["optionalShaders"] = optJson;
-  }
+  json optJson = optionalShaders.serialize();
+  if (!optJson.is_null()) j["optionalShaders"] = optJson;
 
   return j;
 };
@@ -153,17 +133,13 @@ void Shader::activateParameters() {
 
 void Shader::allocateFrames() {
   lastFrame->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y, GL_RGBA);
-
-  optionalFrame->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y, GL_RGBA);
+  // optionalFrame is allocated when an optional shader first runs.
 }
 
 void Shader::releaseFrames() {
   if (lastFrame) lastFrame->clear();
   if (optionalFrame) optionalFrame->clear();
-  // Optional children each have their own lastFrame/optionalFrame.
-  for (auto& opt : optionalShaders) {
-    if (opt) opt->releaseFrames();
-  }
+  for (auto& opt : optionalShaders.created()) opt->releaseFrames();
 }
 
 void Shader::enableAudioAutoReactivity(std::shared_ptr<Parameter> audioParam) {
@@ -353,32 +329,12 @@ void Shader::revertFragmentSource() {
 }
 
 void Shader::drawOptionalSettings() {
-  if (ImGui::CollapsingHeader("Extra Settings", ImGuiTreeNodeFlags_CollapsingHeader))
-  {
-    for (auto shader : optionalShaders) {
-      if (ImGui::CollapsingHeader(shader->name().c_str())) {
-        shader->optionallyEnabled = true;
-        shader->drawSettings();
-      } else {
-        shader->optionallyEnabled = false;
-      }
-    }
-  }
+  optionalShaders.drawOptionalSettings();
 }
 
 void Shader::applyOptionalShaders() {
-  for (auto shader: optionalShaders) {
-    if (!shader->optionallyEnabled) continue;
-    
-    // Clear optionalFrame before applying the shader
-    optionalFrame->begin();
-    ofClear(0, 0, 0, 255);
-    ofClear(0, 0, 0, 0);
-    optionalFrame->end();
-    
-    shader->shade(lastFrame, optionalFrame);
-    populateLastFrame();
-  }
+  if (isOptional) return;
+  optionalShaders.applyOptionalShaders(lastFrame, optionalFrame);
 }
 
 void Shader::drawPreview(ImVec2 pos, float scale)
@@ -422,26 +378,7 @@ void Shader::drawPreviewSized(ImVec2 size)
   );
 }
 
-void Shader::generateOptionalShaders() {
-  if (isOptional) return;
-  if (!optionalShaders.empty()) return;
-  
-  std::vector<ShaderType> optionalShaderTypes = {ShaderTypeHSB, ShaderTypeBackground, ShaderTypeTransform, ShaderTypeRotate, ShaderTypeDoubleBlur, ShaderTypeMirror, ShaderTypeColorKeyMaskMaker, ShaderTypeLumaMaskMaker, ShaderTypeLighten, ShaderTypeDarken};
-  
-  for (ShaderType type : optionalShaderTypes) {
-    std::shared_ptr<Shader> newShader = ShaderChainerService::getService()->shaderForType(type, UUID::generateUUID(), 0);
-    newShader->isOptional = true;
-    optionalShaders.push_back(newShader);
-  }
-}
 
-void Shader::populateLastFrame() {
-  lastFrame->begin();
-  ofClear(0,0,0,255);
-  ofClear(0,0,0,0);
-  optionalFrame->draw(0, 0, lastFrame->getWidth(), lastFrame->getHeight());
-  lastFrame->end();
-}
 
 bool Shader::allowAuxOutputSlot() {
   return type() == ShaderTypeFeedback || type() == ShaderTypeColorKeyMaskMaker || type() == ShaderTypeLumaMaskMaker;

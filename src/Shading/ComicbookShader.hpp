@@ -61,7 +61,6 @@ struct ComicbookSettings: public ShaderSettings {
 struct ComicbookShader: Shader {
   ComicbookSettings *settings;
   ComicbookShader(ComicbookSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
 
   void setup() override {
     shader.load("shaders/Comicbook");

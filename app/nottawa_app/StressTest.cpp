@@ -1,0 +1,691 @@
+#include "StressTest.h"
+
+#include "EngineBridge.h"
+#include "MainWindow.h"
+#include "nodes/NodeEditorView.h"
+#include "nottawa_bridge.h"
+#include "panels/StageView.h"
+
+#include <QApplication>
+#include <cmath>
+#include <QDir>
+#include <QElapsedTimer>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QStandardPaths>
+#include <QToolButton>
+#include <QUrl>
+
+#include <windows.h>
+#include <psapi.h>
+
+namespace {
+const QStringList kAllScenarios = {"churn", "swap", "connect", "undo", "strands", "workspace", "previews",
+                                   "stage", "resolution", "inputs", "copypaste", "optional", "parameters",
+                                   "audio", "badfiles"};
+
+QString processStats() {
+    PROCESS_MEMORY_COUNTERS_EX mem = {};
+    GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&mem), sizeof(mem));
+    DWORD handles = 0;
+    GetProcessHandleCount(GetCurrentProcess(), &handles);
+    return QString("private %1 MB, working set %2 MB, handles %3, gdi %4, user %5")
+        .arg(mem.PrivateUsage >> 20)
+        .arg(mem.WorkingSetSize >> 20)
+        .arg(handles)
+        .arg(GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS))
+        .arg(GetGuiResources(GetCurrentProcess(), GR_USEROBJECTS));
+}
+
+// Live engine objects by class, from the lifecycle counters.
+QString liveObjects() {
+    char* json = ntw_dump_object_counts();
+    const QJsonObject live = QJsonDocument::fromJson(QByteArray(json)).object().value("live").toObject();
+    ntw_free_string(json);
+    QStringList parts;
+    for (auto it = live.begin(); it != live.end(); ++it)
+        if (it.value().toInt() != 0) parts << QString("%1:%2").arg(it.key()).arg(it.value().toInt());
+    return parts.join(' ');
+}
+} // anon
+
+StressTest::StressTest(MainWindow* window) : QObject(window), window_(window) {
+    rng_.seed(qEnvironmentVariableIntValue("NOTTAWA_STRESS_SEED") ? qEnvironmentVariableIntValue("NOTTAWA_STRESS_SEED") : 1);
+    QString list = qEnvironmentVariable("NOTTAWA_STRESS");
+    scenarios_ = list == "all" ? kAllScenarios : list.split(',', Qt::SkipEmptyParts);
+    const int rounds = std::max(1, qEnvironmentVariableIntValue("NOTTAWA_STRESS_ROUNDS"));
+    const QStringList once = scenarios_;
+    for (int r = 1; r < rounds; ++r) scenarios_ += once;
+    scratch_ = QDir(qEnvironmentVariable("NOTTAWA_APPDATA", QDir::tempPath())).filePath("stress");
+    QDir().mkpath(scratch_);
+    timer_.setSingleShot(true);
+    QObject::connect(&timer_, &QTimer::timeout, this, &StressTest::next);
+}
+
+void UrlSink::open(const QUrl& url) { qInfo("[test] not opening %s", qPrintable(url.toString())); }
+
+bool StressTest::requested() { return !qEnvironmentVariableIsEmpty("NOTTAWA_STRESS"); }
+
+void StressTest::start() {
+    window_->log(QString("[stress] seed %1, scenarios: %2").arg(rng_()).arg(scenarios_.join(',')));
+    checkpoint("baseline");
+    for (const QString& s : std::as_const(scenarios_)) enqueueScenario(s.trimmed());
+    add([this] {
+        window_->log("[stress] done");
+        window_->close();
+    });
+    timer_.start(500);
+}
+
+void StressTest::next() {
+    if (steps_.empty()) return;
+    Queued q = std::move(steps_.front());
+    steps_.pop_front();
+    q.step();
+    if (!steps_.empty()) timer_.start(steps_.front().delayMs);
+}
+
+void StressTest::checkpoint(const QString& label) {
+    char* registries = ntw_dump_registry_sizes();
+    const QString sizes = QString::fromUtf8(registries);
+    ntw_free_string(registries);
+    window_->log(QString("[stress] %1 | %2 | registries %3 | live %4").arg(label, processStats(), sizes, liveObjects()));
+}
+
+void StressTest::enqueueScenario(const QString& name) {
+    add([this, name] { window_->log("[stress] >>> " + name); });
+    const int n = std::max(1, qEnvironmentVariableIntValue("NOTTAWA_STRESS_CYCLES"));
+    const int cycles = n > 1 ? n : 20;
+    if (name == "churn") churn(cycles);
+    else if (name == "swap") swap(cycles);
+    else if (name == "connect") connect(cycles);
+    else if (name == "undo") undo(cycles);
+    else if (name == "strands") strands(cycles);
+    else if (name == "workspace") workspace(cycles);
+    else if (name == "previews") previews(cycles);
+    else if (name == "stage") stage(cycles);
+    else if (name == "resolution") resolution(cycles);
+    else if (name == "inputs") inputs(cycles);
+    else if (name == "copypaste") copyPaste(cycles);
+    else if (name == "optional") optional(cycles);
+    else if (name == "parameters") parameters(cycles);
+    else if (name == "memory") memory(cycles);
+    else if (name == "audio") audio(cycles);
+    else if (name == "badfiles") badFiles(cycles);
+    else if (name == "fonts") fonts();
+    else if (name == "swapall") swapAll();
+    else if (name == "bpm") bpm();
+    else add([this, name] { window_->log("[stress] unknown scenario " + name); });
+    // Settle, clear, settle, measure.
+    add([] {}, 1000);
+    add([] { EngineBridge::instance()->clearGraph(); });
+    add([this, name] { checkpoint("after " + name); }, 1500);
+}
+
+// ------------------------------------------------------------------ helpers
+
+QStringList StressTest::nodeIds() const {
+    QStringList ids;
+    for (const GraphNode& n : EngineBridge::instance()->nodes()) ids << n.id;
+    return ids;
+}
+
+QString StressTest::pick(const QStringList& ids) {
+    if (ids.isEmpty()) return {};
+    return ids[int(rng_() % uint32_t(ids.size()))];
+}
+
+QString StressTest::randomSource() {
+    const auto sources = EngineBridge::instance()->sources();
+    if (sources.isEmpty()) return {};
+    return window_->editor_->addFromCatalog(sources[int(rng_() % uint32_t(sources.size()))].typeRaw, true);
+}
+
+void StressTest::randomizeParameters(const QString& nodeId) {
+    auto* eng = EngineBridge::instance();
+    for (const ParamInfo& p : eng->parameters(nodeId)) {
+        const int mode = int(rng_() % 4);  // min, max, middle, random
+        const float t = mode == 0 ? 0.0f : mode == 1 ? 1.0f : mode == 2 ? 0.5f : float(rng_() % 1000) / 1000.0f;
+        switch (p.type) {
+        case ParamInfo::Standard: eng->setParameter(p.id, p.min + t * (p.max - p.min)); break;
+        case ParamInfo::Int:
+            eng->setParameter(p.id, p.options.isEmpty() ? int(std::lround(p.min + t * (p.max - p.min)))
+                                                        : int(rng_() % uint32_t(p.options.size())));
+            break;
+        case ParamInfo::Bool: eng->setParameter(p.id, bool(rng_() % 2)); break;
+        case ParamInfo::Color: eng->setParameterColor(p.id, QColor::fromRgb(rng_() & 0xffffff)); break;
+        case ParamInfo::Text: eng->setParameter(p.id, QString("stress %1").arg(rng_() % 1000)); break;
+        default: break;
+        }
+    }
+}
+
+// ---------------------------------------------------------------- scenarios
+
+// Every catalog shader and source, added in chains and deleted: exercises
+// each type's setup, render and teardown.
+void StressTest::churn(int cycles) {
+    for (int c = 0; c < cycles; ++c) {
+        add([this] {
+            const QString src = randomSource();
+            QString last = src;
+            const auto effects = EngineBridge::instance()->effects();
+            const int count = 1 + int(rng_() % 3);
+            for (int i = 0; i < count && !last.isEmpty(); ++i) {
+                const QString id = window_->editor_->addFromCatalog(effects[int(rng_() % uint32_t(effects.size()))].typeRaw, false, last);
+                if (!id.isEmpty()) last = id;
+            }
+            if (!last.isEmpty()) window_->editor_->selectNode(last);
+        }, 40);
+        add([] {}, 120);  // let it render (and the inspector build)
+        add([this] {
+            auto* eng = EngineBridge::instance();
+            const QStringList ids = nodeIds();
+            if (rng_() % 2) { for (const QString& id : ids) eng->removeNode(id); }
+            else eng->clearGraph();
+        });
+    }
+}
+
+void StressTest::swap(int cycles) {
+    add([this] {
+        const QString src = randomSource();
+        const auto effects = EngineBridge::instance()->effects();
+        window_->editor_->addFromCatalog(effects[0].typeRaw, false, src);
+    });
+    for (int c = 0; c < cycles; ++c) {
+        add([this] {
+            auto* eng = EngineBridge::instance();
+            const auto nodes = eng->nodes();
+            if (nodes.isEmpty()) return;
+            const GraphNode& n = nodes[int(rng_() % uint32_t(nodes.size()))];
+            const auto list = n.isShader ? eng->effects() : eng->sources();
+            const QString id = eng->replaceNode(n.id, list[int(rng_() % uint32_t(list.size()))].typeRaw, !n.isShader);
+            if (!id.isEmpty()) window_->editor_->selectNode(id);
+        }, 80);
+    }
+}
+
+// The whole tempo path in the app: bundled sample tracks played through the
+// file source, the BPM and beat count the app reports logged each second
+// ("[stress] bpm: <track> t=<s> bpm=<x> beats=<n>").
+void StressTest::bpm() {
+    add([] {
+        auto* eng = EngineBridge::instance();
+        for (const auto& s : eng->audioSources())
+            if (s.name.contains("Sample", Qt::CaseInsensitive)) eng->selectAudioSource(s.id);
+        eng->setBpmMode(0);  // Auto
+    }, 200);
+    const auto tracks = EngineBridge::instance()->sampleTracks();
+    for (const auto& track : tracks) {
+        if (!track.name.contains("Nottawa Song") && !track.name.contains("Bass Cascade") && !track.name.contains("Velvet"))
+            continue;
+        const QString name = track.name;
+        const int index = track.index;
+        add([index] { EngineBridge::instance()->selectSampleTrack(index); }, 500);  // starts it playing
+        add([] { if (!EngineBridge::instance()->isAudioActive()) EngineBridge::instance()->toggleAudio(); }, 500);
+        for (int second = 1; second <= 20; ++second) {
+            add([this, name, second] {
+                const AudioAnalysis a = EngineBridge::instance()->audioAnalysis();
+                window_->log(QString("[stress] bpm: %1 t=%2 bpm=%3 beats=%4 active=%5")
+                                 .arg(name).arg(second).arg(a.bpm, 0, 'f', 2).arg(a.beatCount).arg(a.audioActive));
+            }, 1000);
+        }
+    }
+    add([] { if (EngineBridge::instance()->isAudioActive()) EngineBridge::instance()->toggleAudio(); });
+}
+
+// One effect swapped into every effect type in turn (each logged first, so
+// a crash names its type), then one source into every source type.
+void StressTest::swapAll() {
+    add([this] {
+        const QString src = randomSource();
+        swapId_ = window_->editor_->addFromCatalog(EngineBridge::instance()->effects()[0].typeRaw, false, src);
+    });
+    const auto effects = EngineBridge::instance()->effects();
+    for (const auto& e : effects) {
+        add([this, e] {
+            window_->log(QString("[stress] swapall: effect -> %1").arg(e.name));
+            const QString id = EngineBridge::instance()->replaceNode(swapId_, e.typeRaw, false);
+            if (id.isEmpty()) window_->log(QString("[stress] FAIL swapall: replacing with %1 failed").arg(e.name));
+            else swapId_ = id;
+            window_->editor_->selectNode(swapId_);
+        }, 120);
+    }
+    add([this] {
+        EngineBridge::instance()->clearGraph();
+        swapId_ = randomSource();
+    }, 100);
+    const auto sources = EngineBridge::instance()->sources();
+    for (const auto& s : sources) {
+        add([this, s] {
+            window_->log(QString("[stress] swapall: source -> %1").arg(s.name));
+            const QString id = EngineBridge::instance()->replaceNode(swapId_, s.typeRaw, true);
+            if (id.isEmpty()) window_->log(QString("[stress] FAIL swapall: replacing with %1 failed").arg(s.name));
+            else swapId_ = id;
+            window_->editor_->selectNode(swapId_);
+        }, 120);
+    }
+}
+
+// Random wiring between a handful of nodes, including blends, loops and
+// out-of-range slots.
+void StressTest::connect(int cycles) {
+    add([this] {
+        for (int i = 0; i < 3; ++i) randomSource();
+        const auto effects = EngineBridge::instance()->effects();
+        for (int i = 0; i < 4; ++i) window_->editor_->addFromCatalog(effects[int(rng_() % uint32_t(effects.size()))].typeRaw, false);
+    });
+    for (int c = 0; c < cycles * 3; ++c) {
+        add([this] {
+            auto* eng = EngineBridge::instance();
+            const QStringList ids = nodeIds();
+            const int op = int(rng_() % 4);
+            if (op == 0) eng->connectNodes(pick(ids), pick(ids), int(rng_() % 3), int(rng_() % 4));
+            else if (op == 1) eng->blendBetween(pick(ids), pick(ids));
+            else if (op == 2) {
+                const auto edges = eng->edges();
+                if (!edges.isEmpty()) eng->removeConnection(edges[int(rng_() % uint32_t(edges.size()))].id);
+            } else {
+                eng->setNodeActive(pick(ids), bool(rng_() % 2));
+            }
+        }, 30);
+    }
+}
+
+void StressTest::undo(int cycles) {
+    for (int c = 0; c < cycles; ++c) {
+        add([this] {
+            auto* eng = EngineBridge::instance();
+            const QString src = randomSource();
+            const auto effects = eng->effects();
+            const QString fx = window_->editor_->addFromCatalog(effects[int(rng_() % uint32_t(effects.size()))].typeRaw, false, src);
+            randomizeParameters(fx);
+            if (rng_() % 2) eng->removeNode(src);
+        }, 40);
+        add([this] {
+            auto* eng = EngineBridge::instance();
+            const int n = 1 + int(rng_() % 8);
+            for (int i = 0; i < n; ++i) eng->undo();
+            for (int i = 0; i < int(rng_() % 8); ++i) eng->redo();
+        }, 60);
+    }
+}
+
+void StressTest::strands(int cycles) {
+    for (int c = 0; c < cycles; ++c) {
+        add([this] {
+            auto* eng = EngineBridge::instance();
+            const QString src = randomSource();
+            const auto effects = eng->effects();
+            const QString fx = window_->editor_->addFromCatalog(effects[int(rng_() % uint32_t(effects.size()))].typeRaw, false, src);
+            const QString name = QString("stress-%1").arg(++counter_);
+            eng->saveStrand(fx.isEmpty() ? src : fx, QDir(eng->strandsFolder()).filePath(name + ".json"), name, {});
+        }, 60);
+        add([this] {
+            auto* eng = EngineBridge::instance();
+            const auto all = eng->strands();
+            for (const StrandItem& s : all)
+                if (s.name.startsWith("stress-") && rng_() % 2) window_->editor_->loadStrand(s.id);
+        }, 150);
+        add([this] {
+            auto* eng = EngineBridge::instance();
+            for (const StrandItem& s : eng->strands()) {
+                if (!s.name.startsWith("stress-")) continue;
+                if (rng_() % 3 == 0) eng->renameStrand(s.id, s.name + "-r");
+                else if (rng_() % 2) eng->deleteStrand(s.id);
+            }
+            if (rng_() % 2) eng->clearGraph();
+        }, 60);
+    }
+    add([] {
+        auto* eng = EngineBridge::instance();
+        for (const StrandItem& s : eng->strands()) if (s.name.startsWith("stress-")) eng->deleteStrand(s.id);
+    });
+}
+
+void StressTest::workspace(int cycles) {
+    for (int c = 0; c < cycles; ++c) {
+        add([this] {
+            for (int i = 0; i < 2; ++i) {
+                const QString src = randomSource();
+                const auto effects = EngineBridge::instance()->effects();
+                window_->editor_->addFromCatalog(effects[int(rng_() % uint32_t(effects.size()))].typeRaw, false, src);
+            }
+            savedNodes_ = int(EngineBridge::instance()->nodes().size());
+            EngineBridge::instance()->saveWorkspace(QDir(scratch_).filePath("ws.json"), "stress");
+        }, 60);
+        add([] { EngineBridge::instance()->clearGraph(); }, 60);
+        add([this] {
+            QElapsedTimer timer;
+            timer.start();
+            if (!EngineBridge::instance()->loadWorkspace(QDir(scratch_).filePath("ws.json")))
+                window_->log("[stress] FAIL loadWorkspace returned false");
+            const int loaded = int(EngineBridge::instance()->nodes().size());
+            window_->log(QString("[stress] workspace: loaded %1 nodes in %2 ms").arg(loaded).arg(timer.elapsed()));
+            if (loaded != savedNodes_)
+                window_->log(QString("[stress] FAIL workspace saved %1 nodes, loaded %2").arg(savedNodes_).arg(loaded));
+        }, 150);
+    }
+}
+
+// Preview windows opened, re-pointed by deleting their node, and closed.
+void StressTest::previews(int cycles) {
+    for (int c = 0; c < cycles; ++c) {
+        add([this] {
+            const QString src = randomSource();
+            const auto effects = EngineBridge::instance()->effects();
+            const QString fx = window_->editor_->addFromCatalog(effects[int(rng_() % uint32_t(effects.size()))].typeRaw, false, src);
+            window_->editor_->openPreview(fx);
+            window_->editor_->openPreview(src);
+        }, 60);
+        add([this] {
+            const QStringList ids = nodeIds();
+            if (rng_() % 2) EngineBridge::instance()->removeNode(pick(ids));  // window retreats or closes
+        }, 150);
+        add([this] {
+            for (const QString& id : window_->editor_->openPreviewIds())
+                if (rng_() % 2) window_->editor_->closePreview(id);
+            if (rng_() % 2) EngineBridge::instance()->clearGraph();
+        }, 120);
+    }
+    add([this] { for (const QString& id : window_->editor_->openPreviewIds()) window_->editor_->closePreview(id); });
+}
+
+void StressTest::stage(int cycles) {
+    add([this] {
+        for (int i = 0; i < 2; ++i) {
+            const QString src = randomSource();
+            const auto effects = EngineBridge::instance()->effects();
+            window_->editor_->addFromCatalog(effects[int(rng_() % uint32_t(effects.size()))].typeRaw, false, src);
+        }
+    });
+    for (int c = 0; c < cycles; ++c) {
+        add([this] { window_->stageButton_->click(); }, 200);
+        add([this] {  // mutate the graph while staged
+            auto* eng = EngineBridge::instance();
+            if (rng_() % 2) randomSource();
+            else eng->removeNode(pick(nodeIds()));
+        }, 200);
+        add([this] { window_->stageButton_->click(); }, 200);
+    }
+}
+
+void StressTest::resolution(int cycles) {
+    add([this] {
+        const QString src = randomSource();
+        const auto effects = EngineBridge::instance()->effects();
+        const QString fx = window_->editor_->addFromCatalog(effects[int(rng_() % uint32_t(effects.size()))].typeRaw, false, src);
+        window_->editor_->openPreview(fx);
+    });
+    for (int c = 0; c < cycles; ++c)
+        add([this] { EngineBridge::instance()->setResolutionIndex(int(rng_() % 5)); }, 300);
+    add([this] {
+        EngineBridge::instance()->setResolutionIndex(3);
+        for (const QString& id : window_->editor_->openPreviewIds()) window_->editor_->closePreview(id);
+    });
+}
+
+// Text / icon / image / video inputs, the video sometimes deleted while its
+// cache is still being built.
+void StressTest::inputs(int cycles) {
+    const QString video = qEnvironmentVariable("NOTTAWA_STRESS_VIDEO");
+    for (int c = 0; c < cycles; ++c) {
+        add([this, video] {
+            auto* eng = EngineBridge::instance();
+            const QString text = eng->addInput(VideoSourceKind::Text);
+            eng->setTextSourceText(text, QString(int(rng_() % 200), QChar('W')));
+            eng->setTextSourceFontSize(text, int(rng_() % 400));
+            const QString icon = eng->addInput(VideoSourceKind::Icon);
+            eng->setIconSourceIcon(icon, int(rng_() % 50) - 5);
+            if (!video.isEmpty()) window_->editor_->addMediaFile(video);
+        }, 60);
+        add([this] {
+            auto* eng = EngineBridge::instance();
+            for (const QString& id : nodeIds()) {
+                const FileSourceState f = eng->fileSourceState(id);
+                if (!f.valid) continue;
+                eng->setFileSourcePosition(id, float(rng_() % 100) / 100.0f);
+                eng->setFileSourceSpeed(id, float(rng_() % 200) / 100.0f);
+                eng->setFileSourceMuted(id, bool(rng_() % 2));
+            }
+        }, int(rng_() % 2 ? 50 : 1500));
+        add([] { EngineBridge::instance()->clearGraph(); }, 60);
+    }
+}
+
+void StressTest::copyPaste(int cycles) {
+    add([this] {
+        const QString src = randomSource();
+        const auto effects = EngineBridge::instance()->effects();
+        window_->editor_->addFromCatalog(effects[int(rng_() % uint32_t(effects.size()))].typeRaw, false, src);
+    });
+    for (int c = 0; c < cycles; ++c) {
+        add([this] {
+            auto* eng = EngineBridge::instance();
+            QStringList ids = nodeIds();
+            if (ids.size() > 40) { eng->clearGraph(); randomSource(); ids = nodeIds(); }
+            eng->copyNodes(ids.mid(0, 1 + int(rng_() % 3)));
+            eng->pasteNodes();
+        }, 50);
+    }
+}
+
+void StressTest::optional(int cycles) {
+    add([this] {
+        const QString src = randomSource();
+        const auto effects = EngineBridge::instance()->effects();
+        window_->editor_->addFromCatalog(effects[int(rng_() % uint32_t(effects.size()))].typeRaw, false, src);
+    });
+    for (int c = 0; c < cycles * 2; ++c) {
+        add([this] {
+            auto* eng = EngineBridge::instance();
+            const QString id = pick(nodeIds());
+            const auto effects = eng->optionalEffects(id);
+            if (effects.isEmpty()) return;
+            const int index = int(rng_() % uint32_t(effects.size()));
+            eng->toggleOptionalEffect(id, index);
+            for (const ParamInfo& p : eng->optionalEffectParameters(id, index))
+                if (p.type == ParamInfo::Standard) eng->setParameter(p.id, p.max);
+            window_->editor_->selectNode(id);
+        }, 60);
+    }
+    // Optional effects survive a save and load: one enabled, one only
+    // adjusted (its settings kept although it's never been switched on).
+    struct Expect { float enabledValue = 0, adjustedValue = 0; };
+    auto expect = std::make_shared<Expect>();
+    auto firstStandard = [](const QVector<ParamInfo>& params) -> const ParamInfo* {
+        for (const ParamInfo& p : params) if (p.type == ParamInfo::Standard && p.max > p.min) return &p;
+        return nullptr;
+    };
+    add([this, expect, firstStandard] {
+        auto* eng = EngineBridge::instance();
+        eng->clearGraph();
+        const QString src = randomSource();
+        const auto effects = eng->effects();
+        const QString fx = window_->editor_->addFromCatalog(effects[0].typeRaw, false, src);
+        eng->toggleOptionalEffect(fx, 0);
+        const auto enabledParams = eng->optionalEffectParameters(fx, 0);
+        if (const ParamInfo* p = firstStandard(enabledParams)) {
+            expect->enabledValue = p->min + 0.37f * (p->max - p->min);
+            eng->setParameter(p->id, expect->enabledValue);
+        }
+        const auto adjustedParams = eng->optionalEffectParameters(fx, 3);
+        if (const ParamInfo* p = firstStandard(adjustedParams)) {
+            expect->adjustedValue = p->min + 0.61f * (p->max - p->min);
+            eng->setParameter(p->id, expect->adjustedValue);
+        }
+        eng->saveWorkspace(QDir(scratch_).filePath("optional.json"), "optional");
+        eng->clearGraph();
+    }, 100);
+    add([this, expect, firstStandard] {
+        auto* eng = EngineBridge::instance();
+        eng->loadWorkspace(QDir(scratch_).filePath("optional.json"));
+        QString fx;
+        for (const QString& id : nodeIds())
+            if (eng->optionalEffects(id).size() == 10) fx = id;  // an effect's list (a source's has 9)
+        if (fx.isEmpty()) { window_->log("[stress] FAIL optional: effect missing after load"); return; }
+        const auto effects = eng->optionalEffects(fx);
+        if (!effects[0].enabled) window_->log("[stress] FAIL optional: enabled effect came back disabled");
+        if (effects[3].enabled) window_->log("[stress] FAIL optional: adjusted effect came back enabled");
+        const auto enabledParams = eng->optionalEffectParameters(fx, 0);
+        const auto adjustedParams = eng->optionalEffectParameters(fx, 3);
+        const ParamInfo* a = firstStandard(enabledParams);
+        const ParamInfo* b = firstStandard(adjustedParams);
+        if (!a || std::abs(a->value - expect->enabledValue) > 1e-3f)
+            window_->log(QString("[stress] FAIL optional: enabled effect's value %1, expected %2").arg(a ? a->value : -1).arg(expect->enabledValue));
+        if (!b || std::abs(b->value - expect->adjustedValue) > 1e-3f)
+            window_->log(QString("[stress] FAIL optional: adjusted effect's value %1, expected %2").arg(b ? b->value : -1).arg(expect->adjustedValue));
+        window_->log("[stress] optional: save/load checked");
+    }, 300);
+}
+
+// Damaged and hostile inputs: workspaces and strands that are truncated, of
+// the wrong types or garbage; video and image files that aren't; text that's
+// huge or exotic. Each must fail cleanly.
+void StressTest::badFiles(int cycles) {
+    add([this] {
+        QDir dir(scratch_);
+        auto write = [&](const QString& name, const QByteArray& data) {
+            QFile f(dir.filePath(name));
+            if (f.open(QIODevice::WriteOnly)) f.write(data);
+        };
+        // A real workspace to mangle.
+        const QString src = randomSource();
+        const auto effects = EngineBridge::instance()->effects();
+        window_->editor_->addFromCatalog(effects[0].typeRaw, false, src);
+        EngineBridge::instance()->saveWorkspace(dir.filePath("good.json"), "good");
+        QFile good(dir.filePath("good.json"));
+        good.open(QIODevice::ReadOnly);
+        const QByteArray ws = good.readAll();
+        write("empty.json", {});
+        write("truncated.json", ws.left(ws.size() / 2));
+        write("garbage.json", QByteArray(4096, '\x9c'));
+        write("array.json", "[1,2,3]");
+        write("null.json", "null");
+        write("wrongtypes.json", QByteArray(ws).replace("\"x\":", "\"x\":\"left\",\"_x\":")
+                                     .replace("\"shaderType\":", "\"shaderType\":\"oops\",\"_t\":"));
+        write("hugenumbers.json", QByteArray(ws).replace(": 0.", ": 1e308").replace(": 1,", ": -2147483648,"));
+        write("fake.mp4", QByteArray("this is not a video\n").repeated(200));
+        write("zero.mp4", {});
+        write("fake.png", QByteArray(64, '\x00'));
+        write("zero.png", {});
+    }, 100);
+    for (int c = 0; c < cycles; ++c) {
+        add([this] {
+            auto* eng = EngineBridge::instance();
+            QDir dir(scratch_);
+            for (const char* name : {"empty.json", "truncated.json", "garbage.json", "array.json", "null.json",
+                                     "wrongtypes.json", "hugenumbers.json", "missing.json"})
+                eng->loadWorkspace(dir.filePath(name));
+            QFile wrong(dir.filePath("wrongtypes.json"));
+            wrong.open(QIODevice::ReadOnly);
+            eng->loadStrandJson(QString::fromUtf8(wrong.readAll()));
+            eng->loadStrandJson("{not json");
+            eng->loadStrandJson("{\"shaders\": 5, \"sources\": \"x\", \"connections\": [null]}");
+        }, 100);
+        add([this] {
+            QDir dir(scratch_);
+            for (const char* name : {"fake.mp4", "zero.mp4", "fake.png", "zero.png", "missing.mp4"})
+                window_->editor_->addMediaFile(dir.filePath(name));
+            auto* eng = EngineBridge::instance();
+            const QString text = eng->addInput(VideoSourceKind::Text);
+            const QStringList samples = {QString(20000, QChar('W')), QString::fromUtf8("\xf0\x9f\x94\xa5\xe6\xbc\xa2\xe5\xad\x97 \xd9\x85\xd8\xb1\xd8\xad\xd8\xa8\xd8\xa7"),
+                                         QString(), QStringLiteral("\n\n\t\t"), QString(500, QChar(0x200B))};
+            eng->setTextSourceText(text, samples[int(rng_() % uint32_t(samples.size()))]);
+            eng->setTextSourceFontSize(text, rng_() % 2 ? 0 : 2000);
+        }, 300);
+        add([] { EngineBridge::instance()->clearGraph(); }, 100);
+    }
+}
+
+// Text at a few sizes, then the size slider dragged 8 -> 400.
+void StressTest::fonts() {
+    add([this] { textId_ = EngineBridge::instance()->addInput(VideoSourceKind::Text); });
+    for (int size : {24, 72, 200, 400}) {
+        add([this, size] { EngineBridge::instance()->setTextSourceFontSize(textId_, size); }, 100);
+        add([this, size] { checkpoint(QString("fonts: size %1").arg(size)); }, 1500);
+    }
+    add([this] { window_->log("[stress] fonts: drag start"); });
+    for (int size = 8; size <= 400; size += 4)
+        add([this, size] { EngineBridge::instance()->setTextSourceFontSize(textId_, size); }, 16);
+    add([this] { checkpoint("fonts: drag end"); }, 100);
+}
+
+// Audio capture started and stopped, sources and sample tracks switched and
+// BPM settings changed, while audio-reactive nodes come and go.
+void StressTest::audio(int cycles) {
+    for (int c = 0; c < cycles; ++c) {
+        add([this] {
+            auto* eng = EngineBridge::instance();
+            const auto sources = eng->audioSources();
+            if (!sources.isEmpty()) eng->selectAudioSource(sources[int(rng_() % uint32_t(sources.size()))].id);
+            const auto tracks = eng->sampleTracks();
+            if (!tracks.isEmpty()) eng->selectSampleTrack(int(rng_() % uint32_t(tracks.size())));
+            eng->toggleAudio();
+            // An audio-reactive source (they're listed first) with an effect.
+            const auto catalog = eng->sources();
+            const QString src = window_->editor_->addFromCatalog(catalog[int(rng_() % uint32_t(std::min<qsizetype>(catalog.size(), 12)))].typeRaw, true);
+            const auto effects = eng->effects();
+            window_->editor_->addFromCatalog(effects[int(rng_() % uint32_t(effects.size()))].typeRaw, false, src);
+        }, 80);
+        add([this] {
+            auto* eng = EngineBridge::instance();
+            eng->setBpmMode(int(rng_() % 3));
+            eng->setSmoothingMode(int(rng_() % 3));
+            eng->tapBpm();
+            eng->nudgeBpm(float(int(rng_() % 3)) - 1.0f);
+        }, 400);
+        add([this] {
+            auto* eng = EngineBridge::instance();
+            if (rng_() % 2) eng->toggleAudio();
+            if (rng_() % 2) eng->clearGraph();
+        }, 300);
+    }
+    add([] { if (EngineBridge::instance()->isAudioActive()) EngineBridge::instance()->toggleAudio(); });
+}
+
+// Where memory goes: N source + effect pairs, then cleared (undo still holds
+// them), then the undo history flushed with small actions.
+void StressTest::memory(int nodes) {
+    add([this, nodes] {
+        const auto effects = EngineBridge::instance()->effects();
+        for (int i = 0; i < nodes; ++i) {
+            const QString src = randomSource();
+            window_->editor_->addFromCatalog(effects[int(rng_() % uint32_t(effects.size()))].typeRaw, false, src);
+        }
+    }, 100);
+    add([this, nodes] { checkpoint(QString("memory: %1 pairs live").arg(nodes)); }, 2000);
+    add([] { EngineBridge::instance()->clearGraph(); });
+    add([this] { checkpoint("memory: cleared, held by undo"); }, 2000);
+    for (int i = 0; i < 12; ++i) {
+        add([this] { randomSource(); }, 50);
+        add([] { EngineBridge::instance()->clearGraph(); }, 50);
+    }
+    add([this] { checkpoint("memory: undo history flushed"); }, 2000);
+}
+
+// Every parameter of random nodes thrown to its extremes, with oscillators
+// switched on and off.
+void StressTest::parameters(int cycles) {
+    for (int c = 0; c < cycles; ++c) {
+        add([this] {
+            auto* eng = EngineBridge::instance();
+            const QString src = randomSource();
+            const auto effects = eng->effects();
+            const QString fx = window_->editor_->addFromCatalog(effects[int(rng_() % uint32_t(effects.size()))].typeRaw, false, src);
+            for (const QString& id : {src, fx}) {
+                randomizeParameters(id);
+                for (const ParamInfo& p : eng->parameters(id))
+                    if (p.hasOscillator && rng_() % 3 == 0) {
+                        eng->setOscillatorEnabled(p.id, true);
+                        eng->setOscillatorFrequency(p.id, float(rng_() % 400) / 100.0f);
+                    }
+            }
+            window_->editor_->selectNode(fx);
+        }, 60);
+        add([] {}, 150);
+        add([] { EngineBridge::instance()->clearGraph(); }, 40);
+    }
+}

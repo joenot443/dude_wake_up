@@ -130,8 +130,6 @@ clang++ \
 -I../../../addons/ofxMidi/src \
 -I../../../addons/ofxMidi/src/desktop \
 -I../../../addons/ofxMidi/src/ios \
--I../../../addons/ofxSyphon/libs \
--I../../../addons/ofxSyphon/src \
 -I../../../addons/ofxFastFboReader/src \
 -Ilib/imgui-node-editor \
 -Ilib/observable \

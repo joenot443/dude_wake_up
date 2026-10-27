@@ -14,6 +14,19 @@ bin
 build
 lib/ableton
 
+# MSVC / VS 2022 build artifacts (Phase 1 exit gate)
+obj/
+Debug/
+Release/
+x64/
+*.pdb
+*.ilk
+*.user
+.vs/
+
+# ffmpeg is fetched + verified via scripts/fetch_ffmpeg_lgpl.ps1
+libs/ffmpeg/
+
 # Xcode user data
 xcuserdata/
 *.xcuserstate
@@ -46,3 +59,7 @@ dist/
 Network Trash Folder
 Temporary Items
 .apdisk
+# Qt spike build artifacts
+spike/qt-of/build/
+aqtinstall.log
+app/build/

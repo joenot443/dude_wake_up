@@ -41,7 +41,6 @@ struct ChromeGrillSettings: public ShaderSettings {
 struct ChromeGrillShader: Shader {
   ChromeGrillSettings *settings;
   ChromeGrillShader(ChromeGrillSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   
   void setup() override {
     shader.load("shaders/ChromeGrill");

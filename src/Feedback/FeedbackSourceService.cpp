@@ -13,7 +13,7 @@ static std::string DefaultSourceKey = "DefaultSource";
 
 void FeedbackSourceService::setup()
 {
-  std::shared_ptr<FeedbackSource> source = std::make_shared<FeedbackSource>(UUID::generateUUID(), std::make_shared<VideoSourceSettings>(UUID::generateUUID(), 0));
+  std::shared_ptr<FeedbackSource> source = std::make_shared<FeedbackSource>(NottawaUUID::generateUUID(), std::make_shared<VideoSourceSettings>(NottawaUUID::generateUUID(), 0));
   registerFeedbackSource(source);
   defaultFeedbackSource = source;
   // Frame buffer is allocated lazily on the first pushFrame() that has a

@@ -39,7 +39,6 @@ struct TwistedCubesSettings: public ShaderSettings {
 struct TwistedCubesShader: Shader {
   TwistedCubesSettings *settings;
   TwistedCubesShader(TwistedCubesSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   void setup() override {
     shader.load("shaders/TwistedCubes");
   }

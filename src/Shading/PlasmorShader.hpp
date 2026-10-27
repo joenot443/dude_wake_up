@@ -39,7 +39,6 @@ struct PlasmorSettings: public ShaderSettings {
 struct PlasmorShader: Shader {
   PlasmorSettings *settings;
   PlasmorShader(PlasmorSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   
   void setup() override {
     shader.load("shaders/Plasmor");

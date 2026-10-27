@@ -1,6 +1,24 @@
 #include "StrandService.hpp"
+#include <set>
 #include "ConfigService.hpp"
+#include <algorithm>
+#include <cctype>
 #include <filesystem>
+
+namespace {
+// Paths reach the maps in different spellings (separators, doubled
+// slashes), so compare them normalised.
+std::string normalizedPath(const std::string& path)
+{
+  if (path.empty()) return path;
+  std::string out = std::filesystem::path(path).lexically_normal().generic_string();
+#ifdef _WIN32
+  // Windows paths are case-insensitive.
+  std::transform(out.begin(), out.end(), out.begin(), [](unsigned char c) { return char(std::tolower(c)); });
+#endif
+  return out;
+}
+} // namespace
 
 std::shared_ptr<AvailableStrand> StrandService::availableStrandForId(std::string id)
 {
@@ -21,14 +39,17 @@ std::shared_ptr<AvailableStrand> StrandService::availableStrandForId(std::string
 
 std::vector<std::shared_ptr<AvailableStrand>> StrandService::availableStrands()
 {
+  // A strand saved this session is in strandMap and, once the folder is
+  // rescanned, in folderMap too; list each file once.
   std::vector<std::shared_ptr<AvailableStrand>> strands;
-  for (auto const &[key, val] : strandMap)
+  std::set<std::string> paths;
+  for (auto const *map : {&strandMap, &folderMap})
   {
-    strands.push_back(val);
-  }
-  for (auto const &[key, val] : folderMap)
-  {
-    strands.push_back(val);
+    for (auto const &[key, val] : *map)
+    {
+      if (!val->path.empty() && !paths.insert(normalizedPath(val->path)).second) continue;
+      strands.push_back(val);
+    }
   }
   return strands;
 }
@@ -48,7 +69,7 @@ void StrandService::setup() {
   strandsUpdatedSubject.subscribe([this]()
   {
     if (running)
-    	ConfigService::getService()->saveDefaultConfigFile();
+    	ConfigService::getService()->requestSave();
   });
   
   populate();
@@ -78,14 +99,24 @@ void StrandService::addStrand(std::shared_ptr<AvailableStrand> strand)
 
 void StrandService::removeStrand(std::string id)
 {
-  if (strandMap.count(id) == 0)
+  auto strand = availableStrandForId(id);
+  if (strand == nullptr)
   {
     log("Tried to remove Strand %s, but it doesn't exist",
         id.c_str());
     return;
   }
-  auto strand = strandMap[id];
-  strandMap.erase(id);
+  // Drop every entry for the strand's file, from either map.
+  for (auto *map : {&strandMap, &folderMap})
+  {
+    for (auto it = map->begin(); it != map->end();)
+    {
+      if (it->first == id || (!strand->path.empty() && normalizedPath(it->second->path) == normalizedPath(strand->path)))
+        it = map->erase(it);
+      else ++it;
+    }
+  }
+  strandNames.erase(strand->name);
   notifyStrandsUpdated();
 }
 
@@ -104,7 +135,7 @@ std::string StrandService::savePreview(std::string name, std::shared_ptr<Connect
   tex.readToPixels(pixels);
   std::filesystem::path fileName = strandPreviewPath(name);
   ofSaveImage(pixels, fileName);
-  return fileName;
+  return fileName.string();
 }
 
 std::string StrandService::strandPreviewPath(std::string name) {
@@ -227,11 +258,15 @@ void StrandService::populateMapFromFolder(std::map<std::string, std::shared_ptr<
     std::string imagePath;
     if (json.contains("preview")) {
       imagePath = json["preview"];
-    } else {
-      imagePath = "";
+    }
+    // Without a recorded preview, use a same-named PNG beside the file.
+    if (imagePath.empty()) {
+      auto sibling = std::filesystem::path(file.getAbsolutePath()).replace_extension(".png");
+      std::error_code ec;
+      if (std::filesystem::exists(sibling, ec)) imagePath = sibling.string();
     }
     
-    auto strand = std::make_shared<AvailableStrand>(removeFileExtension(file.getFileName()), file.getAbsolutePath(), imagePath, UUID::generateUUID());
+    auto strand = std::make_shared<AvailableStrand>(removeFileExtension(file.getFileName()), file.getAbsolutePath(), imagePath, NottawaUUID::generateUUID());
     if (strandNames.count(strand->name) != 0) {
       log("Adding Strand %s which already exists", strand->name.c_str());
       continue;
@@ -248,15 +283,30 @@ void StrandService::populateMapFromFolder(std::map<std::string, std::shared_ptr<
 void StrandService::renameStrand(std::string id, std::string newName)
 {
   auto strand = availableStrandForId(id);
-  if (strand == nullptr)
+  if (strand == nullptr || isTemplate(id))
   {
-    log("Tried to rename Strand %s, but it doesn't exist", id.c_str());
+    log("Tried to rename Strand %s, but it doesn't exist or is a template", id.c_str());
+    return;
+  }
+  // The name becomes a file name in the same folder: no separators or
+  // characters Windows forbids, so it can't point anywhere else.
+  if (newName.empty() || newName == "." || newName == ".." ||
+      newName.find_first_of("/\\:*?\"<>|") != std::string::npos)
+  {
+    log("Tried to rename Strand %s to an invalid name", id.c_str());
     return;
   }
 
   // Determine new file path (same directory, new filename)
   std::filesystem::path oldPath(strand->path);
   std::filesystem::path newPath = oldPath.parent_path() / (newName + ".json");
+  // Renaming onto another strand's file would replace it.
+  std::error_code existsError;
+  if (newPath != oldPath && std::filesystem::exists(newPath, existsError))
+  {
+    log("Tried to rename Strand %s to %s, which already exists", id.c_str(), newName.c_str());
+    return;
+  }
 
   try
   {
@@ -272,9 +322,19 @@ void StrandService::renameStrand(std::string id, std::string newName)
     return;
   }
 
-  // Update AvailableStrand metadata
-  strand->name = newName;
-  strand->path = newPath.string();
+  // Update every entry for the file (it can be in both maps).
+  const std::string oldPathString = normalizedPath(oldPath.string());
+  strandNames.erase(strand->name);
+  strandNames.insert(newName);
+  for (auto *map : {&strandMap, &folderMap})
+  {
+    for (auto &[key, entry] : *map)
+    {
+      if (entry != strand && normalizedPath(entry->path) != oldPathString) continue;
+      entry->name = newName;
+      entry->path = newPath.string();
+    }
+  }
 
   notifyStrandsUpdated();
 }

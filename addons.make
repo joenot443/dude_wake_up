@@ -1,5 +1,2 @@
 ofxImGui
 ofxMidi
-ofxSyphon
-ofxFastFboReader
-ofxFFmpegRecorder

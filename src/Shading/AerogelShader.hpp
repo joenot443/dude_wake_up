@@ -31,7 +31,6 @@ struct AerogelSettings: public ShaderSettings {
 struct AerogelShader: Shader {
   AerogelSettings *settings;
   AerogelShader(AerogelSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   
   void setup() override {
     shader.load("shaders/Aerogel");

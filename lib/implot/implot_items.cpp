@@ -2222,9 +2222,9 @@ void PlotPieChart(const char* const label_ids[], const T* values, int count, dou
     PopPlotClipRect();
 }
 
-inline ImVec2 operator-(const ImVec2& vec, const ofVec2f& vec2 ) {
-    return ofVec2f(vec.x + vec2.x, vec.y + vec2.y);
-}
+// (Stray Nottawa modification that references OpenFrameworks' ofVec2f
+// without including OF headers. Unreferenced elsewhere; removed on the
+// Windows port.)
 
 
 

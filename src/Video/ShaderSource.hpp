@@ -861,614 +861,614 @@ public:
     switch (addType) {
     // Shader Settings
     case ShaderSource_RisoColumns: { // Settings
-      auto settings = new RisoColumnsSettings(UUID::generateUUID(), 0);
+      auto settings = new RisoColumnsSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<RisoColumnsShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Ferro: { // Settings
-      auto settings = new FerroSettings(UUID::generateUUID(), 0);
+      auto settings = new FerroSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<FerroShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_MarbleFlow: { // Settings
-      auto settings = new MarbleFlowSettings(UUID::generateUUID(), 0);
+      auto settings = new MarbleFlowSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<MarbleFlowShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Gemfield: { // Settings
-      auto settings = new GemfieldSettings(UUID::generateUUID(), 0);
+      auto settings = new GemfieldSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<GemfieldShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Silk: { // Settings
-      auto settings = new SilkSettings(UUID::generateUUID(), 0);
+      auto settings = new SilkSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<SilkShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_MarbleCaves: { // Settings
-      auto settings = new MarbleCavesSettings(UUID::generateUUID(), 0);
+      auto settings = new MarbleCavesSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<MarbleCavesShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_DiscoSun: { // Settings
-      auto settings = new DiscoSunSettings(UUID::generateUUID(), 0);
+      auto settings = new DiscoSunSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<DiscoSunShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Iridescent: { // Settings
-      auto settings = new IridescentSettings(UUID::generateUUID(), 0);
+      auto settings = new IridescentSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<IridescentShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_CyberWarehouse: { // Settings
-      auto settings = new CyberWarehouseSettings(UUID::generateUUID(), 0);
+      auto settings = new CyberWarehouseSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<CyberWarehouseShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Aurora: { // Settings
-      auto settings = new AuroraSettings(UUID::generateUUID(), 0);
+      auto settings = new AuroraSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<AuroraShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_AudioGraph: { // Settings
-      auto settings = new AudioGraphSettings(UUID::generateUUID(), 0);
+      auto settings = new AudioGraphSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<AudioGraphShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Flocking: { // Settings
-      auto settings = new FlockingSettings(UUID::generateUUID(), 0);
+      auto settings = new FlockingSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<FlockingShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_AudioOscillator: { // Settings
-      auto settings = new AudioOscillatorSettings(UUID::generateUUID(), 0);
+      auto settings = new AudioOscillatorSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<AudioOscillatorShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Lava: { // Settings
-      auto settings = new LavaSettings(UUID::generateUUID(), 0);
+      auto settings = new LavaSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<LavaShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_AudioGlowBars: { // Settings
-      auto settings = new AudioGlowBarsSettings(UUID::generateUUID(), 0);
+      auto settings = new AudioGlowBarsSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<AudioGlowBarsShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_AudioPulseGrid: { // Settings
-      auto settings = new AudioPulseGridSettings(UUID::generateUUID(), 0);
+      auto settings = new AudioPulseGridSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<AudioPulseGridShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_AudioPendulum: { // Settings
-      auto settings = new AudioPendulumSettings(UUID::generateUUID(), 0);
+      auto settings = new AudioPendulumSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<AudioPendulumShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_AudioRain: { // Settings
-      auto settings = new AudioRainSettings(UUID::generateUUID(), 0);
+      auto settings = new AudioRainSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<AudioRainShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_AudioPhasePortrait: { // Settings
-      auto settings = new AudioPhasePortraitSettings(UUID::generateUUID(), 0);
+      auto settings = new AudioPhasePortraitSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<AudioPhasePortraitShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_AudioSuminagashi: { // Settings
-      auto settings = new AudioSuminagashiSettings(UUID::generateUUID(), 0);
+      auto settings = new AudioSuminagashiSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<AudioSuminagashiShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_AudioPrism: { // Settings
-      auto settings = new AudioPrismSettings(UUID::generateUUID(), 0);
+      auto settings = new AudioPrismSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<AudioPrismShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_AudioSilk: { // Settings
-      auto settings = new AudioSilkSettings(UUID::generateUUID(), 0);
+      auto settings = new AudioSilkSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<AudioSilkShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_AudioAurora: { // Settings
-      auto settings = new AudioAuroraSettings(UUID::generateUUID(), 0);
+      auto settings = new AudioAuroraSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<AudioAuroraShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_AudioCymatics: { // Settings
-      auto settings = new AudioCymaticsSettings(UUID::generateUUID(), 0);
+      auto settings = new AudioCymaticsSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<AudioCymaticsShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_AudioBall: { // Settings
-      auto settings = new AudioBallSettings(UUID::generateUUID(), 0);
+      auto settings = new AudioBallSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<AudioBallShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Bubbles: { // Settings
-      auto settings = new BubblesSettings(UUID::generateUUID(), 0);
+      auto settings = new BubblesSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<BubblesShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_ElectricEels: { // Settings
-      auto settings = new ElectricEelsSettings(UUID::generateUUID(), 0);
+      auto settings = new ElectricEelsSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<ElectricEelsShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Synthfly: { // Settings
-        auto settings = new SynthflySettings(UUID::generateUUID(), 0);
+        auto settings = new SynthflySettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<SynthflyShader>(settings);
         shader->setup();
         return;
     }
     case ShaderSource_Glassy: { // Settings
-      auto settings = new GlassySettings(UUID::generateUUID(), 0);
+      auto settings = new GlassySettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<GlassyShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Synthwave: { // Settings
-      auto settings = new SynthwaveSettings(UUID::generateUUID(), 0);
+      auto settings = new SynthwaveSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<SynthwaveShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_GlowBeat: { // Settings
-      auto settings = new GlowBeatSettings(UUID::generateUUID(), 0);
+      auto settings = new GlowBeatSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<GlowBeatShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Flaming: { // Settings
-      auto settings = new FlamingSettings(UUID::generateUUID(), 0);
+      auto settings = new FlamingSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<FlamingShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Accretion: { // Settings
-      auto settings = new AccretionSettings(UUID::generateUUID(), 0);
+      auto settings = new AccretionSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<AccretionShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Fireflies: { // Settings
-      auto settings = new FirefliesSettings(UUID::generateUUID(), 0);
+      auto settings = new FirefliesSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<FirefliesShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_CloudyTunnel: { // Settings
-      auto settings = new CloudyTunnelSettings(UUID::generateUUID(), 0);
+      auto settings = new CloudyTunnelSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<CloudyTunnelShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_PixelAudioParty: { // Settings
-      auto settings = new PixelAudioPartySettings(UUID::generateUUID(), 0);
+      auto settings = new PixelAudioPartySettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<PixelAudioPartyShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Companions: { // Settings
-      auto settings = new CompanionsSettings(UUID::generateUUID(), 0);
+      auto settings = new CompanionsSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<CompanionsShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Spiral: { // Settings
-      auto settings = new SpiralSettings(UUID::generateUUID(), 0);
+      auto settings = new SpiralSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<SpiralShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_SimpleBars: { // Settings
-      auto settings = new SimpleBarsSettings(UUID::generateUUID(), 0);
+      auto settings = new SimpleBarsSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<SimpleBarsShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_SimpleShape: { // Settings
-      auto settings = new SimpleShapeSettings(UUID::generateUUID(), 0);
+      auto settings = new SimpleShapeSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<SimpleShapeShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_ColoredDrops: { // Settings
-      auto settings = new ColoredDropsSettings(UUID::generateUUID(), 0);
+      auto settings = new ColoredDropsSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<ColoredDropsShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Plasmor: { // Settings
-      auto settings = new PlasmorSettings(UUID::generateUUID(), 0);
+      auto settings = new PlasmorSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<PlasmorShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Diffractor: { // Settings
-      auto settings = new DiffractorSettings(UUID::generateUUID(), 0);
+      auto settings = new DiffractorSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<DiffractorShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Aerogel: { // Settings
-      auto settings = new AerogelSettings(UUID::generateUUID(), 0);
+      auto settings = new AerogelSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<AerogelShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Breathe: { // Settings
-      auto settings = new BreatheSettings(UUID::generateUUID(), 0);
+      auto settings = new BreatheSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<BreatheShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Heptagons: { // Settings
-      auto settings = new HeptagonsSettings(UUID::generateUUID(), 0);
+      auto settings = new HeptagonsSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<HeptagonsShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Octagrams: { // Settings
-      auto settings = new OctagramsSettings(UUID::generateUUID(), 0);
+      auto settings = new OctagramsSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<OctagramsShader>(settings);
       shader->setup();
       return;
     }
     case ShaderSource_Perplexion: { // Settings
-      auto settings = new PerplexionSettings(UUID::generateUUID(), 0);
+      auto settings = new PerplexionSettings(NottawaUUID::generateUUID(), 0);
       shader = std::make_shared<PerplexionShader>(settings);
       shader->setup();
       return;
     }
       case ShaderSource_ColorWheel: { // Settings
-        auto settings = new ColorWheelSettings(UUID::generateUUID(), 0);
+        auto settings = new ColorWheelSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<ColorWheelShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_DiscoAudio: { // Settings
-        auto settings = new DiscoAudioSettings(UUID::generateUUID(), 0);
+        auto settings = new DiscoAudioSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<DiscoAudioShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_FlickerAudio: { // Settings
-        auto settings = new FlickerAudioSettings(UUID::generateUUID(), 0);
+        auto settings = new FlickerAudioSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<FlickerAudioShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_FractalAudio: { // Settings
-        auto settings = new FractalAudioSettings(UUID::generateUUID(), 0);
+        auto settings = new FractalAudioSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<FractalAudioShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_UnknownPleasures: { // Settings
-        auto settings = new UnknownPleasuresSettings(UUID::generateUUID(), 0);
+        auto settings = new UnknownPleasuresSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<UnknownPleasuresShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_SpaceRings: { // Settings
-        auto settings = new SpaceRingsSettings(UUID::generateUUID(), 0);
+        auto settings = new SpaceRingsSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<SpaceRingsShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_CloudyShapes: { // Settings
-        auto settings = new CloudyShapesSettings(UUID::generateUUID(), 0);
+        auto settings = new CloudyShapesSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<CloudyShapesShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_AudioBlocks: { // Settings
-        auto settings = new AudioBlocksSettings(UUID::generateUUID(), 0);
+        auto settings = new AudioBlocksSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<AudioBlocksShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_FloatingSparks: { // Settings
-        auto settings = new FloatingSparksSettings(UUID::generateUUID(), 0);
+        auto settings = new FloatingSparksSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<FloatingSparksShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_Cosmos: { // Settings
-        auto settings = new CosmosSettings(UUID::generateUUID(), 0);
+        auto settings = new CosmosSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<CosmosShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_ChromeGrill: { // Settings
-        auto settings = new ChromeGrillSettings(UUID::generateUUID(), 0);
+        auto settings = new ChromeGrillSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<ChromeGrillShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_Fibers: { // Settings
-        auto settings = new FibersSettings(UUID::generateUUID(), 0);
+        auto settings = new FibersSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<FibersShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_Mist: { // Settings
-        auto settings = new MistSettings(UUID::generateUUID(), 0);
+        auto settings = new MistSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<MistShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_WelcomeRings: { // Settings
-        auto settings = new WelcomeRingsSettings(UUID::generateUUID(), 0);
+        auto settings = new WelcomeRingsSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<WelcomeRingsShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_MotionBlurTexture: { // Settings
-        auto settings = new MotionBlurTextureSettings(UUID::generateUUID(), 0);
+        auto settings = new MotionBlurTextureSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<MotionBlurTextureShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_IsoFract: { // Settings
-        auto settings = new IsoFractSettings(UUID::generateUUID(), 0);
+        auto settings = new IsoFractSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<IsoFractShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_DirtyPlasma: { // Settings
-        auto settings = new DirtyPlasmaSettings(UUID::generateUUID(), 0);
+        auto settings = new DirtyPlasmaSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<DirtyPlasmaShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_TwistedTrip: { // Settings
-        auto settings = new TwistedTripSettings(UUID::generateUUID(), 0);
+        auto settings = new TwistedTripSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<TwistedTripShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_TwistedCubes: { // Settings
-        auto settings = new TwistedCubesSettings(UUID::generateUUID(), 0);
+        auto settings = new TwistedCubesSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<TwistedCubesShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_Core: { // Settings
-        auto settings = new CoreSettings(UUID::generateUUID(), 0);
+        auto settings = new CoreSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<CoreShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_Warpspeed: { // Settings
-        auto settings = new WarpspeedSettings(UUID::generateUUID(), 0);
+        auto settings = new WarpspeedSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<WarpspeedShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_Reflector: { // Settings
-        auto settings = new ReflectorSettings(UUID::generateUUID(), 0);
+        auto settings = new ReflectorSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<ReflectorShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_FullHouse: { // Settings
-        auto settings = new FullHouseSettings(UUID::generateUUID(), 0);
+        auto settings = new FullHouseSettings(NottawaUUID::generateUUID(), 0);
         shader = std::make_shared<FullHouseShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_GridRun: { // Settings
-        auto settings = new GridRunSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto settings = new GridRunSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<GridRunShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_Gyroids: { // Settings
-        auto settings = new GyroidsSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto settings = new GyroidsSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<GyroidsShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_SwirlingSoul: { // Settings
-        auto settings = new SwirlingSoulSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto settings = new SwirlingSoulSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<SwirlingSoulShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_SmokeRing: { // Settings
-        auto settings = new SmokeRingSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto settings = new SmokeRingSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<SmokeRingShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_Limbo: { // Settings
-        auto settings = new LimboSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto settings = new LimboSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<LimboShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_Vertex: { // Settings
-        auto settings = new VertexSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto settings = new VertexSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<VertexShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_SolidColor: { // Settings
-        auto settings = new SolidColorSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto settings = new SolidColorSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<SolidColorShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_Hilbert: { // Settings
-        auto settings = new HilbertSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto settings = new HilbertSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<HilbertShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_Warp: { // Settings
-        auto settings = new WarpSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto settings = new WarpSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<WarpShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_FrequencyVisualizer: { // Settings
-        auto settings = new FrequencyVisualizerSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto settings = new FrequencyVisualizerSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<FrequencyVisualizerShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_CurlySquares: { // Settings
-        auto settings = new CurlySquaresSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto settings = new CurlySquaresSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<CurlySquaresShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_PlasmaTwo: { // Settings
-        auto settings = new PlasmaTwoSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto settings = new PlasmaTwoSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<PlasmaTwoShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_DancingSquares: { // Settings
-        auto settings = new DancingSquaresSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto settings = new DancingSquaresSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<DancingSquaresShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_Tissue: { // Settings
-        auto settings = new TissueSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto settings = new TissueSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<TissueShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_Psycurves: { // Settings
-        auto settings = new PsycurvesSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto settings = new PsycurvesSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<PsycurvesShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_TriangleMap: { // Settings
-        auto settings = new TriangleMapSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto settings = new TriangleMapSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<TriangleMapShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_Disco: { // Settings
-        auto settings = new DiscoSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto settings = new DiscoSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<DiscoShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_Octahedron: { // Settings
-        auto settings = new OctahedronSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto settings = new OctahedronSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<OctahedronShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_Rubiks: { // Settings
-        auto settings = new RubiksSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto settings = new RubiksSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<RubiksShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_Mountains: { // Settings
-        auto settings = new MountainsSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto settings = new MountainsSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<MountainsShader>(settings);
         shader->setup();
         return;
       }
       case ShaderSource_empty: {
-        auto plasmaSettings = new EmptySettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto plasmaSettings = new EmptySettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<EmptyShader>(plasmaSettings);
         shader->setup();
         return;
       }
       case ShaderSource_audioMountains: {
-        auto plasmaSettings = new AudioMountainsSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto plasmaSettings = new AudioMountainsSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<AudioMountainsShader>(plasmaSettings);
         shader->setup();
         return;
       }
       case ShaderSource_galaxy: {
-        auto plasmaSettings = new GalaxySettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto plasmaSettings = new GalaxySettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<GalaxyShader>(plasmaSettings);
         shader->setup();
         return;
       }
       case ShaderSource_audioBumper: {
-        auto plasmaSettings = new AudioBumperSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto plasmaSettings = new AudioBumperSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<AudioBumperShader>(plasmaSettings);
         shader->setup();
         return;
       }
         
       case ShaderSource_audioWaveform: {
-        auto plasmaSettings = new AudioWaveformSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto plasmaSettings = new AudioWaveformSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<AudioWaveformShader>(plasmaSettings);
         shader->setup();
         return;
       }
       case ShaderSource_rings: {
-        auto plasmaSettings = new RingsSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto plasmaSettings = new RingsSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<RingsShader>(plasmaSettings);
         shader->setup();
         return;
       }
       case ShaderSource_plasma: {
-        auto plasmaSettings = new PlasmaSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto plasmaSettings = new PlasmaSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<PlasmaShader>(plasmaSettings);
         shader->setup();
         return;
       }
       case ShaderSource_fractal: {
-        auto fractalSettings = new FractalSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto fractalSettings = new FractalSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<FractalShader>(fractalSettings);
         shader->setup();
         return;
       }
       case ShaderSource_fuji: {
-        auto fujiSettings = new FujiSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto fujiSettings = new FujiSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<FujiShader>(fujiSettings);
         shader->setup();
         return;
       }
       case ShaderSource_clouds: {
-        auto cloudsSettings = new CloudSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto cloudsSettings = new CloudSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<CloudShader>(cloudsSettings);
         shader->setup();
         return;
       }
       case ShaderSource_melter: {
-        auto melterSettings = new MeltSettings(UUID::generateUUID(), 0, shaderSourceTypeName(addType));
+        auto melterSettings = new MeltSettings(NottawaUUID::generateUUID(), 0, shaderSourceTypeName(addType));
         shader = std::make_shared<MeltShader>(melterSettings);
         shader->setup();
         return;

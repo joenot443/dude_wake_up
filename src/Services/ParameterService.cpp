@@ -73,6 +73,12 @@ void ParameterService::registerParameter(std::shared_ptr<Parameter> parameter) {
   }
 }
 
+void ParameterService::reregisterParameter(const std::string& oldId, std::shared_ptr<Parameter> parameter) {
+  auto it = parameterMap.find(oldId);
+  if (it != parameterMap.end() && it->second == parameter) parameterMap.erase(it);
+  registerParameter(parameter);
+}
+
 void ParameterService::unregisterParameters(const std::vector<std::shared_ptr<Parameter>>& parameters) {
   for (auto const& p : parameters) {
     if (p == nullptr) continue;
@@ -258,7 +264,7 @@ void ParameterService::toggleFavoriteShaderType(ShaderType type) {
   } else {
     favoriteShaderTypes.insert(type);
   }
-  ConfigService::getService()->saveDefaultConfigFile();
+  ConfigService::getService()->requestSave();
   notifyFavoritesUpdate();
 }
 
@@ -272,7 +278,7 @@ void ParameterService::toggleFavoriteSourceType(int sourceType) {
   } else {
     favoriteSourceTypes.insert(sourceType);
   }
-  ConfigService::getService()->saveDefaultConfigFile();
+  ConfigService::getService()->requestSave();
   notifyFavoritesUpdate();
 }
 
@@ -298,6 +304,6 @@ void ParameterService::toggleStageShaderId(std::string shaderId) {
     } else {
         stageShaderIds.insert(shaderId);
     }
-    ConfigService::getService()->saveDefaultConfigFile();
+    ConfigService::getService()->requestSave();
     notifyFavoritesUpdate();
 }

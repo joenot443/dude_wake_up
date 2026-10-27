@@ -69,7 +69,7 @@ void LayoutStateService::updateLibraryPath(std::string path) {
   BookmarkService::getService()->endAccessingBookmark(libraryPath);
   libraryPath = path;
   BookmarkService::getService()->beginAccessingBookmark(libraryPath);
-  ConfigService::getService()->saveDefaultConfigFile();
+  ConfigService::getService()->requestSave();
 }
 
 void LayoutStateService::pushColor(std::shared_ptr<std::array<float, 4>> color) {

@@ -57,7 +57,6 @@ struct UnknownPleasuresSettings: public ShaderSettings {
 struct UnknownPleasuresShader: Shader {
   UnknownPleasuresSettings *settings;
   UnknownPleasuresShader(UnknownPleasuresSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   
   
   

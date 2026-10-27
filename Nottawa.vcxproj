@@ -1,0 +1,1034 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|ARM64">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|ARM64EC">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM64EC</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64EC">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64EC</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Condition="'$(Platform)'=='x64' or '$(Platform)'=='ARM64'">
+    <LatestTargetPlatformVersion>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))</LatestTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(WindowsTargetPlatformVersion)' == ''">$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
+    <TargetPlatformVersion>$(WindowsTargetPlatformVersion)</TargetPlatformVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'=='ARM64EC'">
+    <LatestTargetPlatformVersion>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '11.0'))</LatestTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(WindowsTargetPlatformVersion)' == ''">$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
+    <TargetPlatformVersion>$(WindowsTargetPlatformVersion)</TargetPlatformVersion>
+  </PropertyGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7FD42DF7-442E-479A-BA76-D0022F99702A}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Nottawa</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64' or '$(Configuration)|$(Platform)'=='Debug|ARM64' or '$(Configuration)|$(Platform)'=='Debug|ARM64EC'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64' or '$(Configuration)|$(Platform)'=='Release|ARM64' or '$(Configuration)|$(Platform)'=='Release|ARM64EC'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(NottawaEngineLib)'=='true'" Label="NottawaEngineLibConfig">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64' or '$(Configuration)|$(Platform)'=='Release|ARM64' or '$(Configuration)|$(Platform)'=='Release|ARM64EC'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\libs\openFrameworksCompiled\project\vs\openFrameworksRelease.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64' or '$(Configuration)|$(Platform)'=='Debug|ARM64' or '$(Configuration)|$(Platform)'=='Debug|ARM64EC'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\libs\openFrameworksCompiled\project\vs\openFrameworksDebug.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64' or '$(Configuration)|$(Platform)'=='Debug|ARM64' or '$(Configuration)|$(Platform)'=='Debug|ARM64EC'">
+    <OutDir>bin\</OutDir>
+    <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_debug</TargetName>
+    <LinkIncremental>true</LinkIncremental>
+    <GenerateManifest>true</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64' or '$(Configuration)|$(Platform)'=='Release|ARM64' or '$(Configuration)|$(Platform)'=='Release|ARM64EC'">
+    <OutDir>bin\</OutDir>
+    <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(NottawaEngineLib)'=='true'" Label="NottawaEngineLibPaths">
+    <TargetName>NottawaEngine</TargetName>
+    <OutDir>obj\engine\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>obj\engine\$(Platform)\$(Configuration)\int\</IntDir>
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64' or '$(Configuration)|$(Platform)'=='Debug|ARM64' or '$(Configuration)|$(Platform)'=='Debug|ARM64EC'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;__WINDOWS_WASAPI__;__WINDOWS_MM__;TARGET_WIN32;GLM_FORCE_CTOR_INIT;GLM_ENABLE_EXPERIMENTAL;OF_NO_FMOD=1;USE_KISS_FFT;ofxAddons_ENABLE_IMGUI;JSON_DIAGNOSTICS=1;IMGUI_DEFINE_MATH_OPERATORS=1;LINK_PLATFORM_WINDOWS=1;ASIO_STANDALONE=1</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);src;src\Apps;src\Audio;src\Bridge;src\Engine;src\Feedback;src\Models;src\Network;src\NodeLayout;src\Oscillation;src\Services;src\Shading;src\Util;src\Video;src\Views;src\Audio\gist;src\NodeLayout\node-editor;src\Oscillation\implot;src\Services\Commands;src\Services\Midi;src\Util\observable;src\Util\observable\detail;src\Util\observable\expressions;src\Video\Recording;lib;lib\BTrack;lib\implot;lib\kiss_fft130;libs\ffmpeg\include;lib\ableton\include;lib\ableton\modules\asio-standalone\asio\include;..\..\..\addons\ofxImGui\src;..\..\..\addons\ofxImGui\libs\imgui;..\..\..\addons\ofxImGui\libs\imgui\src;..\..\..\addons\ofxImGui\libs\imgui\backends;..\..\..\addons\ofxMidi\src;..\..\..\addons\ofxMidi\libs\rtmidi</AdditionalIncludeDirectories>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ObjectFileName>$(IntDir)%(Filename).obj</ObjectFileName>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <PostBuildEvent>
+      <Command>if exist "$(SolutionDir)data" (
+    if not exist "$(OutDir)data" mkdir "$(OutDir)data"
+    robocopy "$(SolutionDir)data" "$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+    if %ERRORLEVEL% GEQ 8 exit /b 1
+)
+exit /b 0</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalLibraryDirectories>$(MSBuildProjectDirectory)\libs\ffmpeg\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>avformat.lib;avcodec.lib;avutil.lib;swscale.lib;swresample.lib;winmm.lib;ole32.lib;uuid.lib;avrt.lib;propsys.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)app.manifest</AdditionalManifestFiles>
+      <GenerateManifest>true</GenerateManifest>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <AdditionalDependencies>%(AdditionalDependencies);avformat.lib;avcodec.lib;avutil.lib;swscale.lib;swresample.lib;winmm.lib;ole32.lib;uuid.lib;avrt.lib;propsys.lib;shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);$(MSBuildProjectDirectory)\libs\ffmpeg\lib</AdditionalLibraryDirectories>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+    <ClCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;__WINDOWS_WASAPI__;__WINDOWS_MM__;TARGET_WIN32;GLM_FORCE_CTOR_INIT;GLM_ENABLE_EXPERIMENTAL;OF_NO_FMOD=1;USE_KISS_FFT;ofxAddons_ENABLE_IMGUI;JSON_DIAGNOSTICS=1;IMGUI_DEFINE_MATH_OPERATORS=1;LINK_PLATFORM_WINDOWS=1;ASIO_STANDALONE=1</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);src;src\Apps;src\Audio;src\Bridge;src\Engine;src\Feedback;src\Models;src\Network;src\NodeLayout;src\Oscillation;src\Services;src\Shading;src\Util;src\Video;src\Views;src\Audio\gist;src\NodeLayout\node-editor;src\Oscillation\implot;src\Services\Commands;src\Services\Midi;src\Util\observable;src\Util\observable\detail;src\Util\observable\expressions;src\Video\Recording;lib;lib\BTrack;lib\implot;lib\kiss_fft130;libs\ffmpeg\include;lib\ableton\include;lib\ableton\modules\asio-standalone\asio\include;..\..\..\addons\ofxImGui\src;..\..\..\addons\ofxImGui\libs\imgui;..\..\..\addons\ofxImGui\libs\imgui\src;..\..\..\addons\ofxImGui\libs\imgui\backends;..\..\..\addons\ofxMidi\src;..\..\..\addons\ofxMidi\libs\rtmidi</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)%(Filename).obj</ObjectFileName>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)app.manifest</AdditionalManifestFiles>
+      <GenerateManifest>true</GenerateManifest>
+    </Manifest>
+    <PostBuildEvent>
+      <Command>if exist "$(SolutionDir)data" (
+    if not exist "$(OutDir)data" mkdir "$(OutDir)data"
+    robocopy "$(SolutionDir)data" "$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+    if %ERRORLEVEL% GEQ 8 exit /b 1
+)
+exit /b 0</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <AdditionalDependencies>%(AdditionalDependencies);avformat.lib;avcodec.lib;avutil.lib;swscale.lib;swresample.lib;winmm.lib;ole32.lib;uuid.lib;avrt.lib;propsys.lib;shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);$(MSBuildProjectDirectory)\libs\ffmpeg\lib</AdditionalLibraryDirectories>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+    <ClCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;__WINDOWS_WASAPI__;__WINDOWS_MM__;TARGET_WIN32;GLM_FORCE_CTOR_INIT;GLM_ENABLE_EXPERIMENTAL;OF_NO_FMOD=1;USE_KISS_FFT;ofxAddons_ENABLE_IMGUI;JSON_DIAGNOSTICS=1;IMGUI_DEFINE_MATH_OPERATORS=1;LINK_PLATFORM_WINDOWS=1;ASIO_STANDALONE=1</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);src;src\Apps;src\Audio;src\Bridge;src\Engine;src\Feedback;src\Models;src\Network;src\NodeLayout;src\Oscillation;src\Services;src\Shading;src\Util;src\Video;src\Views;src\Audio\gist;src\NodeLayout\node-editor;src\Oscillation\implot;src\Services\Commands;src\Services\Midi;src\Util\observable;src\Util\observable\detail;src\Util\observable\expressions;src\Video\Recording;lib;lib\BTrack;lib\implot;lib\kiss_fft130;libs\ffmpeg\include;lib\ableton\include;lib\ableton\modules\asio-standalone\asio\include;..\..\..\addons\ofxImGui\src;..\..\..\addons\ofxImGui\libs\imgui;..\..\..\addons\ofxImGui\libs\imgui\src;..\..\..\addons\ofxImGui\libs\imgui\backends;..\..\..\addons\ofxMidi\src;..\..\..\addons\ofxMidi\libs\rtmidi</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)%(Filename).obj</ObjectFileName>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)app.manifest</AdditionalManifestFiles>
+      <GenerateManifest>true</GenerateManifest>
+    </Manifest>
+    <PostBuildEvent>
+      <Command>if exist "$(SolutionDir)data" (
+    if not exist "$(OutDir)data" mkdir "$(OutDir)data"
+    robocopy "$(SolutionDir)data" "$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+    if %ERRORLEVEL% GEQ 8 exit /b 1
+)
+exit /b 0</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64EC'">
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <AdditionalDependencies>%(AdditionalDependencies);avformat.lib;avcodec.lib;avutil.lib;swscale.lib;swresample.lib;winmm.lib;ole32.lib;uuid.lib;avrt.lib;propsys.lib;shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);$(MSBuildProjectDirectory)\libs\ffmpeg\lib</AdditionalLibraryDirectories>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+    <ClCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;__WINDOWS_WASAPI__;__WINDOWS_MM__;TARGET_WIN32;GLM_FORCE_CTOR_INIT;GLM_ENABLE_EXPERIMENTAL;OF_NO_FMOD=1;USE_KISS_FFT;ofxAddons_ENABLE_IMGUI;JSON_DIAGNOSTICS=1;IMGUI_DEFINE_MATH_OPERATORS=1;LINK_PLATFORM_WINDOWS=1;ASIO_STANDALONE=1</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);src;src\Apps;src\Audio;src\Bridge;src\Engine;src\Feedback;src\Models;src\Network;src\NodeLayout;src\Oscillation;src\Services;src\Shading;src\Util;src\Video;src\Views;src\Audio\gist;src\NodeLayout\node-editor;src\Oscillation\implot;src\Services\Commands;src\Services\Midi;src\Util\observable;src\Util\observable\detail;src\Util\observable\expressions;src\Video\Recording;lib;lib\BTrack;lib\implot;lib\kiss_fft130;libs\ffmpeg\include;lib\ableton\include;lib\ableton\modules\asio-standalone\asio\include;..\..\..\addons\ofxImGui\src;..\..\..\addons\ofxImGui\libs\imgui;..\..\..\addons\ofxImGui\libs\imgui\src;..\..\..\addons\ofxImGui\libs\imgui\backends;..\..\..\addons\ofxMidi\src;..\..\..\addons\ofxMidi\libs\rtmidi</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)%(Filename).obj</ObjectFileName>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)app.manifest</AdditionalManifestFiles>
+      <GenerateManifest>true</GenerateManifest>
+    </Manifest>
+    <PostBuildEvent>
+      <Command>if exist "$(SolutionDir)data" (
+    if not exist "$(OutDir)data" mkdir "$(OutDir)data"
+    robocopy "$(SolutionDir)data" "$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+    if %ERRORLEVEL% GEQ 8 exit /b 1
+)
+exit /b 0</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64' or '$(Configuration)|$(Platform)'=='Release|ARM64' or '$(Configuration)|$(Platform)'=='Release|ARM64EC'">
+    <ClCompile>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;__WINDOWS_WASAPI__;__WINDOWS_MM__;TARGET_WIN32;GLM_FORCE_CTOR_INIT;GLM_ENABLE_EXPERIMENTAL;OF_NO_FMOD=1;USE_KISS_FFT;ofxAddons_ENABLE_IMGUI;JSON_DIAGNOSTICS=1;IMGUI_DEFINE_MATH_OPERATORS=1;LINK_PLATFORM_WINDOWS=1;ASIO_STANDALONE=1</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);src;src\Apps;src\Audio;src\Bridge;src\Engine;src\Feedback;src\Models;src\Network;src\NodeLayout;src\Oscillation;src\Services;src\Shading;src\Util;src\Video;src\Views;src\Audio\gist;src\NodeLayout\node-editor;src\Oscillation\implot;src\Services\Commands;src\Services\Midi;src\Util\observable;src\Util\observable\detail;src\Util\observable\expressions;src\Video\Recording;lib;lib\BTrack;lib\implot;lib\kiss_fft130;libs\ffmpeg\include;lib\ableton\include;lib\ableton\modules\asio-standalone\asio\include;..\..\..\addons\ofxImGui\src;..\..\..\addons\ofxImGui\libs\imgui;..\..\..\addons\ofxImGui\libs\imgui\src;..\..\..\addons\ofxImGui\libs\imgui\backends;..\..\..\addons\ofxMidi\src;..\..\..\addons\ofxMidi\libs\rtmidi</AdditionalIncludeDirectories>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <ObjectFileName>$(IntDir)%(Filename).obj</ObjectFileName>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <PostBuildEvent>
+      <Command>if exist "$(SolutionDir)data" (
+    if not exist "$(OutDir)data" mkdir "$(OutDir)data"
+    robocopy "$(SolutionDir)data" "$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+    if %ERRORLEVEL% GEQ 8 exit /b 1
+)
+exit /b 0</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalLibraryDirectories>$(MSBuildProjectDirectory)\libs\ffmpeg\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>avformat.lib;avcodec.lib;avutil.lib;swscale.lib;swresample.lib;winmm.lib;ole32.lib;uuid.lib;avrt.lib;propsys.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)app.manifest</AdditionalManifestFiles>
+      <GenerateManifest>true</GenerateManifest>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Link>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <AdditionalDependencies>%(AdditionalDependencies);avformat.lib;avcodec.lib;avutil.lib;swscale.lib;swresample.lib;winmm.lib;ole32.lib;uuid.lib;avrt.lib;propsys.lib;shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);$(MSBuildProjectDirectory)\libs\ffmpeg\lib</AdditionalLibraryDirectories>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+    <ClCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;__WINDOWS_WASAPI__;__WINDOWS_MM__;TARGET_WIN32;GLM_FORCE_CTOR_INIT;GLM_ENABLE_EXPERIMENTAL;OF_NO_FMOD=1;USE_KISS_FFT;ofxAddons_ENABLE_IMGUI;JSON_DIAGNOSTICS=1;IMGUI_DEFINE_MATH_OPERATORS=1;LINK_PLATFORM_WINDOWS=1;ASIO_STANDALONE=1</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);src;src\Apps;src\Audio;src\Bridge;src\Engine;src\Feedback;src\Models;src\Network;src\NodeLayout;src\Oscillation;src\Services;src\Shading;src\Util;src\Video;src\Views;src\Audio\gist;src\NodeLayout\node-editor;src\Oscillation\implot;src\Services\Commands;src\Services\Midi;src\Util\observable;src\Util\observable\detail;src\Util\observable\expressions;src\Video\Recording;lib;lib\BTrack;lib\implot;lib\kiss_fft130;libs\ffmpeg\include;lib\ableton\include;lib\ableton\modules\asio-standalone\asio\include;..\..\..\addons\ofxImGui\src;..\..\..\addons\ofxImGui\libs\imgui;..\..\..\addons\ofxImGui\libs\imgui\src;..\..\..\addons\ofxImGui\libs\imgui\backends;..\..\..\addons\ofxMidi\src;..\..\..\addons\ofxMidi\libs\rtmidi</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)%(Filename).obj</ObjectFileName>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)app.manifest</AdditionalManifestFiles>
+      <GenerateManifest>true</GenerateManifest>
+    </Manifest>
+    <PostBuildEvent>
+      <Command>if exist "$(SolutionDir)data" (
+    if not exist "$(OutDir)data" mkdir "$(OutDir)data"
+    robocopy "$(SolutionDir)data" "$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+    if %ERRORLEVEL% GEQ 8 exit /b 1
+)
+exit /b 0</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <Link>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <AdditionalDependencies>%(AdditionalDependencies);avformat.lib;avcodec.lib;avutil.lib;swscale.lib;swresample.lib;winmm.lib;ole32.lib;uuid.lib;avrt.lib;propsys.lib;shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);$(MSBuildProjectDirectory)\libs\ffmpeg\lib</AdditionalLibraryDirectories>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+    <ClCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;__WINDOWS_WASAPI__;__WINDOWS_MM__;TARGET_WIN32;GLM_FORCE_CTOR_INIT;GLM_ENABLE_EXPERIMENTAL;OF_NO_FMOD=1;USE_KISS_FFT;ofxAddons_ENABLE_IMGUI;JSON_DIAGNOSTICS=1;IMGUI_DEFINE_MATH_OPERATORS=1;LINK_PLATFORM_WINDOWS=1;ASIO_STANDALONE=1</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);src;src\Apps;src\Audio;src\Bridge;src\Engine;src\Feedback;src\Models;src\Network;src\NodeLayout;src\Oscillation;src\Services;src\Shading;src\Util;src\Video;src\Views;src\Audio\gist;src\NodeLayout\node-editor;src\Oscillation\implot;src\Services\Commands;src\Services\Midi;src\Util\observable;src\Util\observable\detail;src\Util\observable\expressions;src\Video\Recording;lib;lib\BTrack;lib\implot;lib\kiss_fft130;libs\ffmpeg\include;lib\ableton\include;lib\ableton\modules\asio-standalone\asio\include;..\..\..\addons\ofxImGui\src;..\..\..\addons\ofxImGui\libs\imgui;..\..\..\addons\ofxImGui\libs\imgui\src;..\..\..\addons\ofxImGui\libs\imgui\backends;..\..\..\addons\ofxMidi\src;..\..\..\addons\ofxMidi\libs\rtmidi</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)%(Filename).obj</ObjectFileName>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)app.manifest</AdditionalManifestFiles>
+      <GenerateManifest>true</GenerateManifest>
+    </Manifest>
+    <PostBuildEvent>
+      <Command>if exist "$(SolutionDir)data" (
+    if not exist "$(OutDir)data" mkdir "$(OutDir)data"
+    robocopy "$(SolutionDir)data" "$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+    if %ERRORLEVEL% GEQ 8 exit /b 1
+)
+exit /b 0</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64EC'">
+    <Link>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <AdditionalDependencies>%(AdditionalDependencies);avformat.lib;avcodec.lib;avutil.lib;swscale.lib;swresample.lib;winmm.lib;ole32.lib;uuid.lib;avrt.lib;propsys.lib;shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);$(MSBuildProjectDirectory)\libs\ffmpeg\lib</AdditionalLibraryDirectories>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+    <ClCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;__WINDOWS_WASAPI__;__WINDOWS_MM__;TARGET_WIN32;GLM_FORCE_CTOR_INIT;GLM_ENABLE_EXPERIMENTAL;OF_NO_FMOD=1;USE_KISS_FFT;ofxAddons_ENABLE_IMGUI;JSON_DIAGNOSTICS=1;IMGUI_DEFINE_MATH_OPERATORS=1;LINK_PLATFORM_WINDOWS=1;ASIO_STANDALONE=1</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);src;src\Apps;src\Audio;src\Bridge;src\Engine;src\Feedback;src\Models;src\Network;src\NodeLayout;src\Oscillation;src\Services;src\Shading;src\Util;src\Video;src\Views;src\Audio\gist;src\NodeLayout\node-editor;src\Oscillation\implot;src\Services\Commands;src\Services\Midi;src\Util\observable;src\Util\observable\detail;src\Util\observable\expressions;src\Video\Recording;lib;lib\BTrack;lib\implot;lib\kiss_fft130;libs\ffmpeg\include;lib\ableton\include;lib\ableton\modules\asio-standalone\asio\include;..\..\..\addons\ofxImGui\src;..\..\..\addons\ofxImGui\libs\imgui;..\..\..\addons\ofxImGui\libs\imgui\src;..\..\..\addons\ofxImGui\libs\imgui\backends;..\..\..\addons\ofxMidi\src;..\..\..\addons\ofxMidi\libs\rtmidi</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)%(Filename).obj</ObjectFileName>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)app.manifest</AdditionalManifestFiles>
+      <GenerateManifest>true</GenerateManifest>
+    </Manifest>
+    <PostBuildEvent>
+      <Command>if exist "$(SolutionDir)data" (
+    if not exist "$(OutDir)data" mkdir "$(OutDir)data"
+    robocopy "$(SolutionDir)data" "$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+    if %ERRORLEVEL% GEQ 8 exit /b 1
+)
+exit /b 0</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Platform)'=='x64'">
+    <PostBuildEvent>
+      <Command>if exist "$(SolutionDir)data" (
+    if not exist "$(OutDir)data" mkdir "$(OutDir)data"
+    robocopy "$(SolutionDir)data" "$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+    if %ERRORLEVEL% GEQ 8 exit /b 1
+)
+exit /b 0</Command>
+    </PostBuildEvent>
+    <ClCompile>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdc17</LanguageStandard_C>
+      <BuildStlModules Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</BuildStlModules>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Release|x64'">OldStyle</DebugInformationFormat>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;__WINDOWS_WASAPI__;__WINDOWS_MM__;TARGET_WIN32;GLM_FORCE_CTOR_INIT;GLM_ENABLE_EXPERIMENTAL;OF_NO_FMOD=1;USE_KISS_FFT;ofxAddons_ENABLE_IMGUI;JSON_DIAGNOSTICS=1;IMGUI_DEFINE_MATH_OPERATORS=1;LINK_PLATFORM_WINDOWS=1;ASIO_STANDALONE=1</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);src;src\Apps;src\Audio;src\Bridge;src\Engine;src\Feedback;src\Models;src\Network;src\NodeLayout;src\Oscillation;src\Services;src\Shading;src\Util;src\Video;src\Views;src\Audio\gist;src\NodeLayout\node-editor;src\Oscillation\implot;src\Services\Commands;src\Services\Midi;src\Util\observable;src\Util\observable\detail;src\Util\observable\expressions;src\Video\Recording;lib;lib\BTrack;lib\implot;lib\kiss_fft130;libs\ffmpeg\include;lib\ableton\include;lib\ableton\modules\asio-standalone\asio\include;..\..\..\addons\ofxImGui\src;..\..\..\addons\ofxImGui\libs\imgui;..\..\..\addons\ofxImGui\libs\imgui\src;..\..\..\addons\ofxImGui\libs\imgui\backends;..\..\..\addons\ofxMidi\src;..\..\..\addons\ofxMidi\libs\rtmidi</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)%(Filename).obj</ObjectFileName>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <ClCompile>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdc17</LanguageStandard_C>
+      <BuildStlModules Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</BuildStlModules>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">OldStyle</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(MSBuildProjectDirectory)\libs\ffmpeg\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>avformat.lib;avcodec.lib;avutil.lib;swscale.lib;swresample.lib;winmm.lib;ole32.lib;uuid.lib;avrt.lib;propsys.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)app.manifest</AdditionalManifestFiles>
+      <GenerateManifest>true</GenerateManifest>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Platform)'=='ARM64'">
+    <PostBuildEvent>
+      <Command>if exist "$(SolutionDir)data" (
+    if not exist "$(OutDir)data" mkdir "$(OutDir)data"
+    robocopy "$(SolutionDir)data" "$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+    if %ERRORLEVEL% GEQ 8 exit /b 1
+)
+exit /b 0</Command>
+    </PostBuildEvent>
+    <ClCompile>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">stdc17</LanguageStandard_C>
+      <BuildStlModules Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">true</BuildStlModules>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">OldStyle</DebugInformationFormat>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;__WINDOWS_WASAPI__;__WINDOWS_MM__;TARGET_WIN32;GLM_FORCE_CTOR_INIT;GLM_ENABLE_EXPERIMENTAL;OF_NO_FMOD=1;USE_KISS_FFT;ofxAddons_ENABLE_IMGUI;JSON_DIAGNOSTICS=1;IMGUI_DEFINE_MATH_OPERATORS=1;LINK_PLATFORM_WINDOWS=1;ASIO_STANDALONE=1</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);src;src\Apps;src\Audio;src\Bridge;src\Engine;src\Feedback;src\Models;src\Network;src\NodeLayout;src\Oscillation;src\Services;src\Shading;src\Util;src\Video;src\Views;src\Audio\gist;src\NodeLayout\node-editor;src\Oscillation\implot;src\Services\Commands;src\Services\Midi;src\Util\observable;src\Util\observable\detail;src\Util\observable\expressions;src\Video\Recording;lib;lib\BTrack;lib\implot;lib\kiss_fft130;libs\ffmpeg\include;lib\ableton\include;lib\ableton\modules\asio-standalone\asio\include;..\..\..\addons\ofxImGui\src;..\..\..\addons\ofxImGui\libs\imgui;..\..\..\addons\ofxImGui\libs\imgui\src;..\..\..\addons\ofxImGui\libs\imgui\backends;..\..\..\addons\ofxMidi\src;..\..\..\addons\ofxMidi\libs\rtmidi</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)%(Filename).obj</ObjectFileName>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <ClCompile>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">stdc17</LanguageStandard_C>
+      <BuildStlModules Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">true</BuildStlModules>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">OldStyle</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(MSBuildProjectDirectory)\libs\ffmpeg\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>avformat.lib;avcodec.lib;avutil.lib;swscale.lib;swresample.lib;winmm.lib;ole32.lib;uuid.lib;avrt.lib;propsys.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)app.manifest</AdditionalManifestFiles>
+      <GenerateManifest>true</GenerateManifest>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Platform)'=='ARM64EC'">
+    <PostBuildEvent>
+      <Command>if exist "$(SolutionDir)data" (
+    if not exist "$(OutDir)data" mkdir "$(OutDir)data"
+    robocopy "$(SolutionDir)data" "$(OutDir)data" /MIR /NFL /NDL /NJH /NJS /NC /NS /NP
+    if %ERRORLEVEL% GEQ 8 exit /b 1
+)
+exit /b 0</Command>
+    </PostBuildEvent>
+    <ClCompile>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64EC'">stdc17</LanguageStandard_C>
+      <BuildStlModules Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64EC'">true</BuildStlModules>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64EC'">OldStyle</DebugInformationFormat>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32_LEAN_AND_MEAN;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;__WINDOWS_WASAPI__;__WINDOWS_MM__;TARGET_WIN32;GLM_FORCE_CTOR_INIT;GLM_ENABLE_EXPERIMENTAL;OF_NO_FMOD=1;USE_KISS_FFT;ofxAddons_ENABLE_IMGUI;JSON_DIAGNOSTICS=1;IMGUI_DEFINE_MATH_OPERATORS=1;LINK_PLATFORM_WINDOWS=1;ASIO_STANDALONE=1</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);src;src\Apps;src\Audio;src\Bridge;src\Engine;src\Feedback;src\Models;src\Network;src\NodeLayout;src\Oscillation;src\Services;src\Shading;src\Util;src\Video;src\Views;src\Audio\gist;src\NodeLayout\node-editor;src\Oscillation\implot;src\Services\Commands;src\Services\Midi;src\Util\observable;src\Util\observable\detail;src\Util\observable\expressions;src\Video\Recording;lib;lib\BTrack;lib\implot;lib\kiss_fft130;libs\ffmpeg\include;lib\ableton\include;lib\ableton\modules\asio-standalone\asio\include;..\..\..\addons\ofxImGui\src;..\..\..\addons\ofxImGui\libs\imgui;..\..\..\addons\ofxImGui\libs\imgui\src;..\..\..\addons\ofxImGui\libs\imgui\backends;..\..\..\addons\ofxMidi\src;..\..\..\addons\ofxMidi\libs\rtmidi</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)%(Filename).obj</ObjectFileName>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <ClCompile>
+      <LanguageStandard_C Condition="'$(Configuration)|$(Platform)'=='Release|ARM64EC'">stdc17</LanguageStandard_C>
+      <BuildStlModules Condition="'$(Configuration)|$(Platform)'=='Release|ARM64EC'">true</BuildStlModules>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Release|ARM64EC'">OldStyle</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(MSBuildProjectDirectory)\libs\ffmpeg\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>avformat.lib;avcodec.lib;avutil.lib;swscale.lib;swresample.lib;winmm.lib;ole32.lib;uuid.lib;avrt.lib;propsys.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)app.manifest</AdditionalManifestFiles>
+      <GenerateManifest>true</GenerateManifest>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(NottawaEngineLib)'=='true'" Label="NottawaEngineLibDefines">
+    <ClCompile>
+      <PreprocessorDefinitions>NOTTAWA_ENGINE_ONLY=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(OF_ROOT)\libs\openFrameworksCompiled\project\vs\openframeworksLib.vcxproj">
+      <Project>{5837595d-aca9-485c-8e76-729040ce4b0b}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="icon.rc">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64' or '$(Configuration)|$(Platform)'=='Debug|ARM64' or '$(Configuration)|$(Platform)'=='Debug|ARM64EC'">/D_DEBUG %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(OF_ROOT)\libs\openFrameworksCompiled\project\vs</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="icon.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
+  <ItemGroup Label="NottawaAuto">
+    <ClCompile Include="src\Apps\MainApp.cpp" Condition="'$(NottawaEngineLib)'!='true'" />
+    <ClInclude Include="src\Apps\MainApp.h" />
+    <ClInclude Include="src\Apps\ofApp.h" />
+    <ClInclude Include="src\Audio\gist\AccelerateFFT.h" />
+    <ClCompile Include="src\Audio\gist\BTrack.cpp" />
+    <ClInclude Include="src\Audio\gist\BTrack.h" />
+    <ClCompile Include="src\Audio\gist\BTrackOnsetDetectionFunction.cpp" />
+    <ClInclude Include="src\Audio\gist\BTrackOnsetDetectionFunction.h" />
+    <ClInclude Include="src\Audio\gist\CircularBuffer.h" />
+    <ClInclude Include="src\Audio\gist\common.h" />
+    <ClCompile Include="src\Audio\gist\CoreFrequencyDomainFeatures.cpp" />
+    <ClInclude Include="src\Audio\gist\CoreFrequencyDomainFeatures.h" />
+    <ClCompile Include="src\Audio\gist\CoreTimeDomainFeatures.cpp" />
+    <ClInclude Include="src\Audio\gist\CoreTimeDomainFeatures.h" />
+    <ClInclude Include="src\Audio\gist\fastest_coeffs.h" />
+    <ClCompile Include="src\Audio\gist\Gist.cpp" />
+    <ClInclude Include="src\Audio\gist\Gist.h" />
+    <ClInclude Include="src\Audio\gist\high_qual_coeffs.h" />
+    <ClCompile Include="src\Audio\gist\kiss_fft.c" />
+    <ClInclude Include="src\Audio\gist\kiss_fft.h" />
+    <ClCompile Include="src\Audio\gist\MFCC.cpp" />
+    <ClInclude Include="src\Audio\gist\MFCC.h" />
+    <ClInclude Include="src\Audio\gist\mid_qual_coeffs.h" />
+    <ClCompile Include="src\Audio\gist\OnsetDetectionFunction.cpp" />
+    <ClInclude Include="src\Audio\gist\OnsetDetectionFunction.h" />
+    <ClCompile Include="src\Audio\gist\samplerate.c" />
+    <ClInclude Include="src\Audio\gist\samplerate.h" />
+    <ClCompile Include="src\Audio\gist\src_linear.c" />
+    <ClCompile Include="src\Audio\gist\src_sinc.c" />
+    <ClCompile Include="src\Audio\gist\src_zoh.c" />
+    <ClCompile Include="src\Audio\gist\WindowFunctions.cpp" />
+    <ClInclude Include="src\Audio\gist\WindowFunctions.h" />
+    <ClCompile Include="src\Audio\gist\Yin.cpp" />
+    <ClInclude Include="src\Audio\gist\Yin.h" />
+    <ClInclude Include="src\Audio\gist\_kiss_fft_guts.h" />
+    <ClCompile Include="src\Audio\AudioRawSink.cpp" />
+    <ClInclude Include="src\Audio\AudioRawSink.hpp" />
+    <ClInclude Include="src\Audio\AudioSettings.hpp" />
+    <ClCompile Include="src\Audio\AudioSource.cpp" />
+    <ClInclude Include="src\Audio\AudioSource.hpp" />
+    <ClInclude Include="src\Audio\BeatTracker.hpp" />
+    <ClInclude Include="src\Audio\AudioTrack.hpp" />
+    <ClInclude Include="src\Audio\dr_flac.h" />
+    <ClInclude Include="src\Audio\dr_mp3.h" />
+    <ClInclude Include="src\Audio\dr_wav.h" />
+    <ClCompile Include="src\Audio\FileAudioSource.cpp" />
+    <ClInclude Include="src\Audio\FileAudioSource.hpp" />
+    <ClCompile Include="src\Audio\MicrophoneAudioSource.cpp" />
+    <ClInclude Include="src\Audio\MicrophoneAudioSource.hpp" />
+    <ClCompile Include="src\Audio\ofxAudioFile.cpp" />
+    <ClInclude Include="src\Audio\ofxAudioFile.h" />
+    <ClInclude Include="src\Audio\stb_vorbis.h" />
+    <ClInclude Include="src\Audio\SystemAudioSource.hpp" />
+    <ClCompile Include="src\Audio\SystemAudioSource_win.cpp" />
+    <ClCompile Include="src\Bridge\nottawa_bridge.cpp" />
+    <ClInclude Include="src\Bridge\nottawa_bridge.h" />
+    <ClInclude Include="src\Engine\EngineConfig.hpp" />
+    <ClCompile Include="src\Engine\EngineLoop.cpp" />
+    <ClInclude Include="src\Engine\EngineLoop.hpp" />
+    <ClCompile Include="src\Engine\FrameExchange.cpp" />
+    <ClInclude Include="src\Engine\FrameExchange.h" />
+    <ClInclude Include="src\Engine\IOSurfaceTextureManager.hpp" />
+    <ClCompile Include="src\Engine\IOSurfaceTextureManager_win.cpp" />
+    <ClCompile Include="src\Engine\ServiceStatics.cpp" />
+    <ClCompile Include="src\Feedback\FeedbackSource.cpp" />
+    <ClInclude Include="src\Feedback\FeedbackSource.hpp" />
+    <ClCompile Include="src\Feedback\FeedbackSourceService.cpp" />
+    <ClInclude Include="src\Feedback\FeedbackSourceService.hpp" />
+    <ClInclude Include="src\Models\AvailableShaderConfig.hpp" />
+    <ClInclude Include="src\Models\AvailableStrand.hpp" />
+    <ClCompile Include="src\Models\Connection.cpp" />
+    <ClInclude Include="src\Models\Credit.hpp" />
+    <ClInclude Include="src\Models\DisplayText.hpp" />
+    <ClCompile Include="src\Models\FavoriteParameter.cpp" />
+    <ClInclude Include="src\Models\FavoriteParameter.hpp" />
+    <ClInclude Include="src\Models\Font.hpp" />
+    <ClCompile Include="src\Models\Icon.cpp" />
+    <ClInclude Include="src\Models\Icon.hpp" />
+    <ClInclude Include="src\Models\Image.hpp" />
+    <ClInclude Include="src\Models\MarkdownItem.hpp" />
+    <ClCompile Include="src\Models\Parameter.cpp" />
+    <ClInclude Include="src\Models\Parameter.hpp" />
+    <ClInclude Include="src\Models\Settings.hpp" />
+    <ClInclude Include="src\Models\Strand.hpp" />
+    <ClInclude Include="src\Models\Texture.hpp" />
+    <ClInclude Include="src\Models\TileItem.hpp" />
+    <ClInclude Include="src\Models\Workspace.hpp" />
+    <ClInclude Include="src\Network\Backblaze.hpp" />
+    <ClCompile Include="src\Network\LibraryFile.cpp" />
+    <ClInclude Include="src\Network\LibraryFile.hpp" />
+    <ClCompile Include="src\Network\LibraryService.cpp" />
+    <ClInclude Include="src\Network\LibraryService.hpp" />
+    <ClCompile Include="src\NodeLayout\node-editor\crude_json.cpp" />
+    <ClInclude Include="src\NodeLayout\node-editor\crude_json.h" />
+    <ClInclude Include="src\NodeLayout\node-editor\imgui_bezier_math.h" />
+    <ClCompile Include="src\NodeLayout\node-editor\imgui_canvas.cpp" />
+    <ClInclude Include="src\NodeLayout\node-editor\imgui_canvas.h" />
+    <ClInclude Include="src\NodeLayout\node-editor\imgui_extra_math.h" />
+    <ClCompile Include="src\NodeLayout\node-editor\imgui_node_editor.cpp" />
+    <ClInclude Include="src\NodeLayout\node-editor\imgui_node_editor.h" />
+    <ClCompile Include="src\NodeLayout\node-editor\imgui_node_editor_api.cpp" />
+    <ClInclude Include="src\NodeLayout\node-editor\imgui_node_editor_internal.h" />
+    <ClCompile Include="src\NodeLayout\NodeLayoutView.cpp" />
+    <ClInclude Include="src\NodeLayout\NodeLayoutView.hpp" />
+    <ClInclude Include="src\NodeLayout\NodeTypes.hpp" />
+    <ClInclude Include="src\Oscillation\Oscillator.hpp" />
+    <ClCompile Include="src\Oscillation\PulseOscillator.cpp" />
+    <ClInclude Include="src\Oscillation\PulseOscillator.hpp" />
+    <ClCompile Include="src\Oscillation\Pulser.cpp" />
+    <ClInclude Include="src\Oscillation\Pulser.hpp" />
+    <ClCompile Include="src\Oscillation\ValueOscillator.cpp" />
+    <ClInclude Include="src\Oscillation\ValueOscillator.hpp" />
+    <ClCompile Include="src\Oscillation\WaveformOscillator.cpp" />
+    <ClInclude Include="src\Oscillation\WaveformOscillator.hpp" />
+    <ClInclude Include="src\Services\Commands\AddFileVideoSourceCommand.hpp" />
+    <ClInclude Include="src\Services\Commands\AddIconVideoSourceCommand.hpp" />
+    <ClInclude Include="src\Services\Commands\AddImageVideoSourceCommand.hpp" />
+    <ClInclude Include="src\Services\Commands\AddLibraryVideoSourceCommand.hpp" />
+    <ClInclude Include="src\Services\Commands\AddPlaylistVideoSourceCommand.hpp" />
+    <ClInclude Include="src\Services\Commands\AddScrollingTextVideoSourceCommand.hpp" />
+    <ClInclude Include="src\Services\Commands\AddShaderCommand.hpp" />
+    <ClInclude Include="src\Services\Commands\AddShaderVideoSourceCommand.hpp" />
+    <ClInclude Include="src\Services\Commands\AddTextVideoSourceCommand.hpp" />
+    <ClInclude Include="src\Services\Commands\AddTypewriterTextVideoSourceCommand.hpp" />
+    <ClInclude Include="src\Services\Commands\AddWebcamVideoSourceCommand.hpp" />
+    <ClInclude Include="src\Services\Commands\ClearGraphCommand.hpp" />
+    <ClInclude Include="src\Services\Commands\Command.hpp" />
+    <ClInclude Include="src\Services\Commands\CopyCommand.hpp" />
+    <ClInclude Include="src\Services\Commands\MakeConnectionCommand.hpp" />
+    <ClInclude Include="src\Services\Commands\PasteCommand.hpp" />
+    <ClInclude Include="src\Services\Commands\RemoveConnectionCommand.hpp" />
+    <ClInclude Include="src\Services\Commands\RemoveShaderCommand.hpp" />
+    <ClInclude Include="src\Services\Commands\RemoveVideoSourceCommand.hpp" />
+    <ClCompile Include="src\Services\Midi\MidiPairing.cpp" />
+    <ClInclude Include="src\Services\Midi\MidiPairing.hpp" />
+    <ClCompile Include="src\Services\Midi\MidiService.cpp" />
+    <ClInclude Include="src\Services\Midi\MidiService.hpp" />
+    <ClCompile Include="src\Services\Midi\MidiSmoothingService.cpp" />
+    <ClInclude Include="src\Services\Midi\MidiSmoothingService.hpp" />
+    <ClCompile Include="src\Services\ActionService.cpp" />
+    <ClInclude Include="src\Services\ActionService.hpp" />
+    <ClCompile Include="src\Services\AudioSourceService.cpp" />
+    <ClInclude Include="src\Services\AudioSourceService.hpp" />
+    <ClInclude Include="src\Services\BookmarkService.hpp" />
+    <ClCompile Include="src\Services\BookmarkService_win.cpp" />
+    <ClCompile Include="src\Services\ConfigService.cpp" />
+    <ClInclude Include="src\Services\ConfigService.hpp" />
+    <ClInclude Include="src\Services\ConfigurableService.hpp" />
+    <ClCompile Include="src\Services\FontService.cpp" />
+    <ClInclude Include="src\Services\FontService.hpp" />
+    <ClCompile Include="src\Services\IconService.cpp" />
+    <ClInclude Include="src\Services\IconService.hpp" />
+    <ClInclude Include="src\Services\Image.hpp" />
+    <ClCompile Include="src\Services\ImageService.cpp" />
+    <ClInclude Include="src\Services\ImageService.hpp" />
+    <ClCompile Include="src\Services\LayoutStateService.cpp" />
+    <ClInclude Include="src\Services\LayoutStateService.hpp" />
+    <ClCompile Include="src\Services\MarkdownService.cpp" />
+    <ClInclude Include="src\Services\MarkdownService.hpp" />
+    <ClCompile Include="src\Services\ModulationService.cpp" />
+    <ClInclude Include="src\Services\ModulationService.hpp" />
+    <ClCompile Include="src\Services\OscillationService.cpp" />
+    <ClInclude Include="src\Services\OscillationService.hpp" />
+    <ClCompile Include="src\Services\ParameterService.cpp" />
+    <ClInclude Include="src\Services\ParameterService.hpp" />
+    <ClCompile Include="src\Services\ShaderChainerService.cpp" />
+    <ClInclude Include="src\Services\ShaderChainerService.hpp" />
+    <ClInclude Include="src\Services\SparkleUpdater.h" />
+    <ClCompile Include="src\Services\SparkleUpdater_win.cpp" />
+    <ClCompile Include="src\Services\StrandService.cpp" />
+    <ClInclude Include="src\Services\StrandService.hpp" />
+    <ClCompile Include="src\Services\TextureService.cpp" />
+    <ClInclude Include="src\Services\TextureService.hpp" />
+    <ClCompile Include="src\Services\TimeService.cpp" />
+    <ClInclude Include="src\Services\TimeService.hpp" />
+    <ClInclude Include="src\Services\URLSchemeHandler.h" />
+    <ClCompile Include="src\Services\URLSchemeHandler_win.cpp" />
+    <ClCompile Include="src\Services\VideoSourceService.cpp" />
+    <ClInclude Include="src\Services\VideoSourceService.hpp" />
+    <ClInclude Include="src\Shading\16bitShader.hpp" />
+    <ClInclude Include="src\Shading\AccretionShader.hpp" />
+    <ClInclude Include="src\Shading\AerogelShader.hpp" />
+    <ClInclude Include="src\Shading\ASCIIShader.hpp" />
+    <ClInclude Include="src\Shading\AudioAuroraShader.hpp" />
+    <ClInclude Include="src\Shading\AudioBallShader.hpp" />
+    <ClInclude Include="src\Shading\AudioBlocksShader.hpp" />
+    <ClInclude Include="src\Shading\AudioBumperShader.hpp" />
+    <ClInclude Include="src\Shading\AudioCymaticsShader.hpp" />
+    <ClInclude Include="src\Shading\AudioGlowBarsShader.hpp" />
+    <ClInclude Include="src\Shading\AudioGraphShader.hpp" />
+    <ClInclude Include="src\Shading\AudioMountainsShader.hpp" />
+    <ClInclude Include="src\Shading\AudioOscillatorShader.hpp" />
+    <ClInclude Include="src\Shading\AudioPendulumShader.hpp" />
+    <ClInclude Include="src\Shading\AudioPhasePortraitShader.hpp" />
+    <ClInclude Include="src\Shading\AudioPrismShader.hpp" />
+    <ClInclude Include="src\Shading\AudioPulseGridShader.hpp" />
+    <ClInclude Include="src\Shading\AudioRainShader.hpp" />
+    <ClInclude Include="src\Shading\AudioSilkShader.hpp" />
+    <ClInclude Include="src\Shading\AudioSuminagashiShader.hpp" />
+    <ClInclude Include="src\Shading\AudioWaveformShader.hpp" />
+    <ClInclude Include="src\Shading\AuroraShader.hpp" />
+    <ClInclude Include="src\Shading\AutotangentShader.hpp" />
+    <ClInclude Include="src\Shading\BackgroundShader.hpp" />
+    <ClInclude Include="src\Shading\BlendShader.hpp" />
+    <ClInclude Include="src\Shading\BlurShader.hpp" />
+    <ClInclude Include="src\Shading\BounceShader.hpp" />
+    <ClInclude Include="src\Shading\BreatheShader.hpp" />
+    <ClInclude Include="src\Shading\BubblesShader.hpp" />
+    <ClInclude Include="src\Shading\CannyShader.hpp" />
+    <ClInclude Include="src\Shading\ChromaCompassShader.hpp" />
+    <ClInclude Include="src\Shading\ChromeGrillShader.hpp" />
+    <ClInclude Include="src\Shading\CircleBlurShader.hpp" />
+    <ClInclude Include="src\Shading\CircleMixShader.hpp" />
+    <ClInclude Include="src\Shading\CirclePathShader.hpp" />
+    <ClInclude Include="src\Shading\CloudShader.hpp" />
+    <ClInclude Include="src\Shading\CloudyShapesShader.hpp" />
+    <ClInclude Include="src\Shading\CloudyTunnelShader.hpp" />
+    <ClInclude Include="src\Shading\ColoredDropsShader.hpp" />
+    <ClInclude Include="src\Shading\ColorKeyMaskMakerShader.hpp" />
+    <ClInclude Include="src\Shading\ColorPassShader.hpp" />
+    <ClInclude Include="src\Shading\ColorStepperShader.hpp" />
+    <ClInclude Include="src\Shading\ColorSwapShader.hpp" />
+    <ClInclude Include="src\Shading\ColorWheelShader.hpp" />
+    <ClInclude Include="src\Shading\ComicbookShader.hpp" />
+    <ClInclude Include="src\Shading\CompanionsShader.hpp" />
+    <ClInclude Include="src\Shading\Connection.hpp" />
+    <ClInclude Include="src\Shading\CoreShader.hpp" />
+    <ClInclude Include="src\Shading\CosmosShader.hpp" />
+    <ClInclude Include="src\Shading\CrosshatchShader.hpp" />
+    <ClInclude Include="src\Shading\CrystalKaleidoscopeShader.hpp" />
+    <ClInclude Include="src\Shading\CubifyShader.hpp" />
+    <ClInclude Include="src\Shading\CurlySquaresShader.hpp" />
+    <ClInclude Include="src\Shading\CyberWarehouseShader.hpp" />
+    <ClInclude Include="src\Shading\DancingSquaresShader.hpp" />
+    <ClInclude Include="src\Shading\DarkenShader.hpp" />
+    <ClInclude Include="src\Shading\DiffractorShader.hpp" />
+    <ClCompile Include="src\Shading\DiffusionShader.cpp" />
+    <ClInclude Include="src\Shading\DiffusionShader.hpp" />
+    <ClInclude Include="src\Shading\DirtyPlasmaShader.hpp" />
+    <ClInclude Include="src\Shading\DiscoAudioShader.hpp" />
+    <ClInclude Include="src\Shading\DiscoShader.hpp" />
+    <ClInclude Include="src\Shading\DiscoSunShader.hpp" />
+    <ClInclude Include="src\Shading\DitherShader.hpp" />
+    <ClInclude Include="src\Shading\DoubleBlurShader.hpp" />
+    <ClInclude Include="src\Shading\ElectricEelsShader.hpp" />
+    <ClInclude Include="src\Shading\EmptyShader.hpp" />
+    <ClCompile Include="src\Shading\FeedbackShader.cpp" />
+    <ClInclude Include="src\Shading\FeedbackShader.hpp" />
+    <ClInclude Include="src\Shading\FerroShader.hpp" />
+    <ClInclude Include="src\Shading\FibersShader.hpp" />
+    <ClInclude Include="src\Shading\FirefliesShader.hpp" />
+    <ClInclude Include="src\Shading\FishEyeShader.hpp" />
+    <ClInclude Include="src\Shading\FlamingShader.hpp" />
+    <ClInclude Include="src\Shading\FlickerAudioShader.hpp" />
+    <ClInclude Include="src\Shading\FloatingSparksShader.hpp" />
+    <ClInclude Include="src\Shading\FlockingShader.hpp" />
+    <ClInclude Include="src\Shading\FractalAudioShader.hpp" />
+    <ClInclude Include="src\Shading\FractalShader.hpp" />
+    <ClInclude Include="src\Shading\FrequencyVisualizerShader.hpp" />
+    <ClInclude Include="src\Shading\FujiShader.hpp" />
+    <ClInclude Include="src\Shading\FullHouseShader.hpp" />
+    <ClInclude Include="src\Shading\GalaxyShader.hpp" />
+    <ClInclude Include="src\Shading\GameboyShader.hpp" />
+    <ClInclude Include="src\Shading\GemfieldShader.hpp" />
+    <ClInclude Include="src\Shading\GlassyShader.hpp" />
+    <ClInclude Include="src\Shading\GlitchAudioShader.hpp" />
+    <ClInclude Include="src\Shading\GlitchDigitalShader.hpp" />
+    <ClInclude Include="src\Shading\GlitchRGBShader.hpp" />
+    <ClInclude Include="src\Shading\GlitchShader.hpp" />
+    <ClInclude Include="src\Shading\GlowBeatShader.hpp" />
+    <ClInclude Include="src\Shading\GodRayShader.hpp" />
+    <ClInclude Include="src\Shading\GridRunShader.hpp" />
+    <ClInclude Include="src\Shading\GyroidsShader.hpp" />
+    <ClInclude Include="src\Shading\HalfToneShader.hpp" />
+    <ClInclude Include="src\Shading\HeptagonsShader.hpp" />
+    <ClInclude Include="src\Shading\HilbertShader.hpp" />
+    <ClInclude Include="src\Shading\HSBShader.hpp" />
+    <ClCompile Include="src\Shading\ImageTexture.cpp" />
+    <ClInclude Include="src\Shading\ImageTexture.hpp" />
+    <ClInclude Include="src\Shading\IridescentShader.hpp" />
+    <ClCompile Include="src\Shading\IsoFractShader.cpp" />
+    <ClInclude Include="src\Shading\IsoFractShader.hpp" />
+    <ClInclude Include="src\Shading\KaleidoscopeShader.hpp" />
+    <ClInclude Include="src\Shading\LavaShader.hpp" />
+    <ClInclude Include="src\Shading\LightenShader.hpp" />
+    <ClInclude Include="src\Shading\LimboShader.hpp" />
+    <ClInclude Include="src\Shading\LiquidShader.hpp" />
+    <ClInclude Include="src\Shading\LumaMaskMakerShader.hpp" />
+    <ClInclude Include="src\Shading\MarbleCavesShader.hpp" />
+    <ClInclude Include="src\Shading\MarbleFlowShader.hpp" />
+    <ClInclude Include="src\Shading\MaskEngineShader.hpp" />
+    <ClInclude Include="src\Shading\MaskShader.hpp" />
+    <ClInclude Include="src\Shading\MatchBlendShader.hpp" />
+    <ClInclude Include="src\Shading\MelterShader.hpp" />
+    <ClInclude Include="src\Shading\MirrorShader.hpp" />
+    <ClInclude Include="src\Shading\MistShader.hpp" />
+    <ClInclude Include="src\Shading\MixShader.hpp" />
+    <ClInclude Include="src\Shading\MotionBlurTextureShader.hpp" />
+    <ClInclude Include="src\Shading\MountainsShader.hpp" />
+    <ClInclude Include="src\Shading\MultiMixShader.hpp" />
+    <ClInclude Include="src\Shading\NeonShader.hpp" />
+    <ClInclude Include="src\Shading\OctagramsShader.hpp" />
+    <ClInclude Include="src\Shading\OctahedronShader.hpp" />
+    <ClInclude Include="src\Shading\OldTVShader.hpp" />
+    <ClInclude Include="src\Shading\OneBitDitherShader.hpp" />
+    <ClInclude Include="src\Shading\OnOffShader.hpp" />
+    <ClCompile Include="src\Shading\OptionalShadersHelper.cpp" />
+    <ClInclude Include="src\Shading\OptionalShadersHelper.hpp" />
+    <ClInclude Include="src\Shading\OutlineShader.hpp" />
+    <ClInclude Include="src\Shading\OverlayShader.hpp" />
+    <ClInclude Include="src\Shading\PaintShader.hpp" />
+    <ClInclude Include="src\Shading\PerplexionShader.hpp" />
+    <ClInclude Include="src\Shading\PieSplitShader.hpp" />
+    <ClInclude Include="src\Shading\PixelAudioPartyShader.hpp" />
+    <ClInclude Include="src\Shading\PixelPlayShader.hpp" />
+    <ClInclude Include="src\Shading\PixelShader.hpp" />
+    <ClInclude Include="src\Shading\PlasmaShader.hpp" />
+    <ClInclude Include="src\Shading\PlasmaTwoShader.hpp" />
+    <ClInclude Include="src\Shading\PlasmorShader.hpp" />
+    <ClInclude Include="src\Shading\PsycurvesShader.hpp" />
+    <ClInclude Include="src\Shading\RainbowRotatorShader.hpp" />
+    <ClInclude Include="src\Shading\ReflectorShader.hpp" />
+    <ClInclude Include="src\Shading\RetroPCShader.hpp" />
+    <ClInclude Include="src\Shading\RGBShiftShader.hpp" />
+    <ClInclude Include="src\Shading\RingsShader.hpp" />
+    <ClInclude Include="src\Shading\RisoColumnsShader.hpp" />
+    <ClInclude Include="src\Shading\RotateShader.hpp" />
+    <ClInclude Include="src\Shading\RubiksShader.hpp" />
+    <ClInclude Include="src\Shading\RuttEtraShader.hpp" />
+    <ClInclude Include="src\Shading\ScrapbookShader.hpp" />
+    <ClInclude Include="src\Shading\ScratchyShader.hpp" />
+    <ClCompile Include="src\Shading\Shader.cpp" />
+    <ClInclude Include="src\Shading\Shader.hpp" />
+    <ClInclude Include="src\Shading\ShaderSettings.hpp" />
+    <ClInclude Include="src\Shading\ShaderType.hpp" />
+    <ClInclude Include="src\Shading\SilkShader.hpp" />
+    <ClInclude Include="src\Shading\SimpleBarsShader.hpp" />
+    <ClInclude Include="src\Shading\SimpleShapeShader.hpp" />
+    <ClInclude Include="src\Shading\SliderShader.hpp" />
+    <ClInclude Include="src\Shading\SlidingFrameShader.hpp" />
+    <ClInclude Include="src\Shading\SmokeRingShader.hpp" />
+    <ClInclude Include="src\Shading\SnowfallShader.hpp" />
+    <ClInclude Include="src\Shading\SobelShader.hpp" />
+    <ClInclude Include="src\Shading\SolarWaveShader.hpp" />
+    <ClInclude Include="src\Shading\SolidColorShader.hpp" />
+    <ClInclude Include="src\Shading\SourceTransform.hpp" />
+    <ClInclude Include="src\Shading\SpaceRingsShader.hpp" />
+    <ClInclude Include="src\Shading\SpectrumClashShader.hpp" />
+    <ClInclude Include="src\Shading\SpiralShader.hpp" />
+    <ClInclude Include="src\Shading\SpiralWhirlpoolShader.hpp" />
+    <ClInclude Include="src\Shading\StageShader.hpp" />
+    <ClInclude Include="src\Shading\StaticFrameShader.hpp" />
+    <ClInclude Include="src\Shading\StellarShader.hpp" />
+    <ClInclude Include="src\Shading\StrangeScreenShader.hpp" />
+    <ClInclude Include="src\Shading\StrawberryWineShader.hpp" />
+    <ClInclude Include="src\Shading\SwirlingSoulShader.hpp" />
+    <ClInclude Include="src\Shading\SwirlShader.hpp" />
+    <ClInclude Include="src\Shading\SwitcherShader.hpp" />
+    <ClInclude Include="src\Shading\SynthflyShader.hpp" />
+    <ClInclude Include="src\Shading\SynthwaveShader.hpp" />
+    <ClInclude Include="src\Shading\TextureMaskShader.hpp" />
+    <ClInclude Include="src\Shading\TileShader.hpp" />
+    <ClInclude Include="src\Shading\TissueShader.hpp" />
+    <ClInclude Include="src\Shading\TransformShader.hpp" />
+    <ClInclude Include="src\Shading\TriangleMapShader.hpp" />
+    <ClInclude Include="src\Shading\TripleShader.hpp" />
+    <ClInclude Include="src\Shading\TwistedCubesShader.hpp" />
+    <ClInclude Include="src\Shading\TwistedTripShader.hpp" />
+    <ClInclude Include="src\Shading\UnknownPleasuresShader.hpp" />
+    <ClInclude Include="src\Shading\VertexShader.hpp" />
+    <ClInclude Include="src\Shading\VHSShader.hpp" />
+    <ClInclude Include="src\Shading\WarpShader.hpp" />
+    <ClInclude Include="src\Shading\WarpspeedShader.hpp" />
+    <ClInclude Include="src\Shading\WavyShader.hpp" />
+    <ClInclude Include="src\Shading\WebShader.hpp" />
+    <ClInclude Include="src\Shading\WelcomeRingsShader.hpp" />
+    <ClInclude Include="src\Shading\WindowsShader.hpp" />
+    <ClInclude Include="src\Shading\WobbleShader.hpp" />
+    <ClInclude Include="src\Util\observable\detail\collection.hpp" />
+    <ClInclude Include="src\Util\observable\detail\compiler_config.hpp" />
+    <ClInclude Include="src\Util\observable\detail\type_traits.hpp" />
+    <ClInclude Include="src\Util\observable\expressions\expression.hpp" />
+    <ClInclude Include="src\Util\observable\expressions\filters.hpp" />
+    <ClInclude Include="src\Util\observable\expressions\math.hpp" />
+    <ClInclude Include="src\Util\observable\expressions\operators.hpp" />
+    <ClInclude Include="src\Util\observable\expressions\tree.hpp" />
+    <ClInclude Include="src\Util\observable\expressions\utility.hpp" />
+    <ClInclude Include="src\Util\observable\observable.hpp" />
+    <ClInclude Include="src\Util\observable\observe.hpp" />
+    <ClInclude Include="src\Util\observable\subject.hpp" />
+    <ClInclude Include="src\Util\observable\subscription.hpp" />
+    <ClInclude Include="src\Util\observable\value.hpp" />
+    <ClCompile Include="src\Util\AbletonLinkManager.cpp" />
+    <ClInclude Include="src\Util\AbletonLinkManager.hpp" />
+    <ClInclude Include="src\Util\Colors.hpp" />
+    <ClInclude Include="src\Util\ComApartment.hpp" />
+    <ClCompile Include="src\Util\CommonStrings.cpp" />
+    <ClInclude Include="src\Util\CommonStrings.hpp" />
+    <ClCompile Include="src\Util\ConfigServiceHelper.cpp" />
+    <ClInclude Include="src\Util\ConfigServiceHelper.hpp" />
+    <ClInclude Include="src\Util\Console.hpp" />
+    <ClInclude Include="src\Util\dear_widgets.h" />
+    <ClInclude Include="src\Util\dear_widgets.hpp" />
+    <ClInclude Include="src\Util\File.hpp" />
+    <ClInclude Include="src\Util\Fonts.hpp" />
+    <ClInclude Include="src\Util\httplib.h" />
+    <ClInclude Include="src\Util\HttpsClient.hpp" />
+    <ClCompile Include="src\Util\HttpsClient_win.cpp" />
+    <ClInclude Include="src\Util\imgui_markdown.h" />
+    <ClInclude Include="src\Util\json.hpp" />
+    <ClInclude Include="src\Util\JSONSerializable.hpp" />
+    <ClInclude Include="src\Util\LifecycleCounter.hpp" />
+    <ClInclude Include="src\Util\Math.hpp" />
+    <ClCompile Include="src\Util\MSABPMTapper.cpp" />
+    <ClInclude Include="src\Util\MSABPMTapper.h" />
+    <ClInclude Include="src\Util\MSATimer.h" />
+    <ClCompile Include="src\Util\PortabilityCheck.cpp" />
+    <ClInclude Include="src\Util\PortabilityCheck.hpp" />
+    <ClInclude Include="src\Util\RollingMean.hpp" />
+    <ClCompile Include="src\Util\Strings.cpp" />
+    <ClInclude Include="src\Util\Strings.hpp" />
+    <ClCompile Include="src\Util\Utf8Path.cpp" />
+    <ClInclude Include="src\Util\Utf8Path.hpp" />
+    <ClInclude Include="src\Util\UUID.hpp" />
+    <ClInclude Include="src\Util\Vectors.hpp" />
+    <ClInclude Include="src\Util\Video.hpp" />
+    <ClInclude Include="src\Video\Recording\AVFRecorderWrapper.hpp" />
+    <ClCompile Include="src\Video\Recording\AVFRecorderWrapper_win.cpp" />
+    <ClCompile Include="src\Video\Recording\LibavRecorder.cpp" />
+    <ClInclude Include="src\Video\Recording\LibavRecorder.hpp" />
+    <ClCompile Include="src\Video\AvailableVideoSource.cpp" />
+    <ClInclude Include="src\Video\AvailableVideoSource.hpp" />
+    <ClCompile Include="src\Video\FileSource.cpp" />
+    <ClInclude Include="src\Video\FileSource.hpp" />
+    <ClInclude Include="src\Video\FileSourceCacheBuilder.hpp" />
+    <ClCompile Include="src\Video\FileSourceCacheBuilder_win.cpp" />
+    <ClCompile Include="src\Video\IconSource.cpp" />
+    <ClInclude Include="src\Video\IconSource.hpp" />
+    <ClCompile Include="src\Video\ImageSource.cpp" />
+    <ClInclude Include="src\Video\ImageSource.hpp" />
+    <ClInclude Include="src\Video\IOSurfaceVideoPlayer.hpp" />
+    <ClCompile Include="src\Video\IOSurfaceVideoPlayer_win.cpp" />
+    <ClCompile Include="src\Video\LibrarySource.cpp" />
+    <ClInclude Include="src\Video\LibrarySource.hpp" />
+    <ClCompile Include="src\Video\MultiSource.cpp" />
+    <ClInclude Include="src\Video\MultiSource.hpp" />
+    <ClInclude Include="src\Video\OutputWindow.hpp" />
+    <ClCompile Include="src\Video\OutputWindow_win.cpp" />
+    <ClInclude Include="src\Video\PlaylistSettings.hpp" />
+    <ClCompile Include="src\Video\PlaylistSource.cpp" />
+    <ClInclude Include="src\Video\PlaylistSource.hpp" />
+    <ClCompile Include="src\Video\ScrollingTextSource.cpp" />
+    <ClInclude Include="src\Video\ScrollingTextSource.hpp" />
+    <ClCompile Include="src\Video\ShaderSource.cpp" />
+    <ClInclude Include="src\Video\ShaderSource.hpp" />
+    <ClCompile Include="src\Video\TextSource.cpp" />
+    <ClInclude Include="src\Video\TextSource.hpp" />
+    <ClCompile Include="src\Video\TypewriterTextSource.cpp" />
+    <ClInclude Include="src\Video\TypewriterTextSource.hpp" />
+    <ClCompile Include="src\Video\VideoSource.cpp" />
+    <ClInclude Include="src\Video\VideoSource.hpp" />
+    <ClInclude Include="src\Video\VideoSourceSettings.hpp" />
+    <ClCompile Include="src\Video\WebcamSource.cpp" />
+    <ClInclude Include="src\Video\WebcamSource.hpp" />
+    <ClInclude Include="src\Views\AbstractTileBrowserView.hpp" />
+    <ClCompile Include="src\Views\AudioSourceBrowserView.cpp" />
+    <ClInclude Include="src\Views\AudioSourceBrowserView.hpp" />
+    <ClCompile Include="src\Views\AvailableShader.cpp" />
+    <ClInclude Include="src\Views\AvailableShader.hpp" />
+    <ClCompile Include="src\Views\BarPlotView.cpp" />
+    <ClInclude Include="src\Views\BarPlotView.hpp" />
+    <ClCompile Include="src\Views\CommonViews.cpp" />
+    <ClInclude Include="src\Views\CommonViews.hpp" />
+    <ClCompile Include="src\Views\CreditView.cpp" />
+    <ClInclude Include="src\Views\CreditView.hpp" />
+    <ClInclude Include="src\Views\FeedbackView.hpp" />
+    <ClCompile Include="src\Views\FileBrowserView.cpp" />
+    <ClInclude Include="src\Views\FileBrowserView.hpp" />
+    <ClInclude Include="src\Views\FramePreview.hpp" />
+    <ClCompile Include="src\Views\ImGuiExtensions.cpp" />
+    <ClInclude Include="src\Views\ImGuiExtensions.hpp" />
+    <ClCompile Include="src\Views\ListBrowserView.cpp" />
+    <ClInclude Include="src\Views\ListBrowserView.hpp" />
+    <ClCompile Include="src\Views\MainStageView.cpp" />
+    <ClInclude Include="src\Views\MainStageView.hpp" />
+    <ClCompile Include="src\Views\MarkdownView.cpp" />
+    <ClInclude Include="src\Views\MarkdownView.hpp" />
+    <ClCompile Include="src\Views\NodeShaderBrowserView.cpp" />
+    <ClInclude Include="src\Views\NodeShaderBrowserView.hpp" />
+    <ClCompile Include="src\Views\NodeVideoSourceBrowserView.cpp" />
+    <ClInclude Include="src\Views\NodeVideoSourceBrowserView.hpp" />
+    <ClCompile Include="src\Views\OscillatorPanelView.cpp" />
+    <ClInclude Include="src\Views\OscillatorPanelView.hpp" />
+    <ClCompile Include="src\Views\OscillatorView.cpp" />
+    <ClInclude Include="src\Views\OscillatorView.hpp" />
+    <ClCompile Include="src\Views\PagedTileBrowserView.cpp" />
+    <ClInclude Include="src\Views\PagedTileBrowserView.hpp" />
+    <ClCompile Include="src\Views\ParameterTileBrowserView.cpp" />
+    <ClInclude Include="src\Views\ParameterTileBrowserView.hpp" />
+    <ClCompile Include="src\Views\ShaderBrowserView.cpp" />
+    <ClInclude Include="src\Views\ShaderBrowserView.hpp" />
+    <ClCompile Include="src\Views\ShaderConfigSelectionView.cpp" />
+    <ClInclude Include="src\Views\ShaderConfigSelectionView.hpp" />
+    <ClCompile Include="src\Views\ShaderInfoView.cpp" />
+    <ClInclude Include="src\Views\ShaderInfoView.hpp" />
+    <ClInclude Include="src\Views\ShareStrandView.hpp" />
+    <ClCompile Include="src\Views\StageModeView.cpp" />
+    <ClInclude Include="src\Views\StageModeView.hpp" />
+    <ClCompile Include="src\Views\StageParameterView.cpp" />
+    <ClInclude Include="src\Views\StageParameterView.hpp" />
+    <ClCompile Include="src\Views\StrandBrowserView.cpp" />
+    <ClInclude Include="src\Views\StrandBrowserView.hpp" />
+    <ClCompile Include="src\Views\StrandBrowserWindow.cpp" />
+    <ClInclude Include="src\Views\StrandBrowserWindow.hpp" />
+    <ClCompile Include="src\Views\StrandTileView.cpp" />
+    <ClInclude Include="src\Views\StrandTileView.hpp" />
+    <ClCompile Include="src\Views\TextEditorView.cpp" />
+    <ClInclude Include="src\Views\TextEditorView.hpp" />
+    <ClCompile Include="src\Views\TileBrowserView.cpp" />
+    <ClInclude Include="src\Views\TileBrowserView.hpp" />
+    <ClCompile Include="src\Views\TimePanelView.cpp" />
+    <ClInclude Include="src\Views\TimePanelView.hpp" />
+    <ClCompile Include="src\Views\UploadChainerView.cpp" />
+    <ClInclude Include="src\Views\UploadChainerView.h" />
+    <ClCompile Include="src\Views\VideoSourceBrowserView.cpp" />
+    <ClInclude Include="src\Views\VideoSourceBrowserView.hpp" />
+    <ClCompile Include="src\Views\WelcomeScreenView.cpp" />
+    <ClInclude Include="src\Views\WelcomeScreenView.hpp" />
+    <ClCompile Include="src\HelpService.cpp" />
+    <ClInclude Include="src\HelpService.hpp" />
+    <ClInclude Include="src\macro_scope.hpp" />
+    <ClCompile Include="src\main.cpp" Condition="'$(NottawaEngineLib)'!='true'" />
+    <ClCompile Include="lib\imgui_stdlib.cpp" />
+    <ClCompile Include="lib\ofxFastFboReader.cpp" />
+    <ClCompile Include="lib\implot\implot.cpp" />
+    <ClCompile Include="lib\implot\implot_items.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\BaseEngine.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\DefaultTheme.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\EngineGLFW.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\EngineOpenFrameworks.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\Gui.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\GuiEventHelper.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\ImHelpers.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\src\ofxImGuiLoggerChannel.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\libs\imgui\src\imgui.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\libs\imgui\src\imgui_draw.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\libs\imgui\src\imgui_widgets.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\libs\imgui\src\imgui_tables.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\libs\imgui\src\imgui_demo.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\libs\imgui\backends\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\libs\imgui\backends\imgui_impl_opengl2.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\libs\imgui\backends\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxImGui\libs\imgui\backends\imgui_impl_glfw_context_support.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxMidi\src\ofxBaseMidi.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxMidi\src\ofxMidi.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxMidi\src\ofxMidiClock.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxMidi\src\ofxMidiIn.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxMidi\src\ofxMidiMessage.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxMidi\src\ofxMidiOut.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxMidi\src\ofxMidiTimecode.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxMidi\src\desktop\ofxRtMidiIn.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxMidi\src\desktop\ofxRtMidiOut.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxMidi\libs\rtmidi\RtMidi.cpp" />
+  </ItemGroup>
+</Project>

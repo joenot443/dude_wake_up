@@ -5,8 +5,10 @@
 //  Created by Joe Crozier on 11/3/22.
 //
 
+#ifdef __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
 #include <Security/SecItem.h>
+#endif
 #include "VideoSourceService.hpp"
 #include "UUID.hpp"
 #include "NodeLayoutView.hpp"
@@ -67,10 +69,10 @@ void VideoSourceService::populateAvailableVideoSources()
 //  auto iconSource = std::make_shared<AvailableVideoSourceIcon>("Icon");
 //  availableSourceMap[iconSource->availableVideoSourceId] = iconSource;
   
-  for (auto const &file : LibraryService::getService()->libraryFiles)
+  for (auto const &file : LibraryService::getService()->libraryFilesSnapshot())
   {
     // Create an AvailableLibraryVideoSource for each LibraryFile
-    auto fileSource = std::make_shared<AvailableVideoSourceLibrary>(file.second->name, file.second);
+    auto fileSource = std::make_shared<AvailableVideoSourceLibrary>(file->name, file);
     fileSource->generatePreview();
     availableSourceMap[fileSource->availableVideoSourceId] = fileSource;
   }
@@ -120,7 +122,7 @@ std::shared_ptr<ofFbo> VideoSourceService::previewFbo()
   blankFbo->allocate(426, 240);
   
   auto shader = ShaderChainerService::getService()->shaderForType(
-                                                                  ShaderTypeOctahedron, UUID::generateUUID(), 0);
+                                                                  ShaderTypeOctahedron, NottawaUUID::generateUUID(), 0);
   shader->setup();
   shader->shade(blankFbo, fbo);
   return fbo;
@@ -159,7 +161,7 @@ std::shared_ptr<VideoSource> VideoSourceService::defaultVideoSource()
 
 std::shared_ptr<VideoSourceSettings> VideoSourceService::defaultVideoSourceSettings()
 {
-  return std::make_shared<VideoSourceSettings>(UUID::generateUUID(), 0);
+  return std::make_shared<VideoSourceSettings>(NottawaUUID::generateUUID(), 0);
 }
 
 // Add a video source to the map
@@ -172,7 +174,6 @@ void VideoSourceService::addVideoSource(std::shared_ptr<VideoSource> videoSource
     videoSource->load(j);
   }
   videoSource->setup();
-  videoSource->generateOptionalShaders();
   // Subscribe the Source's setup() to resolution updates. Token stored on
   // the source so it can be unsubscribed in removeVideoSource.
   std::weak_ptr<VideoSource> weakSrc = videoSource;
@@ -183,46 +184,62 @@ void VideoSourceService::addVideoSource(std::shared_ptr<VideoSource> videoSource
 }
 
 // Remove a video source from the map
+// Tears a source down and drops everything the services hold for it: its
+// oscillators, its parameters (and those of its optional shaders and, for a
+// ShaderSource, its shader) and its feedback source. Shared by removing one
+// source and clearing them all.
+void VideoSourceService::releaseSource(std::shared_ptr<VideoSource> source)
+{
+  // Unsubscribe from resolution updates BEFORE teardown so a stray
+  // notification can't re-run setup() on a source mid-teardown.
+  source->resolutionUpdateSubscription = observable::unique_subscription{};
+  source->teardown();
+  OscillationService::getService()->removeOscillatorsFor(source->settings->parameters);
+  ParameterService::getService()->unregisterParameters(source->settings->parameters);
+  // Text and webcam sources keep their parameters in settings of their own
+  // (settingsRef()); a ShaderSource's are its shader's, handled below.
+  if (auto own = source->settingsRef(); own && own != source->settings &&
+      !std::dynamic_pointer_cast<ShaderSource>(source)) {
+    OscillationService::getService()->removeOscillatorsFor(own->parameters);
+    ParameterService::getService()->unregisterParameters(own->parameters);
+  }
+
+  // Walk every optional shader created via the VideoSource's helper as
+  // well as any shader nested inside a ShaderSource. Each shader has its
+  // own settings + parameters that were registered at construction time
+  // and would otherwise leak into the global parameterMap forever.
+  std::function<void(std::shared_ptr<Shader>)> cleanShader =
+    [&cleanShader](std::shared_ptr<Shader> s) {
+      if (!s || !s->settings) return;
+      OscillationService::getService()->removeOscillatorsFor(s->settings->parameters);
+      ParameterService::getService()->unregisterParameters(s->settings->parameters);
+      for (auto& opt : s->optionalShaders.created()) cleanShader(opt);
+    };
+  for (auto& opt : source->optionalShadersHelper.created()) cleanShader(opt);
+  if (auto shaderSrc = std::dynamic_pointer_cast<ShaderSource>(source)) {
+    cleanShader(shaderSrc->shader);
+  }
+  FeedbackSourceService::getService()->removeFeedbackSource(source->id);
+  // Drop the back-ref so the FeedbackSource shell can actually die once the
+  // service map entry is gone. Without this, undo-held VideoSources keep
+  // the FeedbackSource alive forever (and any pending frame-buffer state
+  // along with it).
+  source->feedbackDestination = nullptr;
+}
+
 void VideoSourceService::removeVideoSource(std::string id)
 {
   if (videoSourceMap.find(id) != videoSourceMap.end())
   {
     auto source = videoSourceMap[id];
-    // Unsubscribe from resolution updates BEFORE teardown so a stray
-    // notification can't re-run setup() on a source mid-teardown.
-    source->resolutionUpdateSubscription = observable::unique_subscription{};
-    source->teardown();
-    OscillationService::getService()->removeOscillatorsFor(source->settings->parameters);
-    ParameterService::getService()->unregisterParameters(source->settings->parameters);
-
-    // Walk every optional shader created via the VideoSource's helper as
-    // well as any shader nested inside a ShaderSource. Each shader has its
-    // own settings + parameters that were registered at construction time
-    // and would otherwise leak into the global parameterMap forever.
-    std::function<void(std::shared_ptr<Shader>)> cleanShader =
-      [&cleanShader](std::shared_ptr<Shader> s) {
-        if (!s || !s->settings) return;
-        OscillationService::getService()->removeOscillatorsFor(s->settings->parameters);
-        ParameterService::getService()->unregisterParameters(s->settings->parameters);
-        for (auto& opt : s->optionalShaders) cleanShader(opt);
-      };
-    for (auto& opt : source->optionalShadersHelper.optionalShaders) cleanShader(opt);
-    if (auto shaderSrc = std::dynamic_pointer_cast<ShaderSource>(source)) {
-      cleanShader(shaderSrc->shader);
-    }
-    FeedbackSourceService::getService()->removeFeedbackSource(id);
-    // Drop the back-ref so the FeedbackSource shell can actually die once the
-    // service map entry is gone. Without this, undo-held VideoSources keep
-    // the FeedbackSource alive forever (and any pending frame-buffer state
-    // along with it).
-    source->feedbackDestination = nullptr;
+    releaseSource(source);
     ShaderChainerService::getService()->removeConnectable(source);
     videoSourceMap.erase(id);
     log("removeVideoSource(%s): source.use_count=%ld (anything > 1 is held by undo or copies)",
         id.c_str(), source.use_count());
   }
   
-  ConfigService::getService()->saveDefaultConfigFile();
+  ConfigService::getService()->requestSave();
 }
 
 // Return a vector of all video sources
@@ -332,13 +349,14 @@ std::shared_ptr<VideoSource> VideoSourceService::makeFileVideoSource(std::string
     return videoSource;
   }
 
+#ifdef __APPLE__
   // Use the new bookmarkForPath method
   auto bookmarkString = bookmarkService->bookmarkForPath(path);
   if (!bookmarkString) {
     log("Failed to create or retrieve bookmark for path: %s", path.c_str());
     return nullptr;  // Return early on error
   }
-  
+
   // Resolve the bookmark to get the file URL
   CFDataRef bookmarkData = CFDataCreate(kCFAllocatorDefault, reinterpret_cast<const UInt8*>(bookmarkString->c_str()), bookmarkString->length());
   Boolean isStale = false;
@@ -352,7 +370,7 @@ std::shared_ptr<VideoSource> VideoSourceService::makeFileVideoSource(std::string
     &isStale,                   // isStale flag
     &error                      // CFErrorRef for error reporting
   );
-  
+
   // Check if fileURL is resolved successfully
   if (!fileURL) {
     log("Failed to resolve bookmark data for path: %s", path.c_str());
@@ -367,7 +385,7 @@ std::shared_ptr<VideoSource> VideoSourceService::makeFileVideoSource(std::string
     CFRelease(bookmarkData);  // Release bookmarkData before returning
     return nullptr;
   }
-  
+
   // Start accessing the security-scoped resource
   Boolean success = CFURLStartAccessingSecurityScopedResource(fileURL);
   if (!success) {
@@ -376,7 +394,10 @@ std::shared_ptr<VideoSource> VideoSourceService::makeFileVideoSource(std::string
     CFRelease(bookmarkData); // Release bookmarkData
     return nullptr;  // Return early on error
   }
-  
+#endif // __APPLE__
+  // (Windows has no sandbox, so no bookmark resolution required — proceed
+  // directly with the path.)
+
   // At this point, we have successfully resolved the bookmark and accessed the resource
   // Trim the extension from the name
   std::string nameWithoutExtension = name.substr(0, name.find_last_of('.'));
@@ -386,9 +407,11 @@ std::shared_ptr<VideoSource> VideoSourceService::makeFileVideoSource(std::string
   if (j.is_object()) videoSource->load(j);
   videoSource->origin = origin;
 
+#ifdef __APPLE__
   // Release CF objects
   CFRelease(fileURL);
   CFRelease(bookmarkData);
+#endif
 
   return videoSource;
 }
@@ -444,27 +467,28 @@ std::shared_ptr<VideoSource> VideoSourceService::makeImageVideoSource(std::strin
   BookmarkService* bookmarkService = BookmarkService::getService();
   std::shared_ptr<VideoSource> videoSource = nullptr;
   
+#ifdef __APPLE__
   // Use the new bookmarkForPath method
   auto bookmarkString = bookmarkService->bookmarkForPath(path);
   if (!bookmarkString) {
     log("Failed to create or retrieve bookmark for path: %s", path.c_str());
     return nullptr;  // Return early on error
   }
-  
+
   // Resolve the bookmark to get the file URL
   CFDataRef bookmarkData = CFDataCreate(kCFAllocatorDefault, reinterpret_cast<const UInt8*>(bookmarkString->c_str()), bookmarkString->length());
   Boolean isStale = false;
   CFErrorRef error = nullptr;
   CFURLRef fileURL = CFURLCreateByResolvingBookmarkData(
-    kCFAllocatorDefault,        // Allocator
-    bookmarkData,               // Bookmark data
-    kCFURLBookmarkResolutionWithSecurityScope,  // Options (or 0 if no security scope needed)
-    nullptr,                    // relativeToURL (can be nullptr)
-    nullptr,                    // resourcePropertiesToInclude (can be nullptr)
-    &isStale,                   // isStale flag
-    &error                      // CFErrorRef for error reporting
+    kCFAllocatorDefault,
+    bookmarkData,
+    kCFURLBookmarkResolutionWithSecurityScope,
+    nullptr,
+    nullptr,
+    &isStale,
+    &error
   );
-  
+
   // Check if fileURL is resolved successfully
   if (!fileURL) {
     log("Failed to resolve bookmark data for path: %s", path.c_str());
@@ -474,29 +498,29 @@ std::shared_ptr<VideoSource> VideoSourceService::makeImageVideoSource(std::strin
       CFStringGetCString(errorDesc, buffer, sizeof(buffer), kCFStringEncodingUTF8);
       log("Bookmark Resolution Error", buffer);
       CFRelease(errorDesc);
-      CFRelease(error);  // Release error reference
+      CFRelease(error);
     }
-    CFRelease(bookmarkData);  // Release bookmarkData before returning
+    CFRelease(bookmarkData);
     return nullptr;
   }
-  
-  // Start accessing the security-scoped resource
+
   Boolean success = CFURLStartAccessingSecurityScopedResource(fileURL);
   if (!success) {
     log("Failed to access security-scoped resource for URL: %s", path.c_str());
-    CFRelease(fileURL);     // Release fileURL
-    CFRelease(bookmarkData); // Release bookmarkData
-    return nullptr;  // Return early on error
+    CFRelease(fileURL);
+    CFRelease(bookmarkData);
+    return nullptr;
   }
-  
-  // At this point, we have successfully resolved the bookmark and accessed the resource
+#endif // __APPLE__
+
   videoSource = std::make_shared<ImageSource>(id, name, path);
   if (j.is_object()) videoSource->load(j);
   videoSource->origin = origin;
 
-  // Release CF objects
+#ifdef __APPLE__
   CFRelease(fileURL);
   CFRelease(bookmarkData);
+#endif
 
   return videoSource;
 }
@@ -676,12 +700,11 @@ void VideoSourceService::appendConfig(json j)
 
 void VideoSourceService::clear()
 {
+  // Each source is released as removeVideoSource does; tearing down alone
+  // left their parameters registered and their oscillators ticking.
   for (auto it = videoSourceMap.begin(); it != videoSourceMap.end();)
   {
-    auto key = it->first;
-    auto source = videoSourceMap[key];
-    source->teardown();
-    FeedbackSourceService::getService()->removeFeedbackSource(key);
+    releaseSource(it->second);
     it = videoSourceMap.erase(it);
   }
   
@@ -837,33 +860,32 @@ void VideoSourceService::captureAllNodesScreenshots()
 
 void VideoSourceService::startAccessingBookmarkPath(std::string path)
 {
+#ifdef __APPLE__
   // Get the bookmark service instance
   BookmarkService* bookmarkService = BookmarkService::getService();
-  
+
   // Use the bookmarkForPath method to get the bookmark string
   auto bookmarkString = bookmarkService->bookmarkForPath(path);
   if (!bookmarkString) {
     log("Failed to create or retrieve bookmark for path: %s", path.c_str());
-    return;  // Return early on error
+    return;
   }
-  
+
   // Convert the bookmark string to CFDataRef
   CFDataRef bookmarkData = CFDataCreate(kCFAllocatorDefault, reinterpret_cast<const UInt8*>(bookmarkString->c_str()), bookmarkString->length());
   Boolean isStale = false;
   CFErrorRef error = nullptr;
-  
-  // Resolve the bookmark to get the file URL
+
   CFURLRef fileURL = CFURLCreateByResolvingBookmarkData(
-    kCFAllocatorDefault,        // Allocator
-    bookmarkData,               // Bookmark data
-    kCFURLBookmarkResolutionWithSecurityScope,  // Options (or 0 if no security scope needed)
-    nullptr,                    // relativeToURL (can be nullptr)
-    nullptr,                    // resourcePropertiesToInclude (can be nullptr)
-    &isStale,                   // isStale flag
-    &error                      // CFErrorRef for error reporting
+    kCFAllocatorDefault,
+    bookmarkData,
+    kCFURLBookmarkResolutionWithSecurityScope,
+    nullptr,
+    nullptr,
+    &isStale,
+    &error
   );
-  
-  // Check if fileURL is resolved successfully
+
   if (!fileURL) {
     log("Failed to resolve bookmark data for path: %s", path.c_str());
     if (error) {
@@ -872,21 +894,22 @@ void VideoSourceService::startAccessingBookmarkPath(std::string path)
       CFStringGetCString(errorDesc, buffer, sizeof(buffer), kCFStringEncodingUTF8);
       log("Bookmark Resolution Error", buffer);
       CFRelease(errorDesc);
-      CFRelease(error);  // Release error reference
+      CFRelease(error);
     }
-    CFRelease(bookmarkData);  // Release bookmarkData before returning
+    CFRelease(bookmarkData);
     return;
   }
-  
-  // Start accessing the security-scoped resource
+
   Boolean success = CFURLStartAccessingSecurityScopedResource(fileURL);
   if (!success) {
     log("Failed to access security-scoped resource for URL: %s", path.c_str());
   }
-  
-  // Release CF objects
+
   CFRelease(fileURL);
   CFRelease(bookmarkData);
+#else
+  (void)path;  // Windows has no sandbox — nothing to do here.
+#endif
 }
 
 int VideoSourceService::indexOfSourceType(ShaderSourceType type)

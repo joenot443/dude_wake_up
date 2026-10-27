@@ -40,7 +40,7 @@
 #include "IconService.hpp"
 #include "ofMain.h"
 
-#include "httplib.h"
+#include "HttpsClient.hpp"
 
 #include <cstdio>
 #include <cstring>
@@ -50,6 +50,11 @@
 #include <thread>
 #include <atomic>
 #include <future>
+#ifdef _WIN32
+#include <windows.h>
+#include <timeapi.h>
+#pragma comment(lib, "winmm.lib")
+#endif
 #include <tuple>
 #include <type_traits>
 
@@ -69,6 +74,12 @@ static void notifyGraphChanged() {
 }
 
 static void engineThreadFunc() {
+#ifdef _WIN32
+  // sleep_for below rounds up to the 15.6 ms system timer tick unless the
+  // process asks for 1 ms resolution, which capped the engine near 40 fps.
+  timeBeginPeriod(1);
+  SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
+#endif
   try {
     engineThreadId = std::this_thread::get_id();
     EngineLoop::getInstance()->makeContextCurrent();
@@ -96,6 +107,9 @@ static void engineThreadFunc() {
   // Signal that the engine thread is no longer running so
   // runOnEngineThread() falls through instead of deadlocking.
   engineRunning.store(false);
+#ifdef _WIN32
+  timeEndPeriod(1);
+#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -121,14 +135,27 @@ static auto runOnEngineThread(F&& func) -> decltype(func()) {
   std::promise<R> prom;
   auto fut = prom.get_future();
   EngineLoop::getInstance()->executeOnEngineThread([&prom, &func]() {
-    if constexpr (std::is_void_v<R>) {
-      func();
-      prom.set_value();
-    } else {
-      prom.set_value(func());
+    // A throw must still answer the caller (it's blocked on the future) and
+    // mustn't take the engine thread down with it.
+    try {
+      if constexpr (std::is_void_v<R>) {
+        func();
+        prom.set_value();
+      } else {
+        prom.set_value(func());
+      }
+    } catch (...) {
+      prom.set_exception(std::current_exception());
     }
   });
-  return fut.get();
+  try {
+    return fut.get();
+  } catch (const std::exception& e) {
+    ofLogError("Bridge") << "engine task threw: " << e.what();
+  } catch (...) {
+    ofLogError("Bridge") << "engine task threw";
+  }
+  if constexpr (!std::is_void_v<R>) return R{};
 }
 
 // ---------------------------------------------------------------------------
@@ -281,6 +308,14 @@ static void ntwTerminateHandler() {
     fprintf(stderr, "\n*** NTW TERMINATE: no active exception (direct std::terminate call)\n");
   }
   abort();
+}
+
+void ntw_set_data_path(const char* absPath) {
+  EngineLoop::getInstance()->setDataPath(absPath ? absPath : "");
+}
+
+void ntw_set_share_context(void* nativeContext) {
+  EngineLoop::getInstance()->setShareContext(nativeContext);
 }
 
 bool ntw_engine_init(void) {
@@ -667,11 +702,37 @@ void ntw_remove_connection(const char* connectionId) {
 // ---------------------------------------------------------------------------
 
 #include "LifecycleCounter.hpp"
+#ifdef __APPLE__
 #include <mach/mach.h>
+#elif defined(_WIN32)
+#include <windows.h>
+#include <psapi.h>
+#pragma comment(lib, "psapi.lib")
+#endif
 
 char* ntw_dump_object_counts(void) {
   std::string s = ::lifecycle::Registry::instance().dumpJson();
   return strdup_safe(s);
+}
+
+char* ntw_dump_registry_sizes(void) {
+  return runOnEngineThread([]() -> char* {
+    json j;
+    j["parameters"] = ParameterService::getService()->parameterMap.size();
+    j["favorites"] = ParameterService::getService()->favoriteParameterMap.size();
+    j["oscillators"] = OscillationService::getService()->oscillators.size();
+    // The most common owners of registered parameters.
+    std::map<std::string, int> owners;
+    for (auto const& [id, param] : ParameterService::getService()->parameterMap)
+      owners[param ? param->ownerName : "(null)"]++;
+    std::vector<std::pair<int, std::string>> top;
+    for (auto const& [name, count] : owners) top.push_back({count, name});
+    std::sort(top.rbegin(), top.rend());
+    json topJ = json::object();
+    for (size_t i = 0; i < top.size() && i < 6; ++i) topJ[top[i].second] = top[i].first;
+    j["topOwners"] = topJ;
+    return strdup_safe(j.dump());
+  });
 }
 
 void ntw_reset_object_counts(void) {
@@ -686,12 +747,20 @@ void ntw_reset_object_counts(void) {
 // Note: returns a JSON string the caller must free.
 // Returns resident set size in MB.
 static double processRssMB() {
+#ifdef __APPLE__
   task_basic_info_data_t info;
   mach_msg_type_number_t count = TASK_BASIC_INFO_COUNT;
   if (task_info(mach_task_self(), TASK_BASIC_INFO, (task_info_t)&info, &count) != KERN_SUCCESS) {
     return -1.0;
   }
   return info.resident_size / 1048576.0;
+#elif defined(_WIN32)
+  PROCESS_MEMORY_COUNTERS pmc;
+  if (!GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) return -1.0;
+  return pmc.WorkingSetSize / 1048576.0;
+#else
+  return -1.0;
+#endif
 }
 
 char* ntw_run_leak_test(int cycles) {
@@ -995,15 +1064,6 @@ static void populateOscillatorDriverFields(NTWParameterInfo& info, const std::sh
   // Oscillator lookup
   auto osc = OscillationService::getService()->oscillatorForParameter(p);
   auto waveOsc = std::dynamic_pointer_cast<WaveformOscillator>(osc);
-  {
-    FILE* dbg = fopen("/tmp/ntw_osc_debug.log", "a");
-    if (dbg) {
-      fprintf(dbg, "param '%s' (id=%s): osc=%p waveOsc=%p, total_oscs=%zu\n",
-              p->name.c_str(), p->paramId.c_str(), (void*)osc.get(), (void*)waveOsc.get(),
-              OscillationService::getService()->oscillators.size());
-      fclose(dbg);
-    }
-  }
   if (waveOsc) {
     info.hasOscillator = 1;
     info.oscillatorEnabled = (waveOsc->enabled && waveOsc->enabled->boolValue) ? 1 : 0;
@@ -1129,9 +1189,12 @@ void ntw_set_parameter_bool(const char* paramId, bool value) {
 }
 
 void ntw_set_parameter_string(const char* paramId, const char* value) {
-  if (!paramId || !value) return;
-  auto param = ParameterService::getService()->parameterForId(std::string(paramId));
-  if (param) param->stringValue = std::string(value);
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    if (!paramId || !value) return;
+    auto param = ParameterService::getService()->parameterForId(std::string(paramId));
+    if (param) param->stringValue = std::string(value);
+  });
 }
 
 void ntw_set_parameter_color(const char* paramId,
@@ -1168,17 +1231,20 @@ void ntw_set_parameter_color(const char* paramId,
 }
 
 void ntw_toggle_parameter_favorite(const char* paramId) {
-  if (!paramId) return;
-  auto param = ParameterService::getService()->parameterForId(std::string(paramId));
-  if (!param) return;
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    if (!paramId) return;
+    auto param = ParameterService::getService()->parameterForId(std::string(paramId));
+    if (!param) return;
 
-  if (param->favorited) {
-    ParameterService::getService()->removeFavoriteParameter(param);
-    param->favorited = false;
-  } else {
-    ParameterService::getService()->addFavoriteParameter(param);
-    param->favorited = true;
-  }
+    if (param->favorited) {
+      ParameterService::getService()->removeFavoriteParameter(param);
+      param->favorited = false;
+    } else {
+      ParameterService::getService()->addFavoriteParameter(param);
+      param->favorited = true;
+    }
+  });
 }
 
 void ntw_reset_parameter(const char* paramId) {
@@ -1565,15 +1631,21 @@ NTWAvailableShaderInfo* ntw_get_available_shader_sources(int* outCount) {
 // ---------------------------------------------------------------------------
 
 void ntw_select_connectable(const char* connectableId) {
-  if (!connectableId) return;
-  auto conn = findConnectable(connectableId);
-  if (conn) {
-    ShaderChainerService::getService()->selectConnectable(conn);
-  }
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    if (!connectableId) return;
+    auto conn = findConnectable(connectableId);
+    if (conn) {
+      ShaderChainerService::getService()->selectConnectable(conn);
+    }
+  });
 }
 
 void ntw_deselect_connectable(void) {
-  ShaderChainerService::getService()->deselectConnectable();
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    ShaderChainerService::getService()->deselectConnectable();
+  });
 }
 
 char* ntw_get_selected_connectable_id(void) {
@@ -1629,11 +1701,14 @@ NTWAudioSourceInfo* ntw_get_all_audio_sources(int* outCount) {
 }
 
 void ntw_select_audio_source(const char* audioSourceId) {
-  if (!audioSourceId) return;
-  auto source = AudioSourceService::getService()->audioSourceForId(std::string(audioSourceId));
-  if (source) {
-    AudioSourceService::getService()->selectAudioSource(source);
-  }
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    if (!audioSourceId) return;
+    auto source = AudioSourceService::getService()->audioSourceForId(std::string(audioSourceId));
+    if (source) {
+      AudioSourceService::getService()->selectAudioSource(source);
+    }
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -1674,30 +1749,17 @@ NTWExtendedAudioAnalysisInfo ntw_get_extended_audio_analysis(void) {
   info.audioActive = source->active;
   info.audioSourceType = static_cast<int>(source->type());
 
-  // Mel spectrum (copy up to 13 bins)
-  auto melSpec = analysis.getSafeMelSpectrum();
-  info.melSpectrumCount = std::min(static_cast<int>(melSpec.size()), 13);
-  for (int i = 0; i < info.melSpectrumCount; i++) {
-    info.melSpectrum[i] = melSpec[i];
-  }
-
-  // Waveform (downsample to 256 if needed)
-  auto wave = analysis.getSafeWaveform();
-  if (wave.empty()) {
-    info.waveformCount = 0;
-  } else if (wave.size() <= 256) {
-    info.waveformCount = static_cast<int>(wave.size());
-    for (int i = 0; i < info.waveformCount; i++) {
-      info.waveform[i] = wave[i];
-    }
-  } else {
-    // Downsample
-    info.waveformCount = 256;
-    float step = static_cast<float>(wave.size()) / 256.0f;
-    for (int i = 0; i < 256; i++) {
-      info.waveform[i] = wave[static_cast<int>(i * step)];
-    }
-  }
+  // The spectrum and waveform vectors are replaced by the audio thread (and
+  // the engine's preview audio) while we'd be copying them; read the
+  // fixed-size render copies made for cross-thread readers instead (a
+  // concurrent update can tear a frame, but can't free what we read).
+  // Their sizes are only used as counts, clamped to the arrays.
+  const size_t melSize = std::min(analysis.smoothMelSpectrum.size(), AudioAnalysis::kSpectrumSize);
+  info.melSpectrumCount = std::min(static_cast<int>(melSize), 13);
+  for (int i = 0; i < info.melSpectrumCount; i++) info.melSpectrum[i] = analysis.renderMelSpectrum[size_t(i)];
+  const size_t waveSize = std::min(analysis.smoothWaveform.size(), AudioAnalysis::kSpectrumSize);
+  info.waveformCount = std::min(static_cast<int>(waveSize), 256);
+  for (int i = 0; i < info.waveformCount; i++) info.waveform[i] = analysis.renderWaveform[size_t(i)];
 
   return info;
 }
@@ -1823,15 +1885,13 @@ void ntw_tap_bpm(void) {
     auto svc = AudioSourceService::getService();
     auto source = svc->selectedAudioSource;
     if (!source) return;
-    // If tapper has been idle, reset it
-    if (svc->tapper.bpm() < 1.0f) {
-      svc->tapper.startFresh();
-    }
     svc->tapper.tap();
-    float bpm = svc->tapper.bpm();
-    if (bpm > 0) {
-      source->audioAnalysis.adjustBpmStartTimeForPhase(bpm);
-    }
+    // A tap is a beat: the clock restarts on it, and from the second tap
+    // on runs at the tapped tempo (the mean of the taps so far).
+    auto& analysis = source->audioAnalysis;
+    if (svc->tapper.tapCount() >= 2) analysis.bpm->setValue(svc->tapper.bpm());
+    analysis.bpmStartTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count();
   });
 }
 
@@ -1962,11 +2022,16 @@ bool ntw_load_workspace(const char* path) {
     // own writable tmp dir — NSOpenPanel grants read access to the picked file
     // but not write access to its parent directory, so a sibling temp file
     // fails in the sandbox. $TMPDIR resolves to the per-container tmp dir.
-    const char* tmpDir = std::getenv("TMPDIR");
-    std::string tmpBase = tmpDir ? tmpDir : "/tmp";
-    if (!tmpBase.empty() && tmpBase.back() != '/') tmpBase += '/';
-    std::string tmpPath = tmpBase + "ntw_load_" +
-      std::to_string((unsigned long long)ofGetElapsedTimeMillis()) + ".json";
+    // (std::filesystem's temp directory is $TMPDIR on macOS and %TEMP% on
+    // Windows, where /tmp doesn't exist.)
+    std::error_code tmpError;
+    std::filesystem::path tmpFile = std::filesystem::temp_directory_path(tmpError);
+    if (tmpError) {  // never fall back to the working directory: that's the install folder
+      ofLogError("Bridge") << "ntw_load_workspace: no temp directory (" << tmpError.message() << ")";
+      return false;
+    }
+    tmpFile /= "ntw_load_" + std::to_string((unsigned long long)ofGetElapsedTimeMillis()) + ".json";
+    const std::string tmpPath = tmpFile.string();
     std::ofstream tmpOut(tmpPath);
     if (!tmpOut.is_open()) {
       ofLogError("Bridge") << "ntw_load_workspace: failed to write temp file at " << tmpPath;
@@ -1978,12 +2043,8 @@ bool ntw_load_workspace(const char* path) {
     ConfigService::getService()->loadConfigFile(tmpPath);
     std::remove(tmpPath.c_str());
 
-    // Extract name from path (filename without extension).
-    std::string name = spath;
-    auto lastSlash = name.rfind('/');
-    if (lastSlash != std::string::npos) name = name.substr(lastSlash + 1);
-    auto lastDot = name.rfind('.');
-    if (lastDot != std::string::npos) name = name.substr(0, lastDot);
+    // The name is the file's, without extension (either slash separates).
+    const std::string name = std::filesystem::path(spath).stem().string();
 
     ConfigService::getService()->currentWorkspace =
       std::make_shared<Workspace>(name, spath);
@@ -2241,7 +2302,6 @@ char* ntw_create_preview(int shaderTypeRaw, bool isSource) {
       // Reallocate to preview size. ofFbo::allocate calls clear() first, so the
       // full-resolution FBOs that setup() allocated are released here.
       if (src->fbo) src->fbo->allocate(kPreviewWidth, kPreviewHeight, GL_RGBA);
-      if (src->optionalFbo) src->optionalFbo->allocate(kPreviewWidth, kPreviewHeight, GL_RGBA);
       if (src->canvas) src->canvas->allocate(kPreviewWidth, kPreviewHeight, GL_RGBA);
       inst.source = std::dynamic_pointer_cast<VideoSource>(src);
       inst.isSourceOnly = true;
@@ -2269,12 +2329,33 @@ char* ntw_create_preview(int shaderTypeRaw, bool isSource) {
   });
 }
 
+// A preview's source or shader registered its parameters and oscillators
+// with the global services when it was built, like any node's; drop them
+// (and its frames) before the preview goes, or every preview created --
+// browser scrolling, tab changes, the sidebar hiding in stage mode --
+// leaks its registrations. The shared plasma input is released separately.
+static void releasePreview(PreviewInstance& inst) {
+  if (inst.source && inst.source != sharedPlasmaSource)
+    VideoSourceService::getService()->releaseSource(inst.source);
+  std::function<void(std::shared_ptr<Shader>)> cleanShader = [&cleanShader](std::shared_ptr<Shader> s) {
+    if (!s || !s->settings) return;
+    OscillationService::getService()->removeOscillatorsFor(s->settings->parameters);
+    ParameterService::getService()->unregisterParameters(s->settings->parameters);
+    for (auto& opt : s->optionalShaders.created()) cleanShader(opt);
+  };
+  cleanShader(inst.shader);
+  if (inst.shader) inst.shader->releaseFrames();
+}
+
 void ntw_destroy_preview(const char* previewId) {
   if (!previewId) return;
   std::string pid(previewId);
   runOnEngineThread([pid]() {
     IOSurfaceTextureManager::getInstance()->stopSharing(pid);
-    previewInstances.erase(pid);
+    auto it = previewInstances.find(pid);
+    if (it == previewInstances.end()) return;
+    releasePreview(it->second);
+    previewInstances.erase(it);
   });
 }
 
@@ -2282,8 +2363,10 @@ void ntw_destroy_all_previews(void) {
   runOnEngineThread([]() {
     for (auto& [pid, inst] : previewInstances) {
       IOSurfaceTextureManager::getInstance()->stopSharing(pid);
+      releasePreview(inst);
     }
     previewInstances.clear();
+    if (sharedPlasmaSource) VideoSourceService::getService()->releaseSource(sharedPlasmaSource);
     sharedPlasmaSource.reset();
     previewCounter = 0;
   });
@@ -2293,11 +2376,14 @@ void ntw_destroy_all_previews(void) {
 static std::string preferredPreviewSourceId;
 
 void ntw_set_preferred_preview_source(const char* sourceId) {
-  if (sourceId) {
-    preferredPreviewSourceId = std::string(sourceId);
-  } else {
-    preferredPreviewSourceId.clear();
-  }
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    if (sourceId) {
+      preferredPreviewSourceId = std::string(sourceId);
+    } else {
+      preferredPreviewSourceId.clear();
+    }
+  });
 }
 
 // Find the best active VideoSource frame for effect previews.
@@ -2504,8 +2590,10 @@ void ntw_tick_previews(void) {
 
       resultFrame = fbo;
     } else if (inst.shader) {
-      // Same transient-compile recovery as the source branch above.
-      if (!inst.shader->shader.isLoaded() && inst.loadRetries < 60) {
+      // Same transient-compile recovery as the source branch above (for
+      // effects with a program: some, like On Off, draw without one).
+      if (!inst.shader->shader.isLoaded() && inst.loadRetries < 60 &&
+          ofFile::doesFileExist("shaders/" + inst.shader->fileName() + ".frag")) {
         inst.loadRetries++;
         inst.shader->shader.load("shaders/" + inst.shader->fileName());
       }
@@ -2586,16 +2674,21 @@ char* ntw_get_strands_folder_path(void) {
 }
 
 bool ntw_save_strand_from_node(const char* nodeId, const char* path, const char* name) {
-  if (!nodeId || !path || !name) return false;
-  std::string sid(nodeId), spath(path), sname(name);
+  return ntw_save_strand_from_node_with_preview(nodeId, path, name, nullptr);
+}
 
-  bool result = runOnEngineThread([sid, spath, sname]() -> bool {
+bool ntw_save_strand_from_node_with_preview(const char* nodeId, const char* path, const char* name,
+                                            const char* previewPath) {
+  if (!nodeId || !path || !name) return false;
+  std::string sid(nodeId), spath(path), sname(name), spreview(previewPath ? previewPath : "");
+
+  bool result = runOnEngineThread([sid, spath, sname, spreview]() -> bool {
     auto connectable = findConnectable(sid.c_str());
     if (!connectable) return false;
 
     auto strand = ShaderChainerService::getService()->strandForConnectable(connectable);
     strand.name = sname;
-    ConfigService::getService()->saveStrandFile(strand, spath, "");
+    ConfigService::getService()->saveStrandFile(strand, spath, spreview);
     StrandService::getService()->populate();
     return true;
   });
@@ -2736,14 +2829,15 @@ void ntw_delete_strand(const char* strandId) {
 
   runOnEngineThread([sid]() {
     auto strand = StrandService::getService()->availableStrandForId(sid);
-    if (!strand) return;
+    if (!strand || StrandService::getService()->isTemplate(sid)) return;  // templates ship with the app
 
     // Remove files from disk
+    std::error_code error;
     if (!strand->path.empty()) {
-      std::filesystem::remove(strand->path);
+      std::filesystem::remove(strand->path, error);
     }
     if (!strand->imagePath.empty()) {
-      std::filesystem::remove(strand->imagePath);
+      std::filesystem::remove(strand->imagePath, error);
     }
 
     StrandService::getService()->removeStrand(sid);
@@ -2775,13 +2869,13 @@ void ntw_register_strands_updated_callback(NTWStrandsUpdatedCallback callback) {
 // MARK: - Optional Shaders
 // ---------------------------------------------------------------------------
 
-// Helper to find optional shaders for either a shader or video source.
-static std::vector<std::shared_ptr<Shader>>* findOptionalShaders(const std::string& id) {
+// The optional shaders of a shader or video source, kept alive by their owner.
+static std::shared_ptr<OptionalShadersHelper> findOptionalShaders(const std::string& id) {
   auto shader = ShaderChainerService::getService()->shaderForId(id);
-  if (shader) return &shader->optionalShaders;
+  if (shader) return std::shared_ptr<OptionalShadersHelper>(shader, &shader->optionalShaders);
 
   auto source = VideoSourceService::getService()->videoSourceForId(id);
-  if (source) return &source->optionalShadersHelper.optionalShaders;
+  if (source) return std::shared_ptr<OptionalShadersHelper>(source, &source->optionalShadersHelper);
 
   return nullptr;
 }
@@ -2790,7 +2884,7 @@ NTWOptionalShaderInfo* ntw_get_optional_shaders(const char* connectableId, int* 
   if (outCount) *outCount = 0;
   if (!connectableId) return nullptr;
 
-  auto* optionals = findOptionalShaders(std::string(connectableId));
+  auto optionals = findOptionalShaders(std::string(connectableId));
   if (!optionals) return nullptr;
 
   int count = static_cast<int>(optionals->size());
@@ -2800,9 +2894,10 @@ NTWOptionalShaderInfo* ntw_get_optional_shaders(const char* connectableId, int* 
   auto* result = static_cast<NTWOptionalShaderInfo*>(
     calloc(count, sizeof(NTWOptionalShaderInfo)));
 
+  // Names come from the types, so listing doesn't create the shaders.
   for (int i = 0; i < count; i++) {
-    result[i].name = strdup_safe((*optionals)[i]->name());
-    result[i].enabled = (*optionals)[i]->optionallyEnabled;
+    result[i].name = strdup_safe(optionals->name(size_t(i)));
+    result[i].enabled = optionals->enabled(size_t(i));
     result[i].index = i;
   }
 
@@ -2822,12 +2917,9 @@ void ntw_toggle_optional_shader(const char* connectableId, int index) {
   std::string sid(connectableId);
 
   runOnEngineThread([sid, index]() {
-    auto* optionals = findOptionalShaders(sid);
-    if (!optionals) return;
-
-    if (index >= 0 && index < static_cast<int>(optionals->size())) {
-      (*optionals)[index]->optionallyEnabled = !(*optionals)[index]->optionallyEnabled;
-    }
+    auto optionals = findOptionalShaders(sid);
+    if (!optionals || index < 0) return;
+    optionals->toggle(size_t(index));
   });
 }
 
@@ -2835,12 +2927,16 @@ NTWParameterInfo* ntw_get_optional_shader_parameters(const char* connectableId, 
   if (outCount) *outCount = 0;
   if (!connectableId) return nullptr;
 
-  auto* optionals = findOptionalShaders(std::string(connectableId));
+  auto optionals = findOptionalShaders(std::string(connectableId));
   if (!optionals) return nullptr;
 
   if (optionalIndex < 0 || optionalIndex >= static_cast<int>(optionals->size())) return nullptr;
 
-  auto optShader = (*optionals)[optionalIndex];
+  // Opening an optional shader's settings creates it (on the engine thread,
+  // which compiles its program).
+  auto optShader = optionals->existing(size_t(optionalIndex));
+  if (!optShader) optShader = runOnEngineThread([&]() { return optionals->shader(size_t(optionalIndex)); });
+  if (!optShader) return nullptr;
   auto settings = optShader->settingsRef();
   if (!settings) return nullptr;
 
@@ -2906,12 +3002,12 @@ void ntw_fetch_library_files(void) {
 }
 
 int ntw_library_files_loaded(void) {
-  return LibraryService::getService()->libraryFiles.empty() ? 0 : 1;
+  return LibraryService::getService()->hasLibraryFiles() ? 1 : 0;
 }
 
 NTWLibraryFileInfo* ntw_get_library_files(int* outCount) {
   if (outCount) *outCount = 0;
-  auto& files = LibraryService::getService()->libraryFiles;
+  const auto files = LibraryService::getService()->libraryFilesSnapshot();
   int count = static_cast<int>(files.size());
   if (outCount) *outCount = count;
   if (count == 0) return nullptr;
@@ -2920,7 +3016,7 @@ NTWLibraryFileInfo* ntw_get_library_files(int* outCount) {
     calloc(count, sizeof(NTWLibraryFileInfo)));
 
   int i = 0;
-  for (auto& [fileId, file] : files) {
+  for (auto& file : files) {
     result[i].id = strdup_safe(file->id);
     result[i].name = strdup_safe(file->name);
     result[i].category = strdup_safe(file->category);
@@ -3030,24 +3126,36 @@ NTWFileSourceState ntw_get_file_source_state(const char* sourceId) {
   result.duration = fileSrc->player.getDuration();
   result.mute = (fileSrc->mute && fileSrc->mute->boolValue) ? 1 : 0;
   result.playing = fileSrc->playing ? 1 : 0;
+#ifdef TARGET_OSX
   result.cacheAvailable = !fileSrc->cachedFrames.empty() ? 1 : 0;
   result.useCachedMode = fileSrc->useCachedMode ? 1 : 0;
   result.cachedFrameCount = static_cast<int>(fileSrc->cachedFrames.size());
+#else
+  // The player's own cache: available once complete; the count grows while
+  // it builds.
+  const auto cache = fileSrc->player.cacheStatus();
+  result.cacheAvailable = cache.complete ? 1 : 0;
+  result.useCachedMode = cache.enabled ? 1 : 0;
+  result.cachedFrameCount = cache.frames;
+#endif
 
   return result;
 }
 
 void ntw_set_file_source_volume(const char* sourceId, float volume) {
-  if (!sourceId) return;
-  std::string sid(sourceId);
-  auto src = VideoSourceService::getService()->videoSourceForId(sid);
-  if (!src) return;
-  auto* fileSrc = dynamic_cast<FileSource*>(src.get());
-  if (!fileSrc || !fileSrc->volume) return;
-  fileSrc->volume->setValue(volume);
-  if (!fileSrc->mute->boolValue) {
-    fileSrc->player.setVolume(volume);
-  }
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    if (!sourceId) return;
+    std::string sid(sourceId);
+    auto src = VideoSourceService::getService()->videoSourceForId(sid);
+    if (!src) return;
+    auto* fileSrc = dynamic_cast<FileSource*>(src.get());
+    if (!fileSrc || !fileSrc->volume) return;
+    fileSrc->volume->setValue(volume);
+    if (!fileSrc->mute->boolValue) {
+      fileSrc->player.setVolume(volume);
+    }
+  });
 }
 
 void ntw_set_file_source_speed(const char* sourceId, float speed) {
@@ -3073,15 +3181,18 @@ void ntw_set_file_source_position(const char* sourceId, float position) {
 }
 
 void ntw_set_file_source_mute(const char* sourceId, int mute) {
-  if (!sourceId) return;
-  std::string sid(sourceId);
-  auto src = VideoSourceService::getService()->videoSourceForId(sid);
-  if (!src) return;
-  auto* fileSrc = dynamic_cast<FileSource*>(src.get());
-  if (!fileSrc || !fileSrc->mute) return;
-  fileSrc->mute->boolValue = (mute != 0);
-  fileSrc->mute->value = mute ? 1.0f : 0.0f;
-  fileSrc->player.setVolume(mute ? 0.0f : fileSrc->volume->value);
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    if (!sourceId) return;
+    std::string sid(sourceId);
+    auto src = VideoSourceService::getService()->videoSourceForId(sid);
+    if (!src) return;
+    auto* fileSrc = dynamic_cast<FileSource*>(src.get());
+    if (!fileSrc || !fileSrc->mute) return;
+    fileSrc->mute->boolValue = (mute != 0);
+    fileSrc->mute->value = mute ? 1.0f : 0.0f;
+    fileSrc->player.setVolume(mute ? 0.0f : fileSrc->volume->value);
+  });
 }
 
 void ntw_set_file_source_playing(const char* sourceId, int playing) {
@@ -3108,6 +3219,9 @@ void ntw_set_file_source_use_cached_mode(const char* sourceId, int enabled) {
   auto* fileSrc = dynamic_cast<FileSource*>(src.get());
   if (!fileSrc) return;
   fileSrc->useCachedMode = (enabled != 0);
+#ifndef TARGET_OSX
+  fileSrc->player.setCacheEnabled(enabled != 0);
+#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -3150,13 +3264,16 @@ NTWTextSourceState ntw_get_text_source_state(const char* sourceId) {
 }
 
 void ntw_set_text_source_text(const char* sourceId, const char* text) {
-  if (!sourceId || !text) return;
-  std::string sid(sourceId), stext(text);
-  auto src = VideoSourceService::getService()->videoSourceForId(sid);
-  if (!src || src->type != VideoSource_text) return;
-  auto* textSrc = dynamic_cast<TextSource*>(src.get());
-  if (!textSrc || !textSrc->displayText) return;
-  textSrc->displayText->text = stext;
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    if (!sourceId || !text) return;
+    std::string sid(sourceId), stext(text);
+    auto src = VideoSourceService::getService()->videoSourceForId(sid);
+    if (!src || src->type != VideoSource_text) return;
+    auto* textSrc = dynamic_cast<TextSource*>(src.get());
+    if (!textSrc || !textSrc->displayText) return;
+    textSrc->displayText->text = stext;
+  });
 }
 
 void ntw_set_text_source_font_size(const char* sourceId, int fontSize) {
@@ -3170,19 +3287,22 @@ void ntw_set_text_source_font_size(const char* sourceId, int fontSize) {
 }
 
 void ntw_set_text_source_font_index(const char* sourceId, int fontIndex) {
-  if (!sourceId) return;
-  std::string sid(sourceId);
-  auto src = VideoSourceService::getService()->videoSourceForId(sid);
-  if (!src || src->type != VideoSource_text) return;
-  auto* textSrc = dynamic_cast<TextSource*>(src.get());
-  if (!textSrc || !textSrc->displayText) return;
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    if (!sourceId) return;
+    std::string sid(sourceId);
+    auto src = VideoSourceService::getService()->videoSourceForId(sid);
+    if (!src || src->type != VideoSource_text) return;
+    auto* textSrc = dynamic_cast<TextSource*>(src.get());
+    if (!textSrc || !textSrc->displayText) return;
 
-  auto& fonts = FontService::getService()->fonts;
-  if (fontIndex < 0 || fontIndex >= static_cast<int>(fonts.size())) return;
+    auto& fonts = FontService::getService()->fonts;
+    if (fontIndex < 0 || fontIndex >= static_cast<int>(fonts.size())) return;
 
-  textSrc->displayText->fontSelector->intValue = fontIndex;
-  textSrc->displayText->fontSelector->affirmIntValue();
-  textSrc->displayText->font = fonts[fontIndex];
+    textSrc->displayText->fontSelector->intValue = fontIndex;
+    textSrc->displayText->fontSelector->affirmIntValue();
+    textSrc->displayText->font = fonts[fontIndex];
+  });
 }
 
 void ntw_set_text_source_position(const char* sourceId, float x, float y) {
@@ -3197,13 +3317,16 @@ void ntw_set_text_source_position(const char* sourceId, float x, float y) {
 }
 
 void ntw_center_text_source(const char* sourceId) {
-  if (!sourceId) return;
-  std::string sid(sourceId);
-  auto src = VideoSourceService::getService()->videoSourceForId(sid);
-  if (!src || src->type != VideoSource_text) return;
-  auto* textSrc = dynamic_cast<TextSource*>(src.get());
-  if (!textSrc) return;
-  textSrc->centerText();
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    if (!sourceId) return;
+    std::string sid(sourceId);
+    auto src = VideoSourceService::getService()->videoSourceForId(sid);
+    if (!src || src->type != VideoSource_text) return;
+    auto* textSrc = dynamic_cast<TextSource*>(src.get());
+    if (!textSrc) return;
+    textSrc->centerText();
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -3341,7 +3464,10 @@ void ntw_free_available_non_shader_source_info_array(NTWAvailableNonShaderSource
 // ---------------------------------------------------------------------------
 
 void ntw_toggle_favorite_shader_type(int shaderTypeRaw) {
-  ParameterService::getService()->toggleFavoriteShaderType(static_cast<ShaderType>(shaderTypeRaw));
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    ParameterService::getService()->toggleFavoriteShaderType(static_cast<ShaderType>(shaderTypeRaw));
+  });
 }
 
 int ntw_is_shader_type_favorited(int shaderTypeRaw) {
@@ -3349,7 +3475,10 @@ int ntw_is_shader_type_favorited(int shaderTypeRaw) {
 }
 
 void ntw_toggle_favorite_source_type(int sourceType) {
-  ParameterService::getService()->toggleFavoriteSourceType(sourceType);
+  // On the engine thread, which reads this state every frame.
+  runOnEngineThread([&]() {
+    ParameterService::getService()->toggleFavoriteSourceType(sourceType);
+  });
 }
 
 int ntw_is_source_type_favorited(int sourceType) {
@@ -3360,6 +3489,7 @@ int ntw_is_source_type_favorited(int sourceType) {
 // MARK: - Strand Sharing & Community
 // ---------------------------------------------------------------------------
 
+#ifdef NOTTAWA_HAS_HTTPS
 void ntw_share_strand(const char* nodeId, const char* title, const char* description,
                       const char* author, const void* previewPngData, int previewLen,
                       NTWShareStrandCallback callback) {
@@ -3491,19 +3621,6 @@ void ntw_fetch_community_feed(int page, int limit, const char* voterId, NTWFeedC
   }).detach();
 }
 
-void ntw_free_shared_strand_info_array(NTWSharedStrandInfo* array, int count) {
-  if (!array) return;
-  for (int i = 0; i < count; i++) {
-    free((void*)array[i].slug);
-    free((void*)array[i].title);
-    free((void*)array[i].description);
-    free((void*)array[i].previewUrl);
-    free((void*)array[i].author);
-    free((void*)array[i].createdAt);
-    free((void*)array[i].userVote);
-  }
-  free(array);
-}
 
 void ntw_vote_strand(const char* slug, const char* voterId, const char* vote, NTWVoteCallback callback) {
   if (!slug || !voterId || !vote || !callback) return;
@@ -3582,6 +3699,38 @@ void ntw_fetch_shared_strand(const char* slug, NTWFetchStrandCallback callback) 
       callback(false, strdup_safe(err));
     }
   }).detach();
+}
+#else
+// No HTTPS backend in this build (see HttpsClient.hpp): report the feature
+// as unavailable.
+static const char* kNoHttps = "Community features are not available in this build";
+void ntw_share_strand(const char*, const char*, const char*, const char*, const void*, int,
+                      NTWShareStrandCallback callback) {
+  if (callback) callback(false, kNoHttps);
+}
+void ntw_fetch_community_feed(int, int, const char*, NTWFeedCallback callback) {
+  if (callback) callback(false, nullptr, 0, 0);
+}
+void ntw_vote_strand(const char*, const char*, const char*, NTWVoteCallback callback) {
+  if (callback) callback(false, 0, 0, 0, nullptr);
+}
+void ntw_fetch_shared_strand(const char*, NTWFetchStrandCallback callback) {
+  if (callback) callback(false, strdup_safe(kNoHttps));
+}
+#endif
+
+void ntw_free_shared_strand_info_array(NTWSharedStrandInfo* array, int count) {
+  if (!array) return;
+  for (int i = 0; i < count; i++) {
+    free((void*)array[i].slug);
+    free((void*)array[i].title);
+    free((void*)array[i].description);
+    free((void*)array[i].previewUrl);
+    free((void*)array[i].author);
+    free((void*)array[i].createdAt);
+    free((void*)array[i].userVote);
+  }
+  free(array);
 }
 
 char** ntw_load_strand_from_json(const char* jsonStr, int* outCount) {

@@ -17,7 +17,7 @@
 #include "imgui_node_editor.h"
 #include <stdio.h>
 
-static const long NullId = -1000;
+static const intptr_t NullId = -1000;
 
 namespace ed = ax::NodeEditor;
 
@@ -48,7 +48,7 @@ struct Node
   
   std::string idName()
   {
-    return formatString("%s##%d", name.c_str(), id.Get());
+    return formatString("%s##%llu", name.c_str(), static_cast<unsigned long long>(id.Get()));
   }
   
   bool isAudioReactiveParameterActive() {

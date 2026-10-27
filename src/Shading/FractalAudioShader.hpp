@@ -35,7 +35,6 @@ struct FractalAudioSettings: public ShaderSettings {
 struct FractalAudioShader: Shader {
   FractalAudioSettings *settings;
   FractalAudioShader(FractalAudioSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   
   void setup() override {
     shader.load("shaders/FractalAudio");

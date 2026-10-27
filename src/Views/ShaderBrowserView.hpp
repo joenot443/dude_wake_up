@@ -46,7 +46,7 @@ public:
 
   bool* collapsed = nullptr;
 
-  ShaderBrowserView() : browserId(UUID::generateUUID()) {
+  ShaderBrowserView() : browserId(NottawaUUID::generateUUID()) {
     ParameterService::getService()->subscribeToFavoritesUpdates(
         [this]()
         { setup(); });

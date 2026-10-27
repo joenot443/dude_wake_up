@@ -145,7 +145,7 @@ public:
   
   std::map<std::string, std::shared_ptr<Node>> idNodeMap;
   std::map<long, std::shared_ptr<Node>> pinIdNodeMap;
-  std::map<long, std::vector<std::shared_ptr<ShaderLink>>> pinIdConnectionMap;
+  std::map<uintptr_t, std::vector<std::shared_ptr<ShaderLink>>> pinIdConnectionMap;
   std::map<long, std::shared_ptr<Node>> nodeIdNodeMap; // Use this map for node lookup
 	
   std::map<long, std::shared_ptr<ShaderLink>> linksMap;

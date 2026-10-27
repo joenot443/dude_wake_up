@@ -42,7 +42,6 @@ struct OneBitDitherSettings: public ShaderSettings {
 struct OneBitDitherShader: Shader {
   OneBitDitherSettings *settings;
   OneBitDitherShader(OneBitDitherSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   void setup() override {
     shader.load("shaders/OneBitDither");
   }

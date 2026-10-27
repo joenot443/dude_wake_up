@@ -50,7 +50,7 @@ public:
   std::string renameStrandId;
 
   StrandBrowserView(std::vector<std::shared_ptr<AvailableStrandTileItem>> tileItems) :                                                                                       tileItems(tileItems),
-                                                                                      tileBrowserId(UUID::generateUUID()),
+                                                                                      tileBrowserId(NottawaUUID::generateUUID()),
                                                                                       tileBrowserView(tileItems){};
   private:
   std::vector<std::shared_ptr<AvailableStrandTileItem>> tileItemsFromAvailableStrands(std::vector<std::shared_ptr<AvailableStrand>> availableStrands);

@@ -1812,7 +1812,7 @@ bool UpdateInput(ImPlotPlot& plot) {
                                              | plot_button_flags;
 
     const bool plot_clicked = ImGui::ButtonBehavior(plot.PlotRect,plot.ID,&plot.Hovered,&plot.Held,plot_button_flags);
-    ImGui::SetItemAllowOverlap();
+    ImGui::SetNextItemAllowOverlap();
 
     if (plot_clicked) {
         if (!ImHasFlag(plot.Flags, ImPlotFlags_NoBoxSelect) && IO.MouseClicked[gp.InputMap.Select] && ImHasFlag(IO.KeyMods, gp.InputMap.SelectMod)) {

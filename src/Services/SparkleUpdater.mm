@@ -1,3 +1,7 @@
+// Windows portability: entire body gated. Project excludes this file from Windows
+// builds; this gate is belt-and-braces so an accidental compile fails cleanly.
+#ifdef __APPLE__
+
 #import "SparkleUpdater.h"
 
 // Objective-C Implementation
@@ -142,3 +146,5 @@ bool SparkleUpdaterService::canCheckForUpdates() {
         return false;
     }
 }
+
+#endif // __APPLE__

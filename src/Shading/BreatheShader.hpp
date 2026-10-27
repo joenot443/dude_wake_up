@@ -43,7 +43,6 @@ struct BreatheSettings: public ShaderSettings {
 struct BreatheShader: Shader {
   BreatheSettings *settings;
   BreatheShader(BreatheSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   
   void setup() override {
     shader.load("shaders/Breathe");

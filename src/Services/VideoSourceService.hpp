@@ -84,6 +84,7 @@ public:
   std::vector<std::string> getWebcamNames();
   void updateVideoSources();
   void removeVideoSource(std::string id);
+  void releaseSource(std::shared_ptr<VideoSource> source);
   void addVideoSource(std::shared_ptr<VideoSource> videoSource, std::string id, json j = 0);
   void populateAvailableVideoSources();
   void addAvailableVideoSources(std::vector<std::shared_ptr<AvailableVideoSource>> sources);
@@ -91,17 +92,17 @@ public:
   
   std::shared_ptr<VideoSource> videoSourceForId(std::string id);
 
-  std::shared_ptr<VideoSource> makeImageVideoSource(std::string name, std::string path, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
-  std::shared_ptr<MultiSource> makeMultiVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
-  std::shared_ptr<VideoSource> makeWebcamVideoSource(std::string name, int deviceId, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
-  std::shared_ptr<VideoSource> makeShaderVideoSource(ShaderSourceType type, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
-  std::shared_ptr<VideoSource> makeFileVideoSource(std::string name, std::string path, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
-  std::shared_ptr<VideoSource> makePlaylistVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
-  std::shared_ptr<VideoSource> makeTextVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
-  std::shared_ptr<VideoSource> makeTypewriterTextVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
-  std::shared_ptr<VideoSource> makeScrollingTextVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
-  std::shared_ptr<VideoSource> makeIconVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
-  std::shared_ptr<VideoSource> makeLibraryVideoSource(std::shared_ptr<LibraryFile> libraryFile, ImVec2 origin = ImVec2(0., 0.), std::string id = UUID::generateUUID(), json j = 0);
+  std::shared_ptr<VideoSource> makeImageVideoSource(std::string name, std::string path, ImVec2 origin = ImVec2(0., 0.), std::string id = NottawaUUID::generateUUID(), json j = 0);
+  std::shared_ptr<MultiSource> makeMultiVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = NottawaUUID::generateUUID(), json j = 0);
+  std::shared_ptr<VideoSource> makeWebcamVideoSource(std::string name, int deviceId, ImVec2 origin = ImVec2(0., 0.), std::string id = NottawaUUID::generateUUID(), json j = 0);
+  std::shared_ptr<VideoSource> makeShaderVideoSource(ShaderSourceType type, ImVec2 origin = ImVec2(0., 0.), std::string id = NottawaUUID::generateUUID(), json j = 0);
+  std::shared_ptr<VideoSource> makeFileVideoSource(std::string name, std::string path, ImVec2 origin = ImVec2(0., 0.), std::string id = NottawaUUID::generateUUID(), json j = 0);
+  std::shared_ptr<VideoSource> makePlaylistVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = NottawaUUID::generateUUID(), json j = 0);
+  std::shared_ptr<VideoSource> makeTextVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = NottawaUUID::generateUUID(), json j = 0);
+  std::shared_ptr<VideoSource> makeTypewriterTextVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = NottawaUUID::generateUUID(), json j = 0);
+  std::shared_ptr<VideoSource> makeScrollingTextVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = NottawaUUID::generateUUID(), json j = 0);
+  std::shared_ptr<VideoSource> makeIconVideoSource(std::string name, ImVec2 origin = ImVec2(0., 0.), std::string id = NottawaUUID::generateUUID(), json j = 0);
+  std::shared_ptr<VideoSource> makeLibraryVideoSource(std::shared_ptr<LibraryFile> libraryFile, ImVec2 origin = ImVec2(0., 0.), std::string id = NottawaUUID::generateUUID(), json j = 0);
   
   // Output Windows
 

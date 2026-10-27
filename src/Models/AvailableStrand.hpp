@@ -24,7 +24,7 @@ struct AvailableStrand : public JSONSerializable
   std::shared_ptr<ofFbo> fbo;
 
   AvailableStrand(std::string name, std::string path, std::string imagePath,
-                  std::string id = UUID::generateUUID())
+                  std::string id = NottawaUUID::generateUUID())
       : name(name), imagePath(imagePath), path(path), id(id), fbo(std::make_shared<ofFbo>()){
         generatePreview();
       };

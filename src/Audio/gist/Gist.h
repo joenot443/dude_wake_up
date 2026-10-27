@@ -206,7 +206,13 @@ private:
     int samplingFrequency;            /**< The sampling frequency used for analysis */
     WindowType windowType;            /**< The window type used in FFT analysis */
 
+public:
+    // BTrackDetector re-uses the last audio frame after Gist has consumed it.
+    // Kept public rather than adding an accessor to preserve the shape the
+    // macOS build relied on (Apple's toolchain didn't enforce the private
+    // access here — MSVC does).
     std::vector<T> audioFrame;        /**< The current audio frame */
+private:
     std::vector<T> windowFunction;    /**< The window function used in FFT processing */
     std::vector<T> fftReal;           /**< The real part of the FFT for the current audio frame */
     std::vector<T> fftImag;           /**< The imaginary part of the FFT for the current audio frame */

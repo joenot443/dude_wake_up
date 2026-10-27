@@ -30,6 +30,8 @@ private:
   observable::subject<void()> strandsUpdatedSubject;
 
 public:
+  // Built-in templates ship with the app (read-only, replaced on upgrade).
+  bool isTemplate(const std::string& id) const { return templateMap.count(id) != 0; }
   static StrandService *service;
   StrandService(){};
 

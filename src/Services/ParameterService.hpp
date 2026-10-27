@@ -36,6 +36,8 @@ public:
   static ParameterService* service;
   
   void registerParameter(std::shared_ptr<Parameter> parameter);
+  // Registers a parameter whose id changed, dropping its old entry.
+  void reregisterParameter(const std::string& oldId, std::shared_ptr<Parameter> parameter);
 
   // Drop the given parameters from parameterMap, drivenParameters, and the
   // recentlyActiveParameters list. Without this the map grows unbounded —

@@ -43,7 +43,6 @@ struct OutlineSettings: public ShaderSettings {
 struct OutlineShader: Shader {
   OutlineSettings *settings;
   OutlineShader(OutlineSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   
   void setup() override {
     shader.load("shaders/Stroke");

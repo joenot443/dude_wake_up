@@ -1,6 +1,6 @@
 #version 150
 
-uniform sampler2DRect tex;
+uniform sampler2D tex;
 uniform float time;
 uniform vec2 plasma;
 uniform vec2 dimensions;

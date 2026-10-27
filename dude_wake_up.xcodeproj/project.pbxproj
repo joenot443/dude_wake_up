@@ -43,7 +43,6 @@
 		028651B12D95E331000CE0D4 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 028651AF2D95E208000CE0D4 /* icon.icns */; };
 		02AB2F0F2DE0DA2A004EDB3F /* CreditView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02AB2F0E2DE0DA2A004EDB3F /* CreditView.cpp */; };
 		02CED2702E6F95490010EC68 /* BTrackOnsetDetectionFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02CED25C2E6F94C80010EC68 /* BTrackOnsetDetectionFunction.cpp */; };
-		02CED2742E6F95FD0010EC68 /* BTrackDetector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02CED2732E6F95FD0010EC68 /* BTrackDetector.cpp */; };
 		02CED2752E6F9A230010EC68 /* BTrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02CED17A2E6F33530010EC68 /* BTrack.cpp */; };
 		02CED27F2E6F9E580010EC68 /* src_zoh.c in Sources */ = {isa = PBXBuildFile; fileRef = 02CED27E2E6F9E580010EC68 /* src_zoh.c */; };
 		02CED2802E6F9E580010EC68 /* src_sinc.c in Sources */ = {isa = PBXBuildFile; fileRef = 02CED27D2E6F9E580010EC68 /* src_sinc.c */; };
@@ -188,7 +187,6 @@
 		656B21E9FFDE1916B22D8672 /* IOSurfaceOutputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B4D2E036B8BD23D0A6040BA /* IOSurfaceOutputView.swift */; };
 		65B4AA4A5D574B8490A92B97 /* StrandService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "CB8A8FEB-43D7-45EA-8167-6DA30320942A" /* StrandService.cpp */; };
 		6656EFFFB90742EFA331DD4E /* DefaultTheme.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "8825362F-6151-4ED0-BA75-CA3FC3E6FDAE" /* DefaultTheme.cpp */; };
-		674742F9E2CA47C9932421C7 /* BTrackDetector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02CED2732E6F95FD0010EC68 /* BTrackDetector.cpp */; };
 		682581AE48264EB8810A3322 /* ConfigService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "D46400BB-47CF-4D36-B131-04511A2C67EA" /* ConfigService.cpp */; };
 		"68363D6E-D6F1-4CFD-8AB7-36140854C129" /* MainStageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "42ED44B0-B1D8-4B3E-AC0C-46CE88659031" /* MainStageView.cpp */; };
 		6864274AD40D03A5BD5A4249 /* MidiControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE690A620B9F4EAF0E98269C /* MidiControlsView.swift */; };
@@ -704,8 +702,6 @@
 		02CED25B2E6F94C80010EC68 /* BTrackOnsetDetectionFunction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BTrackOnsetDetectionFunction.h; sourceTree = "<group>"; };
 		02CED25C2E6F94C80010EC68 /* BTrackOnsetDetectionFunction.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BTrackOnsetDetectionFunction.cpp; sourceTree = "<group>"; };
 		02CED26F2E6F94D80010EC68 /* CircularBuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CircularBuffer.h; sourceTree = "<group>"; };
-		02CED2722E6F95FD0010EC68 /* BTrackDetector.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BTrackDetector.hpp; sourceTree = "<group>"; };
-		02CED2732E6F95FD0010EC68 /* BTrackDetector.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BTrackDetector.cpp; sourceTree = "<group>"; };
 		02CED2762E6F9A3F0010EC68 /* samplerate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = samplerate.h; sourceTree = "<group>"; };
 		02CED2772E6F9E580010EC68 /* common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
 		02CED2782E6F9E580010EC68 /* fastest_coeffs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fastest_coeffs.h; sourceTree = "<group>"; };
@@ -2004,8 +2000,6 @@
 				"517BC169-93F0-4478-AC03-000F41D7801A" /* AudioSource.hpp */,
 				02D115332DC94674007B87CE /* AudioSettings.hpp */,
 				02D115342DC94674007B87CE /* AudioTrack.hpp */,
-				02CED2722E6F95FD0010EC68 /* BTrackDetector.hpp */,
-				02CED2732E6F95FD0010EC68 /* BTrackDetector.cpp */,
 				"7F50B89F-0348-43F2-A58C-1C5504692393" /* FileAudioSource.cpp */,
 				"847C62FC-F4DB-4D9E-AC52-A7DCA0A4FF8E" /* FileAudioSource.hpp */,
 				"B19D76F5-D648-45E6-A505-7EEDF67F1CC8" /* MicrophoneAudioSource.cpp */,
@@ -2880,7 +2874,6 @@
 				556C0B8272934AA8B9577701 /* MainApp.cpp in Sources */,
 				6D30EE41242143B0866D4A0A /* AudioSource.cpp in Sources */,
 				65343614B91A40EF81DCCEE5 /* BTrackOnsetDetectionFunction.cpp in Sources */,
-				674742F9E2CA47C9932421C7 /* BTrackDetector.cpp in Sources */,
 				05C16AEB62A84E53A8188415 /* FileAudioSource.cpp in Sources */,
 				8876469C011D483D9FF48E57 /* MicrophoneAudioSource.cpp in Sources */,
 				4B30EA23353241D491942960 /* FeedbackSource.cpp in Sources */,
@@ -3157,7 +3150,6 @@
 				"BE747D0D-95DB-4890-8345-A256402BFBCF" /* MainApp.cpp in Sources */,
 				"F291B4B3-9384-43E4-8D8C-B28A47CCBA4B" /* AudioSource.cpp in Sources */,
 				02CED2702E6F95490010EC68 /* BTrackOnsetDetectionFunction.cpp in Sources */,
-				02CED2742E6F95FD0010EC68 /* BTrackDetector.cpp in Sources */,
 				"1BBA5C49-4387-4DF1-B018-9F6E016F444A" /* FileAudioSource.cpp in Sources */,
 				"201BA7D8-7AC0-4851-BA33-523C3122F549" /* MicrophoneAudioSource.cpp in Sources */,
 				"25587D76-FA97-4F2E-8BBA-A4C133F463CF" /* FeedbackSource.cpp in Sources */,

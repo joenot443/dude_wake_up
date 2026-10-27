@@ -15,7 +15,15 @@
 #include <mutex>
 #include <functional>
 #include <memory>
+#include <vector>
+#ifdef __APPLE__
 #include <IOSurface/IOSurface.h>
+#else
+// Windows: the "surface" handed to the UI is a FrameExchange* (a fenced
+// ring of GL textures in the UI's share group, readable by several views).
+typedef void* IOSurfaceRef;
+class FrameExchange;
+#endif
 
 struct SharedTexture {
   IOSurfaceRef surface = nullptr;
@@ -28,6 +36,14 @@ struct SharedTexture {
   // source FBO hasn't been written since the previous blit. UINT64_MAX
   // until the first successful blit, so the initial frame always blits.
   uint64_t lastBlittedTick = UINT64_MAX;
+#ifndef __APPLE__
+  std::shared_ptr<FrameExchange> exchange;  // `surface` points at this
+  unsigned int slotTextures[7] = {};  // FrameExchange::kSlots
+  unsigned int slotFbos[7] = {};
+  // Storage is allocated on a slot's first write: the engine reuses the
+  // lowest free slot, so with few readers most slots never need any.
+  bool slotReady[7] = {};
+#endif
 };
 
 class IOSurfaceTextureManager {
@@ -79,6 +95,15 @@ private:
   std::unordered_map<std::string, SharedTexture> tracked;
   std::mutex mutex;
   ConnectableLookup secondaryLookup;
+#ifndef __APPLE__
+  // stopSharing may run off the GL thread, so GL cleanup is deferred to the
+  // next blitTrackedTextures(). Exchanges outlive their entries because the
+  // UI may still hold the pointer.
+  void publish(SharedTexture& tex, unsigned int srcFboId, int srcW, int srcH);
+  bool ensureSlot(SharedTexture& tex, int slot);
+  std::vector<SharedTexture> pendingCleanup;
+  std::vector<std::shared_ptr<FrameExchange>> retiredExchanges;
+#endif
 
   static IOSurfaceTextureManager* instance;
 };

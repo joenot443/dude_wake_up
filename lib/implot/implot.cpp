@@ -334,7 +334,7 @@ void AddTextVertical(ImDrawList *DrawList, ImVec2 pos, ImU32 col, const char *te
     // Align to be pixel perfect
     pos.x = IM_FLOOR(pos.x);
     pos.y = IM_FLOOR(pos.y);
-    const float scale = g.FontSize / font->FontSize;
+    const float scale = g.FontSize / font->LegacySize;
     const char* s = text_begin;
     int chars_exp = (int)(text_end - s);
     int chars_rnd = 0;
@@ -351,7 +351,9 @@ void AddTextVertical(ImDrawList *DrawList, ImVec2 pos, ImU32 col, const char *te
             if (c == 0) // Malformed UTF-8?
                 break;
         }
-        const ImFontGlyph * glyph = font->FindGlyph((ImWchar)c);
+        // ImGui 1.92 moved FindGlyph off of ImFont onto ImFontBaked.
+        // g.FontBaked == g.Font->GetFontBaked(g.FontSize) per imgui.h docs.
+        const ImFontGlyph * glyph = g.FontBaked->FindGlyph((ImWchar)c);
         if (glyph == NULL) {
             continue;
         }
@@ -1812,7 +1814,7 @@ bool UpdateInput(ImPlotPlot& plot) {
                                              | plot_button_flags;
 
     const bool plot_clicked = ImGui::ButtonBehavior(plot.PlotRect,plot.ID,&plot.Hovered,&plot.Held,plot_button_flags);
-    ImGui::SetItemAllowOverlap();
+    ImGui::SetNextItemAllowOverlap();
 
     if (plot_clicked) {
         if (!ImHasFlag(plot.Flags, ImPlotFlags_NoBoxSelect) && IO.MouseClicked[gp.InputMap.Select] && ImHasFlag(IO.KeyMods, gp.InputMap.SelectMod)) {

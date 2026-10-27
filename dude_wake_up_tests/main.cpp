@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include "ofMain.h"
 #include "ShaderChainerServiceTests.hpp"
+#include "Utf8PathTests.hpp"
+#include "RecorderTests.hpp"
 
 
 

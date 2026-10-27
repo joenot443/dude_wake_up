@@ -32,6 +32,31 @@
 #include <stdio.h>
 #include "URLSchemeHandler.h"
 
+static void logGLEnvironmentOnce() {
+  static bool logged = false;
+  if (logged) return;
+  logged = true;
+
+  const char* vendor   = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+  const char* renderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+  const char* version  = reinterpret_cast<const char*>(glGetString(GL_VERSION));
+  const char* glsl     = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
+  ofLogNotice("GL") << "vendor="   << (vendor   ? vendor   : "(null)");
+  ofLogNotice("GL") << "renderer=" << (renderer ? renderer : "(null)");
+  ofLogNotice("GL") << "version="  << (version  ? version  : "(null)");
+  ofLogNotice("GL") << "glsl="     << (glsl     ? glsl     : "(null)");
+
+  GLint format = 0, type = 0;
+  glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &format);
+  glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &type);
+  ofLogNotice("GL") << "impl_color_read_format=0x" << std::hex << format
+                    << " type=0x" << type << std::dec;
+
+  GLboolean srgb = GL_FALSE;
+  glGetBooleanv(GL_FRAMEBUFFER_SRGB, &srgb);
+  ofLogNotice("GL") << "framebuffer_srgb=" << (srgb ? "ENABLED" : "disabled");
+}
+
 void MainApp::setup()
 {
   glEnable(GL_DEPTH_TEST);
@@ -40,14 +65,22 @@ void MainApp::setup()
   ofDisableArbTex();
   ofEnableAlphaBlending();
   ofDisableDepthTest();
+  logGLEnvironmentOnce();
   ModulationService::getService();
   AudioSourceService::getService();
   TextureService::getService();
   BookmarkService::getService();
   StrandService::getService();
   LayoutStateService::getService();
+#ifdef _WIN32
+  // Daandelange's ofxImGui default autoDraw=true isn't painting on Windows
+  // (listener on window->events().draw at OF_EVENT_ORDER_AFTER_APP doesn't
+  // fire for us). Switch to manual draw mode: gui.end() closes the frame,
+  // we explicitly call gui.draw() after to render.
+  gui.setup(nullptr, false);
+#else
   gui.setup();
-  ImGui::CreateContext();
+#endif
   ImPlot::CreateContext();
   setupStyle(); // Apply the style
   FontService::getService()->setup();
@@ -93,6 +126,10 @@ void MainApp::draw()
   gui.begin();
   drawMainStage();
   gui.end();
+#ifdef _WIN32
+  // Manual draw since Windows build opts out of autoDraw in setup().
+  gui.draw();
+#endif
 }
 
 void MainApp::drawMainStage()
@@ -109,9 +146,15 @@ void MainApp::drawMainStage()
   
   CommonViews::PushRedesignStyle();
   ImGui::Begin("Main Stage", NULL, windowFlags);
-  ImGui::PushFont(FontService::getService()->current->p);
+  // Guard against FontService::current being null or its `p` not yet
+  // loaded (happens briefly during first draw on Windows). Fall back to
+  // the current ImGui default font — the UI will look wrong until the
+  // real font arrives but it won't crash.
+  auto* fs = FontService::getService();
+  ImFont* font = (fs && fs->current) ? fs->current->p : nullptr;
+  if (font) ImGui::PushFont(font);
   mainStageView->draw();
-  ImGui::PopFont();
+  if (font) ImGui::PopFont();
   ImGui::End();
   CommonViews::PopRedesignStyle();
 }
@@ -120,47 +163,51 @@ void MainApp::exitStream(ofEventArgs &args) {}
 
 void MainApp::dragEvent(ofDragInfo dragInfo)
 {
-  
-  if (ofFile(dragInfo.files[0]).isDirectory()) {
-    BookmarkService::getService()->saveBookmarkForDirectory(dragInfo.files[0]);
-    BookmarkService::getService()->beginAccessingBookmark(dragInfo.files[0]);
-    mainStageView->loadDirectory(dragInfo.files[0]);
+  // OF 0.12 returns std::filesystem::path from dragInfo.files; MSVC (unlike
+  // Apple libc++) refuses the implicit conversion to std::string. Materialize
+  // once at the top so the rest of the function keeps its old shape.
+  const std::string dropped = dragInfo.files[0].string();
+
+  if (ofFile(dropped).isDirectory()) {
+    BookmarkService::getService()->saveBookmarkForDirectory(dropped);
+    BookmarkService::getService()->beginAccessingBookmark(dropped);
+    mainStageView->loadDirectory(dropped);
     return;
   }
-  
+
   // Check if the file is a JSON file
-  if (ofIsStringInString(dragInfo.files[0], ".json"))
+  if (ofIsStringInString(dropped, ".json"))
   {
-    ConfigService::getService()->loadStrandFile(dragInfo.files[0]);
+    ConfigService::getService()->loadStrandFile(dropped);
     return;
   }
-  
+
   // Check if the file is a video file
-  if (ofIsStringInString(dragInfo.files[0], ".mp4") ||
-      ofIsStringInString(dragInfo.files[0], ".mov") ||
-      ofIsStringInString(dragInfo.files[0], ".avi") ||
-      ofIsStringInString(dragInfo.files[0], ".mkv") ||
-      ofIsStringInString(dragInfo.files[0], ".flv") ||
-      ofIsStringInString(dragInfo.files[0], ".wmv"))
+  if (ofIsStringInString(dropped, ".mp4") ||
+      ofIsStringInString(dropped, ".mov") ||
+      ofIsStringInString(dropped, ".avi") ||
+      ofIsStringInString(dropped, ".mkv") ||
+      ofIsStringInString(dropped, ".flv") ||
+      ofIsStringInString(dropped, ".wmv"))
   {
     // Create a new VideoSource for the file
-    auto fileName = ofFilePath::getFileName(dragInfo.files[0]);
-    
-    auto videoSource = ActionService::getService()->addFileVideoSource(fileName, dragInfo.files[0]);
+    auto fileName = ofFilePath::getFileName(dropped);
+
+    auto videoSource = ActionService::getService()->addFileVideoSource(fileName, dropped);
     NodeLayoutView::getInstance()->fileDropInProgress = true;
     NodeLayoutView::getInstance()->handleDroppedSource(videoSource);
     return;
   }
-  
+
   // Check if the file is a video file
-  if (ofIsStringInString(dragInfo.files[0], ".png") ||
-      ofIsStringInString(dragInfo.files[0], ".jpg") ||
-      ofIsStringInString(dragInfo.files[0], ".jpeg") ||
-      ofIsStringInString(dragInfo.files[0], ".gif"))
+  if (ofIsStringInString(dropped, ".png") ||
+      ofIsStringInString(dropped, ".jpg") ||
+      ofIsStringInString(dropped, ".jpeg") ||
+      ofIsStringInString(dropped, ".gif"))
   {
     // Create a new VideoSource for the file
-    auto fileName = ofFilePath::getFileName(dragInfo.files[0]);
-    auto videoSource = ActionService::getService()->addImageVideoSource(fileName, dragInfo.files[0]);
+    auto fileName = ofFilePath::getFileName(dropped);
+    auto videoSource = ActionService::getService()->addImageVideoSource(fileName, dropped);
     NodeLayoutView::getInstance()->handleDroppedSource(videoSource);
   }
 }

@@ -156,6 +156,15 @@ void ntw_free_string(char* str);
 // MARK: - Engine Lifecycle
 // ---------------------------------------------------------------------------
 
+// Optional, before ntw_engine_init: absolute path of the OF data root
+// (fonts, images, shaders...). Defaults to the macOS bundle's Resources/data/.
+void ntw_set_data_path(const char* absPath);
+
+// Optional, before ntw_engine_init: the host UI's native GL context
+// (Windows: HGLRC). The engine joins it to its share group so shared
+// textures (see Texture Sharing) can be sampled directly in that context.
+void ntw_set_share_context(void* nativeContext);
+
 // Initialize the engine: create OpenGL context, set up services.
 // Returns true on success.
 bool ntw_engine_init(void);
@@ -287,6 +296,11 @@ char* ntw_dump_object_counts(void);
 
 // Reset all lifecycle counters to zero (establishes a baseline).
 void ntw_reset_object_counts(void);
+
+// Sizes of the engine's global registries (parameters, oscillators,
+// favourites, MIDI assignments) as JSON, for telling a leak's holder.
+// Caller must free with ntw_free_string.
+char* ntw_dump_registry_sizes(void);
 
 // Run an automated leak test: for `cycles` iterations, add a Plasma source
 // and an HSB shader, connect them, then remove both. Logs counts each cycle.
@@ -627,6 +641,11 @@ char* ntw_get_strands_folder_path(void);
 // Save a strand from a node to a file.
 // Returns true on success.
 bool ntw_save_strand_from_node(const char* nodeId, const char* path, const char* name);
+
+// As ntw_save_strand_from_node, recording `previewPath` (an image the caller
+// has written, or NULL) as the strand's thumbnail.
+bool ntw_save_strand_from_node_with_preview(const char* nodeId, const char* path, const char* name,
+                                            const char* previewPath);
 
 typedef struct {
     const char* id;        // Owned by caller (strdup'd) - must free
@@ -989,9 +1008,13 @@ void ntw_start_texture_sharing(const char* connectableId);
 // Stop sharing and release IOSurface resources.
 void ntw_stop_texture_sharing(const char* connectableId);
 
-// Get the IOSurface for a connectable's output texture.
-// Returns the IOSurfaceRef as void* (caller does NOT own it; do not CFRelease).
-// Returns NULL if not sharing or not yet set up.
+// Get the shared surface for a connectable's output texture. Returns NULL if
+// not sharing or not yet set up; the caller does not own the result.
+//   macOS:   IOSurfaceRef (do not CFRelease).
+//   Windows: FrameExchange* (src/Engine/FrameExchange.h) — a fenced ring
+//            of GL textures in the share group set up by
+//            ntw_set_share_context. Stays valid until engine shutdown, but
+//            stops receiving frames after ntw_stop_texture_sharing.
 void* ntw_get_connectable_texture(const char* connectableId);
 
 // Get the current texture dimensions for a shared connectable.

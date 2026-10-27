@@ -39,6 +39,9 @@ private:
   std::shared_ptr<ofFbo> previewTempFbo;
   ofShader previewStrokeShader;
   ofTrueTypeFont previewFont;
+  // Track the loaded font's identity separately — ofTrueTypeFont::settings
+  // is protected on some platforms (MSVC enforces; Apple libc++ did not).
+  std::string previewFontName;
   bool previewsInitialized = false;
   bool previewResourcesAllocated = false;
   static const int PreviewWidth = 250;

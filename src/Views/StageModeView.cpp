@@ -38,11 +38,11 @@ void StageModeView::draw() {
   
   float topY = ImGui::GetCursorPosY();
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10.0, 10.0));
-  ImGui::BeginChild("stage_mode_child", stageSize, true, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+  ImGui::BeginChild("stage_mode_child", stageSize, true, ImGuiChildFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 //  ImGui::Columns(2, "stage_mode_view", false);
   
   float stageParamHeight = LayoutStateService::getService()->helpEnabled ? stageSize.y / 2.0 : stageSize.y;
-  ImGui::BeginChild("stage_mode_parameters", ImVec2(stageSize.x / 2., stageParamHeight), true, ImGuiWindowFlags_AlwaysUseWindowPadding);
+  ImGui::BeginChild("stage_mode_parameters", ImVec2(stageSize.x / 2., stageParamHeight), true, ImGuiChildFlags_AlwaysUseWindowPadding);
   
   // FAVORITES 50% | OUTPUT 50%
 //  ImGui::SetColumnWidth(0, stageSize.x / 2.);
@@ -72,7 +72,7 @@ void StageModeView::draw() {
   
   ImGui::SetCursorPos(ImVec2(stageSize.x / 2. + 20.0, topY));
   
-  ImGui::BeginChild("stage_mode_output", ImVec2(stageSize.x / 2., stageSize.y - 40.0), true, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar);
+  ImGui::BeginChild("stage_mode_output", ImVec2(stageSize.x / 2., stageSize.y - 40.0), true, ImGuiChildFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar);
   ImGui::NewLine();
   // OUTPUT
   std::vector<std::string> shaderIdsToRemove = {};

@@ -47,7 +47,6 @@ struct AudioBlocksSettings: public ShaderSettings {
 struct AudioBlocksShader: Shader {
   AudioBlocksSettings *settings;
   AudioBlocksShader(AudioBlocksSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   
   void setup() override {
     shader.load("shaders/AudioBlocks");

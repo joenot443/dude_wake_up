@@ -66,7 +66,7 @@ struct BounceShader: Shader {
     
     if (changedVelocity) {
       changedVelocity = false;
-      position = ImVec2(0, 0);
+      position = glm::vec2(0, 0);
     }
     // Update position based on velocity
     position.x += velocity.x * settings->speed->value;
@@ -105,8 +105,8 @@ ShaderType type() override {
     CommonViews::ShaderParameter(settings->scale, settings->speedOscillator);
     
     if (ImGui::Button("Reset")) {
-      position = ImVec2(0, 0);
-      velocity = ImVec2(-5., -5.);
+      position = glm::vec2(0, 0);
+      velocity = glm::vec2(-5., -5.);
     }
   }
 };

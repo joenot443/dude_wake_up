@@ -13,7 +13,7 @@
 #include "ConfigurableService.hpp"
 #include "AudioTrack.hpp"
 #include "Parameter.hpp"
-#include "Link.hpp"
+#include <ableton/Link.hpp>
 #include <stdio.h>
 
 class AudioSourceService : public ConfigurableService {

@@ -21,7 +21,7 @@ void AvailableShader::generatePreview() {
   canvas->allocate(426, 240);
   
   auto shader = ShaderChainerService::getService()->shaderForType(
-                                                                  type, UUID::generateUUID(), 0);
+                                                                  type, NottawaUUID::generateUUID(), 0);
   shader->allocateFrames();
   shader->setup();
   shader->shade(basePreview, canvas);

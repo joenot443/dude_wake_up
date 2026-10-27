@@ -7,7 +7,9 @@
 
 #include "ShaderChainerService.hpp"
 #include "Models/Strand.hpp"
-#include "AsciiShader.hpp"
+// NB: ASCIIShader is uppercase on disk — some filesystems (ext4, NTFS
+// resolved case-sensitively from Linux) reject the lowercase form.
+#include "ASCIIShader.hpp"
 #include "RisoColumnsShader.hpp"
 #include "FerroShader.hpp"
 #include "MarbleFlowShader.hpp"
@@ -139,7 +141,7 @@
 #include "StaticFrameShader.hpp"
 #include "SlidingFrameShader.hpp"
 #include "SolidColorShader.hpp"
-#include "16BitShader.hpp"
+#include "16bitShader.hpp"
 #include "HilbertShader.hpp"
 #include "WarpShader.hpp"
 #include "FrequencyVisualizerShader.hpp"
@@ -401,7 +403,7 @@ void ShaderChainerService::deselectConnectable()
 
 std::shared_ptr<Shader> ShaderChainerService::makeShader(ShaderType type)
 {
-  auto shader = shaderForType(type, UUID::generateUUID(), 0);
+  auto shader = shaderForType(type, NottawaUUID::generateUUID(), 0);
   addShader(shader);
   return shader;
 }
@@ -518,7 +520,7 @@ std::vector<std::string> ShaderChainerService::idsFromLoadingConfig(json j) {
     if (shader == nullptr) continue;
     addShader(shader);
 
-    // Restore optional shaders (must be after addShader which calls generateOptionalShaders)
+    // Restore optional shaders
     shader->load(val);
 
     // Set the position of the Shader
@@ -653,12 +655,11 @@ void ShaderChainerService::addShader(std::shared_ptr<Shader> shader)
     return;
   }
   
-  std::shared_ptr<FeedbackSource> feedbackSource = std::make_shared<FeedbackSource>(shader->shaderId, std::make_shared<VideoSourceSettings>(UUID::generateUUID(), 0));
+  std::shared_ptr<FeedbackSource> feedbackSource = std::make_shared<FeedbackSource>(shader->shaderId, std::make_shared<VideoSourceSettings>(NottawaUUID::generateUUID(), 0));
   
   FeedbackSourceService::getService()->registerFeedbackSource(feedbackSource);
   shader->feedbackDestination = feedbackSource;
   shader->allocateFrames();
-  shader->generateOptionalShaders();
   shader->settings->selectorParam->setValue(shader->type());
   shadersMap[shader->shaderId] = shader;
   
@@ -673,7 +674,7 @@ void ShaderChainerService::addShader(std::shared_ptr<Shader> shader)
       }
     });
   
-  ConfigService::getService()->saveDefaultConfigFile();
+  ConfigService::getService()->requestSave();
 }
 
 void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader, bool fromMap)
@@ -724,7 +725,7 @@ void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader, bool fro
       if (!s || !s->settings) return;
       OscillationService::getService()->removeOscillatorsFor(s->settings->parameters);
       ParameterService::getService()->unregisterParameters(s->settings->parameters);
-      for (auto& opt : s->optionalShaders) cleanShader(opt);
+      for (auto& opt : s->optionalShaders.created()) cleanShader(opt);
     };
   cleanShader(shader);
   
@@ -761,7 +762,7 @@ void ShaderChainerService::removeShader(std::shared_ptr<Shader> shader, bool fro
   shader.reset();
   
   // Save configuration changes
-  ConfigService::getService()->saveDefaultConfigFile();
+  ConfigService::getService()->requestSave();
 }
 std::vector<std::shared_ptr<Connectable>> ShaderChainerService::pasteConnectables(const std::vector<std::shared_ptr<Connectable>>& connectables) {
   std::map<std::shared_ptr<Connectable>, std::shared_ptr<Connectable>> originalToNewMap;
@@ -890,7 +891,7 @@ void ShaderChainerService::removeConnectable(std::shared_ptr<Connectable> connec
     connectionMap.erase(connId);
   }
 
-  ConfigService::getService()->saveDefaultConfigFile();
+  ConfigService::getService()->requestSave();
 }
 
 void ShaderChainerService::insert(std::shared_ptr<Connectable> start, std::shared_ptr<Connectable> connectable, OutputSlot slot) {
@@ -1048,7 +1049,7 @@ void ShaderChainerService::breakConnectionForConnectionId(std::string connection
     }
   }
 
-  ConfigService::getService()->saveDefaultConfigFile();
+  ConfigService::getService()->requestSave();
 }
 
 std::shared_ptr<Connection> ShaderChainerService::makeConnection(std::shared_ptr<Connectable> start,
@@ -1091,7 +1092,7 @@ std::shared_ptr<Connection> ShaderChainerService::makeConnection(std::shared_ptr
   
   if (shouldSaveConfig)
   {
-    ConfigService::getService()->saveDefaultConfigFile();
+    ConfigService::getService()->requestSave();
   }
   
   return connection;
@@ -2325,14 +2326,14 @@ void ShaderChainerService::randomStrand(const std::vector<std::shared_ptr<Availa
   auto source1 = VideoSourceService::getService()->makeShaderVideoSource(
     sources[sourceIndex1]->shaderType,
     ImVec2(origin.x, origin.y),
-    UUID::generateUUID(),
+    NottawaUUID::generateUUID(),
     0
   );
   
   auto source2 = VideoSourceService::getService()->makeShaderVideoSource(
     sources[sourceIndex2]->shaderType,
     ImVec2(origin.x, origin.y + 1200),
-    UUID::generateUUID(),
+    NottawaUUID::generateUUID(),
     0
   );
 

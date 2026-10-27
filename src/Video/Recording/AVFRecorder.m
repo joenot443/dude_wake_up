@@ -1,3 +1,7 @@
+// Windows portability: entire body gated. Project excludes this file from Windows
+// builds; this gate is belt-and-braces so an accidental compile fails cleanly.
+#ifdef __APPLE__
+
 #import "AVFRecorder.h"
 #import <AppKit/AppKit.h> // For NSAlert if debugging needed
 
@@ -403,3 +407,4 @@ static void *AVFRecordingContext = &AVFRecordingContext;
 
 
 @end 
+#endif // __APPLE__

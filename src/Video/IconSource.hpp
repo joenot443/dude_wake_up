@@ -42,7 +42,10 @@ public:
   IconSource(std::string id, std::string name) : VideoSource(id, name, VideoSource_icon),
                                                  settings(std::make_shared<IconSourceSettings>(id, 0)),
                                                  imageTexture(std::make_shared<ImageTexture>(IconService::getService()->availableIcons()[0])){
-    // Set base class settings to our IconSourceSettings so settingsRef() returns the correct parameters
+    // Set base class settings to our IconSourceSettings so settingsRef() returns the correct parameters.
+    // The base constructor's default settings registered their parameters;
+    // drop those with it, or they stay in the global map for good.
+    ParameterService::getService()->unregisterParameters(VideoSource::settings->parameters);
     VideoSource::settings = settings;
   };
 

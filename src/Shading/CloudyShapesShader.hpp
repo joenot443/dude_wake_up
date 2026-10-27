@@ -35,7 +35,6 @@ struct CloudyShapesSettings: public ShaderSettings {
 struct CloudyShapesShader: Shader {
   CloudyShapesSettings *settings;
   CloudyShapesShader(CloudyShapesSettings *settings) : settings(settings), Shader(settings) {};
-  ofShader shader;
   
   void setup() override {
     shader.load("shaders/CloudyShapes");
