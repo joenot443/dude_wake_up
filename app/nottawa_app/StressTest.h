@@ -67,6 +67,8 @@ private:
     void audioLaunch();
     void cacheSettings();
     void beatTiming();
+    void outputWindows();
+    void outputWindowsLaunch();
     void measureBeat(const QString& label, bool video);
 
     // Helpers working on the live graph.

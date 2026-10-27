@@ -161,8 +161,8 @@ on both inputs.
 
 | Input | Windows | macOS |
 |---|---|---|
-| Audio file | 12 ms late (spread 5) | ~19 ms late |
-| System Audio | 47 ms late (spread 0.6) | ~63 ms late |
+| Audio file | 12 ms late (spread 5) | ~8 ms late |
+| System Audio | 47 ms late (spread 0.6) | 56 ms late |
 | System minus File (the capture path) | ~35 ms | ~45 ms |
 
 (The engine runs at 60 fps, so a shown beat is up to one frame stale; that
@@ -170,7 +170,9 @@ is included.)
 
 Defaults (Joe): Audio Files and Inputs 0 ms; System Audio the capture path,
 +35 ms on Windows and +45 ms on macOS, so it lines up as a file does
-whatever the speakers. Speaker latency is left to each setup.
+whatever the speakers. Speaker latency is left to each setup. With the
+default, System Audio measured 11 ms late on macOS (two runs), in line with
+files.
 
 ## Running the evaluation
 

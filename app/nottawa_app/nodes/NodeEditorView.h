@@ -61,6 +61,10 @@ public:
     // Opens (or raises) a separate window showing the node's output.
     void openPreview(const QString& id);
     QStringList openPreviewIds() const;
+    // The open output windows (node, display, geometry, full screen), to
+    // reopen at the next launch (Reopen Output Windows).
+    QVariantList outputWindowState() const;
+    void restoreOutputWindows(const QVariantList& state);
     void closePreview(const QString& id);
     // A node's bounds in viewport coordinates (null if it isn't shown).
     QRect nodeViewportRect(const QString& id) const;

@@ -96,6 +96,7 @@ Step 3, batch 1 (Audio and Output):
 | output.resolution | Output | choice | 720p | gains `custom` |
 | output.customWidth / customHeight | Output | int px | 1920 / 1080 | dependsOn `output.resolution=custom` |
 | output.frameRate | Output | choice | 60 | 24/30/60/120: the engine loop's rate |
+| output.reopenWindows | Output | bool | true | group Output Window: each app records its open output windows at quit (node, display, frame, full screen; platform state) and reopens them at launch, on the same display if connected |
 | audio.startOnLaunch | Audio | bool | false | starts the input used last |
 | audio.tempoRange | Audio | choice | auto | auto, 60-120, 80-160, 90-180, 100-200: Auto's tempo shown folded into it by octaves (beat count and phase with it) |
 | audio.beatOffsetFile / Input / System | Audio | float ms -250..250 | 0 / 0 / +35 (Win), +45 (Mac) | group Beat Timing; + shows the pulse earlier; Auto only; taps are moved back by it before hinting |

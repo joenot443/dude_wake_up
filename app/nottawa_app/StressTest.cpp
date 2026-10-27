@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
+#include "PreviewWindow.h"
 #include "ui/Controls.h"
 #include "Theme.h"
 #include "UpdateCheck.h"
@@ -135,6 +136,8 @@ void StressTest::enqueueScenario(const QString& name) {
     else if (name == "audiolaunch") audioLaunch();
     else if (name == "cachesettings") cacheSettings();
     else if (name == "beattiming") beatTiming();
+    else if (name == "outputwindows") outputWindows();
+    else if (name == "outputwindowslaunch") outputWindowsLaunch();
     else add([this, name] { window_->log("[stress] unknown scenario " + name); });
     // Settle, clear, settle, measure.
     add([] {}, 1000);
@@ -549,6 +552,35 @@ void StressTest::measureBeat(const QString& label, bool video) {
         window_->log(QString("[stress] beattiming: %1 late %2 ms (spread %3 ms, %4 of %5 samples at 128)")
                          .arg(label).arg(-mean * kPeriod * 1000, 0, 'f', 1).arg(spread, 0, 'f', 1).arg(acc->n).arg(acc->total));
     }, 30000);
+}
+
+// Reopen Output Windows, with "outputwindowslaunch" in a second run
+// (-Keep): an output window left open at quit, at a known place.
+void StressTest::outputWindows() {
+    add([this] {
+        EngineBridge::instance()->clearGraph();
+        const QString id = randomSource();
+        window_->editor_->openPreview(id);
+        for (QWidget* w : QApplication::topLevelWidgets())
+            if (auto* p = qobject_cast<PreviewWindow*>(w)) p->setGeometry(220, 180, 640, 360);
+        window_->log(QString("[stress] outputwindows: left open on %1").arg(id));
+    }, 500);
+    // Quit now, through the main window as a user would (the scenario's
+    // clean-up would clear the graph, closing the window).
+    add([this] { window_->close(); }, 1000);
+}
+
+void StressTest::outputWindowsLaunch() {
+    add([this] {
+        const QStringList open = window_->editor_->openPreviewIds();
+        QRect geometry;
+        for (QWidget* w : QApplication::topLevelWidgets())
+            if (auto* p = qobject_cast<PreviewWindow*>(w); p && p->isVisible()) geometry = p->geometry();
+        window_->log(QString("[stress] outputwindowslaunch: reopened %1 at %2,%3 %4x%5").arg(open.join(","))
+                         .arg(geometry.x()).arg(geometry.y()).arg(geometry.width()).arg(geometry.height()));
+        if (open.size() != 1) window_->log("[stress] FAIL outputwindowslaunch: expected one reopened output window");
+        else if (geometry != QRect(220, 180, 640, 360)) window_->log("[stress] FAIL outputwindowslaunch: not where it was");
+    }, 1500);
 }
 
 // The second launch after "audiosettings": the sample tracks selected and

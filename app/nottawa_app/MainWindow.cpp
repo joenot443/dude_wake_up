@@ -196,6 +196,12 @@ void MainWindow::log(const QString& line) {
     }
 }
 
+// The open output windows, for Reopen Output Windows at the next launch.
+void MainWindow::closeEvent(QCloseEvent* e) {
+    if (EngineBridge::instance()->isRunning()) QSettings().setValue("outputWindows/open", editor_->outputWindowState());
+    QMainWindow::closeEvent(e);
+}
+
 void MainWindow::resizeEvent(QResizeEvent* e) {
     QMainWindow::resizeEvent(e);
     welcome_->setGeometry(centre_->rect());
@@ -703,6 +709,7 @@ void MainWindow::startEngine() {
     log(QString("[engine] running at %1x%2 — %3 sources, %4 effects available")
         .arg(res.width()).arg(res.height()).arg(sources.size()).arg(effects.size()));
     refreshGraph();
+    if (Prefs::boolean("output.reopenWindows")) editor_->restoreOutputWindows(QSettings().value("outputWindows/open").toList());
     editor_->setFocus();
     // Scripted runs skip it so their clicks land on the canvas.
     const bool scripted = !qEnvironmentVariableIsEmpty("NOTTAWA_ADD") || StressTest::requested();

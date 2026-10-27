@@ -334,6 +334,10 @@ private:
     auto& fade = addNumber("output.advanceFade", "Output", "Advance Fade", "Crossfade when the output window moves to another node.",
                            SettingType_Float, 0.0, 2.0, 0.1, 1, "s", 0.3);
     fade.group = "Output Window"; fade.dependsOn = "output.autoAdvance";
+    auto& reopen = addBool("output.reopenWindows", "Output", "Reopen Output Windows",
+                           "At launch, reopen the output windows that were open at quit, on the same displays and full "
+                           "screen if they were.", true);
+    reopen.group = "Output Window"; reopen.keywords = "launch display projector fullscreen restore preview";
     auto& stretch = addBool("output.stretchPreviews", "Output", "Stretch Preview Windows",
                             "Fill preview windows, ignoring the output's aspect ratio.", false);
     stretch.group = "Output Window"; stretch.keywords = "aspect fill";

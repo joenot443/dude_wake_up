@@ -7,6 +7,7 @@
 #include "panels/CatalogPopup.h"
 #include "Theme.h"
 
+#include <QGuiApplication>
 #include <QCoreApplication>
 #include <QApplication>
 #include <QSettings>
@@ -728,6 +729,43 @@ void NodeEditorView::openPreview(const QString& id) {
     window->show();
     window->raise();
     window->activateWindow();
+}
+
+QVariantList NodeEditorView::outputWindowState() const {
+    QVariantList list;
+    for (auto it = previews_.cbegin(); it != previews_.cend(); ++it) {
+        PreviewWindow* w = it.value();
+        if (!w || !w->isVisible()) continue;
+        QVariantMap m;
+        m["node"] = w->source();  // (it may have advanced to another node)
+        m["screen"] = w->screen() ? w->screen()->name() : QString();
+        m["geometry"] = w->isFullScreen() ? w->normalGeometry() : w->geometry();
+        m["fullScreen"] = w->isFullScreen();
+        list << m;
+    }
+    return list;
+}
+
+void NodeEditorView::restoreOutputWindows(const QVariantList& state) {
+    for (const QVariant& v : state) {
+        const QVariantMap m = v.toMap();
+        const QString id = m["node"].toString();
+        if (!nodes_.contains(id)) continue;  // not in this session
+        openPreview(id);
+        PreviewWindow* w = previews_.value(id);
+        if (!w) continue;
+        // On its display if that's still connected; otherwise windowed where it opened.
+        QScreen* screen = nullptr;
+        for (QScreen* s : QGuiApplication::screens()) if (s->name() == m["screen"].toString()) screen = s;
+        const QRect geometry = m["geometry"].toRect();
+        if (!screen) continue;
+        if (geometry.isValid() && screen->availableGeometry().intersects(geometry)) w->setGeometry(geometry);
+        else w->move(screen->availableGeometry().center() - w->rect().center());
+        if (m["fullScreen"].toBool()) {
+            w->setScreen(screen);
+            w->showFullScreen();
+        }
+    }
 }
 
 QStringList NodeEditorView::openPreviewIds() const {

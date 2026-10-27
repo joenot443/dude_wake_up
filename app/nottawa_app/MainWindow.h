@@ -47,6 +47,7 @@ public:
 
 protected:
     void resizeEvent(QResizeEvent* e) override;
+    void closeEvent(QCloseEvent* e) override;
     bool eventFilter(QObject* watched, QEvent* e) override;
     bool handleParameterKey(QObject* watched, class QKeyEvent* e);
     void stepParameter(const ParamInfo& p, int direction, Qt::KeyboardModifiers mods);
