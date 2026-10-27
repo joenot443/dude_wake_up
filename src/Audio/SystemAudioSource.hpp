@@ -114,7 +114,7 @@ public:
     void setup() override;
     void disable() override;
     AudioSourceType type() override { return AudioSourceType_System; }
-    float getSampleRate() const {
+    float getSampleRate() const override {
 #ifdef __APPLE__
         return static_cast<float>(streamFormat.mSampleRate);
 #elif defined(_WIN32)
