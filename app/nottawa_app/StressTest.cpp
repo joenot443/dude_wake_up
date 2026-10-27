@@ -1,5 +1,6 @@
 #define _USE_MATH_DEFINES
 #include "Diagnostics.h"
+#include <QScreen>
 #include <memory>
 #include <QTimer>
 #include <QFrame>
@@ -139,6 +140,8 @@ void StressTest::enqueueScenario(const QString& name) {
     else if (name == "beattiming") beatTiming();
     else if (name == "outputwindows") outputWindows();
     else if (name == "savetiming") saveTiming();
+    else if (name == "enginestall") engineStall();
+    else if (name == "canvasimage") canvasImage();
     else if (name == "outputwindowslaunch") outputWindowsLaunch();
     else add([this, name] { window_->log("[stress] unknown scenario " + name); });
     // Settle, clear, settle, measure.
@@ -584,6 +587,43 @@ void StressTest::saveTiming() {
             ntw_save_default_config();
             window_->log(QString("[stress] savetiming: %1 nodes, save %2 ms").arg(EngineBridge::instance()->nodes().size()).arg(t.elapsed()));
         }, 1000);
+}
+
+// An image of the main window with a few nodes showing their previews
+// (<scratch>/canvas-screen.png), to check how they're drawn.
+void StressTest::canvasImage() {
+    add([this] {
+        EngineBridge::instance()->clearGraph();
+        const QString src = randomSource();
+        const auto effects = EngineBridge::instance()->effects();
+        window_->editor_->addFromCatalog(effects[int(rng_() % uint32_t(effects.size()))].typeRaw, false, src);
+        window_->editor_->zoomToFit();
+        window_->raise();
+        window_->activateWindow();
+    }, 300);
+    add([this] {
+        // What's on screen in the window's own rect, raised first (grab()
+        // leaves the GL viewports blank).
+        const QRect r = window_->frameGeometry();
+        if (QScreen* screen = window_->screen())
+            screen->grabWindow(0, r.x() - screen->geometry().x(), r.y() - screen->geometry().y(), r.width(), r.height())
+                .save(QDir(scratch_).filePath("canvas-screen.png"));
+    }, 2000);
+}
+
+// The hang watchdog catches a long engine frame while it's running: a
+// 1.2 s stall, then the engine log should hold an ENGINE STALL report with
+// the engine thread in it.
+void StressTest::engineStall() {
+    add([] { ntw_debug_stall_engine(1200); });
+    add([this] {
+        QFile log(QDir(qApp->property("appDataDir").toString()).filePath("logs/engine.log"));
+        const QString text = log.open(QIODevice::ReadOnly) ? QString::fromUtf8(log.readAll()) : QString();
+        const qsizetype at = text.lastIndexOf("=== ENGINE STALL");
+        const bool engineStack = at >= 0 && text.indexOf("(engine)", at) > at && text.indexOf("ntw_debug_stall_engine", at) > at;
+        window_->log(QString("[stress] enginestall: report %1, engine stack %2").arg(at >= 0).arg(engineStack));
+        if (at < 0 || !engineStack) window_->log("[stress] FAIL enginestall: no ENGINE STALL report naming the engine thread's stall");
+    }, 3000);
 }
 
 // Reopen Output Windows, with "outputwindowslaunch" in a second run

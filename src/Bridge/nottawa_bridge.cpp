@@ -77,6 +77,22 @@ static void notifyGraphChanged() {
   if (graphChangedCallback) graphChangedCallback();
 }
 
+static std::atomic<unsigned long> engineNativeThreadId{0};
+
+long long ntw_engine_frame_running_ms(void) {
+  const long long started = EngineLoop::getInstance()->frameStartedMs.load();
+  if (started == 0) return 0;
+  const long long now = std::chrono::duration_cast<std::chrono::milliseconds>(
+      std::chrono::steady_clock::now().time_since_epoch()).count();
+  return now - started;
+}
+
+unsigned long ntw_engine_native_thread_id(void) { return engineNativeThreadId.load(); }
+
+void ntw_debug_stall_engine(int ms) {
+  EngineLoop::getInstance()->executeOnEngineThread([ms] { std::this_thread::sleep_for(std::chrono::milliseconds(ms)); });
+}
+
 static void engineThreadFunc() {
 #ifdef _WIN32
   // sleep_for below rounds up to the 15.6 ms system timer tick unless the
@@ -90,6 +106,9 @@ static void engineThreadFunc() {
 #endif
   try {
     engineThreadId = std::this_thread::get_id();
+#ifdef _WIN32
+    engineNativeThreadId = GetCurrentThreadId();
+#endif
     EngineLoop::getInstance()->makeContextCurrent();
     using clock = std::chrono::steady_clock;
     using us = std::chrono::microseconds;
@@ -739,6 +758,10 @@ char* ntw_dump_registry_sizes(void) {
     json topJ = json::object();
     for (size_t i = 0; i < top.size() && i < 6; ++i) topJ[top[i].second] = top[i].first;
     j["topOwners"] = topJ;
+    const EngineLoop::GpuMemory gpu = EngineLoop::gpuMemory();
+    if (gpu.ok) j["gpu"] = {{"freeMB", gpu.freeMB}, {"totalMB", gpu.totalMB}, {"evictions", gpu.evictions}, {"evictedMB", gpu.evictedMB}};
+    const auto& res = LayoutStateService::getService()->resolution;
+    j["resolution"] = std::to_string(int(res.x)) + "x" + std::to_string(int(res.y));
     return strdup_safe(j.dump());
   });
 }

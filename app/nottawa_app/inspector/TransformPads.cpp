@@ -61,8 +61,8 @@ bool FramePad::drawFrame(QPainter& p, const QRectF& rect) {
     // Clip to the widget (the rect may hang off it).
     gl->glEnable(GL_SCISSOR_TEST);
     gl->glScissor(0, 0, int(width() * dpr), int(height() * dpr));
-    gl->glViewport(int(std::lround(rect.left() * dpr)), int(std::lround((height() - rect.bottom()) * dpr)),
-                   int(std::lround(rect.width() * dpr)), int(std::lround(rect.height() * dpr)));
+    presenter_.setViewport(int(std::lround(rect.left() * dpr)), int(std::lround((height() - rect.bottom()) * dpr)),
+                           int(std::lround(rect.width() * dpr)), int(std::lround(rect.height() * dpr)));
     const bool ok = presenter_.draw(ex, FramePresenter::InspectorPad);
     gl->glDisable(GL_SCISSOR_TEST);
     gl->glViewport(0, 0, int(width() * dpr), int(height() * dpr));

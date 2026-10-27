@@ -24,44 +24,44 @@ IOSurfaceTextureManager::~IOSurfaceTextureManager() {}
 
 void IOSurfaceTextureManager::startSharing(const std::string& connectableId) {
   std::lock_guard<std::mutex> lock(mutex);
-  if (tracked.count(connectableId)) return;
-  SharedTexture tex;
-  tex.exchange = std::make_shared<FrameExchange>();
-  tex.surface = tex.exchange.get();
-  tracked[connectableId] = std::move(tex);
+  if (entries.count(connectableId)) return;
+  auto entry = std::make_shared<Entry>();
+  entry->tex.exchange = std::make_shared<FrameExchange>();
+  entry->tex.surface = entry->tex.exchange.get();
+  entries[connectableId] = std::move(entry);
 }
 
 void IOSurfaceTextureManager::stopSharing(const std::string& connectableId) {
   std::lock_guard<std::mutex> lock(mutex);
-  auto it = tracked.find(connectableId);
-  if (it == tracked.end()) return;
-  retiredExchanges.push_back(it->second.exchange);
+  auto it = entries.find(connectableId);
+  if (it == entries.end()) return;
+  retiredExchanges.push_back(it->second->tex.exchange);
   pendingCleanup.push_back(std::move(it->second));
-  tracked.erase(it);
+  entries.erase(it);
 }
 
 IOSurfaceRef IOSurfaceTextureManager::getIOSurface(const std::string& connectableId) {
   std::lock_guard<std::mutex> lock(mutex);
-  auto it = tracked.find(connectableId);
-  if (it == tracked.end() || it->second.needsSetup) return nullptr;
-  return it->second.surface;
+  auto it = entries.find(connectableId);
+  if (it == entries.end() || !it->second->ready) return nullptr;
+  return it->second->tex.surface;
 }
 
 int IOSurfaceTextureManager::getWidth(const std::string& connectableId) {
   std::lock_guard<std::mutex> lock(mutex);
-  auto it = tracked.find(connectableId);
-  return it == tracked.end() ? 0 : it->second.width;
+  auto it = entries.find(connectableId);
+  return it == entries.end() ? 0 : it->second->width;
 }
 
 int IOSurfaceTextureManager::getHeight(const std::string& connectableId) {
   std::lock_guard<std::mutex> lock(mutex);
-  auto it = tracked.find(connectableId);
-  return it == tracked.end() ? 0 : it->second.height;
+  auto it = entries.find(connectableId);
+  return it == entries.end() ? 0 : it->second->height;
 }
 
 bool IOSurfaceTextureManager::isSharing(const std::string& connectableId) {
   std::lock_guard<std::mutex> lock(mutex);
-  return tracked.count(connectableId) > 0;
+  return entries.count(connectableId) > 0;
 }
 
 void IOSurfaceTextureManager::setSecondaryLookup(ConnectableLookup lookup) {
@@ -103,13 +103,37 @@ void IOSurfaceTextureManager::publish(SharedTexture& tex, unsigned int srcFboId,
   tex.exchange->publish(slot, glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0));
 }
 
-void IOSurfaceTextureManager::blitTrackedTextures() {
+bool IOSurfaceTextureManager::prepare(Entry& entry, int width, int height) {
+  SharedTexture& tex = entry.tex;
+  if (!tex.needsSetup && tex.width == width && tex.height == height) return true;
+  {
+    std::lock_guard<std::mutex> lock(mutex);
+    entry.ready = false;  // (its textures are about to change)
+  }
+  cleanupSharedTexture(tex);
+  setupSharedTexture(tex, width, height);
+  if (tex.needsSetup) return false;
   std::lock_guard<std::mutex> lock(mutex);
-  for (auto& tex : pendingCleanup) cleanupSharedTexture(tex);
-  pendingCleanup.clear();
-  if (tracked.empty()) return;
+  entry.ready = true;
+  entry.width = width;
+  entry.height = height;
+  return true;
+}
 
-  for (auto& [id, tex] : tracked) {
+void IOSurfaceTextureManager::blitTrackedTextures() {
+  // The entries to work on, taken under the lock; the GL work without it.
+  std::vector<std::shared_ptr<Entry>> cleanup;
+  std::vector<std::pair<std::string, std::shared_ptr<Entry>>> work;
+  {
+    std::lock_guard<std::mutex> lock(mutex);
+    cleanup.swap(pendingCleanup);
+    work.reserve(entries.size());
+    for (auto& [id, entry] : entries) work.emplace_back(id, entry);
+  }
+  for (auto& entry : cleanup) cleanupSharedTexture(entry->tex);
+  if (work.empty()) return;
+
+  for (auto& [id, entry] : work) {
     auto connectable = findConnectableForBlit(id);
     if (!connectable) continue;
     auto fbo = connectable->frame();
@@ -118,13 +142,9 @@ void IOSurfaceTextureManager::blitTrackedTextures() {
     const int srcH = fbo->getHeight();
     if (srcW <= 0 || srcH <= 0) continue;
 
-    bool reallocated = false;
-    if (tex.needsSetup || tex.width != srcW || tex.height != srcH) {
-      cleanupSharedTexture(tex);
-      setupSharedTexture(tex, srcW, srcH);
-      if (tex.needsSetup) continue;
-      reallocated = true;
-    }
+    SharedTexture& tex = entry->tex;
+    const bool reallocated = tex.needsSetup || tex.width != srcW || tex.height != srcH;
+    if (!prepare(*entry, srcW, srcH)) continue;
     if (!reallocated && tex.lastBlittedTick == connectable->renderTick) continue;
 
     publish(tex, fbo->getId(), srcW, srcH);
@@ -136,16 +156,15 @@ void IOSurfaceTextureManager::blitTrackedTextures() {
 
 void IOSurfaceTextureManager::blitExternalFrame(const std::string& id, unsigned int srcFboId,
                                                 int srcW, int srcH) {
-  std::lock_guard<std::mutex> lock(mutex);
-  auto it = tracked.find(id);
-  if (it == tracked.end() || srcW <= 0 || srcH <= 0) return;
-  auto& tex = it->second;
-  if (tex.needsSetup || tex.width != srcW || tex.height != srcH) {
-    cleanupSharedTexture(tex);
-    setupSharedTexture(tex, srcW, srcH);
-    if (tex.needsSetup) return;
+  std::shared_ptr<Entry> entry;
+  {
+    std::lock_guard<std::mutex> lock(mutex);
+    auto it = entries.find(id);
+    if (it == entries.end() || srcW <= 0 || srcH <= 0) return;
+    entry = it->second;
   }
-  publish(tex, srcFboId, srcW, srcH);
+  if (!prepare(*entry, srcW, srcH)) return;
+  publish(entry->tex, srcFboId, srcW, srcH);
   glFlush();
 }
 
@@ -177,12 +196,11 @@ bool IOSurfaceTextureManager::ensureSlot(SharedTexture& tex, int slot) {
   glBindTexture(GL_TEXTURE_2D, 0);
   glBindFramebuffer(GL_FRAMEBUFFER, tex.slotFbos[slot]);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex.slotTextures[slot], 0);
-  const bool ok = glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+  // No glCheckFramebufferStatus: one RGBA8 texture of non-zero size is
+  // always complete, and the check makes the NVIDIA driver commit the new
+  // storage on the spot. With the GPU busy that waited seconds while holding
+  // the lock the UI's context needs (its wglMakeCurrent): the UI froze.
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  if (!ok) {
-    ofLogError("IOSurfaceTextureManager") << "shared texture FBO incomplete (" << tex.width << "x" << tex.height << ")";
-    return false;
-  }
   tex.slotReady[slot] = true;
   return true;
 }

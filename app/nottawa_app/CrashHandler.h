@@ -8,7 +8,8 @@ void install();
 
 // Hang reports: once the UI thread's heartbeat (call heartbeat() from a UI
 // timer) has been silent for `stallMs`, every thread's stack is written to
-// stderr, once per stall. Call startHangWatchdog() on the UI thread.
+// stderr, once per stall; likewise when an engine frame has run for 700 ms
+// ("ENGINE STALL"). Call startHangWatchdog() on the UI thread.
 void startHangWatchdog(int stallMs);
 void heartbeat();
 }

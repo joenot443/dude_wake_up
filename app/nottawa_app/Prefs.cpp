@@ -1,5 +1,6 @@
 #include "Prefs.h"
 
+#include <QCoreApplication>
 #include <QSettings>
 
 #include <functional>
@@ -52,7 +53,10 @@ Prefs* Prefs::instance() {
     return prefs;
 }
 
-Prefs::Prefs(QObject* parent) : QObject(parent), settings_(EngineBridge::instance()->settings()) {
+Prefs::Prefs(QObject* parent)
+    : QObject(parent), store_(new QSettings(this)), settings_(EngineBridge::instance()->settings()) {
+    // (Never destroyed: written out at quit.)
+    connect(qApp, &QCoreApplication::aboutToQuit, this, [this] { store_->sync(); });
     for (const SettingInfo& s : settings_)
         if (s.restart & 2) atLaunch_.insert(s.id, stored(s));
     connect(EngineBridge::instance(), &EngineBridge::settingChanged, this, [this](const QString& id) {
@@ -75,7 +79,7 @@ bool Prefs::restartPending() const {
 }
 
 QVariant Prefs::stored(const SettingInfo& s) const {
-    QSettings settings;
+    QSettings& settings = *store_;
     QVariant v;
     if (settings.contains(cacheKey(s.id))) v = settings.value(cacheKey(s.id));
     else if (const Legacy* l = legacyFor(s.id); l && settings.contains(l->key))
@@ -93,7 +97,7 @@ QVariant Prefs::current(const SettingInfo& s) const {
 void Prefs::remember(const QString& id) {
     const SettingInfo* s = info(id);
     if (s && s->type != SettingInfo::Action && EngineBridge::instance()->isRunning())
-        QSettings().setValue(cacheKey(id), current(*s));
+        store_->setValue(cacheKey(id), current(*s));
 }
 
 double Prefs::number(const QString& id) {
@@ -109,14 +113,14 @@ QString Prefs::string(const QString& id) {
 void Prefs::set(const QString& id, double value) {
     auto* eng = EngineBridge::instance();
     if (eng->isRunning()) { eng->setSetting(id, value); return; }  // the engine reports the change
-    QSettings().setValue(cacheKey(id), value);
+    instance()->store_->setValue(cacheKey(id), value);
     emit instance()->changed(id);
 }
 
 void Prefs::set(const QString& id, const QString& value) {
     auto* eng = EngineBridge::instance();
     if (eng->isRunning()) { eng->setSetting(id, value); return; }
-    QSettings().setValue(cacheKey(id), value);
+    instance()->store_->setValue(cacheKey(id), value);
     emit instance()->changed(id);
 }
 
@@ -126,7 +130,7 @@ void Prefs::engineStarted() {
     QHash<QString, QVariant> before;
     for (const SettingInfo& s : settings_) before.insert(s.id, stored(s));
 
-    QSettings settings;
+    QSettings& settings = *store_;
     if (!settings.value("prefs/migrated").toBool()) {
         // An existing install had Clear on Disconnect off unless it was
         // turned on (the shared default is on): keep what it did.

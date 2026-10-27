@@ -17,9 +17,16 @@ public:
     void destroy();
     bool isInitialized() const { return program_ != 0; }
 
+    // Sets the GL viewport draw() fills (device pixels, GL's bottom-left
+    // origin). Call it rather than glViewport before draw(): draw() needs the
+    // rect, and asking GL for it (glGetIntegerv) makes the thread wait for
+    // the driver, which waits for the GPU: with the GPU busy (a strand
+    // loading, another app), that stalled the UI for seconds.
+    void setViewport(int x, int y, int width, int height);
+
     // Returns false if the exchange has no frame yet. `newFrame` is set when
     // the frame wasn't shown by this reader before. `opacity` scales alpha.
-    // A non-zero `cornerRadiusPx` rounds the corners of the current viewport
+    // A non-zero `cornerRadiusPx` rounds the corners of the viewport
     // (antialiased); blending is enabled whenever either applies.
     bool draw(FrameExchange* exchange, Reader reader, float opacity = 1.0f,
               float cornerRadiusPx = 0.0f, bool* newFrame = nullptr);
@@ -32,4 +39,5 @@ private:
     int      locOpacity_ = -1;
     int      locRect_    = -1;
     int      locRadius_  = -1;
+    int      viewport_[4] = {0, 0, 0, 0};
 };

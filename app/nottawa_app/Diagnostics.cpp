@@ -42,7 +42,7 @@ QString previousSession() {
     QStringList reports;
     while (!log.atEnd()) {
         const QString line = QString::fromUtf8(log.readLine()).trimmed();
-        if (line.startsWith("=== CRASH") || line.startsWith("=== HANG")) reports << line;
+        if (line.startsWith("=== CRASH") || line.startsWith("=== HANG") || line.startsWith("=== ENGINE STALL")) reports << line;
     }
     if (reports.isEmpty()) return "ended normally (no crash or hang report)";
     // (Not the full path: it names the Windows user.)

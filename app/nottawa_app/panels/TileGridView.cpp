@@ -333,11 +333,10 @@ bool TileGridView::drawPreview(QPainter& p, const QString& previewId, const QRec
     p.beginNativePainting();
     QOpenGLFunctions* gl = QOpenGLContext::currentContext()->functions();
     if (!presenter_.isInitialized()) presenter_.initialize();
-    GLint saved[4];
-    gl->glGetIntegerv(GL_VIEWPORT, saved);
-    gl->glViewport(left, fbHeight - bottom, right - left, bottom - top);
+    presenter_.setViewport(left, fbHeight - bottom, right - left, bottom - top);
     const bool ok = presenter_.draw(ex, FramePresenter::Preview, 1.0f, float(kPreviewRadius * dpr));
-    gl->glViewport(saved[0], saved[1], saved[2], saved[3]);
+    // Back to the whole viewport (known: never read back from GL, see FramePresenter::setViewport).
+    gl->glViewport(0, 0, int(std::lround(viewport()->width() * dpr)), fbHeight);
     p.endNativePainting();
     return ok;
 }
@@ -353,7 +352,7 @@ QImage TileGridView::capture(const QString& previewId, QSize size) {
     gl->glGetIntegerv(GL_VIEWPORT, saved);
     QOpenGLFramebufferObject fbo(size);
     fbo.bind();
-    gl->glViewport(0, 0, size.width(), size.height());
+    presenter_.setViewport(0, 0, size.width(), size.height());
     const bool ok = presenter_.draw(ex, FramePresenter::Preview);
     QImage image = ok ? fbo.toImage().convertToFormat(QImage::Format_RGB32) : QImage();
     fbo.release();

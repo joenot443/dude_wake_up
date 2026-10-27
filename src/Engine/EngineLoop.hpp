@@ -9,6 +9,7 @@
 #ifndef EngineLoop_hpp
 #define EngineLoop_hpp
 
+#include <atomic>
 #include <functional>
 #include <mutex>
 #include <queue>
@@ -17,6 +18,13 @@
 class EngineLoop {
 public:
   static EngineLoop* getInstance();
+
+  // Video memory, from the NVIDIA driver (GL_NVX_gpu_memory_info; ok false
+  // elsewhere). MB; evictions: textures and buffers the driver has had to
+  // move out of video memory since the context was made (memory pressure).
+  // Engine thread.
+  struct GpuMemory { bool ok = false; int freeMB = 0, totalMB = 0, evictions = 0, evictedMB = 0; };
+  static GpuMemory gpuMemory();
 
   // Initialize all services in dependency order.
   // Must be called from a thread with a valid OpenGL context.
@@ -65,6 +73,11 @@ private:
   // FPS tracking
   float fps = 0.0f;
   int frameCount = 0;
+public:
+  // When the frame in progress started (steady clock ms), or 0 between
+  // frames: the hang watchdog reports a frame that runs too long.
+  std::atomic<long long> frameStartedMs{0};
+private:
   double lastFPSTime = 0.0;
 
   // Auto-save timing (time-based, works without OF main loop)

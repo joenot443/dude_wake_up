@@ -2,6 +2,7 @@
 
 #include "EngineBridge.h"
 
+#include <cmath>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 #include <QScreen>
@@ -56,6 +57,8 @@ void StageWidget::paintGL() {
     gl->glClearColor(0.055f, 0.059f, 0.075f, 1.f);
     gl->glClear(GL_COLOR_BUFFER_BIT);
     if (nodeId_.isEmpty()) return;
+    const qreal dpr = devicePixelRatioF();
+    presenter_.setViewport(0, 0, int(std::lround(width() * dpr)), int(std::lround(height() * dpr)));
     bool isNew = false;
     presenter_.draw(EngineBridge::instance()->frames(nodeId_), reader_, 1.0f, 0.0f, &isNew);
     if (isNew) framesShown_.fetch_add(1);

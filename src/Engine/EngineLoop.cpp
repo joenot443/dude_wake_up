@@ -283,6 +283,24 @@ void EngineLoop::setup() {
   }
 }
 
+EngineLoop::GpuMemory EngineLoop::gpuMemory() {
+  constexpr GLenum kTotal = 0x9048, kFree = 0x9049, kEvictions = 0x904A, kEvicted = 0x904B;  // NVX_gpu_memory_info
+  GpuMemory m;
+  while (glGetError() != GL_NO_ERROR) {}
+  GLint total = 0, free = 0, evictions = 0, evicted = 0;
+  glGetIntegerv(kTotal, &total);
+  if (glGetError() != GL_NO_ERROR) return m;  // not NVIDIA
+  glGetIntegerv(kFree, &free);
+  glGetIntegerv(kEvictions, &evictions);
+  glGetIntegerv(kEvicted, &evicted);
+  m.ok = true;
+  m.totalMB = total / 1024;
+  m.freeMB = free / 1024;
+  m.evictions = evictions;
+  m.evictedMB = evicted / 1024;
+  return m;
+}
+
 void EngineLoop::tick() {
   if (!setupComplete) return;
 
@@ -300,6 +318,7 @@ void EngineLoop::tick() {
   // in a later stage than the one that queued it.
   using clock = std::chrono::steady_clock;
   const auto t0 = clock::now();
+  frameStartedMs = std::chrono::duration_cast<std::chrono::milliseconds>(t0.time_since_epoch()).count();
 
   // 1. Run queued tasks
   runQueuedTasks();
@@ -363,14 +382,17 @@ void EngineLoop::tick() {
   MidiService::getService()->update();
 
   const auto tEnd = clock::now();
+  frameStartedMs = 0;
   auto ms = [](clock::time_point a, clock::time_point b) {
     return static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(b - a).count());
   };
   if (ms(t0, tEnd) > 250) {
+    const GpuMemory gpu = gpuMemory();
     printf("[engine] slow frame %d ms: tasks %d, update %d, sources %d, effects %d, previews %d, blit %d, save %d, "
-           "audio+midi %d\n",
+           "audio+midi %d | gpu free %d of %d MB, evictions %d (%d MB)\n",
            ms(t0, tEnd), ms(t0, tTasks), ms(tTasks, tUpdate), ms(tUpdate, tSources), ms(tSources, tEffects),
-           ms(tEffects, tPreviews), ms(tPreviews, tBlit), ms(tBlit, tSave), ms(tSave, tEnd));
+           ms(tEffects, tPreviews), ms(tPreviews, tBlit), ms(tBlit, tSave), ms(tSave, tEnd),
+           gpu.freeMB, gpu.totalMB, gpu.evictions, gpu.evictedMB);
     fflush(stdout);
   }
 }

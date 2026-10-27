@@ -52,7 +52,7 @@ void PositionPad::paintGL() {
     if (FrameExchange* ex = EngineBridge::instance()->frames(nodeId_)) {
         p.beginNativePainting();
         const qreal dpr = devicePixelRatioF();
-        context()->functions()->glViewport(0, 0, int(width() * dpr), int(height() * dpr));
+        presenter_.setViewport(0, 0, int(width() * dpr), int(height() * dpr));
         presenter_.draw(ex, FramePresenter::InspectorPad, 1.0f, float(6 * dpr));
         p.endNativePainting();
         p.fillPath(frame, QColor(0, 0, 0, 77));  // dim so the handle stands out

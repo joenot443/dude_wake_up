@@ -1,4 +1,5 @@
 #include "CrashHandler.h"
+#include "nottawa_bridge.h"
 
 #include <windows.h>
 #include <dbghelp.h>
@@ -104,6 +105,7 @@ int unwind(CONTEXT context, DWORD64* out) {
 }
 
 std::atomic<long long> lastBeat{0};
+constexpr long long kEngineStallMs = 700;
 DWORD uiThreadId = 0;
 
 long long nowMs() {
@@ -111,8 +113,9 @@ long long nowMs() {
                std::chrono::steady_clock::now().time_since_epoch()).count();
 }
 
-// Every thread's stack (the UI thread's first), written to stderr.
-void dumpAllThreads(long long stalledMs) {
+// Every thread's stack (the UI and engine threads' first), written to
+// stderr under `heading`.
+void dumpAllThreads(const char* heading) {
     struct Stack { DWORD id; int count; DWORD64 frames[kMaxFrames]; };
     std::vector<Stack> stacks;
     stacks.reserve(64);
@@ -141,11 +144,14 @@ void dumpAllThreads(long long stalledMs) {
     HANDLE process = GetCurrentProcess();
     SymSetOptions(SYMOPT_LOAD_LINES | SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS);
     SymInitialize(process, nullptr, TRUE);
-    std::fprintf(stderr, "\n=== HANG: the UI thread has been unresponsive for %lld ms ===\n", stalledMs);
-    for (int pass = 0; pass < 2; ++pass) {
+    std::fprintf(stderr, "\n%s\n", heading);
+    const DWORD engineThreadId = DWORD(ntw_engine_native_thread_id());
+    auto rank = [&](DWORD id) { return id == uiThreadId ? 0 : id == engineThreadId ? 1 : 2; };
+    for (int pass = 0; pass < 3; ++pass) {
         for (const Stack& stack : stacks) {
-            if ((stack.id == uiThreadId) != (pass == 0)) continue;
-            std::fprintf(stderr, "-- thread %lu%s\n", stack.id, stack.id == uiThreadId ? " (UI)" : "");
+            if (rank(stack.id) != pass) continue;
+            std::fprintf(stderr, "-- thread %lu%s\n", stack.id,
+                         pass == 0 ? " (UI)" : pass == 1 ? " (engine)" : "");
             for (int i = 0; i < stack.count; ++i) printFrame(process, i, stack.frames[i]);
         }
     }
@@ -168,12 +174,28 @@ void startHangWatchdog(int stallMs) {
     uiThreadId = GetCurrentThreadId();
     heartbeat();
     std::thread([stallMs] {
-        bool reported = false;
+        bool reported = false, engineReported = false;
         for (;;) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(250));
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            // An engine frame running long: caught while it's stuck (the UI
+            // waits on the engine thread, so a UI hang report comes too late
+            // to show why).
+            const long long frame = ntw_engine_frame_running_ms();
+            if (frame < kEngineStallMs) engineReported = false;
+            else if (!engineReported) {
+                char heading[128];
+                std::snprintf(heading, sizeof(heading), "=== ENGINE STALL: an engine frame has run for %lld ms ===", frame);
+                dumpAllThreads(heading);
+                engineReported = true;
+            }
             const long long stalled = nowMs() - lastBeat.load();
             if (stalled < stallMs) { reported = false; continue; }
-            if (!reported) { dumpAllThreads(stalled); reported = true; }  // once per stall
+            if (!reported) {  // once per stall
+                char heading[128];
+                std::snprintf(heading, sizeof(heading), "=== HANG: the UI thread has been unresponsive for %lld ms ===", stalled);
+                dumpAllThreads(heading);
+                reported = true;
+            }
         }
     }).detach();
 }

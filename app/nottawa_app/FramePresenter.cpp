@@ -104,6 +104,11 @@ void FramePresenter::destroy() {
     program_ = vao_ = vbo_ = 0;
 }
 
+void FramePresenter::setViewport(int x, int y, int width, int height) {
+    viewport_[0] = x; viewport_[1] = y; viewport_[2] = width; viewport_[3] = height;
+    glViewport(x, y, width, height);
+}
+
 bool FramePresenter::draw(FrameExchange* ex, Reader reader, float opacity, float cornerRadiusPx, bool* newFrame) {
     if (newFrame) *newFrame = false;
     if (!ex || !program_) return false;
@@ -116,8 +121,7 @@ bool FramePresenter::draw(FrameExchange* ex, Reader reader, float opacity, float
     if (newFrame) *newFrame = isNew;
 
     const bool blend = opacity < 1.0f || cornerRadiusPx > 0.0f;
-    GLint vp[4];
-    glGetIntegerv(GL_VIEWPORT, vp);
+    const int* vp = viewport_;  // (setViewport: never read back from GL here)
     if (blend) {
         glEnable(GL_BLEND);
         // Leave destination alpha alone: the widget's framebuffer is

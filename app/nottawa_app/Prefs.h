@@ -3,6 +3,7 @@
 #include "EngineBridge.h"
 
 #include <QHash>
+#include <QSettings>
 #include <QObject>
 #include <QVariant>
 #include <QVector>
@@ -47,6 +48,10 @@ private:
     QVariant current(const SettingInfo& s) const;
     void     remember(const QString& id);         // copy the engine's value
 
+    // One QSettings for the copy, kept open: Qt batches its writes. A
+    // QSettings per change synced the file (lock file, disk flush) each
+    // time, on the UI thread: a Reset All stalled the UI for seconds.
+    QSettings*               store_;
     QVector<SettingInfo>     settings_;
     QHash<QString, QVariant> atLaunch_;  // restart-to-apply settings, as the app started with them
 };

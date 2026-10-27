@@ -184,6 +184,13 @@ bool ntw_engine_is_initialized(void);
 // Returns the engine's current ticks-per-second.
 float ntw_engine_fps(void);
 
+// For a hang watchdog (any thread): how long the engine's current frame has
+// been running, ms (0 between frames), and the engine thread's OS id.
+long long ntw_engine_frame_running_ms(void);
+unsigned long ntw_engine_native_thread_id(void);
+// Testing: makes the engine's next frame take `ms` (queued; returns at once).
+void ntw_debug_stall_engine(int ms);
+
 // ---------------------------------------------------------------------------
 // MARK: - Shader Mutations (via ActionService)
 // ---------------------------------------------------------------------------
