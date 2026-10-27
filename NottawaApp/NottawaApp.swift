@@ -241,6 +241,7 @@ struct NottawaApp: App {
             engineStatus = .ready
             viewModel.setup()
             helpGuide.viewModel = viewModel
+            SelfTest.startIfRequested()
 
             // GLFW creates a hidden window for the GL context that registers
             // raw accessibility elements, preventing XCUITest from seeing the
