@@ -1,0 +1,55 @@
+#!/bin/bash
+# Runs NottawaApp's built-in self-test (NottawaApp/Engine/SelfTest.swift)
+# and scores it. Needs a built bin/NottawaApp.app and no running copy.
+#
+#   scripts/mac_selftest.sh [scenarios]    default: files,system,tap,tapauto,persist
+#
+# "persist" launches twice: change a parameter and quit at once, then check
+# it on relaunch. Audio scenarios are scored by scripts/mac_selftest_bpm.py.
+# NOTTAWA_SELFTEST_SECONDS (default 40) is the listening time per track.
+set -u
+cd "$(dirname "$0")/.."
+
+APP=bin/NottawaApp.app/Contents/MacOS/NottawaApp
+per=${NOTTAWA_SELFTEST_SECONDS:-40}
+OUT=~/Library/Containers/com.joecrozier.nottawa/Data/tmp/selftest
+SCENARIOS=${1:-files,system,tap,tapauto,persist}
+
+if pgrep -xq NottawaApp; then echo "NottawaApp is running; quit it first" >&2; exit 2; fi
+[ -x "$APP" ] || { echo "no $APP; build the NottawaApp scheme" >&2; exit 2; }
+
+# One launch, killed if it hasn't quit by itself in $2 seconds.
+launch() {
+  rm -f "$OUT/report.txt"
+  # Through LaunchServices, ignoring saved window state: the engine starts
+  # (and the quit-time save is hooked) from the main window, which a bare
+  # launch or a no-window saved state never shows.
+  open -n -W -g --env NOTTAWA_SELFTEST="$1" --env NOTTAWA_SELFTEST_SECONDS="$per" \
+    bin/NottawaApp.app --args -ApplePersistenceIgnoreState YES &
+  local opener=$! waited=0
+  while kill -0 $opener 2>/dev/null; do
+    sleep 1; waited=$((waited + 1))
+    if [ $waited -ge "$2" ]; then
+      echo "FAIL: $1 did not finish in $2 s; killed" | tee -a "$OUT/report.txt"
+      pkill -9 -x NottawaApp
+    fi
+  done
+  grep -qE "^(done|persist-set .*quitting)$" "$OUT/report.txt" 2>/dev/null ||
+    echo "FAIL: $1 quit without finishing (see Console, process NottawaApp)" | tee -a "$OUT/report.txt"
+  cat "$OUT/report.txt" >>"$OUT/all.txt" 2>/dev/null
+}
+
+rm -rf "$OUT"; mkdir -p "$OUT"
+in_app=$(echo "$SCENARIOS" | tr ',' '\n' | grep -v '^persist$' | paste -sd, -)
+if [ -n "$in_app" ]; then launch "$in_app" $((per * 16 + 120)); fi
+if echo "$SCENARIOS" | tr ',' '\n' | grep -qx persist; then
+  launch persist-set 60
+  launch persist-check 60
+fi
+
+echo "== report"; cat "$OUT/all.txt"
+if ls "$OUT"/*.csv >/dev/null 2>&1; then
+  echo "== beat scoring"
+  python3 scripts/mac_selftest_bpm.py "$OUT" bin/NottawaApp.app/Contents/Resources/data/audio
+fi
+! grep -q FAIL "$OUT/all.txt"
