@@ -2,10 +2,12 @@
 # Runs NottawaApp's built-in self-test (NottawaApp/Engine/SelfTest.swift)
 # and scores it. Needs a built bin/NottawaApp.app and no running copy.
 #
-#   scripts/mac_selftest.sh [scenarios]    default: files,system,tap,tapauto,persist
+#   scripts/mac_selftest.sh [scenarios]
+#     default: files,system,tap,tapauto,persist,settings,settingspersist,settingsui
 #
-# "persist" launches twice: change a parameter and quit at once, then check
-# it on relaunch. Audio scenarios are scored by scripts/mac_selftest_bpm.py.
+# "persist" and "settingspersist" launch twice: change a parameter (or some
+# settings) and quit at once, then check on relaunch. settingsui leaves
+# images of the Settings window (ui-*.png) in the output folder. Audio scenarios are scored by scripts/mac_selftest_bpm.py.
 # NOTTAWA_SELFTEST_SECONDS (default 40) is the listening time per track.
 set -u
 cd "$(dirname "$0")/.."
@@ -13,7 +15,7 @@ cd "$(dirname "$0")/.."
 APP=bin/NottawaApp.app/Contents/MacOS/NottawaApp
 per=${NOTTAWA_SELFTEST_SECONDS:-40}
 OUT=~/Library/Containers/com.joecrozier.nottawa/Data/tmp/selftest
-SCENARIOS=${1:-files,system,tap,tapauto,persist}
+SCENARIOS=${1:-files,system,tap,tapauto,persist,settings,settingspersist,settingsui}
 
 if pgrep -xq NottawaApp; then echo "NottawaApp is running; quit it first" >&2; exit 2; fi
 [ -x "$APP" ] || { echo "no $APP; build the NottawaApp scheme" >&2; exit 2; }
@@ -34,17 +36,21 @@ launch() {
       pkill -9 -x NottawaApp
     fi
   done
-  grep -qE "^(done|persist-set .*quitting)$" "$OUT/report.txt" 2>/dev/null ||
+  grep -qE "^(done|(persist|settings)-set .*quitting)$" "$OUT/report.txt" 2>/dev/null ||
     echo "FAIL: $1 quit without finishing (see Console, process NottawaApp)" | tee -a "$OUT/report.txt"
   cat "$OUT/report.txt" >>"$OUT/all.txt" 2>/dev/null
 }
 
 rm -rf "$OUT"; mkdir -p "$OUT"
-in_app=$(echo "$SCENARIOS" | tr ',' '\n' | grep -v '^persist$' | paste -sd, -)
+in_app=$(echo "$SCENARIOS" | tr ',' '\n' | grep -vE '^(persist|settingspersist)$' | paste -sd, -)
 if [ -n "$in_app" ]; then launch "$in_app" $((per * 16 + 120)); fi
 if echo "$SCENARIOS" | tr ',' '\n' | grep -qx persist; then
   launch persist-set 60
   launch persist-check 60
+fi
+if echo "$SCENARIOS" | tr ',' '\n' | grep -qx settingspersist; then
+  launch settings-set 60
+  launch settings-check 60
 fi
 
 echo "== report"; cat "$OUT/all.txt"

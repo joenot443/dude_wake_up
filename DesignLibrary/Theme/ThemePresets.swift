@@ -2,6 +2,8 @@ import SwiftUI
 
 enum ThemePreset: String, CaseIterable, Identifiable {
     case default_ = "Default"
+    case midnight = "Midnight"
+    case daylight = "Daylight"
     case ember = "Ember"
     case arctic = "Arctic"
     case forest = "Forest"
@@ -10,7 +12,8 @@ enum ThemePreset: String, CaseIterable, Identifiable {
 
     var tokens: DesignTokens {
         switch self {
-        case .default_: return Self.midnightTokens
+        case .default_, .midnight: return Self.midnightTokens
+        case .daylight: return Self.daylightTokens
         case .ember: return Self.emberTokens
         case .arctic: return Self.arcticTokens
         case .forest: return Self.forestTokens
