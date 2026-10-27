@@ -1,4 +1,5 @@
 #include "PreviewWindow.h"
+#include "Prefs.h"
 
 #include "EngineBridge.h"
 #include "Screenshots.h"
@@ -28,6 +29,9 @@ PreviewWindow::PreviewWindow(const QString& connectableId, const QString& name, 
     view_->setAttribute(Qt::WA_TransparentForMouseEvents);
     view_->setSourceNode(connectableId);
     connect(EngineBridge::instance(), &EngineBridge::resolutionChanged, this, &PreviewWindow::layoutView);
+    connect(Prefs::instance(), &Prefs::changed, this, [this](const QString& id) {
+        if (id == "output.stretchPreviews") layoutView();
+    });
     notice_ = new QLabel(this);
     notice_->setStyleSheet("QLabel { background: rgba(0,0,0,170); color: white; border-radius: 6px; padding: 6px 10px; }");
     notice_->hide();
@@ -48,13 +52,10 @@ PreviewWindow::PreviewWindow(const QString& connectableId, const QString& name, 
     setNodeName(name);
 }
 
-bool PreviewWindow::stretchToFill() { return QSettings().value("ui/stretchPreviews", false).toBool(); }
+bool PreviewWindow::stretchToFill() { return Prefs::boolean("output.stretchPreviews"); }
 
-void PreviewWindow::setStretchToFill(bool on) {
-    QSettings().setValue("ui/stretchPreviews", on);
-    for (QWidget* w : QApplication::topLevelWidgets())
-        if (auto* preview = qobject_cast<PreviewWindow*>(w)) preview->layoutView();
-}
+// Open preview windows follow the setting (see the constructor).
+void PreviewWindow::setStretchToFill(bool on) { Prefs::set("output.stretchPreviews", on ? 1.0 : 0.0); }
 
 void PreviewWindow::layoutView() {
     if (stretchToFill()) { view_->setGeometry(rect()); return; }
@@ -76,7 +77,7 @@ void PreviewWindow::setSource(const QString& connectableId, const QString& name)
 }
 
 int PreviewWindow::fadeMs() {
-    return int(QSettings().value("ui/outputWindowFadeSeconds", 0.3).toDouble() * 1000);
+    return int(Prefs::number("output.advanceFade") * 1000);
 }
 
 void PreviewWindow::advanceTo(const QString& connectableId, const QString& name) {

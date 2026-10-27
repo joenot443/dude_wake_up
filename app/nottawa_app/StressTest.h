@@ -62,6 +62,7 @@ private:
     void swapAll();
     void bpm();
     void settings();
+    void settingsUi();
 
     // Helpers working on the live graph.
     QString randomSource();

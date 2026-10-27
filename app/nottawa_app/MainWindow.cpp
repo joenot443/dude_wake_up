@@ -23,6 +23,7 @@
 #include "StressTest.h"
 #include "ui/ParamSelection.h"
 #include "ui/Flash.h"
+#include "Prefs.h"
 #include "SettingsDialog.h"
 #include "panels/WelcomeOverlay.h"
 #include "ui/ActionBar.h"
@@ -375,8 +376,6 @@ void MainWindow::buildMenus() {
     edit->addAction("&Settings…", QKeySequence("Ctrl+,"), this, [this] {
         if (!settings_) {
             settings_ = new SettingsDialog(this);
-            connect(settings_, &SettingsDialog::showHintsChanged, editor_, &NodeEditorView::setShowHints);
-            connect(settings_, &SettingsDialog::showHintsChanged, hintsAction_, &QAction::setChecked);
             connect(settings_, &SettingsDialog::restartRequested, this, [this] {
                 // main() relaunches once this instance has saved and shut down.
                 qApp->setProperty("restartRequested", true);
@@ -397,25 +396,26 @@ void MainWindow::buildMenus() {
     view->addAction("&Audio Panel", QKeySequence("Ctrl+Shift+A"), this, [this] { audioButton_->click(); });
     stageAction_ = view->addAction("&Stage Mode", QKeySequence("Ctrl+Return"), this, [this] { stageButton_->click(); });
     view->addAction("Zoom to &Fit", QKeySequence("Ctrl+0"), editor_, &NodeEditorView::zoomToFit);
+    // Menu toggles mirroring settings: they set them, and follow them (Prefs::changed below).
     auto* stretch = view->addAction("S&tretch Preview Windows", this, [](bool on) { PreviewWindow::setStretchToFill(on); });
     stretch->setCheckable(true);
     stretch->setChecked(PreviewWindow::stretchToFill());
-    hintsAction_ = view->addAction("Show Node &Hints", this, [this](bool on) {
-        QSettings().setValue("ui/showNodeHints", on);
-        editor_->setShowHints(on);
-    });
+    hintsAction_ = view->addAction("Show Node &Hints", this, [](bool on) { Prefs::set("display.nodeHints", on ? 1.0 : 0.0); });
     hintsAction_->setCheckable(true);
-    hintsAction_->setChecked(QSettings().value("ui/showNodeHints", true).toBool());
+    hintsAction_->setChecked(Prefs::boolean("display.nodeHints"));
     auto* showLog = view->addAction("Show &Log", this, [this](bool on) { logPanel_->setVisible(on); });
     showLog->setCheckable(true);
     view->addSeparator();
-    QSettings settings;
-    auto* clearOnDisconnect = view->addAction("Clear on Disconnect", this, [engine](bool on) {
-        QSettings().setValue("ui/clearOnDisconnect", on);
-        engine->setClearOnDisconnect(on);
+    auto* clearOnDisconnect = view->addAction("Clear on Disconnect", this, [](bool on) {
+        Prefs::set("graph.clearOnDisconnect", on ? 1.0 : 0.0);
     });
     clearOnDisconnect->setCheckable(true);
-    clearOnDisconnect->setChecked(settings.value("ui/clearOnDisconnect", false).toBool());
+    clearOnDisconnect->setChecked(Prefs::boolean("graph.clearOnDisconnect"));
+    connect(Prefs::instance(), &Prefs::changed, this, [stretch, clearOnDisconnect, this](const QString& id) {
+        if (id == "output.stretchPreviews") stretch->setChecked(Prefs::boolean(id));
+        else if (id == "display.nodeHints") hintsAction_->setChecked(Prefs::boolean(id));
+        else if (id == "graph.clearOnDisconnect") clearOnDisconnect->setChecked(Prefs::boolean(id));
+    });
 
     // Rebuilt each time it opens: sources can appear (devices plugged in)
     // and capture state changes from elsewhere.
@@ -695,7 +695,7 @@ void MainWindow::startEngine() {
         log("[engine] ERROR engine failed to initialise");
         return;
     }
-    engine->setClearOnDisconnect(QSettings().value("ui/clearOnDisconnect", false).toBool());
+    Prefs::instance()->engineStarted();  // moves old settings into the engine the first time
     const auto sources = engine->sources();
     const auto effects = engine->effects();
     browser_->reload();

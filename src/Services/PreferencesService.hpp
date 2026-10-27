@@ -100,6 +100,8 @@ public:
 
   // Sets a value, kept to the setting's type, range or choices. Returns
   // whether it changed. Subscribers are told; the file is written soon.
+  // The default isn't stored, so a later version can change a default for
+  // everyone who never chose otherwise.
   bool set(const std::string& id, json v) {
     const SettingDefinition* d = definition(id);
     if (!d) return false;
@@ -107,8 +109,9 @@ public:
     if (v.is_null()) return false;
     {
       std::lock_guard<std::mutex> lock(mutex_);
-      if (values_.contains(id) && values_[id] == v) return false;
-      values_[id] = v;
+      if (valueLocked(id) == v) return false;
+      if (v == d->defaultValue) values_.erase(id);
+      else values_[id] = v;
       dirty_ = true;
       dirtySince_ = std::chrono::steady_clock::now();
     }
@@ -150,7 +153,7 @@ public:
               const SettingDefinition* d = definition(id);
               if (!d) { values_[id] = v; continue; }  // kept for a newer version's settings
               const json c = conform(*d, v);
-              if (!c.is_null()) values_[id] = c;
+              if (!c.is_null() && c != d->defaultValue) values_[id] = c;
             }
             found = true;
           }

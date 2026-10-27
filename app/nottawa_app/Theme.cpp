@@ -1,4 +1,6 @@
 #include "Theme.h"
+
+#include "Prefs.h"
 #include <QApplication>
 #include <QPalette>
 #include <QColor>
@@ -48,11 +50,13 @@ void load() {
 // macOS lists Default, Ember, Arctic and Forest; Midnight and Daylight are
 // offered too, so the dark look is available whatever Windows' mode.
 QStringList presets() { return {"Default", "Midnight", "Daylight", "Ember", "Arctic", "Forest"}; }
+// The shared appearance.theme setting (ids are the names in lower case).
 QString preset() {
-    const QString name = QSettings().value("ui/theme", "Default").toString();
-    return presets().contains(name) ? name : QStringLiteral("Default");
+    const QString id = Prefs::string("appearance.theme");
+    for (const QString& name : presets()) if (name.toLower() == id) return name;
+    return QStringLiteral("Default");
 }
-void setPreset(const QString& name) { QSettings().setValue("ui/theme", name); }
+void setPreset(const QString& name) { Prefs::set("appearance.theme", name.toLower()); }
 bool isDark() { return g_dark; }
 
 // The app-wide stylesheet, from the active preset's tokens. Panels add

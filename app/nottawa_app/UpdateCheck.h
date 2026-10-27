@@ -19,7 +19,7 @@ public:
     // Store (packaged) copies get updates from the Store instead.
     static bool supported();
     // Supported, not a test run, and not turned off in Settings
-    // (QSettings "updates/check").
+    // (the "updates.check" setting).
     static bool enabled();
     // Checks if a day has passed since the last check (or `force`).
     void start(bool force = false);

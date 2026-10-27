@@ -1,4 +1,5 @@
 #include "Screenshots.h"
+#include "Prefs.h"
 
 #include <QDateTime>
 #include <QDir>
@@ -11,19 +12,20 @@
 namespace Screenshots {
 
 QString folder() {
-    const QString f = QSettings().value("screenshots/folder").toString();
+    const QString f = Prefs::string("screenshots.folder");
     return QFileInfo(f).isDir() ? f : QString();
 }
 
 QString chooseFolder(QWidget* parent) {
     const QString start = folder().isEmpty() ? QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) : folder();
     const QString f = QFileDialog::getExistingDirectory(parent, "Choose a folder for screenshots", start);
-    if (!f.isEmpty()) QSettings().setValue("screenshots/folder", f);
+    if (!f.isEmpty()) Prefs::set("screenshots.folder", f);
     return f;
 }
 
-QString format() { return QSettings().value("screenshots/format", "png").toString() == "jpg" ? "jpg" : "png"; }
-void setFormat(const QString& f) { QSettings().setValue("screenshots/format", f); }
+// (The setting's choices are png and jpeg; files are .png or .jpg.)
+QString format() { return Prefs::string("screenshots.format") == "jpeg" ? "jpg" : "png"; }
+void setFormat(const QString& f) { Prefs::set("screenshots.format", f == "jpg" ? QStringLiteral("jpeg") : QStringLiteral("png")); }
 
 QString save(const QImage& image, QWidget* parent) {
     if (image.isNull()) return {};

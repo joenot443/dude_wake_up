@@ -1,8 +1,8 @@
 # Settings
 
 A richer settings screen on macOS (NottawaApp) and Windows (app/nottawa_app),
-built in lockstep. Status: **agreed**; step 1 (engine) done, step 2 (both
-UIs) next.
+built in lockstep. Status: steps 1 (engine) and 2 (both settings screens)
+done; step 3 (new settings) next.
 
 ## Where settings live
 
@@ -33,7 +33,7 @@ declares every setting once, in display order:
   `restart` (platform bits where a change needs a restart), `platforms`
   (1 macOS, 2 Windows, 3 both)
 
-Values persist in `<nottawa folder>/preferences.json` (under
+Values other than the default persist in `<nottawa folder>/preferences.json` (under
 `appSupportFilePath()`; inside the sandbox container on macOS), written 0.5 s
 after the last change, and on `ntw_save_default_config`. On first run (no
 file) resolution and MIDI smoothing are seeded from the session.
@@ -135,3 +135,16 @@ both UIs build on it; both builds green before the next.
 3. First round of new settings: **all four groups**: Audio, Output,
    Performance, MIDI & Advanced.
 4. Layout: a **sidebar of sections** with search.
+
+## Platform notes
+
+- **Windows** (app/nottawa_app/Prefs.*): menus and the theme need values
+  before the engine starts, so every value is copied to QSettings
+  (`prefs/<id>`) on each change and read until then. Migration on first
+  start copies the old QSettings keys that were ever written; an existing
+  install keeps Clear on Disconnect off (its old default) unless it was on.
+  The theme applies after a restart (banner in Settings).
+- **macOS** (NottawaApp/Engine/SettingsStore.swift): migration flag
+  `nottawa.settingsMigrated`; screenshots.folder stays a sandbox bookmark.
+  Opening a welcome template strand sets the resolution it was made at,
+  which is now a lasting preference change (with a toast).

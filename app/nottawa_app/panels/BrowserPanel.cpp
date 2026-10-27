@@ -1,4 +1,5 @@
 #include "BrowserPanel.h"
+#include "Prefs.h"
 
 #include "Icons.h"
 #include "PreviewPool.h"
@@ -167,7 +168,10 @@ BrowserPanel::BrowserPanel(QWidget* parent) : QWidget(parent) {
         liveButton_->setToolTip(on ? "Live Preview On" : "Live Preview Off");
         liveButton_->setStyleSheet(on ? QString("color: %1; font-weight: 600;").arg(Theme::accent.name()) : QString());
         grid_->setLivePreview(on);
-        QSettings().setValue("browser/livePreview", on);
+        if (Prefs::boolean("browser.livePreview") != on) Prefs::set("browser.livePreview", on ? 1.0 : 0.0);
+    });
+    connect(Prefs::instance(), &Prefs::changed, this, [this](const QString& id) {
+        if (id == "browser.livePreview" && liveButton_->isChecked() != Prefs::boolean(id)) liveButton_->setChecked(Prefs::boolean(id));
     });
     row->addWidget(searchButton_);
     row->addWidget(favoritesButton_);
@@ -223,7 +227,7 @@ BrowserPanel::BrowserPanel(QWidget* parent) : QWidget(parent) {
     QSettings settings;
     const QStringList collapsed = settings.value("browser/collapsed").toStringList();
     grid_->setCollapsed(QSet<QString>(collapsed.begin(), collapsed.end()));
-    const bool live = settings.value("browser/livePreview", true).toBool();
+    const bool live = Prefs::boolean("browser.livePreview");
     liveButton_->setChecked(!live);
     liveButton_->setChecked(live);
     setTab(Tab(settings.value("browser/tab", int(Sources)).toInt()));

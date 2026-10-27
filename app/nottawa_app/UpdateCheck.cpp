@@ -1,4 +1,5 @@
 #include "UpdateCheck.h"
+#include "Prefs.h"
 
 #include <QCoreApplication>
 #include <QDateTime>
@@ -29,7 +30,7 @@ bool UpdateCheck::supported() { return !packaged(); }
 
 bool UpdateCheck::enabled() {
     if (!supported() || !qEnvironmentVariableIsEmpty("NOTTAWA_NO_PUBLISH")) return false;
-    return QSettings().value("updates/check", true).toBool();
+    return Prefs::boolean("updates.check");
 }
 
 bool UpdateCheck::isNewer(const QString& version, const QString& current) {

@@ -59,6 +59,7 @@ qt_add_executable(nottawa_app WIN32
     ui/ParamSelection.h      ui/ParamSelection.cpp
     SettingsDialog.h         SettingsDialog.cpp
     Screenshots.h            Screenshots.cpp
+    Prefs.h                  Prefs.cpp
     StressTest.h             StressTest.cpp
     inspector/ParameterRow.h inspector/ParameterRow.cpp
     inspector/PositionPad.h  inspector/PositionPad.cpp

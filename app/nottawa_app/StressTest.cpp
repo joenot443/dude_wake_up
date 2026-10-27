@@ -1,3 +1,12 @@
+#include <QFrame>
+#include <QLabel>
+#include <QLineEdit>
+#include <QListWidget>
+#include "ui/Controls.h"
+#include "Theme.h"
+#include "UpdateCheck.h"
+#include "SettingsDialog.h"
+#include "Prefs.h"
 #include "StressTest.h"
 
 #include "EngineBridge.h"
@@ -118,6 +127,7 @@ void StressTest::enqueueScenario(const QString& name) {
     else if (name == "swapall") swapAll();
     else if (name == "bpm") bpm();
     else if (name == "settings") settings();
+    else if (name == "settingsui") settingsUi();
     else add([this, name] { window_->log("[stress] unknown scenario " + name); });
     // Settle, clear, settle, measure.
     add([] {}, 1000);
@@ -262,6 +272,77 @@ void StressTest::settings() {
                          .arg(eng->settingNumber("output.advanceFade")).arg(eng->settingString("screenshots.format"))
                          .arg(eng->settingString("output.resolution")));
     }, 800);  // past the save delay: preferences.json written
+}
+
+// The settings window: every setting's value (after any migration), an
+// image of each section and of searches, rows following changes made
+// elsewhere, dependent rows disabled. Images: <scratch>/settings-*.png.
+void StressTest::settingsUi() {
+    add([this] {
+        QStringList values;
+        for (const SettingInfo& s : Prefs::instance()->settings()) {
+            if (s.type == SettingInfo::Action) continue;
+            const bool text = s.type == SettingInfo::Choice || s.type == SettingInfo::String || s.type == SettingInfo::Path;
+            values << s.id + "=" + (text ? Prefs::string(s.id) : QString::number(Prefs::number(s.id)));
+        }
+        window_->log("[stress] settingsui: values " + values.join(" "));
+        for (QAction* a : window_->findChildren<QAction*>()) if (a->text() == "&Settings…") a->trigger();
+    }, 600);
+    add([this] {
+        auto* dialog = window_->findChild<SettingsDialog*>();
+        if (!dialog) { window_->log("[stress] FAIL settingsui: no settings window"); return; }
+        auto* sections = dialog->findChild<QListWidget*>();
+        QStringList names;
+        for (int i = 0; i < sections->count(); ++i) {
+            sections->setCurrentRow(i);
+            QApplication::processEvents();
+            const QString name = sections->item(i)->text();
+            names << name;
+            dialog->grab().save(QDir(scratch_).filePath("settings-" + name.toLower() + ".png"));
+        }
+        window_->log("[stress] settingsui: sections " + names.join(", "));
+        if (names.contains("Updates") == !UpdateCheck::supported()) window_->log("[stress] FAIL settingsui: Updates shown wrongly");
+        auto* search = dialog->findChild<QLineEdit*>();
+        for (const QString& term : {"fade", "midi", "zzz"}) {
+            search->setText(term);
+            QApplication::processEvents();
+            dialog->grab().save(QDir(scratch_).filePath("settings-search-" + term + ".png"));
+        }
+        search->clear();
+        sections->setCurrentRow(int(names.indexOf("Output")));
+        // Changed elsewhere (as a menu or the engine would): the window follows.
+        Prefs::set("output.autoAdvance", 0.0);
+        Prefs::set("appearance.theme", QString("ember"));
+    }, 400);
+    add([this] {
+        auto* dialog = window_->findChild<SettingsDialog*>();
+        dialog->grab().save(QDir(scratch_).filePath("settings-output-noadvance.png"));
+        bool fadeDisabled = false, toggleOff = false;
+        for (auto* l : dialog->findChildren<QLabel*>()) {
+            if (l->text() == "Advance Fade") fadeDisabled = !l->isEnabledTo(dialog);
+            if (l->text() == "Advance Output Window Automatically")
+                if (auto* t = l->parentWidget()->findChild<DSToggle*>()) toggleOff = !t->isChecked();
+        }
+        if (!fadeDisabled) window_->log("[stress] FAIL settingsui: Advance Fade not disabled with auto advance off");
+        if (!toggleOff) window_->log("[stress] FAIL settingsui: the toggle didn't follow a change made elsewhere");
+        if (!Prefs::instance()->restartPending()) window_->log("[stress] FAIL settingsui: no restart pending after a theme change");
+        if (auto* banner = dialog->findChild<QFrame*>("Restart"); !banner || !banner->isVisibleTo(dialog))
+            window_->log("[stress] FAIL settingsui: no restart banner");
+        Prefs::set("display.nodeHints", 0.0);
+    }, 400);
+    add([this] {
+        for (QAction* a : window_->findChildren<QAction*>())
+            if (a->text() == "Show Node &Hints" && a->isChecked()) window_->log("[stress] FAIL settingsui: the menu didn't follow node hints");
+        EngineBridge::instance()->resetSettings();
+    }, 400);
+    add([this] {
+        auto* dialog = window_->findChild<SettingsDialog*>();
+        // (The run starts in Midnight, so after the reset to Default a restart is still pending.)
+        window_->log(QString("[stress] settingsui: done; after reset theme %1, hints %2, restart pending %3")
+                         .arg(Prefs::string("appearance.theme")).arg(Prefs::number("display.nodeHints"))
+                         .arg(Prefs::instance()->restartPending()));
+        dialog->close();
+    }, 400);
 }
 
 // The whole tempo path in the app: bundled sample tracks played through the

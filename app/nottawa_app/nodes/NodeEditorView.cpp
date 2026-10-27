@@ -1,4 +1,5 @@
 #include "NodeEditorView.h"
+#include "Prefs.h"
 
 #include "EngineBridge.h"
 #include "NodeItems.h"
@@ -45,7 +46,10 @@ constexpr qreal kStackStep = 228.0;
 } // anon
 
 NodeEditorView::NodeEditorView(QWidget* parent) : QGraphicsView(parent) {
-    showHints_ = QSettings().value("ui/showNodeHints", true).toBool();
+    showHints_ = Prefs::boolean("display.nodeHints");
+    connect(Prefs::instance(), &Prefs::changed, this, [this](const QString& id) {
+        if (id == "display.nodeHints") setShowHints(Prefs::boolean(id));
+    });
     connect(&downloadPoll_, &QTimer::timeout, this, &NodeEditorView::refreshDownloads);
     // Live previews are drawn with GL straight into the viewport, which
     // shares textures with the engine through Qt's global share context.
@@ -738,7 +742,7 @@ void NodeEditorView::closePreview(const QString& id) {
 }
 
 void NodeEditorView::advancePreview(const QString& fromId, const QString& toId, int outSlot) {
-    if (outSlot != 0 || !QSettings().value("ui/autoAdvanceOutputWindow", true).toBool()) return;
+    if (outSlot != 0 || !Prefs::boolean("output.autoAdvance")) return;
     PreviewWindow* window = previews_.value(fromId);
     if (!window || previews_.value(toId)) return;
     NodeItem* to = nodes_.value(toId);
