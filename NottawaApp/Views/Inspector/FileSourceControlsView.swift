@@ -106,7 +106,7 @@ struct FileSourceControlsView: View {
 
                 Text(state.cacheAvailable
                      ? "\(state.cachedFrameCount) frames cached"
-                     : "no cache")
+                     : SettingsStore.shared.bool("performance.frameCache") ? "not cached" : "caching off in Settings")
                     .font(.caption2)
                     .foregroundStyle(theme.colors.textSecondary)
                     .monospacedDigit()
