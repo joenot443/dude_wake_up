@@ -375,7 +375,9 @@ public:
     void setBpmEnabled(bool on);
     void setBpm(float bpm);
     void nudgeBpm(float delta);
-    void tapBpm();
+    // A tap now (call it at the key or button press), or at `seconds` on the
+    // steady clock (tests). Emits tapped().
+    void tapBpm(double seconds = -1);
     void setSmoothingMode(int mode);
     void setFrequencyRelease(float v);
     void setFrequencyScale(float v);
@@ -422,6 +424,7 @@ signals:
     void strandVoted(const QString& slug, bool ok, int upvotes, int downvotes, int score, const QString& userVote);
     void sharedStrandFetched(const QString& slug, bool ok, const QString& jsonOrError);
     void strandShared(bool ok, const QString& slugOrError);
+    void tapped(float bpm);  // the tapped tempo so far (0 until two taps)
 
 private:
     EngineBridge() = default;

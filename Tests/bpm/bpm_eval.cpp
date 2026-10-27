@@ -21,6 +21,9 @@
 #include "Synth.hpp"
 #include "kiss_fft.h"
 #include "Trackers.hpp"
+#include "TapTempo.hpp"
+
+#include <random>
 
 #define DR_WAV_IMPLEMENTATION
 #include "dr_wav.h"
@@ -113,8 +116,10 @@ static double fMeasure(const std::vector<double>& detections, const std::vector<
 
 // ---- Running a tracker over an item ----------------------------------------
 
+void runTapEvaluation();  // Taps.cpp
 static bool g_dump = false;    // --dump: pulse offsets over time
 static bool g_oracle = false;  // --oracle: offline whole-track tempo only
+static double g_hintAt = 0;    // --hint <s>: someone taps 8 true beats (20 ms wobble) up to then
 
 static Result evaluate(Tracker& tracker, const Item& item, int block) {
     Result res{item.dataset, item.category, item.name};
@@ -128,6 +133,7 @@ static Result evaluate(Tracker& tracker, const Item& item, int block) {
     res.truthTempo = globalTruth;
 
     std::vector<double> sampleT, sampleBpm, beats, pulses;
+    bool hinted = false;
     double nextSample = 0.0, nextPhaseT = 0.0, lastPhase = -1;
     const double phaseStep = 0.002;
     for (size_t f = 0; f < frames; f += size_t(block)) {
@@ -135,6 +141,18 @@ static Result evaluate(Tracker& tracker, const Item& item, int block) {
         const double t = f / item.sampleRate;
         const double tEnd = (f + n) / item.sampleRate;
         tracker.process(item.audio.data() + f * size_t(item.channels), n, item.channels, item.sampleRate, t);
+        if (g_hintAt > 0 && !hinted && tEnd >= g_hintAt && item.beats.size() > 8) {
+            hinted = true;
+            auto last = std::lower_bound(item.beats.begin(), item.beats.end(), g_hintAt);
+            if (last - item.beats.begin() >= 8) {
+                std::mt19937 rng(unsigned(std::hash<std::string>{}(item.name)));
+                std::normal_distribution<double> wobble(0.0, 0.020);
+                TapTempo taps;
+                TapTempo::Result r;
+                for (auto it = last - 8; it != last; ++it) r = taps.tap(*it + wobble(rng));
+                if (r.valid) tracker.hint(r.bpm, r.beatTime);
+            }
+        }
         for (double b : tracker.takeBeats()) beats.push_back(b);
         // The state after this block is what the app shows until the next one.
         const double tNext = std::min(duration, (f + n + block) / item.sampleRate);
@@ -149,8 +167,8 @@ static Result evaluate(Tracker& tracker, const Item& item, int block) {
         }
     }
 
-    // Tempo scores, after warm-up.
-    const double warm = 8.0;
+    // Tempo scores, after warm-up (or after the taps).
+    const double warm = g_hintAt > 0 ? g_hintAt + 1.0 : 8.0;
     int count = 0, a1 = 0, a2 = 0, ex = 0;
     std::vector<double> settled;
     for (size_t i = 0; i < sampleT.size(); ++i) {
@@ -221,9 +239,10 @@ static Result evaluate(Tracker& tracker, const Item& item, int block) {
             }
         }
         if (onCount > 1) res.spreadMs = 1000 * std::sqrt(std::max(0.0, sumSq / onCount - (sum / onCount) * (sum / onCount)));
-        res.beatF = fMeasure(beats, item.beats, 0.07, 5.0);
+        const double from = g_hintAt > 0 ? g_hintAt + 1.0 : 5.0;
+        res.beatF = fMeasure(beats, item.beats, 0.07, from);
         std::vector<double> offsets;
-        res.pulseF = fMeasure(pulses, item.beats, 0.07, 5.0, &offsets);
+        res.pulseF = fMeasure(pulses, item.beats, 0.07, from, &offsets);
         if (!offsets.empty()) {
             double s = 0, a = 0;
             for (double o : offsets) { s += o; a += std::fabs(o); }
@@ -383,6 +402,8 @@ int main(int argc, char** argv) {
         else if (a == "--only") only = next();  // items whose name contains this
         else if (a == "--dump") g_dump = true;
         else if (a == "--oracle") g_oracle = true;
+        else if (a == "--hint") g_hintAt = std::stod(next());
+        else if (a == "--taps") { runTapEvaluation(); return 0; }
     }
 
     std::vector<Result> results;

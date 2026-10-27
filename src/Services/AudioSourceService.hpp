@@ -10,6 +10,7 @@
 
 #include "AudioSource.hpp"
 #include "MSABPMTapper.h"
+#include "TapTempo.hpp"
 #include "ConfigurableService.hpp"
 #include "AudioTrack.hpp"
 #include "Parameter.hpp"
@@ -47,7 +48,8 @@ public:
   
   void update();
 
-  msa::BPMTapper tapper;
+  msa::BPMTapper tapper;  // the ImGui views'
+  TapTempo tapTempo;      // taps from the apps (ntw_tap_bpm_at)
   std::vector<std::shared_ptr<AudioTrack>> sampleTracks;
 
   std::vector<std::shared_ptr<AudioSource>> audioSources();

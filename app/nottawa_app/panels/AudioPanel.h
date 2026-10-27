@@ -60,6 +60,7 @@ private:
     QToolButton*   bpmPause_;
     DSSegmented*   bpmMode_;
     QWidget*       manualRow_;
+    QPushButton*   tap_ = nullptr;
     DSSlider*      bpmValue_;
     QLabel*        nudge_;
     // Frequency

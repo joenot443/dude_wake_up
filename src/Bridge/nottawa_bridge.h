@@ -548,7 +548,13 @@ void ntw_set_bpm_locked(bool locked);
 void ntw_set_bpm_value(float bpm);
 void ntw_nudge_bpm(float delta);
 void ntw_set_bpm_nudge(float value);
-void ntw_tap_bpm(void);
+void ntw_tap_bpm(void);  // a tap now
+// A tap at `seconds` on the steady clock (std::chrono::steady_clock, in
+// seconds since its epoch): time it at the key or button press. Auto mode:
+// from the third tap, corrects the tracker's tempo, octave and beat. Manual
+// (or a locked BPM): sets the tempo and puts the beat on the taps. Returns
+// the tapped tempo (0 until there are two taps).
+float ntw_tap_bpm_at(double seconds);
 void ntw_set_bpm_enabled(bool enabled);
 void ntw_set_smoothing_mode(int mode);
 void ntw_set_frequency_release(float value);

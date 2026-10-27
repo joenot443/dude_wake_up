@@ -2,6 +2,7 @@
 
 #include "nottawa_bridge.h"
 
+#include <chrono>
 #include <QFileInfo>
 #include <QHash>
 #include <QSet>
@@ -431,7 +432,11 @@ void EngineBridge::setBpmLocked(bool on) { ntw_set_bpm_locked(on); }
 void EngineBridge::setBpmEnabled(bool on) { ntw_set_bpm_enabled(on); }
 void EngineBridge::setBpm(float bpm) { ntw_set_bpm_value(bpm); }
 void EngineBridge::nudgeBpm(float d) { ntw_nudge_bpm(d); }
-void EngineBridge::tapBpm() { ntw_tap_bpm(); }
+void EngineBridge::tapBpm(double seconds) {
+    if (!running_) return;
+    if (seconds < 0) seconds = std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
+    emit tapped(ntw_tap_bpm_at(seconds));
+}
 void EngineBridge::setSmoothingMode(int m) { ntw_set_smoothing_mode(m); }
 void EngineBridge::setFrequencyRelease(float v) { ntw_set_frequency_release(v); }
 void EngineBridge::setFrequencyScale(float v) { ntw_set_frequency_scale(v); }
