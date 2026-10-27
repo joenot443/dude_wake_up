@@ -20,6 +20,8 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QScrollArea>
+#include <QSignalBlocker>
+#include <QSpinBox>
 #include <QToolButton>
 #include <QUrl>
 #include <QVBoxLayout>
@@ -83,8 +85,16 @@ bool shown(const SettingInfo& s) {
 
 QString appDataDir() { return qApp->property("appDataDir").toString(); }
 
+// A row's dependsOn: "id" (a Bool that's on) or "id=choice" (a Choice set to it).
+QString conditionId(const QString& dependsOn) { return dependsOn.section('=', 0, 0); }
+bool conditionMet(const QString& dependsOn) {
+    const qsizetype eq = dependsOn.indexOf('=');
+    if (eq < 0) return Prefs::boolean(dependsOn);
+    return Prefs::string(dependsOn.left(eq)) == dependsOn.mid(eq + 1);
+}
+
 // A row whose setting depends on another: greyed as a whole (labels too)
-// while that one is off.
+// while the condition isn't met.
 void setRowEnabled(QWidget* row, bool on) {
     row->setEnabled(on);
     auto* effect = qobject_cast<QGraphicsOpacityEffect*>(row->graphicsEffect());
@@ -180,7 +190,7 @@ SettingsDialog::SettingsDialog(QWidget* parent) : QDialog(parent) {
 void SettingsDialog::showEvent(QShowEvent*) {
     for (const auto& refresh : std::as_const(refreshers_)) refresh();
     for (auto it = dependents_.cbegin(); it != dependents_.cend(); ++it)
-        for (QWidget* w : it.value()) setRowEnabled(w, Prefs::boolean(it.key()));
+        for (QWidget* w : it.value()) setRowEnabled(w, conditionMet(w->property("dependsOn").toString()));
     updateRestartBanner();
     midiSignature_ = "-";
     refreshMidi();
@@ -261,7 +271,7 @@ void SettingsDialog::build() {
 
     scroll_->setWidget(content);  // (deletes the previous page)
     for (auto it = dependents_.cbegin(); it != dependents_.cend(); ++it)
-        for (QWidget* w : it.value()) setRowEnabled(w, Prefs::boolean(it.key()));
+        for (QWidget* w : it.value()) setRowEnabled(w, conditionMet(w->property("dependsOn").toString()));
     if (devices_) {
         midiSignature_ = "-";
         refreshMidi();
@@ -284,14 +294,28 @@ QWidget* SettingsDialog::rowFor(const SettingInfo& s, QWidget* parent) {
         v->addWidget(row(s.label, toggle, w));
         break;
     }
-    case SettingInfo::Int:
+    case SettingInfo::Int: {
+        auto* spin = new QSpinBox(w);
+        spin->setRange(int(s.min), int(s.max));
+        spin->setSingleStep(std::max(1, int(s.step)));
+        if (!s.unit.isEmpty()) spin->setSuffix(" " + s.unit);
+        spin->setKeyboardTracking(false);  // set once typing is done, not per digit
+        spin->setMinimumWidth(110);
+        connect(spin, &QSpinBox::valueChanged, this, [id](int x) { Prefs::set(id, double(x)); });
+        refresh = [spin, id] {
+            const QSignalBlocker block(spin);
+            spin->setValue(int(Prefs::number(id)));
+        };
+        v->addWidget(row(s.label, spin, w));
+        break;
+    }
     case SettingInfo::Float: {
         auto* box = new QWidget(w);
         auto* h = new QHBoxLayout(box);
         h->setContentsMargins(0, 0, 0, 0);
         auto* slider = new DSSlider(box);
         slider->setRange(float(s.min), float(s.max));
-        slider->setStep(float(s.type == SettingInfo::Int ? std::max(1.0, s.step) : s.step));
+        slider->setStep(float(s.step));
         slider->setDecimals(s.decimals);
         slider->setMinimumWidth(180);
         auto* value = new QLabel(box);
@@ -376,7 +400,10 @@ QWidget* SettingsDialog::rowFor(const SettingInfo& s, QWidget* parent) {
         refresh();
         refreshers_.insert(id, refresh);
     }
-    if (!s.dependsOn.isEmpty()) dependents_[s.dependsOn] << w;
+    if (!s.dependsOn.isEmpty()) {
+        w->setProperty("dependsOn", s.dependsOn);
+        dependents_[conditionId(s.dependsOn)] << w;
+    }
     return w;
 }
 
@@ -396,7 +423,7 @@ void SettingsDialog::perform(const QString& action) {
 void SettingsDialog::settingChanged(const QString& id) {
     if (auto it = refreshers_.constFind(id); it != refreshers_.cend()) it.value()();
     if (auto it = dependents_.constFind(id); it != dependents_.cend())
-        for (QWidget* w : it.value()) setRowEnabled(w, Prefs::boolean(id));
+        for (QWidget* w : it.value()) setRowEnabled(w, conditionMet(w->property("dependsOn").toString()));
     if (id == "screenshots.folder" || id == "screenshots.format")  // (the folder row shows the folder if it exists)
         if (auto f = refreshers_.constFind("screenshots.folder"); f != refreshers_.cend()) f.value()();
     updateRestartBanner();

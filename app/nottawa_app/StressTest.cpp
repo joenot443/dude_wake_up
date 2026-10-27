@@ -128,6 +128,8 @@ void StressTest::enqueueScenario(const QString& name) {
     else if (name == "bpm") bpm();
     else if (name == "settings") settings();
     else if (name == "settingsui") settingsUi();
+    else if (name == "audiosettings") audioSettings();
+    else if (name == "audiolaunch") audioLaunch();
     else add([this, name] { window_->log("[stress] unknown scenario " + name); });
     // Settle, clear, settle, measure.
     add([] {}, 1000);
@@ -343,6 +345,97 @@ void StressTest::settingsUi() {
                          .arg(Prefs::instance()->restartPending()));
         dialog->close();
     }, 400);
+}
+
+// Step 3's Audio and Output settings in effect: the tempo range folding
+// Velvet Skies (87) by octaves, the frame rate, a custom resolution, a
+// workspace not switching the input. Leaves Start Audio on Launch on with
+// the sample tracks selected, for "audiolaunch" in a second run (-Keep).
+void StressTest::audioSettings() {
+    auto sampleSource = [] {
+        for (const auto& s : EngineBridge::instance()->audioSources())
+            if (s.name.contains("Sample", Qt::CaseInsensitive)) return s.id;
+        return QString();
+    };
+    add([sampleSource] {
+        auto* eng = EngineBridge::instance();
+        eng->selectAudioSource(sampleSource());
+        eng->setBpmMode(0);
+        for (const auto& t : eng->sampleTracks()) if (t.name.contains("Velvet")) eng->selectSampleTrack(t.index);
+    }, 500);
+    add([] { if (!EngineBridge::instance()->isAudioActive()) EngineBridge::instance()->toggleAudio(); }, 9000);
+    for (const QString range : {"auto", "90-180", "60-120", "100-200", "auto"}) {
+        add([range] { Prefs::set("audio.tempoRange", range); }, 1500);
+        add([this, range] {
+            const float bpm = EngineBridge::instance()->audioAnalysis().bpm;
+            const double want = range == "90-180" || range == "100-200" ? 174 : 87;
+            window_->log(QString("[stress] audiosettings: range %1 bpm %2").arg(range).arg(bpm, 0, 'f', 2));
+            if (std::abs(bpm / want - 1) > 0.04) window_->log(QString("[stress] FAIL audiosettings: range %1 shows %2, expected about %3").arg(range).arg(bpm).arg(want));
+        });
+    }
+    add([] { Prefs::set("audio.beatOffsetFile", 120.0); }, 1500);
+    add([this] {
+        const float bpm = EngineBridge::instance()->audioAnalysis().bpm;
+        if (std::abs(bpm / 87 - 1) > 0.04) window_->log(QString("[stress] FAIL audiosettings: with a beat offset, bpm %1").arg(bpm));
+        Prefs::set("audio.beatOffsetFile", 0.0);
+        if (EngineBridge::instance()->isAudioActive()) EngineBridge::instance()->toggleAudio();
+    });
+    for (const QString rate : {"30", "120", "60"}) {
+        add([rate] { Prefs::set("output.frameRate", rate); });
+        add([this, rate] {  // (a step's delay comes before it: the fps after 3 s at the new rate)
+            const float fps = EngineBridge::instance()->fps();
+            window_->log(QString("[stress] audiosettings: frame rate %1 -> fps %2").arg(rate).arg(fps, 0, 'f', 1));
+            if (std::abs(fps / rate.toFloat() - 1) > 0.15) window_->log(QString("[stress] FAIL audiosettings: frame rate %1 runs at %2").arg(rate).arg(fps));
+        }, 3000);
+    }
+    add([] {
+        Prefs::set("output.customWidth", 1000.0);
+        Prefs::set("output.customHeight", 500.0);
+        Prefs::set("output.resolution", QString("custom"));
+    }, 500);
+    add([this] {
+        const QSize res = EngineBridge::instance()->resolution();
+        if (res != QSize(1000, 500)) window_->log(QString("[stress] FAIL audiosettings: custom resolution is %1x%2").arg(res.width()).arg(res.height()));
+        Prefs::set("output.customWidth", 1200.0);  // changed while custom: applies
+    }, 500);
+    add([this] {
+        const QSize res = EngineBridge::instance()->resolution();
+        if (res != QSize(1200, 500)) window_->log(QString("[stress] FAIL audiosettings: custom width change gave %1x%2").arg(res.width()).arg(res.height()));
+        Prefs::set("output.resolution", QString("720p"));
+    }, 500);
+    add([this] {
+        const QSize res = EngineBridge::instance()->resolution();
+        if (res != QSize(1280, 720)) window_->log(QString("[stress] FAIL audiosettings: back to 720p gave %1x%2").arg(res.width()).arg(res.height()));
+        // A workspace saved with the sample tracks selected doesn't switch the input back.
+        EngineBridge::instance()->saveWorkspace(QDir(scratch_).filePath("audio-ws.json"), "audio");
+        for (const auto& s : EngineBridge::instance()->audioSources())
+            if (s.name.contains("System", Qt::CaseInsensitive)) EngineBridge::instance()->selectAudioSource(s.id);
+    }, 500);
+    add([this, sampleSource] {
+        auto* eng = EngineBridge::instance();
+        const QString system = eng->selectedAudioSource();
+        eng->loadWorkspace(QDir(scratch_).filePath("audio-ws.json"));
+        if (eng->selectedAudioSource() != system) window_->log("[stress] FAIL audiosettings: opening a workspace switched the input");
+        eng->selectAudioSource(sampleSource());
+        if (eng->isAudioActive()) eng->toggleAudio();
+        Prefs::set("audio.startOnLaunch", 1.0);
+        window_->log(QString("[stress] audiosettings: done; input %1, start on launch on").arg(eng->selectedAudioSource()));
+    }, 1000);
+    add([] {}, 800);  // preferences.json written
+}
+
+// The second launch after "audiosettings": the sample tracks selected and
+// started. ("[stress] audiolaunch: ...")
+void StressTest::audioLaunch() {
+    add([this] {
+        auto* eng = EngineBridge::instance();
+        QString name;
+        for (const auto& s : eng->audioSources()) if (s.id == eng->selectedAudioSource()) name = s.name;
+        window_->log(QString("[stress] audiolaunch: input %1, active %2").arg(name).arg(eng->isAudioActive()));
+        if (!name.contains("Sample", Qt::CaseInsensitive)) window_->log("[stress] FAIL audiolaunch: the last input wasn't selected");
+        if (!eng->isAudioActive()) window_->log("[stress] FAIL audiolaunch: audio didn't start");
+        if (eng->isAudioActive()) eng->toggleAudio();
+    }, 1500);
 }
 
 // The whole tempo path in the app: bundled sample tracks played through the

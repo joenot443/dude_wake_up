@@ -57,7 +57,7 @@ struct SettingDefinition {
   std::string id, section, label, help, unit;
   std::string group;      // optional subheading within the section
   std::string keywords;   // extra search terms, space-separated
-  std::string dependsOn;  // a Bool setting's id: this row is disabled while it's off
+  std::string dependsOn;  // "id" (a Bool: disabled while it's off) or "id=choice" (a Choice: disabled unless it's that)
   SettingType type = SettingType_Bool;
   double min = 0, max = 1, step = 0;
   int decimals = 0;       // numbers: digits shown after the point
@@ -133,6 +133,20 @@ public:
     for (const auto& id : changed) notify(id);
   }
 
+  // App state that isn't a setting (e.g. the audio input last used): kept
+  // in preferences.json too, apart from any workspace, but not in the list.
+  json state(const std::string& key) const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    return state_.contains(key) ? state_.at(key) : json();
+  }
+  void setState(const std::string& key, const json& v) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (state_.contains(key) && state_[key] == v) return;
+    state_[key] = v;
+    dirty_ = true;
+    dirtySince_ = std::chrono::steady_clock::now();
+  }
+
   // Called with the id whenever a value changes (engine thread).
   using Observer = std::function<void(const std::string& id)>;
   void subscribe(Observer observer) { observers_.push_back(std::move(observer)); }
@@ -155,6 +169,7 @@ public:
               const json c = conform(*d, v);
               if (!c.is_null() && c != d->defaultValue) values_[id] = c;
             }
+            if (j.contains("state") && j["state"].is_object()) state_ = j["state"];
             found = true;
           }
         } catch (...) {}
@@ -177,6 +192,7 @@ public:
     {
       std::lock_guard<std::mutex> lock(mutex_);
       j["values"] = values_;
+      j["state"] = state_;
       dirty_ = false;
     }
     j["version"] = 1;
@@ -296,8 +312,18 @@ private:
     addChoice("output.resolution", "Output", "Resolution", "The size every source and effect renders at.",
               {{"240p", "240p (426 x 240)"}, {"360p", "360p (640 x 360)"}, {"480p", "480p (854 x 480)"},
                {"720p", "720p (1280 x 720)"}, {"1080p", "1080p (1920 x 1080)"}, {"1440p", "1440p (2560 x 1440)"},
-               {"4k", "4K (3840 x 2160)"}}, "720p")
-        .keywords = "size quality 4k hd";
+               {"4k", "4K (3840 x 2160)"}, {"custom", "Custom"}}, "720p")
+        .keywords = "size quality 4k hd custom";
+    auto& width = addNumber("output.customWidth", "Output", "Width", "The custom resolution's width.",
+                            SettingType_Int, 64, 7680, 1, 0, "px", 1920);
+    width.dependsOn = "output.resolution=custom"; width.keywords = "custom resolution size";
+    auto& height = addNumber("output.customHeight", "Output", "Height", "The custom resolution's height.",
+                             SettingType_Int, 64, 4320, 1, 0, "px", 1080);
+    height.dependsOn = "output.resolution=custom"; height.keywords = "custom resolution size";
+    addChoice("output.frameRate", "Output", "Frame Rate",
+              "How often a frame is rendered. Lower uses less power and GPU; higher is smoother on fast displays.",
+              {{"24", "24 fps"}, {"30", "30 fps"}, {"60", "60 fps"}, {"120", "120 fps"}}, "60")
+        .keywords = "fps performance smooth";
     auto& advance = addBool("output.autoAdvance", "Output", "Advance Output Window Automatically",
                             "When the node an output window shows is deleted, show the next one instead of closing.", true);
     advance.group = "Output Window";
@@ -307,6 +333,25 @@ private:
     auto& stretch = addBool("output.stretchPreviews", "Output", "Stretch Preview Windows",
                             "Fill preview windows, ignoring the output's aspect ratio.", false);
     stretch.group = "Output Window"; stretch.keywords = "aspect fill";
+
+    // Audio
+    addBool("audio.startOnLaunch", "Audio", "Start Audio on Launch",
+            "Turn audio analysis on when Nottawa starts, with the input used last.", false)
+        .keywords = "input analysis microphone automatic";
+    addChoice("audio.tempoRange", "Audio", "Tempo Range",
+              "Tempos outside the range show doubled or halved. Choose 90-180 to see drum & bass as 174 rather than 87.",
+              {{"auto", "Automatic (60-200)"}, {"60-120", "60-120 BPM"}, {"80-160", "80-160 BPM"},
+               {"90-180", "90-180 BPM"}, {"100-200", "100-200 BPM"}}, "auto")
+        .keywords = "bpm octave half double drum bass";
+    auto offset = [&](std::string id, std::string label, std::string help) {
+      auto& d = addNumber(id, "Audio", label, help, SettingType_Float, -250.0, 250.0, 1.0, 0, "ms", 0.0);
+      d.group = "Beat Timing";
+      d.keywords = "latency delay sync nudge offset";
+    };
+    offset("audio.beatOffsetFile", "Audio Files",
+           "Moves the beat pulse earlier (+) or later (-) to line up with what you hear. Automatic tempo only.");
+    offset("audio.beatOffsetInput", "Inputs", "Microphones and audio interfaces.");
+    offset("audio.beatOffsetSystem", "System Audio", "Audio playing on this computer.");
 
     // Graph
     addBool("graph.clearOnDisconnect", "Graph", "Clear Output on Disconnect",
@@ -345,6 +390,7 @@ private:
   std::vector<Observer> observers_;
   mutable std::mutex mutex_;
   json values_ = json::object();
+  json state_ = json::object();
   bool dirty_ = false;
   std::atomic<bool> loaded_{false};
   std::chrono::steady_clock::time_point dirtySince_;

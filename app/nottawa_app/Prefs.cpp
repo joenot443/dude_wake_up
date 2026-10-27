@@ -91,7 +91,8 @@ QVariant Prefs::current(const SettingInfo& s) const {
 }
 
 void Prefs::remember(const QString& id) {
-    if (const SettingInfo* s = info(id); s && EngineBridge::instance()->isRunning())
+    const SettingInfo* s = info(id);
+    if (s && s->type != SettingInfo::Action && EngineBridge::instance()->isRunning())
         QSettings().setValue(cacheKey(id), current(*s));
 }
 

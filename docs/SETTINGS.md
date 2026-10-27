@@ -89,6 +89,24 @@ Step 1's settings (all engine preferences now):
 | updates.check | Updates | bool | true | Windows only |
 | advanced.openLogs / openData / resetAll | Advanced | action | | the app performs them |
 
+Step 3, batch 1 (Audio and Output):
+
+| id | section | type | default | notes |
+|---|---|---|---|---|
+| output.resolution | Output | choice | 720p | gains `custom` |
+| output.customWidth / customHeight | Output | int px | 1920 / 1080 | dependsOn `output.resolution=custom` |
+| output.frameRate | Output | choice | 60 | 24/30/60/120: the engine loop's rate |
+| audio.startOnLaunch | Audio | bool | false | starts the input used last |
+| audio.tempoRange | Audio | choice | auto | auto, 60-120, 80-160, 90-180, 100-200: Auto's tempo shown folded into it by octaves (beat count and phase with it) |
+| audio.beatOffsetFile / Input / System | Audio | float ms -250..250 | 0 | group Beat Timing; + shows the pulse earlier; Auto only; taps are moved back by it before hinting |
+
+The audio input is remembered app-wide (preferences.json `state`, not a
+setting): selecting one records it, it's selected (not started) at launch,
+and opening a workspace no longer switches it.
+
+`dependsOn` is `id` (a Bool that's on) or `id=choice` (a Choice set to
+that). Each app picks widgets by type; Windows uses a spin box for Int.
+
 New settings, step 3 (Joe chose all four groups; each is an engine change
 that then appears in both apps):
 

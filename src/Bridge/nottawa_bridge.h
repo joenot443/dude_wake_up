@@ -614,7 +614,8 @@ typedef struct {
   const char* unit;         // "ms", "s", "%" or ""
   const char* group;        // subheading within the section, or ""
   const char* keywords;     // extra search terms (space-separated), or ""
-  const char* dependsOn;    // a Bool setting's id: disable (grey) this row while it's off; or ""
+  const char* dependsOn;    // "" or a condition for the row to be enabled (greyed otherwise):
+                            // "id" (a Bool that's on) or "id=choice" (a Choice set to it)
   int type;                 // NTWSettingType
   double min, max, step;    // Int / Float (step 0: continuous)
   int decimals;             // Int / Float: digits shown after the point

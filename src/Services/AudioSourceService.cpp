@@ -6,6 +6,7 @@
 //
 
 #include "AudioSourceService.hpp"
+#include "PreferencesService.hpp"
 #include "LayoutStateService.hpp"
 #include "FileAudioSource.hpp"
 #include "Console.hpp"
@@ -150,9 +151,28 @@ void AudioSourceService::update() {
   // on its own clock (as Manual).
   if (analysis.bpmMode == BpmMode_Auto && !analysis.bpmLocked->boolValue) {
     const BeatTracker::Snapshot beat = selectedAudioSource->beatTracker.snapshot();
-    if (beat.locked) analysis.bpm->setValue(static_cast<float>(beat.bpm));
-    analysis.updateBeat(static_cast<float>(BeatTracker::phaseAt(beat, std::chrono::steady_clock::now())));
-    analysis.beatCount = static_cast<uint32_t>(beat.beats);
+    // The pulse moved by the input's offset (+: earlier, for audio heard after it's analysed).
+    const int kind = static_cast<int>(selectedAudioSource->type());
+    const double offsetMs = kind >= 0 && kind < 3 ? beatOffsetMs[kind] : 0.0;
+    const auto at = std::chrono::steady_clock::now() + std::chrono::microseconds(static_cast<int64_t>(offsetMs * 1000.0));
+    double bpm = beat.bpm, phase = BeatTracker::phaseAt(beat, at);
+    uint64_t beats = beat.beats;
+    // Shown within the tempo range, by octaves (every other beat, or half beats).
+    if (tempoMin > 0 && tempoMax > tempoMin) {
+      for (int i = 0; i < 4 && bpm > tempoMax; ++i) {
+        phase = 0.5 * (phase + static_cast<double>(beats % 2));
+        beats /= 2;
+        bpm *= 0.5;
+      }
+      for (int i = 0; i < 4 && bpm < tempoMin; ++i) {
+        beats = 2 * beats + (phase >= 0.5 ? 1 : 0);
+        phase = 2.0 * phase - std::floor(2.0 * phase);
+        bpm *= 2.0;
+      }
+    }
+    if (beat.locked) analysis.bpm->setValue(static_cast<float>(bpm));
+    analysis.updateBeat(static_cast<float>(phase));
+    analysis.beatCount = static_cast<uint32_t>(beats);
     return;
   }
 
@@ -222,8 +242,9 @@ json AudioSourceService::config() {
 }
 
 void AudioSourceService::loadConfig(json j) {
-  // Load by selectedAudioSourceId
-  if (j.contains("selectedAudioSourceId")) {
+  // Load by selectedAudioSourceId, unless the input is remembered app-wide
+  // (EnginePreferences: a workspace doesn't change it).
+  if (j.contains("selectedAudioSourceId") && !PreferencesService::getService()->state("audio.input").is_string()) {
     std::string sourceId = j["selectedAudioSourceId"];
     if (audioSourceMap.count(sourceId) != 0) {
       selectedAudioSource = audioSourceMap[sourceId];
@@ -259,4 +280,5 @@ void AudioSourceService::selectAudioSource(
   
   selectedAudioSource = source;
   selectedAudioSource->setup();
+  PreferencesService::getService()->setState("audio.input", source->id);
 }

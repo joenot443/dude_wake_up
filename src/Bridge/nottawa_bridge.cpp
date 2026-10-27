@@ -86,10 +86,10 @@ static void engineThreadFunc() {
     EngineLoop::getInstance()->makeContextCurrent();
     using clock = std::chrono::steady_clock;
     using us = std::chrono::microseconds;
-    constexpr auto frameDuration = us(16667); // ~60fps
     constexpr auto sleepMargin = us(2000);    // spin-wait the last 2ms
     while (engineRunning.load()) {
       auto frameStart = clock::now();
+      const auto frameDuration = us(1000000 / std::max(1, EnginePreferences::frameRate.load()));  // output.frameRate
       EngineLoop::getInstance()->tick();
       auto remaining = frameDuration - std::chrono::duration_cast<us>(clock::now() - frameStart);
       if (remaining > sleepMargin) {
@@ -1898,7 +1898,12 @@ float ntw_tap_bpm_at(double seconds) {
     if (analysis.bpmMode == BpmMode_Auto && !analysis.bpmLocked->boolValue) {
       // Two taps are too rough to steer by; from three, the tracker takes
       // the tapped tempo, octave and beat (and keeps refining from the music).
-      if (tap.valid && tap.taps >= 3) source->beatTracker.hint(tap.bpm, beat);
+      // Taps follow what's heard, which the input's beat offset says is
+      // that much after the analysis.
+      const int kind = static_cast<int>(source->type());
+      const double offsetMs = kind >= 0 && kind < 3 ? svc->beatOffsetMs[kind] : 0.0;
+      const auto analysed = beat - std::chrono::microseconds(static_cast<int64_t>(offsetMs * 1000.0));
+      if (tap.valid && tap.taps >= 3) source->beatTracker.hint(tap.bpm, analysed);
     } else {
       // The clock: a beat on the (fitted) taps, at the tapped tempo.
       if (tap.valid) analysis.bpm->setValue(static_cast<float>(tap.bpm));

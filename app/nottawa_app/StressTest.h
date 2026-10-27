@@ -63,6 +63,8 @@ private:
     void bpm();
     void settings();
     void settingsUi();
+    void audioSettings();
+    void audioLaunch();
 
     // Helpers working on the live graph.
     QString randomSource();

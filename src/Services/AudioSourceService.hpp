@@ -50,6 +50,11 @@ public:
 
   msa::BPMTapper tapper;  // the ImGui views'
   TapTempo tapTempo;      // taps from the apps (ntw_tap_bpm_at)
+
+  // Settings (EnginePreferences): the tempo range Auto shows (0: as found,
+  // 60-200), and the beat pulse's offset per kind of input, ms (+: earlier).
+  double tempoMin = 0, tempoMax = 0;
+  double beatOffsetMs[3] = {0, 0, 0};  // by AudioSourceType
   std::vector<std::shared_ptr<AudioTrack>> sampleTracks;
 
   std::vector<std::shared_ptr<AudioSource>> audioSources();
