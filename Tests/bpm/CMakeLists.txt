@@ -12,6 +12,7 @@ add_executable(bpm_eval
     Trackers.cpp
     LegacyTracker.cpp
     NewTracker.cpp
+    Taps.cpp
     # The detector the app used before BeatTracker (the baseline), and Gist/BTrack.
     legacy/BTrackDetector.cpp
     ${GIST}/BTrack.cpp ${GIST}/BTrackOnsetDetectionFunction.cpp

@@ -17,6 +17,8 @@ struct Tracker {
     virtual double pulsePhase(double t) const = 0;
     // Beat events reported since the last call, in audio time.
     virtual std::vector<double> takeBeats() = 0;
+    // Someone tapped along: a tempo and a beat (audio time).
+    virtual void hint(double /*bpm*/, double /*beatTime*/) {}
 };
 
 std::unique_ptr<Tracker> makeTracker(const std::string& name);

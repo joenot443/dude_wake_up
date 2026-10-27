@@ -6,6 +6,7 @@
 #include "nottawa_bridge.h"
 #include "panels/StageView.h"
 
+#include <chrono>
 #include <QApplication>
 #include <cmath>
 #include <QDir>
@@ -232,7 +233,32 @@ void StressTest::bpm() {
                                  .arg(name).arg(second).arg(a.bpm, 0, 'f', 2).arg(a.beatCount).arg(a.audioActive));
             }, 1000);
         }
+        // Velvet Skies (87) tapped at double tempo, as someone who hears it
+        // that way: the tracker should follow to 174.
+        if (name.contains("Velvet")) {
+            // Exact 174 BPM taps ending now (step timers are too coarse to tap with).
+            add([] {
+                const double now = std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
+                for (int i = 7; i >= 0; --i) EngineBridge::instance()->tapBpm(now - i * 60.0 / 174.0);
+            });
+            for (int second = 1; second <= 8; ++second)
+                add([this, second] {
+                    const AudioAnalysis a = EngineBridge::instance()->audioAnalysis();
+                    window_->log(QString("[stress] bpm: tapped 174 t=%1 bpm=%2").arg(second).arg(a.bpm, 0, 'f', 2));
+                }, 1000);
+        }
     }
+    // Manual: taps set the tempo.
+    add([this] {
+        auto* eng = EngineBridge::instance();
+        eng->setBpmMode(1);
+        const double now = std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
+        for (int i = 5; i >= 0; --i) eng->tapBpm(now - i * 0.6);
+    }, 300);
+    add([this] {
+        window_->log(QString("[stress] bpm: manual tapped 100 bpm=%1").arg(EngineBridge::instance()->audioAnalysis().bpm, 0, 'f', 2));
+        EngineBridge::instance()->setBpmMode(0);
+    });
     add([] { if (EngineBridge::instance()->isAudioActive()) EngineBridge::instance()->toggleAudio(); });
 }
 

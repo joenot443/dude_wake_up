@@ -19,6 +19,8 @@ public:
         return p - std::floor(p);
     }
     std::vector<double> takeBeats() override { return tracker_.takeBeats(); }
+    // BT_NOHINT: ignore taps (the baseline for --hint, scored over the same time).
+    void hint(double bpm, double beatTime) override { if (!std::getenv("BT_NOHINT")) tracker_.hintAudioTime(bpm, beatTime); }
 
 private:
     BeatTracker tracker_;
@@ -36,6 +38,8 @@ std::unique_ptr<Tracker> makeNewTracker() {
     env("BT_GAIN", t.phaseGain);
     env("BT_EVERY", every);
     env("BT_SNAP", t.snapSeconds);
+    env("BT_HRANGE", t.hintRange);
+    env("BT_HRECENTRE", t.hintRecentre);
     t.phaseEvery = std::max(1, int(every));
     return std::make_unique<NewTracker>();
 }

@@ -224,8 +224,21 @@ QWidget* AudioPanel::buildBpm() {
     connect(bpmMode_, &DSSegmented::currentIndexChanged, this, [this, eng](int m) {
         eng->setBpmMode(m);
         manualRow_->setVisible(m == 1);
+        tap_->setVisible(m != 2);
     });
-    layout->addWidget(bpmMode_);
+    // Tap along: in Auto it corrects the detected tempo and beat, in Manual
+    // it sets them. Taps count at the press, not the release.
+    auto* modeRow = new QHBoxLayout;
+    modeRow->setSpacing(6);
+    modeRow->addWidget(bpmMode_, 1);
+    tap_ = new QPushButton("Tap", col);
+    tap_->setCursor(Qt::PointingHandCursor);
+    tap_->setToolTip("Tap along to the beat (T)");
+    tap_->setStyleSheet("QPushButton { padding: 1px 8px; font-size: 8pt; }");
+    connect(tap_, &QPushButton::pressed, this, [eng] { eng->tapBpm(); });
+    modeRow->addStretch(0);
+    modeRow->addWidget(tap_);
+    layout->addLayout(modeRow);
 
     manualRow_ = new QWidget(col);
     auto* manual = new QHBoxLayout(manualRow_);
@@ -235,17 +248,12 @@ QWidget* AudioPanel::buildBpm() {
     auto* plus = smallButton(Icons::Plus, "Faster", manualRow_);
     bpmValue_ = new DSSlider(manualRow_);
     bpmValue_->setRange(1, 300);
-    auto* tap = new QPushButton("Tap", manualRow_);
-    tap->setCursor(Qt::PointingHandCursor);
-    tap->setStyleSheet("QPushButton { padding: 1px 8px; font-size: 8pt; }");
     connect(minus, &QToolButton::clicked, this, [this, eng] { eng->setBpm(bpm_ - 1); });
     connect(plus, &QToolButton::clicked, this, [this, eng] { eng->setBpm(bpm_ + 1); });
     connect(bpmValue_, &DSSlider::valueChanged, this, [eng](float v) { eng->setBpm(v); });
-    connect(tap, &QPushButton::clicked, this, [eng] { eng->tapBpm(); });
     manual->addWidget(minus);
     manual->addWidget(bpmValue_, 1);
     manual->addWidget(plus);
-    manual->addWidget(tap);
     manualRow_->hide();
     layout->addWidget(manualRow_);
 
@@ -396,6 +404,7 @@ void AudioPanel::pollControls() {
     bpmMode_->setVisible(!file.isFileSource);
     bpmMode_->setCurrentIndex(a.bpmMode);
     manualRow_->setVisible(a.bpmMode == 1);
+    tap_->setVisible(a.bpmMode != 2);  // Link sets the tempo
     bpmValue_->setValue(a.bpm);
     nudge_->setText(QString::number(a.bpmNudge, 'f', 2));
     smoothing_->setCurrentIndex(a.smoothingMode);

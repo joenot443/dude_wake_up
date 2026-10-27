@@ -122,6 +122,9 @@ MainWindow::MainWindow(const QString& dataPath) : dataPath_(dataPath) {
     connect(actionBar_, &ActionBar::zoomToFit, editor_, &NodeEditorView::zoomToFit);
     connect(actionBar_, &ActionBar::helpToggled, this, [this] { help_->setEnabled(!help_->enabled()); });
     toast_ = new Toast(centre_);
+    connect(EngineBridge::instance(), &EngineBridge::tapped, this, [this](float bpm) {
+        toast_->show(bpm > 0 ? QString("Tap tempo: %1 BPM").arg(bpm, 0, 'f', 1) : QString("Tap tempo: keep tapping"), 1500);
+    });
     fpsOverlay_ = new QLabel(centre_);
     fpsOverlay_->setStyleSheet(QString("QLabel { background: %1; color: %2; border-radius: 6px; padding: 4px 8px;"
                                        " font-family: Consolas; font-size: 8pt; }")
@@ -245,6 +248,11 @@ bool MainWindow::handleParameterKey(QObject* watched, QKeyEvent* e) {
         if (!stage && param->type == ParamInfo::Standard && !(mods & (Qt::ControlModifier | Qt::AltModifier)) &&
             text.size() == 1 && (text[0].isDigit() || text[0] == '-' || text[0] == '.'))
             return inspector_->beginEdit(param->id, text);
+    }
+    // T taps the tempo, anywhere (auto-repeat isn't a tap).
+    if (e->key() == Qt::Key_T && !(mods & (Qt::ControlModifier | Qt::AltModifier | Qt::MetaModifier))) {
+        if (!e->isAutoRepeat()) EngineBridge::instance()->tapBpm();
+        return true;
     }
     // Stage mode, as on macOS: S saves a screenshot of the output (Shift+S
     // chooses the folder first), C copies it.

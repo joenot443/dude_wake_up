@@ -3,7 +3,7 @@
 # in parallel, then prints each overall line and right-tempo phase summary.
 # (WSLENV passes the BT_* settings through to the Windows program.)
 cd "$(dirname "$0")"
-export WSLENV=BT_MEM:BT_GAIN:BT_EVERY:BT_SNAP
+export WSLENV=BT_MEM:BT_GAIN:BT_EVERY:BT_SNAP:BT_HRANGE:BT_HRECENTRE:BT_NOHINT
 i=0
 for setting in "$@"; do
   i=$((i+1))

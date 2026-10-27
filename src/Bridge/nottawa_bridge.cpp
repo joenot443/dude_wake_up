@@ -1862,7 +1862,7 @@ void ntw_set_bpm_value(float bpm) {
     auto source = svc->selectedAudioSource;
     if (!source) return;
     source->audioAnalysis.adjustBpmStartTimeForPhase(bpm);
-    svc->tapper.setBpm(bpm);
+    svc->tapTempo.reset();  // a set tempo replaces a tapped one
   });
 }
 
@@ -1881,17 +1881,29 @@ void ntw_set_bpm_nudge(float value) {
 }
 
 void ntw_tap_bpm(void) {
-  runOnEngineThread([]() {
+  ntw_tap_bpm_at(std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count());
+}
+
+float ntw_tap_bpm_at(double seconds) {
+  return runOnEngineThread([seconds]() -> float {
     auto svc = AudioSourceService::getService();
     auto source = svc->selectedAudioSource;
-    if (!source) return;
-    svc->tapper.tap();
-    // A tap is a beat: the clock restarts on it, and from the second tap
-    // on runs at the tapped tempo (the mean of the taps so far).
+    if (!source) return 0.0f;
     auto& analysis = source->audioAnalysis;
-    if (svc->tapper.tapCount() >= 2) analysis.bpm->setValue(svc->tapper.bpm());
-    analysis.bpmStartTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::steady_clock::now().time_since_epoch()).count();
+    if (analysis.bpmMode == BpmMode_Link) return 0.0f;  // Link's session sets the tempo
+    const TapTempo::Result tap = svc->tapTempo.tap(seconds);
+    const auto beat = std::chrono::steady_clock::time_point(std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+        std::chrono::duration<double>(tap.valid ? tap.beatTime : seconds)));
+    if (analysis.bpmMode == BpmMode_Auto && !analysis.bpmLocked->boolValue) {
+      // Two taps are too rough to steer by; from three, the tracker takes
+      // the tapped tempo, octave and beat (and keeps refining from the music).
+      if (tap.valid && tap.taps >= 3) source->beatTracker.hint(tap.bpm, beat);
+    } else {
+      // The clock: a beat on the (fitted) taps, at the tapped tempo.
+      if (tap.valid) analysis.bpm->setValue(static_cast<float>(tap.bpm));
+      analysis.bpmStartTime = std::chrono::duration_cast<std::chrono::milliseconds>(beat.time_since_epoch()).count();
+    }
+    return tap.valid ? static_cast<float>(tap.bpm) : 0.0f;
   });
 }
 

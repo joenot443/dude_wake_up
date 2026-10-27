@@ -69,6 +69,8 @@ public:
     double phaseGain = 0.5;   // share of a phase error corrected per update
     int phaseEvery = 6;       // onset frames between phase updates (~29/s: smooth on screen)
     double snapSeconds = 0.75;  // a phase error over a quarter beat for this long: jump to it
+    double hintRange = 0.35;    // after taps: how far (beats) the onsets may move the tapped beat
+    double hintRecentre = 8.0;  // ...and how fast (seconds) that range re-centres while they agree
   };
   static Tuning& tuning() { static Tuning t; return t; }
 
@@ -99,6 +101,7 @@ public:
     audioTime_ = 0.0;
     phaseErrors_ = 0;
     snapPhase_ = true;
+    hintBpm_ = 0;
     beats_.clear();  // (beatCount_ carries on: consumers count on it rising)
     if (!fft_) {
       fft_ = kiss_fft_alloc(kFft, 0, nullptr, nullptr);
@@ -112,10 +115,30 @@ public:
   // Any thread: start over at the next buffer (new music: a track change).
   void requestReset() { resetRequested_.store(true); }
 
+  // Any thread: a tapped tempo and beat (applied at the next buffer). The
+  // tempo is taken at once and kept to its octave and meter (its x2, /2,
+  // 3/2... relatives are held back); the beat clock is set to the tapped
+  // beat and kept from drifting onto the off-beat. It lasts until the music
+  // changes: a reset, or an unrelated tempo taking over.
+  void hint(double bpm, std::chrono::steady_clock::time_point beat) {
+    std::lock_guard<std::mutex> lock(hintMutex_);
+    pendingHint_ = {bpm, beat, true};
+  }
+  // As hint(), with the beat in audio time, on the audio thread (tests).
+  void hintAudioTime(double bpm, double beatAudioTime) { applyHint(bpm, beatAudioTime); }
+
   // Audio thread: one callback's interleaved samples.
   void process(const float* data, int frames, int channels, double sampleRate) {
     if (frames <= 0 || channels <= 0 || sampleRate <= 0) return;
     if (resetRequested_.exchange(false)) reset();
+    {
+      std::lock_guard<std::mutex> lock(hintMutex_);
+      if (pendingHint_.set) {
+        pendingHint_.set = false;
+        // The tapped beat in audio time: audioTime_ was current at lastWall_.
+        applyHint(pendingHint_.bpm, audioTime_ + std::chrono::duration<double>(pendingHint_.beat - lastWall_).count());
+      }
+    }
     if (sampleRate != inputRate_) startResampler(sampleRate);
 
     // Downmix, then slow automatic gain (attack ~50 ms, release ~3 s) so
@@ -400,6 +423,7 @@ private:
     const size_t available = odf_.size();
     if (available < size_t(kMinSeconds * kFps)) return;
     const size_t W = std::min(available, size_t(kWindowSeconds * kFps));
+    if (confidence_ < 0.15) return;  // no clear beat (a breakdown): the clock runs on
     if (fresh) smoothOnsets(odf_.data() + (available - W), W);
     const Beat current = judge(60.0 * kFps / tempo_, W);
     followPhase(current.phase);
@@ -474,7 +498,7 @@ private:
     // subset), so the tempo preference settles octaves.
     (void)off;
     const double salience = on / norm / smoothMean_;
-    b.score = salience * prior(60.0 * kFps / period);
+    b.score = salience * weight(60.0 * kFps / period);
     b.phase = bestPhi;
     return b;
   }
@@ -509,6 +533,38 @@ private:
 
   // Soft preference for usual tempos: log-normal around 120 BPM, about an
   // octave wide.
+  // The tempo preference: around 120, or after a tapped hint, the hinted
+  // tempo over its octave and meter relatives (other tempos as usual, so a
+  // new track can take over).
+  double weight(double bpm) const {
+    if (hintBpm_ <= 0) return prior(bpm);
+    if (std::fabs(bpm / hintBpm_ - 1) < 0.04) return 1.0;
+    if (related(bpm, hintBpm_, 0.04)) return 0.3 * prior(bpm);
+    return prior(bpm);
+  }
+
+  // Tempos an octave or a simple meter ratio apart.
+  static bool related(double a, double b, double tolerance) {
+    for (double r : {2.0, 0.5, 1.5, 2.0 / 3.0, 3.0, 1.0 / 3.0, 4.0 / 3.0, 0.75})
+      if (std::fabs(a / (b * r) - 1) < tolerance) return true;
+    return false;
+  }
+
+  void applyHint(double bpm, double beatAudioTime) {
+    if (!(bpm >= kMinBpm * 0.5 && bpm <= kMaxBpm * 1.5)) return;
+    hintBpm_ = std::clamp(bpm, kMinBpm, kMaxBpm);
+    tempo_ = hintBpm_;
+    locked_ = true;
+    candidate_ = 0; candidateCount_ = 0;
+    alternative_ = 0; alternativeCount_ = 0;
+    double fraction = (audioTime_ - beatAudioTime) * tempo_ / 60.0;
+    fraction -= std::floor(fraction);
+    setClockFraction(fraction);
+    snapPhase_ = false;
+    phaseErrors_ = 0;
+    hintOffset_ = 0;
+  }
+
   static double prior(double bpm) {
     const double x = std::log2(bpm / 120.0) / 0.9;
     return std::exp(-0.5 * x * x);
@@ -548,6 +604,7 @@ private:
       if (++alternativeCount_ >= 8) {
         tempo_ = alternative_;
         snapPhase_ = true;
+        if (hintBpm_ > 0 && std::fabs(tempo_ / hintBpm_ - 1) > 0.04) hintBpm_ = 0;  // new music
         alternative_ = 0; alternativeCount_ = 0;
       }
     } else {
@@ -564,9 +621,21 @@ private:
     const double beatSeconds = 60.0 / tempo_;
     double measured = (audioTime_ - lastBeat) / beatSeconds;
     measured -= std::floor(measured);
-    double error = measured - (clock_ - std::floor(clock_));
-    if (error > 0.5) error -= 1;
-    if (error < -0.5) error += 1;
+    auto wrap = [](double e) { return e > 0.5 ? e - 1 : (e < -0.5 ? e + 1 : e); };
+    double error = wrap(measured - (clock_ - std::floor(clock_)));
+    if (hintBpm_ > 0) {
+      // A tapped beat: the onsets fine-tune it but can't walk it away (to
+      // the off-beat, where some music's strongest onsets are). The
+      // corrections since the taps stay within hintRange of a beat; while
+      // the onsets agree with the clock that allowance re-centres on it, so
+      // a long set can still drift with the music.
+      const double range = tuning().hintRange;
+      const double allowed = std::clamp(hintOffset_ + tuning().phaseGain * error, -range, range);
+      clock_ += allowed - hintOffset_;
+      hintOffset_ = allowed;
+      if (std::fabs(error) < 0.1) hintOffset_ *= 1.0 - double(tuning().phaseEvery) / (tuning().hintRecentre * kFps);
+      return;
+    }
     const int snapAfter = std::max(1, int(tuning().snapSeconds * kFps / tuning().phaseEvery));
     if (snapPhase_ || (std::fabs(error) > 0.25 && ++phaseErrors_ >= snapAfter)) {
       setClockFraction(measured);
@@ -600,6 +669,7 @@ private:
   }
 
   void publish() {
+    lastWall_ = std::chrono::steady_clock::now();
     std::lock_guard<std::mutex> lock(snapshotMutex_);
     snapshot_.bpm = tempo_;
     snapshot_.confidence = confidence_;
@@ -607,7 +677,7 @@ private:
     snapshot_.phase = clock_ - std::floor(clock_);
     snapshot_.audioTime = audioTime_;
     snapshot_.beats = beatCount_;
-    snapshot_.wallTime = std::chrono::steady_clock::now();
+    snapshot_.wallTime = lastWall_;
   }
 
   // Input
@@ -645,6 +715,12 @@ private:
   std::vector<double> beats_;
 
   std::atomic<bool> resetRequested_{false};
+  struct PendingHint { double bpm = 0; std::chrono::steady_clock::time_point beat; bool set = false; };
+  std::mutex hintMutex_;
+  PendingHint pendingHint_;
+  double hintBpm_ = 0;     // a tapped tempo being held to (0: none)
+  double hintOffset_ = 0;  // phase corrections since the tapped beat (beats)
+  std::chrono::steady_clock::time_point lastWall_ = std::chrono::steady_clock::now();
   mutable std::mutex snapshotMutex_;
   Snapshot snapshot_;
 };

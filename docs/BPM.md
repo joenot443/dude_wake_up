@@ -91,10 +91,61 @@ as convincingly 88.7 (its triplet feel) as 133.
   the shown tempo is the one nearer 120: drum & bass reads 87 rather than
   174, half-time dubstep 70 rather than 140, a kick on every beat at 180
   reads 90. The beat pulse then lands on every other beat. (Acc2 counts
-  these right; DJ software differs too.)
+  these right; DJ software differs too.) Tapping along fixes it.
 - **Syncopated music** (some Latin) can still lock to the off-beat.
 - **Latency.** The pulse is aligned to the audio as it's analysed; output,
   capture and display latency are for the BPM Nudge control.
+
+## Tap tempo
+
+`src/Audio/TapTempo.hpp`. Tap with the **Tap** button (it counts the press,
+not the release) or the **T** key anywhere outside a text field, including
+in stage mode; a toast shows the tapped tempo.
+
+- **Manual mode** (or a locked BPM): the taps set the tempo and put the beat
+  on them.
+- **Auto mode**: from the third tap, the tracker takes the tapped tempo and
+  beat, then keeps refining both from the music. The tapped octave and meter
+  stick (the tracker's x2, /2, 3/2... alternatives are held back), and the
+  beat can be fine-tuned by the onsets by up to a third of a beat but not
+  walked onto the off-beat. A different tempo in the music (the next track
+  of a mix) still takes over, and ends it. This is how to fix drum & bass
+  showing 87, or a beat on the off-beat.
+
+The tapper fits a straight line through the recent taps (up to 16) rather
+than averaging intervals: a missed tap counts as two beats, a double tap is
+ignored, a stray tap is dropped, a deliberate tempo change (taps drifting
+further off the line than their wobble explains) starts afresh, and a pause
+of a few beats starts over.
+
+Simulated people tapping (`bpm_eval --taps`: 300 runs per case, 70-174 BPM,
+10-35 ms timing wobble), error after 8 / 16 taps, median:
+
+| | old tapper | new |
+|---|---|---|
+| 128 BPM, 20 ms wobble | 0.60% / 0.26% | 0.45% / 0.18% |
+| 174 BPM, 35 ms wobble | 1.53% / 0.63% | 1.08% / 0.40% |
+| a missed tap | 12.6% | 0.4% |
+| a double tap | 14.2% / 6.7% | 0.45% / 0.18% |
+| tempo change 128 -> 140 | 0.6% / 4.8% | 0.45% / 0.66% |
+
+The beat position is better too (median 9 ms against 13 ms at 20 ms
+wobble). Eight casual taps give a tempo to about half a BPM: that's the
+information in them; more taps tighten it, and in Auto mode the tracker
+refines it from the music.
+
+Correcting Auto mode with 8 taps (20 ms wobble) on the true beats at 10 s
+(`--hint 10`; without taps scored over the same time):
+
+| | tempo within 4% | beat F |
+|---|---|---|
+| synthetic, no taps | 80% | 0.92 |
+| synthetic, tapped | 100% | 0.99 |
+| Ballroom, no taps | 65% | 0.74 |
+| Ballroom, tapped | 95% | 0.85 |
+
+(201 recordings' beats improve by over 0.15 F; 14 get worse, mostly
+quickstep whose strongest onsets are off the beat at the tapped tempo.)
 
 ## Running the evaluation
 
@@ -110,10 +161,13 @@ cd Tests/bpm
 
 `--algo legacy` runs the old detector; `--verbose` prints each item;
 `--only <text>` limits to matching items; `--dump` prints pulse offsets over
-time; `--csv` writes per-item results. `build.ps1 -Trace` builds a version
+time; `--csv` writes per-item results; `--taps` runs the tapper evaluation;
+`--hint <s>` simulates someone tapping along at that time (`BT_NOHINT=1`
+for the untapped baseline over the same time). `build.ps1 -Trace` builds a version
 that prints the tracker's candidates at every update. `sweep.sh` runs
 Ballroom once per tuning setting, in parallel (`BT_MEM`, `BT_GAIN`,
-`BT_EVERY`, `BT_SNAP`; see `BeatTracker::Tuning`).
+`BT_EVERY`, `BT_SNAP`, `BT_HRANGE`, `BT_HRECENTRE`; see
+`BeatTracker::Tuning`).
 
 Ballroom: audio from
 `https://mtg.upf.edu/ismir2004/contest/tempoContest/data1.tar.gz` (the server
