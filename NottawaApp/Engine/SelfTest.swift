@@ -24,6 +24,8 @@
 //                   scored against the track's beat
 //    audiolaunch-set / audiolaunch-check  start-on-launch and the remembered
 //                   input across a relaunch; then put back
+//    cachesettings  a video clip (NOTTAWA_SELFTEST_CLIP, ~1.1 GB to cache)
+//                   loaded under each Cache Video Clips / Cache Memory choice
 //
 //  NOTTAWA_SELFTEST_SECONDS sets the listening time per track (default 40).
 //  Results go to <container tmp>/selftest/: report.txt, plus a CSV of
@@ -83,6 +85,7 @@ final class SelfTest {
             case "audiosettings": await audioSettings()
             case "audiolaunch-set": audioLaunchSet(); return  // quits right away, on purpose
             case "audiolaunch-check": audioLaunchCheck()
+            case "cachesettings": await cacheSettings()
             default: log("FAIL unknown scenario \(scenario)")
             }
         }
@@ -744,6 +747,49 @@ extension SelfTest {
         log(String(format: "output device %@ @ %.0f Hz: device latency %.1f ms + safety %.1f ms + stream %.1f ms + buffer %.1f ms = %.1f ms after render",
                    (name?.takeRetainedValue() as String?) ?? "?", rate, ms(device), ms(safety), ms(streamLatency), ms(buffer),
                    ms(device + safety + streamLatency + buffer)))
+    }
+}
+
+// MARK: - Frame cache
+
+extension SelfTest {
+    /// The clip loaded fresh under each setting: whether FileSource cached it.
+    func cacheSettings() async {
+        let store = SettingsStore.shared
+        guard let path = ProcessInfo.processInfo.environment["NOTTAWA_SELFTEST_CLIP"],
+              FileManager.default.fileExists(atPath: path) else {
+            return log("FAIL cachesettings: no clip (NOTTAWA_SELFTEST_CLIP)")
+        }
+        let saved = (on: store.bool("performance.frameCache"), budget: store.string("performance.frameCacheBudget"))
+        // (enabled, budget, cached?) for a clip whose cache is ~1106 MB.
+        let cases: [(Bool, String, Bool)] = [(false, "auto", false), (true, "1024", false), (true, "2048", true), (true, "auto", true)]
+        for (on, budget, want) in cases {
+            store.set("performance.frameCache", bool: on)
+            store.set("performance.frameCacheBudget", string: budget)
+            await wait(0.3)
+            let started = Date()
+            guard let id = engine.addFileVideoSource(name: "selftest clip", path: path) else {
+                log("FAIL cachesettings: couldn't add \(path)")
+                continue
+            }
+            var state = ntw_get_file_source_state(id)
+            for _ in 0..<40 where state.duration <= 0 { await wait(0.25); state = ntw_get_file_source_state(id) }
+            let cached = state.cacheAvailable != 0
+            log(String(format: "%@ cache %@ budget %@: cached %@ (%d frames, in use %d), loaded in %.1f s",
+                       cached == want ? "PASS" : "FAIL", on ? "on" : "off", budget, cached ? "yes" : "no",
+                       state.cachedFrameCount, state.useCachedMode, Date().timeIntervalSince(started)))
+            if !on {
+                // The clip's own switch, with the setting off: there's no cache to use.
+                ntw_set_file_source_use_cached_mode(id, 1)
+                await wait(0.5)
+                let after = ntw_get_file_source_state(id)
+                log("cachesettings: clip's own cache switched on with the setting off: available \(after.cacheAvailable), in use \(after.useCachedMode), frames \(after.cachedFrameCount)")
+            }
+            engine.removeConnectable(id: id)
+            await wait(0.5)
+        }
+        store.set("performance.frameCache", bool: saved.on)
+        store.set("performance.frameCacheBudget", string: saved.budget)
     }
 }
 

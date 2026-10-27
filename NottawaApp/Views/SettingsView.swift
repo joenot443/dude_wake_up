@@ -50,6 +50,7 @@ struct SettingsView: View {
         case "Appearance": return "paintpalette"
         case "Output": return "rectangle.on.rectangle"
         case "Audio": return "waveform"
+        case "Performance": return "speedometer"
         case "Graph": return "point.3.connected.trianglepath.dotted"
         case "Browser": return "square.grid.2x2"
         case "MIDI": return "pianokeys"

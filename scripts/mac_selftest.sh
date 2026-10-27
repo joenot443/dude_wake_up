@@ -4,7 +4,7 @@
 #
 #   scripts/mac_selftest.sh [scenarios]
 #     default: files,system,tap,tapauto,persist,settings,settingspersist,settingsui,
-#              audiosettings,audiolaunch
+#              audiosettings,audiolaunch,cachesettings
 #
 # "persist" and "settingspersist" launch twice: change a parameter (or some
 # settings) and quit at once, then check on relaunch. settingsui leaves
@@ -16,7 +16,7 @@ cd "$(dirname "$0")/.."
 APP=bin/NottawaApp.app/Contents/MacOS/NottawaApp
 per=${NOTTAWA_SELFTEST_SECONDS:-40}
 OUT=~/Library/Containers/com.joecrozier.nottawa/Data/tmp/selftest
-SCENARIOS=${1:-files,system,tap,tapauto,persist,settings,settingspersist,settingsui,audiosettings,audiolaunch}
+SCENARIOS=${1:-files,system,tap,tapauto,persist,settings,settingspersist,settingsui,audiosettings,audiolaunch,cachesettings}
 
 if pgrep -xq NottawaApp; then echo "NottawaApp is running; quit it first" >&2; exit 2; fi
 [ -x "$APP" ] || { echo "no $APP; build the NottawaApp scheme" >&2; exit 2; }
@@ -27,7 +27,7 @@ launch() {
   # Through LaunchServices, ignoring saved window state: the engine starts
   # (and the quit-time save is hooked) from the main window, which a bare
   # launch or a no-window saved state never shows.
-  open -n -W -g --env NOTTAWA_SELFTEST="$1" --env NOTTAWA_SELFTEST_SECONDS="$per" \
+  open -n -W -g --env NOTTAWA_SELFTEST="$1" --env NOTTAWA_SELFTEST_SECONDS="$per" --env NOTTAWA_SELFTEST_CLIP="$CLIP" \
     bin/NottawaApp.app --args -ApplePersistenceIgnoreState YES &
   local opener=$! waited=0
   while kill -0 $opener 2>/dev/null; do
@@ -43,6 +43,12 @@ launch() {
 }
 
 rm -rf "$OUT"; mkdir -p "$OUT"
+# A 10 s 720p30 test clip inside the sandbox container (cachesettings): ~1.1 GB to cache.
+CLIP=~/Library/Containers/com.joecrozier.nottawa/Data/tmp/selftest-media/clip720p30.mp4
+if [ ! -f "$CLIP" ] && echo "$SCENARIOS" | tr ',' '\n' | grep -qx cachesettings; then
+  mkdir -p "$(dirname "$CLIP")"
+  ffmpeg -v quiet -f lavfi -i testsrc2=size=1280x720:rate=30 -t 10 -c:v libx264 -pix_fmt yuv420p "$CLIP"
+fi
 in_app=$(echo "$SCENARIOS" | tr ',' '\n' | grep -vE '^(persist|settingspersist|audiolaunch)$' | paste -sd, -)
 if [ -n "$in_app" ]; then launch "$in_app" $((per * 16 + 120)); fi
 if echo "$SCENARIOS" | tr ',' '\n' | grep -qx persist; then
