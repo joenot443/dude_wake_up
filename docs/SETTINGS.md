@@ -87,6 +87,7 @@ Step 1's settings (all engine preferences now):
 | screenshots.format | Screenshots | choice | png | png/jpeg |
 | screenshots.folder | Screenshots | path | "" | listed only: each app keeps its own (Mac bookmark) and chooser |
 | updates.check | Updates | bool | true | Windows only |
+| advanced.copyDiagnostics | Advanced | action | | plain text for a bug report: version, system, GPU, displays, engine state, settings changed from defaults (not paths), whether the previous session crashed or hung; nothing naming the user |
 | advanced.openLogs / openData / resetAll | Advanced | action | | the app performs them |
 
 Step 3, batch 1 (Audio and Output):
@@ -122,9 +123,10 @@ that then appears in both apps):
 - **Output**: frame-rate cap (30/60/display); output window display and
   fullscreen on launch; custom resolution (width x height, already in the
   engine).
-- **Performance**: preview quality (thumbnail size / update rate); live
-  previews in the browser; video frame cache on/off and RAM budget (Windows
-  has it per file today); stage-mode GPU priority.
+- **Performance**: video frame cache on/off and RAM budget (done). Preview
+  quality was dropped: browser previews already render small (Live Previews
+  turns them off) and node previews draw frames the graph renders anyway,
+  so their cost is Resolution and Frame Rate's.
 - **MIDI**: smoothing (above), device list and assignments manager (bridge
   queries exist; make it a proper page).
 - **Advanced**: open logs folder, open data folder, reset all settings, crash

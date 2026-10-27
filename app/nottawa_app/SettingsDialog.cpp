@@ -1,6 +1,7 @@
 #include "SettingsDialog.h"
 #include "UpdateCheck.h"
 
+#include "Diagnostics.h"
 #include "EngineBridge.h"
 #include "Icons.h"
 #include "Prefs.h"
@@ -9,6 +10,9 @@
 #include "ui/Controls.h"
 
 #include <QApplication>
+#include <QClipboard>
+#include <QCursor>
+#include <QToolTip>
 #include <QDesktopServices>
 #include <QDir>
 #include <QFileDialog>
@@ -408,7 +412,10 @@ QWidget* SettingsDialog::rowFor(const SettingInfo& s, QWidget* parent) {
 }
 
 void SettingsDialog::perform(const QString& action) {
-    if (action == "advanced.openLogs") {
+    if (action == "advanced.copyDiagnostics") {
+        QApplication::clipboard()->setText(Diagnostics::report());
+        QToolTip::showText(QCursor::pos(), "Copied to the clipboard", this);
+    } else if (action == "advanced.openLogs") {
         QDesktopServices::openUrl(QUrl::fromLocalFile(QDir(appDataDir()).filePath("logs")));
     } else if (action == "advanced.openData") {
         QDesktopServices::openUrl(QUrl::fromLocalFile(appDataDir()));

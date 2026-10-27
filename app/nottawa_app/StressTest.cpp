@@ -1,4 +1,5 @@
 #define _USE_MATH_DEFINES
+#include "Diagnostics.h"
 #include <memory>
 #include <QTimer>
 #include <QFrame>
@@ -342,6 +343,18 @@ void StressTest::settingsUi() {
         Prefs::set("display.nodeHints", 0.0);
     }, 400);
     add([this] {
+        // Copy Diagnostics, with a previous session that hung.
+        const QString logs = QDir(qApp->property("appDataDir").toString()).filePath("logs");
+        QFile previous(QDir(logs).filePath("engine.previous.log"));
+        if (previous.open(QIODevice::WriteOnly)) previous.write("starting\n=== HANG: the UI thread has been unresponsive for 2100 ms ===\n");
+        previous.close();
+        const QString report = Diagnostics::report();
+        for (const QString& line : report.split('\n')) window_->log("[stress] settingsui: diagnostics | " + line);
+        if (report.contains("Graphics: unavailable")) window_->log("[stress] FAIL settingsui: diagnostics without the GPU");
+        if (!report.contains("1 report(s)")) window_->log("[stress] FAIL settingsui: diagnostics missed the previous session's hang");
+        if (!report.contains("display.nodeHints=0")) window_->log("[stress] FAIL settingsui: diagnostics missed a changed setting");
+        if (report.contains(QDir::homePath()) || report.contains(qEnvironmentVariable("USERNAME")))
+            window_->log("[stress] FAIL settingsui: diagnostics name the user");
         for (QAction* a : window_->findChildren<QAction*>())
             if (a->text() == "Show Node &Hints" && a->isChecked()) window_->log("[stress] FAIL settingsui: the menu didn't follow node hints");
         EngineBridge::instance()->resetSettings();
