@@ -1,8 +1,8 @@
-# Settings (spec, draft)
+# Settings
 
 A richer settings screen on macOS (NottawaApp) and Windows (app/nottawa_app),
-built in lockstep. Status: **draft for review** (Windows session wrote it; Mac
-session reviews; Joe decides the open questions at the end).
+built in lockstep. Status: **agreed**; step 1 (engine) done, step 2 (both
+UIs) next.
 
 ## Where settings live
 
@@ -16,43 +16,41 @@ Three kinds, and today they're mixed up:
 
 The engine's `config.json` is the session: anything in it changes when a
 workspace is opened. Resolution and MIDI smoothing are stored there today, so
-opening a workspace silently changes them (see open questions).
+opening a workspace silently changed them. They're app preferences now
+(decision 1): `loadConfigFile` re-applies the preferences after loading.
 
 ## Engine side (Windows session owns)
 
-`PreferencesService` (src/Services): a registry of settings, each with
+`PreferencesService` (src/Services/PreferencesService.hpp, header-only)
+declares every setting once, in display order:
 
-- `id` (stable, dotted: `display.nodeHints`), `section`, `label`, `help` (one line)
-- `type`: bool, int, float, choice (string id from a list), string, path
-- `min` / `max` / `step` (numbers), `choices` (id + label), `unit` ("ms", "s", "%")
-- `default`, `restart` (needs a restart to take effect), `platforms` (both / mac / windows)
+- `id` (stable, dotted: `display.nodeHints`), `section`, optional `group`
+  (subheading), `label`, `help` (one line), `keywords` (extra search terms)
+- `type`: bool, int, float, choice (string id from a list), string, path,
+  action (a button with no value; the app performs it by id)
+- numbers: `min` / `max` / `step`, `decimals`, `unit` ("ms", "s", "%")
+- `default`, `dependsOn` (a bool's id: the row is greyed while it's off),
+  `restart` (platform bits where a change needs a restart), `platforms`
+  (1 macOS, 2 Windows, 3 both)
 
-values persisted in `<app data>/preferences.json` (written debounced, like the
-config), and engine code reading them by id. Engine services that already own a
-setting (MIDI smoothing, clear on disconnect) read it from preferences.
+Values persist in `<nottawa folder>/preferences.json` (under
+`appSupportFilePath()`; inside the sandbox container on macOS), written 0.5 s
+after the last change, and on `ntw_save_default_config`. On first run (no
+file) resolution and MIDI smoothing are seeded from the session.
+`EnginePreferences.hpp` puts the engine's own (resolution, MIDI smoothing,
+clear on disconnect) into effect. The legacy ImGui app never loads
+preferences, so it neither applies nor writes them.
 
-Bridge (C, in nottawa_bridge.h):
+Values are behind a mutex: any thread may read. Sets go to the engine thread,
+which runs the change callback for every change, including the app's own
+sets (menus mirroring a setting can just follow it).
 
-```c
-typedef struct {
-  const char* id; const char* section; const char* label; const char* help;
-  int type;                    // NTWSettingType
-  double min, max, step;       // numbers
-  const char* unit;
-  const char** choiceIds; const char** choiceLabels; int choiceCount;
-  int restart;                 // 1: takes effect after a restart
-} NTWSettingInfo;
-
-NTWSettingInfo* ntw_get_settings(int* outCount);   // in display order
-void   ntw_free_settings(NTWSettingInfo*, int count);
-double ntw_get_setting_number(const char* id);      // bool/int/float
-void   ntw_set_setting_number(const char* id, double value);
-char*  ntw_get_setting_string(const char* id);      // choice/string/path (free with ntw_free_string)
-void   ntw_set_setting_string(const char* id, const char* value);
-void   ntw_reset_settings(const char* section);     // NULL: all
-typedef void (*NTWSettingsChangedCallback)(const char* id);
-void   ntw_register_settings_changed_callback(NTWSettingsChangedCallback);
-```
+Bridge: the `MARK: - Settings` section of src/Bridge/nottawa_bridge.h is the
+reference (`NTWSettingInfo`, `ntw_get_settings` / `ntw_free_settings`, get /
+set number or string by id, `ntw_reset_settings(section)`,
+`ntw_register_settings_changed_callback`). The old setters
+(`ntw_set_resolution`, `ntw_set_midi_smoothing_*`,
+`ntw_set_clear_on_disconnect`) set the preference.
 
 Platform-only entries (e.g. Windows "check for updates") are still declared
 in the engine with `platforms`, so one list describes the whole screen; each
@@ -72,31 +70,36 @@ app skips what isn't for it and handles its own (path pickers, theme apply).
 
 ## Settings
 
-Existing (both platforms unless noted), proposed home:
+Step 1's settings (all engine preferences now):
 
-| id | type | default | today | proposed |
+| id | section | type | default | notes |
 |---|---|---|---|---|
-| display.nodeHints | bool | true | Mac UserDefaults, Win QSettings | shared pref |
-| output.autoAdvance | bool | true | both, UI-side | shared pref |
-| output.advanceFade | float s 0-2 | 0.3 | both, UI-side (Mac reads 0 when unset: bug) | shared pref |
-| graph.clearOnDisconnect | bool | true | Mac UserDefaults + bridge, Win QSettings | shared pref (engine already uses it) |
-| midi.smoothing | bool | false | engine, per workspace | shared pref? (open question) |
-| midi.smoothingMs | float ms 0-4000 | 80 | engine, per workspace | shared pref? |
-| output.resolution | choice | 720p | engine, per workspace | open question |
-| screenshots.format | choice png/jpeg | png | both, UI-side | shared pref |
-| screenshots.folder | path | (ask) | Mac bookmark, Win path | platform UI state |
-| browser.livePreview | bool | true | both, UI-side (Mac: sidebar only) | shared pref |
-| appearance.theme | choice | Default | both; Mac doesn't persist it (bug), Win needs restart | open question |
-| updates.check | bool | true | Windows only | pref, platforms: windows |
+| appearance.theme | Appearance | choice | default | default/midnight/daylight/ember/arctic/forest; restart on Windows |
+| display.nodeHints | Appearance | bool | true | |
+| output.resolution | Output | choice | 720p | 240p ... 4k; was per workspace |
+| output.autoAdvance | Output | bool | true | group Output Window |
+| output.advanceFade | Output | float s 0-2 | 0.3 | dependsOn autoAdvance |
+| output.stretchPreviews | Output | bool | false | Mac didn't persist it |
+| graph.clearOnDisconnect | Graph | bool | true | |
+| browser.livePreview | Browser | bool | true | |
+| midi.smoothing | MIDI | bool | false | was per workspace |
+| midi.smoothingMs | MIDI | float ms 0-4000 | 80 | dependsOn smoothing |
+| screenshots.format | Screenshots | choice | png | png/jpeg |
+| screenshots.folder | Screenshots | path | "" | listed only: each app keeps its own (Mac bookmark) and chooser |
+| updates.check | Updates | bool | true | Windows only |
+| advanced.openLogs / openData / resetAll | Advanced | action | | the app performs them |
 
-New settings: **proposed, Joe to pick** (each is an engine change that then
-appears in both apps):
+New settings, step 3 (Joe chose all four groups; each is an engine change
+that then appears in both apps):
 
 - **Audio**: default input on launch (last used / microphone / system audio /
   sample track); start audio on launch; BPM range (60-200 default, or prefer
   "78-156" / "90-180" so drum & bass shows 174, see docs/BPM.md); beat pulse
   offset (latency compensation, ms, replacing ad-hoc nudge); tap-tempo taps
-  needed in Auto (3).
+  needed in Auto (3). Measured on the Mac: the shown beat is +15-20 ms late
+  from a File source but +61-65 ms from System Audio (tap capture plus output
+  buffering), so the offset should be per input kind (or File / System
+  defaults differing by about 45 ms), not one number.
 - **Output**: frame-rate cap (30/60/display); output window display and
   fullscreen on launch; custom resolution (width x height, already in the
   engine).
@@ -120,12 +123,15 @@ both UIs build on it; both builds green before the next.
 3. The chosen new settings, a few at a time: engine [Windows], then each UI
    only if it needs a platform hook. [both]
 
-## Open questions (Joe)
+## Decisions (Joe)
 
-1. **Resolution and MIDI smoothing**: app preferences (same whatever workspace
-   is open), or stay saved with each workspace? Suggest: preferences. They
-   describe the setup (projector, MIDI controller), not the piece.
-2. **Theme**: shared (one choice for both) or per platform? Windows needs a
-   restart to apply; Mac doesn't persist it at all today.
-3. **Which new settings** from the list above (or others) for the first round.
-4. **Layout**: a sidebar of sections (like macOS System Settings), or tabs?
+1. Resolution and MIDI smoothing are **app preferences**: opening a
+   workspace no longer changes them. (Existing users: seeded once from the
+   current session.)
+2. The theme is **shared**: `appearance.theme`, choices `default`,
+   `midnight`, `daylight`, `ember`, `arctic`, `forest`. ("default" follows the
+   system appearance: Midnight dark, Daylight light. macOS adds explicit
+   Midnight and Daylight, which Windows already has.)
+3. First round of new settings: **all four groups**: Audio, Output,
+   Performance, MIDI & Advanced.
+4. Layout: a **sidebar of sections** with search.

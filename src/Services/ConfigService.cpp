@@ -6,6 +6,7 @@
 //
 
 #include "ConfigService.hpp"
+#include "EnginePreferences.hpp"
 #include "BlurShader.hpp"
 #include "LayoutStateService.hpp"
 #include "Console.hpp"
@@ -355,6 +356,7 @@ void ConfigService::requestSave()
 
 void ConfigService::flushRequestedSave()
 {
+  PreferencesService::getService()->flush();
   if (saveRequested && ofGetElapsedTimef() - saveRequestedAt >= kSaveDelay) saveDefaultConfigFile();
 }
 
@@ -831,7 +833,11 @@ void ConfigService::loadConfigFile(std::string path)
         std::cerr << "Error loading Workspace config: " << e.what() << std::endl;
     }
   }
-    
+
+  // Resolution and MIDI smoothing are app preferences: whatever this
+  // config held, the preferences decide.
+  EnginePreferences::apply();
+
   isLoading = false;
 }
 

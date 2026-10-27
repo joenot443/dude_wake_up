@@ -593,8 +593,68 @@ char* ntw_get_current_workspace_path(void);
 char* ntw_get_current_workspace_name(void);
 
 // ---------------------------------------------------------------------------
+// MARK: - Settings (app preferences, shared by both apps; docs/SETTINGS.md)
+// ---------------------------------------------------------------------------
+
+typedef enum {
+  NTWSettingBool = 0,
+  NTWSettingInt = 1,
+  NTWSettingFloat = 2,
+  NTWSettingChoice = 3,   // value: one of choiceIds
+  NTWSettingString = 4,
+  NTWSettingPath = 5,
+  NTWSettingAction = 6,   // a button, no value: the app performs it by id
+} NTWSettingType;
+
+typedef struct {
+  const char* id;           // stable, e.g. "display.nodeHints"
+  const char* section;      // sidebar section, e.g. "Appearance"
+  const char* label;
+  const char* help;         // one line, under the row
+  const char* unit;         // "ms", "s", "%" or ""
+  const char* group;        // subheading within the section, or ""
+  const char* keywords;     // extra search terms (space-separated), or ""
+  const char* dependsOn;    // a Bool setting's id: disable (grey) this row while it's off; or ""
+  int type;                 // NTWSettingType
+  double min, max, step;    // Int / Float (step 0: continuous)
+  int decimals;             // Int / Float: digits shown after the point
+  double defaultNumber;     // Bool (0/1) / Int / Float
+  const char* defaultString;  // Choice / String / Path
+  const char** choiceIds;   // Choice: choiceCount ids...
+  const char** choiceLabels;  // ...and their labels
+  int choiceCount;
+  int restart;              // platforms (bits as below) where a change needs a restart; 0 none
+  int platforms;            // 1 macOS, 2 Windows, 3 both: an app skips rows not for it
+} NTWSettingInfo;
+
+// Every setting, in display order (sections in order of first appearance).
+// The list is fixed for the run. Free with ntw_free_settings. Any thread.
+NTWSettingInfo* ntw_get_settings(int* outCount);
+void ntw_free_settings(NTWSettingInfo* settings, int count);
+
+// Values by id. Numbers for Bool (0/1), Int and Float; strings for Choice,
+// String and Path (free with ntw_free_string). Setting keeps a value to the
+// setting's range or choices, applies it, and saves it (soon after). Any
+// thread (gets read directly; sets and resets wait for the engine thread).
+double ntw_get_setting_number(const char* id);
+void   ntw_set_setting_number(const char* id, double value);
+char*  ntw_get_setting_string(const char* id);
+void   ntw_set_setting_string(const char* id, const char* value);
+
+// Back to defaults: one section, or all (NULL or "").
+void ntw_reset_settings(const char* section);
+
+// Called with a setting's id whenever its value changes, whoever changed it
+// (including this app's own sets: menus mirroring a setting can just follow
+// this). Fires on the ENGINE thread: hop to the main thread for UI.
+typedef void (*NTWSettingsChangedCallback)(const char* id);
+void ntw_register_settings_changed_callback(NTWSettingsChangedCallback callback);
+
+// ---------------------------------------------------------------------------
 // MARK: - Resolution
 // ---------------------------------------------------------------------------
+
+// (Also the "output.resolution" setting: these set it.)
 
 void ntw_set_resolution(int settingIndex);
 int ntw_get_resolution_setting_index(void);

@@ -6,6 +6,7 @@
 //  C++ singleton services.
 //
 
+#include "EnginePreferences.hpp"
 #include "nottawa_bridge.h"
 
 #include "IOSurfaceTextureManager.hpp"
@@ -1545,7 +1546,7 @@ int ntw_get_shader_bypassed(const char* shaderId) {
 }
 
 void ntw_set_clear_on_disconnect(int enabled) {
-  ShaderChainerService::getService()->clearOnDisconnect = (enabled != 0);
+  runOnEngineThread([enabled]() { PreferencesService::getService()->set("graph.clearOnDisconnect", enabled != 0); });
 }
 
 int ntw_get_clear_on_disconnect(void) {
@@ -1989,7 +1990,105 @@ void ntw_set_file_audio_position(float position) {
 // ---------------------------------------------------------------------------
 
 void ntw_save_default_config(void) {
-  runOnEngineThread([]() { ConfigService::getService()->saveDefaultConfigFile(); });
+  runOnEngineThread([]() {
+    ConfigService::getService()->saveDefaultConfigFile();
+    PreferencesService::getService()->save();
+  });
+}
+
+// ---------------------------------------------------------------------------
+// MARK: - Settings
+// ---------------------------------------------------------------------------
+
+static NTWSettingsChangedCallback settingsChangedCallback = nullptr;
+
+NTWSettingInfo* ntw_get_settings(int* outCount) {
+  const auto& defs = PreferencesService::getService()->definitions();
+  const int count = static_cast<int>(defs.size());
+  if (outCount) *outCount = count;
+  if (count == 0) return nullptr;
+  auto* result = static_cast<NTWSettingInfo*>(calloc(count, sizeof(NTWSettingInfo)));
+  for (int i = 0; i < count; i++) {
+    const SettingDefinition& d = defs[size_t(i)];
+    NTWSettingInfo& r = result[i];
+    r.id = strdup_safe(d.id);
+    r.section = strdup_safe(d.section);
+    r.label = strdup_safe(d.label);
+    r.help = strdup_safe(d.help);
+    r.unit = strdup_safe(d.unit);
+    r.group = strdup_safe(d.group);
+    r.keywords = strdup_safe(d.keywords);
+    r.dependsOn = strdup_safe(d.dependsOn);
+    r.type = static_cast<int>(d.type);
+    r.min = d.min; r.max = d.max; r.step = d.step;
+    r.decimals = d.decimals;
+    if (d.defaultValue.is_boolean()) r.defaultNumber = d.defaultValue.get<bool>() ? 1.0 : 0.0;
+    else if (d.defaultValue.is_number()) r.defaultNumber = d.defaultValue.get<double>();
+    r.defaultString = strdup_safe(d.defaultValue.is_string() ? d.defaultValue.get<std::string>() : std::string());
+    r.choiceCount = static_cast<int>(d.choices.size());
+    if (r.choiceCount > 0) {
+      r.choiceIds = static_cast<const char**>(calloc(size_t(r.choiceCount), sizeof(char*)));
+      r.choiceLabels = static_cast<const char**>(calloc(size_t(r.choiceCount), sizeof(char*)));
+      for (int c = 0; c < r.choiceCount; c++) {
+        r.choiceIds[c] = strdup_safe(d.choices[size_t(c)].first);
+        r.choiceLabels[c] = strdup_safe(d.choices[size_t(c)].second);
+      }
+    }
+    r.restart = d.restart;
+    r.platforms = d.platforms;
+  }
+  return result;
+}
+
+void ntw_free_settings(NTWSettingInfo* settings, int count) {
+  if (!settings) return;
+  for (int i = 0; i < count; i++) {
+    NTWSettingInfo& r = settings[i];
+    for (const char* s : {r.id, r.section, r.label, r.help, r.unit, r.group, r.keywords, r.dependsOn, r.defaultString}) free((void*)s);
+    for (int c = 0; c < r.choiceCount; c++) { free((void*)r.choiceIds[c]); free((void*)r.choiceLabels[c]); }
+    free((void*)r.choiceIds);
+    free((void*)r.choiceLabels);
+  }
+  free(settings);
+}
+
+double ntw_get_setting_number(const char* id) {
+  return id ? PreferencesService::getService()->number(id) : 0.0;
+}
+
+void ntw_set_setting_number(const char* id, double value) {
+  if (!id) return;
+  const std::string sid(id);
+  runOnEngineThread([sid, value]() {
+    const SettingDefinition* d = PreferencesService::getService()->definition(sid);
+    if (!d) return;
+    PreferencesService::getService()->set(sid, d->type == SettingType_Bool ? json(value != 0.0) : json(value));
+  });
+}
+
+char* ntw_get_setting_string(const char* id) {
+  return strdup_safe(id ? PreferencesService::getService()->string(id) : std::string());
+}
+
+void ntw_set_setting_string(const char* id, const char* value) {
+  if (!id || !value) return;
+  const std::string sid(id), svalue(value);
+  runOnEngineThread([sid, svalue]() { PreferencesService::getService()->set(sid, svalue); });
+}
+
+void ntw_reset_settings(const char* section) {
+  const std::string s(section ? section : "");
+  runOnEngineThread([s]() { PreferencesService::getService()->reset(s); });
+}
+
+void ntw_register_settings_changed_callback(NTWSettingsChangedCallback callback) {
+  static bool subscribed = false;
+  settingsChangedCallback = callback;
+  if (subscribed) return;
+  subscribed = true;
+  PreferencesService::getService()->subscribe([](const std::string& id) {
+    if (settingsChangedCallback) settingsChangedCallback(id.c_str());
+  });
 }
 
 void ntw_load_default_config(void) {
@@ -2109,8 +2208,9 @@ char* ntw_get_current_workspace_name(void) {
 // ---------------------------------------------------------------------------
 
 void ntw_set_resolution(int settingIndex) {
+  if (settingIndex < 0 || settingIndex >= EnginePreferences::kResolutionCount) return;
   runOnEngineThread([settingIndex]() {
-    LayoutStateService::getService()->updateResolutionSettings(settingIndex);
+    PreferencesService::getService()->set("output.resolution", EnginePreferences::kResolutions[settingIndex]);
   });
 }
 
@@ -2141,9 +2241,7 @@ bool ntw_get_midi_smoothing_enabled(void) {
 }
 
 void ntw_set_midi_smoothing_enabled(bool enabled) {
-  runOnEngineThread([enabled]() {
-    MidiSmoothingService::getService()->setEnabled(enabled);
-  });
+  runOnEngineThread([enabled]() { PreferencesService::getService()->set("midi.smoothing", enabled); });
 }
 
 float ntw_get_midi_smoothing_duration_ms(void) {
@@ -2151,9 +2249,7 @@ float ntw_get_midi_smoothing_duration_ms(void) {
 }
 
 void ntw_set_midi_smoothing_duration_ms(float ms) {
-  runOnEngineThread([ms]() {
-    MidiSmoothingService::getService()->setDurationMs(ms);
-  });
+  runOnEngineThread([ms]() { PreferencesService::getService()->set("midi.smoothingMs", ms); });
 }
 
 // ---------------------------------------------------------------------------

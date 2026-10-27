@@ -117,6 +117,7 @@ void StressTest::enqueueScenario(const QString& name) {
     else if (name == "fonts") fonts();
     else if (name == "swapall") swapAll();
     else if (name == "bpm") bpm();
+    else if (name == "settings") settings();
     else add([this, name] { window_->log("[stress] unknown scenario " + name); });
     // Settle, clear, settle, measure.
     add([] {}, 1000);
@@ -206,6 +207,61 @@ void StressTest::swap(int cycles) {
             if (!id.isEmpty()) window_->editor_->selectNode(id);
         }, 80);
     }
+}
+
+// App preferences: the schema, values kept to range and choices, the
+// engine following them, and workspaces no longer changing them. Results:
+// "[stress] settings: ..." lines; problems as FAIL.
+void StressTest::settings() {
+    add([this] {
+        auto* eng = EngineBridge::instance();
+        const auto all = eng->settings();
+        QStringList sections;
+        for (const auto& s : all) if (!sections.contains(s.section)) sections << s.section;
+        window_->log(QString("[stress] settings: %1 settings in %2").arg(all.size()).arg(sections.join(", ")));
+        if (all.isEmpty()) window_->log("[stress] FAIL settings: no schema");
+        for (const auto& s : all) {
+            if (s.id == "output.advanceFade" && (s.dependsOn != "output.autoAdvance" || s.decimals != 1 || s.defaultNumber != 0.3))
+                window_->log("[stress] FAIL settings: advanceFade's dependsOn/decimals/default");
+            if (s.id == "appearance.theme" && s.restart != 2) window_->log("[stress] FAIL settings: theme should need a restart on Windows only");
+            if (s.type == SettingInfo::Action && eng->settingString(s.id) != QString()) window_->log("[stress] FAIL settings: an action has a value");
+        }
+        eng->setSetting("advanced.resetAll", 1.0);  // an action: no value to set
+        eng->setSetting("output.advanceFade", 99.0);       // above its max (2)
+        eng->setSetting("screenshots.format", QString("gif"));  // not a choice
+        eng->setSetting("display.nodeHints", 0.0);
+        eng->setSetting("output.resolution", QString("1080p"));
+    }, 200);
+    add([this] {
+        auto* eng = EngineBridge::instance();
+        const double fade = eng->settingNumber("output.advanceFade");
+        if (fade != 2.0) window_->log(QString("[stress] FAIL settings: advanceFade %1, expected the max 2").arg(fade));
+        if (eng->settingString("screenshots.format") != "png") window_->log("[stress] FAIL settings: an invalid choice was taken");
+        if (eng->settingNumber("display.nodeHints") != 0.0) window_->log("[stress] FAIL settings: nodeHints not set");
+        if (eng->resolutionIndex() != 4) window_->log(QString("[stress] FAIL settings: engine resolution index %1 after 1080p").arg(eng->resolutionIndex()));
+        // A workspace saved at 1080p, then the preference changed to 480p: opening it must not change it back.
+        eng->saveWorkspace(QDir(scratch_).filePath("settings-ws.json"), "settings");
+        eng->setSetting("output.resolution", QString("480p"));
+    }, 300);
+    add([this] {
+        auto* eng = EngineBridge::instance();
+        eng->loadWorkspace(QDir(scratch_).filePath("settings-ws.json"));
+        if (eng->resolutionIndex() != 2) window_->log(QString("[stress] FAIL settings: opening a workspace set resolution index %1 (preference 480p)").arg(eng->resolutionIndex()));
+        if (eng->settingString("output.resolution") != "480p") window_->log("[stress] FAIL settings: the workspace changed the preference");
+        eng->setResolutionIndex(3);  // the old API sets the preference too
+    }, 500);
+    add([this] {
+        auto* eng = EngineBridge::instance();
+        if (eng->settingString("output.resolution") != "720p") window_->log("[stress] FAIL settings: ntw_set_resolution didn't set the preference");
+        eng->resetSettings("Appearance");
+    }, 300);
+    add([this] {
+        auto* eng = EngineBridge::instance();
+        if (eng->settingNumber("display.nodeHints") != 1.0) window_->log("[stress] FAIL settings: reset didn't restore nodeHints");
+        window_->log(QString("[stress] settings: checked (fade %1, format %2, resolution %3)")
+                         .arg(eng->settingNumber("output.advanceFade")).arg(eng->settingString("screenshots.format"))
+                         .arg(eng->settingString("output.resolution")));
+    }, 800);  // past the save delay: preferences.json written
 }
 
 // The whole tempo path in the app: bundled sample tracks played through the

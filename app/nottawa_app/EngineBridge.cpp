@@ -95,6 +95,11 @@ void onMidiLearned(const char* paramId, const char* descriptor) {
     }, Qt::QueuedConnection);
 }
 
+void onSettingChanged(const char* id) {
+    const QString sid = str(id);
+    QMetaObject::invokeMethod(EngineBridge::instance(), [=] { emit EngineBridge::instance()->settingChanged(sid); }, Qt::QueuedConnection);
+}
+
 void onStrandsChanged() {
     QMetaObject::invokeMethod(EngineBridge::instance(), &EngineBridge::strandsChanged, Qt::QueuedConnection);
 }
@@ -127,6 +132,7 @@ bool EngineBridge::start(void* shareContext, const QString& dataPath) {
     ntw_register_library_update_callback(&onLibraryChanged);
     ntw_register_resolution_changed_callback(&onResolutionChanged);
     ntw_register_midi_learned_callback(&onMidiLearned);
+    ntw_register_settings_changed_callback(&onSettingChanged);
     ntw_engine_start();
     running_ = true;
     return true;
@@ -432,6 +438,38 @@ void EngineBridge::setBpmLocked(bool on) { ntw_set_bpm_locked(on); }
 void EngineBridge::setBpmEnabled(bool on) { ntw_set_bpm_enabled(on); }
 void EngineBridge::setBpm(float bpm) { ntw_set_bpm_value(bpm); }
 void EngineBridge::nudgeBpm(float d) { ntw_nudge_bpm(d); }
+QVector<SettingInfo> EngineBridge::settings() const {
+    QVector<SettingInfo> out;
+    if (!running_) return out;
+    int n = 0;
+    NTWSettingInfo* arr = ntw_get_settings(&n);
+    for (int i = 0; i < n; ++i) {
+        const NTWSettingInfo& r = arr[i];
+        SettingInfo s;
+        s.id = str(r.id); s.section = str(r.section); s.label = str(r.label); s.help = str(r.help); s.unit = str(r.unit);
+        s.group = str(r.group); s.keywords = str(r.keywords); s.dependsOn = str(r.dependsOn);
+        s.decimals = r.decimals;
+        s.type = SettingInfo::Type(r.type);
+        s.min = r.min; s.max = r.max; s.step = r.step;
+        s.defaultNumber = r.defaultNumber; s.defaultString = str(r.defaultString);
+        for (int c = 0; c < r.choiceCount; ++c) { s.choiceIds << str(r.choiceIds[c]); s.choiceLabels << str(r.choiceLabels[c]); }
+        s.restart = r.restart;
+        s.platforms = r.platforms;
+        out.push_back(s);
+    }
+    ntw_free_settings(arr, n);
+    return out;
+}
+double EngineBridge::settingNumber(const QString& id) const { return running_ ? ntw_get_setting_number(id.toUtf8().constData()) : 0.0; }
+QString EngineBridge::settingString(const QString& id) const { return running_ ? takeString(ntw_get_setting_string(id.toUtf8().constData())) : QString(); }
+void EngineBridge::setSetting(const QString& id, double value) { if (running_) ntw_set_setting_number(id.toUtf8().constData(), value); }
+void EngineBridge::setSetting(const QString& id, const QString& value) {
+    if (running_) ntw_set_setting_string(id.toUtf8().constData(), value.toUtf8().constData());
+}
+void EngineBridge::resetSettings(const QString& section) {
+    if (running_) ntw_reset_settings(section.isEmpty() ? nullptr : section.toUtf8().constData());
+}
+
 void EngineBridge::tapBpm(double seconds) {
     if (!running_) return;
     if (seconds < 0) seconds = std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();

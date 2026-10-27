@@ -5,6 +5,7 @@
 //  Standalone engine update loop extracted from MainApp::update().
 //
 
+#include "EnginePreferences.hpp"
 #include "EngineLoop.hpp"
 #include "AudioSourceService.hpp"
 #include "BookmarkService.hpp"
@@ -246,6 +247,8 @@ void EngineLoop::setup() {
 
   // Load saved config to restore last session
   ConfigService::getService()->loadDefaultConfigFile();
+  // App preferences (apart from the session; seeded from it on first run).
+  EnginePreferences::setup();
 
   StrandService::getService()->setup();
 

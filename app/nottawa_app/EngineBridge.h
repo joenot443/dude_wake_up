@@ -118,6 +118,21 @@ struct AudioTrack {
     int     index = 0;
 };
 
+// One app preference (ntw_get_settings; docs/SETTINGS.md).
+struct SettingInfo {
+    enum Type { Bool = 0, Int = 1, Float = 2, Choice = 3, String = 4, Path = 5, Action = 6 };
+    QString id, section, label, help, unit;
+    QString group, keywords, dependsOn;
+    Type    type = Bool;
+    double  min = 0, max = 1, step = 0;
+    int     decimals = 0;
+    double  defaultNumber = 0;
+    QString defaultString;
+    QStringList choiceIds, choiceLabels;
+    int     restart = 0;    // platform bits where a change needs a restart
+    int     platforms = 3;  // 1 macOS, 2 Windows, 3 both
+};
+
 struct AudioSourceItem {
     QString id;
     QString name;
@@ -378,6 +393,14 @@ public:
     // A tap now (call it at the key or button press), or at `seconds` on the
     // steady clock (tests). Emits tapped().
     void tapBpm(double seconds = -1);
+
+    // App preferences, shared with the macOS app (docs/SETTINGS.md).
+    QVector<SettingInfo> settings() const;
+    double  settingNumber(const QString& id) const;
+    QString settingString(const QString& id) const;
+    void    setSetting(const QString& id, double value);
+    void    setSetting(const QString& id, const QString& value);
+    void    resetSettings(const QString& section = QString());
     void setSmoothingMode(int mode);
     void setFrequencyRelease(float v);
     void setFrequencyScale(float v);
@@ -425,6 +448,7 @@ signals:
     void sharedStrandFetched(const QString& slug, bool ok, const QString& jsonOrError);
     void strandShared(bool ok, const QString& slugOrError);
     void tapped(float bpm);  // the tapped tempo so far (0 until two taps)
+    void settingChanged(const QString& id);  // an app preference changed (from anywhere)
 
 private:
     EngineBridge() = default;
