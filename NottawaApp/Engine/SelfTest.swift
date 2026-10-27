@@ -24,6 +24,10 @@
 //                   scored against the track's beat
 //    audiolaunch-set / audiolaunch-check  start-on-launch and the remembered
 //                   input across a relaunch; then put back
+//    outputwindows  output windows recorded for reopening, and reopened by the
+//                   rules (saved frame, centred on its display, display gone)
+//    outputwindows-set / outputwindows-check  a window reopened at launch
+//                   where it was at quit; then closed
 //    cachesettings  a video clip (NOTTAWA_SELFTEST_CLIP, ~1.1 GB to cache)
 //                   loaded under each Cache Video Clips / Cache Memory choice
 //
@@ -86,6 +90,9 @@ final class SelfTest {
             case "audiolaunch-set": audioLaunchSet(); return  // quits right away, on purpose
             case "audiolaunch-check": audioLaunchCheck()
             case "cachesettings": await cacheSettings()
+            case "outputwindows": await outputWindows()
+            case "outputwindows-set": await outputWindowsSet(); return  // quits, on purpose
+            case "outputwindows-check": outputWindowsCheck()
             default: log("FAIL unknown scenario \(scenario)")
             }
         }
@@ -764,6 +771,107 @@ extension SelfTest {
         log(String(format: "output device %@ @ %.0f Hz: device latency %.1f ms + safety %.1f ms + stream %.1f ms + buffer %.1f ms = %.1f ms after render",
                    (name?.takeRetainedValue() as String?) ?? "?", rate, ms(device), ms(safety), ms(streamLatency), ms(buffer),
                    ms(device + safety + streamLatency + buffer)))
+    }
+}
+
+// MARK: - Output windows
+
+extension SelfTest {
+    private var windowsDefaultsKey: String { "nottawa.outputWindows" }
+
+    /// A node of the session to show, and its name.
+    private func someNode() -> (id: String, name: String)? {
+        if let v = engine.allVideoSources().first { return (v.id, v.name) }
+        if let s = engine.allShaders().first { return (s.id, s.name) }
+        return nil
+    }
+
+    private func close(after: Set<String>) {
+        for id in PreviewWindowManager.shared.openNodeIds.subtracting(after) { PreviewWindowManager.shared.closePreview(for: id) }
+    }
+
+    func outputWindows() async {
+        let manager = PreviewWindowManager.shared
+        let savedDefaults = UserDefaults.standard.data(forKey: windowsDefaultsKey)
+        defer { UserDefaults.standard.set(savedDefaults, forKey: windowsDefaultsKey) }
+        guard let node = someNode(), let screen = NSScreen.main else { return log("FAIL outputwindows: no node or screen") }
+        let before = manager.openNodeIds
+        let place = NSRect(x: screen.frame.minX + 220, y: screen.frame.minY + 180, width: 640, height: 360)
+
+        // Recorded at quit: node, display, frame, not full screen.
+        manager.openPreview(for: node.id, nodeName: node.name)
+        await wait(0.5)
+        manager.reopen([.init(nodeId: node.id, screenName: screen.localizedName, frame: place, fullScreen: false)]) { _ in node.name }
+        await wait(0.3)
+        manager.saveOpenWindows()
+        let entry = manager.savedWindows.first { $0.nodeId == node.id }
+        let recorded = entry.map { $0.screenName == screen.localizedName && !$0.fullScreen && $0.frame.equalTo(place) } ?? false
+        log("\(recorded ? "PASS" : "FAIL") outputwindows saved: \(entry.map { "\($0.screenName ?? "nil") \(NSStringFromRect($0.frame)) fullScreen \($0.fullScreen)" } ?? "nothing")")
+        close(after: before)
+        await wait(0.3)
+
+        // Reopened at the saved frame on its display.
+        var opened = manager.reopen([.init(nodeId: node.id, screenName: screen.localizedName, frame: place, fullScreen: false)]) { _ in node.name }
+        await wait(0.3)
+        let atFrame = manager.frame(for: node.id).map { $0.equalTo(place) } ?? false
+        log("\(atFrame && opened == [node.id] ? "PASS" : "FAIL") outputwindows reopen: \(manager.frame(for: node.id).map(NSStringFromRect) ?? "none") (want \(NSStringFromRect(place)))")
+        close(after: before)
+        await wait(0.3)
+
+        // A frame off its display: centred on the display instead.
+        let lost = NSRect(x: -30000, y: -30000, width: 640, height: 360)
+        manager.reopen([.init(nodeId: node.id, screenName: screen.localizedName, frame: lost, fullScreen: false)]) { _ in node.name }
+        await wait(0.3)
+        let centred = manager.frame(for: node.id).map { abs($0.midX - screen.visibleFrame.midX) < 2 && abs($0.midY - screen.visibleFrame.midY) < 2 } ?? false
+        log("\(centred ? "PASS" : "FAIL") outputwindows off-display frame centred: \(manager.frame(for: node.id).map(NSStringFromRect) ?? "none")")
+        close(after: before)
+        await wait(0.3)
+
+        // The display isn't connected: opens windowed where it lands, not at the saved frame.
+        opened = manager.reopen([.init(nodeId: node.id, screenName: "No Such Display", frame: place, fullScreen: true)]) { _ in node.name }
+        await wait(0.8)
+        let frame = manager.frame(for: node.id)
+        let windowed = opened == [node.id] && frame.map { !$0.equalTo(place) && $0.intersects(screen.frame) } ?? false
+        log("\(windowed ? "PASS" : "FAIL") outputwindows display gone: opened windowed at \(frame.map(NSStringFromRect) ?? "none")")
+        close(after: before)
+
+        // A node that isn't in the session: skipped.
+        opened = manager.reopen([.init(nodeId: "no-such-node", screenName: screen.localizedName, frame: place, fullScreen: false)]) { _ in nil }
+        log("\(opened.isEmpty ? "PASS" : "FAIL") outputwindows missing node skipped")
+    }
+
+    private struct WindowsLaunchState: Codable {
+        var nodeId: String
+        var frame: CGRect
+    }
+
+    private var windowsLaunchURL: URL { dir.appendingPathComponent("outputwindows.json") }
+
+    /// An output window placed, then quit (through the real quit-time save).
+    func outputWindowsSet() async {
+        let manager = PreviewWindowManager.shared
+        guard let node = someNode(), let screen = NSScreen.main else {
+            log("FAIL outputwindows-set: no node or screen")
+            return NSApp.terminate(nil)
+        }
+        let place = NSRect(x: screen.frame.minX + 220, y: screen.frame.minY + 180, width: 640, height: 360)
+        manager.reopen([.init(nodeId: node.id, screenName: screen.localizedName, frame: place, fullScreen: false)]) { _ in node.name }
+        await wait(0.5)
+        try? JSONEncoder().encode(WindowsLaunchState(nodeId: node.id, frame: place)).write(to: windowsLaunchURL)
+        log("outputwindows-set: \(node.name) at \(NSStringFromRect(place)) on \(screen.localizedName), quitting")
+        NSApp.terminate(nil)
+    }
+
+    func outputWindowsCheck() {
+        guard let data = try? Data(contentsOf: windowsLaunchURL),
+              let state = try? JSONDecoder().decode(WindowsLaunchState.self, from: data) else {
+            return log("FAIL outputwindows-check: no outputwindows.json from outputwindows-set")
+        }
+        let frame = PreviewWindowManager.shared.frame(for: state.nodeId)
+        let ok = frame.map { $0.equalTo(state.frame) } ?? false
+        log("\(ok ? "PASS" : "FAIL") outputwindows launch: reopened at \(frame.map(NSStringFromRect) ?? "not reopened") (want \(NSStringFromRect(state.frame)))")
+        PreviewWindowManager.shared.closePreview(for: state.nodeId)  // the quit-time save then records it closed
+        try? FileManager.default.removeItem(at: windowsLaunchURL)
     }
 }
 

@@ -82,6 +82,7 @@ struct NottawaApp: App {
                 viewModel.loadSharedStrand(slug: String(slug))
             }
             .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
+                PreviewWindowManager.shared.saveOpenWindows()
                 viewModel.cleanup()
                 NottawaEngine.shared.stop()
             }
@@ -238,6 +239,15 @@ struct NottawaApp: App {
             engineStatus = .ready
             viewModel.setup()
             helpGuide.viewModel = viewModel
+            // Output windows open at the last quit, once the graph is in (launch only, not on opening a workspace).
+            if settings.bool("output.reopenWindows") {
+                DispatchQueue.main.async { [viewModel] in
+                    PreviewWindowManager.shared.reopen(PreviewWindowManager.shared.savedWindows) { id in
+                        viewModel.nodes.first { $0.id == id }?.name
+                    }
+                    viewModel.refreshOpenWindows()
+                }
+            }
             SelfTest.startIfRequested()
 
             // GLFW creates a hidden window for the GL context that registers
