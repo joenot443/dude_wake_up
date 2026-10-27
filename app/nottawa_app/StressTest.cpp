@@ -138,6 +138,7 @@ void StressTest::enqueueScenario(const QString& name) {
     else if (name == "cachesettings") cacheSettings();
     else if (name == "beattiming") beatTiming();
     else if (name == "outputwindows") outputWindows();
+    else if (name == "savetiming") saveTiming();
     else if (name == "outputwindowslaunch") outputWindowsLaunch();
     else add([this, name] { window_->log("[stress] unknown scenario " + name); });
     // Settle, clear, settle, measure.
@@ -565,6 +566,24 @@ void StressTest::measureBeat(const QString& label, bool video) {
         window_->log(QString("[stress] beattiming: %1 late %2 ms (spread %3 ms, %4 of %5 samples at 128)")
                          .arg(label).arg(-mean * kPeriod * 1000, 0, 'f', 1).arg(spread, 0, 'f', 1).arg(acc->n).arg(acc->total));
     }, 30000);
+}
+
+// How long saving the session takes with a big graph (it runs on the
+// engine thread: the UI waits). "[stress] savetiming: <nodes> nodes, <ms>"
+void StressTest::saveTiming() {
+    add([] { EngineBridge::instance()->clearGraph(); });
+    for (int i = 0; i < 15; ++i)
+        add([this] {
+            const auto effects = EngineBridge::instance()->effects();
+            window_->editor_->addFromCatalog(effects[int(rng_() % uint32_t(effects.size()))].typeRaw, false, randomSource());
+        }, 100);
+    for (int i = 0; i < 3; ++i)
+        add([this] {
+            QElapsedTimer t;
+            t.start();
+            ntw_save_default_config();
+            window_->log(QString("[stress] savetiming: %1 nodes, save %2 ms").arg(EngineBridge::instance()->nodes().size()).arg(t.elapsed()));
+        }, 1000);
 }
 
 // Reopen Output Windows, with "outputwindowslaunch" in a second run

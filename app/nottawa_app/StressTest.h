@@ -68,6 +68,7 @@ private:
     void cacheSettings();
     void beatTiming();
     void outputWindows();
+    void saveTiming();
     void outputWindowsLaunch();
     void measureBeat(const QString& label, bool video);
 

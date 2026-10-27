@@ -140,6 +140,7 @@ public:
   ConfigService(){};
   
   json lastConfig = 0;
+  std::string configTimings;  // currentConfig's slow sections (ms), for the slow-save log
   
   static ConfigService *getService() {
     if (!service) {

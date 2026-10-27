@@ -5,6 +5,8 @@
 //  Created by Joe Crozier on 8/7/22.
 //
 
+#include <functional>
+#include <chrono>
 #include "ConfigService.hpp"
 #include "EnginePreferences.hpp"
 #include "BlurShader.hpp"
@@ -391,17 +393,25 @@ bool ConfigService::isEditingWorkspace() {
 
 json ConfigService::currentConfig()
 {
+  // Each section timed: a slow save says which (saveConfigFile).
   json config;
-  config[MidiJsonKey] = MidiService::getService()->config();
-  config[MidiSmoothingJsonKey] = MidiSmoothingService::getService()->config();
-  config[OscJsonKey] = OscillationService::getService()->config();
-  config[ShadersJsonKey] = ShaderChainerService::getService()->config();
-  config[LayoutJsonKey] = LayoutStateService::getService()->config();
-  config[SourcesJsonKey] = VideoSourceService::getService()->config();
-  config[ConnectionsJsonKey] = ShaderChainerService::getService()->connectionsConfig();
-  config[StrandsJsonKey] = StrandService::getService()->config();
-  config[ParametersJsonKey] = ParameterService::getService()->config();
-  config[AudioJsonKey] = AudioSourceService::getService()->config();
+  configTimings.clear();
+  auto section = [&](const std::string& key, const std::function<json()>& build) {
+    const auto start = std::chrono::steady_clock::now();
+    config[key] = build();
+    const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count();
+    if (ms >= 20) configTimings += std::string(configTimings.empty() ? "" : ", ") + key + " " + std::to_string(ms);
+  };
+  section(MidiJsonKey, [] { return MidiService::getService()->config(); });
+  section(MidiSmoothingJsonKey, [] { return MidiSmoothingService::getService()->config(); });
+  section(OscJsonKey, [] { return OscillationService::getService()->config(); });
+  section(ShadersJsonKey, [] { return ShaderChainerService::getService()->config(); });
+  section(LayoutJsonKey, [] { return LayoutStateService::getService()->config(); });
+  section(SourcesJsonKey, [] { return VideoSourceService::getService()->config(); });
+  section(ConnectionsJsonKey, [] { return ShaderChainerService::getService()->connectionsConfig(); });
+  section(StrandsJsonKey, [] { return StrandService::getService()->config(); });
+  section(ParametersJsonKey, [] { return ParameterService::getService()->config(); });
+  section(AudioJsonKey, [] { return AudioSourceService::getService()->config(); });
   if (currentWorkspace != nullptr) {
     config[WorkspaceJsonKey] = currentWorkspace->serialize();
   }
@@ -413,16 +423,29 @@ void ConfigService::saveConfigFile(std::string path)
 {
   if (isLoading) return;
 
+  // Logged when it's slow (over 250 ms: the engine thread, and so the UI,
+  // waits for it): which sections took the time, or the file.
+  const auto tA = std::chrono::steady_clock::now();
   json config = currentConfig();
+  const auto tB = std::chrono::steady_clock::now();
 
   std::ofstream fileStream;
   fileStream.open(path.c_str(), std::ios::trunc);
 
   if (fileStream.is_open())
   {
-    fileStream << config.dump(4, ' ', false, nlohmann::detail::error_handler_t::ignore);
+    const std::string text = config.dump(4, ' ', false, nlohmann::detail::error_handler_t::ignore);
+    const auto tC = std::chrono::steady_clock::now();
+    fileStream << text;
     fileStream.close();
     lastConfig = config;
+    const auto tD = std::chrono::steady_clock::now();
+    auto ms = [](auto a, auto b) { return (int)std::chrono::duration_cast<std::chrono::milliseconds>(b - a).count(); };
+    if (ms(tA, tD) > 250) {
+      printf("[engine] slow save %d ms: build %d (%s), dump %d, write %d (%zu bytes)\n", ms(tA, tD), ms(tA, tB),
+             configTimings.empty() ? "no slow section" : configTimings.c_str(), ms(tB, tC), ms(tC, tD), text.size());
+      fflush(stdout);
+    }
   }
   else
   {

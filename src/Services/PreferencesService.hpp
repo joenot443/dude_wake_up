@@ -409,7 +409,7 @@ private:
               "Version, system, graphics, displays, changed settings and whether the last session crashed, "
               "to paste into a bug report.")
         .keywords = "support bug report crash hang system info gpu";
-    addAction("advanced.openLogs", "Advanced", "Open Logs Folder", "The engine log and any crash or hang reports.")
+    addAction("advanced.openLogs", "Advanced", "Open Logs Folder", "Logs, and any crash or hang reports.")
         .keywords = "crash hang report debug";
     addAction("advanced.openData", "Advanced", "Open Data Folder", "Settings, the session, workspaces and the library.");
     addAction("advanced.resetAll", "Advanced", "Reset All Settings", "Every setting back to its default. Workspaces aren't affected.")

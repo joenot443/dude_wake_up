@@ -295,8 +295,15 @@ void EngineLoop::tick() {
     lastFPSTime = now;
   }
 
+  // A frame over 250 ms is logged with where the time went (the UI waits
+  // on the engine thread, so these are the app's stalls). GPU work can land
+  // in a later stage than the one that queued it.
+  using clock = std::chrono::steady_clock;
+  const auto t0 = clock::now();
+
   // 1. Run queued tasks
   runQueuedTasks();
+  const auto tTasks = clock::now();
 
   // 2. Update oscillators and modulation
   OscillationService::getService()->tickOscillators();
@@ -308,20 +315,26 @@ void EngineLoop::tick() {
   // 3b. Advance MIDI smoothings (eases stepped CC values toward their target).
   MidiSmoothingService::getService()->tick();
 
+  const auto tUpdate = clock::now();
+
   // 4. Update video sources (render to FBOs)
   VideoSourceService::getService()->updateVideoSources();
+  const auto tSources = clock::now();
 
   // 5. Process shader chain (render effects)
   ShaderChainerService::getService()->processFrame();
+  const auto tEffects = clock::now();
 
   // 5b. Tick preview instances (browser live previews)
   ntw_tick_previews();
+  const auto tPreviews = clock::now();
 
   // 5c. Blit tracked textures to IOSurfaces (no-op when nothing tracked)
   IOSurfaceTextureManager::getInstance()->blitTrackedTextures();
 
   // 6. Advance global time
   TimeService::getService()->tick();
+  const auto tBlit = clock::now();
 
   // 7. Auto-save config if needed
 #ifdef NOTTAWA_ENGINE_ONLY
@@ -341,11 +354,25 @@ void EngineLoop::tick() {
   ConfigService::getService()->checkAndSaveDefaultConfigFile();
 #endif
 
+  const auto tSave = clock::now();
+
   // 8. Update audio analysis
   AudioSourceService::getService()->update();
 
   // 9. Update MIDI
   MidiService::getService()->update();
+
+  const auto tEnd = clock::now();
+  auto ms = [](clock::time_point a, clock::time_point b) {
+    return static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(b - a).count());
+  };
+  if (ms(t0, tEnd) > 250) {
+    printf("[engine] slow frame %d ms: tasks %d, update %d, sources %d, effects %d, previews %d, blit %d, save %d, "
+           "audio+midi %d\n",
+           ms(t0, tEnd), ms(t0, tTasks), ms(tTasks, tUpdate), ms(tUpdate, tSources), ms(tSources, tEffects),
+           ms(tEffects, tPreviews), ms(tPreviews, tBlit), ms(tBlit, tSave), ms(tSave, tEnd));
+    fflush(stdout);
+  }
 }
 
 void EngineLoop::releaseContext() {
