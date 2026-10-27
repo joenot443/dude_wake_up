@@ -10,6 +10,8 @@
 # settings) and quit at once, then check on relaunch. settingsui leaves
 # images of the Settings window (ui-*.png) in the output folder. Audio scenarios are scored by scripts/mac_selftest_bpm.py.
 # NOTTAWA_SELFTEST_SECONDS (default 40) is the listening time per track.
+# NOTTAWA_SELFTEST_CALIB=<wav from Tests/bpm/calib_drums.py> makes "system"
+# play that instead, scored against its exact beats.
 set -u
 cd "$(dirname "$0")/.."
 
@@ -28,6 +30,7 @@ launch() {
   # (and the quit-time save is hooked) from the main window, which a bare
   # launch or a no-window saved state never shows.
   open -n -W -g --env NOTTAWA_SELFTEST="$1" --env NOTTAWA_SELFTEST_SECONDS="$per" --env NOTTAWA_SELFTEST_CLIP="$CLIP" \
+    --env NOTTAWA_SELFTEST_CALIB="${NOTTAWA_SELFTEST_CALIB:-}" \
     bin/NottawaApp.app --args -ApplePersistenceIgnoreState YES &
   local opener=$! waited=0
   while kill -0 $opener 2>/dev/null; do
