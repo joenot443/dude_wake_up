@@ -439,8 +439,7 @@ void EngineBridge::setBpmEnabled(bool on) { ntw_set_bpm_enabled(on); }
 void EngineBridge::setBpm(float bpm) { ntw_set_bpm_value(bpm); }
 void EngineBridge::nudgeBpm(float d) { ntw_nudge_bpm(d); }
 QVector<SettingInfo> EngineBridge::settings() const {
-    QVector<SettingInfo> out;
-    if (!running_) return out;
+    QVector<SettingInfo> out;  // (the list is fixed: no need for the engine to be running)
     int n = 0;
     NTWSettingInfo* arr = ntw_get_settings(&n);
     for (int i = 0; i < n; ++i) {
