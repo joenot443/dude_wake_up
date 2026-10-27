@@ -49,6 +49,7 @@ struct SettingsView: View {
         switch section {
         case "Appearance": return "paintpalette"
         case "Output": return "rectangle.on.rectangle"
+        case "Audio": return "waveform"
         case "Graph": return "point.3.connected.trianglepath.dotted"
         case "Browser": return "square.grid.2x2"
         case "MIDI": return "pianokeys"
@@ -151,7 +152,7 @@ private struct SettingRow: View {
     @State private var confirmReset = false
 
     private var enabled: Bool {
-        setting.dependsOn.map { settings.bool($0) } ?? true
+        setting.dependsOn.map { settings.isSatisfied($0) } ?? true
     }
 
     var body: some View {
@@ -175,7 +176,22 @@ private struct SettingRow: View {
         switch setting.kind {
         case .bool:
             Toggle(isOn: settings.binding(setting.id)) { title }
-        case .int, .float:
+        case .int:
+            // A slider is no use over 64-7680: a field, with a stepper for small moves.
+            LabeledContent {
+                HStack(spacing: 6) {
+                    TextField("", value: settings.intBinding(setting.id), format: .number.grouping(.never))
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 72)
+                    if !setting.unit.isEmpty {
+                        Text(setting.unit).foregroundStyle(.secondary)
+                    }
+                    Stepper("", value: settings.intBinding(setting.id),
+                            in: Int(setting.min)...Int(setting.max), step: max(1, Int(setting.step)))
+                        .labelsHidden()
+                }
+            } label: { title }
+        case .float:
             LabeledContent {
                 HStack(spacing: 8) {
                     // Snapped to the step in the binding: a stepped Slider draws a tick per step.
@@ -219,7 +235,8 @@ private struct SettingRow: View {
     /// second up read as seconds.
     private func formatted(_ value: Double) -> String {
         if setting.unit == "ms" && value >= 1000 { return String(format: "%.2f s", value / 1000) }
-        let number = String(format: "%.\(setting.decimals)f", value)
+        // Signed ranges (the beat offsets) show the sign, so +/- reads as earlier/later.
+        let number = String(format: setting.min < 0 && value > 0 ? "+%.\(setting.decimals)f" : "%.\(setting.decimals)f", value)
         return setting.unit.isEmpty ? number : "\(number) \(setting.unit)"
     }
 
@@ -354,6 +371,12 @@ extension SettingsStore {
         Binding(get: { self.number(id) }, set: { value in
             let snapped = step > 0 ? (value / step).rounded() * step : value
             if snapped != self.number(id) { self.set(id, number: snapped) }
+        })
+    }
+
+    func intBinding(_ id: String) -> Binding<Int> {
+        Binding(get: { Int(self.number(id).rounded()) }, set: { value in
+            if Double(value) != self.number(id) { self.set(id, number: Double(value)) }
         })
     }
 

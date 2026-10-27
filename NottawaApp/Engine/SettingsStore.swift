@@ -168,6 +168,12 @@ final class SettingsStore {
         }
     }
 
+    /// A row's dependsOn: a Bool's id (on), or "id=choice" (that choice picked).
+    func isSatisfied(_ dependsOn: String) -> Bool {
+        let parts = dependsOn.split(separator: "=", maxSplits: 1).map(String.init)
+        return parts.count == 2 ? string(parts[0]) == parts[1] : bool(dependsOn)
+    }
+
     // MARK: - Theme
 
     var theme: ThemePreset { ThemePreset(settingId: string("appearance.theme")) }

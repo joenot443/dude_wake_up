@@ -15,7 +15,7 @@ below ~1.5 the beat position isn't trustworthy.
 
 Per track: median shown BPM; acc1 (within 4% of the label) and acc2 (also
 allowing x2, /2, x3, /3) over the scored part; beat offset (median of shown
-beats minus true beats, ms; + is late) and the share of shown beats within
+beats minus true beats within a quarter beat, ms; + is late) and the share of shown beats within
 70 ms of a true beat ("on") or of the off-beat ("off"). Scoring starts 10 s
 in, after the tracker's warm-up.
 """
@@ -35,7 +35,7 @@ WARM = 10.0
 # encoder delay and the info frame that ffmpeg and AVFoundation trim: its
 # sample clock is this many samples ahead of theirs for the same audio
 # (2257 on every sample track, measured by cross-correlating the decodes).
-# Applies to the "files" clock only; "system" uses AVAudioPlayer's.
+# Applies to the "files*" clocks only; "system" uses AVAudioPlayer's.
 DR_MP3_LEAD_SAMPLES = 2257
 
 
@@ -135,7 +135,7 @@ def score(csv_path, audio_dir):
     if fit is None:
         return f"{label:6s} {name:20s} no track clock samples"
     a, b, end = fit
-    if label == "files":
+    if label.startswith("files"):
         b -= DR_MP3_LEAD_SAMPLES / track_rate(track)
     seconds = (end * a + b) + 2
     period, phase, contrast = truth_grid(track, bpm_label, seconds)
@@ -163,7 +163,10 @@ def score(csv_path, audio_dir):
     acc2 = np.mean([within(x, bpm_label, 0.04, True) for x in shown]) * 100
     on = np.mean(np.abs(off) < 70) * 100 if len(off) else 0
     offb = np.mean(np.abs(np.abs(off) - pms / 2) < 70) * 100 if len(off) else 0
-    bias = np.median(off[np.abs(off) < 70]) if on > 0 else float("nan")
+    # Median offset near the beat (within a quarter beat), not just within
+    # 70 ms, so a pulse moved on purpose (a beat offset) still measures right.
+    near = off[np.abs(off) < pms / 4]
+    bias = np.median(near) if len(near) else float("nan")
     flag = "" if contrast >= 1.5 else "  (weak beat truth)"
     return (f"{label:6s} {name:20s} label {bpm_label:3d} (audio {true_bpm:6.2f})  shown {np.median(shown):6.2f}  "
             f"acc1 {acc1:3.0f}%  acc2 {acc2:3.0f}%  beats on {on:3.0f}% off {offb:3.0f}%  bias {bias:+5.0f} ms  "

@@ -20,6 +20,10 @@
 //    settings-check (next launch) they survived; then they're put back
 //    settingsui     the Settings window rendered per section, searching and
 //                   with a dependent row off, plus the main window per theme
+//    audiosettings  tempo ranges on Velvet Skies, and a File beat offset
+//                   scored against the track's beat
+//    audiolaunch-set / audiolaunch-check  start-on-launch and the remembered
+//                   input across a relaunch; then put back
 //
 //  NOTTAWA_SELFTEST_SECONDS sets the listening time per track (default 40).
 //  Results go to <container tmp>/selftest/: report.txt, plus a CSV of
@@ -29,6 +33,7 @@
 
 import AppKit
 import AVFoundation
+import CoreAudio
 import Foundation
 
 @MainActor
@@ -47,6 +52,8 @@ final class SelfTest {
     private let dir = FileManager.default.temporaryDirectory.appendingPathComponent("selftest")
     private let seconds = Double(ProcessInfo.processInfo.environment["NOTTAWA_SELFTEST_SECONDS"] ?? "") ?? 40
     private var report = ""
+    /// Set by a scenario that has put the audio state back itself.
+    fileprivate var keepAudioState = false
     private var sampler: Sampler?
 
     private init(scenarios: [String]) {
@@ -73,10 +80,13 @@ final class SelfTest {
             case "settings-set": settingsSet(); return  // quits right away, on purpose
             case "settings-check": settingsCheck()
             case "settingsui": await settingsUI()
+            case "audiosettings": await audioSettings()
+            case "audiolaunch-set": audioLaunchSet(); return  // quits right away, on purpose
+            case "audiolaunch-check": audioLaunchCheck()
             default: log("FAIL unknown scenario \(scenario)")
             }
         }
-        saved.restore(engine)
+        if !keepAudioState { saved.restore(engine) }
         await wait(0.5)
         log("done")
         NSApp.terminate(nil)
@@ -362,6 +372,7 @@ extension SelfTest {
             case .int, .float:
                 let was = store.number(s.id)
                 var mid = (s.min + s.max) / 2
+                if mid == was { mid = (mid + s.max) / 2 }  // a change, so the callback fires
                 if s.step > 0 { mid = (mid / s.step).rounded() * s.step }
                 store.set(s.id, number: mid)
                 await wait(0.15)
@@ -382,10 +393,33 @@ extension SelfTest {
                     switch s.id {
                     case "output.resolution":
                         check(Int(ntw_get_resolution_setting_index()) == i, "resolution \(choice.id): engine index \(ntw_get_resolution_setting_index())")
+                        for dependent in rows where dependent.dependsOn?.hasPrefix("output.resolution=") == true {
+                            check(store.isSatisfied(dependent.dependsOn!) == (choice.id == "custom"),
+                                  "\(dependent.id) enabled \(store.isSatisfied(dependent.dependsOn!)) with resolution \(choice.id)")
+                        }
+                        if choice.id == "custom" {
+                            let w0 = store.number("output.customWidth"), h0 = store.number("output.customHeight")
+                            store.set("output.customWidth", number: 1000)
+                            store.set("output.customHeight", number: 500)
+                            await wait(0.6)
+                            check(ntw_get_resolution_width() == 1000 && ntw_get_resolution_height() == 500,
+                                  "custom 1000x500: engine renders \(ntw_get_resolution_width())x\(ntw_get_resolution_height())")
+                            store.set("output.customWidth", number: 1200)
+                            await wait(0.6)
+                            check(ntw_get_resolution_width() == 1200, "custom width change: engine width \(ntw_get_resolution_width())")
+                            store.set("output.customWidth", number: w0)
+                            store.set("output.customHeight", number: h0)
+                            await wait(0.3)
+                        }
                     case "screenshots.format":
                         check(ScreenshotService.shared.format.rawValue == choice.id, "screenshot format \(choice.id) not used")
                     case "appearance.theme":
                         check(store.theme.settingId == choice.id, "theme \(choice.id) maps to \(store.theme)")
+                    case "output.frameRate":
+                        await wait(3)
+                        let fps = Double(engine.engineFPS), target = Double(choice.id) ?? 0
+                        log(String(format: "settings: frame rate %@: engine runs at %.1f fps", choice.id, fps))
+                        check(abs(fps - target) <= 0.08 * target, "frame rate \(choice.id): engine at \(fps) fps")
                     default: break
                     }
                 }
@@ -571,6 +605,145 @@ extension SelfTest {
         await wait(0.5)
         window.performClose(nil)
         log("settingsui: \(shots.count) images (ui-*.png): \(shots.joined(separator: ", "))")
+    }
+}
+
+// MARK: - Audio settings
+
+extension SelfTest {
+    /// Tempo ranges and a beat offset, on the File source with real tracks.
+    func audioSettings() async {
+        let store = SettingsStore.shared
+        let saved = (range: store.string("audio.tempoRange"), offset: store.number("audio.beatOffsetFile"))
+        guard let file = engine.allAudioSources().first(where: { $0.sourceType == 1 }),
+              let velvet = engine.sampleTracks().first(where: { $0.name.contains("Velvet") }),
+              let song = engine.sampleTracks().first(where: { $0.name.contains("Nottawa Song") }) else {
+            return log("FAIL audiosettings: no File source or sample tracks")
+        }
+        logOutputDevice()
+        engine.selectAudioSource(id: file.id)
+        engine.setBpmEnabled(true)
+        engine.setBpmMode(BpmMode.auto.rawValue)
+        engine.setBpmLocked(false)
+        store.set("audio.tempoRange", string: "auto")
+        store.set("audio.beatOffsetFile", number: 0)
+
+        // Velvet Skies is 87: shown doubled only where 87 is below the range.
+        engine.selectSampleTrack(velvet.index)
+        engine.setFileAudioPosition(0)
+        if !engine.isAudioActive { engine.toggleAudioSource() }
+        await wait(15)
+        let expected: [(String, Double)] = [("auto", 87), ("60-120", 87), ("80-160", 87), ("90-180", 174), ("100-200", 174), ("auto", 87)]
+        for (range, want) in expected {
+            store.set("audio.tempoRange", string: range)
+            await wait(1.5)
+            var shown: [Float] = []
+            for _ in 0..<12 { shown.append(engine.extendedAudioAnalysis().bpm); await wait(0.25) }
+            let median = Double(shown.sorted()[shown.count / 2])
+            let ok = abs(median - want) <= 0.03 * want
+            log(String(format: "%@ tempo range %@: Velvet Skies shows %.2f (want %.0f)", ok ? "PASS" : "FAIL", range, median, want))
+        }
+
+        // The pulse moved by the File offset: Nottawa Song recorded without
+        // and with +100 ms (scored offline: bias should drop by 100 ms).
+        for offset in [0.0, 100.0] {
+            store.set("audio.beatOffsetFile", number: offset)
+            engine.selectSampleTrack(song.index)
+            engine.setFileAudioPosition(0)
+            await listen(label: offset == 0 ? "files" : "filesoffset\(Int(offset))", track: song, clock: { [engine] in
+                let s = engine.fileAudioState()
+                return Double(s.playbackPosition) * Double(s.totalDuration)
+            })
+        }
+        store.set("audio.tempoRange", string: saved.range)
+        store.set("audio.beatOffsetFile", number: saved.offset)
+    }
+
+    private struct LaunchState: Codable {
+        var sourceId: String?
+        var active: Bool
+        var startOnLaunch: Bool
+        var expectId: String
+    }
+
+    private var launchURL: URL { dir.appendingPathComponent("audiolaunch.json") }
+
+    /// Start-on-launch on, a different input picked, then quit at once.
+    func audioLaunchSet() {
+        let store = SettingsStore.shared
+        guard let file = engine.allAudioSources().first(where: { $0.sourceType == 1 }) else {
+            log("FAIL audiolaunch-set: no File source")
+            NSApp.terminate(nil)
+            return
+        }
+        let state = LaunchState(sourceId: engine.selectedAudioSourceId, active: engine.isAudioActive,
+                                startOnLaunch: store.bool("audio.startOnLaunch"), expectId: file.id)
+        try? JSONEncoder().encode(state).write(to: launchURL)
+        if engine.isAudioActive { engine.toggleAudioSource() }
+        engine.selectAudioSource(id: file.id)
+        if engine.isAudioActive { engine.toggleAudioSource() }  // remembered, but not running at quit
+        store.set("audio.startOnLaunch", bool: true)
+        log("audiolaunch-set: input \(file.name), start on launch on, quitting")
+        NSApp.terminate(nil)
+    }
+
+    func audioLaunchCheck() {
+        guard let data = try? Data(contentsOf: launchURL),
+              let state = try? JSONDecoder().decode(LaunchState.self, from: data) else {
+            return log("FAIL audiolaunch-check: no audiolaunch.json from audiolaunch-set")
+        }
+        let selected = engine.selectedAudioSourceId
+        let ok = selected == state.expectId && engine.isAudioActive
+        log("\(ok ? "PASS" : "FAIL") audiolaunch: after relaunch input \(selected ?? "none") (want \(state.expectId)), running \(engine.isAudioActive)")
+        // Put back what the user had: their input, running or not, and the setting.
+        SettingsStore.shared.set("audio.startOnLaunch", bool: state.startOnLaunch)
+        if engine.isAudioActive { engine.toggleAudioSource() }
+        if let id = state.sourceId { engine.selectAudioSource(id: id) }
+        if engine.isAudioActive != state.active { engine.toggleAudioSource() }
+        keepAudioState = true
+        try? FileManager.default.removeItem(at: launchURL)
+    }
+
+    /// The default output device and the latency it adds after the app's
+    /// clock (what a beat offset for heard audio has to cover).
+    func logOutputDevice() {
+        var id = AudioObjectID(kAudioObjectUnknown)
+        var size = UInt32(MemoryLayout<AudioObjectID>.size)
+        var addr = AudioObjectPropertyAddress(mSelector: kAudioHardwarePropertyDefaultOutputDevice,
+                                              mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMain)
+        guard AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &addr, 0, nil, &size, &id) == noErr else {
+            return log("output device: unknown")
+        }
+        func u32(_ selector: AudioObjectPropertySelector, _ object: AudioObjectID? = nil) -> UInt32 {
+            var v: UInt32 = 0
+            var s = UInt32(MemoryLayout<UInt32>.size)
+            var a = AudioObjectPropertyAddress(mSelector: selector, mScope: kAudioDevicePropertyScopeOutput, mElement: kAudioObjectPropertyElementMain)
+            _ = AudioObjectGetPropertyData(object ?? id, &a, 0, nil, &s, &v)
+            return v
+        }
+        var rate: Float64 = 0
+        var rs = UInt32(MemoryLayout<Float64>.size)
+        var ra = AudioObjectPropertyAddress(mSelector: kAudioDevicePropertyNominalSampleRate,
+                                            mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMain)
+        _ = AudioObjectGetPropertyData(id, &ra, 0, nil, &rs, &rate)
+        var name: Unmanaged<CFString>?
+        var ns = UInt32(MemoryLayout<Unmanaged<CFString>?>.size)
+        var na = AudioObjectPropertyAddress(mSelector: kAudioObjectPropertyName,
+                                            mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMain)
+        _ = AudioObjectGetPropertyData(id, &na, 0, nil, &ns, &name)
+        // The first output stream's own latency.
+        var streams = [AudioStreamID](repeating: 0, count: 8)
+        var ss = UInt32(MemoryLayout<AudioStreamID>.size * streams.count)
+        var sa = AudioObjectPropertyAddress(mSelector: kAudioDevicePropertyStreams,
+                                            mScope: kAudioDevicePropertyScopeOutput, mElement: kAudioObjectPropertyElementMain)
+        _ = AudioObjectGetPropertyData(id, &sa, 0, nil, &ss, &streams)
+        let streamLatency = ss > 0 ? u32(kAudioStreamPropertyLatency, streams[0]) : 0
+        let device = u32(kAudioDevicePropertyLatency), safety = u32(kAudioDevicePropertySafetyOffset)
+        let buffer = u32(kAudioDevicePropertyBufferFrameSize)
+        let ms = { (frames: UInt32) in rate > 0 ? Double(frames) / rate * 1000 : 0 }
+        log(String(format: "output device %@ @ %.0f Hz: device latency %.1f ms + safety %.1f ms + stream %.1f ms + buffer %.1f ms = %.1f ms after render",
+                   (name?.takeRetainedValue() as String?) ?? "?", rate, ms(device), ms(safety), ms(streamLatency), ms(buffer),
+                   ms(device + safety + streamLatency + buffer)))
     }
 }
 
