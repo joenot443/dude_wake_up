@@ -224,6 +224,12 @@ final class SettingsStore {
     static var logsFolder: URL {
         URL(fileURLWithPath: "/Users/\(NSUserName())/Library/Logs/DiagnosticReports", isDirectory: true)
     }
+
+    /// Shows the crash reports folder in Finder. Outside the sandbox
+    /// container, NSWorkspace.open(_:) is refused; revealing it in Finder isn't.
+    static func openLogsFolder() {
+        NSWorkspace.shared.activateFileViewerSelecting([logsFolder])
+    }
 }
 
 extension ThemePreset {

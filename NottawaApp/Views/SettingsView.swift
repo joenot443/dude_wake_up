@@ -151,6 +151,7 @@ private struct SettingRow: View {
     let setting: SettingInfo
     private var settings: SettingsStore { .shared }
     @State private var confirmReset = false
+    @State private var copied = false
 
     private var enabled: Bool {
         setting.dependsOn.map { settings.isSatisfied($0) } ?? true
@@ -222,7 +223,12 @@ private struct SettingRow: View {
             }
         case .action:
             LabeledContent {
-                Button(setting.label) { perform() }
+                HStack(spacing: 8) {
+                    if copied {
+                        Text("Copied to the clipboard").foregroundStyle(.secondary)
+                    }
+                    Button(setting.label) { perform() }
+                }
                     .confirmationDialog("Reset every setting to its default?", isPresented: $confirmReset) {
                         Button("Reset All Settings", role: .destructive) { resetAll() }
                     } message: {
@@ -243,9 +249,13 @@ private struct SettingRow: View {
 
     private func perform() {
         switch setting.id {
-        case "advanced.openLogs": NSWorkspace.shared.open(SettingsStore.logsFolder)
+        case "advanced.openLogs": SettingsStore.openLogsFolder()
         case "advanced.openData": NSWorkspace.shared.open(SettingsStore.dataFolder)
         case "advanced.resetAll": confirmReset = true
+        case "advanced.copyDiagnostics":
+            Diagnostics.copyToPasteboard()
+            copied = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { copied = false }
         default: break
         }
     }

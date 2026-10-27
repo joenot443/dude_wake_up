@@ -58,6 +58,9 @@ final class PreviewWindowManager {
     }
 
     private var closeObservers: [String: Any] = [:]
+    /// Each window's frame from before it went full screen, for reopening it.
+    private var normalFrames: [ObjectIdentifier: NSRect] = [:]
+    private var fullScreenObservers: [ObjectIdentifier: Any] = [:]
 
     /// App-wide key monitor that dispatches hotkeys when an output window
     /// is key. Installed once at init.
@@ -146,6 +149,12 @@ final class PreviewWindowManager {
 
         windows[nodeId] = window
         states[nodeId] = state
+        fullScreenObservers[ObjectIdentifier(window)] = NotificationCenter.default.addObserver(
+            forName: NSWindow.willEnterFullScreenNotification, object: window, queue: .main
+        ) { [weak self] note in
+            guard let w = note.object as? NSWindow else { return }
+            self?.normalFrames[ObjectIdentifier(w)] = w.frame
+        }
 
         let observer = NotificationCenter.default.addObserver(
             forName: NSWindow.willCloseNotification,
@@ -156,6 +165,10 @@ final class PreviewWindowManager {
                   let closedWindow = notification.object as? NSWindow else { return }
             // Tear down the hosting view to stop display links
             closedWindow.contentView = nil
+            self.normalFrames.removeValue(forKey: ObjectIdentifier(closedWindow))
+            if let obs = self.fullScreenObservers.removeValue(forKey: ObjectIdentifier(closedWindow)) {
+                NotificationCenter.default.removeObserver(obs)
+            }
             // Remove from tracking
             if let closedId = self.windows.first(where: { $0.value === closedWindow })?.key {
                 self.windows.removeValue(forKey: closedId)
@@ -350,6 +363,66 @@ final class PreviewWindowManager {
         }
         closeObservers.removeAll()
     }
+
+    // MARK: - Reopening at launch (the output.reopenWindows setting)
+
+    /// An output window as it was at quit.
+    struct SavedWindow: Codable, Equatable {
+        var nodeId: String
+        var screenName: String?
+        var frame: CGRect      // the normal (not full screen) frame
+        var fullScreen: Bool
+    }
+
+    private static let savedKey = "nottawa.outputWindows"
+
+    /// The open output windows, recorded at quit (whether or not the
+    /// setting is on, so turning it on later has something to reopen).
+    func saveOpenWindows() {
+        let saved = windows.map { nodeId, window -> SavedWindow in
+            let fullScreen = window.styleMask.contains(.fullScreen)
+            return SavedWindow(nodeId: nodeId, screenName: window.screen?.localizedName,
+                               frame: fullScreen ? (normalFrames[ObjectIdentifier(window)] ?? window.frame) : window.frame,
+                               fullScreen: fullScreen)
+        }
+        UserDefaults.standard.set(try? JSONEncoder().encode(saved), forKey: Self.savedKey)
+    }
+
+    var savedWindows: [SavedWindow] {
+        guard let data = UserDefaults.standard.data(forKey: Self.savedKey) else { return [] }
+        return (try? JSONDecoder().decode([SavedWindow].self, from: data)) ?? []
+    }
+
+    /// Reopens saved windows whose nodes are in the session: on the same
+    /// display where it's connected (full screen if they were), otherwise
+    /// windowed where they open. Returns the node ids reopened.
+    @discardableResult
+    func reopen(_ saved: [SavedWindow], nodeName: (String) -> String?) -> [String] {
+        var opened: [String] = []
+        for entry in saved {
+            guard let name = nodeName(entry.nodeId) else { continue }
+            openPreview(for: entry.nodeId, nodeName: name)
+            guard let window = windows[entry.nodeId] else { continue }
+            opened.append(entry.nodeId)
+            // A display that isn't connected (a projector left unplugged): stay where it opened.
+            guard let screen = NSScreen.screens.first(where: { $0.localizedName == entry.screenName }) else { continue }
+            if entry.frame.intersects(screen.frame) {
+                window.setFrame(entry.frame, display: true)
+            } else {
+                let visible = screen.visibleFrame
+                window.setFrame(NSRect(x: visible.midX - entry.frame.width / 2, y: visible.midY - entry.frame.height / 2,
+                                       width: entry.frame.width, height: entry.frame.height), display: true)
+            }
+            if entry.fullScreen && !window.styleMask.contains(.fullScreen) {
+                // After the frame has moved it to its display.
+                DispatchQueue.main.async { window.toggleFullScreen(nil) }
+            }
+        }
+        return opened
+    }
+
+    /// Frame of the window showing a node (for tests), nil if none.
+    func frame(for nodeId: String) -> NSRect? { windows[nodeId]?.frame }
 
     /// Toggle between stretch-to-fill and aspect-fit modes for all preview windows.
     func setStretchToFill(_ stretch: Bool) {

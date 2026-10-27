@@ -216,6 +216,7 @@
 		"790DBE16-E73B-4C5E-BF78-804335431710" /* DefaultTheme.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "8825362F-6151-4ED0-BA75-CA3FC3E6FDAE" /* DefaultTheme.cpp */; };
 		"79FDB964-430A-434A-83C2-8189E221D78B" /* StageModeView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "523A9F92-6D65-4A8C-9743-56ABCD3D4984" /* StageModeView.cpp */; };
 		7A1B2C3D4E5F6A7B8C9D0E1F /* ScreenshotService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7E3F1A8B2D4E5F6A7B8C9D /* ScreenshotService.swift */; };
+		502847328E80E6B203353266 /* Diagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1DE899EBF2C085A491E6426 /* Diagnostics.swift */; };
 		9D2936516081CCB1AC210987 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC26C534E95DED92D6A963E5 /* SettingsStore.swift */; };
 		BB5751FA2D739FBC9E935B79 /* SelfTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A924BE6A7AD5D8FFC43CAEB0 /* SelfTest.swift */; };
 		"7AB682D1-3FEB-4225-B47A-9C28A710EFAF" /* MultiSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "166E0882-F427-4D90-8DD3-6F8508D27C84" /* MultiSource.cpp */; };
@@ -879,6 +880,7 @@
 		"5B5111E7-FE21-4A34-9529-5D26A19D1179" /* 16bitShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = 16bitShader.hpp; sourceTree = "<group>"; };
 		"5BA75C12-E200-4722-9570-11118DF3DCDB" /* CurlySquaresShader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CurlySquaresShader.hpp; sourceTree = "<group>"; };
 		5C7E3F1A8B2D4E5F6A7B8C9D /* ScreenshotService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ScreenshotService.swift; path = NottawaApp/Engine/ScreenshotService.swift; sourceTree = "<group>"; };
+		F1DE899EBF2C085A491E6426 /* Diagnostics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Diagnostics.swift; path = NottawaApp/Engine/Diagnostics.swift; sourceTree = "<group>"; };
 		DC26C534E95DED92D6A963E5 /* SettingsStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SettingsStore.swift; path = NottawaApp/Engine/SettingsStore.swift; sourceTree = "<group>"; };
 		A924BE6A7AD5D8FFC43CAEB0 /* SelfTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SelfTest.swift; path = NottawaApp/Engine/SelfTest.swift; sourceTree = "<group>"; };
 		5CBC397FF88E48CB95EA5471 /* NodeEditorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = NodeEditorView.swift; path = NottawaApp/Views/NodeEditor/NodeEditorView.swift; sourceTree = "<group>"; };
@@ -1337,6 +1339,7 @@
 				A4CF33713ED543A4A4887E28 /* GraphModel.swift */,
 				14CBB713E9374F12B59F29C7 /* TextureProvider.swift */,
 				5C7E3F1A8B2D4E5F6A7B8C9D /* ScreenshotService.swift */,
+				F1DE899EBF2C085A491E6426 /* Diagnostics.swift */,
 				DC26C534E95DED92D6A963E5 /* SettingsStore.swift */,
 				A924BE6A7AD5D8FFC43CAEB0 /* SelfTest.swift */,
 				FBE44CFC89A0F95F4D4C6A14 /* RecentWorkspacesService.swift */,
@@ -3057,6 +3060,7 @@
 				D5E6F7A8B9CA01D2E3F4A5B6 /* PreviewTileView.swift in Sources */,
 				2DC874BFD9F241C187D0217B /* FPSOverlayView.swift in Sources */,
 				7A1B2C3D4E5F6A7B8C9D0E1F /* ScreenshotService.swift in Sources */,
+				502847328E80E6B203353266 /* Diagnostics.swift in Sources */,
 				9D2936516081CCB1AC210987 /* SettingsStore.swift in Sources */,
 				BB5751FA2D739FBC9E935B79 /* SelfTest.swift in Sources */,
 				84C606F0BEE0E97201E01227 /* RecentWorkspacesService.swift in Sources */,
