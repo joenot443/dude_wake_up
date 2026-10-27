@@ -4,6 +4,7 @@
 #include "StressTest.h"
 #include "Theme.h"
 
+#include <QFile>
 #include <QApplication>
 #include <QMessageBox>
 #include <QDesktopServices>
@@ -41,10 +42,14 @@ QString appDataDir() {
     return QDir(qEnvironmentVariable("LOCALAPPDATA")).absoluteFilePath("Nottawa");
 }
 // The engine logs to stdout/stderr, which a Windows GUI app discards; send
-// them to <app data>/logs/engine.log (rewritten each launch).
+// them to <app data>/logs/engine.log (rewritten each launch; the previous
+// session's is kept as engine.previous.log, so a crash report survives the
+// relaunch after it).
 void captureEngineLog() {
     const QString dir = QDir(appDataDir()).filePath("logs");
     QDir().mkpath(dir);
+    QFile::remove(QDir(dir).filePath("engine.previous.log"));
+    QFile::rename(QDir(dir).filePath("engine.log"), QDir(dir).filePath("engine.previous.log"));
     const std::wstring path = QDir::toNativeSeparators(QDir(dir).filePath("engine.log")).toStdWString();
     if (!_wfreopen(path.c_str(), L"w", stdout)) return;
     setvbuf(stdout, nullptr, _IONBF, 0);
