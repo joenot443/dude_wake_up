@@ -11,7 +11,10 @@ says when the last shown beat was: track time - phase * 60 / bpm.
 Truth: the tempo in the track's file name, and the beat position found in
 the audio itself, by folding a kick-weighted onset envelope at that tempo
 (period fine-tuned within 1%). Folding contrast says how clear that is;
-below ~1.5 the beat position isn't trustworthy.
+below ~1.5 the beat position isn't trustworthy. Measured on the
+calibration track (Tests/bpm/calib_drums.py, exact beats), this onset
+method puts the kick about 11 ms early, so biases against it read about
+11 ms late; a track named "Calibration" is scored against its exact beats.
 
 Per track: median shown BPM; acc1 (within 4% of the label) and acc2 (also
 allowing x2, /2, x3, /3) over the scored part; beat offset (median of shown
@@ -130,6 +133,7 @@ def score(csv_path, audio_dir):
     m = re.match(r"(\w+)-(\d{3})-(.+)\.csv$", os.path.basename(csv_path))
     label, bpm_label, name = m.group(1), int(m.group(2)), m.group(3)
     track = os.path.join(audio_dir, f"{bpm_label:03d}{name}.mp3")
+    calibration = name == "Calibration"  # Tests/bpm/calib_drums.py: exact beats
     rows = load_rows(csv_path)
     fit = clock_fit(rows)
     if fit is None:
@@ -138,7 +142,10 @@ def score(csv_path, audio_dir):
     if label.startswith("files"):
         b -= DR_MP3_LEAD_SAMPLES / track_rate(track)
     seconds = (end * a + b) + 2
-    period, phase, contrast = truth_grid(track, bpm_label, seconds)
+    if calibration:
+        period, phase, contrast = 60.0 / 128.0, 0.5 % (60.0 / 128.0), float("inf")
+    else:
+        period, phase, contrast = truth_grid(track, bpm_label, seconds)
     true_bpm = 60 / period
 
     shown, offsets = [], []

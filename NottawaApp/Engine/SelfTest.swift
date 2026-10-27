@@ -145,7 +145,22 @@ final class SelfTest {
         ensureAudioActive()
         let picks = ProcessInfo.processInfo.environment["NOTTAWA_SELFTEST_SYSTEM_TRACKS"]?
             .split(separator: ",").map(String.init) ?? ["Nottawa Song", "Bass Cascade", "Eclipse", "Velvet Skies"]
-        for track in engine.sampleTracks() where picks.contains(where: { track.name.contains($0) }) {
+        var tracks = engine.sampleTracks().filter { track in picks.contains(where: { track.name.contains($0) }) }
+        // The calibration drum track (Tests/bpm/calib_drums.py: 128 BPM, exact
+        // beats) instead, when given: scored against its known beats.
+        if let calib = ProcessInfo.processInfo.environment["NOTTAWA_SELFTEST_CALIB"], !calib.isEmpty {
+            tracks = [AudioTrackInfo(name: "Calibration", path: calib, bpm: 128, index: -1)]
+        }
+        // Measured with no offset (the capture path itself); the calibration
+        // track again with the default offset, which should cancel it.
+        let store = SettingsStore.shared
+        let savedOffset = store.number("audio.beatOffsetSystem")
+        let defaultOffset = store.info("audio.beatOffsetSystem")?.defaultNumber ?? 0
+        var passes = tracks.map { ($0, 0.0, "system") }
+        if tracks.first?.name == "Calibration" { passes.append((tracks[0], defaultOffset, "systemdefault")) }
+        defer { store.set("audio.beatOffsetSystem", number: savedOffset) }
+        for (track, offset, label) in passes {
+            store.set("audio.beatOffsetSystem", number: offset)
             guard let player = try? AVAudioPlayer(contentsOf: URL(fileURLWithPath: track.path)) else {
                 log("FAIL system: can't play \(track.path)")
                 continue
@@ -154,7 +169,7 @@ final class SelfTest {
             player.play()
             // currentTime is read on the sampler thread; AVAudioPlayer tolerates that for reads.
             nonisolated(unsafe) let p = player
-            await listen(label: "system", track: track, clock: { p.isPlaying ? p.currentTime : -1 })
+            await listen(label: label, track: track, clock: { p.isPlaying ? p.currentTime : -1 })
             player.stop()
             await wait(2)  // a gap, so the tracker's reset-after-silence starts each track fresh
         }
@@ -356,6 +371,8 @@ extension SelfTest {
         func check(_ ok: Bool, _ what: String) { checks += 1; if expect(ok, what) { passed += 1 } }
 
         check(!rows.contains { $0.id == "updates.check" }, "Windows-only updates.check listed on the Mac")
+        // System Audio's offset defaults to the Mac capture path (docs/BPM.md).
+        check(store.info("audio.beatOffsetSystem")?.defaultNumber == 45, "System Audio offset default is \(store.info("audio.beatOffsetSystem")?.defaultNumber ?? .nan), want 45 on the Mac")
         check(UserDefaults.standard.bool(forKey: SettingsStore.migratedKey), "this launch didn't record the migration")
 
         for s in rows {
