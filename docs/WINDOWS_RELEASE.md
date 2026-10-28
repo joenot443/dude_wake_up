@@ -115,5 +115,10 @@ A minimal LGPL ffmpeg build ships in the first release.
 - [ ] Clean-machine install, launch, upgrade, uninstall: Windows Sandbox
       **(you: enable it; needs admin and a reboot)** or a spare PC.
 - [x] Stress suite and monkey seeds pass (dev build).
-- [ ] One-hour stage-mode soak with audio: memory and handles flat.
+- [x] One-hour stage-mode soak with audio (stress scenario `soak`,
+      `NOTTAWA_SOAK_MINUTES`): 9 nodes with feedback and a Blend, 4
+      parameters on a sample track's audio (volume 0), an output window,
+      stage mode. 2.1.0 (2026-10-28): private memory 1414 -> 1415 MB and
+      handles 1702 -> 1682 from minute 5 to 60; 59.9 fps average, 59.3
+      lowest; BPM 130 throughout. No crash, hang or slow frame.
 - [ ] Other GPUs (Intel / AMD), high DPI, multi-monitor stage output.

@@ -155,6 +155,7 @@ void StressTest::enqueueScenario(const QString& name) {
     else if (name == "golden") golden();
     else if (name == "workflows") workflows();
     else if (name == "videoformats") videoFormats();
+    else if (name == "soak") soak();
     else if (name == "outputwindowslaunch") outputWindowsLaunch();
     else add([this, name] { window_->log("[stress] unknown scenario " + name); });
     // Settle, clear, settle, measure.
@@ -870,6 +871,98 @@ void StressTest::golden() {
                              .arg(stats->value("checked")).arg(stats->value("unstable")).arg(failures->size()));
         }
         for (const QString& f : std::as_const(*failures)) window_->log("[stress] FAIL golden: " + f);
+    });
+}
+
+// A show left running: NOTTAWA_SOAK_MINUTES (60) of stage mode with an
+// output window, a graph of sources, effects, feedback and a Blend, and
+// parameters driven by a sample track's audio (at volume 0: analysed,
+// not heard). Memory, handles, fps and BPM each minute; fails if, after
+// five minutes' warm-up, private memory grows over 150 MB or handles over
+// 300. "[stress] soak: ..."
+void StressTest::soak() {
+    const int minutes = qEnvironmentVariableIsSet("NOTTAWA_SOAK_MINUTES") ? std::max(1, qEnvironmentVariableIntValue("NOTTAWA_SOAK_MINUTES")) : 60;
+    struct Sample { int minute; qint64 privateMB; qint64 handles; float fps; float bpm; };
+    auto samples = std::make_shared<QVector<Sample>>();
+    auto blend = std::make_shared<QString>();
+    auto sample = [samples](int minute) {
+        PROCESS_MEMORY_COUNTERS_EX mem = {};
+        GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&mem), sizeof(mem));
+        DWORD handles = 0;
+        GetProcessHandleCount(GetCurrentProcess(), &handles);
+        auto* eng = EngineBridge::instance();
+        samples->push_back({minute, qint64(mem.PrivateUsage >> 20), qint64(handles), eng->fps(), eng->audioAnalysis().bpm});
+        return samples->back();
+    };
+    auto typeOf = [](const QString& name, bool source) {
+        for (const auto& c : source ? EngineBridge::instance()->sources() : EngineBridge::instance()->effects())
+            if (c.name == name) return c.typeRaw;
+        return -1;
+    };
+    add([this, blend, typeOf, minutes] {
+        auto* eng = EngineBridge::instance();
+        eng->clearGraph();
+        for (const auto& s : eng->audioSources())
+            if (s.name.contains("Sample", Qt::CaseInsensitive)) eng->selectAudioSource(s.id);
+        eng->setBpmMode(0);
+        for (const auto& t : eng->sampleTracks()) if (t.name.contains("Bass Cascade")) eng->selectSampleTrack(t.index);
+        if (!eng->isAudioActive()) eng->toggleAudio();
+        eng->setFileAudioVolume(0.0f);
+        auto* ed = window_->editor_;
+        const QString plasma = ed->addFromCatalog(typeOf("Plasma", true), true);
+        const QString kaleido = ed->addFromCatalog(typeOf("Kaleidoscope", false), false, plasma);
+        const QString feedback = ed->addFromCatalog(typeOf("Feedback", false), false, kaleido);
+        const QString hsb = ed->addFromCatalog(typeOf("HSB", false), false, feedback);
+        const QString fractal = ed->addFromCatalog(typeOf("Fractal", true), true);
+        *blend = eng->blendBetween(hsb, fractal);
+        const QString viz = ed->addFromCatalog(typeOf("Frequency Visualizer", true), true);
+        ed->addFromCatalog(typeOf("Mirror", false), false, viz);
+        const QString text = eng->addInput(VideoSourceKind::Text);
+        eng->setTextSourceText(text, "NOTTAWA");
+        ed->syncFromEngine();
+        // The first float parameter of a few nodes follows the audio.
+        const QStringList drivers = eng->audioDriverNames();
+        int driven = 0;
+        for (const QString& id : {kaleido, hsb, plasma, fractal}) {
+            for (const ParamInfo& p : eng->parameters(id))
+                if (p.type == ParamInfo::Standard && !drivers.isEmpty()) {
+                    eng->setParameterDriver(p.id, drivers[driven++ % drivers.size()]);
+                    break;
+                }
+        }
+        ed->openPreview(*blend);
+        window_->setStageMode(true);
+        window_->log(QString("[stress] soak: %1 minutes; %2 nodes, %3 parameters on audio, output window on the Blend, stage mode")
+                         .arg(minutes).arg(eng->nodes().size()).arg(driven));
+    }, 500);
+    for (int m = 1; m <= minutes; ++m) {
+        add([this, sample, m, minutes] {
+            const Sample s = sample(m);
+            if (m % 5 == 0 || m == minutes)
+                window_->log(QString("[stress] soak: minute %1: private %2 MB, handles %3, %4 fps, %5 BPM")
+                                 .arg(m).arg(s.privateMB).arg(s.handles).arg(s.fps, 0, 'f', 1).arg(s.bpm, 0, 'f', 1));
+        }, 60000);
+    }
+    add([this, samples, blend] {
+        auto* eng = EngineBridge::instance();
+        window_->setStageMode(false);
+        window_->editor_->closePreview(*blend);
+        if (eng->isAudioActive()) eng->toggleAudio();
+        eng->setFileAudioVolume(1.0f);
+        // Growth after a five-minute warm-up.
+        Sample from = samples->isEmpty() ? Sample{} : samples->first();
+        for (const Sample& s : *samples) if (s.minute == 5) from = s;
+        const Sample to = samples->isEmpty() ? Sample{} : samples->last();
+        float minFps = 1e9f, sumFps = 0;
+        for (const Sample& s : *samples) { minFps = std::min(minFps, s.fps); sumFps += s.fps; }
+        const qint64 memGrowth = to.privateMB - from.privateMB, handleGrowth = to.handles - from.handles;
+        window_->log(QString("[stress] soak: minutes %1 to %2: private %3 MB -> %4 MB (%5), handles %6 -> %7 (%8); fps average %9, lowest %10")
+                         .arg(from.minute).arg(to.minute).arg(from.privateMB).arg(to.privateMB).arg(memGrowth, 0, 10)
+                         .arg(from.handles).arg(to.handles).arg(handleGrowth).arg(samples->isEmpty() ? 0 : sumFps / samples->size(), 0, 'f', 1)
+                         .arg(minFps, 0, 'f', 1));
+        if (memGrowth > 150) window_->log(QString("[stress] FAIL soak: private memory grew %1 MB").arg(memGrowth));
+        if (handleGrowth > 300) window_->log(QString("[stress] FAIL soak: handles grew %1").arg(handleGrowth));
+        eng->clearGraph();
     });
 }
 
