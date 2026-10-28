@@ -2807,7 +2807,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"$OF_PATH/scripts/osx/xcode_project.sh\"\nNOTTAWA_DIR=\"/Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up\"\n\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n\n# Copy resources into Resources/data\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/\"\n\ncp -R \"$NOTTAWA_DIR/images/\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/images\"\ncp -R \"$NOTTAWA_DIR/shaders/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/shaders\"\ncp -R \"$NOTTAWA_DIR/markdown/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/markdown\"\ncp -R \"$NOTTAWA_DIR/fonts/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/fonts\"\ncp -R \"$NOTTAWA_DIR/misc/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/misc\"\ncp -R \"$NOTTAWA_DIR/audio/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/audio\"\n";
+			shellScript = "\"$OF_PATH/scripts/osx/xcode_project.sh\"\nNOTTAWA_DIR=\"$SRCROOT\"\n\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n\n# Copy resources into Resources/data\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/\"\n\ncp -R \"$NOTTAWA_DIR/images/\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/images\"\ncp -R \"$NOTTAWA_DIR/shaders/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/shaders\"\ncp -R \"$NOTTAWA_DIR/markdown/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/markdown\"\ncp -R \"$NOTTAWA_DIR/fonts/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/fonts\"\ncp -R \"$NOTTAWA_DIR/misc/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/misc\"\ncp -R \"$NOTTAWA_DIR/audio/\"  \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/data/audio\"\n";
 			showEnvVarsInLog = 0;
 		};
 		50BDB473A67E43A1B61ADF61 /* Run Script — Compile OF */ = {
@@ -2839,7 +2839,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up/NottawaApp/copy_resources.sh\n";
+			shellScript = "\"$SRCROOT/NottawaApp/copy_resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		E42962A92163ECCD00A6A9E2 /* Run Script — Compile OF */ = {

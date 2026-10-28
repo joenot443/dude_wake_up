@@ -2,7 +2,7 @@
 # Copy resources and frameworks for NottawaApp target
 
 "$OF_PATH/scripts/osx/xcode_project.sh"
-NOTTAWA_DIR="/Users/jcrozier/open_frameworks/apps/myApps/dude_wake_up"
+NOTTAWA_DIR="$SRCROOT"  # (this checkout, not a fixed path: worktrees and other clones)
 
 mkdir -p "$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/"
 
