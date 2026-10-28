@@ -1357,6 +1357,27 @@ extension SelfTest {
             engine.removeConnectable(id: mask)
         }
 
+        // 3b. A Text input draws its text: opaque text on a transparent
+        // background, and new text draws differently. (Its FBO is
+        // multisampled: the readback resolves it.)
+        if let text = engine.addTextVideoSource(name: "Text") {
+            ntw_set_text_source_text(text, "NOTTAWA")
+            ntw_set_text_source_font_size(text, 120)
+            render()
+            let first = GoldenImage.frame(text)
+            var opaque = 0, clear = 0
+            if let first {
+                for i in stride(from: 3, to: first.pixels.count, by: 4) { if first.pixels[i] > 200 { opaque += 1 } else { clear += 1 } }
+                _ = first.write(to: dir.appendingPathComponent("workflows-text.png"))
+            }
+            ntw_set_text_source_text(text, "Hello")
+            render()
+            let second = GoldenImage.frame(text)
+            check(opaque > 0 && clear > opaque, "a Text input draws text on a transparent background (\(opaque) opaque, \(clear) clear)")
+            check(second.map { !$0.diff(first).same } == true, "new text draws differently")
+            engine.removeConnectable(id: text)
+        }
+
         // 4. A workspace saved and reopened renders the same.
         render()
         let hsbFrame = GoldenImage.frame(hsb)
