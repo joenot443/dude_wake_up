@@ -1,4 +1,7 @@
 #define _USE_MATH_DEFINES
+#include <QCoreApplication>
+#include <atomic>
+#include <thread>
 #include <QImage>
 #include <QSet>
 #include <QPainter>
@@ -753,6 +756,21 @@ void StressTest::golden() {
             if (seen.contains(fileName(e.name))) add([this, e] { window_->log("[stress] FAIL golden: two entries share " + e.name); });
             else seen << fileName(e.name);
     }
+    // The stored images, read on a thread: reading them on the UI thread
+    // stalled it past the hang watchdog when antivirus scanned the files.
+    struct Expected { QHash<QString, QImage> images; std::atomic<bool> done{false}; std::thread loader; };
+    auto expected = std::shared_ptr<Expected>(new Expected, [](Expected* e) { if (e->loader.joinable()) e->loader.join(); delete e; });
+    {
+        QStringList names;
+        for (const Entry& e : entries) names << e.name;
+        expected->loader = std::thread([expected = expected.get(), names, dir, fileName] {
+            for (const QString& name : names) expected->images.insert(name, QImage(QDir(dir).filePath(fileName(name))));
+            expected->done = true;
+        });
+    }
+    add([expected] {  // wait for them, the UI still responsive
+        while (!expected->done) QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
+    });
     auto plasma = std::make_shared<QString>();
     auto first = std::make_shared<QHash<QString, QImage>>();  // record: pass 1
     auto failures = std::make_shared<QStringList>();
@@ -779,7 +797,7 @@ void StressTest::golden() {
     const int passes = record ? 2 : 1;
     for (int pass = 0; pass < passes; ++pass) {
         for (const Entry& entry : entries) {
-            add([this, entry, plasma, pass, record, stabilize, dir, fileName, first, failures, unstable, stats, knownUnstable] {
+            add([this, entry, plasma, pass, record, stabilize, dir, fileName, first, failures, unstable, stats, knownUnstable, expected] {
                 auto* eng = EngineBridge::instance();
                 ntw_debug_render_frames(0, 1);  // seeds ofRandom before the node's setup draws from it
                 const QString id = entry.isSource ? window_->editor_->addFromCatalog(entry.typeRaw, true)
@@ -798,14 +816,14 @@ void StressTest::golden() {
                 if (knownUnstable.contains(entry.name)) {
                     (*stats)["unstable"]++;
                     // Only that it renders something (unless it didn't when recorded either).
-                    const QImage expected(path);
-                    if (goldenEmpty(frame) && !(QFileInfo::exists(path) && goldenEmpty(expected)))
+                    const QImage stored = expected->images.value(entry.name);
+                    if (goldenEmpty(frame) && !(!stored.isNull() && goldenEmpty(stored)))
                         *failures << entry.name + " (renders nothing)";
                     return;
                 }
-                const QImage expected(path);
-                if (expected.isNull()) { *failures << entry.name + " (no golden image: record them)"; return; }
-                const GoldenDiff d = goldenDiff(expected, frame);
+                const QImage stored = expected->images.value(entry.name);
+                if (stored.isNull()) { *failures << entry.name + " (no golden image: record them)"; return; }
+                const GoldenDiff d = goldenDiff(stored, frame);
                 (*stats)["checked"]++;
                 if (!d.same() && stabilize) { *unstable << entry.name; return; }
                 if (!d.same()) {
@@ -813,7 +831,7 @@ void StressTest::golden() {
                     QImage pair(256, 72, QImage::Format_RGBA8888);
                     pair.fill(Qt::black);
                     QPainter p(&pair);
-                    p.drawImage(0, 0, expected);
+                    p.drawImage(0, 0, stored);
                     p.drawImage(128, 0, frame);
                     p.end();
                     pair.save(QDir(scratch_).filePath("golden-" + fileName(entry.name)));
