@@ -75,6 +75,7 @@ private:
     void renderAll();
     void golden();
     void workflows();
+    void videoFormats();
     void outputWindowsLaunch();
     void measureBeat(const QString& label, bool video);
 

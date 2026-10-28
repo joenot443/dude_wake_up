@@ -27,12 +27,14 @@ Qt 6.8.0 - LGPL-3.0 [LGPL-3.0.txt, GPL-3.0.txt]
   data) under BSD, Zlib, libpng, IJG, FTL, MIT, MPL-2.0 and Unicode
   licences: https://doc.qt.io/qt-6.8/licenses-used-in-qt.html
 
-FFmpeg 8.1 (n8.1.2-44-g7c533d0f86) - LGPL-3.0 [LGPL-3.0.txt]
+FFmpeg 8.1.2 - LGPL-2.1-or-later [LGPL-2.1.txt]
   Copyright (C) the FFmpeg developers.
-  avcodec, avformat, avutil, swscale, swresample. Built by BtbN's
-  FFmpeg-Builds (LGPL configuration). You may replace these DLLs.
-  Source: https://github.com/FFmpeg/FFmpeg/tree/7c533d0f86
-  Build scripts: https://github.com/BtbN/FFmpeg-Builds
+  avcodec, avformat, avutil, swscale, swresample, dynamically linked; you
+  may replace these DLLs. Built for Nottawa as decoders and demuxers only,
+  with no external libraries and no GPL or non-free parts.
+  Source: https://ffmpeg.org/releases/ffmpeg-8.1.2.tar.xz (unmodified)
+  Build script (configuration): scripts/build_ffmpeg_lgpl.sh in Nottawa's
+  source, https://github.com/joenot443/dude_wake_up
 
 Microsoft Visual C++ runtime - Microsoft Visual Studio redistributable
   (msvcp140*.dll, vcruntime140*.dll, concrt140.dll), distributed under the

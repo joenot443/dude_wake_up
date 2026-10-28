@@ -154,6 +154,7 @@ void StressTest::enqueueScenario(const QString& name) {
     else if (name == "renderall") renderAll();
     else if (name == "golden") golden();
     else if (name == "workflows") workflows();
+    else if (name == "videoformats") videoFormats();
     else if (name == "outputwindowslaunch") outputWindowsLaunch();
     else add([this, name] { window_->log("[stress] unknown scenario " + name); });
     // Settle, clear, settle, measure.
@@ -870,6 +871,36 @@ void StressTest::golden() {
         }
         for (const QString& f : std::as_const(*failures)) window_->log("[stress] FAIL golden: " + f);
     });
+}
+
+// Every clip in NOTTAWA_TEST_VIDEOS (a folder) plays: added as a file
+// source, it knows its duration, draws, and its picture changes as it
+// plays. For checking an ffmpeg build's formats. "[stress] videoformats: ..."
+void StressTest::videoFormats() {
+    const QDir dir(qEnvironmentVariable("NOTTAWA_TEST_VIDEOS"));
+    const QStringList files = dir.entryList(QDir::Files, QDir::Name);
+    if (files.isEmpty()) { add([this] { window_->log("[stress] FAIL videoformats: no clips in NOTTAWA_TEST_VIDEOS"); }); return; }
+    auto id = std::make_shared<QString>();
+    auto firstFrame = std::make_shared<QImage>();
+    for (const QString& file : files) {
+        add([this, dir, file, id] {
+            EngineBridge::instance()->clearGraph();
+            window_->editor_->addMediaFile(dir.filePath(file));
+            id->clear();
+            for (const QString& n : nodeIds()) if (EngineBridge::instance()->fileSourceState(n).valid) *id = n;
+        }, 300);
+        add([id, firstFrame] { *firstFrame = goldenFrame(*id); }, 1200);
+        add([this, file, id, firstFrame] {
+            const FileSourceState f = EngineBridge::instance()->fileSourceState(*id);
+            const QImage later = goldenFrame(*id);
+            const bool draws = !later.isNull() && !goldenEmpty(later);
+            const bool moves = !goldenDiff(*firstFrame, later).same();
+            const bool ok = !id->isEmpty() && f.valid && f.duration > 3.0f && draws && moves;
+            window_->log(QString("[stress] %1videoformats: %2 (duration %3 s, draws %4, moves %5)")
+                             .arg(ok ? "" : "FAIL ").arg(file).arg(f.duration, 0, 'f', 2).arg(draws).arg(moves));
+        }, 1000);
+    }
+    add([] { EngineBridge::instance()->clearGraph(); });
 }
 
 // What users do, checked by what it renders (deterministic as golden()):

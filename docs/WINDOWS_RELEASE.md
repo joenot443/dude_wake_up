@@ -38,12 +38,15 @@ A minimal LGPL ffmpeg build ships in the first release.
 - [x] MSIX for the Store (`build_msix.ps1`): manifest, tile/taskbar images
       from the icon, resources.pri. Registered and run locally (Developer
       Mode) with test identity values.
-- [ ] Minimal ffmpeg: `scripts/build_ffmpeg_lgpl.sh` (decoders/demuxers for
-      common formats, LGPL-2.1+, no external libraries) replaces the 104 MB
-      BtbN build. **(you)** install the cross-compiler in WSL once:
-      `sudo apt-get install -y mingw-w64 nasm make pkg-config`. Dropped
-      against the old build: AV1 playback (needs the dav1d library; can be
-      added later). HAP needs snappy and wasn't supported before either.
+- [x] Minimal ffmpeg: `scripts/build_ffmpeg_lgpl.sh` builds ffmpeg 8.1.2
+      (decoders, demuxers, parsers for common formats; LGPL-2.1-or-later; no
+      external libraries) with mingw-w64 in WSL (`sudo apt-get install -y gcc
+      mingw-w64 nasm make pkg-config`; `FFMPEG_WORK=~/ffmpeg-build` builds
+      faster than on /mnt/c). The DLLs went from 109 MB to 12 MB. Plays
+      H.264, HEVC, VP9, ProRes, MPEG-4, Motion JPEG and raw video with AAC,
+      Opus and PCM audio (stress scenario `videoformats`; the bundled intro
+      is H.264). Not included: AV1 (needs dav1d), HAP (needs snappy). The
+      exact source and build script land in `dist/ffmpeg-source/`.
 
 ## 2. App readiness
 

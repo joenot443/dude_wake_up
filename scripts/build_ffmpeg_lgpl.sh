@@ -8,7 +8,7 @@
 # --enable-nonfree).
 #
 # Cross-compiles from WSL/Linux with mingw-w64:
-#   sudo apt-get install -y mingw-w64 nasm make pkg-config
+#   sudo apt-get install -y gcc mingw-w64 nasm make pkg-config
 #
 # Installs into the layout the build uses (as scripts/fetch_ffmpeg_lgpl.ps1
 # did): bin/<lib>-<major>.dll, libs/ffmpeg/include, libs/ffmpeg/lib/<lib>.lib.
@@ -21,13 +21,16 @@ set -euo pipefail
 
 VERSION=8.1.2
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-WORK="$ROOT/.cache/ffmpeg-build"
+SELF="$ROOT/scripts/$(basename "$0")"  # (the script cds away from where it was run)
+# FFMPEG_WORK: where to build (default .cache/ffmpeg-build; under WSL a
+# Linux path such as ~/ffmpeg-build builds much faster than one on /mnt/c).
+WORK="${FFMPEG_WORK:-$ROOT/.cache/ffmpeg-build}"
 SRC="$WORK/ffmpeg-$VERSION"
 PREFIX="$WORK/install"
 TARBALL="ffmpeg-$VERSION.tar.xz"
 
-for tool in x86_64-w64-mingw32-gcc nasm make pkg-config; do
-  command -v "$tool" >/dev/null || { echo "missing $tool: sudo apt-get install -y mingw-w64 nasm make pkg-config" >&2; exit 1; }
+for tool in gcc x86_64-w64-mingw32-gcc nasm make pkg-config; do
+  command -v "$tool" >/dev/null || { echo "missing $tool: sudo apt-get install -y gcc mingw-w64 nasm make pkg-config" >&2; exit 1; }
 done
 
 mkdir -p "$WORK"
@@ -96,7 +99,7 @@ powershell.exe -NoProfile -Command "
 OUT="$ROOT/dist/ffmpeg-source"
 mkdir -p "$OUT"
 cp "$WORK/$TARBALL" "$WORK/$TARBALL.asc" "$OUT/"
-cp "$0" "$OUT/build_ffmpeg_lgpl.sh"
+cp "$SELF" "$OUT/build_ffmpeg_lgpl.sh"
 cp "$SRC/COPYING.LGPLv2.1" "$ROOT/packaging/windows/licenses/LGPL-2.1.txt"
 
 echo

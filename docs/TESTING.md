@@ -71,8 +71,11 @@ All in `app/nottawa_app/StressTest.cpp`, driven through the engine bridge:
   previews**: the stress scenarios (graph changes, crashes, leaks).
 
 Not in the pre-push suite (they play audio aloud or need media files):
-bpm, audiosettings, beattiming, inputs, cachesettings; run them with the
-stress driver when touching those areas.
+bpm, audiosettings, beattiming, inputs, cachesettings, videoformats; run
+them with the stress driver when touching those areas. `videoformats`
+(set `NOTTAWA_TEST_VIDEOS` to a folder of clips) checks every clip plays:
+duration, a picture, and a picture that changes; run it after changing the
+ffmpeg build.
 
 ## Known issues
 
