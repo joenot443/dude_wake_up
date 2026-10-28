@@ -601,14 +601,19 @@ void StressTest::canvasImage() {
         window_->raise();
         window_->activateWindow();
     }, 300);
-    add([this] {
-        // What's on screen in the window's own rect, raised first (grab()
-        // leaves the GL viewports blank).
+    // What's on screen in the window's own rect, raised first (grab()
+    // leaves the GL viewports blank): at fit, zoomed out, zoomed in.
+    auto shot = [this](const QString& name) {
         const QRect r = window_->frameGeometry();
         if (QScreen* screen = window_->screen())
             screen->grabWindow(0, r.x() - screen->geometry().x(), r.y() - screen->geometry().y(), r.width(), r.height())
-                .save(QDir(scratch_).filePath("canvas-screen.png"));
-    }, 2000);
+                .save(QDir(scratch_).filePath(name));
+    };
+    add([shot] { shot("canvas-screen.png"); }, 2000);
+    add([this] { window_->editor_->scale(0.35, 0.35); });
+    add([shot] { shot("canvas-out.png"); }, 700);
+    add([this] { window_->editor_->scale(1 / 0.35 * 2.6, 1 / 0.35 * 2.6); });
+    add([shot] { shot("canvas-in.png"); }, 700);
 }
 
 // The hang watchdog catches a long engine frame while it's running: a

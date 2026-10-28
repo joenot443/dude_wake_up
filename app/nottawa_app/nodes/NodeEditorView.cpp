@@ -29,6 +29,7 @@
 #include <QFileInfo>
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLWidget>
+#include <QSurfaceFormat>
 #include <QScreen>
 #include <QScrollBar>
 #include <QSet>
@@ -54,11 +55,18 @@ NodeEditorView::NodeEditorView(QWidget* parent) : QGraphicsView(parent) {
     connect(&downloadPoll_, &QTimer::timeout, this, &NodeEditorView::refreshDownloads);
     // Live previews are drawn with GL straight into the viewport, which
     // shares textures with the engine through Qt's global share context.
-    setViewport(new QOpenGLWidget);
+    // Multisampled: Qt's OpenGL painter antialiases shapes and text only on
+    // a multisampled surface (the Antialiasing hint alone does nothing
+    // there), so without it borders, ports, wires and zoomed text were jagged.
+    auto* gl = new QOpenGLWidget;
+    QSurfaceFormat format = gl->format();
+    format.setSamples(4);
+    gl->setFormat(format);
+    setViewport(gl);
     auto* scene = new QGraphicsScene(this);
     scene->setSceneRect(-50000, -50000, 100000, 100000);
     setScene(scene);
-    setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+    setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     setDragMode(QGraphicsView::RubberBandDrag);
     setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
