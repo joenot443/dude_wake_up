@@ -868,10 +868,7 @@ void StressTest::workflows() {
         return -1;
     };
     // Known bugs (reported, not failing the run; KNOWN-FIXED when one passes).
-    static const QStringList known = {
-        "Mask without a mask passes its input through",  // Mask ignores its mask input (pre-existing)
-        "Mask's second input changes its output",
-    };
+    static const QStringList known = {};
     auto check = [this](bool ok, const QString& what) {
         if (known.contains(what))
             window_->log(QString("[stress] %1 workflows: %2").arg(ok ? "KNOWN-FIXED (remove from the known list)" : "KNOWN", what));
@@ -917,20 +914,31 @@ void StressTest::workflows() {
         check(!goldenEmpty(on) && !goldenDiff(before, on).same(), "optional effect (Mirror) changes the output");
         check(goldenDiff(before, off).same(), "optional effect off restores the output");
     });
-    // 3. A two-input effect: Mask with nothing in its mask slot passes its
-    // input through; a mask (Plasma through Color Mask, which keys colour out
-    // to transparency) changes its output.
+    // 3. Mask (MaskEngineShader; "Masker" is the older MaskShader). By
+    // default (Luma) it keeps the input's bright parts and clears the rest;
+    // with Unmatched Source set to Input B, a second input fills the
+    // cleared parts.
     add([this, st, typeOf, check, render] {
         auto* eng = EngineBridge::instance();
+        auto transparent = [](const QImage& im) {
+            int n = 0;
+            for (int y = 0; y < im.height(); ++y)
+                for (int x = 0; x < im.width(); ++x) if (qAlpha(im.pixel(x, y)) < 128) ++n;
+            return n;
+        };
         st->mask = window_->editor_->addFromCatalog(typeOf("Mask", false), false, st->plasma);
         render();
-        const QImage plasma = goldenFrame(st->plasma), alone = goldenFrame(st->mask);
-        check(goldenDiff(plasma, alone).same(), "Mask without a mask passes its input through");
-        st->fractal = window_->editor_->addFromCatalog(typeOf("Color Mask", false), false, st->plasma);
+        const QImage alone = goldenFrame(st->mask);
+        const int cleared = transparent(alone), total = alone.width() * alone.height();
+        check(cleared > 0 && cleared < total, QString("Mask (Luma) keeps the bright parts, clears the rest (%1 of %2 cleared)").arg(cleared).arg(total));
+        st->fractal = window_->editor_->addFromCatalog(typeOf("Warp", true), true);
         eng->connectNodes(st->fractal, st->mask, 0, 1);
+        for (const ParamInfo& p : eng->parameters(st->mask))
+            if (p.name == "Unmatched Source") eng->setParameter(p.id, 1);  // Input B
         render();
-        const QImage masked = goldenFrame(st->mask);
-        check(!goldenDiff(alone, masked).same(), "Mask's second input changes its output");
+        const QImage filled = goldenFrame(st->mask);
+        check(transparent(filled) == 0 && !goldenDiff(alone, filled).same(),
+              QString("Mask's second input fills the cleared parts (%1 left clear)").arg(transparent(filled)));
         eng->removeNode(st->mask);
         eng->removeNode(st->fractal);
     });

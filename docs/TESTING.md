@@ -38,7 +38,8 @@ All in `app/nottawa_app/StressTest.cpp`, driven through the engine bridge:
   `golden-<name>.png` (expected | actual) to the scratch folder.
 - **workflows**: what users do, checked by pixels: a chain renders at every
   stage; an effect changes its input; an optional effect on changes the
-  output, off restores it; a two-input Mask; a workspace saved and reopened
+  output, off restores it; Mask keeps bright parts and a second input
+  fills the rest; a workspace saved and reopened
   renders the same; 1080p frames are 1920x1080; undo removes an added
   effect and redo restores it.
 - **blenddrag**: a Blend made through the engine and by dragging one output
@@ -58,9 +59,6 @@ Listed in the scenario (`known` in `workflows()`), reported as KNOWN and
 not failing the run; one that starts passing is reported as KNOWN-FIXED, so
 it can come off the list.
 
-- Mask ignores its mask input: the output is the same with nothing, an
-  opaque or a transparent mask connected (found 2026-10-28; predates the
-  recent engine changes).
 - DirtyPlasma and Glitch RGB render differently on the first launch after a
   build (the same image every time), then match their golden images. Both
   sample TextureService textures. In `unstable.txt` until understood.
