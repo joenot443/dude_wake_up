@@ -98,8 +98,12 @@ A minimal LGPL ffmpeg build ships in the first release.
 - [x] Partner Center: registered, "Nottawa" reserved. Identity:
       `JoeCrozier.Nottawa`, `CN=30C50E17-1DED-455C-93DC-3B02982966B0`,
       "Joe Crozier" (build_msix.ps1 defaults).
-- [ ] Run the Windows App Certification Kit on the MSIX (needs admin:
-      `appcert.exe test -appxpackagepath dist\Nottawa-<ver>.msix -reportoutputpath ...`).
+- [x] Windows App Certification Kit: `packaging\windows\run_wack.ps1` (from an
+      elevated PowerShell; signs a test copy with a throwaway certificate for
+      the publisher, runs the kit, cleans up). 2.1.0 (2026-10-28): **PASS**,
+      23 of 24. The one failure is optional, "Blocked executables": Qt can
+      launch processes (opening URLs and folders) and Nottawa.exe holds a
+      "cmd" string, which only matters for Windows in S mode.
 - [ ] Store listing: description, screenshots, privacy policy URL (the app
       talks to nottawa.app for community strands), age rating.
 - [ ] **(you)** Where the direct-download installer is hosted, if anywhere.
