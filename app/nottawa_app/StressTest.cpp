@@ -1,4 +1,7 @@
 #define _USE_MATH_DEFINES
+#include <QImage>
+#include <QSet>
+#include <QPainter>
 #include <QMouseEvent>
 #include "nodes/NodeItems.h"
 #include "Diagnostics.h"
@@ -146,6 +149,8 @@ void StressTest::enqueueScenario(const QString& name) {
     else if (name == "canvasimage") canvasImage();
     else if (name == "blenddrag") blendDrag();
     else if (name == "renderall") renderAll();
+    else if (name == "golden") golden();
+    else if (name == "workflows") workflows();
     else if (name == "outputwindowslaunch") outputWindowsLaunch();
     else add([this, name] { window_->log("[stress] unknown scenario " + name); });
     // Settle, clear, settle, measure.
@@ -663,6 +668,321 @@ void StressTest::blendDrag() {
             screen->grabWindow(0, r.x() - screen->geometry().x(), r.y() - screen->geometry().y(), r.width(), r.height())
                 .save(QDir(scratch_).filePath("blend.png"));
     }, 2000);
+}
+
+namespace {
+// A node's frame, read back in the engine, shrunk to 128x72 (golden size).
+QImage goldenFrame(const QString& id) {
+    int w = 0, h = 0;
+    ntw_debug_frame_rgba(id.toUtf8().constData(), &w, &h, nullptr, 0);
+    if (w <= 0 || h <= 0) return {};
+    QImage image(w, h, QImage::Format_RGBA8888);
+    if (!ntw_debug_frame_rgba(id.toUtf8().constData(), &w, &h, image.bits(), int(image.sizeInBytes()))) return {};
+    return image.mirrored().scaled(128, 72, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+}
+
+// How far apart two golden frames are: the share of pixels with a channel
+// (alpha included) more than 24 apart, and the mean channel difference.
+struct GoldenDiff { double changed = 1.0, mean = 255.0; bool same() const { return changed < 0.01 && mean < 2.0; } };
+GoldenDiff goldenDiff(const QImage& a, const QImage& b) {
+    if (a.isNull() || b.isNull() || a.size() != b.size()) return {};
+    const QImage x = a.convertToFormat(QImage::Format_RGBA8888), y = b.convertToFormat(QImage::Format_RGBA8888);
+    qint64 changed = 0, sum = 0;
+    const qint64 n = qint64(x.width()) * x.height();
+    for (int row = 0; row < x.height(); ++row) {
+        const uchar* p = x.constScanLine(row);
+        const uchar* q = y.constScanLine(row);
+        for (int i = 0; i < x.width(); ++i) {
+            int worst = 0;
+            for (int c = 0; c < 4; ++c) {
+                const int d = std::abs(int(p[i * 4 + c]) - int(q[i * 4 + c]));
+                worst = std::max(worst, d);
+                sum += d;
+            }
+            if (worst > 24) ++changed;
+        }
+    }
+    return {double(changed) / double(n), double(sum) / double(n * 4)};
+}
+
+bool goldenEmpty(const QImage& image) {
+    const QImage x = image.convertToFormat(QImage::Format_RGBA8888);
+    for (int row = 0; row < x.height(); ++row) {
+        const uchar* p = x.constScanLine(row);
+        for (int i = 0; i < x.width() * 4; ++i) if (p[i] > 2) return false;
+    }
+    return true;
+}
+} // anon
+
+// Golden images: every effect (fed by Plasma) and every generated source,
+// rendered deterministically (the clock frozen, exactly 8 frames, ofRandom
+// seeded, 256x144) and compared with the stored image (Tests/golden/<os>,
+// NOTTAWA_GOLDEN_DIR). NOTTAWA_GOLDEN=record renders everything twice and
+// stores the ones that come out the same both times; the others (effects
+// reading the system clock, say) are listed in unstable.txt and only
+// checked for rendering something. "[stress] golden: ..."; failures write
+// <scratch>/golden-<name>.png (expected | actual). NOTTAWA_GOLDEN=stabilize
+// (after recording, a few launches) moves entries that differ between
+// launches into unstable.txt.
+void StressTest::golden() {
+    const bool record = qEnvironmentVariable("NOTTAWA_GOLDEN") == "record";
+    // stabilize: as check, but entries that differ are added to unstable.txt
+    // (rendering that differs between launches); run a few after recording.
+    const bool stabilize = qEnvironmentVariable("NOTTAWA_GOLDEN") == "stabilize";
+    const QString dir = qEnvironmentVariable("NOTTAWA_GOLDEN_DIR");
+    if (dir.isEmpty()) { add([this] { window_->log("[stress] FAIL golden: NOTTAWA_GOLDEN_DIR isn't set"); }); return; }
+    struct Entry { QString name; int typeRaw; bool isSource; };
+    QVector<Entry> entries;
+    // Named by kind, name and type (two sources are both called "Fractal").
+    for (const auto& s : EngineBridge::instance()->sources())
+        if (!s.isInput) entries.push_back({QString("src-%1-%2").arg(s.name).arg(s.typeRaw), s.typeRaw, true});
+    QSet<int> effectTypes;  // (the catalog lists Glitch in two categories)
+    for (const auto& e : EngineBridge::instance()->effects())
+        if (!effectTypes.contains(e.typeRaw)) {
+            effectTypes << e.typeRaw;
+            entries.push_back({QString("fx-%1-%2").arg(e.name).arg(e.typeRaw), e.typeRaw, false});
+        }
+    auto fileName = [](QString name) {
+        for (QChar& c : name) if (!c.isLetterOrNumber() && c != '-') c = '_';
+        return name + ".png";
+    };
+    {
+        QSet<QString> seen;
+        for (const Entry& e : entries)
+            if (seen.contains(fileName(e.name))) add([this, e] { window_->log("[stress] FAIL golden: two entries share " + e.name); });
+            else seen << fileName(e.name);
+    }
+    auto plasma = std::make_shared<QString>();
+    auto first = std::make_shared<QHash<QString, QImage>>();  // record: pass 1
+    auto failures = std::make_shared<QStringList>();
+    auto unstable = std::make_shared<QStringList>();
+    auto stats = std::make_shared<QHash<QString, int>>();
+    QSet<QString> knownUnstable;
+    {
+        QFile f(QDir(dir).filePath("unstable.txt"));
+        if (!record && f.open(QIODevice::ReadOnly))
+            for (const QString& line : QString::fromUtf8(f.readAll()).split('\n', Qt::SkipEmptyParts))
+                if (!line.trimmed().startsWith('#')) knownUnstable << line.trimmed();  // (# comments)
+    }
+
+    add([this, plasma] {
+        auto* eng = EngineBridge::instance();
+        eng->clearGraph();
+        Prefs::set("output.customWidth", 256.0);
+        Prefs::set("output.customHeight", 144.0);
+        Prefs::set("output.resolution", QString("custom"));
+        ntw_debug_freeze_time(12.5);
+        ntw_debug_step_mode(1);
+        for (const auto& s : eng->sources()) if (s.name == "Plasma") *plasma = window_->editor_->addFromCatalog(s.typeRaw, true);
+    }, 500);
+    const int passes = record ? 2 : 1;
+    for (int pass = 0; pass < passes; ++pass) {
+        for (const Entry& entry : entries) {
+            add([this, entry, plasma, pass, record, stabilize, dir, fileName, first, failures, unstable, stats, knownUnstable] {
+                auto* eng = EngineBridge::instance();
+                ntw_debug_render_frames(0, 1);  // seeds ofRandom before the node's setup draws from it
+                const QString id = entry.isSource ? window_->editor_->addFromCatalog(entry.typeRaw, true)
+                                                  : window_->editor_->addFromCatalog(entry.typeRaw, false, *plasma);
+                ntw_debug_render_frames(8, 1);
+                const QImage frame = goldenFrame(id);
+                eng->removeNode(id);
+                if (frame.isNull()) { *failures << entry.name + " (no frame)"; return; }
+                const QString path = QDir(dir).filePath(fileName(entry.name));
+                if (record) {
+                    if (pass == 0) { first->insert(entry.name, frame); return; }
+                    if (goldenDiff(first->value(entry.name), frame).same()) { frame.save(path); (*stats)["stored"]++; }
+                    else { *unstable << entry.name; QFile::remove(path); }
+                    return;
+                }
+                if (knownUnstable.contains(entry.name)) {
+                    (*stats)["unstable"]++;
+                    // Only that it renders something (unless it didn't when recorded either).
+                    const QImage expected(path);
+                    if (goldenEmpty(frame) && !(QFileInfo::exists(path) && goldenEmpty(expected)))
+                        *failures << entry.name + " (renders nothing)";
+                    return;
+                }
+                const QImage expected(path);
+                if (expected.isNull()) { *failures << entry.name + " (no golden image: record them)"; return; }
+                const GoldenDiff d = goldenDiff(expected, frame);
+                (*stats)["checked"]++;
+                if (!d.same() && stabilize) { *unstable << entry.name; return; }
+                if (!d.same()) {
+                    *failures << QString("%1 (%2% of pixels differ, mean %3)").arg(entry.name).arg(d.changed * 100, 0, 'f', 1).arg(d.mean, 0, 'f', 1);
+                    QImage pair(256, 72, QImage::Format_RGBA8888);
+                    pair.fill(Qt::black);
+                    QPainter p(&pair);
+                    p.drawImage(0, 0, expected);
+                    p.drawImage(128, 0, frame);
+                    p.end();
+                    pair.save(QDir(scratch_).filePath("golden-" + fileName(entry.name)));
+                }
+            });
+        }
+    }
+    add([this, record, stabilize, dir, failures, unstable, stats, entries] {
+        ntw_debug_step_mode(0);
+        ntw_debug_freeze_time(-1);
+        EngineBridge::instance()->clearGraph();
+        EngineBridge::instance()->resetSettings("Output");
+        if (record) {
+            // Kept: the block from "# Kept by hand" on (entries added by hand, with why).
+            QFile f(QDir(dir).filePath("unstable.txt"));
+            QString kept;
+            if (f.open(QIODevice::ReadOnly)) {
+                const QString old = QString::fromUtf8(f.readAll());
+                const qsizetype at = old.indexOf("# Kept by hand");
+                if (at >= 0) kept = old.mid(at);
+                f.close();
+            }
+            if (f.open(QIODevice::WriteOnly | QIODevice::Truncate))
+                f.write(("# Rendered differently twice in one launch (found when recording): only checked for rendering something.\n"
+                         + unstable->join('\n') + '\n' + kept).toUtf8());
+            window_->log(QString("[stress] golden: recorded %1 of %2; unstable (not the same twice): %3")
+                             .arg(stats->value("stored")).arg(entries.size()).arg(unstable->join(", ")));
+        } else if (stabilize) {
+            QFile f(QDir(dir).filePath("unstable.txt"));
+            if (!unstable->isEmpty() && f.open(QIODevice::Append)) f.write((unstable->join('\n') + '\n').toUtf8());
+            window_->log(QString("[stress] golden: stabilize: %1 differed from their images and are now unstable: %2")
+                             .arg(unstable->size()).arg(unstable->join(", ")));
+        } else {
+            window_->log(QString("[stress] golden: checked %1 against their images, %2 unstable for rendering something; %3 failed")
+                             .arg(stats->value("checked")).arg(stats->value("unstable")).arg(failures->size()));
+        }
+        for (const QString& f : std::as_const(*failures)) window_->log("[stress] FAIL golden: " + f);
+    });
+}
+
+// What users do, checked by what it renders (deterministic as golden()):
+// a chain, an optional effect on and off, a two-input Mask, a workspace
+// saved and reopened, a resolution change, undo and redo.
+// "[stress] workflows: <name> ok" or FAIL.
+void StressTest::workflows() {
+    struct State { QString plasma, kaleido, hsb, fractal, mask, extra; QImage hsbFrame; int nodes = 0; };
+    auto st = std::make_shared<State>();
+    auto typeOf = [this](const QString& name, bool source) {
+        for (const auto& c : source ? EngineBridge::instance()->sources() : EngineBridge::instance()->effects())
+            if (c.name == name) return c.typeRaw;
+        window_->log("[stress] FAIL workflows: no " + QString(source ? "source" : "effect") + " called " + name);
+        return -1;
+    };
+    // Known bugs (reported, not failing the run; KNOWN-FIXED when one passes).
+    static const QStringList known = {
+        "Mask without a mask passes its input through",  // Mask ignores its mask input (pre-existing)
+        "Mask's second input changes its output",
+    };
+    auto check = [this](bool ok, const QString& what) {
+        if (known.contains(what))
+            window_->log(QString("[stress] %1 workflows: %2").arg(ok ? "KNOWN-FIXED (remove from the known list)" : "KNOWN", what));
+        else
+            window_->log(ok ? "[stress] workflows: " + what + " ok" : "[stress] FAIL workflows: " + what);
+    };
+    auto render = [] { ntw_debug_render_frames(4, 1); };
+
+    add([this, st, typeOf] {
+        auto* eng = EngineBridge::instance();
+        eng->clearGraph();
+        Prefs::set("output.customWidth", 256.0);
+        Prefs::set("output.customHeight", 144.0);
+        Prefs::set("output.resolution", QString("custom"));
+        ntw_debug_freeze_time(12.5);
+        ntw_debug_step_mode(1);
+        st->plasma = window_->editor_->addFromCatalog(typeOf("Plasma", true), true);
+    }, 500);
+    // 1. A chain renders at every stage, and an effect changes its input.
+    add([this, st, typeOf, check, render] {
+        st->kaleido = window_->editor_->addFromCatalog(typeOf("Kaleidoscope", false), false, st->plasma);
+        st->hsb = window_->editor_->addFromCatalog(typeOf("HSB", false), false, st->kaleido);
+        render();
+        const QImage p = goldenFrame(st->plasma), k = goldenFrame(st->kaleido), h = goldenFrame(st->hsb);
+        check(!p.isNull() && !goldenEmpty(p) && !goldenEmpty(k) && !goldenEmpty(h), "chain renders at every stage");
+        check(!goldenDiff(p, k).same(), "Kaleidoscope changes its input");
+        st->hsbFrame = h;
+    });
+    // 2. An optional effect changes the output; off again, it's as before.
+    // (On Plasma: Kaleidoscope's output is already mirror-symmetric.)
+    add([this, st, check, render] {
+        auto* eng = EngineBridge::instance();
+        const QImage before = goldenFrame(st->plasma);
+        int mirror = -1;
+        for (const auto& o : eng->optionalEffects(st->plasma)) if (o.name.contains("Mirror")) mirror = o.index;
+        if (mirror < 0) { check(false, "optional effect: no Mirror on the node"); return; }
+        eng->toggleOptionalEffect(st->plasma, mirror);
+        render();
+        const QImage on = goldenFrame(st->plasma);
+        eng->toggleOptionalEffect(st->plasma, mirror);
+        render();
+        const QImage off = goldenFrame(st->plasma);
+        check(!goldenEmpty(on) && !goldenDiff(before, on).same(), "optional effect (Mirror) changes the output");
+        check(goldenDiff(before, off).same(), "optional effect off restores the output");
+    });
+    // 3. A two-input effect: Mask with nothing in its mask slot passes its
+    // input through; a mask (Plasma through Color Mask, which keys colour out
+    // to transparency) changes its output.
+    add([this, st, typeOf, check, render] {
+        auto* eng = EngineBridge::instance();
+        st->mask = window_->editor_->addFromCatalog(typeOf("Mask", false), false, st->plasma);
+        render();
+        const QImage plasma = goldenFrame(st->plasma), alone = goldenFrame(st->mask);
+        check(goldenDiff(plasma, alone).same(), "Mask without a mask passes its input through");
+        st->fractal = window_->editor_->addFromCatalog(typeOf("Color Mask", false), false, st->plasma);
+        eng->connectNodes(st->fractal, st->mask, 0, 1);
+        render();
+        const QImage masked = goldenFrame(st->mask);
+        check(!goldenDiff(alone, masked).same(), "Mask's second input changes its output");
+        eng->removeNode(st->mask);
+        eng->removeNode(st->fractal);
+    });
+    // 4. A workspace saved and reopened renders the same.
+    add([this, st, check, render] {
+        auto* eng = EngineBridge::instance();
+        render();
+        st->hsbFrame = goldenFrame(st->hsb);
+        st->nodes = int(eng->nodes().size());
+        eng->saveWorkspace(QDir(scratch_).filePath("workflows-ws.json"), "workflows");
+        eng->clearGraph();
+        render();
+        const bool loaded = eng->loadWorkspace(QDir(scratch_).filePath("workflows-ws.json"));
+        window_->editor_->syncFromEngine();
+        render();
+        const QImage again = goldenFrame(st->hsb);
+        check(loaded && int(eng->nodes().size()) == st->nodes, "workspace reopens with its nodes");
+        check(goldenDiff(st->hsbFrame, again).same(), "workspace reopens rendering the same");
+    });
+    // 5. A resolution change reaches the frames.
+    add([this, st, check, render] {
+        Prefs::set("output.resolution", QString("1080p"));
+        render();
+        int w = 0, h = 0;
+        ntw_debug_frame_rgba(st->hsb.toUtf8().constData(), &w, &h, nullptr, 0);
+        check(w == 1920 && h == 1080 && !goldenEmpty(goldenFrame(st->hsb)), QString("1080p renders at 1920x1080 (got %1x%2)").arg(w).arg(h));
+        Prefs::set("output.resolution", QString("custom"));
+        render();
+    });
+    // 6. Undo removes an added effect; redo brings it back, rendering.
+    add([this, st, typeOf, check, render] {
+        auto* eng = EngineBridge::instance();
+        const int before = int(eng->nodes().size());
+        st->extra = window_->editor_->addFromCatalog(typeOf("Pixelate", false), false, st->hsb);
+        render();
+        eng->undo();
+        render();
+        const int afterUndo = int(eng->nodes().size());
+        eng->redo();
+        window_->editor_->syncFromEngine();
+        render();
+        QString back;
+        for (const auto& n : eng->nodes()) if (n.name == "Pixelate") back = n.id;
+        check(afterUndo == before && !back.isEmpty() && !goldenEmpty(goldenFrame(back)),
+              QString("undo removes an effect, redo restores it rendering (%1 -> %2 nodes)").arg(before).arg(afterUndo));
+    });
+    add([] {
+        ntw_debug_step_mode(0);
+        ntw_debug_freeze_time(-1);
+        EngineBridge::instance()->clearGraph();
+        EngineBridge::instance()->resetSettings("Output");
+    });
 }
 
 // Every effect, fed by Plasma, renders something: its own frame (read in

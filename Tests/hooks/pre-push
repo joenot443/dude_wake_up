@@ -1,0 +1,24 @@
+#!/bin/sh
+# Runs the Windows test suite (Tests/run_tests.ps1) before a push: a failing
+# test, a crash or a UI hang stops the push. `git push --no-verify` skips it.
+# Installed by Tests/hooks/install.ps1 (a copy in .git/hooks).
+repo=$(git rev-parse --show-toplevel)
+if command -v wslpath >/dev/null 2>&1; then
+  winrepo=$(wslpath -w "$repo")
+elif command -v cygpath >/dev/null 2>&1; then
+  winrepo=$(cygpath -w "$repo")
+else
+  winrepo=$repo
+fi
+if ! command -v powershell.exe >/dev/null 2>&1; then
+  echo "pre-push: not on Windows; skipping the Windows tests." >&2
+  exit 0
+fi
+echo "pre-push: running the Windows tests (Tests/run_tests.ps1; --no-verify skips)..." >&2
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$winrepo\\Tests\\run_tests.ps1"
+status=$?
+if [ $status -ne 0 ]; then
+  echo "pre-push: tests failed; not pushing." >&2
+  exit 1
+fi
+exit 0

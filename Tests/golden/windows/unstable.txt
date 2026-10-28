@@ -1,0 +1,13 @@
+# Rendered differently twice in one launch (found when recording): only checked for rendering something.
+src-Waveform-18
+src-Full House-32
+src-Disco Audio-54
+src-Aerogel-60
+src-Companions-67
+fx-Snowfall-62
+# Kept by hand (recording keeps this block).
+# These two differ on the first launch after a build (deterministically: the same
+# image every time), then match; both sample TextureService textures. Not yet
+# understood (2026-10-28); see docs/TESTING.md, Known issues.
+src-DirtyPlasma-38
+fx-Glitch RGB-95

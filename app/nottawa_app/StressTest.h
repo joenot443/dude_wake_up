@@ -73,6 +73,8 @@ private:
     void canvasImage();
     void blendDrag();
     void renderAll();
+    void golden();
+    void workflows();
     void outputWindowsLaunch();
     void measureBeat(const QString& label, bool video);
 
