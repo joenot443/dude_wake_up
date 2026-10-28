@@ -12,19 +12,19 @@ unless -Certificate is given (to install it locally from the .msix; with
 Developer Mode on, -Register installs the unpacked layout instead).
 
 The package identity comes from Partner Center (Apps > Nottawa > Product
-identity): -IdentityName, -Publisher and -PublisherDisplayName. Until the
-name is reserved, the defaults below are test values: fine for local
-installs, rejected by the Store.
+identity): the defaults below are Nottawa's reserved identity. To install
+the package locally it has to be signed with a certificate whose subject
+matches -Publisher (-Certificate), or registered unpacked (-Register).
 
 .EXAMPLE
 powershell -File packaging\windows\build_msix.ps1 -Register
-powershell -File packaging\windows\build_msix.ps1 -IdentityName 12345Joe.Nottawa -Publisher "CN=ABCD-1234" -PublisherDisplayName "Joe Crozier"
+powershell -File packaging\windows\build_msix.ps1   # the Store package
 #>
 
 [CmdletBinding()]
 param(
-    [string]$IdentityName = 'Nottawa.Test',
-    [string]$Publisher = 'CN=Nottawa Test',
+    [string]$IdentityName = 'JoeCrozier.Nottawa',
+    [string]$Publisher = 'CN=30C50E17-1DED-455C-93DC-3B02982966B0',
     [string]$PublisherDisplayName = 'Joe Crozier',
     [string]$Certificate,
     [string]$PfxPassword,

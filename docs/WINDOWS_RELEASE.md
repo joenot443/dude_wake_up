@@ -7,8 +7,8 @@ decision or action from Joe.
 
 Build a release: `powershell -File packaging\windows\build_release.ps1`
 (installer, portable zip, symbols), then
-`powershell -File packaging\windows\build_msix.ps1 -IdentityName ... -Publisher ...`
-(the Store package). Version: `VERSION`.
+`powershell -File packaging\windows\build_msix.ps1` (the Store package; Nottawa's
+Partner Center identity is the script's default). Version: `VERSION`.
 
 Decisions so far: distributed through the **Microsoft Store** (MSIX, signed
 by Microsoft, updated by the Store); the Inno installer stays for direct
@@ -92,10 +92,9 @@ A minimal LGPL ffmpeg build ships in the first release.
 
 ## 4. Signing and distribution
 
-- [ ] **(you)** Partner Center: register as an app developer (free for
-      individuals), reserve the name "Nottawa", and send me the package
-      identity values (Product identity page: Package/Identity/Name,
-      Package/Identity/Publisher, Package/Properties/PublisherDisplayName).
+- [x] Partner Center: registered, "Nottawa" reserved. Identity:
+      `JoeCrozier.Nottawa`, `CN=30C50E17-1DED-455C-93DC-3B02982966B0`,
+      "Joe Crozier" (build_msix.ps1 defaults).
 - [ ] Run the Windows App Certification Kit on the MSIX (needs admin:
       `appcert.exe test -appxpackagepath dist\Nottawa-<ver>.msix -reportoutputpath ...`).
 - [ ] Store listing: description, screenshots, privacy policy URL (the app
