@@ -540,8 +540,11 @@ QString EngineBridge::outputNodeId() const {
 }
 
 QString EngineBridge::addEffect(int typeRaw, const QString& connectFromId) {
+    // Added and connected: one undo step.
+    ntw_begin_undo_group();
     const QString id = takeString(ntw_add_shader(typeRaw));
     if (!id.isEmpty() && !connectFromId.isEmpty()) connectNodes(connectFromId, id, 0, 0);
+    ntw_end_undo_group();
     return id;
 }
 

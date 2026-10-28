@@ -324,6 +324,10 @@ void EngineLoop::tick() {
   runQueuedTasks();
   const auto tTasks = clock::now();
 
+  // Step mode (testing): only the granted frames render.
+  if (frameBudget.load() == 0) { frameStartedMs = 0; return; }
+  if (frameBudget.load() > 0) frameBudget.fetch_sub(1);
+
   // 2. Update oscillators and modulation
   OscillationService::getService()->tickOscillators();
   ModulationService::getService()->tickMappings();

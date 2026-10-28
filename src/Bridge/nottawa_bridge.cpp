@@ -22,6 +22,7 @@
 #include "ParameterService.hpp"
 #include "ShaderChainerService.hpp"
 #include "VideoSourceService.hpp"
+#include "TimeService.hpp"
 #include "ShaderSource.hpp"
 #include "BlendShader.hpp"
 #include "BounceShader.hpp"
@@ -396,6 +397,14 @@ char* ntw_add_shader(int shaderTypeRaw) {
   return result;
 }
 
+void ntw_begin_undo_group(void) {
+  runOnEngineThread([]() { ActionService::getService()->beginGroup(); });
+}
+
+void ntw_end_undo_group(void) {
+  runOnEngineThread([]() { ActionService::getService()->endGroup(); });
+}
+
 char* ntw_create_blend_between(const char* id1, const char* id2) {
   if (!id1 || !id2) return nullptr;
   std::string sid1(id1), sid2(id2);
@@ -405,6 +414,9 @@ char* ntw_create_blend_between(const char* id1, const char* id2) {
     auto conn2 = findConnectable(sid2.c_str());
     if (!conn1 || !conn2) return nullptr;
 
+    // The Blend and its two connections are one undo step.
+    ActionService::getService()->beginGroup();
+    struct EndGroup { ~EndGroup() { ActionService::getService()->endGroup(); } } endGroup;
     auto blend = ActionService::getService()->addShader(ShaderTypeBlend);
     if (!blend) return nullptr;
 
@@ -2031,13 +2043,56 @@ void ntw_save_default_config(void) {
   });
 }
 
+void ntw_debug_freeze_time(double seconds) {
+  runOnEngineThread([seconds]() {
+    TimeService::getService()->frozenTime = static_cast<float>(seconds);
+    TimeService::getService()->tick();
+  });
+}
+
+void ntw_debug_step_mode(int on) {
+  EngineLoop::getInstance()->frameBudget = on ? 0 : -1;
+}
+
+void ntw_debug_render_frames(int frames, unsigned int seed) {
+  auto* loop = EngineLoop::getInstance();
+  runOnEngineThread([seed]() { ofSeedRandom(seed); });
+  loop->frameBudget = frames;
+  while (loop->frameBudget.load() > 0 && engineRunning.load())
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  runOnEngineThread([]() {});  // the last frame's tick has finished
+}
+
+static std::shared_ptr<Connectable> debugConnectable(const std::string& id) {
+  if (auto s = VideoSourceService::getService()->videoSourceForId(id)) return std::dynamic_pointer_cast<Connectable>(s);
+  if (auto sh = ShaderChainerService::getService()->shaderForId(id)) return std::dynamic_pointer_cast<Connectable>(sh);
+  return nullptr;
+}
+
+int ntw_debug_frame_rgba(const char* connectableId, int* outWidth, int* outHeight, unsigned char* out, int capacity) {
+  if (!connectableId) return 0;
+  const std::string id(connectableId);
+  return runOnEngineThread([&]() -> int {
+    auto c = debugConnectable(id);
+    auto fbo = c ? c->frame() : nullptr;
+    if (!fbo || !fbo->isAllocated()) return 0;
+    const int w = int(fbo->getWidth()), h = int(fbo->getHeight());
+    if (outWidth) *outWidth = w;
+    if (outHeight) *outHeight = h;
+    if (!out || capacity < w * h * 4) return 0;
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo->getId());
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, out);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    return 1;
+  });
+}
+
 unsigned int ntw_debug_frame_pixel(const char* connectableId, float x, float y) {
   if (!connectableId) return 0;
   const std::string id(connectableId);
   return runOnEngineThread([id, x, y]() -> unsigned int {
-    std::shared_ptr<Connectable> c;
-    if (auto s = VideoSourceService::getService()->videoSourceForId(id)) c = std::dynamic_pointer_cast<Connectable>(s);
-    else if (auto sh = ShaderChainerService::getService()->shaderForId(id)) c = std::dynamic_pointer_cast<Connectable>(sh);
+    auto c = debugConnectable(id);
     if (!c) return 0;
     auto fbo = c->frame();
     if (!fbo || !fbo->isAllocated()) return 0;
@@ -2496,7 +2551,7 @@ char* ntw_create_preview(int shaderTypeRaw, bool isSource) {
       shader->allocateFrames();
       // Reallocate to preview size (see comment above).
       if (shader->lastFrame) shader->lastFrame->allocate(kPreviewWidth, kPreviewHeight, GL_RGBA);
-      if (shader->optionalFrame) shader->optionalFrame->allocate(kPreviewWidth, kPreviewHeight, GL_RGBA);
+      // (Its scratch frame sizes itself to the preview's frame when used.)
 
       inst.shader = shader;
 

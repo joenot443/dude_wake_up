@@ -14,6 +14,11 @@ ActionService* ActionService::getService() {
 
 void ActionService::executeCommand(std::shared_ptr<Command> command) {
   command->execute();
+  if (group_) { group_->add(command); return; }  // (pushed as one at endGroup)
+  pushUndo(command);
+}
+
+void ActionService::pushUndo(std::shared_ptr<Command> command) {
   undoStack.push_back(command);
   // Cap the undo stack: drop oldest entries so removed connectables can
   // actually be released instead of being pinned forever by the stack.
@@ -22,6 +27,17 @@ void ActionService::executeCommand(std::shared_ptr<Command> command) {
   }
   // Clear the redo stack whenever a new command is executed.
   redoStack.clear();
+}
+
+void ActionService::beginGroup() {
+  if (groupDepth_++ == 0) group_ = std::make_shared<GroupCommand>();
+}
+
+void ActionService::endGroup() {
+  if (groupDepth_ == 0 || --groupDepth_ > 0) return;
+  auto group = std::move(group_);
+  group_.reset();
+  if (group && !group->empty()) pushUndo(group);
 }
 
 void ActionService::undo() {

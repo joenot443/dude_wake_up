@@ -38,7 +38,11 @@ public:
 
   void setup();
 
+  // Testing (golden images): a fixed time, or < 0 for the clock.
+  float frozenTime = -1.0f;
+
   void tick() {
+    if (frozenTime >= 0.0f) { timeParam->value = frozenTime; return; }
     float newTime = ofGetElapsedTimef() * timeSpeedParam->value + timeOffsetParam->value;
     timeParam->value = newTime;
   }

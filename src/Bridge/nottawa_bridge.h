@@ -190,6 +190,17 @@ long long ntw_engine_frame_running_ms(void);
 unsigned long ntw_engine_native_thread_id(void);
 // Testing: makes the engine's next frame take `ms` (queued; returns at once).
 void ntw_debug_stall_engine(int ms);
+// Testing, deterministic rendering (golden images): the engine clock held at
+// `seconds` (< 0: the real clock again); step mode on or off (on: frames
+// render only when granted); render exactly `frames` frames, after seeding
+// ofRandom with `seed`, and return when they're done (step mode on).
+void ntw_debug_freeze_time(double seconds);
+void ntw_debug_step_mode(int on);
+void ntw_debug_render_frames(int frames, unsigned int seed);
+// Testing: a node's frame read back whole, as RGBA8 rows bottom-up (GL
+// order), into `out` (width * height * 4 bytes). Returns 0 if it has none.
+int ntw_debug_frame_rgba(const char* connectableId, int* outWidth, int* outHeight, unsigned char* out, int capacity);
+
 // Testing: a node's own frame (its FBO, read on the engine thread) at
 // (x, y) in 0..1, as 0xAARRGGBB; 0 if it has none.
 unsigned int ntw_debug_frame_pixel(const char* connectableId, float x, float y);
@@ -206,6 +217,11 @@ void ntw_remove_shader(const char* shaderId);
 
 // Create a blend shader connecting two existing connectables.
 // Returns the new blend shader's ID (caller must free), or NULL on failure.
+// Undo: the changes between begin and end are one undo step (e.g. adding an
+// effect and connecting it). Calls nest; always pair them.
+void ntw_begin_undo_group(void);
+void ntw_end_undo_group(void);
+
 char* ntw_create_blend_between(const char* id1, const char* id2);
 
 // Replace a shader's type in-place, preserving connections.

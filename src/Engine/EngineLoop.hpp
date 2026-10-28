@@ -77,6 +77,9 @@ public:
   // When the frame in progress started (steady clock ms), or 0 between
   // frames: the hang watchdog reports a frame that runs too long.
   std::atomic<long long> frameStartedMs{0};
+  // Testing (golden images): -1 renders every tick; otherwise ticks only run
+  // queued tasks until frames are granted, and each rendered frame uses one.
+  std::atomic<int> frameBudget{-1};
 private:
   double lastFPSTime = 0.0;
 

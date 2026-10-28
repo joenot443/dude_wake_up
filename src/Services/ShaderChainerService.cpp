@@ -645,14 +645,15 @@ void ShaderChainerService::loadConnectionsConfig(json j)
 
 void ShaderChainerService::addShader(std::shared_ptr<Shader> shader)
 {
-  if (shadersMap.count(shader->shaderId) != 0)
-  {
-    log("Reregistering Shader %s", shader->shaderId.c_str());
-  }
+  // (Checked first: an unknown type gives a null Shader, which crashed here.)
   if (shader == nullptr)
   {
     log("Tried to add a null Shader");
     return;
+  }
+  if (shadersMap.count(shader->shaderId) != 0)
+  {
+    log("Reregistering Shader %s", shader->shaderId.c_str());
   }
   
   std::shared_ptr<FeedbackSource> feedbackSource = std::make_shared<FeedbackSource>(shader->shaderId, std::make_shared<VideoSourceSettings>(NottawaUUID::generateUUID(), 0));

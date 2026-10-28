@@ -2,6 +2,7 @@
 #define ACTION_SERVICE_HPP
 
 #include "Commands/Command.hpp"
+#include "Commands/GroupCommand.hpp"
 #include "Commands/AddShaderCommand.hpp"
 #include "Commands/AddPlaylistVideoSourceCommand.hpp"
 #include "Commands/RemoveShaderCommand.hpp"
@@ -43,6 +44,11 @@ public:
   
   // Check if redo is possible
   bool canRedo() const;
+
+  // Commands executed between these are one undo step (nested calls
+  // join the outer group). Engine thread.
+  void beginGroup();
+  void endGroup();
   
   // Entry points for specific commands
   
@@ -88,6 +94,9 @@ private:
   static constexpr size_t kMaxStackSize = 10;
   std::deque<std::shared_ptr<Command>> undoStack;
   std::deque<std::shared_ptr<Command>> redoStack;
+  std::shared_ptr<GroupCommand> group_;  // while grouping
+  int groupDepth_ = 0;
+  void pushUndo(std::shared_ptr<Command> command);
   
   // Static instance of the service
   static ActionService* service;
