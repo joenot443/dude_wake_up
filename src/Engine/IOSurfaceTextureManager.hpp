@@ -92,14 +92,12 @@ private:
   // Tear down GL resources for a SharedTexture.
   void cleanupSharedTexture(SharedTexture& tex);
 
-  std::unordered_map<std::string, SharedTexture> tracked;
   std::mutex mutex;
   ConnectableLookup secondaryLookup;
-#ifndef __APPLE__
-  // Windows. `mutex` guards only the map and what the UI reads (ready,
-  // width, height); the engine's GL work on an entry happens without it.
-  // Holding it across GL calls froze the UI whenever the driver made the
-  // engine wait for a busy GPU (the UI takes it to find a node's frames).
+  // `mutex` guards only the map and what the UI reads (ready, width,
+  // height); the engine's GL work on an entry happens without it. Holding
+  // it across GL calls froze the UI whenever the driver made the engine
+  // wait for a busy GPU (the UI takes it to find a node's frames).
   struct Entry {
     SharedTexture tex;        // GL state: engine thread only
     bool ready = false;       // under mutex: what the UI sees
@@ -107,15 +105,20 @@ private:
   };
   std::unordered_map<std::string, std::shared_ptr<Entry>> entries;
   // stopSharing may run off the GL thread, so GL cleanup is deferred to the
-  // next blitTrackedTextures(). Exchanges outlive their entries because the
-  // UI may still hold the pointer.
+  // next blitTrackedTextures().
   std::vector<std::shared_ptr<Entry>> pendingCleanup;
-  std::vector<std::shared_ptr<FrameExchange>> retiredExchanges;
-  void publish(SharedTexture& tex, unsigned int srcFboId, int srcW, int srcH);
-  bool ensureSlot(SharedTexture& tex, int slot);
   // Sizes an entry's textures for the source (engine thread, without mutex),
   // then publishes ready/width/height under it.
   bool prepare(Entry& entry, int width, int height);
+#ifdef __APPLE__
+  // Surfaces replaced or stopped, released one blit later: getIOSurface
+  // hands the UI an unretained pointer, which it retains just after.
+  std::vector<IOSurfaceRef> retiredSurfaces;
+#else
+  // Exchanges outlive their entries because the UI may still hold the pointer.
+  std::vector<std::shared_ptr<FrameExchange>> retiredExchanges;
+  void publish(SharedTexture& tex, unsigned int srcFboId, int srcW, int srcH);
+  bool ensureSlot(SharedTexture& tex, int slot);
 #endif
 
   static IOSurfaceTextureManager* instance;

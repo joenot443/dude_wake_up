@@ -5,11 +5,13 @@
 #   scripts/mac_selftest.sh [scenarios]
 #     default: files,system,tap,tapauto,persist,settings,settingspersist,settingsui,
 #              audiosettings,audiolaunch,cachesettings,outputwindows,outputwindowslaunch,
-#              diagnostics,diagnosticslaunch
+#              diagnostics,diagnosticslaunch,texturelock
 #
 # "persist" and "settingspersist" launch twice: change a parameter (or some
 # settings) and quit at once, then check on relaunch. settingsui leaves
 # images of the Settings window (ui-*.png) in the output folder. Audio scenarios are scored by scripts/mac_selftest_bpm.py.
+# "texturelock" launches on its own with scripts/mac_gpu_hog.swift loading the
+# GPU (NOTTAWA_SELFTEST_LOCK_SECONDS, default 15).
 # NOTTAWA_SELFTEST_SECONDS (default 40) is the listening time per track.
 # NOTTAWA_SELFTEST_CALIB=<wav from Tests/bpm/calib_drums.py> makes "system"
 # play that instead, scored against its exact beats.
@@ -18,8 +20,9 @@ cd "$(dirname "$0")/.."
 
 APP=bin/NottawaApp.app/Contents/MacOS/NottawaApp
 per=${NOTTAWA_SELFTEST_SECONDS:-40}
+lock=${NOTTAWA_SELFTEST_LOCK_SECONDS:-15}
 OUT=~/Library/Containers/com.joecrozier.nottawa/Data/tmp/selftest
-SCENARIOS=${1:-files,system,tap,tapauto,persist,settings,settingspersist,settingsui,audiosettings,audiolaunch,cachesettings,outputwindows,outputwindowslaunch,diagnostics,diagnosticslaunch}
+SCENARIOS=${1:-files,system,tap,tapauto,persist,settings,settingspersist,settingsui,audiosettings,audiolaunch,cachesettings,outputwindows,outputwindowslaunch,diagnostics,diagnosticslaunch,texturelock}
 
 if pgrep -xq NottawaApp; then echo "NottawaApp is running; quit it first" >&2; exit 2; fi
 [ -x "$APP" ] || { echo "no $APP; build the NottawaApp scheme" >&2; exit 2; }
@@ -33,6 +36,7 @@ launch() {
   open -n -W -g --env NOTTAWA_SELFTEST="$1" --env NOTTAWA_SELFTEST_SECONDS="$per" --env NOTTAWA_SELFTEST_CLIP="$CLIP" \
     --env NOTTAWA_SELFTEST_CALIB="${NOTTAWA_SELFTEST_CALIB:-}" \
     --env NOTTAWA_SELFTEST_OPENFOLDERS="${NOTTAWA_SELFTEST_OPENFOLDERS:-}" \
+    --env NOTTAWA_SELFTEST_LOCK_SECONDS="$lock" \
     bin/NottawaApp.app --args -ApplePersistenceIgnoreState YES &
   local opener=$! waited=0
   while kill -0 $opener 2>/dev/null; do
@@ -54,8 +58,8 @@ if [ ! -f "$CLIP" ] && echo "$SCENARIOS" | tr ',' '\n' | grep -qx cachesettings;
   mkdir -p "$(dirname "$CLIP")"
   ffmpeg -v quiet -f lavfi -i testsrc2=size=1280x720:rate=30 -t 10 -c:v libx264 -pix_fmt yuv420p "$CLIP"
 fi
-in_app=$(echo "$SCENARIOS" | tr ',' '\n' | grep -vE '^(persist|settingspersist|audiolaunch|outputwindowslaunch|diagnosticslaunch)$' | paste -sd, -)
-if [ -n "$in_app" ]; then launch "$in_app" $((per * 16 + 120)); fi
+in_app=$(echo "$SCENARIOS" | tr ',' '\n' | grep -vE '^(persist|settingspersist|audiolaunch|outputwindowslaunch|diagnosticslaunch|texturelock)$' | paste -sd, -)
+if [ -n "$in_app" ]; then launch "$in_app" $((per * 20 + 120)); fi
 if echo "$SCENARIOS" | tr ',' '\n' | grep -qx persist; then
   launch persist-set 60
   launch persist-check 60
@@ -75,6 +79,13 @@ fi
 if echo "$SCENARIOS" | tr ',' '\n' | grep -qx settingspersist; then
   launch settings-set 60
   launch settings-check 60
+fi
+if echo "$SCENARIOS" | tr ',' '\n' | grep -qx texturelock; then
+  hog=$(mktemp -d)/gpuhog
+  swiftc -O scripts/mac_gpu_hog.swift -o "$hog" 2>/dev/null || echo "FAIL: texturelock: GPU hog didn't build" >>"$OUT/all.txt"
+  [ -x "$hog" ] && "$hog" $((lock + 30)) &
+  launch texturelock $((lock + 90))
+  pkill -f "$hog" 2>/dev/null; rm -rf "$(dirname "$hog")"
 fi
 
 echo "== report"; cat "$OUT/all.txt"
