@@ -8,6 +8,7 @@
 
 import SwiftUI
 import MetalKit
+import os
 
 /// MTKView subclass that never accepts mouse events, letting SwiftUI
 /// gestures on parent views handle all interaction.
@@ -48,6 +49,11 @@ struct TextureDisplayView: NSViewRepresentable {
         private var pipelineState: MTLRenderPipelineState?
         private var vertexBuffer: MTLBuffer?
         private let commandQueue: MTLCommandQueue
+        /// The last frame's command buffer hasn't completed. A busy GPU (a
+        /// heavy strand, another app) holds drawables back, and
+        /// currentDrawable then blocks the main thread for up to a second:
+        /// skipping frames instead keeps the UI responsive.
+        private let inFlight = OSAllocatedUnfairLock(initialState: false)
 
         init(connectableId: String) {
             self.connectableId = connectableId
@@ -117,6 +123,14 @@ struct TextureDisplayView: NSViewRepresentable {
         func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}
 
         func draw(in view: MTKView) {
+            let busy = inFlight.withLock { busy in
+                defer { busy = true }
+                return busy
+            }
+            if busy { return }
+            var committed = false
+            defer { if !committed { inFlight.withLock { $0 = false } } }
+
             guard let drawable = view.currentDrawable,
                   let passDescriptor = view.currentRenderPassDescriptor else { return }
 
@@ -138,7 +152,9 @@ struct TextureDisplayView: NSViewRepresentable {
             encoder.endEncoding()
 
             commandBuffer.present(drawable)
+            commandBuffer.addCompletedHandler { [inFlight] _ in inFlight.withLock { $0 = false } }
             commandBuffer.commit()
+            committed = true
         }
     }
 }

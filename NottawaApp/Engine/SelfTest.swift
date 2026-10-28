@@ -101,6 +101,7 @@ final class SelfTest {
             case "diagnostics-check": diagnosticsCheck()
             case "outputwindows-set": await outputWindowsSet(); return  // quits, on purpose
             case "outputwindows-check": outputWindowsCheck()
+            case "texturelock": await textureLock()
             default: log("FAIL unknown scenario \(scenario)")
             }
         }
@@ -1034,6 +1035,85 @@ private final class Sampler: @unchecked Sendable {
             out += String(format: "%.6f,%.6f,%.3f,%.5f,%u,%.5f\n", r.wall, r.trackTime, r.bpm, r.pulse, r.beatCount, r.rms)
         }
         return out
+    }
+}
+
+// MARK: - Texture lookups under load
+
+extension SelfTest {
+    /// The UI looks up each preview's surface every display frame. Under GPU
+    /// load (run scripts/mac_gpu_hog.swift alongside) that lookup must not
+    /// wait for the engine's GL work, nor previews wait for drawables. Renders 4K with every node shared and
+    /// times the lookups from a thread, and the main thread's lateness.
+    private func textureLock() async {
+        let saved = snapshotSettings()
+        ntw_set_custom_resolution(3840, 2160)
+        let ids = engine.allVideoSources().map(\.id) + engine.allShaders().map(\.id)
+        let started = ids.filter { ntw_get_connectable_texture($0) == nil }
+        for id in started { engine.startTextureSharing(connectableId: id) }
+        await wait(1.5)
+
+        let duration = Double(ProcessInfo.processInfo.environment["NOTTAWA_SELFTEST_LOCK_SECONDS"] ?? "") ?? 15
+        let end = CACurrentMediaTime() + duration
+        let probe = LookupProbe(ids: ids, until: end)
+        probe.start()
+        var mainWorst = 0.0, mainOver50 = 0
+        var engineWorst: Int64 = 0
+        while CACurrentMediaTime() < end {
+            let asked = CACurrentMediaTime()
+            await wait(0.005)
+            let late = CACurrentMediaTime() - asked - 0.005
+            mainWorst = max(mainWorst, late)
+            if late > 0.05 { mainOver50 += 1 }
+            engineWorst = max(engineWorst, Int64(ntw_engine_frame_running_ms()))
+        }
+        while !probe.finished { await wait(0.05) }
+
+        let (worst, over16, over50, count) = probe.summary()
+        log(String(format: "texturelock: %d nodes at 4K, %d lookups: worst %.1f ms, %d over 16 ms, %d over 50 ms; main thread worst late %.1f ms (%d over 50 ms); engine frame seen running %lld ms; %.1f fps",
+                   ids.count, count, worst * 1000, over16, over50, mainWorst * 1000, mainOver50, engineWorst, engine.engineFPS))
+        log((ids.isEmpty ? "FAIL" : worst < 0.05 ? "PASS" : "FAIL") + " texturelock: lookups never wait on the engine's GL work")
+        log((mainWorst < 0.1 ? "PASS" : "FAIL") + " texturelock: the main thread never waits 100 ms (previews skip frames instead)")
+
+        for id in started { engine.stopTextureSharing(connectableId: id) }
+        restoreSettings(saved)
+        await wait(0.5)
+    }
+}
+
+/// Times ntw_get_connectable_texture for every id, round robin, until `until`.
+private final class LookupProbe: @unchecked Sendable {
+    private let ids: [String]
+    private let until: Double
+    private let lock = NSLock()
+    private var times: [Double] = []
+    private var done = false
+
+    init(ids: [String], until: Double) {
+        self.ids = ids
+        self.until = until
+    }
+
+    var finished: Bool { lock.withLock { done } }
+
+    func start() {
+        Thread { [self] in
+            var local: [Double] = []
+            var i = 0
+            while CACurrentMediaTime() < until, !ids.isEmpty {
+                let t0 = CACurrentMediaTime()
+                _ = ntw_get_connectable_texture(ids[i % ids.count])
+                local.append(CACurrentMediaTime() - t0)
+                i += 1
+                usleep(1000)
+            }
+            lock.withLock { times = local; done = true }
+        }.start()
+    }
+
+    func summary() -> (worst: Double, over16: Int, over50: Int, count: Int) {
+        let t = lock.withLock { times }
+        return (t.max() ?? 0, t.filter { $0 > 0.016 }.count, t.filter { $0 > 0.05 }.count, t.count)
     }
 }
 
