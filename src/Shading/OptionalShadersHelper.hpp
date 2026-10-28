@@ -8,6 +8,7 @@
 #include <mutex>
 #include <string>
 #include <vector>
+#include "ScratchFrame.hpp"
 #include "ofFbo.h"
 #include "ShaderType.hpp"
 #include "json.hpp"
@@ -48,9 +49,9 @@ public:
   // An entry per slot, or null if no slot has been used or loaded.
   nlohmann::json serialize() const;
 
-  // Runs the enabled extras over `lastFrame`, using `optionalFrame` (sized to
-  // match on first use) as scratch.
-  void applyOptionalShaders(std::shared_ptr<ofFbo> lastFrame, std::shared_ptr<ofFbo> optionalFrame);
+  // Runs the enabled extras over `lastFrame`, using `scratch` (allocated, at
+  // lastFrame's size, only when one is enabled).
+  void applyOptionalShaders(std::shared_ptr<ofFbo> lastFrame, ScratchFrame& scratch);
   void drawOptionalSettings();
 
 private:

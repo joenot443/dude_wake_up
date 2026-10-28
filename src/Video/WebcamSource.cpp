@@ -74,7 +74,7 @@ void WebcamSource::teardown() {
   grabberReady = false;
   grabber.close();
   if (fbo) fbo->clear();
-  if (optionalFbo) optionalFbo->clear();
+  optionalFbo.release();
 }
 
 void WebcamSource::saveFrame() {

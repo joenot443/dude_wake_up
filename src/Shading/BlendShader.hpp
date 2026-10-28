@@ -200,13 +200,8 @@ struct BlendShader: Shader {
 
     // Guard: bail if FBOs aren't allocated yet (startup race)
     if (!frame || !canvas || !frame->isAllocated() || !canvas->isAllocated()) return;
-    // optionalFrame is the ping-pong buffer here. Nodes allocate it lazily
-    // (only optional effects used to need it), so a Blend without any
-    // allocates its own; bailing out instead left every Blend black.
-    if (!optionalFrame) return;
-    if (!optionalFrame->isAllocated() || optionalFrame->getWidth() != frame->getWidth() ||
-        optionalFrame->getHeight() != frame->getHeight())
-      optionalFrame->allocate(frame->getWidth(), frame->getHeight(), GL_RGBA);
+    // The ping-pong buffer: the node's scratch frame, at this frame's size.
+    const std::shared_ptr<ofFbo> pingPong = optionalFrame.get(frame->getWidth(), frame->getHeight());
     // Validate GL textures are actually valid (isAllocated can be true with stale textures)
     if (frame->getTexture().getTextureData().textureID == 0) return;
     if (canvas->getTexture().getTextureData().textureID == 0) return;
@@ -254,9 +249,9 @@ struct BlendShader: Shader {
     ofClear(0, 0, 0, 0);
     canvas->end();
     
-    optionalFrame->begin();
+    pingPong->begin();
     ofClear(0, 0, 0, 0);
-    optionalFrame->end();
+    pingPong->end();
     
     // Start with the main frame in the canvas, scaled by mainStrength
     canvas->begin();
@@ -274,8 +269,8 @@ struct BlendShader: Shader {
       if (!hasInputAtSlot(slot)) continue;
 
       // Determine source and destination FBOs
-      std::shared_ptr<ofFbo> sourceFbo = useOptionalAsSource ? optionalFrame : canvas;
-      std::shared_ptr<ofFbo> destFbo = useOptionalAsSource ? canvas : optionalFrame;
+      std::shared_ptr<ofFbo> sourceFbo = useOptionalAsSource ? pingPong : canvas;
+      std::shared_ptr<ofFbo> destFbo = useOptionalAsSource ? canvas : pingPong;
 
       std::shared_ptr<ofFbo> nextFrame = inputAtSlot(slot)->frame();
       if (!nextFrame || !nextFrame->isAllocated()) continue;
@@ -307,7 +302,7 @@ struct BlendShader: Shader {
     // Final copy to canvas if needed
     if (useOptionalAsSource) {
       canvas->begin();
-      optionalFrame->draw(0, 0);
+      pingPong->draw(0, 0);
       canvas->end();
     }
   }

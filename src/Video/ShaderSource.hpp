@@ -1483,7 +1483,7 @@ public:
     // the inner shader's lastFrame/optionalFrame and any optional children.
     // Without this every removed ShaderSource pins ~50 MB on the undo stack.
     if (fbo) fbo->clear();
-    if (optionalFbo) optionalFbo->clear();
+    optionalFbo.release();
     if (canvas) canvas->clear();
     if (shader) shader->releaseFrames();
   }

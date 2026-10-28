@@ -8,6 +8,7 @@
 #ifndef VideoSource_hpp
 #define VideoSource_hpp
 
+#include "ScratchFrame.hpp"
 #include "FeedbackSource.hpp"
 #include "OptionalShadersHelper.hpp"
 #include "Settings.hpp"
@@ -46,7 +47,8 @@ public:
   std::shared_ptr<VideoSourceSettings> settings;
   VideoSourceType type;
   std::shared_ptr<ofFbo> fbo;
-  std::shared_ptr<ofFbo> optionalFbo;
+  // Scratch for the optional shaders, allocated on first use: get(w, h).
+  ScratchFrame optionalFbo;
   std::shared_ptr<FeedbackSource> feedbackDestination;
   
   // Layout
@@ -56,7 +58,7 @@ public:
   VideoSource() : id(NottawaUUID::generateUUID()), sourceName(NottawaUUID::generateUUID()), settings(std::make_shared<VideoSourceSettings>(id, 0)), origin(ImVec2(0.,0.)) {};
 
   VideoSource(std::string id, std::string name, VideoSourceType type)
-      : id(id), fbo(std::make_shared<ofFbo>()), optionalFbo(std::make_shared<ofFbo>()), sourceName(name), type(type), settings(std::make_shared<VideoSourceSettings>(id, 0)), origin(ImVec2(0.,0.)) {};
+      : id(id), fbo(std::make_shared<ofFbo>()), sourceName(name), type(type), settings(std::make_shared<VideoSourceSettings>(id, 0)), origin(ImVec2(0.,0.)) {};
 
   virtual void setup(){};
   void update() {

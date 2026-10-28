@@ -133,12 +133,12 @@ void Shader::activateParameters() {
 
 void Shader::allocateFrames() {
   lastFrame->allocate(LayoutStateService::getService()->resolution.x, LayoutStateService::getService()->resolution.y, GL_RGBA);
-  // optionalFrame is allocated when an optional shader first runs.
+  // optionalFrame (a ScratchFrame) is allocated when it's first used.
 }
 
 void Shader::releaseFrames() {
   if (lastFrame) lastFrame->clear();
-  if (optionalFrame) optionalFrame->clear();
+  optionalFrame.release();
   for (auto& opt : optionalShaders.created()) opt->releaseFrames();
 }
 

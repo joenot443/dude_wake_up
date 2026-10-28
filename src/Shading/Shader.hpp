@@ -8,6 +8,7 @@
 #ifndef Shader_h
 #define Shader_h
 
+#include "ScratchFrame.hpp"
 #include "Console.hpp"
 #include "imgui.h"
 #include "FeedbackSource.hpp"
@@ -37,8 +38,7 @@ public:
   shaderId(settings->shaderId),
   creationTime(ofGetUnixTime()),
   lastModified(ofGetUnixTime()),
-  lastFrame(std::make_shared<ofFbo>()),
-  optionalFrame(std::make_shared<ofFbo>())
+  lastFrame(std::make_shared<ofFbo>())
   {
     color = colorFromName(settings->name);
   };
@@ -63,8 +63,9 @@ public:
 
   std::shared_ptr<ofFbo> lastFrame;
   
-  // Used for applying the optional shaders
-  std::shared_ptr<ofFbo> optionalFrame;
+  // Scratch for the optional shaders (and Blend's ping-pong), allocated on
+  // first use: get(width, height).
+  ScratchFrame optionalFrame;
   
   // Shaders which can be optionally applied to an existing Shader.
   OptionalShadersHelper optionalShaders{OptionalShadersHelper::shaderTypes(), false};

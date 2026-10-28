@@ -121,16 +121,10 @@ nlohmann::json OptionalShadersHelper::serialize() const {
   return any ? out : nlohmann::json();
 }
 
-void OptionalShadersHelper::applyOptionalShaders(std::shared_ptr<ofFbo> lastFrame, std::shared_ptr<ofFbo> optionalFrame) {
+void OptionalShadersHelper::applyOptionalShaders(std::shared_ptr<ofFbo> lastFrame, ScratchFrame& scratch) {
   for (auto shader : created()) {
     if (!shader->optionallyEnabled) continue;
-
-    // The scratch frame is only needed here, so it's allocated on first use.
-    if (!optionalFrame->isAllocated() ||
-        optionalFrame->getWidth() != lastFrame->getWidth() ||
-        optionalFrame->getHeight() != lastFrame->getHeight()) {
-      optionalFrame->allocate(lastFrame->getWidth(), lastFrame->getHeight(), GL_RGBA);
-    }
+    const std::shared_ptr<ofFbo> optionalFrame = scratch.get(lastFrame->getWidth(), lastFrame->getHeight());
 
     // Clear optionalFrame before applying the shader
     optionalFrame->begin();

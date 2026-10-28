@@ -490,7 +490,7 @@ void FileSource::teardown()
   // the underlying GL FBO + attached textures + depth/stencil buffers. Without
   // this, ~16 MB per source lingers for the lifetime of the undo entry.
   if (fbo) fbo->clear();
-  if (optionalFbo) optionalFbo->clear();
+  optionalFbo.release();
   maskShader.unload();
 }
 
