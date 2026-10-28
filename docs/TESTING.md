@@ -29,7 +29,8 @@ All in `app/nottawa_app/StressTest.cpp`, driven through the engine bridge:
   rendered deterministically and compared with `Tests/golden/windows/*.png`.
   Deterministic: the clock frozen (`ntw_debug_freeze_time`), step mode with
   exactly 8 frames (`ntw_debug_render_frames`, which also seeds ofRandom),
-  256x144, read back from the engine (`ntw_debug_frame_rgba`), compared at
+  256x144, read back from the engine (`ntw_debug_frame_rgba`, which reads a
+  multisampled frame, such as a Text input's, from its resolved texture), compared at
   128x72. A pixel "differs" when a channel is more than 24 apart; an image
   fails when over 1% of pixels differ or the mean difference is over 2.
   Entries that render differently twice in a row or between launches
@@ -39,7 +40,7 @@ All in `app/nottawa_app/StressTest.cpp`, driven through the engine bridge:
 - **workflows**: what users do, checked by pixels: a chain renders at every
   stage; an effect changes its input; an optional effect on changes the
   output, off restores it; Mask keeps bright parts and a second input
-  fills the rest; a workspace saved and reopened
+  fills the rest; a Text input draws its text; a workspace saved and reopened
   renders the same; 1080p frames are 1920x1080; undo removes an added
   effect and redo restores it.
 - **blenddrag**: a Blend made through the engine and by dragging one output
@@ -62,8 +63,7 @@ it can come off the list.
 - DirtyPlasma and Glitch RGB render differently on the first launch after a
   build (the same image every time), then match their golden images. Both
   sample TextureService textures. In `unstable.txt` until understood.
-- Text inputs don't draw in the deterministic test mode (step mode): their
-  frame stays uninitialised. Not yet checked in normal use.
+
 
 ## When a golden test fails
 

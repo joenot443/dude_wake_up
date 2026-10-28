@@ -942,6 +942,27 @@ void StressTest::workflows() {
         eng->removeNode(st->mask);
         eng->removeNode(st->fractal);
     });
+    // 3b. A Text input draws its text: opaque text on a transparent
+    // background, and new text draws differently. (Its FBO is multisampled:
+    // read back resolved.)
+    add([this, check, render] {
+        auto* eng = EngineBridge::instance();
+        const QString text = eng->addInput(VideoSourceKind::Text);
+        eng->setTextSourceText(text, "NOTTAWA");
+        eng->setTextSourceFontSize(text, 120);
+        render();
+        const QImage first = goldenFrame(text);
+        int opaque = 0, clear = 0;
+        for (int y = 0; y < first.height(); ++y)
+            for (int x = 0; x < first.width(); ++x) (qAlpha(first.pixel(x, y)) > 200 ? opaque : clear)++;
+        first.save(QDir(scratch_).filePath("workflows-text.png"));
+        eng->setTextSourceText(text, "Hello");
+        render();
+        const QImage second = goldenFrame(text);
+        check(opaque > 0 && clear > opaque, QString("a Text input draws text on a transparent background (%1 opaque, %2 clear)").arg(opaque).arg(clear));
+        check(!goldenDiff(first, second).same(), "new text draws differently");
+        eng->removeNode(text);
+    });
     // 4. A workspace saved and reopened renders the same.
     add([this, st, check, render] {
         auto* eng = EngineBridge::instance();

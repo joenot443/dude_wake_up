@@ -2063,6 +2063,15 @@ void ntw_debug_render_frames(int frames, unsigned int seed) {
   runOnEngineThread([]() {});  // the last frame's tick has finished
 }
 
+// The framebuffer holding a frame's pixels for reading. A multisampled FBO
+// (TextSource's) renders into renderbuffers that can't be read back:
+// getTexture() resolves them into its texture, whose framebuffer is
+// getIdDrawBuffer(). (Reading getId() of one fails and reads nothing.)
+static GLuint debugReadableFramebuffer(const std::shared_ptr<ofFbo>& fbo) {
+  fbo->getTexture();  // resolves a multisampled FBO if needed
+  return fbo->getIdDrawBuffer();
+}
+
 static std::shared_ptr<Connectable> debugConnectable(const std::string& id) {
   if (auto s = VideoSourceService::getService()->videoSourceForId(id)) return std::dynamic_pointer_cast<Connectable>(s);
   if (auto sh = ShaderChainerService::getService()->shaderForId(id)) return std::dynamic_pointer_cast<Connectable>(sh);
@@ -2080,7 +2089,7 @@ int ntw_debug_frame_rgba(const char* connectableId, int* outWidth, int* outHeigh
     if (outWidth) *outWidth = w;
     if (outHeight) *outHeight = h;
     if (!out || capacity < w * h * 4) return 0;
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo->getId());
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, debugReadableFramebuffer(fbo));
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
     glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, out);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
@@ -2097,7 +2106,7 @@ unsigned int ntw_debug_frame_pixel(const char* connectableId, float x, float y) 
     auto fbo = c->frame();
     if (!fbo || !fbo->isAllocated()) return 0;
     unsigned char px[4] = {0, 0, 0, 0};
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo->getId());
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, debugReadableFramebuffer(fbo));
     glReadPixels(int(x * fbo->getWidth()), int(y * fbo->getHeight()), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, px);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
     return (unsigned(px[3]) << 24) | (unsigned(px[0]) << 16) | (unsigned(px[1]) << 8) | unsigned(px[2]);
