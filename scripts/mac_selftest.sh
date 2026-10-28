@@ -7,8 +7,9 @@
 #              audiosettings,audiolaunch,cachesettings,outputwindows,outputwindowslaunch,
 #              diagnostics,diagnosticslaunch,texturelock,golden,workflows
 #
-# "golden" and "workflows" (docs/TESTING.md) launch on their own with a
-# throwaway session (NOTTAWA_APPDATA), so your graph is never touched.
+# "settings", "golden" and "workflows" (docs/TESTING.md) launch on their own
+# with a throwaway session (NOTTAWA_APPDATA): your graph is never touched,
+# and doesn't decide the results (a heavy graph can't run at 120 fps).
 # Golden images: Tests/golden/macos. NOTTAWA_GOLDEN=record renders them
 # again (then look at the changes in git); =stabilize moves entries that
 # differ from their image into unstable.txt.
@@ -69,7 +70,7 @@ if [ ! -f "$CLIP" ] && echo "$SCENARIOS" | tr ',' '\n' | grep -qx cachesettings;
   mkdir -p "$(dirname "$CLIP")"
   ffmpeg -v quiet -f lavfi -i testsrc2=size=1280x720:rate=30 -t 10 -c:v libx264 -pix_fmt yuv420p "$CLIP"
 fi
-in_app=$(echo "$SCENARIOS" | tr ',' '\n' | grep -vE '^(persist|settingspersist|audiolaunch|outputwindowslaunch|diagnosticslaunch|texturelock|golden|workflows)$' | paste -sd, -)
+in_app=$(echo "$SCENARIOS" | tr ',' '\n' | grep -vE '^(persist|settingspersist|audiolaunch|outputwindowslaunch|diagnosticslaunch|texturelock|settings|golden|workflows)$' | paste -sd, -)
 if [ -n "$in_app" ]; then launch "$in_app" $((per * 20 + 120)); fi
 if echo "$SCENARIOS" | tr ',' '\n' | grep -qx persist; then
   launch persist-set 60
@@ -99,8 +100,8 @@ if echo "$SCENARIOS" | tr ',' '\n' | grep -qx texturelock; then
   pkill -f "$hog" 2>/dev/null; rm -rf "$(dirname "$hog")"
 fi
 
-# Rendered pixels, in a throwaway session.
-pixels=$(echo "$SCENARIOS" | tr ',' '\n' | grep -xE 'golden|workflows' | paste -sd, -)
+# Settings and rendered pixels, in a throwaway session.
+pixels=$(echo "$SCENARIOS" | tr ',' '\n' | grep -xE 'settings|golden|workflows' | paste -sd, -)
 if [ -n "$pixels" ]; then
   rm -rf "$GOLDEN" "$CONTAINER/tmp/selftest-appdata"
   mkdir -p "$GOLDEN" Tests/golden/macos
