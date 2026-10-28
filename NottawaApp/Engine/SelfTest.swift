@@ -31,6 +31,11 @@
 //    diagnostics    the Copy Diagnostics text: its parts, and nothing naming the user
 //    diagnostics-set / diagnostics-check  an abrupt exit, then the relaunch
 //                   reports the previous session didn't quit normally
+//    golden         every effect (fed by Plasma) and generated source, rendered
+//                   deterministically and compared with NOTTAWA_GOLDEN_DIR
+//                   (NOTTAWA_GOLDEN=record|stabilize); see docs/TESTING.md
+//    workflows      a chain, an optional effect, Mask, a workspace round trip,
+//                   1080p, undo/redo, checked by rendered pixels
 //    cachesettings  a video clip (NOTTAWA_SELFTEST_CLIP, ~1.1 GB to cache)
 //                   loaded under each Cache Video Clips / Cache Memory choice
 //
@@ -44,20 +49,23 @@ import AppKit
 import AVFoundation
 import CoreAudio
 import Foundation
+import ImageIO
 
 @MainActor
 final class SelfTest {
     private static var running: SelfTest?
 
-    static func startIfRequested() {
+    static func startIfRequested(viewModel: NodeEditorViewModel) {
         guard let list = ProcessInfo.processInfo.environment["NOTTAWA_SELFTEST"], !list.isEmpty else { return }
         let test = SelfTest(scenarios: list.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) })
+        test.viewModel = viewModel
         running = test
         Task { await test.run() }
     }
 
     private let scenarios: [String]
     private let engine = NottawaEngine.shared
+    private var viewModel: NodeEditorViewModel!
     private let dir = FileManager.default.temporaryDirectory.appendingPathComponent("selftest")
     private let seconds = Double(ProcessInfo.processInfo.environment["NOTTAWA_SELFTEST_SECONDS"] ?? "") ?? 40
     private var report = ""
@@ -102,6 +110,8 @@ final class SelfTest {
             case "outputwindows-set": await outputWindowsSet(); return  // quits, on purpose
             case "outputwindows-check": outputWindowsCheck()
             case "texturelock": await textureLock()
+            case "golden": golden()
+            case "workflows": workflows()
             default: log("FAIL unknown scenario \(scenario)")
             }
         }
@@ -1035,6 +1045,356 @@ private final class Sampler: @unchecked Sendable {
             out += String(format: "%.6f,%.6f,%.3f,%.5f,%u,%.5f\n", r.wall, r.trackTime, r.bpm, r.pulse, r.beatCount, r.rms)
         }
         return out
+    }
+}
+
+// MARK: - Rendered pixels (golden, workflows)
+
+/// A node's frame shrunk to 128x72, top row first, straight RGBA: what golden
+/// images hold. Same rules as the Windows suite (docs/TESTING.md).
+struct GoldenImage {
+    static let width = 128, height = 72
+    var pixels: [UInt8]  // width * height * 4
+
+    /// Reads a node's frame back from the engine (bottom-up rows) and box-
+    /// filters it down, top row first.
+    static func frame(_ id: String) -> GoldenImage? {
+        var w: Int32 = 0, h: Int32 = 0
+        ntw_debug_frame_rgba(id, &w, &h, nil, 0)
+        guard w > 0, h > 0 else { return nil }
+        var raw = [UInt8](repeating: 0, count: Int(w) * Int(h) * 4)
+        guard ntw_debug_frame_rgba(id, &w, &h, &raw, Int32(raw.count)) != 0 else { return nil }
+        let sw = Int(w), sh = Int(h)
+        var out = [UInt8](repeating: 0, count: width * height * 4)
+        for ty in 0..<height {
+            let y0 = ty * sh / height, y1 = max(y0 + 1, (ty + 1) * sh / height)
+            for tx in 0..<width {
+                let x0 = tx * sw / width, x1 = max(x0 + 1, (tx + 1) * sw / width)
+                var sum = [Int](repeating: 0, count: 4)
+                for y in y0..<y1 {
+                    let row = (sh - 1 - y) * sw  // bottom-up
+                    for x in x0..<x1 { for c in 0..<4 { sum[c] += Int(raw[(row + x) * 4 + c]) } }
+                }
+                let n = (y1 - y0) * (x1 - x0)
+                for c in 0..<4 { out[(ty * width + tx) * 4 + c] = UInt8((sum[c] + n / 2) / n) }
+            }
+        }
+        return GoldenImage(pixels: out)
+    }
+
+    /// Nothing drawn: every channel 2 or less.
+    var isEmpty: Bool { !pixels.contains { $0 > 2 } }
+
+    /// The share of pixels with a channel more than 24 apart, and the mean
+    /// channel difference; the same within 1% and a mean of 2.
+    func diff(_ other: GoldenImage?) -> (changed: Double, mean: Double, same: Bool) {
+        guard let other, other.pixels.count == pixels.count else { return (1, 255, false) }
+        var changed = 0, sum = 0
+        for i in stride(from: 0, to: pixels.count, by: 4) {
+            var worst = 0
+            for c in 0..<4 {
+                let d = abs(Int(pixels[i + c]) - Int(other.pixels[i + c]))
+                worst = max(worst, d)
+                sum += d
+            }
+            if worst > 24 { changed += 1 }
+        }
+        let n = Double(pixels.count / 4)
+        let c = Double(changed) / n, m = Double(sum) / (n * 4)
+        return (c, m, c < 0.01 && m < 2)
+    }
+
+    private static func cgImage(_ pixels: [UInt8], width: Int) -> CGImage? {
+        let provider = CGDataProvider(data: Data(pixels) as CFData)!
+        return CGImage(width: width, height: pixels.count / 4 / width, bitsPerComponent: 8, bitsPerPixel: 32,
+                       bytesPerRow: width * 4, space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                       bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue),
+                       provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
+    }
+
+    private static func writePNG(_ image: CGImage, to url: URL) -> Bool {
+        guard let dest = CGImageDestinationCreateWithURL(url as CFURL, "public.png" as CFString, 1, nil) else { return false }
+        CGImageDestinationAddImage(dest, image, nil)
+        return CGImageDestinationFinalize(dest)
+    }
+
+    func write(to url: URL) -> Bool {
+        guard let image = Self.cgImage(pixels, width: Self.width) else { return false }
+        return Self.writePNG(image, to: url)
+    }
+
+    /// Expected | actual side by side, for a failure.
+    static func writePair(_ a: GoldenImage?, _ b: GoldenImage, to url: URL) {
+        var out = [UInt8](repeating: 0, count: width * 2 * height * 4)
+        for y in 0..<height {
+            for x in 0..<width {
+                for c in 0..<4 {
+                    out[(y * width * 2 + x) * 4 + c] = a?.pixels[(y * width + x) * 4 + c] ?? 0
+                    out[(y * width * 2 + width + x) * 4 + c] = b.pixels[(y * width + x) * 4 + c]
+                }
+            }
+        }
+        if let image = cgImage(out, width: width * 2) { _ = writePNG(image, to: url) }
+    }
+
+    /// A stored image, as straight RGBA (as written), or nil.
+    init?(contentsOf url: URL) {
+        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+              let image = CGImageSourceCreateImageAtIndex(source, 0, nil),
+              image.width == Self.width, image.height == Self.height,
+              image.bitsPerPixel == 32, image.alphaInfo == .last,
+              let data = image.dataProvider?.data as Data? else { return nil }
+        var out = [UInt8](repeating: 0, count: Self.width * Self.height * 4)
+        for y in 0..<Self.height {
+            let row = data.subdata(in: (y * image.bytesPerRow)..<(y * image.bytesPerRow + Self.width * 4))
+            out.replaceSubrange((y * Self.width * 4)..<((y + 1) * Self.width * 4), with: row)
+        }
+        pixels = out
+    }
+
+    init(pixels: [UInt8]) { self.pixels = pixels }
+}
+
+extension SelfTest {
+    /// 256x144, the clock held, step mode: what golden images are rendered at.
+    private func enterDeterministicMode() {
+        engine.clearGraph()
+        store.set("output.customWidth", number: 256)
+        store.set("output.customHeight", number: 144)
+        store.set("output.resolution", string: "custom")
+        ntw_debug_freeze_time(12.5)
+        ntw_debug_step_mode(1)
+    }
+
+    private func leaveDeterministicMode() {
+        ntw_debug_step_mode(0)
+        ntw_debug_freeze_time(-1)
+        engine.clearGraph()
+        ntw_reset_settings("Output")
+        viewModel.refresh()
+    }
+
+    private func addSource(named name: String) -> String? {
+        guard let s = engine.availableShaderSources().first(where: { $0.name == name }) else {
+            log("FAIL no source called \(name)")
+            return nil
+        }
+        return engine.addShaderVideoSource(type: s.shaderTypeRaw)
+    }
+
+    private func effectType(named name: String) -> Int? {
+        if let e = engine.availableShaders().first(where: { $0.name == name }) { return e.shaderTypeRaw }
+        log("FAIL no effect called \(name)")
+        return nil
+    }
+
+    /// An effect fed from `input` (a source or an effect), output 0 to input 0.
+    private func addEffect(type: Int, after input: String, inputIsSource: Bool) -> String? {
+        engine.undoGroup {
+            guard let id = engine.addShader(type: type) else { return nil }
+            engine.makeConnection(startId: input, endId: id, connectionType: inputIsSource ? 1 : 0, outputSlot: 0, inputSlot: 0)
+            return id
+        }
+    }
+
+    /// Golden images (docs/TESTING.md): every effect fed by Plasma and every
+    /// generated source, rendered deterministically and compared with
+    /// NOTTAWA_GOLDEN_DIR. NOTTAWA_GOLDEN=record renders each twice and
+    /// stores those that came out the same (the others go in unstable.txt);
+    /// stabilize moves entries that differ from their image into unstable.txt.
+    func golden() {
+        let env = ProcessInfo.processInfo.environment
+        let mode = env["NOTTAWA_GOLDEN"] ?? "check"
+        guard let dirPath = env["NOTTAWA_GOLDEN_DIR"], !dirPath.isEmpty else { return log("FAIL golden: NOTTAWA_GOLDEN_DIR isn't set") }
+        let dir = URL(fileURLWithPath: dirPath)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+
+        struct Entry { let name: String; let typeRaw: Int; let isSource: Bool }
+        var entries: [Entry] = engine.availableShaderSources().map { Entry(name: "src-\($0.name)-\($0.shaderTypeRaw)", typeRaw: $0.shaderTypeRaw, isSource: true) }
+        var effectTypes = Set<Int>()  // (an effect can be listed in two categories)
+        for e in engine.availableShaders() where effectTypes.insert(e.shaderTypeRaw).inserted {
+            entries.append(Entry(name: "fx-\(e.name)-\(e.shaderTypeRaw)", typeRaw: e.shaderTypeRaw, isSource: false))
+        }
+        func fileName(_ name: String) -> String {
+            String(name.map { $0.isLetter || $0.isNumber || $0 == "-" ? $0 : "_" }) + ".png"
+        }
+        var seen = Set<String>()
+        for e in entries where !seen.insert(fileName(e.name)).inserted { log("FAIL golden: two entries share \(e.name)") }
+
+        let unstableURL = dir.appendingPathComponent("unstable.txt")
+        let unstableText = (try? String(contentsOf: unstableURL, encoding: .utf8)) ?? ""
+        let knownUnstable: Set<String> = mode == "record" ? [] : Set(unstableText.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty && !$0.hasPrefix("#") })
+
+        enterDeterministicMode()
+        guard let plasma = addSource(named: "Plasma") else { return leaveDeterministicMode() }
+        var first: [String: GoldenImage] = [:]
+        var failures: [String] = [], unstable: [String] = []
+        var stored = 0, checked = 0, unstableChecked = 0
+
+        for pass in 0..<(mode == "record" ? 2 : 1) {
+            for entry in entries {
+                ntw_debug_render_frames(0, 1)  // seeds ofRandom before the node's setup draws from it
+                let id = entry.isSource ? engine.addShaderVideoSource(type: entry.typeRaw)
+                                        : addEffect(type: entry.typeRaw, after: plasma, inputIsSource: true)
+                guard let id else { failures.append("\(entry.name) (couldn't be added)"); continue }
+                ntw_debug_render_frames(8, 1)
+                let frame = GoldenImage.frame(id)
+                engine.removeConnectable(id: id)
+                guard let frame else { failures.append("\(entry.name) (no frame)"); continue }
+                let url = dir.appendingPathComponent(fileName(entry.name))
+
+                if mode == "record" {
+                    if pass == 0 { first[entry.name] = frame; continue }
+                    if frame.diff(first[entry.name]).same {
+                        if frame.write(to: url), GoldenImage(contentsOf: url)?.pixels == frame.pixels { stored += 1 }
+                        else { failures.append("\(entry.name) (didn't read back as written)") }
+                    } else {
+                        unstable.append(entry.name)
+                        try? FileManager.default.removeItem(at: url)
+                    }
+                    continue
+                }
+                let expected = GoldenImage(contentsOf: url)
+                if knownUnstable.contains(entry.name) {
+                    unstableChecked += 1
+                    // Only that it renders something (unless it didn't when recorded either).
+                    if frame.isEmpty && !(expected?.isEmpty ?? false) { failures.append("\(entry.name) (renders nothing)") }
+                    continue
+                }
+                guard let expected else { failures.append("\(entry.name) (no golden image: record them)"); continue }
+                let d = frame.diff(expected)
+                checked += 1
+                if d.same { continue }
+                if mode == "stabilize" { unstable.append(entry.name); continue }
+                failures.append(String(format: "%@ (%.1f%% of pixels differ, mean %.1f)", entry.name, d.changed * 100, d.mean))
+                GoldenImage.writePair(expected, frame, to: self.dir.appendingPathComponent("golden-" + fileName(entry.name)))
+            }
+        }
+        leaveDeterministicMode()
+
+        switch mode {
+        case "record":
+            // Kept: the block from "# Kept by hand" on (entries added by hand, with why).
+            let kept = unstableText.range(of: "# Kept by hand").map { String(unstableText[$0.lowerBound...]) } ?? ""
+            let text = "# Rendered differently twice in one launch (found when recording): only checked for rendering something.\n"
+                + unstable.map { $0 + "\n" }.joined() + kept
+            try? text.write(to: unstableURL, atomically: true, encoding: .utf8)
+            log("golden: recorded \(stored) of \(entries.count); unstable (not the same twice): \(unstable.joined(separator: ", "))")
+        case "stabilize":
+            if !unstable.isEmpty {
+                try? (unstableText + unstable.map { $0 + "\n" }.joined()).write(to: unstableURL, atomically: true, encoding: .utf8)
+            }
+            log("golden: stabilize: \(unstable.count) differed from their images and are now unstable: \(unstable.joined(separator: ", "))")
+        default:
+            log("golden: checked \(checked) against their images, \(unstableChecked) unstable for rendering something; \(failures.count) failed")
+        }
+        for f in failures { log("FAIL golden: \(f)") }
+        if failures.isEmpty { log("PASS golden: \(entries.count) entries") }
+    }
+
+    /// What users do, checked by what it renders (deterministic, as golden).
+    func workflows() {
+        // Known bugs: reported, not failing the run; KNOWN-FIXED when one passes.
+        let known: Set<String> = []
+        func check(_ ok: Bool, _ what: String) {
+            if known.contains(what) { log("\(ok ? "KNOWN-FIXED (remove from the known list)" : "KNOWN") workflows: \(what)") }
+            else { log("\(ok ? "PASS" : "FAIL") workflows: \(what)") }
+        }
+        func render() { ntw_debug_render_frames(4, 1) }
+        func nodeCount() -> Int { engine.allShaders().count + engine.allVideoSources().count }
+
+        enterDeterministicMode()
+        defer { leaveDeterministicMode() }
+        guard let plasma = addSource(named: "Plasma"),
+              let kaleidoType = effectType(named: "Kaleidoscope"), let hsbType = effectType(named: "HSB"),
+              let maskType = effectType(named: "Mask"), let colorMaskType = effectType(named: "Color Mask"),
+              let pixelateType = effectType(named: "Pixelate"),
+              let kaleido = addEffect(type: kaleidoType, after: plasma, inputIsSource: true),
+              let hsb = addEffect(type: hsbType, after: kaleido, inputIsSource: false) else {
+            return log("FAIL workflows: couldn't build the chain")
+        }
+
+        // 1. A chain renders at every stage, and an effect changes its input.
+        render()
+        let p = GoldenImage.frame(plasma), k = GoldenImage.frame(kaleido), h = GoldenImage.frame(hsb)
+        check(p.map { !$0.isEmpty } == true && k.map { !$0.isEmpty } == true && h.map { !$0.isEmpty } == true, "chain renders at every stage")
+        check(k.map { !$0.diff(p).same } == true, "Kaleidoscope changes its input")
+
+        // 2. An optional effect changes the output; off again, it's as before.
+        // (On Plasma: Kaleidoscope's output is already mirror-symmetric.)
+        if let mirror = engine.optionalShaders(for: plasma).first(where: { $0.name.contains("Mirror") }) {
+            let before = GoldenImage.frame(plasma)
+            engine.toggleOptionalShader(connectableId: plasma, index: mirror.index)
+            render()
+            let on = GoldenImage.frame(plasma)
+            engine.toggleOptionalShader(connectableId: plasma, index: mirror.index)
+            render()
+            let off = GoldenImage.frame(plasma)
+            check(on.map { !$0.isEmpty && !$0.diff(before).same } == true, "optional effect (Mirror) changes the output")
+            check(off.map { $0.diff(before).same } == true, "optional effect off restores the output")
+        } else {
+            check(false, "optional effect: no Mirror on the node")
+        }
+
+        // 3. A two-input effect reads its second input. The catalog's Mask is
+        // MaskEngine: by default it keys input A by its own brightness and
+        // never reads B, so Matched Source is set to Input B. Without B
+        // connected B is A, so the output is A where it's bright enough;
+        // with B (Plasma through Color Mask, keyed to transparency) it changes.
+        if let mask = addEffect(type: maskType, after: plasma, inputIsSource: true) {
+            if let matched = engine.parameters(for: mask).first(where: { $0.name == "Matched Source" }) {
+                engine.setParameterInt(paramId: matched.id, value: 1)
+            }
+            render()
+            let alone = GoldenImage.frame(mask)
+            check(alone.map { !$0.isEmpty } == true, "Mask renders with one input")
+            if let colorMask = addEffect(type: colorMaskType, after: plasma, inputIsSource: true) {
+                engine.makeConnection(startId: colorMask, endId: mask, connectionType: 0, outputSlot: 0, inputSlot: 1)
+                render()
+                check(GoldenImage.frame(mask).map { !$0.diff(alone).same } == true, "Mask (Matched Source: Input B) reads its second input")
+                engine.removeConnectable(id: colorMask)
+            }
+            engine.removeConnectable(id: mask)
+        }
+
+        // 4. A workspace saved and reopened renders the same.
+        render()
+        let hsbFrame = GoldenImage.frame(hsb)
+        let nodes = nodeCount()
+        let wsPath = dir.appendingPathComponent("workflows-ws.json").path
+        engine.saveWorkspaceToPath(path: wsPath, name: "workflows")
+        engine.clearGraph()
+        render()
+        let loaded = engine.loadWorkspace(path: wsPath)
+        viewModel.refresh()
+        render()
+        check(loaded && nodeCount() == nodes, "workspace reopens with its nodes (\(nodes) -> \(nodeCount()))")
+        check(GoldenImage.frame(hsb).map { $0.diff(hsbFrame).same } == true, "workspace reopens rendering the same")
+
+        // 5. A resolution change reaches the frames.
+        store.set("output.resolution", string: "1080p")
+        render()
+        var w: Int32 = 0, hh: Int32 = 0
+        ntw_debug_frame_rgba(hsb, &w, &hh, nil, 0)
+        check(w == 1920 && hh == 1080 && GoldenImage.frame(hsb).map { !$0.isEmpty } == true, "1080p renders at 1920x1080 (got \(w)x\(hh))")
+        store.set("output.resolution", string: "custom")
+        render()
+
+        // 6. Undo removes an effect added after a node (dropped on it, the
+        // app's add-and-connect path); redo brings it back, rendering.
+        viewModel.refresh()
+        let before = nodeCount()
+        viewModel.addNodeFromDrop(payload: "shader:\(pixelateType)", at: .zero, targetNodeId: hsb)
+        render()
+        let added = nodeCount()
+        engine.undo()
+        render()
+        let afterUndo = nodeCount()
+        engine.redo()
+        render()
+        let back = engine.allShaders().first { $0.name == "Pixelate" }?.id
+        check(added == before + 1 && afterUndo == before && back.flatMap { GoldenImage.frame($0) }.map { !$0.isEmpty } == true,
+              "one undo removes a dropped-on effect, redo restores it rendering (\(before) -> \(added) -> \(afterUndo) nodes)")
     }
 }
 

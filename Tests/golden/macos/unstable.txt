@@ -1,0 +1,8 @@
+# Rendered differently twice in one launch (found when recording): only checked for rendering something.
+src-Waveform-18
+src-Full House-32
+src-Mist-42
+src-Disco Audio-54
+src-Aerogel-60
+src-Companions-67
+fx-Snowfall-62

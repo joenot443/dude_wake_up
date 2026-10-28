@@ -103,6 +103,13 @@ std::string ConfigService::appSupportFilePath() {
   // Both the legacy ImGui app and the SwiftUI rebuild ship under bundle ID
   // com.joecrozier.nottawa as of v2.0, so they share the same sandbox container.
   std::string appSupportPath = ofFilePath::getUserHomeDir() + "/Library/Containers/com.joecrozier.nottawa/Data";
+  // NOTTAWA_APPDATA, as on Windows: a throwaway session for scripted test
+  // runs (somewhere the sandbox can write, i.e. inside the container).
+  if (const char* overridePath = std::getenv("NOTTAWA_APPDATA")) {
+    appSupportPath = overridePath;
+    std::error_code ec;
+    std::filesystem::create_directories(std::filesystem::u8path(appSupportPath + "/nottawa"), ec);
+  }
 #ifndef NOTTAWA_ENGINE_ONLY
   if (!ofDirectory::doesDirectoryExist(appSupportPath, false)) {
     ofDirectory::createDirectory(appSupportPath, false, true);

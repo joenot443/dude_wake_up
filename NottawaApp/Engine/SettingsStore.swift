@@ -217,7 +217,9 @@ final class SettingsStore {
 
     /// Settings, the session, workspaces and the library, inside the sandbox container.
     static var dataFolder: URL {
-        URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("nottawa", isDirectory: true)
+        // (NOTTAWA_APPDATA: the engine's throwaway data for scripted test runs.)
+        let root = ProcessInfo.processInfo.environment["NOTTAWA_APPDATA"] ?? NSHomeDirectory()
+        return URL(fileURLWithPath: root).appendingPathComponent("nottawa", isDirectory: true)
     }
 
     /// The Mac app keeps no log file: crash and hang reports are macOS's.

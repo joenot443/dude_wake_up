@@ -976,15 +976,19 @@ final class NodeEditorViewModel {
                    let targetNode = nodes.first(where: { $0.id == targetId }) {
                     // Dropped onto an existing node — chain the new effect after it
                     let chainPos = CGPoint(x: targetNode.position.x + 300, y: targetNode.position.y)
-                    guard let newId = addShader(type: typeInt, at: chainPos) else { return }
-                    let connectionType: Int = targetNode.isSource ? 1 : 0
-                    engine.makeConnection(
-                        startId: targetId,
-                        endId: newId,
-                        connectionType: connectionType,
-                        outputSlot: 0,
-                        inputSlot: 0
-                    )
+                    // One undo removes the effect and its connection.
+                    let added: String? = engine.undoGroup {
+                        guard let newId = addShader(type: typeInt, at: chainPos) else { return nil }
+                        engine.makeConnection(
+                            startId: targetId,
+                            endId: newId,
+                            connectionType: targetNode.isSource ? 1 : 0,
+                            outputSlot: 0,
+                            inputSlot: 0
+                        )
+                        return newId
+                    }
+                    guard let newId = added else { return }
                     advanceOutputWindowIfApplicable(fromNodeId: targetId, toNodeId: newId, outputSlot: 0)
                     refresh()
                 } else if let cableId = targetCableId,
@@ -1003,6 +1007,10 @@ final class NodeEditorViewModel {
     /// Insert a new shader into an existing connection, splicing it between
     /// the two connected nodes.
     private func insertShaderIntoCable(shaderType: Int, connection: ConnectionModel, at canvasPos: CGPoint) {
+        // One undo step for the whole splice.
+        ntw_begin_undo_group()
+        defer { ntw_end_undo_group() }
+
         // 1. Create the new shader at the drop position
         guard let newId = addShader(type: shaderType, at: canvasPos) else { return }
 

@@ -1,8 +1,28 @@
 #!/bin/sh
-# Runs the Windows test suite (Tests/run_tests.ps1) before a push: a failing
-# test, a crash or a UI hang stops the push. `git push --no-verify` skips it.
-# Installed by Tests/hooks/install.ps1 (a copy in .git/hooks).
+# Runs the test suite before a push: a failing test, a crash or a UI hang
+# stops the push. `git push --no-verify` skips it.
+#   Windows: Tests/run_tests.ps1. Installed by Tests/hooks/install.ps1.
+#   macOS: builds NottawaApp, then scripts/mac_selftest.sh without the
+#   scenarios that play audio aloud or need media files. Installed by
+#   Tests/hooks/install.sh.
+# (Both copy this file into .git/hooks.)
 repo=$(git rev-parse --show-toplevel)
+if [ "$(uname)" = "Darwin" ]; then
+  cd "$repo" || exit 1
+  log=$(mktemp -t nottawa-prepush-build)
+  echo "pre-push: building NottawaApp (log: $log; --no-verify skips the tests)..." >&2
+  if ! xcodebuild -project dude_wake_up.xcodeproj -scheme NottawaApp -configuration Debug build >"$log" 2>&1; then
+    grep -E "error:" "$log" | sort -u | head -20 >&2
+    echo "pre-push: the build failed; not pushing." >&2
+    exit 1
+  fi
+  echo "pre-push: running the macOS self-test..." >&2
+  if ! scripts/mac_selftest.sh tap,tapauto,persist,settings,settingspersist,settingsui,outputwindows,outputwindowslaunch,diagnostics,diagnosticslaunch,texturelock,golden,workflows >&2; then
+    echo "pre-push: tests failed; not pushing." >&2
+    exit 1
+  fi
+  exit 0
+fi
 if command -v wslpath >/dev/null 2>&1; then
   winrepo=$(wslpath -w "$repo")
 elif command -v cygpath >/dev/null 2>&1; then

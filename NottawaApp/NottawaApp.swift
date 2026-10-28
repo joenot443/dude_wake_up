@@ -250,7 +250,7 @@ struct NottawaApp: App {
                     viewModel.refreshOpenWindows()
                 }
             }
-            SelfTest.startIfRequested()
+            SelfTest.startIfRequested(viewModel: viewModel)
 
             // GLFW creates a hidden window for the GL context that registers
             // raw accessibility elements, preventing XCUITest from seeing the

@@ -149,6 +149,9 @@ struct FeedbackAuxStrandView: View {
         let anchor = chainSnapshot.last ?? parentNode
         let newPos = CGPoint(x: anchor.position.x + 320, y: anchor.position.y)
 
+        // One undo removes the filter and its connection.
+        ntw_begin_undo_group()
+        defer { ntw_end_undo_group() }
         guard let newId = viewModel.addShader(type: shaderType, at: newPos) else { return }
 
         let startId: String

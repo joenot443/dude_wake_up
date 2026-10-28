@@ -21,6 +21,26 @@ failure, a crash or a UI hang (> 2 s). Logs: `%TEMP%\nottawa-tests`.
 clone: `Tests\hooks\install.ps1`). A failure stops the push.
 `git push --no-verify` skips it; don't, unless the failure is understood.
 
+### macOS
+
+```
+scripts/mac_selftest.sh                                  # everything (~25 min, plays audio)
+scripts/mac_selftest.sh golden,workflows                 # rendered pixels only (~3 min)
+NOTTAWA_GOLDEN=record scripts/mac_selftest.sh golden     # record the golden images again
+NOTTAWA_GOLDEN=stabilize scripts/mac_selftest.sh golden  # move entries that differ into unstable.txt
+```
+
+Needs a built `bin/NottawaApp.app` (scheme NottawaApp) and no NottawaApp
+running. golden and workflows run with a throwaway session
+(`NOTTAWA_APPDATA`, inside the sandbox container), so your graph is never
+touched; the other scenarios use your session and put back what they change.
+Results: `~/Library/Containers/com.joecrozier.nottawa/Data/tmp/selftest`
+(report.txt; `golden-<name>.png`, expected | actual, for a failure).
+
+**Before every push**: the same `pre-push` hook builds NottawaApp and runs
+the self-test without the scenarios that play audio aloud or need media
+files (install once per clone: `Tests/hooks/install.sh`).
+
 ## What's in it
 
 All in `app/nottawa_app/StressTest.cpp`, driven through the engine bridge:
@@ -80,4 +100,5 @@ it can come off the list.
   add their image).
 - The macOS app has the same tests in its self-test (NottawaApp
   SelfTest.swift), with its own images in `Tests/golden/macos` (GPUs and
-  drivers differ, so images aren't shared between platforms).
+  drivers differ, and so does ofRandom: the same seed gives Plasma other
+  colours, so images aren't shared between platforms).

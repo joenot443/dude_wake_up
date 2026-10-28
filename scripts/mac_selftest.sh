@@ -5,7 +5,13 @@
 #   scripts/mac_selftest.sh [scenarios]
 #     default: files,system,tap,tapauto,persist,settings,settingspersist,settingsui,
 #              audiosettings,audiolaunch,cachesettings,outputwindows,outputwindowslaunch,
-#              diagnostics,diagnosticslaunch,texturelock
+#              diagnostics,diagnosticslaunch,texturelock,golden,workflows
+#
+# "golden" and "workflows" (docs/TESTING.md) launch on their own with a
+# throwaway session (NOTTAWA_APPDATA), so your graph is never touched.
+# Golden images: Tests/golden/macos. NOTTAWA_GOLDEN=record renders them
+# again (then look at the changes in git); =stabilize moves entries that
+# differ from their image into unstable.txt.
 #
 # "persist" and "settingspersist" launch twice: change a parameter (or some
 # settings) and quit at once, then check on relaunch. settingsui leaves
@@ -19,10 +25,13 @@ set -u
 cd "$(dirname "$0")/.."
 
 APP=bin/NottawaApp.app/Contents/MacOS/NottawaApp
+CONTAINER=~/Library/Containers/com.joecrozier.nottawa/Data
+GOLDEN=$CONTAINER/tmp/selftest-golden  # (the sandboxed app can't reach the repo)
+APPDATA=
 per=${NOTTAWA_SELFTEST_SECONDS:-40}
 lock=${NOTTAWA_SELFTEST_LOCK_SECONDS:-15}
 OUT=~/Library/Containers/com.joecrozier.nottawa/Data/tmp/selftest
-SCENARIOS=${1:-files,system,tap,tapauto,persist,settings,settingspersist,settingsui,audiosettings,audiolaunch,cachesettings,outputwindows,outputwindowslaunch,diagnostics,diagnosticslaunch,texturelock}
+SCENARIOS=${1:-files,system,tap,tapauto,persist,settings,settingspersist,settingsui,audiosettings,audiolaunch,cachesettings,outputwindows,outputwindowslaunch,diagnostics,diagnosticslaunch,texturelock,golden,workflows}
 
 if pgrep -xq NottawaApp; then echo "NottawaApp is running; quit it first" >&2; exit 2; fi
 [ -x "$APP" ] || { echo "no $APP; build the NottawaApp scheme" >&2; exit 2; }
@@ -37,6 +46,8 @@ launch() {
     --env NOTTAWA_SELFTEST_CALIB="${NOTTAWA_SELFTEST_CALIB:-}" \
     --env NOTTAWA_SELFTEST_OPENFOLDERS="${NOTTAWA_SELFTEST_OPENFOLDERS:-}" \
     --env NOTTAWA_SELFTEST_LOCK_SECONDS="$lock" \
+    ${APPDATA:+--env NOTTAWA_APPDATA="$APPDATA"} \
+    --env NOTTAWA_GOLDEN="${NOTTAWA_GOLDEN:-}" --env NOTTAWA_GOLDEN_DIR="$GOLDEN" \
     bin/NottawaApp.app --args -ApplePersistenceIgnoreState YES &
   local opener=$! waited=0
   while kill -0 $opener 2>/dev/null; do
@@ -58,7 +69,7 @@ if [ ! -f "$CLIP" ] && echo "$SCENARIOS" | tr ',' '\n' | grep -qx cachesettings;
   mkdir -p "$(dirname "$CLIP")"
   ffmpeg -v quiet -f lavfi -i testsrc2=size=1280x720:rate=30 -t 10 -c:v libx264 -pix_fmt yuv420p "$CLIP"
 fi
-in_app=$(echo "$SCENARIOS" | tr ',' '\n' | grep -vE '^(persist|settingspersist|audiolaunch|outputwindowslaunch|diagnosticslaunch|texturelock)$' | paste -sd, -)
+in_app=$(echo "$SCENARIOS" | tr ',' '\n' | grep -vE '^(persist|settingspersist|audiolaunch|outputwindowslaunch|diagnosticslaunch|texturelock|golden|workflows)$' | paste -sd, -)
 if [ -n "$in_app" ]; then launch "$in_app" $((per * 20 + 120)); fi
 if echo "$SCENARIOS" | tr ',' '\n' | grep -qx persist; then
   launch persist-set 60
@@ -86,6 +97,23 @@ if echo "$SCENARIOS" | tr ',' '\n' | grep -qx texturelock; then
   [ -x "$hog" ] && "$hog" $((lock + 30)) &
   launch texturelock $((lock + 90))
   pkill -f "$hog" 2>/dev/null; rm -rf "$(dirname "$hog")"
+fi
+
+# Rendered pixels, in a throwaway session.
+pixels=$(echo "$SCENARIOS" | tr ',' '\n' | grep -xE 'golden|workflows' | paste -sd, -)
+if [ -n "$pixels" ]; then
+  rm -rf "$GOLDEN" "$CONTAINER/tmp/selftest-appdata"
+  mkdir -p "$GOLDEN" Tests/golden/macos
+  cp Tests/golden/macos/* "$GOLDEN"/ 2>/dev/null
+  APPDATA=$CONTAINER/tmp/selftest-appdata
+  launch "$pixels" 900
+  APPDATA=
+  if [ -n "${NOTTAWA_GOLDEN:-}" ]; then
+    rm -f Tests/golden/macos/*.png
+    cp "$GOLDEN"/*.png "$GOLDEN"/unstable.txt Tests/golden/macos/
+    echo "golden images ($NOTTAWA_GOLDEN): Tests/golden/macos; check the changes in git"
+  fi
+  rm -rf "$CONTAINER/tmp/selftest-appdata"
 fi
 
 echo "== report"; cat "$OUT/all.txt"

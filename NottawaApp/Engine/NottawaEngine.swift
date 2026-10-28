@@ -51,6 +51,14 @@ final class NottawaEngine {
 
     // MARK: - Shader Mutations
 
+    /// Runs `body` as one undo step (e.g. adding an effect and connecting it).
+    @discardableResult
+    func undoGroup<T>(_ body: () -> T) -> T {
+        ntw_begin_undo_group()
+        defer { ntw_end_undo_group() }
+        return body()
+    }
+
     @discardableResult
     func addShader(type: Int) -> String? {
         guard let cStr = ntw_add_shader(Int32(type)) else { return nil }
