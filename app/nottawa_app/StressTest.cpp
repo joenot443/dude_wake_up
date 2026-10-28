@@ -1,4 +1,6 @@
 #define _USE_MATH_DEFINES
+#include <QMouseEvent>
+#include "nodes/NodeItems.h"
 #include "Diagnostics.h"
 #include <QScreen>
 #include <memory>
@@ -142,6 +144,8 @@ void StressTest::enqueueScenario(const QString& name) {
     else if (name == "savetiming") saveTiming();
     else if (name == "enginestall") engineStall();
     else if (name == "canvasimage") canvasImage();
+    else if (name == "blenddrag") blendDrag();
+    else if (name == "renderall") renderAll();
     else if (name == "outputwindowslaunch") outputWindowsLaunch();
     else add([this, name] { window_->log("[stress] unknown scenario " + name); });
     // Settle, clear, settle, measure.
@@ -587,6 +591,109 @@ void StressTest::saveTiming() {
             ntw_save_default_config();
             window_->log(QString("[stress] savetiming: %1 nodes, save %2 ms").arg(EngineBridge::instance()->nodes().size()).arg(t.elapsed()));
         }, 1000);
+}
+
+// Blending two nodes: through the engine, then by dragging one node's
+// output port onto the other's on the canvas, as a user does (mouse events
+// sent to the viewport). "[stress] blenddrag: ..."
+void StressTest::blendDrag() {
+    auto state = std::make_shared<QStringList>();  // the two sources
+    add([this, state] {
+        auto* eng = EngineBridge::instance();
+        eng->clearGraph();
+        *state = {randomSource(), randomSource()};
+        eng->setNodePosition((*state)[0], QPointF(0, 0));
+        eng->setNodePosition((*state)[1], QPointF(0, 420));
+        window_->editor_->syncFromEngine();
+        window_->editor_->zoomToFit();
+    }, 300);
+    add([this, state] {
+        auto* eng = EngineBridge::instance();
+        const int before = int(eng->nodes().size());
+        const QString blend = eng->blendBetween((*state)[0], (*state)[1]);
+        window_->log(QString("[stress] blenddrag: engine blend '%1', nodes %2 -> %3").arg(blend).arg(before).arg(eng->nodes().size()));
+        if (blend.isEmpty()) window_->log("[stress] FAIL blenddrag: the engine didn't create a blend");
+        else eng->removeNode(blend);
+        window_->editor_->syncFromEngine();
+    }, 500);
+    add([this, state] {
+        auto* view = window_->editor_;
+        PortItem* ports[2] = {nullptr, nullptr};
+        for (QGraphicsItem* item : view->scene()->items())
+            if (auto* port = dynamic_cast<PortItem*>(item); port && port->kind() == PortItem::Output && port->slot() == 0)
+                for (int i = 0; i < 2; ++i) if (port->nodeId() == (*state)[i]) ports[i] = port;
+        if (!ports[0] || !ports[1]) { window_->log("[stress] FAIL blenddrag: output ports not found on the canvas"); return; }
+        const int before = int(EngineBridge::instance()->nodes().size());
+        QWidget* vp = view->viewport();
+        const QPointF a = view->mapFromScene(ports[0]->anchor()), b = view->mapFromScene(ports[1]->anchor());
+        auto send = [vp](QEvent::Type type, QPointF pos, Qt::MouseButton button, Qt::MouseButtons buttons) {
+            QMouseEvent ev(type, pos, vp->mapToGlobal(pos), button, buttons, Qt::NoModifier);
+            QApplication::sendEvent(vp, &ev);
+        };
+        send(QEvent::MouseButtonPress, a, Qt::LeftButton, Qt::LeftButton);
+        for (int i = 1; i <= 10; ++i) send(QEvent::MouseMove, a + (b - a) * (i / 10.0), Qt::NoButton, Qt::LeftButton);
+        send(QEvent::MouseButtonRelease, b, Qt::LeftButton, Qt::NoButton);
+        const int after = int(EngineBridge::instance()->nodes().size());
+        window_->log(QString("[stress] blenddrag: drag from (%1,%2) to (%3,%4): nodes %5 -> %6")
+                         .arg(a.x()).arg(a.y()).arg(b.x()).arg(b.y()).arg(before).arg(after));
+        if (after != before + 1) window_->log("[stress] FAIL blenddrag: dragging output onto output didn't blend");
+        for (const GraphEdge& e : EngineBridge::instance()->edges())
+            window_->log(QString("[stress] blenddrag: edge %1 [%2] -> %3 [%4] type %5")
+                             .arg(e.startId.left(8)).arg(e.outputSlot).arg(e.endId.left(8)).arg(e.inputSlot).arg(e.connectionType));
+        for (const GraphNode& n : EngineBridge::instance()->nodes())
+            window_->log(QString("[stress] blenddrag: node %1 %2").arg(n.id.left(8), n.name));
+        // Its own frame in the engine (not the preview): black means the blend itself is broken.
+        QTimer::singleShot(1000, window_, [this] {
+            for (const GraphNode& n : EngineBridge::instance()->nodes()) {
+                QStringList px;
+                for (float t : {0.25f, 0.5f, 0.75f})
+                    px << QString::number(ntw_debug_frame_pixel(n.id.toUtf8().constData(), t, t), 16);
+                window_->log(QString("[stress] blenddrag: %1 frame pixels %2").arg(n.name, px.join(" ")));
+                if (n.name == "Blend" && px.join("") == "000")
+                    window_->log("[stress] FAIL blenddrag: the Blend renders nothing (its frame is empty)");
+            }
+        });
+        window_->editor_->zoomToFit();
+        window_->raise();
+        window_->activateWindow();
+    }, 500);
+    add([this] {
+        const QRect r = window_->frameGeometry();
+        if (QScreen* screen = window_->screen())
+            screen->grabWindow(0, r.x() - screen->geometry().x(), r.y() - screen->geometry().y(), r.width(), r.height())
+                .save(QDir(scratch_).filePath("blend.png"));
+    }, 2000);
+}
+
+// Every effect, fed by Plasma, renders something: its own frame (read in
+// the engine) isn't empty. Lists the ones that are ("[stress] renderall:").
+void StressTest::renderAll() {
+    auto plasma = std::make_shared<QString>();
+    auto current = std::make_shared<QString>();
+    auto empty = std::make_shared<QStringList>();
+    add([this, plasma] {
+        auto* eng = EngineBridge::instance();
+        eng->clearGraph();
+        for (const auto& s : eng->sources()) if (s.name == "Plasma") *plasma = window_->editor_->addFromCatalog(s.typeRaw, true);
+    }, 300);
+    const auto effects = EngineBridge::instance()->effects();
+    for (const auto& e : effects) {
+        add([this, e, plasma, current] {
+            if (!current->isEmpty()) EngineBridge::instance()->removeNode(*current);
+            *current = window_->editor_->addFromCatalog(e.typeRaw, false, *plasma);
+        }, 50);
+        add([this, e, current, empty] {
+            int nonEmpty = 0;
+            for (float t : {0.2f, 0.4f, 0.5f, 0.6f, 0.8f})
+                for (float u : {0.3f, 0.5f, 0.7f})
+                    if (ntw_debug_frame_pixel(current->toUtf8().constData(), t, u) != 0) ++nonEmpty;
+            if (nonEmpty == 0) *empty << e.name;
+        }, 400);
+    }
+    add([this, empty, effects] {
+        window_->log(QString("[stress] renderall: %1 of %2 effects rendered nothing: %3")
+                         .arg(empty->size()).arg(effects.size()).arg(empty->join(", ")));
+    });
 }
 
 // An image of the main window with a few nodes showing their previews

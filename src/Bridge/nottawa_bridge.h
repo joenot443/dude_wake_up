@@ -190,6 +190,9 @@ long long ntw_engine_frame_running_ms(void);
 unsigned long ntw_engine_native_thread_id(void);
 // Testing: makes the engine's next frame take `ms` (queued; returns at once).
 void ntw_debug_stall_engine(int ms);
+// Testing: a node's own frame (its FBO, read on the engine thread) at
+// (x, y) in 0..1, as 0xAARRGGBB; 0 if it has none.
+unsigned int ntw_debug_frame_pixel(const char* connectableId, float x, float y);
 
 // ---------------------------------------------------------------------------
 // MARK: - Shader Mutations (via ActionService)

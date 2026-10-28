@@ -200,7 +200,13 @@ struct BlendShader: Shader {
 
     // Guard: bail if FBOs aren't allocated yet (startup race)
     if (!frame || !canvas || !frame->isAllocated() || !canvas->isAllocated()) return;
-    if (!optionalFrame || !optionalFrame->isAllocated()) return;
+    // optionalFrame is the ping-pong buffer here. Nodes allocate it lazily
+    // (only optional effects used to need it), so a Blend without any
+    // allocates its own; bailing out instead left every Blend black.
+    if (!optionalFrame) return;
+    if (!optionalFrame->isAllocated() || optionalFrame->getWidth() != frame->getWidth() ||
+        optionalFrame->getHeight() != frame->getHeight())
+      optionalFrame->allocate(frame->getWidth(), frame->getHeight(), GL_RGBA);
     // Validate GL textures are actually valid (isAllocated can be true with stale textures)
     if (frame->getTexture().getTextureData().textureID == 0) return;
     if (canvas->getTexture().getTextureData().textureID == 0) return;

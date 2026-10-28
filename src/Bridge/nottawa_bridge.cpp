@@ -2031,6 +2031,24 @@ void ntw_save_default_config(void) {
   });
 }
 
+unsigned int ntw_debug_frame_pixel(const char* connectableId, float x, float y) {
+  if (!connectableId) return 0;
+  const std::string id(connectableId);
+  return runOnEngineThread([id, x, y]() -> unsigned int {
+    std::shared_ptr<Connectable> c;
+    if (auto s = VideoSourceService::getService()->videoSourceForId(id)) c = std::dynamic_pointer_cast<Connectable>(s);
+    else if (auto sh = ShaderChainerService::getService()->shaderForId(id)) c = std::dynamic_pointer_cast<Connectable>(sh);
+    if (!c) return 0;
+    auto fbo = c->frame();
+    if (!fbo || !fbo->isAllocated()) return 0;
+    unsigned char px[4] = {0, 0, 0, 0};
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo->getId());
+    glReadPixels(int(x * fbo->getWidth()), int(y * fbo->getHeight()), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, px);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    return (unsigned(px[3]) << 24) | (unsigned(px[0]) << 16) | (unsigned(px[1]) << 8) | unsigned(px[2]);
+  });
+}
+
 NTWBeatProbe ntw_get_beat_probe(const char* videoSourceId) {
   const std::string vid(videoSourceId ? videoSourceId : "");
   return runOnEngineThread([vid]() {
