@@ -1,0 +1,9 @@
+{
+  "name": "nottawa-video",
+  "private": true,
+  "type": "module",
+  "description": "The Nottawa promo videos: footage from the app, composed frame by frame in a headless page",
+  "devDependencies": {
+    "playwright": "1.60.0"
+  }
+}

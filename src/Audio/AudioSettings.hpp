@@ -14,6 +14,7 @@
 #include <iostream>
 #include <deque>
 #include "Gist.h"
+#include "AudioClock.hpp"
 #include "Math.hpp"
 #include "Oscillator.hpp"
 #include "Parameter.hpp"
@@ -162,7 +163,7 @@ struct AudioAnalysis {
   // seconds; `currentReleaseFactor` is the per-frame multiplier derived from
   // it each tick via dt. All smoothing modes consume the factor, not the
   // half-life directly.
-  std::chrono::steady_clock::time_point lastAnalyzeTime = std::chrono::steady_clock::now();
+  std::chrono::steady_clock::time_point lastAnalyzeTime = AudioClock::now();
   float currentReleaseFactor = 1.0f;
 
   AudioAnalysisParameter rmsAnalysisParam;  
@@ -222,7 +223,7 @@ struct AudioAnalysis {
         parameters({beatPulse, rms, highs, mids, lows}),
         analysisParameters({&rmsAnalysisParam, &lowsAnalysisParam, &midsAnalysisParam, &highsAnalysisParam}) {
     // Initialize bpmStartTime to current time
-    auto currentTime = std::chrono::steady_clock::now();
+    auto currentTime = AudioClock::now();
     bpmStartTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
 
     // Sync bpmMode with bpmModeParam
@@ -301,7 +302,7 @@ struct AudioAnalysis {
   void analyzeFrame(Gist<float> *gist) {
     // Convert the half-life parameter into a per-frame multiplier using the
     // actual time since the last call. half=0 → instant decay, larger → slower.
-    auto now = std::chrono::steady_clock::now();
+    auto now = AudioClock::now();
     float dt = std::chrono::duration<float>(now - lastAnalyzeTime).count();
     lastAnalyzeTime = now;
     float halfLife = frequencyRelease->value;
@@ -373,7 +374,7 @@ struct AudioAnalysis {
   }
 
   float bpmPct() {
-    auto currentTime = std::chrono::steady_clock::now();
+    auto currentTime = AudioClock::now();
     auto currentTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
 
     auto elapsedTime = (currentTimeMs - bpmStartTime) / 1000.0;
@@ -410,7 +411,7 @@ struct AudioAnalysis {
     float newBeatDuration = 60.0f / newBpm;
 
     // Adjust bpmStartTime so that bpmPct() returns the same phase
-    auto currentTime = std::chrono::steady_clock::now();
+    auto currentTime = AudioClock::now();
     auto currentTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
 
     // New start time = current time - (phase * beat duration)

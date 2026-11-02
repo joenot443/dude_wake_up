@@ -36,6 +36,7 @@
 #define BeatTracker_hpp
 
 #include "kiss_fft.h"
+#include "AudioClock.hpp"
 
 #include <algorithm>
 #include <atomic>
@@ -669,7 +670,7 @@ private:
   }
 
   void publish() {
-    lastWall_ = std::chrono::steady_clock::now();
+    lastWall_ = AudioClock::now();
     std::lock_guard<std::mutex> lock(snapshotMutex_);
     snapshot_.bpm = tempo_;
     snapshot_.confidence = confidence_;
@@ -720,7 +721,7 @@ private:
   PendingHint pendingHint_;
   double hintBpm_ = 0;     // a tapped tempo being held to (0: none)
   double hintOffset_ = 0;  // phase corrections since the tapped beat (beats)
-  std::chrono::steady_clock::time_point lastWall_ = std::chrono::steady_clock::now();
+  std::chrono::steady_clock::time_point lastWall_ = AudioClock::now();
   mutable std::mutex snapshotMutex_;
   Snapshot snapshot_;
 };

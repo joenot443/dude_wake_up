@@ -50,7 +50,7 @@ void AudioSource::audioIn(ofSoundBuffer &soundBuffer) {
   // Tempo and beats: every buffer, silence included (the audio is the
   // tracker's clock), in its own rate and channel layout. After a gap (the
   // source stopped and started again) the old beat is no longer valid.
-  const auto now = std::chrono::steady_clock::now();
+  const auto now = AudioClock::now();
   if (now - lastAudioTime > std::chrono::seconds(2)) beatTracker.reset();
   lastAudioTime = now;
   beatTracker.process(buffer.data(), static_cast<int>(frames), static_cast<int>(channels),

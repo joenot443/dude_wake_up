@@ -197,6 +197,13 @@ void ntw_debug_stall_engine(int ms);
 void ntw_debug_freeze_time(double seconds);
 void ntw_debug_step_mode(int on);
 void ntw_debug_render_frames(int frames, unsigned int seed);
+// Testing, offline renders (videos): the audio clock that analysis and beat
+// tracking read, held at `seconds` (< 0: the real clock again); and `frames`
+// mono samples at `sampleRate` given to the selected audio source as playback
+// delivers them, in 512-sample buffers, the held clock moving on by each one
+// (its own file playback is paused).
+void ntw_debug_audio_clock(double seconds);
+void ntw_debug_feed_audio(const float* mono, int frames, int sampleRate);
 // Testing: a node's frame read back whole, as RGBA8 rows bottom-up (GL
 // order), into `out` (width * height * 4 bytes). Returns 0 if it has none.
 int ntw_debug_frame_rgba(const char* connectableId, int* outWidth, int* outHeight, unsigned char* out, int capacity);

@@ -154,7 +154,7 @@ void AudioSourceService::update() {
     // The pulse moved by the input's offset (+: earlier, for audio heard after it's analysed).
     const int kind = static_cast<int>(selectedAudioSource->type());
     const double offsetMs = kind >= 0 && kind < 3 ? beatOffsetMs[kind] : 0.0;
-    const auto at = std::chrono::steady_clock::now() + std::chrono::microseconds(static_cast<int64_t>(offsetMs * 1000.0));
+    const auto at = AudioClock::now() + std::chrono::microseconds(static_cast<int64_t>(offsetMs * 1000.0));
     double bpm = beat.bpm, phase = BeatTracker::phaseAt(beat, at);
     uint64_t beats = beat.beats;
     // Shown within the tempo range, by octaves (every other beat, or half beats).

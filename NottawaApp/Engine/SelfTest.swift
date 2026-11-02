@@ -36,6 +36,7 @@
 //                   (NOTTAWA_GOLDEN=record|stabilize); see docs/TESTING.md
 //    workflows      a chain, an optional effect, Mask, a workspace round trip,
 //                   1080p, undo/redo, checked by rendered pixels
+//    video          footage for scripts/video (NOTTAWA_VIDEO_PLAN, NOTTAWA_VIDEO_OUT)
 //    cachesettings  a video clip (NOTTAWA_SELFTEST_CLIP, ~1.1 GB to cache)
 //                   loaded under each Cache Video Clips / Cache Memory choice
 //
@@ -112,6 +113,7 @@ final class SelfTest {
             case "texturelock": await textureLock()
             case "golden": golden()
             case "workflows": workflows()
+            case "video": video()
             default: log("FAIL unknown scenario \(scenario)")
             }
         }
@@ -1416,6 +1418,169 @@ extension SelfTest {
         let back = engine.allShaders().first { $0.name == "Pixelate" }?.id
         check(added == before + 1 && afterUndo == before && back.flatMap { GoldenImage.frame($0) }.map { !$0.isEmpty } == true,
               "one undo removes a dropped-on effect, redo restores it rendering (\(before) -> \(added) -> \(afterUndo) nodes)")
+    }
+}
+
+// MARK: - Video capture
+
+extension SelfTest {
+    struct VideoShot: Decodable {
+        struct Setting: Decodable { let node: Int; let name: String; let value: Float?; let driver: String?; let scale: Float?; let shift: Float? }
+        let name: String
+        let chain: [String]       // a source (name or "#<type>"), then effects, each feeding the next
+        let start: Double         // track seconds of the first frame
+        let seconds: Double
+        var warmup: Double?       // rendered, not kept, before the first frame (default 1)
+        var settings: [Setting]?  // values and audio drivers, by node index and parameter name
+        var width: Int?
+        var height: Int?
+        var keep: [Int]?          // nodes whose frames are kept (default: the last)
+    }
+    struct VideoPlan: Decodable {
+        let audio: String         // the track as raw mono float32
+        let sampleRate: Int
+        let fps: Int
+        let width: Int
+        let height: Int
+        let shots: [VideoShot]
+    }
+
+    /// Footage for scripts/video: each shot's chain rendered frame by frame
+    /// with the track fed to the File source (Auto tempo) on a held clock,
+    /// so it reacts as if the track played; NOTTAWA_VIDEO_PLAN is the plan
+    /// (JSON), NOTTAWA_VIDEO_OUT gets each shot's frames as <shot>/00000.jpg...
+    /// plus shot.json.
+    func video() {
+        let env = ProcessInfo.processInfo.environment
+        guard let planPath = env["NOTTAWA_VIDEO_PLAN"], let outPath = env["NOTTAWA_VIDEO_OUT"],
+              let planData = FileManager.default.contents(atPath: planPath) else { return log("FAIL video: NOTTAWA_VIDEO_PLAN / NOTTAWA_VIDEO_OUT") }
+        let plan: VideoPlan
+        do { plan = try JSONDecoder().decode(VideoPlan.self, from: planData) } catch { return log("FAIL video: plan: \(error)") }
+        guard let audioData = FileManager.default.contents(atPath: plan.audio) else { return log("FAIL video: no audio at \(plan.audio)") }
+        let samples: [Float] = audioData.withUnsafeBytes { Array($0.bindMemory(to: Float.self)) }
+        let out = URL(fileURLWithPath: outPath)
+        try? FileManager.default.createDirectory(at: out, withIntermediateDirectories: true)
+
+        guard let file = audioSource(type: 1) else { return log("FAIL video: no File audio source") }
+        engine.selectAudioSource(id: file.id)
+        engine.selectSampleTrack(0)
+        engine.setBpmEnabled(true)
+        engine.setBpmMode(BpmMode.auto.rawValue)
+        engine.setBpmLocked(false)
+        ensureAudioActive()
+
+        // The track is fed on a held clock that advances only as audio is fed,
+        // in whole 512-sample buffers (as playback delivers it).
+        let rate = Double(plan.sampleRate), chunk = 512
+        var cursor = 0             // the next sample to feed
+        ntw_debug_audio_clock(0)
+        func feed(to seconds: Double) {
+            let target = min(samples.count, max(0, Int(seconds * rate))) / chunk * chunk
+            guard target > cursor else { return }
+            samples.withUnsafeBufferPointer { ntw_debug_feed_audio($0.baseAddress! + cursor, Int32(target - cursor), Int32(plan.sampleRate)) }
+            cursor = target
+        }
+        // Each call into the engine waits for its next tick: as fast as it goes.
+        store.set("output.frameRate", number: 120)
+
+        engine.clearGraph()
+        ntw_debug_step_mode(1)
+        for shot in plan.shots {
+            let w = shot.width ?? plan.width, h = shot.height ?? plan.height
+            store.set("output.customWidth", number: Double(w))
+            store.set("output.customHeight", number: Double(h))
+            store.set("output.resolution", string: "custom")
+
+            // Earlier than what's been fed, or far ahead: the beat needs some
+            // seconds of the music before the shot to lock on again.
+            let warmup = shot.warmup ?? 1
+            let lead = shot.start - warmup
+            if Double(cursor) / rate > lead || lead - Double(cursor) / rate > 8 { cursor = max(0, Int((lead - 8) * rate)) / chunk * chunk }
+            feed(to: lead)
+
+            ntw_debug_freeze_time(max(0, lead))
+            ntw_debug_render_frames(0, 1)
+            // A source by name, or by type as "#<type>" (two can share a name).
+            let head = shot.chain[0]
+            guard let source = head.hasPrefix("#") ? Int(head.dropFirst()).flatMap({ engine.addShaderVideoSource(type: $0) }) : addSource(named: head) else { continue }
+            var ids = [source]
+            for name in shot.chain.dropFirst() {
+                guard let type = effectType(named: name), let id = addEffect(type: type, after: ids.last!, inputIsSource: ids.count == 1) else { break }
+                ids.append(id)
+            }
+            guard ids.count == shot.chain.count else { log("FAIL video: \(shot.name): chain"); engine.clearGraph(); continue }
+            for s in shot.settings ?? [] where s.node < ids.count {
+                guard let p = engine.parameters(for: ids[s.node]).first(where: { $0.name == s.name }) else {
+                    log("FAIL video: \(shot.name): no parameter \(s.name) on \(shot.chain[s.node])"); continue
+                }
+                if let v = s.value { if p.parameterType == .int_ { engine.setParameterInt(paramId: p.id, value: Int(v)) } else { engine.setParameterValue(paramId: p.id, value: v) } }
+                if let d = s.driver {
+                    engine.setParameterDriver(paramId: p.id, audioParamName: d)
+                    if let k = s.scale { engine.setParameterDriverScale(paramId: p.id, scale: k) }
+                    if let k = s.shift { engine.setParameterDriverShift(paramId: p.id, shift: k) }
+                }
+            }
+
+            let first = -Int((warmup * Double(plan.fps)).rounded()), count = Int((shot.seconds * Double(plan.fps)).rounded())
+            // Each kept node's frames go to <shot>/ (the last node) or <shot>-n<i>/.
+            let keep = shot.keep ?? [ids.count - 1]
+            let dirs = keep.map { out.appendingPathComponent($0 == ids.count - 1 && shot.keep == nil ? shot.name : "\(shot.name)-n\($0)") }
+            for d in dirs { try? FileManager.default.removeItem(at: d); try? FileManager.default.createDirectory(at: d, withIntermediateDirectories: true) }
+            var frame = [UInt8](repeating: 0, count: w * h * 4)
+            var kept = 0
+            let began = Date()
+            frames: for f in first..<count {
+                let t = shot.start + Double(f) / Double(plan.fps)
+                feed(to: t)
+                ntw_debug_freeze_time(t)
+                ntw_debug_render_frames(1, UInt32(f - first + 1))
+                guard f >= 0 else { continue }
+                for (node, d) in zip(keep, dirs) {
+                    var fw: Int32 = 0, fh: Int32 = 0
+                    guard node < ids.count, ntw_debug_frame_rgba(ids[node], &fw, &fh, &frame, Int32(frame.count)) != 0, Int(fw) == w, Int(fh) == h else {
+                        log("FAIL video: \(shot.name): node \(node) frame \(f) is \(fw)x\(fh), not \(w)x\(h)"); break frames
+                    }
+                    guard Self.writeVideoFrame(frame, width: w, height: h, to: d.appendingPathComponent(String(format: "%05d.jpg", f))) else {
+                        log("FAIL video: \(shot.name): couldn't write frame \(f)"); break frames
+                    }
+                }
+                kept += 1
+            }
+            let meta: [String: Any] = ["width": w, "height": h, "fps": plan.fps, "frames": kept, "start": shot.start]
+            if let json = try? JSONSerialization.data(withJSONObject: meta) {
+                for d in dirs { try? json.write(to: d.appendingPathComponent("shot.json")) }
+            }
+            log(String(format: "video: %@: %d frames %dx%d in %.1f s, bpm %.1f", shot.name, kept, w, h, Date().timeIntervalSince(began), ntw_get_beat_probe(nil).bpm))
+            engine.clearGraph()
+        }
+        ntw_debug_step_mode(0)
+        ntw_debug_freeze_time(-1)
+        ntw_debug_audio_clock(-1)
+        ntw_reset_settings("Output")
+        viewModel.refresh()
+        log("PASS video: \(plan.shots.count) shots")
+    }
+
+    /// A frame read back (bottom-up rows, straight alpha) as a JPEG, upright and over black.
+    private static func writeVideoFrame(_ pixels: [UInt8], width: Int, height: Int, to url: URL) -> Bool {
+        let space = CGColorSpace(name: CGColorSpace.sRGB)!
+        guard let provider = CGDataProvider(data: Data(pixels) as CFData),
+              let image = CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: width * 4,
+                                  space: space, bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue),
+                                  provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent),
+              let ctx = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
+                                  space: space, bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue) else { return false }
+        ctx.setFillColor(CGColor(gray: 0, alpha: 1))
+        ctx.fill(CGRect(x: 0, y: 0, width: width, height: height))
+        // The image's first row is the frame's bottom one; a context draws
+        // with y up, so flipping puts it back at the bottom.
+        ctx.translateBy(x: 0, y: CGFloat(height))
+        ctx.scaleBy(x: 1, y: -1)
+        ctx.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+        guard let upright = ctx.makeImage(),
+              let dest = CGImageDestinationCreateWithURL(url as CFURL, "public.jpeg" as CFString, 1, nil) else { return false }
+        CGImageDestinationAddImage(dest, upright, [kCGImageDestinationLossyCompressionQuality: 0.93] as CFDictionary)
+        return CGImageDestinationFinalize(dest)
     }
 }
 

@@ -40,6 +40,7 @@
 #include "LibraryFile.hpp"
 #include "FileSource.hpp"
 #include "FileAudioSource.hpp"
+#include "AudioClock.hpp"
 #include "TextSource.hpp"
 #include "IconSource.hpp"
 #include "IconService.hpp"
@@ -2061,6 +2062,32 @@ void ntw_debug_render_frames(int frames, unsigned int seed) {
   while (loop->frameBudget.load() > 0 && engineRunning.load())
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
   runOnEngineThread([]() {});  // the last frame's tick has finished
+}
+
+void ntw_debug_audio_clock(double seconds) {
+  AudioClock::hold(seconds);
+}
+
+void ntw_debug_feed_audio(const float* mono, int frames, int sampleRate) {
+  if (!mono || frames <= 0) return;
+  std::vector<float> samples(mono, mono + frames);
+  runOnEngineThread([samples = std::move(samples), sampleRate]() {
+    auto source = AudioSourceService::getService()->selectedAudioSource;
+    if (!source) return;
+    // The fed audio replaces the file's own playback.
+    if (auto* file = dynamic_cast<FileAudioSource*>(source.get())) file->isPaused = true;
+    source->audioAnalysis.bpmEnabled = true;
+    const size_t chunk = 512;
+    ofSoundBuffer buffer;
+    for (size_t at = 0; at < samples.size(); at += chunk) {
+      const size_t n = std::min(chunk, samples.size() - at);
+      buffer.allocate(n, 1);
+      buffer.setSampleRate(sampleRate);
+      std::copy_n(samples.begin() + at, n, buffer.getBuffer().begin());
+      AudioClock::advance(double(n) / sampleRate);
+      source->audioIn(buffer);
+    }
+  });
 }
 
 // The framebuffer holding a frame's pixels for reading. A multisampled FBO
