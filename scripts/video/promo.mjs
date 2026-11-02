@@ -17,8 +17,9 @@ import { pathToFileURL } from 'node:url';
 const HERE = dirname(new URL(import.meta.url).pathname);
 const FPS = 30;
 const START = 36;              // track seconds at video 0: four bars before the drop at 40
-const STOP = 67;               // the track's own hard stop; the logo holds in silence after
-const DURATION = 32.5;
+const STOP = 80;               // just before the track's next hit; the logo holds in silence after
+const DURATION = 45;
+const LATER = 24;              // beats the closing sections (grid onward) come after the effects and Feedback
 const FORMATS = { wide: { W: 1920, H: 1080 }, tall: { W: 1080, H: 1920 } };
 const tr = (b) => START + b / 2;
 
@@ -36,18 +37,38 @@ const MONTAGE = [            // one per beat, b16–24
   { chain: ['#52'], name: 'Fractal' },
 ];
 const CHAIN = { chain: ['Plasma Two', 'Kaleidoscope', 'Neon'], names: ['Plasma Two', 'Kaleidoscope', 'Neon'] };
-const GRID = [               // b36–40, one more per beat
-  { chain: ['Audio Pulse Grid'], name: 'Audio Pulse Grid' },
+const FX = {                 // b36–44: one source, a different effect on each beat
+  source: 'MarbleCaves',
+  effects: ['Crystal Kaleidoscope', 'RuttEtra', 'Cubify', 'Comicbook', 'Canny', 'Half Tone', 'Solar Wave', 'Web'],
+};
+// b44–60: Feedback. The first look also plays in the loop diagram (b44–48), then each fills the frame.
+// Node 0 is the source, 1 Feedback, 2+ effects inside its loop (its aux output).
+const fbBase = [
+  { node: 1, name: 'Delay Amount', value: 28 }, { node: 1, name: 'Feedback Alpha', value: 1 },
+  { node: 1, name: 'Feedback Mix', value: 0.92 }, { node: 1, name: 'Blend Mode', value: 4 },
+];
+const FEEDBACK = [
+  { chain: ['Core', 'Feedback'], label: 'Tunnel', settings: [...fbBase, { node: 1, name: 'Scale', value: 1.03 }] },
+  { chain: ['Iridescent', 'Feedback'], label: 'Spiral', settings: [...fbBase, { node: 1, name: 'Scale', value: 1.025 }, { node: 1, name: 'Rotation', value: 0.035 }] },
+  { chain: ['Swirling Soul', 'Feedback'], label: 'Kaleidoscope in the loop', aux: { from: 1, chain: ['Kaleidoscope'] },
+    settings: [...fbBase.slice(0, 2), { node: 1, name: 'Feedback Mix', value: 0.85 }, fbBase[3], { node: 1, name: 'Scale', value: 1.02 }] },
+  // Scale on the beat: none between beats (the pulse rests near 0), a step out on each one.
+  // It takes a few beats to build: it starts 4 s early.
+  { chain: ['Reflector', 'Feedback'], label: 'Hue in the loop, on the beat', aux: { from: 1, chain: ['HSB'] }, warmup: 4,
+    settings: [...fbBase, { node: 1, name: 'Scale', driver: 'BPM', shift: 0.53, scale: 0.6 }, { node: 2, name: 'Hue', value: 0.03 }] },
+];
+const GRID = [               // b36–40 (+LATER), one more per beat
+  { chain: ['Audio Rain'], name: 'Audio Rain' },
   { chain: ['Synthwave'], name: 'Synthwave' },
   { chain: ['Audio Silk'], name: 'Audio Silk' },
   { chain: ['AudioBall'], name: 'AudioBall' },
 ];
-const QUICK = [              // a cut every half beat, b40–44
+const QUICK = [              // a cut every half beat, b40–44 (+LATER)
   { chain: ['DiscoSun'] }, { chain: ['Disco'] }, { chain: ['Perplexion'] }, { chain: ['Smoke Ring'] },
   { chain: ['Reflector'] }, { chain: ['Core'] }, { chain: ['Audio Prism'] }, { chain: ['Blocks'] },
 ];
-const HERO_B = { chain: ['Iridescent'], name: 'Iridescent' };     // b44–48, under the words
-const HERO_C = { chain: ['Gyroids'], name: 'Gyroids' };           // b48–56
+const HERO_B = { chain: ['Audio Silk'], name: 'Audio Silk' };     // b44–48 (+LATER), under the words
+const HERO_C = { chain: ['Gyroids'], name: 'Gyroids' };           // b48–56 (+LATER)
 
 // Each footage clip: its chain, the track time it starts at, its length, its size (1 = full).
 function clips() {
@@ -56,18 +77,23 @@ function clips() {
   add('hero', HERO, 0, 16);
   MONTAGE.forEach((s, i) => add(`m${i}`, s, 16 + i, 17 + i, { warmup: 0.5 }));
   add('chain', CHAIN, 24, 36, { keep: [0, 1, 2] });
-  GRID.forEach((s, i) => add(`g${i}`, s, 36, 40, { scale: 0.5 }));
-  QUICK.forEach((s, i) => add(`q${i}`, s, 40 + i / 2, 40.5 + i / 2, { warmup: 0.5 }));
-  add('heroB', HERO_B, 44, 48);
-  add('heroC', HERO_C, 48, 56);
+  FX.effects.forEach((e, i) => add(`fx${i}`, { chain: [FX.source, e] }, 36 + i, 37 + i, { warmup: 0.5 }));
+  // Feedback builds up over its first frames: a longer warm-up, at twice the frame rate.
+  const fb = (s) => ({ warmup: s.warmup ?? 2, substeps: 2, settings: s.settings, ...(s.aux ? { aux: s.aux } : {}) });
+  add('fb0', FEEDBACK[0], 44, 51, { ...fb(FEEDBACK[0]), keep: [0, 1] });
+  FEEDBACK.slice(1).forEach((s, i) => add(`fb${i + 1}`, s, 51 + 3*i, 54 + 3*i, fb(s)));
+  const L = LATER;
+  GRID.forEach((s, i) => add(`g${i}`, s, L + 36, L + 40, { scale: 0.5 }));
+  QUICK.forEach((s, i) => add(`q${i}`, s, L + 40 + i / 2, L + 40.5 + i / 2, { warmup: 0.5 }));
+  add('heroB', HERO_B, L + 44, L + 48);
+  add('heroC', HERO_C, L + 48, L + 56);
   return out;
 }
 
 function plan(format) {
   const { W, H } = FORMATS[format];
-  const shots = clips().map(({ key, chain, start, seconds, warmup, keep, scale = 1 }) => ({
-    name: key, chain, start, seconds, ...(warmup ? { warmup } : {}), ...(keep ? { keep } : {}),
-    width: Math.round(W * scale), height: Math.round(H * scale),
+  const shots = clips().map(({ key, start, seconds, scale = 1, ...rest }) => ({
+    name: key, start, seconds, ...rest, width: Math.round(W * scale), height: Math.round(H * scale),
   }));
   return { fps: FPS, width: W, height: H, shots };
 }
@@ -86,7 +112,8 @@ function page(format, footage) {
   const CFG = {
     W, H, FPS, START, tall: format === 'tall', dirs, starts,
     hero: HERO.name, montage: MONTAGE.map((s) => s.name), chainNames: CHAIN.names, grid: GRID.map((s) => s.name),
-    heroB: HERO_B.name, heroC: HERO_C.name,
+    heroB: HERO_B.name, heroC: HERO_C.name, later: LATER,
+    fxSource: FX.source, fx: FX.effects, fbLabels: FEEDBACK.map((s) => s.label), fbSources: FEEDBACK.map((s) => s.chain[0]),
     font: pathToFileURL(resolve(HERE, 'fonts/Geist-Variable.woff2')).href,
     mono: pathToFileURL(resolve(HERE, 'fonts/GeistMono-Variable.woff2')).href,
   };
@@ -254,6 +281,61 @@ window.seek = async (t) => {
     out += flash(b, 32, .3);
   }
 
+  // ── D2. One source, every effect (36–44): the hero again, a new effect on each beat ─────
+  if (b >= 36 && b < 44) {
+    const k = Math.floor(b - 36);
+    out += full('fx' + k, T);
+    out += flash(b, 36 + k, .22);
+    const cap = easeOut(seg(b, 36, 36.6));
+    out += '<div class="abs" style="left:0;right:0;top:'+(C.tall ? 200*S : 64*S)+'px;display:flex;justify-content:center;opacity:'+cap+';transform:translateY('+((1-cap)*-20)+'px)">'
+      + '<div style="padding:'+(18*S)+'px '+(34*S)+'px;border-radius:'+(20*S)+'px;background:rgba(8,8,12,.7);backdrop-filter:blur(20px);font-size:'+(52*S)+'px;font-weight:700;letter-spacing:-.03em;white-space:nowrap">One source. <span style="color:'+ACCENT+'">Every effect.</span></div></div>';
+    out += label(C.fxSource + ' → ' + C.fx[k]);
+  }
+
+  // ── D3. Feedback (44–60): the loop, then four looks ─────────────────────────────────────
+  if (b >= 44 && b < 60) {
+    if (b < 48.6) {
+      // The loop: the source into Feedback, whose output feeds back into itself.
+      out += '<div class="fill" style="background-image:radial-gradient(rgba(255,255,255,.09) 1.6px,transparent 1.6px);background-size:'+(40*S)+'px '+(40*S)+'px"></div>';
+      const grow = easeInOut(seg(b, 47.4, 48.6));
+      const nw = C.tall ? W * .38 : W * .3, nh = nw * H / W;
+      const p0 = C.tall ? { x: W/2 - nw/2, y: 350*S } : { x: W * .12, y: H * .5 - nh/2 + 40*S };
+      const p1 = C.tall ? { x: W/2 - nw/2, y: 350*S + nh + 110*S } : { x: W * .88 - nw, y: H * .5 - nh/2 + 40*S };
+      const word = 'Feedback'.split('').map((chr, k) => {
+        const v = spring(clamp((seg(b, 44, 45) * 8 - k) / 2.5));
+        return '<span style="display:inline-block;opacity:'+clamp(v*1.5)+';transform:translateY('+((1-v)*50*S)+'px)">'+chr+'</span>';
+      }).join('');
+      out += '<div class="abs" style="left:0;right:0;top:'+(C.tall ? 90*S : 70*S)+'px;text-align:center;opacity:'+(1-grow)+'"><div style="font-size:'+(C.tall ? 150 : 140)*S+'px;font-weight:800;letter-spacing:-.05em;line-height:1">'+word+'</div>'
+        + '<div style="margin-top:'+(18*S)+'px;font-size:'+(40*S)+'px;font-weight:500;color:rgba(245,243,240,.75);opacity:'+easeOut(seg(b, 45.5, 46.2))+'">Every frame feeds the next.</div></div>';
+      // Cables: source → Feedback, and Feedback's loop back into itself.
+      const u0 = easeInOut(seg(b, 44.6, 45.4)), u1 = easeInOut(seg(b, 45.6, 46.8));
+      let svg = '';
+      const sw = 5*S;
+      const path = (d, u) => '<path d="'+d+'" fill="none" stroke="'+ACCENT+'" stroke-width="'+sw+'" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="'+(1-u)+'"/>';
+      if (C.tall) {
+        const a = { x: p0.x + nw/2, y: p0.y + nh }, z = { x: p1.x + nw/2, y: p1.y };
+        svg += path('M'+a.x+' '+a.y+' L'+z.x+' '+z.y, u0);
+        const r = { x: p1.x + nw, y: p1.y + nh*.7 }, l = { x: p1.x + nw, y: p1.y + nh*.3 }, out2 = 170*S;
+        svg += path('M'+r.x+' '+r.y+' C'+(r.x+out2)+' '+r.y+' '+(l.x+out2)+' '+l.y+' '+l.x+' '+l.y, u1);
+      } else {
+        const a = { x: p0.x + nw, y: p0.y + nh/2 }, z = { x: p1.x, y: p1.y + nh/2 };
+        svg += path('M'+a.x+' '+a.y+' C'+(a.x+120*S)+' '+a.y+' '+(z.x-120*S)+' '+z.y+' '+z.x+' '+z.y, u0);
+        const r = { x: p1.x + nw*.7, y: p1.y + nh }, l = { x: p1.x + nw*.3, y: p1.y + nh }, down = 150*S;
+        svg += path('M'+r.x+' '+r.y+' C'+r.x+' '+(r.y+down)+' '+l.x+' '+(l.y+down)+' '+l.x+' '+l.y, u1);
+      }
+      out += '<svg class="fill" width="'+W+'" height="'+H+'" style="opacity:'+(1-grow)+'">'+svg+'</svg>';
+      out += '<div style="opacity:'+(1-grow)+'">' + node('fb0-n0', T, p0.x, p0.y, nw, nh, C.fbSources[0], seg(b, 44.2, 44.8), '', C.tall) + '</div>';
+      out += node('fb0-n1', T, lerp(p1.x, 0, grow), lerp(p1.y, 0, grow), lerp(nw, W, grow), lerp(nh, H, grow), grow < .2 ? 'Feedback' : '', seg(b, 45, 45.6), 'transform:none', C.tall);
+      out += flash(b, 48, .3);
+    } else {
+      const k = b < 51 ? 0 : 1 + Math.floor((b - 51) / 3);
+      out += full(k === 0 ? 'fb0-n1' : 'fb' + k, T);
+      if (k > 0) out += flash(b, 51 + 3*(k-1), .3);
+      out += label('Feedback · ' + C.fbLabels[k] + '<span style="opacity:.5">&nbsp;&nbsp;' + C.fbSources[k] + '</span>');
+    }
+  }
+
+  { const b = t * 2 - C.later;   // the closing sections keep their own beat numbers
   // ── E. A grid (36–40): one more on each beat, all on the same beat ──────────────────────
   if (b >= 36 && b < 40) {
     const g = 10 * S, cw = (W - g) / 2, ch = (H - g) / 2;
@@ -323,6 +405,7 @@ window.seek = async (t) => {
       + '<div class="mono" style="margin-top:'+(70*S)+'px;font-size:'+(30*S)+'px;color:'+ACCENT+';opacity:'+url+';letter-spacing:.08em;text-transform:none">nottawa.app</div>'
       + '</div>';
     out += '<div class="abs mono" style="left:0;right:0;bottom:'+(60*S)+'px;text-align:center;font-size:'+(18*S)+'px;color:rgba(245,243,240,.45);opacity:'+url+'">Free · macOS · Open source · Every frame rendered by Nottawa</div>';
+  }
   }
 
   out += '<div class="grain" style="background:url('+grain[fi % grain.length]+');transform:translate('+((fi*37)%64)+'px,'+((fi*53)%64)+'px)"></div>';

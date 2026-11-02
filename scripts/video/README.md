@@ -52,9 +52,18 @@ for sample track 1), plus a second of rendered warm-up for feedback and trails.
 
 ## Changing it
 
-- The shots and their shaders are at the top of `promo.mjs` (`HERO`, `MONTAGE`, `CHAIN`, …). A
-  source is named as in the app, or `#<type>` when two share a name. Change a pick, then re-run
-  `plan` and `capture.sh`.
+- The shots and their shaders are at the top of `promo.mjs` (`HERO`, `MONTAGE`, `CHAIN`, `FX`,
+  `FEEDBACK`, …). A source is named as in the app, or `#<type>` when two share a name. Change a
+  pick, then re-run `plan` and `capture.sh`. To re-shoot only some clips, filter the plan's
+  `shots` by name: the other clips in the footage folder are kept.
+- A shot can also set parameters and audio drivers (`settings`, by node index and parameter
+  name), put effects inside a node's feedback loop (`aux`: its aux output into the first, then
+  each into the next), and render several engine frames per video frame (`substeps`), so
+  Feedback's trails decay at the app's real frame rate.
+- Feedback at its defaults is subtle. The Feedback section uses the previous frame (Delay Amount
+  28) at full strength (Feedback Alpha 1, Blend Mode Lighten), zoomed a little each pass (Scale
+  1.02 to 1.03). Sources that move against black (Core, Reflector, Iridescent) build into
+  tunnels; ones that fill the frame wash out.
 - The video's beat `b` runs at 2 per second, and the track plays from `START` (36 s: four bars before
   the drop at 40). Every scene's timing is a `seg(b, from, to)` call in `seek`.
 - Another track: pass it as the last argument to `capture.sh` and `render`, then set `START`, `STOP`

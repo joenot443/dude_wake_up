@@ -1435,6 +1435,9 @@ extension SelfTest {
         var width: Int?
         var height: Int?
         var keep: [Int]?          // nodes whose frames are kept (default: the last)
+        var aux: Aux?             // effects in a node's feedback loop (its aux output)
+        var substeps: Int?        // engine frames per video frame (default 1); feedback runs at their rate
+        struct Aux: Decodable { let from: Int; let chain: [String] }
     }
     struct VideoPlan: Decodable {
         let audio: String         // the track as raw mono float32
@@ -1509,6 +1512,17 @@ extension SelfTest {
                 ids.append(id)
             }
             guard ids.count == shot.chain.count else { log("FAIL video: \(shot.name): chain"); engine.clearGraph(); continue }
+            // The aux chain: the node's aux output (slot 10) into the first, then each into the next.
+            // Its nodes follow the chain's in node numbering.
+            if let aux = shot.aux, aux.from < ids.count {
+                var tail = ids[aux.from], slot = 10
+                for name in aux.chain {
+                    guard let type = effectType(named: name), let id = engine.addShader(type: type) else { break }
+                    engine.makeConnection(startId: tail, endId: id, connectionType: 0, outputSlot: slot, inputSlot: 0)
+                    ids.append(id); tail = id; slot = 0
+                }
+                guard ids.count == shot.chain.count + aux.chain.count else { log("FAIL video: \(shot.name): aux chain"); engine.clearGraph(); continue }
+            }
             for s in shot.settings ?? [] where s.node < ids.count {
                 guard let p = engine.parameters(for: ids[s.node]).first(where: { $0.name == s.name }) else {
                     log("FAIL video: \(shot.name): no parameter \(s.name) on \(shot.chain[s.node])"); continue
@@ -1522,18 +1536,22 @@ extension SelfTest {
             }
 
             let first = -Int((warmup * Double(plan.fps)).rounded()), count = Int((shot.seconds * Double(plan.fps)).rounded())
-            // Each kept node's frames go to <shot>/ (the last node) or <shot>-n<i>/.
-            let keep = shot.keep ?? [ids.count - 1]
-            let dirs = keep.map { out.appendingPathComponent($0 == ids.count - 1 && shot.keep == nil ? shot.name : "\(shot.name)-n\($0)") }
+            // Kept nodes' frames go to <shot>/ (by default, the chain's output) or <shot>-n<i>/.
+            let keep = shot.keep ?? [shot.chain.count - 1]  // (the chain's output, not the aux chain's)
+            let dirs = keep.map { out.appendingPathComponent(shot.keep == nil ? shot.name : "\(shot.name)-n\($0)") }
             for d in dirs { try? FileManager.default.removeItem(at: d); try? FileManager.default.createDirectory(at: d, withIntermediateDirectories: true) }
             var frame = [UInt8](repeating: 0, count: w * h * 4)
             var kept = 0
             let began = Date()
             frames: for f in first..<count {
                 let t = shot.start + Double(f) / Double(plan.fps)
-                feed(to: t)
-                ntw_debug_freeze_time(t)
-                ntw_debug_render_frames(1, UInt32(f - first + 1))
+                let steps = max(1, shot.substeps ?? 1)
+                for k in 0..<steps {
+                    let ts = t - Double(steps - 1 - k) / Double(plan.fps * steps)
+                    feed(to: ts)
+                    ntw_debug_freeze_time(ts)
+                    ntw_debug_render_frames(1, UInt32((f - first) * steps + k + 1))
+                }
                 guard f >= 0 else { continue }
                 for (node, d) in zip(keep, dirs) {
                     var fw: Int32 = 0, fh: Int32 = 0
