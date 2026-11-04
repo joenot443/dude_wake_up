@@ -65,8 +65,8 @@ A minimal LGPL ffmpeg build ships in the first release.
 - [x] Update check (non-Store copies): once a day reads
       `https://nottawa.app/windows/latest.json`; a newer version adds "Download
       Nottawa X…" to the Help menu and a toast (not during stage mode).
-      Settings switch to turn it off. **(you)** publish that file with each
-      release: `{"version": "2.1.1", "url": "https://...", "notes": "..."}`.
+      Settings switch to turn it off. The website generates that file from
+      `site.json` (see "Publishing on nottawa.app" below).
 - [x] engine.log kept crash/hang reports intact (stdout used to overwrite
       them); the hang watchdog ignores startup.
 - [ ] Minor: icon thumbnails log load errors (a `previews/` folder that
@@ -106,7 +106,9 @@ A minimal LGPL ffmpeg build ships in the first release.
       "cmd" string, which only matters for Windows in S mode.
 - [ ] Store listing: description, screenshots, privacy policy URL (the app
       talks to nottawa.app for community strands), age rating.
-- [ ] **(you)** Where the direct-download installer is hosted, if anywhere.
+- [x] Direct-download installer hosted at `nottawa.app/downloads/`; the
+      download page has a Windows section (see "Publishing on nottawa.app").
+- [ ] **(you)** Store listing live: put its URL in the website's `site.json`.
 - [ ] Release checklist: bump `VERSION`, notes, build, sign, upload, smoke
       test the download.
 
@@ -122,3 +124,48 @@ A minimal LGPL ffmpeg build ships in the first release.
       handles 1702 -> 1682 from minute 5 to 60; 59.9 fps average, 59.3
       lowest; BPM 130 throughout. No crash, hang or slow frame.
 - [ ] Other GPUs (Intel / AMD), high DPI, multi-monitor stage output.
+
+## Publishing on nottawa.app
+
+The website (repo `joenot443/nottawa-server`, folder `nottawa-website/`)
+has a Windows section on `/download.html#windows`. Its buttons and
+`/windows/latest.json` (the update check) all come from one block in
+`nottawa-website/src/_data/site.json`:
+
+```json
+"windows": {
+  "version": "2.1.0",
+  "storeUrl": "",
+  "installer": "/downloads/Nottawa-Setup-2.1.0.exe",
+  "portable": "/downloads/Nottawa-2.1.0-portable.zip",
+  "notes": "Nottawa is now available for Windows."
+}
+```
+
+The Microsoft Store button is hidden while `storeUrl` is empty. Once it's
+set, the Store button is the main button and the installer is the second
+one. The Mac section is separate and `release.sh` still maintains it.
+
+For each release, from the Windows machine (after `build_release.ps1`):
+
+1. Upload the installer and portable zip to the folder the server mounts
+   at `/downloads` (Windows 10+ ships OpenSSH; needs your SSH key on the
+   server for `root@165.227.44.1`):
+   ```powershell
+   scp dist\Nottawa-Setup-<version>.exe dist\Nottawa-<version>-portable.zip `
+       root@165.227.44.1:/root/nottawa-server/downloads/
+   ```
+   Check it: `curl.exe -I https://nottawa.app/downloads/Nottawa-Setup-<version>.exe`
+   should return 200 (it's served straight from that folder, no deploy needed).
+2. In `nottawa-server`, edit `windows` in `nottawa-website/src/_data/site.json`:
+   `version`, both paths, `notes`, and `storeUrl` once the listing is live
+   (`https://apps.microsoft.com/detail/<product id>`, from Partner Center >
+   Product identity).
+3. Deploy the website: run `./deploy.sh` from the `nottawa-server` checkout
+   (on Windows, from Git Bash). It commits everything in that repo, pushes,
+   and rebuilds the site and server on the droplet.
+4. Check `https://nottawa.app/windows/latest.json` shows the new version.
+   Installed non-Store copies will offer the update within a day.
+
+The 2.1.0 files have not been uploaded yet, so the Windows download links
+404 until step 1 is done for 2.1.0.
